@@ -1,0 +1,42 @@
+What is Texy!
+=============
+
+
+Texy! is text-to-HTML formatter and converter library. It allows you to write
+structured documents without knowledge or using of HTML language. You write
+documents in humane easy-to-read plain text format and Texy! converts it to
+structurally and valid (X)HTML code.
+
+
+Texy! is one of the most complex formatters. Its possibilities covers images,
+links (anchors), nested lists, tables and has full support for CSS and UTF-8.
+
+
+Texy! formats text in accordance with typographic rules. Special attention is
+paid to locale specifications. Texy! replaces single and double quotes with
+typographic correct quotes, hyphens with em-dash entity, converts letter x to
+dimension sign etc.
+
+
+Code is written in object PHP. Library is well-advised designed, so any
+enhancements or specific requirements adaptations are as easy as possible.
+
+
+Texy is sexy!
+
+
+
+
+Support Texy!
+-------------
+
+If you like or use Texy!, support it by placing small button to your website.
+Choose buttons and look at exemplary HTML code in directory /support-us/
+
+
+
+
+Copyright
+---------
+
+Texy! (C) David Grudl, 2004-2005

@@ -1,0 +1,10 @@
+Copyright notice
+----------------
+
+Texy! (C) David Grudl, 2004-2005 <dave@dgx.cz>
+
+Website: http://www.texy.info
+Author's website: http://www.dgx.cz/
+Author's weblog:  http://www.dgx.cz/trine/
+
+

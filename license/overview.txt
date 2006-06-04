@@ -1,0 +1,54 @@
+What is Texy! software licensing model?
+=======================================
+
+Texy! uses a "dual licensing" business model. Users may choose to use Texy!
+products under the free software GNU General Public License (GPL) or under a
+commercial license.
+
+
+GPL license
+-----------
+
+With the GPL license, Texy! is available free of charge and there is no
+warranty. Users may download the software for free and modify, integrate and
+distribute it. However, GPL users must abide by the rules of the GPL, which
+stipulate that if a Texy!-based application is redistributed, the complete
+source code for this application must also be open and available for
+redistribution.
+
+
+Commercial license
+------------------
+
+Author of Texy! David Grudl offers a commercial license for organizations that
+do not want to release the source code for their application. David Grudl is
+able to provide a commercial license because it has full ownership of the Texy!
+code. The Texy! product is essentially identical under either the GPL license
+or the commercial license.
+
+Example: A company sells some kind of CMS system. If they were to use Texy!
+in it's current state, they would have to release the portal software under the
+GPL. A preferable solution for them would be to buy a commercial license and
+thus be able to release their portal software (including Texy!) under a
+commercial license.
+
+And how much does a commercial Texy! license cost? Current pricing can be found
+at website http://www.texy.info, or contact author directly on dave@dgx.cz.
+
+
+Why does Texy! offer two licenses?
+----------------------------------
+
+  - Texy! open source community gets superior software for no cost;
+
+  - Texy! commercial customers have the option of using reliable, community
+    "battle tested" Texy! software for a relatively low cost;
+
+  - Texy! business is healthy and viable, which also strengthens the open source
+    movement.
+
+
+
+
+
+---(based on MySQL Licensing Policy FAQ)---
