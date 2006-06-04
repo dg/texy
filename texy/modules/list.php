@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -27,15 +27,15 @@ if (!defined('TEXY')) die();
  */
 class TexyListModule extends TexyModule {
     var $allowed = array(
-                 '*'            => true,
-                 '-'            => true,
-                 '+'            => true,
-                 '1.'           => true,
-                 '1)'           => true,
-                 'I.'           => true,
-                 'I)'           => true,
-                 'a)'           => true,
-                 'A)'           => true,
+                 '*'            => TRUE,
+                 '-'            => TRUE,
+                 '+'            => TRUE,
+                 '1.'           => TRUE,
+                 '1)'           => TRUE,
+                 'I.'           => TRUE,
+                 'I)'           => TRUE,
+                 'a)'           => TRUE,
+                 'A)'           => TRUE,
     );
 
     // private
@@ -61,7 +61,7 @@ class TexyListModule extends TexyModule {
         foreach ($this->allowed as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
-        $this->registerBlockPattern('processBlock', '#^(?:<MODIFIER_H>\n)?'                             // .{color: red}
+        $this->texy->registerBlockPattern($this, 'processBlock', '#^(?:<MODIFIER_H>\n)?'                             // .{color: red}
                                                                                             . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mU');  // item (unmatched)
     }
 
@@ -79,9 +79,9 @@ class TexyListModule extends TexyModule {
      *            3) ....
      *
      */
-    function processBlock(&$blockParser, &$matches)
+    function processBlock(&$parser, $matches)
     {
-        list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mBullet, $mNewLine) = $matches;
+        list(, $mMod1, $mMod2, $mMod3, $mMod4, $mBullet, $mNewLine) = $matches;
         //    [1] => (title)
         //    [2] => [class]
         //    [3] => {style}
@@ -102,16 +102,16 @@ class TexyListModule extends TexyModule {
                 break;
             }
 
-        $blockParser->moveBackward($mNewLine ? 2 : 1);
+        $parser->moveBackward($mNewLine ? 2 : 1);
 
         $count = 0;
-        while ($elItem = &$this->processItem($blockParser, $bullet)) {
-            $el->children[] = & $elItem;
+        while ($elItem = &$this->processItem($parser, $bullet)) {
+            $el->appendChild($elItem);
             $count++;
         }
 
-        if (!$count) return false;
-        else $blockParser->element->appendChild($el);
+        if (!$count) return FALSE;
+        else $parser->element->appendChild($el);
     }
 
 
@@ -121,17 +121,17 @@ class TexyListModule extends TexyModule {
 
 
 
-    function &processItem(&$blockParser, $bullet, $indented = false) {
+    function &processItem(&$parser, $bullet, $indented = FALSE) {
         $texy = & $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
         $patternItem = $texy->translatePattern("#^\n?($spacesBase)$bullet(\n?)(\ +)(\S.*)?<MODIFIER_H>?()$#mAU");
 
         // first line (with bullet)
-        if (!$blockParser->receiveNext($patternItem, $matches)) {
-            $false = false; // php4_sucks
-            return $false;
+        if (!$parser->receiveNext($patternItem, $matches)) {
+            $FALSE = FALSE; // php4_sucks
+            return $FALSE;
         }
-        list($match, $mIndent, $mNewLine, $mSpace, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, $mIndent, $mNewLine, $mSpace, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
             //    [1] => indent
             //    [2] => \n
             //    [3] => space
@@ -148,8 +148,8 @@ class TexyListModule extends TexyModule {
         // next lines
         $spaces = $mNewLine ? strlen($mSpace) : '';
         $content = ' ' . $mContent; // trick
-        while ($blockParser->receiveNext('#^(\n*)'.$mIndent.'(\ {1,'.$spaces.'})(.*)()$#Am', $matches)) {
-            list($match, $mBlank, $mSpaces, $mContent) = $matches;
+        while ($parser->receiveNext('#^(\n*)'.$mIndent.'(\ {1,'.$spaces.'})(.*)()$#Am', $matches)) {
+            list(, $mBlank, $mSpaces, $mContent) = $matches;
             //    [1] => blank line?
             //    [2] => spaces
             //    [3] => ...
@@ -161,7 +161,7 @@ class TexyListModule extends TexyModule {
         // parse content
         $mergeMode = & $texy->genericBlock[0]->mergeMode;
         $tmp = $mergeMode;
-        $mergeMode = false;
+        $mergeMode = FALSE;
 
         $elItem->parse($content);
         $mergeMode = $tmp;

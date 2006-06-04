@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -27,7 +27,7 @@ if (!defined('TEXY')) die();
  * PARAGRAPH / GENERIC MODULE CLASS
  */
 class TexyGenericBlockModule extends TexyModule {
-    var $mergeMode = true;
+    var $mergeMode = TRUE;
 
 
     /**
@@ -40,7 +40,7 @@ class TexyGenericBlockModule extends TexyModule {
 
 
 
-    function processBlock(&$blockParser, $content)
+    function processBlock(&$parser, $content)
     {
         $str_blocks = $this->mergeMode
                       ? preg_split('#(\n{2,})#', $content)
@@ -49,7 +49,7 @@ class TexyGenericBlockModule extends TexyModule {
         foreach ($str_blocks as $str) {
             $str = trim($str);
             if ($str == '') continue;
-            $this->processSingleBlock($blockParser, $str);
+            $this->processSingleBlock($parser, $str);
         }
     }
 
@@ -63,10 +63,10 @@ class TexyGenericBlockModule extends TexyModule {
      *             ...
      *
      */
-    function processSingleBlock(&$blockParser, $content)
+    function processSingleBlock(&$parser, $content)
     {
         preg_match($this->texy->translatePattern('#^(.*)<MODIFIER_H>?(\n.*)?()$#sU'), $content, $matches);
-        list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
+        list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
         //    [1] => ...
         //    [2] => (title)
         //    [3] => [class]
@@ -85,7 +85,6 @@ class TexyGenericBlockModule extends TexyModule {
         $el = &new TexyGenericBlockElement($this->texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse($mContent);
-        $blockParser->element->appendChild($el);
 
         // specify tag
         if ($el->contentType == TEXY_CONTENT_TEXTUAL) $el->tag = 'p';
@@ -94,12 +93,14 @@ class TexyGenericBlockModule extends TexyModule {
         else $el->tag = 'div';
 
         // add <br />
-        if ($el->tag && (strpos($el->content, "\n") !== false)) {
+        if ($el->tag && (strpos($el->content, "\n") !== FALSE)) {
             $elBr = &new TexyLineBreakElement($this->texy);
             $el->content = strtr($el->content,
                               array("\n" => $el->appendChild($elBr))
                            );
         }
+
+        $parser->element->appendChild($el);
     }
 
 

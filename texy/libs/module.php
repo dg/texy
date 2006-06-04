@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -28,21 +28,27 @@ if (!defined('TEXY')) die();
  * ------------------------
  */
 class TexyModule {
-    var $texy;             // parent Texy! object (reference to itself is: $texy->modules->__CLASSNAME__)
+    var $texy;             // parent Texy! object
     var $allowed = TEXY_ALL;   // module configuration
 
 
-    // PHP5 constructor
     function __construct(&$texy)
     {
         $this->texy = & $texy;
+        $texy->registerModule($this);
     }
 
 
-    // PHP4 constructor
+    /**
+     * PHP4 compatible constructor
+     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
+     */
     function TexyModule(&$texy)
     {
-        // call php5 constructor
+        // generate references
+        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+
+        // call PHP5 constructor
         call_user_func_array(array(&$this, '__construct'), array(&$texy));
     }
 
@@ -71,33 +77,6 @@ class TexyModule {
     function linePostProcess(&$line)
     {
     }
-
-
-
-    function registerLinePattern($func, $pattern, $user_args = null)
-    {
-        $this->texy->patternsLine[] = array(
-                         'handler'     => array(&$this, $func),
-                         'pattern'     => $this->texy->translatePattern($pattern) ,
-                         'user'        => $user_args
-        );
-    }
-
-
-    function registerBlockPattern($func, $pattern, $user_args = null)
-    {
-//    if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Class '.get_class($this).', pattern '.htmlSpecialChars($pattern));
-
-        $this->texy->patternsBlock[] = array(
-                         'handler'     => array(&$this, $func),
-                         'pattern'     => $this->texy->translatePattern($pattern)  . 'm',  // force multiline!
-                         'user'        => $user_args
-        );
-    }
-
-
-
-
 
 
 

@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -31,12 +31,10 @@ define('TEXY_VALIGN_MIDDLE',    'middle');
 define('TEXY_VALIGN_BOTTOM',    'bottom');
 
 
-// URL TYPES
 define('TEXY_URL_ABSOLUTE',     1);
 define('TEXY_URL_RELATIVE',     2);
 define('TEXY_URL_EMAIL',        4);
-define('TEXY_URL_IMAGE_INLINE', 1 << 3);
-define('TEXY_URL_IMAGE_LINKED', 4 << 3);
+define('TEXY_URL_IMAGE',        8);
 
 
 // TEXY ELEMENT'S CONTENT TYPE
@@ -46,22 +44,37 @@ define('TEXY_CONTENT_BLOCK',   3);
 
 
 // HTML ELEMENT CLASIFICATION
-// notice 1: Constants may only evaluate to scalar values, so use serialize :-(
-// notice 2: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
-define('TEXY_BLOCK_ELEMENTS',  serialize(array_flip(array('address', 'blockquote', 'caption', 'col', 'colgroup', 'dd', 'div', 'dl', 'dt', 'fieldset', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'iframe', 'legend', 'li', 'object', 'ol', 'p', 'param', 'pre', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'ul'))) );
-define('TEXY_INLINE_ELEMENTS', serialize(array_flip(array('a', 'abbr', 'acronym', 'area', 'b', 'big', 'br', 'button', 'cite', 'code', 'del', 'dfn', 'em', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'map', 'noscript', 'optgroup', 'option', 'q', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'tt', 'var'))) );
-define('TEXY_EMPTY_ELEMENTS',  serialize(array_flip(array('img', 'hr', 'br', 'input', 'meta', 'area', 'base', 'col', 'link', 'param'))) );
-define('TEXY_VALID_ELEMENTS',  serialize(array_merge(unserialize(TEXY_BLOCK_ELEMENTS), unserialize(TEXY_INLINE_ELEMENTS))) );
-//define('TEXY_HEAD_ELEMENTS',   serialize(array_flip(array('html', 'head', 'body', 'base', 'meta', 'link', 'title'))) );
-define('TEXY_ACCEPTED_ATTRS',  serialize(array_flip(array('abbr','accesskey','align','alt','archive','axis','bgcolor','cellpadding','cellspacing','char','charoff','charset','cite','classid','codebase','codetype','colspan','compact','coords','data','datetime','declare','dir','face','frame','headers','href','hreflang','hspace','ismap','lang','longdesc','name','noshade','nowrap','onblur','onclick','ondblclick','onkeydown','onkeypress','onkeyup','onmousedown','onmousemove','onmouseout','onmouseover','onmouseup','rel','rev','rowspan','rules','scope','shape','size','span','src','standby','start','summary','tabindex','target','title','type','usemap','valign','value','vspace'))));
+// notice: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
+
+$GLOBALS['TexyHTML::$block'] = array_flip(array(
+    'address','blockquote','caption','col','colgroup','dd','div','dl','dt','fieldset','form','h1','h2','h3','h4','h5','h6','hr','iframe','legend','li','object','ol','p','param','pre','table','tbody','td','tfoot','th','thead','tr','ul',/*'embed',*/
+));
+
+$GLOBALS['TexyHTML::$inline'] = array_flip(array(
+    'a','abbr','acronym','area','b','big','br','button','cite','code','del','dfn','em','i','img','input','ins','kbd','label','map','noscript','optgroup','option','q','samp','script','select','small','span','strong','sub','sup','textarea','tt','var',
+));
+
+$GLOBALS['TexyHTML::$empty'] = array_flip(array(
+    'img','hr','br','input','meta','area','base','col','link','param',
+));
+/*
+$GLOBALS['TexyHTML::$meta'] = array_flip(array(
+    'html','head','body','base','meta','link','title',
+));
+*/
+$GLOBALS['TexyHTML::$valid'] = array_merge($GLOBALS['TexyHTML::$block'], $GLOBALS['TexyHTML::$inline']);
+
+$GLOBALS['TexyHTML::$accepted_attrs'] = array_flip(array(
+    'abbr','accesskey','align','alt','archive','axis','bgcolor','cellpadding','cellspacing','char','charoff','charset','cite','classid','codebase','codetype','colspan','compact','coords','data','datetime','declare','dir','face','frame','headers','href','hreflang','hspace','ismap','lang','longdesc','name','noshade','nowrap','onblur','onclick','ondblclick','onkeydown','onkeypress','onkeyup','onmousedown','onmousemove','onmouseout','onmouseover','onmouseup','rel','rev','rowspan','rules','scope','shape','size','span','src','standby','start','summary','tabindex','target','title','type','usemap','valign','value','vspace',
+));
+
 
 define('TEXY_EMPTY',    '/');
-define('TEXY_CLOSING',  '*');
 
 
 // CONFIGURATION DIRECTIVES
-define('TEXY_ALL',   true);
-define('TEXY_NONE',  false);
+define('TEXY_ALL',   TRUE);
+define('TEXY_NONE',  FALSE);
 
 
 

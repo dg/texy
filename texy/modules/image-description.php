@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -17,7 +17,6 @@
 
 // security - include texy.php, not this file
 if (!defined('TEXY')) die();
-require_once TEXY_DIR.'modules/tm-image.php';
 
 
 
@@ -36,7 +35,7 @@ class TexyImageDescModule extends TexyModule {
     function init()
     {
         if ($this->texy->imageModule->allowed)
-            $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?? +\*\*\* +(.*)<MODIFIER_H>?()$#mU');
+            $this->texy->registerBlockPattern($this, 'processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?? +\*\*\* +(.*)<MODIFIER_H>?()$#mU');
     }
 
 
@@ -47,9 +46,9 @@ class TexyImageDescModule extends TexyModule {
      *            [*image*]:link *** .... .(title)[class]{style}>
      *
      */
-    function processBlock(&$blockParser, &$matches)
+    function processBlock(&$parser, $matches)
     {
-        list($match, $mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4, $mLink, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, $mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4, $mLink, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
         //    [1] => URLs
         //    [2] => (title)
         //    [3] => [class]
@@ -70,7 +69,7 @@ class TexyImageDescModule extends TexyModule {
         $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
         $el->modifier->hAlign = $elImage->modifier->hAlign;
-        $elImage->modifier->hAlign = null;
+        $elImage->modifier->hAlign = NULL;
 
         $content = $el->appendChild($elImage);
 
@@ -89,9 +88,9 @@ class TexyImageDescModule extends TexyModule {
         $elDesc = &new TexyGenericBlockElement($this->texy);
         $elDesc->parse(ltrim($mContent));
         $content .= $el->appendChild($elDesc);
-        $el->setContent($content, true);
+        $el->setContent($content, TRUE);
 
-        $blockParser->element->appendChild($el);
+        $parser->element->appendChild($el);
     }
 
 

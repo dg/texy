@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -68,7 +68,7 @@ class TexyLongWordsModule extends TexyModule {
      * (c) David Grudl
      * @return string
      */
-    function _replace(&$matches)
+    function _replace($matches)
     {
         list($mWord) = $matches;
         //    [0] => lllloooonnnnggggwwwoorrdddd

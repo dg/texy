@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -27,7 +27,7 @@ if (!defined('TEXY')) die();
  * SCRIPTS MODULE CLASS
  */
 class TexyScriptModule extends TexyModule {
-    var $handler;             // function &myUserFunc(&$element, string $identifier, array/null $args)
+    var $handler;             // function &myUserFunc(&$element, string $identifier, array/NULL $args)
 
 
     /**
@@ -35,7 +35,7 @@ class TexyScriptModule extends TexyModule {
      */
     function init()
     {
-        $this->registerLinePattern('processLine', '#\{\{([^:HASH:]+)\}\}()#U');
+        $this->texy->registerLinePattern($this, 'processLine', '#\{\{([^:HASH:]+)\}\}()#U');
     }
 
 
@@ -44,15 +44,15 @@ class TexyScriptModule extends TexyModule {
      * Callback function: ${...}
      * @return string
      */
-    function processLine(&$lineParser, &$matches, $tag)
+    function processLine(&$parser, $matches, $tag)
     {
-        list($match, $mContent) = $matches;
+        list(, $mContent) = $matches;
         //    [1] => ...
 
         $identifier = trim($mContent);
         if ($identifier === '') return;
 
-        $args = null;
+        $args = NULL;
         if (preg_match('#^([a-z_][a-z0-9_]*)\s*\(([^()]*)\)$#i', $identifier, $matches)) {
             $identifier = $matches[1];
             array_walk(
@@ -64,17 +64,17 @@ class TexyScriptModule extends TexyModule {
         $el = &new TexyScriptElement($this->texy);
 
         do {
-            if ($this->handler === null) break;
+            if ($this->handler === NULL) break;
 
             if (is_object($this->handler)) {
 
-                if ($args === null && isset($this->handler->$identifier)) {
+                if ($args === NULL && isset($this->handler->$identifier)) {
                     $el->setContent($this->handler->$identifier);
                     break;
                 }
 
                 if (is_array($args) && is_callable( array(&$this->handler, $identifier) ))  {
-                    array_unshift($args, null);
+                    array_unshift($args, NULL);
                     $args[0] = &$el;
                     call_user_func_array( array(&$this->handler, $identifier), $args);
                     break;
@@ -88,7 +88,7 @@ class TexyScriptModule extends TexyModule {
 
         } while(0);
 
-        return $lineParser->element->appendChild($el);
+        return $parser->element->appendChild($el);
     }
 
 
@@ -98,7 +98,7 @@ class TexyScriptModule extends TexyModule {
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->setContent('<texy:script content="'.htmlSpecialChars($identifier).'" />', true);
+        $element->setContent('<texy:script content="'.htmlSpecialChars($identifier).'" />', TRUE);
     }
 
 

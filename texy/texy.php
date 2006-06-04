@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -26,30 +26,32 @@ define('TEXY', 'Version 1.0 (c) David Grudl, http://www.texy.info');
  */
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
-require_once TEXY_DIR.'libs/texy-constants.php';      // regular expressions & other constants
-require_once TEXY_DIR.'libs/texy-modifier.php';       // modifier processor
-require_once TEXY_DIR.'libs/texy-url.php';            // object encapsulate of URL
-require_once TEXY_DIR.'libs/texy-dom.php';            // Texy! DOM element's base class
-require_once TEXY_DIR.'libs/texy-module.php';         // Texy! module base class
-require_once TEXY_DIR.'libs/texy-entity.php';         // HTML entity => chars
-require_once TEXY_DIR.'modules/tm-block.php';
-require_once TEXY_DIR.'modules/tm-definition-list.php';
-require_once TEXY_DIR.'modules/tm-formatter.php';
-require_once TEXY_DIR.'modules/tm-generic-block.php';
-require_once TEXY_DIR.'modules/tm-heading.php';
-require_once TEXY_DIR.'modules/tm-horiz-line.php';
-require_once TEXY_DIR.'modules/tm-html-tag.php';
-require_once TEXY_DIR.'modules/tm-image.php';
-require_once TEXY_DIR.'modules/tm-image-description.php';
-require_once TEXY_DIR.'modules/tm-link.php';
-require_once TEXY_DIR.'modules/tm-list.php';
-require_once TEXY_DIR.'modules/tm-long-words.php';
-require_once TEXY_DIR.'modules/tm-phrase.php';
-require_once TEXY_DIR.'modules/tm-quick-correct.php';
-require_once TEXY_DIR.'modules/tm-quote.php';
-require_once TEXY_DIR.'modules/tm-script.php';
-require_once TEXY_DIR.'modules/tm-table.php';
-require_once TEXY_DIR.'modules/tm-smilies.php';
+require_once TEXY_DIR.'libs/constants.php';      // regular expressions & other constants
+require_once TEXY_DIR.'libs/modifier.php';       // modifier processor
+require_once TEXY_DIR.'libs/url.php';            // object encapsulate of URL
+require_once TEXY_DIR.'libs/dom.php';            // Texy! DOM element's base class
+require_once TEXY_DIR.'libs/module.php';         // Texy! module base class
+require_once TEXY_DIR.'libs/entity.php';         // HTML entity => chars
+require_once TEXY_DIR.'libs/parser.php';         // Texy! parser
+require_once TEXY_DIR.'libs/html.php';
+require_once TEXY_DIR.'modules/block.php';
+require_once TEXY_DIR.'modules/formatter.php';
+require_once TEXY_DIR.'modules/generic-block.php';
+require_once TEXY_DIR.'modules/heading.php';
+require_once TEXY_DIR.'modules/horiz-line.php';
+require_once TEXY_DIR.'modules/html-tag.php';
+require_once TEXY_DIR.'modules/image.php';
+require_once TEXY_DIR.'modules/image-description.php';
+require_once TEXY_DIR.'modules/link.php';
+require_once TEXY_DIR.'modules/list.php';
+require_once TEXY_DIR.'modules/definition-list.php';
+require_once TEXY_DIR.'modules/long-words.php';
+require_once TEXY_DIR.'modules/phrase.php';
+require_once TEXY_DIR.'modules/quick-correct.php';
+require_once TEXY_DIR.'modules/quote.php';
+require_once TEXY_DIR.'modules/script.php';
+require_once TEXY_DIR.'modules/table.php';
+require_once TEXY_DIR.'modules/smilies.php';
 
 
 /**
@@ -66,7 +68,7 @@ class Texy {
      * Use UTF-8? (texy configuration)
      * @var boolean
      */
-    var $utf = false;
+    var $utf = FALSE;
 
     /**
      * TAB width (for converting tabs to spaces)
@@ -76,19 +78,19 @@ class Texy {
 
     /**
      * Allowed classes
-     * @var true|false|array
+     * @var TRUE|FALSE|array
      */
     var $allowedClasses;
 
     /**
      * Allowed inline CSS style
-     * @var true|false|array
+     * @var TRUE|FALSE|array
      */
     var $allowedStyles;
 
     /**
      * Allowed HTML tags
-     * @var true|false|array
+     * @var TRUE|FALSE|array
      */
     var $allowedTags;
 
@@ -96,17 +98,17 @@ class Texy {
      * Do obfuscate e-mail addresses?
      * @var boolean
      */
-    var $obfuscateEmail = true;
+    var $obfuscateEmail = TRUE;
 
     /**
      * Reference handler
-     * @var callback function &myUserFunc($refName, &$texy): returns object or false
+     * @var callback function &myUserFunc($refName, &$texy): returns object or FALSE
      */
     var $referenceHandler;
 
     /**
      * List of all used modules
-     * @var object
+     * @var array
      */
     var $modules;
 
@@ -132,7 +134,7 @@ class Texy {
      * Merge lines mode
      * @var bool
      */
-    var $mergeLines = true;
+    var $mergeLines = TRUE;
 
 
     /**
@@ -179,18 +181,35 @@ class Texy {
      * @var boolean
      * @private
      */
-    var $_preventCycling  = false;
+    var $_preventCycling  = FALSE;
+
+
+    var
+        $scriptModule,
+        $htmlModule,
+        $imageModule,
+        $linkModule,
+        $phraseModule,
+        $smiliesModule,
+        $blockModule,
+        $headingModule,
+        $horizLineModule,
+        $quoteModule,
+        $listModule,
+        $definitionListModule,
+        $tableModule,
+        $imageDescModule,
+        $genericBlockModule,
+        $quickCorrectModule,
+        $longWordsModule,
+        $formatterModule;
 
 
 
-
-
-    /**
-     * PHP4 & PHP5 constructor
-     */
     function __construct()
     {
         // init some other variables
+        $this->summary          = (object) NULL;
         $this->summary->images  = array();
         $this->summary->links   = array();
         $this->summary->preload = array();
@@ -198,7 +217,7 @@ class Texy {
 
         $this->allowedClasses = TEXY_ALL;                   // classes and id are allowed
         $this->allowedStyles  = TEXY_ALL;                   // inline styles are allowed
-        $this->allowedTags    = unserialize(TEXY_VALID_ELEMENTS); // full support for HTML tags
+        $this->allowedTags    = $GLOBALS['TexyHTML::$valid']; // full support for HTML tags
 
         // load all modules
         $this->loadModules();
@@ -210,13 +229,16 @@ class Texy {
     }
 
 
-
     /**
-     * PHP4 constructor
+     * PHP4 compatible constructor
+     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
      */
     function Texy()
     {
-        // call php5 constructor
+        // generate references
+        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+
+        // call PHP5 constructor
         $args = func_get_args();
         call_user_func_array(array(&$this, '__construct'), $args);
     }
@@ -233,47 +255,59 @@ class Texy {
     function loadModules()
     {
         // Line parsing - order is not much important
-        $this->registerModule('TexyScriptModule');
-        $this->registerModule('TexyHtmlModule');
-        $this->registerModule('TexyImageModule');
-        $this->registerModule('TexyLinkModule');
-        $this->registerModule('TexyPhraseModule');
-        $this->registerModule('TexySmiliesModule');
+        $this->scriptModule = &new TexyScriptModule($this);
+        $this->htmlModule = &new TexyHtmlModule($this);
+        $this->imageModule = &new TexyImageModule($this);
+        $this->linkModule = &new TexyLinkModule($this);
+        $this->phraseModule = &new TexyPhraseModule($this);
+        $this->smiliesModule = &new TexySmiliesModule($this);
 
         // block parsing - order is not much important
-        $this->registerModule('TexyBlockModule');
-        $this->registerModule('TexyHeadingModule');
-        $this->registerModule('TexyHorizLineModule');
-        $this->registerModule('TexyQuoteModule');
-        $this->registerModule('TexyListModule');
-        $this->registerModule('TexyDefinitionListModule');
-        $this->registerModule('TexyTableModule');
-        $this->registerModule('TexyImageDescModule');
-        $this->registerModule('TexyGenericBlockModule');
+        $this->blockModule = &new TexyBlockModule($this);
+        $this->headingModule = &new TexyHeadingModule($this);
+        $this->horizLineModule = &new TexyHorizLineModule($this);
+        $this->quoteModule = &new TexyQuoteModule($this);
+        $this->listModule = &new TexyListModule($this);
+        $this->definitionListModule = &new TexyDefinitionListModule($this);
+        $this->tableModule = &new TexyTableModule($this);
+        $this->imageDescModule = &new TexyImageDescModule($this);
+        $this->genericBlockModule = &new TexyGenericBlockModule($this);
 
         // post process
-        $this->registerModule('TexyQuickCorrectModule');
-        $this->registerModule('TexyLongWordsModule');
-        $this->registerModule('TexyFormatterModule');  // should be last post-processing module!
+        $this->quickCorrectModule = &new TexyQuickCorrectModule($this);
+        $this->longWordsModule = &new TexyLongWordsModule($this);
+        $this->formatterModule = &new TexyFormatterModule($this);  // should be last post-processing module!
     }
 
 
 
-    function registerModule($className, $shortName = null)
+    function registerModule(&$module)
     {
-        if (isset($this->modules->$className)) return false;
-
-        $this->modules->$className = &new $className($this);
-
-        // universal shortcuts
-        if ($shortName === null) {
-            $shortName = (substr($className, 0, 4) === 'Texy') ? substr($className, 4) : $className;
-            $shortName{0} = strtolower($shortName{0});
-        }
-        if (!isset($this->$shortName)) $this->$shortName = & $this->modules->$className;
+        $this->modules[] = &$module;
     }
 
 
+
+    function registerLinePattern(&$module, $method, $pattern, $user_args = NULL)
+    {
+        $this->patternsLine[] = array(
+            'handler'     => array(&$module, $method),
+            'pattern'     => $this->translatePattern($pattern),
+            'user'        => $user_args
+        );
+    }
+
+
+    function registerBlockPattern(&$module, $method, $pattern, $user_args = NULL)
+    {
+//    if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
+
+        $this->patternsBlock[] = array(
+            'handler'     => array(&$module, $method),
+            'pattern'     => $this->translatePattern($pattern)  . 'm',  // force multiline!
+            'user'        => $user_args
+        );
+    }
 
     /**
      * Initialization
@@ -281,7 +315,6 @@ class Texy {
      */
     function init()
     {
-        $GLOBALS['Texy__$hashCounter'] = 0;
         $this->refQueries = array();
 
         if ($this->inited) return;
@@ -289,10 +322,10 @@ class Texy {
         if (!$this->modules) die('Texy: No modules installed');
 
         // init modules
-        foreach ($this->modules as $name => $foo)
-            $this->modules->$name->init();
+        foreach ($this->modules as $id => $foo)
+            $this->modules[$id]->init();
 
-        $this->inited = true;
+        $this->inited = TRUE;
     }
 
 
@@ -305,8 +338,8 @@ class Texy {
     {
         $this->patternsLine   = array();
         $this->patternsBlock  = array();
-        $this->genericBlock   = null;
-        $this->inited = false;
+        $this->genericBlock   = NULL;
+        $this->inited = FALSE;
         $this->init();
     }
 
@@ -317,7 +350,7 @@ class Texy {
      * This is shortcut for parse() & DOM->toHTML()
      * @return string
      */
-    function process($text, $singleLine = false)
+    function process($text, $singleLine = FALSE)
     {
         if ($singleLine)
             $this->parseLine($text);
@@ -385,8 +418,8 @@ class Texy {
     function toText()
     {
         // generate output
-        $saveLineWrap = $this->formatterModule->lineWrap = false;
-        $this->formatterModule->lineWrap = false;
+        $saveLineWrap = $this->formatterModule->lineWrap = FALSE;
+        $this->formatterModule->lineWrap = FALSE;
 
         $text = $this->toHTML();
 
@@ -414,9 +447,8 @@ class Texy {
         $this->allowedClasses = TEXY_NONE;                  // no class or ID are allowed
         $this->allowedStyles  = TEXY_NONE;                  // style modifiers are disabled
         $this->htmlModule->safeMode();                      // only HTML tags and attributes specified in $safeTags array are allowed
-        $this->blockModule->safeMode();                     // make /--html blocks HTML safe
-        $this->imageModule->allowed = false;                // disable images
-        $this->linkModule->forceNoFollow = true;            // force rel="nofollow"
+        $this->imageModule->allowed = FALSE;                // disable images
+        $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
     }
 
 
@@ -430,130 +462,11 @@ class Texy {
         $this->allowedClasses = TEXY_ALL;                   // classes and id are allowed
         $this->allowedStyles  = TEXY_ALL;                   // inline styles are allowed
         $this->htmlModule->trustMode();                     // full support for HTML tags
-        $this->blockModule->trustMode();                    // no-texy blocks are free of use
-        $this->imageModule->allowed = true;                 // enable images
-        $this->linkModule->forceNoFollow = false;           // disable automatic rel="nofollow"
+        $this->imageModule->allowed = TRUE;                 // enable images
+        $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
     }
 
 
-
-
-
-
-
-    /**
-     * Like htmlSpecialChars, but preserve entities
-     * @return string
-     * @static
-     */
-    function htmlChars($s, $quotes = ENT_NOQUOTES)
-    {
-        return preg_replace('#'.TEXY_PATTERN_ENTITY.'#i', '&$1;', htmlSpecialChars($s, $quotes));
-    }
-
-
-
-
-
-    /**
-     * Create a URL class and return it. Subclasses can override
-     * this method to return an instance of inherited URL class.
-     * @return TexyURL
-     */
-    function &createURL()
-    {
-        $php4_sucks = &new TexyURL($this);
-        return $php4_sucks;
-    }
-
-
-
-    /**
-     * Create a modifier class and return it. Subclasses can override
-     * this method to return an instance of inherited modifier class.
-     * @return TexyModifier
-     */
-    function &createModifier()
-    {
-        $php4_sucks = &new TexyModifier($this);
-        return $php4_sucks;
-    }
-
-
-
-
-    /**
-     * Build string which represents (X)HTML opening tag
-     * @param string   tag
-     * @param array    associative array of attributes and values ( / mean empty tag, arrays are imploded )
-     * @return string
-     * @static
-     */
-    function openingTags($tags)
-    {
-        static $TEXY_EMPTY_ELEMENTS;
-        if (!$TEXY_EMPTY_ELEMENTS) $TEXY_EMPTY_ELEMENTS = unserialize(TEXY_EMPTY_ELEMENTS);
-
-        $result = '';
-        foreach ((array)$tags as $tag => $attrs) {
-
-            if ($tag == null) continue;
-
-            $empty = isset($TEXY_EMPTY_ELEMENTS[$tag]) || isset($attrs[TEXY_EMPTY]);
-
-            $attrStr = '';
-            if (is_array($attrs)) {
-                unset($attrs[TEXY_EMPTY]);
-
-                foreach (array_change_key_case($attrs, CASE_LOWER) as $name => $value) {
-                    if (is_array($value)) {
-                        if ($name == 'style') {
-                            $style = array();
-                            foreach (array_change_key_case($value, CASE_LOWER) as $keyS => $valueS)
-                                if ($keyS && ($valueS !== '') && ($valueS !== null)) $style[] = $keyS.':'.$valueS;
-                            $value = implode(';', $style);
-                        } else $value = implode(' ', array_unique($value));
-                        if ($value == '') continue;
-                    }
-
-                    if ($value === null || $value === false) continue;
-                    $value = trim($value);
-                    $attrStr .= ' '
-                              . Texy::htmlChars($name)
-                              . '="'
-                              . Texy::freezeSpaces(Texy::htmlChars($value, ENT_COMPAT))   // freezed spaces will be preserved during reformating
-                              . '"';
-                }
-            }
-
-            $result .= '<' . $tag . $attrStr . ($empty ? ' /' : '') . '>';
-        }
-
-        return $result;
-    }
-
-
-
-    /**
-     * Build string which represents (X)HTML opening tag
-     * @return string
-     * @static
-     */
-    function closingTags($tags)
-    {
-        static $TEXY_EMPTY_ELEMENTS;
-        if (!$TEXY_EMPTY_ELEMENTS) $TEXY_EMPTY_ELEMENTS = unserialize(TEXY_EMPTY_ELEMENTS);
-
-        $result = '';
-        foreach (array_reverse((array) $tags, true) as $tag => $attrs) {
-            if ($tag == '') continue;
-            if ( isset($TEXY_EMPTY_ELEMENTS[$tag]) || isset($attrs[TEXY_EMPTY]) ) continue;
-
-            $result .= '</'.$tag.'>';
-        }
-
-        return $result;
-    }
 
 
 
@@ -608,28 +521,6 @@ class Texy {
 
 
     /**
-     * Generate unique HASH key - useful for freezing (folding) some substrings
-     * Key consist of unique chars \x19, \x1B-\x1E (noncontent) (or \x1F detect opening tag)
-     *                             \x1A, \x1B-\x1E (with content)
-     * @return string
-     * @static
-     */
-    function hashKey($contentType = null, $opening = null)
-    {
-        $border = ($contentType == TEXY_CONTENT_NONE) ? "\x19" : "\x1A";
-        return $border . ($opening ? "\x1F" : "") . strtr(base_convert(++$GLOBALS['Texy__$hashCounter'], 10, 4), '0123', "\x1B\x1C\x1D\x1E") . $border;
-    }
-
-
-    /**
-     * @static
-     */
-    function isHashOpening($hash) {
-        return $hash{1} == "\x1F";
-    }
-
-
-    /**
      * Add new named reference
      */
     function addReference($name, &$obj)
@@ -649,11 +540,11 @@ class Texy {
     function &getReference($name)
     {
         $name = strtolower($name);
-        $false = false; // php4_sucks
+        $FALSE = FALSE; // php4_sucks
 
         if ($this->_preventCycling) {
-            if (isset($this->refQueries[$name])) return $false;
-            $this->refQueries[$name] = true;
+            if (isset($this->refQueries[$name])) return $FALSE;
+            $this->refQueries[$name] = TRUE;
         } else $this->refQueries = array();
 
 
@@ -662,17 +553,17 @@ class Texy {
 
 
         if ($this->referenceHandler) {
-            $this->_disableReferences = true;
+            $this->_disableReferences = TRUE;
             $this->references[$name] = call_user_func_array(
                                      $this->referenceHandler,
                                      array($name, &$this)
             );
-            $this->_disableReferences = false;
+            $this->_disableReferences = FALSE;
 
             return $this->references[$name];
         }
 
-        return $false;
+        return $FALSE;
     }
 
 
@@ -700,259 +591,21 @@ class Texy {
 
 
 
+
+    /**
+     * experimental
+     */
     function free()
     {
         foreach (array_keys(get_object_vars($this)) as $key)
-            $this->$key = null;
+            $this->$key = NULL;
 
-        if (PHP_VERSION < 5) ${'this'.''} = null;
+        if (PHP_VERSION < 5) ${'this'.''} = NULL;
     }
 
 
 
 } // Texy
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * INTERNAL PARSING BLOCK STRUCTURE
- * --------------------------------
- */
-class TexyBlockParser {
-    var $element;     // TexyBlockElement
-    var $text;        // text splited in array of lines
-    var $offset;
-
-
-    // constructor
-    function TexyBlockParser(& $element)
-    {
-        $this->element = &$element;
-    }
-
-
-    // match current line against RE.
-    // if succesfull, increments current position and returns true
-    function receiveNext($pattern, &$matches)
-    {
-        $ok = preg_match(
-                   $pattern . 'Am', // anchored & multiline
-                   $this->text,
-                   $matches,
-                   PREG_OFFSET_CAPTURE,
-                   $this->offset);
-        if ($ok) {
-            $this->offset += strlen($matches[0][0]) + 1;  // 1 = "\n"
-            foreach ($matches as $key => $value) $matches[$key] = $value[0];
-        }
-        return $ok;
-    }
-
-
-
-    function moveBackward($linesCount = 1)
-    {
-        while (--$this->offset > 0)
-         if ($this->text{ $this->offset-1 } == TEXY_NEWLINE)
-             if (--$linesCount < 1) break;
-
-        $this->offset = max($this->offset, 0);
-    }
-
-
-
-
-    function parse($text)
-    {
-            ///////////   INITIALIZATION
-        $texy = &$this->element->texy;
-        $this->text = & $text;
-        $this->offset = 0;
-        $this->element->children = array();
-
-        $patternKeys = array_keys($texy->patternsBlock);
-        $arrMatches = $arrPos = array();
-        foreach ($patternKeys as $key) $arrPos[$key] = -1;
-
-
-            ///////////   PARSING
-        do {
-            $minKey = -1;
-            $minPos = strlen($this->text);
-            if ($this->offset >= $minPos) break;
-
-            foreach ($patternKeys as $index => $key) {
-                if ($arrPos[$key] === false) continue;
-
-                if ($arrPos[$key] < $this->offset) {
-                    $delta = ($arrPos[$key] == -2) ? 1 : 0;
-                    $matches = & $arrMatches[$key];
-                    if (preg_match(
-                            $texy->patternsBlock[$key]['pattern'],
-                            $text,
-                            $matches,
-                            PREG_OFFSET_CAPTURE,
-                            $this->offset + $delta)) {
-
-                        $arrPos[$key] = $matches[0][1];
-                        foreach ($matches as $keyX => $valueX) $matches[$keyX] = $valueX[0];
-
-                    } else {
-                        unset($patternKeys[$index]);
-                        continue;
-                    }
-                }
-
-                if ($arrPos[$key] === $this->offset) { $minKey = $key; break; }
-
-                if ($arrPos[$key] < $minPos) { $minPos = $arrPos[$key]; $minKey = $key; }
-            } // foreach
-
-            $next = ($minKey == -1) ? strlen($text) : $arrPos[$minKey];
-
-            if ($next > $this->offset) {
-                $str = substr($text, $this->offset, $next - $this->offset);
-                $this->offset = $next;
-                call_user_func_array($texy->genericBlock, array(&$this, $str));
-                continue;
-            }
-
-            $px = & $texy->patternsBlock[$minKey];
-            $matches = & $arrMatches[$minKey];
-            $this->offset = $arrPos[$minKey] + strlen($matches[0]) + 1;   // 1 = \n
-            $ok = call_user_func_array($px['handler'], array(&$this, $matches, $px['user']));
-            if ($ok === false || ( $this->offset <= $arrPos[$minKey] )) { // module rejects text
-                $this->offset = $arrPos[$minKey]; // turn offset back
-                $arrPos[$minKey] = -2;
-                continue;
-            }
-
-            $arrPos[$minKey] = -1;
-
-        } while (1);
-    }
-
-} // TexyBlockParser
-
-
-
-
-
-
-
-
-/**
- * INTERNAL PARSING LINE STRUCTURE
- * -------------------------------
- */
-class TexyLineParser {
-    var $element;   // TexyTextualElement
-
-
-    // constructor
-    function TexyLineParser(& $element)
-    {
-        $this->element = &$element;
-    }
-
-
-
-    function parse($text, $postProcess = true)
-    {
-            ///////////   INITIALIZATION
-        $element = &$this->element;
-        $texy = &$element->texy;
-
-        $offset = 0;
-        $hashStrLen = 0;
-        $patternKeys = array_keys($texy->patternsLine);
-        $arrMatches = $arrPos = array();
-        foreach ($patternKeys as $key) $arrPos[$key] = -1;
-
-
-            ///////////   PARSING
-        do {
-            $minKey = -1;
-            $minPos = strlen($text);
-
-            foreach ($patternKeys as $index => $key) {
-                if ($arrPos[$key] < $offset) {
-                    $delta = ($arrPos[$key] == -2) ? 1 : 0;
-                    $matches = & $arrMatches[$key];
-                    if (preg_match($texy->patternsLine[$key]['pattern'],
-                                     $text,
-                                     $matches,
-                                     PREG_OFFSET_CAPTURE,
-                                     $offset+$delta)) {
-                        if (!strlen($matches[0][0])) continue;
-                        $arrPos[$key] = $matches[0][1];
-                        foreach ($matches as $keyx => $value) $matches[$keyx] = $value[0];
-
-                    } else {
-
-                        unset($patternKeys[$index]);
-                        continue;
-                    }
-                } // if
-
-                if ($arrPos[$key] == $offset) { $minKey = $key; break; }
-
-                if ($arrPos[$key] < $minPos) { $minPos = $arrPos[$key]; $minKey = $key; }
-
-            } // foreach
-
-            if ($minKey == -1) break;
-
-            $px = & $texy->patternsLine[$minKey];
-            $offset = $arrPos[$minKey];
-            $replacement = call_user_func_array($px['handler'], array(&$this, $arrMatches[$minKey], $px['user']));
-            $len = strlen($arrMatches[$minKey][0]);
-            $text = substr_replace(
-                        $text,
-                        $replacement,
-                        $offset,
-                        $len);
-
-            $delta = strlen($replacement) - $len;
-            foreach ($patternKeys as $key) {
-                if ($arrPos[$key] < $offset + $len) $arrPos[$key] = -1;
-                else $arrPos[$key] += $delta;
-            }
-
-            $arrPos[$minKey] = -2;
-
-        } while (1);
-
-        $text = Texy::htmlChars($text);
-
-        if ($postProcess)
-            foreach ($texy->modules as $name => $foo)
-                $texy->modules->$name->linePostProcess($text);
-
-        $element->setContent($text, true);
-
-        if ($element->contentType == TEXY_CONTENT_NONE) {
-            $s = trim( preg_replace('#['.TEXY_HASH.']+#', '', $text) );
-            if (strlen($s)) $element->contentType = TEXY_CONTENT_TEXTUAL;
-        }
-    }
-
-} // TexyLineParser
-
-
-
 
 
 ?>

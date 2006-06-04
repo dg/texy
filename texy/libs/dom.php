@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -33,19 +33,25 @@ class TexyDOMElement {
     var $contentType = TEXY_CONTENT_NONE;
 
 
-    // PHP5 constructor
     function __construct(&$texy)
     {
         $this->texy = & $texy;
     }
 
 
-    // PHP4 constructor
+    /**
+     * PHP4 compatible constructor
+     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
+     */
     function TexyDOMElement(&$texy)
     {
-        // call php5 constructor
+        // generate references
+        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+
+        // call PHP5 constructor
         call_user_func_array(array(&$this, '__construct'), array(&$texy));
     }
+
 
 
     // convert element to HTML string
@@ -87,29 +93,27 @@ class TexyHTMLElement extends TexyDOMElement {
     function __construct(&$texy)
     {
         $this->texy = & $texy;
-        $this->modifier = & $texy->createModifier();
+        $this->modifier = &new TexyModifier($texy);
     }
 
 
 
-    function generateTags(&$tags, $defaultTag = null)
+    function generateTags(&$tags)
     {
         $tags = (array) $tags;
-        if ($defaultTag == null) {
-            if ($this->tag == null) return;
-            $defaultTag = $this->tag;
+
+        if ($this->tag) {
+            $attrs = $this->modifier->getAttrs($this->tag);
+            $attrs['id']    = $this->modifier->id;
+            if ($this->modifier->title !== NULL)
+                $attrs['title'] = $this->modifier->title;
+            $attrs['class'] = $this->modifier->classes;
+            $attrs['style'] = $this->modifier->styles;
+            if ($this->modifier->hAlign) $attrs['style']['text-align'] = $this->modifier->hAlign;
+            if ($this->modifier->vAlign) $attrs['style']['vertical-align'] = $this->modifier->vAlign;
+
+            $tags[$this->tag] = $attrs;
         }
-
-        $attrs = $this->modifier->getAttrs($defaultTag);
-        $attrs['id']    = $this->modifier->id;
-        if ($this->modifier->title !== null)
-            $attrs['title'] = $this->modifier->title;
-        $attrs['class'] = $this->modifier->classes;
-        $attrs['style'] = $this->modifier->styles;
-        if ($this->modifier->hAlign) $attrs['style']['text-align'] = $this->modifier->hAlign;
-        if ($this->modifier->vAlign) $attrs['style']['vertical-align'] = $this->modifier->vAlign;
-
-        $tags[$defaultTag] = $attrs;
     }
 
 
@@ -122,9 +126,9 @@ class TexyHTMLElement extends TexyDOMElement {
         $this->generateTags($tags);
         if ($this->hidden) return;
 
-        return Texy::openingTags($tags)
+        return TexyHTML::openingTags($tags)
                      . $this->generateContent()
-                     . Texy::closingTags($tags);
+                     . TexyHTML::closingTags($tags);
     }
 
 
@@ -194,8 +198,8 @@ class TexyBlockElement extends TexyHTMLElement {
      */
     function parse($text)
     {
-        $blockParser = &new TexyBlockParser($this);
-        $blockParser->parse($text);
+        $parser = &new TexyBlockParser($this);
+        $parser->parse($text);
     }
 
 
@@ -230,12 +234,12 @@ class TexyBlockElement extends TexyHTMLElement {
  */
 class TexyTextualElement extends TexyBlockElement {
     var $content;                    // string
-    var $htmlSafe    = false;        // is content HTML-safe?
+    var $htmlSafe    = FALSE;        // is content HTML-safe?
 
 
 
 
-    function setContent($text, $isHtmlSafe = false)
+    function setContent($text, $isHtmlSafe = FALSE)
     {
         $this->content = $text;
         $this->htmlSafe = $isHtmlSafe;
@@ -243,13 +247,13 @@ class TexyTextualElement extends TexyBlockElement {
 
 
 
-    function safeContent($onlyReturn = false)
+    function safeContent($onlyReturn = FALSE)
     {
         $safeContent = $this->htmlSafe ? $this->content : htmlSpecialChars($this->content, ENT_NOQUOTES);
 
         if ($onlyReturn) return $safeContent;
         else {
-            $this->htmlSafe = true;
+            $this->htmlSafe = TRUE;
             return $this->content = $safeContent;
         }
     }
@@ -259,12 +263,12 @@ class TexyTextualElement extends TexyBlockElement {
 
     function generateContent()
     {
-        $content = $this->safeContent(true);
+        $content = $this->safeContent(TRUE);
 
         if ($this->children) {
             $table = array();
             foreach (array_keys($this->children) as $key)
-                $table[$key] = $this->children[$key]->toHTML( Texy::isHashOpening($key) );
+                $table[$key] = $this->children[$key]->toHTML( TexyTextualElement::isHashOpening($key) );
 
             return strtr($content, $table);
         }
@@ -277,12 +281,36 @@ class TexyTextualElement extends TexyBlockElement {
     /**
      * Parse $text as SINGLE LINE and create string $content and array of Texy DOM elements ($children)
      */
-    function parse($text, $postProcess = true)
+    function parse($text, $postProcess = TRUE)
     {
-        $lineParser = &new TexyLineParser($this);
-        $lineParser->parse($text, $postProcess);
+        $parser = &new TexyLineParser($this);
+        $parser->parse($text, $postProcess);
     }
 
+
+
+
+    /**
+     * Generate unique HASH key - useful for freezing (folding) some substrings
+     * Key consist of unique chars \x19, \x1B-\x1E (noncontent) (or \x1F detect opening tag)
+     *                             \x1A, \x1B-\x1E (with content)
+     * @return string
+     * @static
+     */
+    function hashKey($contentType = NULL, $opening = NULL)
+    {
+        $border = ($contentType == TEXY_CONTENT_NONE) ? "\x19" : "\x1A";
+        return $border . ($opening ? "\x1F" : "") . strtr(base_convert(count($this->children), 10, 4), '0123', "\x1B\x1C\x1D\x1E") . $border;
+    }
+
+
+    /**
+     *
+     */
+    function isHashOpening($hash)
+    {
+        return $hash{1} == "\x1F";
+    }
 
 
 
@@ -291,15 +319,15 @@ class TexyTextualElement extends TexyBlockElement {
         $this->contentType = max($this->contentType, $child->contentType);
 
         if (is_a($child, 'TexyInlineTagElement')) {
-            $keyOpen  = Texy::hashKey($child->contentType, true);
-            $keyClose = Texy::hashKey($child->contentType, false);
+            $keyOpen  = $this->hashKey($child->contentType, TRUE);
+            $keyClose = $this->hashKey($child->contentType, FALSE);
 
             $this->children[$keyOpen]  = &$child;
             $this->children[$keyClose] = &$child;
             return $keyOpen . $innerText . $keyClose;
         }
 
-        $key = Texy::hashKey($child->contentType);
+        $key = $this->hashKey($child->contentType);
         $this->children[$key] = &$child;
         return $key;
     }
@@ -333,8 +361,8 @@ class TexyInlineTagElement extends TexyHTMLElement {
         if ($opening) {
             $this->generateTags($tags);
             if ($this->hidden) return;
-            $this->_closingTag = Texy::closingTags($tags);
-            return Texy::openingTags($tags);
+            $this->_closingTag = TexyHTML::closingTags($tags);
+            return TexyHTML::openingTags($tags);
 
         } else {
             return $this->_closingTag;
@@ -388,7 +416,7 @@ class TexyDOM extends TexyBlockElement {
 
             ///////////   REPLACE TABS WITH SPACES
         $tabWidth = $this->texy->tabWidth;
-        while (strpos($text, "\t") !== false)
+        while (strpos($text, "\t") !== FALSE)
             $text = preg_replace_callback('#^(.*)\t#mU',
                        create_function('&$matches', "return \$matches[1] . str_repeat(' ', $tabWidth - strlen(\$matches[1]) % $tabWidth);"),
                        $text);
@@ -402,8 +430,8 @@ class TexyDOM extends TexyBlockElement {
 
 
             ///////////   PRE-PROCESSING
-        foreach ($this->texy->modules as $name => $foo)
-            $this->texy->modules->$name->preProcess($text);
+        foreach ($this->texy->modules as $id => $foo)
+            $this->texy->modules[$id]->preProcess($text);
 
             ///////////   PROCESS
         parent::parse($text);
@@ -423,8 +451,8 @@ class TexyDOM extends TexyBlockElement {
         $html = parent::toHTML();
 
             ///////////   POST-PROCESS
-        foreach ($this->texy->modules as $name => $foo)
-            $this->texy->modules->$name->postProcess($html);
+        foreach ($this->texy->modules as $id => $foo)
+            $this->texy->modules[$id]->postProcess($html);
 
             ///////////   UNFREEZE SPACES
         $html = Texy::unfreezeSpaces($html);
@@ -432,7 +460,7 @@ class TexyDOM extends TexyBlockElement {
             // THIS NOTICE SHOULD REMAIN!
         if (!defined('TEXY_NOTICE_SHOWED')) {
             $html .= "\n<!-- generated by Texy! -->";
-            define('TEXY_NOTICE_SHOWED', true);
+            define('TEXY_NOTICE_SHOWED', TRUE);
         }
 
         return $html;

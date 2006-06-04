@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -33,16 +33,15 @@ class TexyImageModule extends TexyModule {
     var $root       = 'images/';     // root of relative images (http)
     var $linkedRoot = 'images/';     // root of linked images (http)
     var $rootPrefix = '';            // physical location on server
-    var $leftClass  = null;          // left-floated image class
-    var $rightClass = null;          // right-floated image class
+    var $leftClass  = NULL;          // left-floated image class
+    var $rightClass = NULL;          // right-floated image class
     var $defaultAlt = '';            // default image alternative text
 
 
 
 
 
-    // constructor
-    function TexyImageModule(&$texy)
+    function __construct(&$texy)
     {
         parent::__construct($texy);
 
@@ -60,7 +59,7 @@ class TexyImageModule extends TexyModule {
         Texy::adjustDir($this->rootPrefix);
 
         // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
-        $this->registerLinePattern('processLine',     '#'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'??()#U');
+        $this->texy->registerLinePattern($this, 'processLine',     '#'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'??()#U');
     }
 
 
@@ -86,8 +85,8 @@ class TexyImageModule extends TexyModule {
         $el = $this->texy->getReference('*'.$name.'*');
         if (is_a($el, 'TexyImageReference')) return $el;
         else {
-          $false = false; // php4_sucks
-          return $false;
+          $FALSE = FALSE; // php4_sucks
+          return $FALSE;
         }
     }
 
@@ -112,16 +111,16 @@ class TexyImageModule extends TexyModule {
      * Callback function: [*image*]: urls .(title)[class]{style}
      * @return string
      */
-    function processReferenceDefinition(&$matches)
+    function processReferenceDefinition($matches)
     {
-        list($match, $mRef, $mUrls, $mMod1, $mMod2, $mMod3) = $matches;
+        list(, $mRef, $mURLs, $mMod1, $mMod2, $mMod3) = $matches;
         //    [1] => [* (reference) *]
         //    [2] => urls
         //    [3] => (title)
         //    [4] => [class]
         //    [5] => {style}
 
-        $elRef = &new TexyImageReference($this->texy, $mUrls);
+        $elRef = &new TexyImageReference($this->texy, $mURLs);
         $elRef->modifier->setProperties($mMod1, $mMod2, $mMod3);
 
         $this->addReference($mRef, $elRef);
@@ -138,10 +137,11 @@ class TexyImageModule extends TexyModule {
      * Callback function: [* texy.gif *]: small.jpg | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
      * @return string
      */
-    function processLine(&$lineParser, &$matches)
+    function processLine(&$parser, $matches)
     {
         if (!$this->allowed) return '';
-        list($match, $mURLs, $mMod1, $mMod2, $mMod3, $mMod4, $mLink) = $matches;
+
+        list(, $mURLs, $mMod1, $mMod2, $mMod3, $mMod4, $mLink) = $matches;
         //    [1] => URLs
         //    [2] => (title)
         //    [3] => [class]
@@ -162,13 +162,13 @@ class TexyImageModule extends TexyModule {
                 $elLink->setLinkRaw($mLink);
             }
 
-            return $lineParser->element->appendChild(
+            return $parser->element->appendChild(
                 $elLink,
-                $lineParser->element->appendChild($elImage)
+                $parser->element->appendChild($elImage)
             );
         }
 
-        return $lineParser->element->appendChild($elImage);
+        return $parser->element->appendChild($elImage);
     }
 
 
@@ -187,11 +187,24 @@ class TexyImageReference {
     var $modifier;
 
 
-    // constructor
-    function TexyImageReference(&$texy, $URLs = null)
+    function __construct(&$texy, $URLs = NULL)
     {
-        $this->modifier = & $texy->createModifier();
+        $this->modifier = &new TexyModifier($texy);
         $this->URLs = $URLs;
+    }
+
+
+    /**
+     * PHP4 compatible constructor
+     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
+     */
+    function TexyImageReference(&$texy, $URLs = NULL)
+    {
+        // generate references
+        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+
+        // call PHP5 constructor
+        call_user_func_array(array(&$this, '__construct'), array(&$texy, $URLs));
     }
 
 }
@@ -213,8 +226,6 @@ class TexyImageReference {
  * HTML ELEMENT IMAGE
  */
 class TexyImageElement extends TexyHTMLElement {
-    var $parentModule;
-
     var $image;
     var $overImage;
     var $linkImage;
@@ -226,36 +237,18 @@ class TexyImageElement extends TexyHTMLElement {
     function __construct(&$texy)
     {
         parent::__construct($texy);
-        $this->parentModule = & $texy->imageModule;
-
-        $this->image = & $texy->createURL();
-        $this->image->root = $this->parentModule->root;
-
-        $this->overImage = & $texy->createURL();
-        $this->overImage->root = $this->parentModule->root;
-
-        $this->linkImage = & $texy->createURL();
-        $this->linkImage->root = $this->parentModule->linkedRoot;
+        $this->image = &new TexyURL($texy);
+        $this->overImage = &new TexyURL($texy);
+        $this->linkImage = &new TexyURL($texy);
     }
 
 
 
-    function setImages($URL = null, $URL_over = null, $URL_link = null)
+    function setImages($URL = NULL, $URL_over = NULL, $URL_link = NULL)
     {
-        if ($URL)
-            $this->image->set($URL, TEXY_URL_IMAGE_INLINE);
-        else
-            $this->image->clear();
-
-        if ($URL_over)
-            $this->overImage->set($URL_over, TEXY_URL_IMAGE_INLINE);
-        else
-            $this->overImage->clear();
-
-        if ($URL_link)
-            $this->linkImage->set($URL_link, TEXY_URL_IMAGE_LINKED);
-        else
-            $this->linkImage->clear();
+        $this->image->set($URL, $this->texy->imageModule->root, TRUE);
+        $this->overImage->set($URL_over, $this->texy->imageModule->root, TRUE);
+        $this->linkImage->set($URL_link, $this->texy->imageModule->linkedRoot, TRUE);
     }
 
 
@@ -270,7 +263,7 @@ class TexyImageElement extends TexyHTMLElement {
     // private
     function setImagesRaw($URLs)
     {
-        $elRef = &$this->parentModule->getReference(trim($URLs));
+        $elRef = &$this->texy->imageModule->getReference(trim($URLs));
         if ($elRef) {
             $URLs = $elRef->URLs;
             $this->modifier->copyFrom($elRef->modifier);
@@ -292,7 +285,7 @@ class TexyImageElement extends TexyHTMLElement {
 
     function generateTags(&$tags)
     {
-        if ($this->image->URL == null) return;  // image URL is required
+        if ($this->image->asURL() == '') return;  // image URL is required
 
         // classes & styles
         $attrs = $this->modifier->getAttrs('img');
@@ -301,15 +294,15 @@ class TexyImageElement extends TexyHTMLElement {
         $attrs['id'] = $this->modifier->id;
 
         if ($this->modifier->hAlign == TEXY_HALIGN_LEFT) {
-            if ($this->parentModule->leftClass != '')
-                $attrs['class'][] = $this->parentModule->leftClass;
+            if ($this->texy->imageModule->leftClass != '')
+                $attrs['class'][] = $this->texy->imageModule->leftClass;
             else
                 $attrs['style']['float'] = 'left';
 
         } elseif ($this->modifier->hAlign == TEXY_HALIGN_RIGHT)  {
 
-            if ($this->parentModule->rightClass != '')
-                $attrs['class'][] = $this->parentModule->rightClass;
+            if ($this->texy->imageModule->rightClass != '')
+                $attrs['class'][] = $this->texy->imageModule->rightClass;
             else
                 $attrs['style']['float'] = 'right';
         }
@@ -323,17 +316,17 @@ class TexyImageElement extends TexyHTMLElement {
         if ($this->height) $attrs['height'] = $this->height;
 
         // attribute generate
-        $this->texy->summary->images[] = $attrs['src'] = $this->image->URL;
+        $this->texy->summary->images[] = $attrs['src'] = $this->image->asURL();
 
         // onmouseover actions generate
-        if ($this->overImage->URL) {
-            $attrs['onmouseover'] = 'this.src=\''.$this->overImage->URL.'\'';
-            $attrs['onmouseout'] = 'this.src=\''.$this->image->URL.'\'';
-            $this->texy->summary->preload[] = $this->overImage->URL;
+        if ($this->overImage->asURL()) {
+            $attrs['onmouseover'] = 'this.src=\''.$this->overImage->asURL().'\'';
+            $attrs['onmouseout'] = 'this.src=\''.$this->image->asURL().'\'';
+            $this->texy->summary->preload[] = $this->overImage->asURL();
         }
 
         // alternative text generate
-        $attrs['alt'] = $this->modifier->title ? $this->modifier->title : $this->parentModule->defaultAlt;
+        $attrs['alt'] = $this->modifier->title ? $this->modifier->title : $this->texy->imageModule->defaultAlt;
 
         $tags['img'] = $attrs;
     }
@@ -344,11 +337,11 @@ class TexyImageElement extends TexyHTMLElement {
     {
         if ($this->width) return;
 
-        $file = $this->parentModule->rootPrefix . $this->image->URL;
-        if (!is_file($file)) return false;
+        $file = $this->texy->imageModule->rootPrefix . $this->image->asURL();
+        if (!is_file($file)) return FALSE;
 
         $size = getImageSize($file);
-        if (!is_array($size)) return false;
+        if (!is_array($size)) return FALSE;
 
         $this->setSize($size[0], $size[1]);
     }
@@ -356,8 +349,9 @@ class TexyImageElement extends TexyHTMLElement {
 
     function requireLinkImage()
     {
-        if ($this->linkImage->URL == null)
-            $this->linkImage->set($this->image->text, TEXY_URL_IMAGE_LINKED);
+        if ($this->linkImage->asURL() == '')
+            $this->linkImage->set($this->image->value, $this->texy->imageModule->linkedRoot, TRUE);
+
     }
 
 

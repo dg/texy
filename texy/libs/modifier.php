@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -50,11 +50,24 @@ class TexyModifier {
 
 
 
-    function TexyModifier(& $texy)
+    function __construct(&$texy)
     {
         $this->texy = & $texy;
     }
 
+
+    /**
+     * PHP4 compatible constructor
+     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
+     */
+    function TexyModifier(&$texy)
+    {
+        // generate references
+        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+
+        // call PHP5 constructor
+        call_user_func_array(array(&$this, '__construct'), array(&$texy));
+    }
 
 
 
@@ -67,15 +80,15 @@ class TexyModifier {
             if ($arg == '') continue;
             $argX = trim(substr($arg, 1, -1));
             switch ($arg{0}) {
-                case '{' :  $styles .= $argX . ';';  break;
-                case '(' :  $this->title = $argX; break;
-                case '[' :  $classes .= ' '.$argX; break;
-                case '^' :  $this->vAlign = TEXY_VALIGN_TOP; break;
-                case '-' :  $this->vAlign = TEXY_VALIGN_MIDDLE; break;
-                case '_' :  $this->vAlign = TEXY_VALIGN_BOTTOM; break;
-                case '=' :  $this->hAlign = TEXY_HALIGN_JUSTIFY; break;
-                case '>' :  $this->hAlign = TEXY_HALIGN_RIGHT; break;
-                case '<' :  $this->hAlign = $arg == '<>' ? TEXY_HALIGN_CENTER : TEXY_HALIGN_LEFT; break;
+                case '{':  $styles .= $argX . ';';  break;
+                case '(':  $this->title = $argX; break;
+                case '[':  $classes .= ' '.$argX; break;
+                case '^':  $this->vAlign = TEXY_VALIGN_TOP; break;
+                case '-':  $this->vAlign = TEXY_VALIGN_MIDDLE; break;
+                case '_':  $this->vAlign = TEXY_VALIGN_BOTTOM; break;
+                case '=':  $this->hAlign = TEXY_HALIGN_JUSTIFY; break;
+                case '>':  $this->hAlign = TEXY_HALIGN_RIGHT; break;
+                case '<':  $this->hAlign = $arg == '<>' ? TEXY_HALIGN_CENTER : TEXY_HALIGN_LEFT; break;
             }
         }
 
@@ -116,15 +129,15 @@ class TexyModifier {
 
     function clear()
     {
-        $this->id = null;
+        $this->id = NULL;
         $this->classes = array();
         $this->unfilteredClasses = array();
         $this->styles = array();
         $this->unfilteredStyles = array();
         $this->unfilteredAttrs = array();
-        $this->hAlign = null;
-        $this->vAlign = null;
-        $this->title = null;
+        $this->hAlign = NULL;
+        $this->vAlign = NULL;
+        $this->title = NULL;
     }
 
 
@@ -147,7 +160,7 @@ class TexyModifier {
 
     function parseClasses($str)
     {
-        if ($str == null) return;
+        if ($str == NULL) return;
 
         $tmp = is_array($this->texy->allowedClasses) ? array_flip($this->texy->allowedClasses) : array(); // little speed-up trick
 
@@ -173,11 +186,9 @@ class TexyModifier {
 
     function parseStyles($str)
     {
-        if ($str == null) return;
+        if ($str == NULL) return;
 
         $tmp = is_array($this->texy->allowedStyles) ? array_flip($this->texy->allowedStyles) : array(); // little speed-up trick
-        static $TEXY_ACCEPTED_ATTRS;
-        if (!$TEXY_ACCEPTED_ATTRS) $TEXY_ACCEPTED_ATTRS = unserialize(TEXY_ACCEPTED_ATTRS);
 
         foreach (explode(';', $str) as $value) {
             $pair = explode(':', $value.':');
@@ -185,7 +196,7 @@ class TexyModifier {
             $value = trim($pair[1]);
             if ($property == '') continue;
 
-            if (isset($TEXY_ACCEPTED_ATTRS[$property])) { // attribute
+            if (isset($GLOBALS['TexyHTML::$accepted_attrs'][$property])) { // attribute
                 $this->unfilteredAttrs[$property] = $value;
 
             } else { // style

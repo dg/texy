@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -27,7 +27,7 @@ if (!defined('TEXY')) die();
  * AUTOMATIC REPLACEMENTS MODULE CLASS
  */
 class TexySmiliesModule extends TexyModule {
-    var $allowed   = false;
+    var $allowed   = FALSE;
     var $icons     = array (
                         ':-)'  =>  'smile.gif',
                         ':-('  =>  'sad.gif',
@@ -56,11 +56,11 @@ class TexySmiliesModule extends TexyModule {
             krsort($this->icons);
             $pattern = array();
             foreach ($this->icons as $key => $value)
-                $pattern[] = preg_quote($key) . '+';
+                $pattern[] = preg_quote($key, '#') . '+';
 
             $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
 
-            $this->registerLinePattern('processLine', $crazyRE);
+            $this->texy->registerLinePattern($this, 'processLine', $crazyRE);
         }
     }
 
@@ -73,9 +73,9 @@ class TexySmiliesModule extends TexyModule {
      * Callback function: :-)
      * @return string
      */
-    function processLine(&$lineParser, &$matches)
+    function processLine(&$parser, $matches)
     {
-        $match = &$matches[0];
+        $match = $matches[0];
         //    [1] => **
         //    [2] => ...
         //    [3] => (title)
@@ -87,16 +87,15 @@ class TexySmiliesModule extends TexyModule {
         $el = &new TexyImageElement($texy);
         $el->modifier->title = $match;
         $el->modifier->classes[] = $this->class;
-        $el->image->root = $this->root;
 
          // find the closest match
         foreach ($this->icons as $key => $value)
             if (substr($match, 0, strlen($key)) == $key) {
-                $el->image->set($value);
+                $el->image->set($value, $this->root, TRUE);
                 break;
             }
 
-        return $lineParser->element->appendChild($el);
+        return $parser->element->appendChild($el);
     }
 
 

@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -17,7 +17,6 @@
 
 // security - include texy.php, not this file
 if (!defined('TEXY')) die();
-require_once TEXY_DIR.'modules/tm-list.php';
 
 
 
@@ -27,9 +26,9 @@ require_once TEXY_DIR.'modules/tm-list.php';
  */
 class TexyDefinitionListModule extends TexyListModule {
     var $allowed = array(
-           '*'            => true,
-           '-'            => true,
-           '+'            => true,
+           '*'            => TRUE,
+           '-'            => TRUE,
+           '+'            => TRUE,
     );
 
     // private
@@ -50,7 +49,7 @@ class TexyDefinitionListModule extends TexyListModule {
         foreach ($this->allowed as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
-        $this->registerBlockPattern('processBlock', '#^(?:<MODIFIER_H>\n)?'                              // .{color:red}
+        $this->texy->registerBlockPattern($this, 'processBlock', '#^(?:<MODIFIER_H>\n)?'                              // .{color:red}
                                                                                             . '(\S.*)\:\ *<MODIFIER_H>?\n'                         // Term:
                                                                                             . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU');   //    - description
     }
@@ -66,9 +65,9 @@ class TexyDefinitionListModule extends TexyListModule {
      *              - description 3
      *
      */
-    function processBlock(&$blockParser, &$matches)
+    function processBlock(&$parser, $matches)
     {
-        list($match, $mMod1, $mMod2, $mMod3, $mMod4,
+        list(, $mMod1, $mMod2, $mMod3, $mMod4,
                                  $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
                                  $mSpaces, $mBullet) = $matches;
         //    [1] => (title)
@@ -98,22 +97,22 @@ class TexyDefinitionListModule extends TexyListModule {
                 break;
             }
 
-        $blockParser->element->appendChild($el);
+        $parser->element->appendChild($el);
 
-        $blockParser->moveBackward(2);
+        $parser->moveBackward(2);
 
         $patternTerm = $texy->translatePattern('#^\n?(\S.*)\:\ *<MODIFIER_H>?()$#mUA');
         $bullet = preg_quote($mBullet);
 
-        while (true) {
-            if ($elItem = &$this->processItem($blockParser, preg_quote($mBullet), true)) {
+        while (TRUE) {
+            if ($elItem = &$this->processItem($parser, preg_quote($mBullet), TRUE)) {
                 $elItem->tag = 'dd';
-                $el->children[] = & $elItem;
+                $el->appendChild($elItem);
                 continue;
             }
 
-            if ($blockParser->receiveNext($patternTerm, $matches)) {
-                list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+            if ($parser->receiveNext($patternTerm, $matches)) {
+                list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
                 //    [1] => ...
                 //    [2] => (title)
                 //    [3] => [class]
@@ -123,7 +122,7 @@ class TexyDefinitionListModule extends TexyListModule {
                 $elItem->tag = 'dt';
                 $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                 $elItem->parse($mContent);
-                $el->children[] = & $elItem;
+                $el->appendChild($elItem);
                 continue;
             }
 

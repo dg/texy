@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -67,65 +67,65 @@ class TexyPhraseModule extends TexyModule {
     {
 
         // strong & em speciality *** ... *** !!! its not good!
-        if (@$this->allowed['***'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\*)\*\*\*(?!\ |\*)(.+)<MODIFIER>?(?<!\ |\*)\*\*\*(?!\*)()<LINK>??()#U',   $this->allowed['***']);
+        if (@$this->allowed['***'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\*)\*\*\*(?!\ |\*)(.+)<MODIFIER>?(?<!\ |\*)\*\*\*(?!\*)()<LINK>??()#U',   $this->allowed['***']);
 
         // **strong**
-        if (@$this->allowed['**'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\*)\*\*(?!\ |\*)(.+)<MODIFIER>?(?<!\ |\*)\*\*(?!\*)<LINK>??()#U', $this->allowed['**']);
+        if (@$this->allowed['**'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\*)\*\*(?!\ |\*)(.+)<MODIFIER>?(?<!\ |\*)\*\*(?!\*)<LINK>??()#U', $this->allowed['**']);
 
         // *emphasis*
-        if (@$this->allowed['*'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\*)\*(?!\ |\*)(.+)<MODIFIER>?(?<!\ |\*)\*(?!\*)<LINK>??()#U',     $this->allowed['*']);
+        if (@$this->allowed['*'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\*)\*(?!\ |\*)(.+)<MODIFIER>?(?<!\ |\*)\*(?!\*)<LINK>??()#U',     $this->allowed['*']);
 
         // ++inserted++
-        if (@$this->allowed['++'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\+)\+\+(?!\ |\+)(.+)<MODIFIER>?(?<!\ |\+)\+\+(?!\+)()#U',       $this->allowed['++']);
+        if (@$this->allowed['++'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\+)\+\+(?!\ |\+)(.+)<MODIFIER>?(?<!\ |\+)\+\+(?!\+)()#U',       $this->allowed['++']);
 
         // --deleted--
-        if (@$this->allowed['--'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\-)\-\-(?!\ |\-)(.+)<MODIFIER>?(?<!\ |\-)\-\-(?!\-)()#U',       $this->allowed['--']);
+        if (@$this->allowed['--'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\-)\-\-(?!\ |\-)(.+)<MODIFIER>?(?<!\ |\-)\-\-(?!\-)()#U',       $this->allowed['--']);
 
         // ^^superscript^^
-        if (@$this->allowed['^^'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\^)\^\^(?!\ |\^)(.+)<MODIFIER>?(?<!\ |\^)\^\^(?!\^)()#U',       $this->allowed['^^']);
+        if (@$this->allowed['^^'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\^)\^\^(?!\ |\^)(.+)<MODIFIER>?(?<!\ |\^)\^\^(?!\^)()#U',       $this->allowed['^^']);
 
         // __subscript__
-        if (@$this->allowed['__'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\_)\_\_(?!\ |\_)(.+)<MODIFIER>?(?<!\ |\_)\_\_(?!\_)()#U',       $this->allowed['__']);
+        if (@$this->allowed['__'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\_)\_\_(?!\ |\_)(.+)<MODIFIER>?(?<!\ |\_)\_\_(?!\_)()#U',       $this->allowed['__']);
 
         // "span"
-        if (@$this->allowed['"'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)<MODIFIER>?(?<!\ )\"(?!\")<LINK>??()#U',       $this->allowed['"']);
-//      $this->registerLinePattern('processPhrase',  '#()(?<!\")\"(?!\ )(?:.|(?R))+<MODIFIER>?(?<!\ )\"(?!\")<LINK>?()#',         $this->allowed['"']);
+        if (@$this->allowed['"'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)<MODIFIER>?(?<!\ )\"(?!\")<LINK>??()#U',       $this->allowed['"']);
+//      $this->texy->registerLinePattern($this, 'processPhrase',  '#()(?<!\")\"(?!\ )(?:.|(?R))+<MODIFIER>?(?<!\ )\"(?!\")<LINK>?()#',         $this->allowed['"']);
 
         // ~alternative span~
-        if (@$this->allowed['~'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\~)\~(?!\ )([^\~]+)<MODIFIER>?(?<!\ )\~(?!\~)<LINK>??()#U',       $this->allowed['~']);
+        if (@$this->allowed['~'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\~)\~(?!\ )([^\~]+)<MODIFIER>?(?<!\ )\~(?!\~)<LINK>??()#U',       $this->allowed['~']);
 
         // ~~cite~~
-        if (@$this->allowed['~~'] !== false)
-            $this->registerLinePattern('processPhrase',  '#(?<!\~)\~\~(?!\ |\~)(.+)<MODIFIER>?(?<!\ |\~)\~\~(?!\~)<LINK>??()#U', $this->allowed['~~']);
+        if (@$this->allowed['~~'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\~)\~\~(?!\ |\~)(.+)<MODIFIER>?(?<!\ |\~)\~\~(?!\~)<LINK>??()#U', $this->allowed['~~']);
 
-        if (@$this->allowed['""()'] !== false)
+        if (@$this->allowed['""()'] !== FALSE)
             // acronym/abbr "et al."((and others))
-            $this->registerLinePattern('processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)<MODIFIER>?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', $this->allowed['""()']);
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)<MODIFIER>?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', $this->allowed['""()']);
 
-        if (@$this->allowed['()'] !== false)
+        if (@$this->allowed['()'] !== FALSE)
             // acronym/abbr NATO((North Atlantic Treaty Organisation))
-            $this->registerLinePattern('processPhrase',  '#(?<![:CHAR:])([:CHAR:]{2,})()()()\(\((.+)\)\)#U<UTF>',              $this->allowed['()']);
+            $this->texy->registerLinePattern($this, 'processPhrase',  '#(?<![:CHAR:])([:CHAR:]{2,})()()()\(\((.+)\)\)#U<UTF>',              $this->allowed['()']);
 
 
         // ``protected`` (experimental, dont use)
-        if (@$this->allowed['``'] !== false)
-            $this->registerLinePattern('processProtect', '#\`\`(\S[^:HASH:]*)(?<!\ )\`\`()#U',                               false);
+        if (@$this->allowed['``'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processProtect', '#\`\`(\S[^:HASH:]*)(?<!\ )\`\`()#U',                               FALSE);
 
         // `code`
-        if (@$this->allowed['`'] !== false)
-            $this->registerLinePattern('processCode',    '#\`(\S[^:HASH:]*)<MODIFIER>?(?<!\ )\`()#U');
+        if (@$this->allowed['`'] !== FALSE)
+            $this->texy->registerLinePattern($this, 'processCode',    '#\`(\S[^:HASH:]*)<MODIFIER>?(?<!\ )\`()#U');
 
         // `=samp
-        $this->registerBlockPattern('processBlock',    '#^`=(none|code|kbd|samp|var|span)$#mUi');
+        $this->texy->registerBlockPattern($this, 'processBlock',    '#^`=(none|code|kbd|samp|var|span)$#mUi');
     }
 
 
@@ -135,10 +135,10 @@ class TexyPhraseModule extends TexyModule {
      * Callback function: **.... .(title)[class]{style}**
      * @return string
      */
-    function processPhrase(&$lineParser, &$matches, $tags)
+    function processPhrase(&$parser, $matches, $tags)
     {
         list($match, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
-        if ($mContent == null) {
+        if ($mContent == NULL) {
             preg_match('#^(.)+(.+)'.TEXY_PATTERN_MODIFIER.'?\\1+()$#U', $match, $matches);
             list($match, $mDelim, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         }
@@ -150,20 +150,20 @@ class TexyPhraseModule extends TexyModule {
         if (($tags == 'span') && $mLink) $tags = ''; // eliminate wasted spans, use <a ..> instead
         if (($tags == 'span') && !$mMod1 && !$mMod2 && !$mMod3) return $match; // don't use wasted spans...
         $tags = array_reverse(explode(' ', $tags));
-        $el = null;
+        $el = NULL;
 
         foreach ($tags as $tag) {
             $el = &new TexyInlineTagElement($this->texy);
             $el->tag = $tag;
             if ($tag == 'acronym' || $tag == 'abbr') { $el->modifier->title = $mLink; $mLink=''; }
 
-            $mContent = $lineParser->element->appendChild($el, $mContent);
+            $mContent = $parser->element->appendChild($el, $mContent);
         }
 
         if ($mLink) {
             $el = &new TexyLinkElement($this->texy);
             $el->setLinkRaw($mLink);
-            $mContent = $lineParser->element->appendChild($el, $mContent);
+            $mContent = $parser->element->appendChild($el, $mContent);
         }
 
         if ($el)
@@ -180,9 +180,9 @@ class TexyPhraseModule extends TexyModule {
     /**
      * Callback function `=code
      */
-    function processBlock(&$blockParser, &$matches)
+    function processBlock(&$parser, $matches)
     {
-        list($match, $mTag) = $matches;
+        list(, $mTag) = $matches;
         //    [1] => ...
 
         $this->allowed['`'] = strtolower($mTag);
@@ -198,9 +198,9 @@ class TexyPhraseModule extends TexyModule {
      * Callback function: `.... .(title)[class]{style}`
      * @return string
      */
-    function processCode(&$lineParser, &$matches)
+    function processCode(&$parser, $matches)
     {
-        list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
+        list(, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
         //    [1] => ...
         //    [2] => (title)
         //    [3] => [class]
@@ -210,7 +210,7 @@ class TexyPhraseModule extends TexyModule {
         $el = &new TexyTextualElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
         $el->contentType = TEXY_CONTENT_TEXTUAL;
-        $el->setContent($mContent, false);  // content isn't html safe
+        $el->setContent($mContent, FALSE);  // content isn't html safe
         $el->tag = $this->allowed['`'];
 
         if ($this->codeHandler)
@@ -218,7 +218,7 @@ class TexyPhraseModule extends TexyModule {
 
         $el->safeContent(); // ensure that content is HTML safe
 
-        return $lineParser->element->appendChild($el);
+        return $parser->element->appendChild($el);
     }
 
 
@@ -232,16 +232,16 @@ class TexyPhraseModule extends TexyModule {
      * User callback - PROTECT PHRASE
      * @return string
      */
-    function processProtect(&$lineParser, &$matches, $isHtmlSafe = false)
+    function processProtect(&$parser, $matches, $isHtmlSafe = FALSE)
     {
-        list($match, $mContent) = $matches;
+        list(, $mContent) = $matches;
 
         $el = &new TexyTextualElement($this->texy);
         $el->contentType = TEXY_CONTENT_TEXTUAL;
 //    $el->contentType = TEXY_CONTENT_BLOCK;
         $el->setContent( Texy::freezeSpaces($mContent), $isHtmlSafe );
 
-        return $lineParser->element->appendChild($el);
+        return $parser->element->appendChild($el);
     }
 
 

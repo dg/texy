@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -43,7 +43,7 @@ class TexyTableModule extends TexyModule {
      */
     function init()
     {
-        $this->registerBlockPattern('processBlock', '#^(?:<MODIFIER_HV>\n)?'      // .{color: red}
+        $this->texy->registerBlockPattern($this, 'processBlock', '#^(?:<MODIFIER_HV>\n)?'      // .{color: red}
                                                     . '\|.*()$#mU');                // | ....
     }
 
@@ -61,9 +61,9 @@ class TexyTableModule extends TexyModule {
      *            | aa  | bb  | cc  |
      *
      */
-    function processBlock(&$blockParser, &$matches)
+    function processBlock(&$parser, $matches)
     {
-        list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+        list(, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
         //    [1] => (title)
         //    [2] => [class]
         //    [3] => {style}
@@ -73,12 +73,12 @@ class TexyTableModule extends TexyModule {
         $texy = & $this->texy;
         $el = &new TexyTableElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-        $blockParser->element->appendChild($el);
+        $parser->element->appendChild($el);
 
-        $blockParser->moveBackward();
+        $parser->moveBackward();
 
-        if ($blockParser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_PATTERN_MODIFIER_H.'?()$#Um', $matches)) {
-            list($match, $mChar, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        if ($parser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_PATTERN_MODIFIER_H.'?()$#Um', $matches)) {
+            list(, $mChar, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
             //    [1] => # / =
             //    [2] => ....
             //    [3] => (title)
@@ -92,19 +92,20 @@ class TexyTableModule extends TexyModule {
             $el->caption->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         }
 
-        $this->isHead = false;
+        $this->isHead = FALSE;
         $this->colModifier = array();
         $this->last = array();
         $this->row = 0;
 
-        while (true) {
-            if ($blockParser->receiveNext('#^\|\-{3,}$#Um', $matches)) {
+        while (TRUE) {
+            if ($parser->receiveNext('#^\|\-{3,}$#Um', $matches)) {
                 $this->isHead = !$this->isHead;
                 continue;
             }
 
-            if ($elRow = &$this->processRow($blockParser)) {
-                $el->children[$this->row++] = & $elRow;
+            if ($elRow = &$this->processRow($parser)) {
+                $el->appendChild($elRow);
+                $this->row++;
                 continue;
             }
 
@@ -117,14 +118,14 @@ class TexyTableModule extends TexyModule {
 
 
 
-    function &processRow(&$blockParser) {
+    function &processRow(&$parser) {
         $texy = & $this->texy;
 
-        if (!$blockParser->receiveNext('#^\|(.*)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $matches)) {
-            $false = false; // php4_sucks
-            return $false;
+        if (!$parser->receiveNext('#^\|(.*)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $matches)) {
+            $FALSE = FALSE; // php4_sucks
+            return $FALSE;
         }
-        list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+        list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
         //    [1] => ....
         //    [2] => (title)
         //    [3] => [class]
@@ -141,7 +142,7 @@ class TexyTableModule extends TexyModule {
         }
 
         $col = 0;
-        $elField = null;
+        $elField = NULL;
         foreach (explode('|', $mContent) as $field) {
             if (($field == '') && $elField) { // colspan
                 $elField->colSpan++;
@@ -160,7 +161,7 @@ class TexyTableModule extends TexyModule {
             }
 
             if (!preg_match('#(\*??)\ *'.TEXY_PATTERN_MODIFIER_HV.'??(.*)'.TEXY_PATTERN_MODIFIER_HV.'?()$#AU', $field, $matches)) continue;
-            list($match, $mHead, $mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+            list(, $mHead, $mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
             //    [1] => * ^
             //    [2] => (title)
             //    [3] => [class]
@@ -175,7 +176,7 @@ class TexyTableModule extends TexyModule {
             //    [12] => ^
 
             if ($mModCol1 || $mModCol2 || $mModCol3 || $mModCol4 || $mModCol5) {
-                $this->colModifier[$col] = &$texy->createModifier();
+                $this->colModifier[$col] = &new TexyModifier($this->texy);
                 $this->colModifier[$col]->setProperties($mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5);
             }
 
@@ -185,8 +186,9 @@ class TexyTableModule extends TexyModule {
                 $elField->modifier->copyFrom($this->colModifier[$col]);
             $elField->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
             $elField->parse($mContent);
-            $elRow->children[$col] = & $elField;
-            $this->last[$col] = & $elField;
+//            $elRow->children[$col] = $elField;
+            $elRow->appendChild($elField);
+            $this->last[$col] = &$elField;
             $col++;
         }
 
@@ -257,10 +259,10 @@ class TexyTableFieldElement extends TexyTextualElement {
 
     function generateTags(&$tags)
     {
-        $tag = $this->isHead ? 'th' : 'td';
-        parent::generateTags($tags, $tag);
-        if ($this->colSpan <> 1) $tags[$tag]['colspan'] = (int) $this->colSpan;
-        if ($this->rowSpan <> 1) $tags[$tag]['rowspan'] = (int) $this->rowSpan;
+        $this->tag = $this->isHead ? 'th' : 'td';
+        parent::generateTags($tags);
+        if ($this->colSpan <> 1) $tags[$this->tag]['colspan'] = (int) $this->colSpan;
+        if ($this->rowSpan <> 1) $tags[$this->tag]['rowspan'] = (int) $this->rowSpan;
     }
 
 

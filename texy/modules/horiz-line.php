@@ -6,8 +6,8 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://www.texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
@@ -34,7 +34,7 @@ class TexyHorizLineModule extends TexyModule {
      */
     function init()
     {
-        $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *<MODIFIER_H>?()$#mU');
+        $this->texy->registerBlockPattern($this, 'processBlock', '#^(\- |\-|\* |\*){3,}\ *<MODIFIER_H>?()$#mU');
     }
 
 
@@ -51,9 +51,9 @@ class TexyHorizLineModule extends TexyModule {
      *            * * * * * * * * * * * * * *
      *
      */
-    function processBlock(&$blockParser, &$matches)
+    function processBlock(&$parser, $matches)
     {
-        list($match, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
         //    [1] => ---
         //    [2] => (title)
         //    [3] => [class]
@@ -62,7 +62,7 @@ class TexyHorizLineModule extends TexyModule {
 
         $el = &new TexyHorizLineElement($this->texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $blockParser->element->appendChild($el);
+        $parser->element->appendChild($el);
     }
 
 
