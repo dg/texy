@@ -30,7 +30,7 @@ if (version_compare(phpversion(), '4.3.3', '<'))
 
 
 // include Texy!
-require_once('../../texy/texy.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 

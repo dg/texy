@@ -39,3 +39,10 @@ And Now for Something Completely Different:
   <meta http-equiv="Content-Type" content="text/html; charset=windows-1250" />
   <title>Vyzkoušejte si Texy!</title>
 \---
+
+
+/--code sql
+
+SELECT * FROM `girls` WHERE `girls`.`iq` > `dgx`.`iq` AND `girls`.`age` < `dgx`.`age` GROUP BY `girls`.`sexual-orientation`
+
+\---

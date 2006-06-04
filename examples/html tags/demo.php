@@ -69,23 +69,23 @@ function doIt() {
 
 
 echo '<h2>trustMode() - enable all valid tags</h2>';
-$texy->modules->TexyHTMLModule->trustMode();
+$texy->htmlModule->trustMode();
 doIt();
 
 echo '<h2>trustMode(false) - enable all tags</h2>';
-$texy->modules->TexyHTMLModule->trustMode(false);
+$texy->htmlModule->trustMode(false);
 doIt();
 
 echo '<h2>safeMode() - enable only "safe" tags</h2>';
-$texy->modules->TexyHTMLModule->safeMode();
+$texy->htmlModule->safeMode();
 doIt();
 
 echo '<h2>safeMode(false) - disable all tags</h2>';
-$texy->modules->TexyHTMLModule->safeMode(false);
+$texy->htmlModule->safeMode(false);
 doIt();
 
 echo '<h2>custom</h2>';
-$texy->modules->TexyHTMLModule->allowed =
+$texy->htmlModule->allowed =
      array(            // enable only tags <a> (with attributes href, rel, title) and <strong>
          'myExtraTag' => array('attr1'),
          'strong'     => array(),

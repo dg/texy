@@ -32,13 +32,13 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$texyPath = '../../texy/';
-$fshlPath = dirname(__FILE__).'/fshl/fshl/';
+$texyPath = dirname(__FILE__).'/../../texy/';
+$fshlPath = dirname(__FILE__).'/fshl/';
 
 
 // include libs
 require_once($texyPath . 'texy.php');
-include_once($fshlPath.'fshl.php');
+include_once($fshlPath . 'fshl.php');
 
 
 
@@ -65,7 +65,7 @@ function myUserFunc(&$element) {
   if ($lang == 'JAVASCRIPT') $lang = 'JS';
   if (!in_array(
           $lang,
-          array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS'))
+          array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
      ) return;
 
   $parser = new fshlParser($element->texy->utf ? 'HTML_UTF8' : 'HTML', P_TAB_INDENT);

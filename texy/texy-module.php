@@ -7,21 +7,16 @@
  *
  * Version 1 Release Candidate
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
+ * Copyright (c) 2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
  *
- * Texy! modules are used to parse text into elements (DOM) by regular expressions
+ * Texy! modules base class
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * For the full copyright and license information, please view the COPYRIGHT
+ * file that was distributed with this source code. If the COPYRIGHT file is
+ * missing, please visit the Texy! homepage: http://www.texy.info
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+ * @package Texy
  */
 
 // security - include texy.php, not this file
@@ -37,71 +32,71 @@ if (!defined('TEXY')) die();
  * ------------------------
  */
 class TexyModule {
-  var $texy;             // parent Texy! object (reference to itself is: $texy->modules->__CLASSNAME__)
-  var $allowed = true;   // module configuration
+    var $texy;             // parent Texy! object (reference to itself is: $texy->modules->__CLASSNAME__)
+    var $allowed = TEXY_ALL;   // module configuration
 
 
-  function TexyModule(&$texy)
-  {
-    $this->texy = & $texy;
-  }
-
-
-
-  // register all line & block patterns a routines
-  function init()
-  {
-  }
-
-
-  // block's pre-process
-  function preProcess(&$text)
-  {
-  }
+    function TexyModule(&$texy)
+    {
+        $this->texy = & $texy;
+    }
 
 
 
-  // block's post-process
-  function postProcess(&$text)
-  {
-  }
+    // register all line & block patterns a routines
+    function init()
+    {
+    }
+
+
+    // block's pre-process
+    function preProcess(&$text)
+    {
+    }
+
+
+
+    // block's post-process
+    function postProcess(&$text)
+    {
+    }
 
 
 /* not used yet
-  // single line pre-process
-  function linePreProcess(&$line)
-  {
-  }
+    // single line pre-process
+    function linePreProcess(&$line)
+    {
+    }
 */
 
-  // single line post-process
-  function linePostProcess(&$line)
-  {
-  }
+    // single line post-process
+    function linePostProcess(&$line)
+    {
+    }
 
 
 
 
-  function registerLinePattern($func, $pattern, $user_args = null)
-  {
-    $this->texy->patternsLine[] = array(
-             'replacement' => array(&$this, $func),
-             'pattern'     => $this->texy->translatePattern($pattern) ,
-             'user'        => $user_args
-    );
-  }
+    function registerLinePattern($func, $pattern, $user_args = null)
+    {
+        $this->texy->patternsLine[] = array(
+                         'handler'     => array(&$this, $func),
+                         'pattern'     => $this->texy->translatePattern($pattern) ,
+                         'user'        => $user_args
+        );
+    }
 
 
-  function registerBlockPattern($func, $pattern, $user_args = null)
-  {
+    function registerBlockPattern($func, $pattern, $user_args = null)
+    {
 //    if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Class '.get_class($this).', pattern '.htmlSpecialChars($pattern));
 
-    $this->texy->patternsBlock[] = array(
-             'func'    => array(&$this, $func),
-             'pattern' => $this->texy->translatePattern($pattern)  . 'm',  // force multiline!
-             'user'    => $user_args
-    );
-  }
+        $this->texy->patternsBlock[] = array(
+                         'handler'     => array(&$this, $func),
+                         'pattern'     => $this->texy->translatePattern($pattern)  . 'm',  // force multiline!
+                         'user'        => $user_args
+        );
+    }
 
 
 

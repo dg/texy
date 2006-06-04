@@ -7,21 +7,16 @@
  *
  * Version 1 Release Candidate
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
+ * Copyright (c) 2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
  *
  * Elements of Texy! "DOM"
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * For the full copyright and license information, please view the COPYRIGHT
+ * file that was distributed with this source code. If the COPYRIGHT file is
+ * missing, please visit the Texy! homepage: http://www.texy.info
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+ * @package Texy
  */
 
 // security - include texy.php, not this file
@@ -37,29 +32,29 @@ if (!defined('TEXY')) die();
  * ------------------------
  */
 class TexyDOMElement {
-  var $texy; // parent Texy! object
-  var $hidden;
+    var $texy; // parent Texy! object
+    var $hidden;
 
 
-  // constructor
-  function TexyDOMElement(&$texy)
-  {
-    $this->texy = & $texy;
-  }
+    // constructor
+    function TexyDOMElement(&$texy)
+    {
+        $this->texy = & $texy;
+    }
 
 
-  // convert element to HTML string
-  function toHTML()
-  {
-  }
+    // convert element to HTML string
+    function toHTML()
+    {
+    }
 
 
-  // for easy Texy! DOM manipulation
-  function broadcast()
-  {
-    // build DOM->elements list
-    $this->texy->DOM->elements[] = &$this;
-  }
+    // for easy Texy! DOM manipulation
+    function broadcast()
+    {
+        // build DOM->elements list
+        $this->texy->DOM->elements[] = &$this;
+    }
 
 
 }  // TexyDOMElement
@@ -79,65 +74,69 @@ class TexyDOMElement {
  *
  */
 class TexyHTMLElement extends TexyDOMElement {
-  var $tag;
-  var $modifier;
+    var $modifier;
+    var $tag;
 
 
-  // constructor
-  function TexyHTMLElement(&$texy) { // $parentModule = null, maybe in PHP5
-    $this->texy = & $texy;
+    // constructor
+    function TexyHTMLElement(&$texy)
+    { // $parentModule = null, maybe in PHP5
+        $this->texy = & $texy;
 //    $this->parentModule = & $parentModule;
-    $this->modifier = & $texy->createModifier();
-  }
+        $this->modifier = & $texy->createModifier();
+    }
 
 
 
-  function generateTag(&$tag, &$attr)
-  {
-    $tag  = $this->tag;
+    function generateTags(&$tags, $defaultTag = null)
+    {
+        $tags = (array) $tags;
+        if (!$defaultTag) {
+            if (!$this->tag) return;
+            $defaultTag = $this->tag;
+        }
 
-    $attr['id']    = $this->modifier->id;
-    $attr['title'] = $this->modifier->title;
-    $attr['class'] = TexyModifier::implodeClasses( $this->modifier->classes );
+        $attr['id']    = $this->modifier->id;
+        $attr['title'] = $this->modifier->title;
+        $attr['class'] = $this->modifier->classes;
+        $attr['style'] = $this->modifier->styles;
+        if ($this->modifier->hAlign) $attr['style']['text-align'] = $this->modifier->hAlign;
+        if ($this->modifier->vAlign) $attr['style']['vertical-align'] = $this->modifier->vAlign;
 
-    $styles = $this->modifier->styles;
-    $styles['text-align'] = $this->modifier->hAlign;
-    $styles['vertical-align'] = $this->modifier->vAlign;
-    $attr['style'] = TexyModifier::implodeStyles($styles);
-  }
-
-
-
-  // abstract
-  function generateContent() { }
-
-
-  // convert element to HTML string
-  function toHTML()
-  {
-    $this->generateTag($tag, $attr);
-    if ($this->hidden) return;
-
-    return Texy::openingTag($tag, $attr)
-           . $this->generateContent()
-           . Texy::closingTag($tag);
-  }
+        $tags[$defaultTag] = $attr;
+    }
 
 
+    // abstract
+    function generateContent() { }
 
-  function broadcast()
-  {
-    parent::broadcast();
 
-    // build $texy->DOM->elementsById list
-    if ($this->modifier->id)
-      $this->texy->DOM->elementsById[$this->modifier->id] = &$this;
+    // convert element to HTML string
+    function toHTML()
+    {
+        $this->generateTags($tags);
+        if ($this->hidden) return;
 
-    // build $texy->DOM->elementsByClass list
-    if ($this->modifier->classes)
-      foreach ($this->modifier->classes as $class)
-        $this->texy->DOM->elementsByClass[$class][] = &$this;
-  }
+        return Texy::openingTags($tags)
+                     . $this->generateContent()
+                     . Texy::closingTags($tags);
+    }
+
+
+
+    function broadcast()
+    {
+        parent::broadcast();
+
+        // build $texy->DOM->elementsById list
+        if ($this->modifier->id)
+            $this->texy->DOM->elementsById[$this->modifier->id] = &$this;
+
+        // build $texy->DOM->elementsByClass list
+        if ($this->modifier->classes)
+            foreach ($this->modifier->classes as $class)
+                $this->texy->DOM->elementsByClass[$class][] = &$this;
+    }
 
 
 }  // TexyHTMLElement
@@ -160,42 +159,42 @@ class TexyHTMLElement extends TexyDOMElement {
  *
  */
 class TexyBlockElement extends TexyHTMLElement {
-  var $children = array(); // of TexyHTMLElement
+    var $children = array(); // of TexyHTMLElement
 
 
 
 
-  function generateContent()
-  {
-    $html = '';
-    foreach (array_keys($this->children) as $key)
-      $html .= $this->children[$key]->toHTML();
+    function generateContent()
+    {
+        $html = '';
+        foreach (array_keys($this->children) as $key)
+            $html .= $this->children[$key]->toHTML();
 
-    return $html;
-  }
-
-
-
-
-  /***
-   * Parse $text as BLOCK and create array children (array of Texy DOM elements)
-   ***/
-  function parse($text)
-  {
-    $blockParser = &new TexyBlockParser($this);
-    $blockParser->parse($text);
-  }
+        return $html;
+    }
 
 
 
-  function broadcast()
-  {
-    parent::broadcast();
 
-    // apply to all children
-    foreach (array_keys($this->children) as $key)
-      $this->children[$key]->broadcast();
-  }
+    /***
+     * Parse $text as BLOCK and create array children (array of Texy DOM elements)
+     ***/
+    function parse($text)
+    {
+        $blockParser = &new TexyBlockParser($this);
+        $blockParser->parse($text);
+    }
+
+
+
+    function broadcast()
+    {
+        parent::broadcast();
+
+        // apply to all children
+        foreach (array_keys($this->children) as $key)
+            $this->children[$key]->broadcast();
+    }
 
 }  // TexyBlockElement
 
@@ -217,92 +216,84 @@ class TexyBlockElement extends TexyHTMLElement {
  *
  */
 class TexyTextualElement extends TexyHTMLElement {
-  var $children    = array();      // of TexyTextualElement
+    var $children    = array();      // of TexyTextualElement
 
-  var $contentType = TEXY_CONTENT_NONE;
-  var $content;                    // string
-  var $htmlSafe    = false;        // is content HTML-safe?
-
-
-
-
-  function setContent($text, $isHtmlSafe = false)
-  {
-    $this->content = $text;
-    $this->htmlSafe = $isHtmlSafe;
-  }
-
-
-
-  function safeContent($onlyReturn = false)
-  {
-    $safeContent = $this->htmlSafe ? $this->content : htmlSpecialChars($this->content, ENT_QUOTES);
-
-    if ($onlyReturn) return $safeContent;
-    else {
-      $this->htmlSafe = true;
-      return $this->content = $safeContent;
-    }
-  }
+    var $contentType = TEXY_CONTENT_NONE;
+    var $content;                    // string
+    var $htmlSafe    = false;        // is content HTML-safe?
 
 
 
 
-  function generateContent()
-  {
-    $content = $this->safeContent(true);
-
-    if ($this->children) {
-      $table = array();
-      foreach (array_keys($this->children) as $key)
-        $table[$key] = $this->children[$key]->toHTML( Texy::isHashOpening($key) );
-
-      return strtr($content, $table);
+    function setContent($text, $isHtmlSafe = false)
+    {
+        $this->content = $text;
+        $this->htmlSafe = $isHtmlSafe;
     }
 
-    return $content;
-  }
 
 
+    function safeContent($onlyReturn = false)
+    {
+        $safeContent = $this->htmlSafe ? $this->content : htmlSpecialChars($this->content, ENT_NOQUOTES);
 
-  /***
-   * Parse $text as SINGLE LINE and create string $content and array of Texy DOM elements ($children)
-   ***/
-  function parse($text)
-  {
-    $lineParser = &new TexyLineParser($this);
-    $lineParser->parse($text);
-  }
-
-
-
-
-  function toText()
-  {
-    return preg_replace('#['.TEXY_HASH.']+#', '', $this->content);
-  }
-
-
-
-  function broadcast()
-  {
-    parent::broadcast();
-
-    // apply to all children
-    foreach (array_keys($this->children) as $key)
-      $this->children[$key]->broadcast();
-  }
+        if ($onlyReturn) return $safeContent;
+        else {
+            $this->htmlSafe = true;
+            return $this->content = $safeContent;
+        }
+    }
 
 
 
 
-  function addTo(&$ownerElement)
-  {
-    $key = Texy::hashKey($this->contentType);
-    $ownerElement->children[$key]  = &$this;
-    $ownerElement->contentType = max($ownerElement->contentType, $this->contentType);
-    return $key;
-  }
+    function generateContent()
+    {
+        $content = $this->safeContent(true);
+
+        if ($this->children) {
+            $table = array();
+            foreach (array_keys($this->children) as $key)
+                $table[$key] = $this->children[$key]->toHTML( Texy::isHashOpening($key) );
+
+            return strtr($content, $table);
+        }
+
+        return $content;
+    }
+
+
+
+    /***
+     * Parse $text as SINGLE LINE and create string $content and array of Texy DOM elements ($children)
+     ***/
+    function parse($text, $postProcess = true)
+    {
+        $lineParser = &new TexyLineParser($this);
+        $lineParser->parse($text, $postProcess);
+    }
+
+
+
+    function broadcast()
+    {
+        parent::broadcast();
+
+        // apply to all children
+        foreach (array_keys($this->children) as $key)
+            $this->children[$key]->broadcast();
+    }
+
+
+
+
+    function addTo(&$ownerElement)
+    {
+        $key = Texy::hashKey($this->contentType);
+        $ownerElement->children[$key]  = &$this;
+        $ownerElement->contentType = max($ownerElement->contentType, $this->contentType);
+        return $key;
+    }
 
 }  // TexyTextualElement
 
@@ -321,36 +312,36 @@ class TexyTextualElement extends TexyHTMLElement {
  *
  */
 class TexyInlineTagElement extends TexyHTMLElement {
-  var $contentType = TEXY_CONTENT_NONE;
-  var $_closingTag;
+    var $contentType = TEXY_CONTENT_NONE;
+    var $_closingTag;
 
 
 
-  // convert element to HTML string
-  function toHTML($opening)
-  {
-    if ($opening) {
-      $this->generateTag($tag, $attr);
-      if ($this->hidden) return;
-      $this->_closingTag = Texy::closingTag($tag);
-      return Texy::openingTag($tag, $attr);
+    // convert element to HTML string
+    function toHTML($opening)
+    {
+        if ($opening) {
+            $this->generateTags($tags);
+            if ($this->hidden) return;
+            $this->_closingTag = Texy::closingTags($tags);
+            return Texy::openingTags($tags);
 
-    } else {
-      return $this->_closingTag;
+        } else {
+            return $this->_closingTag;
+        }
     }
-  }
 
 
 
-  function addTo(&$ownerElement, $elementContent = null)
-  {
-    $keyOpen  = Texy::hashKey($this->contentType, true);
-    $keyClose = Texy::hashKey($this->contentType, false);
+    function addTo(&$ownerElement, $elementContent = null)
+    {
+        $keyOpen  = Texy::hashKey($this->contentType, true);
+        $keyClose = Texy::hashKey($this->contentType, false);
 
-    $ownerElement->children[$keyOpen]  = &$this;
-    $ownerElement->children[$keyClose] = &$this;
-    return $keyOpen . $elementContent . $keyClose;
-  }
+        $ownerElement->children[$keyOpen]  = &$this;
+        $ownerElement->children[$keyClose] = &$this;
+        return $keyOpen . $elementContent . $keyClose;
+    }
 
 
 
@@ -378,95 +369,94 @@ class TexyInlineTagElement extends TexyHTMLElement {
  * ---------
  */
 class TexyDOM extends TexyBlockElement {
-  var  $elements;
-  var  $elementsById;
-  var  $elementsByClass;
+    var  $elements;
+    var  $elementsById;
+    var  $elementsByClass;
 
 
-  /***
-   * Convert Texy! document into DOM structure
-   * Before converting it normalize text and call all pre-processing modules
-   ***/
-  function parse($text)
-  {
-      ///////////   REMOVE SPECIAL CHARS, NORMALIZE LINES
-    $text = Texy::wash($text);
+    /***
+     * Convert Texy! document into DOM structure
+     * Before converting it normalize text and call all pre-processing modules
+     ***/
+    function parse($text)
+    {
+            ///////////   REMOVE SPECIAL CHARS, NORMALIZE LINES
+        $text = Texy::wash($text);
 
-      ///////////   STANDARDIZE LINE ENDINGS TO UNIX-LIKE  (DOS, MAC)
-    $text = str_replace("\r\n", TEXY_NEWLINE, $text); // DOS
-    $text = str_replace("\r", TEXY_NEWLINE, $text); // Mac
+            ///////////   STANDARDIZE LINE ENDINGS TO UNIX-LIKE  (DOS, MAC)
+        $text = str_replace("\r\n", TEXY_NEWLINE, $text); // DOS
+        $text = str_replace("\r", TEXY_NEWLINE, $text); // Mac
 
-      ///////////   REPLACE TABS WITH SPACES
-    $tabWidth = $this->texy->tabWidth;
-    while (strpos($text, "\t") !== false)
-      $text = preg_replace_callback('#^(.*)\t#mU',
-                 create_function('&$matches', "return \$matches[1] . str_repeat(' ', $tabWidth - strlen(\$matches[1]) % $tabWidth);"),
-                 $text);
+            ///////////   REPLACE TABS WITH SPACES
+        $tabWidth = $this->texy->tabWidth;
+        while (strpos($text, "\t") !== false)
+            $text = preg_replace_callback('#^(.*)\t#mU',
+                       create_function('&$matches', "return \$matches[1] . str_repeat(' ', $tabWidth - strlen(\$matches[1]) % $tabWidth);"),
+                       $text);
 
-      ///////////   REMOVE TEXY! COMMENTS
-    $commentChars = $this->texy->utf ? "\xC2\xA7" : "\xA7";
-    $text = preg_replace('#'.$commentChars.'{2,}(?!'.$commentChars.').*('.$commentChars.'{2,}|$)(?!'.$commentChars.')#mU', '', $text);
+            ///////////   REMOVE TEXY! COMMENTS
+        $commentChars = $this->texy->utf ? "\xC2\xA7" : "\xA7";
+        $text = preg_replace('#'.$commentChars.'{2,}(?!'.$commentChars.').*('.$commentChars.'{2,}|$)(?!'.$commentChars.')#mU', '', $text);
 
-      ///////////   RIGHT TRIM
-    $text = preg_replace("#[\t ]+(\n|$)#", TEXY_NEWLINE, $text); // right trim
-
-
-      ///////////   PRE-PROCESSING
-    foreach ($this->texy->modules as $name => $moduleX)
-      $this->texy->modules->$name->preProcess($text);
-
-      ///////////   PROCESS
-    parent::parse($text);
-  }
+            ///////////   RIGHT TRIM
+        $text = preg_replace("#[\t ]+$#m", '', $text); // right trim
 
 
+            ///////////   PRE-PROCESSING
+        foreach ($this->texy->modules as $name => $foo)
+            $this->texy->modules->$name->preProcess($text);
 
-
-
-  /***
-   * Convert DOM structure to (X)HTML code
-   * and call all post-processing modules
-   * @return string
-   ***/
-  function toHTML()
-  {
-    $text = parent::toHTML();
-
-      ///////////   POST-PROCESS
-    foreach ($this->texy->modules as $name => $moduleX)
-      $this->texy->modules->$name->postProcess($text);
-
-      ///////////   UNFREEZE SPACES
-    $text = Texy::unfreezeSpaces($text);
-
-      // THIS (C) NOTICE SHOULD REMAIN!
-    static $messageShowed = false;
-    if (!$messageShowed) {
-      $text .= "\n<!-- generated by Texy! -->";
-      $messageShowed = true;
+            ///////////   PROCESS
+        parent::parse($text);
     }
 
-    return $text;
-  }
 
 
 
 
-  /***
-   * Build list for easy access to DOM structure
-   ***/
-  function buildLists()
-  {
-    $this->elements = array();
-    $this->elementsById = array();
-    $this->elementsByClass = array();
-    $this->broadcast();
-  }
+    /***
+     * Convert DOM structure to (X)HTML code
+     * and call all post-processing modules
+     * @return string
+     ***/
+    function toHTML()
+    {
+        $html = parent::toHTML();
+
+            ///////////   POST-PROCESS
+        foreach ($this->texy->modules as $name => $foo)
+            $this->texy->modules->$name->postProcess($html);
+
+            ///////////   UNFREEZE SPACES
+        $html = Texy::unfreezeSpaces($html);
+
+            // THIS NOTICE SHOULD REMAIN!
+        if (!defined('TEXY_NOTICE_SHOWED')) {
+            $html .= "\n<!-- generated by Texy! -->";
+            define('TEXY_NOTICE_SHOWED', true);
+        }
+
+        return $html;
+    }
+
+
+
+
+
+    /***
+     * Build list for easy access to DOM structure
+     ***/
+    function buildLists()
+    {
+        $this->elements = array();
+        $this->elementsById = array();
+        $this->elementsByClass = array();
+        $this->broadcast();
+    }
 
 
 
 }  // TexyDOM
-
 
 
 
@@ -483,52 +473,52 @@ class TexyDOM extends TexyBlockElement {
  * -------------------------
  */
 class TexyDOMLine extends TexyTextualElement {
-  var  $elements;
-  var  $elementsById;
-  var  $elementsByClass;
+    var  $elements;
+    var  $elementsById;
+    var  $elementsByClass;
 
 
-  /***
-   * Convert Texy! single line into DOM structure
-   ***/
-  function parse($text)
-  {
-      ///////////   REMOVE SPECIAL CHARS AND LINE ENDINGS
-    $text = Texy::wash($text);
-    $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
+    /***
+     * Convert Texy! single line into DOM structure
+     ***/
+    function parse($text)
+    {
+            ///////////   REMOVE SPECIAL CHARS AND LINE ENDINGS
+        $text = Texy::wash($text);
+        $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
 
-      ///////////   PROCESS
-    parent::parse($text);
-  }
-
-
-
-
-
-  /***
-   * Convert DOM structure to (X)HTML code
-   * @return string
-   ***/
-  function toHTML()
-  {
-    $text = parent::toHTML();
-    $text = Texy::unfreezeSpaces($text);
-    return $text;
-  }
+            ///////////   PROCESS
+        parent::parse($text);
+    }
 
 
 
 
-  /***
-   * Build list for easy access to DOM structure
-   ***/
-  function buildLists()
-  {
-    $this->elements = array();
-    $this->elementsById = array();
-    $this->elementsByClass = array();
-    $this->broadcast();
-  }
+
+    /***
+     * Convert DOM structure to (X)HTML code
+     * @return string
+     ***/
+    function toHTML()
+    {
+        $html = parent::toHTML();
+        $html = Texy::unfreezeSpaces($html);
+        return $html;
+    }
+
+
+
+
+    /***
+     * Build list for easy access to DOM structure
+     ***/
+    function buildLists()
+    {
+        $this->elements = array();
+        $this->elementsById = array();
+        $this->elementsByClass = array();
+        $this->broadcast();
+    }
 
 
 

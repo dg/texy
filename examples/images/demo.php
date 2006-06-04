@@ -45,8 +45,10 @@ require_once($texyPath . 'texy.php');
 // returns false or TexyImageReference
 
 function &myUserFunc($refName, &$texy) {
-  if ($refName != '*user*')  // accept only [* user *]
-    return false;
+  if ($refName != '*user*') { // accept only [* user *]
+    $false = false; // php4_sucks
+    return $false;
+  }
 
   $elRef = &new TexyImageReference($texy);
   $elRef->URLs = 'image.gif | '        // image URL

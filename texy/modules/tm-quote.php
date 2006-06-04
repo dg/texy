@@ -7,19 +7,14 @@
  *
  * Version 1 Release Candidate
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
+ * Copyright (c) 2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * For the full copyright and license information, please view the COPYRIGHT
+ * file that was distributed with this source code. If the COPYRIGHT file is
+ * missing, please visit the Texy! homepage: http://www.texy.info
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+ * @package Texy
  */
 
 // security - include texy.php, not this file
@@ -34,105 +29,108 @@ if (!defined('TEXY')) die();
  * QUOTE & BLOCKQUOTE MODULE CLASS
  */
 class TexyQuoteModule extends TexyModule {
-  var $allowed;
+    var $allowed;
 
 
 
-  // constructor
-  function TexyQuoteModule(&$texy)
-  {
-    parent::TexyModule($texy);
+    // constructor
+    function TexyQuoteModule(&$texy)
+    {
+        parent::TexyModule($texy);
 
-    $this->allowed->line  = true;
-    $this->allowed->block = true;
-  }
-
-
-
-  /***
-   * Module initialization.
-   */
-  function init()
-  {
-    if ($this->allowed->block)
-      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
-
-    if ($this->allowed->line)
-      $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)'.TEXY_PATTERN_LINK.'?()#U', 'q');
-  }
-
-
-  /***
-   * Callback function: >>.... .(title)[class]{style}<<:LINK
-   * @return string
-   */
-  function processLine(&$lineParser, &$matches, $tag)
-  {
-    list($match, $mMark, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
-    //    [1] => **
-    //    [2] => ...
-    //    [3] => (title)
-    //    [4] => [class]
-    //    [5] => {style}
-    //    [6] => LINK
-
-    $texy = & $this->texy;
-    $el = &new TexyQuoteElement($texy);
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-
-    if ($mLink)
-      $el->cite->set($mLink);
-
-    return $el->addTo($lineParser->element, $mContent);
-  }
+        $this->allowed->line  = true;
+        $this->allowed->block = true;
+    }
 
 
 
+    /***
+     * Module initialization.
+     */
+    function init()
+    {
+        if ($this->allowed->block)
+            $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
 
-  /***
-   * Callback function (for blocks)
-   *
-   *            > They went in single file, running like hounds on a strong scent,
-   *            and an eager light was in their eyes. Nearly due west the broad
-   *            swath of the marching Orcs tramped its ugly slot; the sweet grass
-   *            of Rohan had been bruised and blackened as they passed.
-   *            >:http://www.mycom.com/tolkien/twotowers.html
-   *
-   */
-  function processBlock(&$blockParser, &$matches)
-  {
-    list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
-    //    [1] => (title)
-    //    [2] => [class]
-    //    [3] => {style}
-    //    [4] => <>
-    //    [5] => spaces |
-    //    [6] => ... / LINK
+        if ($this->allowed->line)
+            $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)LINK??()#U', 'q');
+    }
 
-    $texy = & $this->texy;
-    $el = &new TexyBlockQuoteElement($texy);
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-    $blockParser->addChildren($el);
 
-    $content = '';
-    $linkTarget = '';
-    $spaces = '';
-    do {
-      if ($mSpaces == ':') $linkTarget = $mContent;
-      else {
-        if ($spaces === '') $spaces = strlen($mSpaces);
-        $content .= $mContent . TEXY_NEWLINE;
-      }
+    /***
+     * Callback function: >>.... .(title)[class]{style}<<:LINK
+     * @return string
+     */
+    function processLine(&$lineParser, &$matches, $tag)
+    {
+        list($match, $mMark, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
+        //    [1] => **
+        //    [2] => ...
+        //    [3] => (title)
+        //    [4] => [class]
+        //    [5] => {style}
+        //    [6] => LINK
 
-      if (!$blockParser->receiveNext("#^>(?:|(\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
-      list($match, $mSpaces, $mContent) = $matches;
-    } while (true);
+        $texy = & $this->texy;
+        $el = &new TexyQuoteElement($texy);
+        $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
 
-    if ($linkTarget)
-      $el->cite->set($linkTarget);
+        if ($mLink)
+            $el->cite->set($mLink);
 
-    $el->parse($content);
-  }
+        return $el->addTo($lineParser->element, $mContent);
+    }
+
+
+
+
+    /***
+     * Callback function (for blocks)
+     *
+     *            > They went in single file, running like hounds on a strong scent,
+     *            and an eager light was in their eyes. Nearly due west the broad
+     *            swath of the marching Orcs tramped its ugly slot; the sweet grass
+     *            of Rohan had been bruised and blackened as they passed.
+     *            >:http://www.mycom.com/tolkien/twotowers.html
+     *
+     */
+    function processBlock(&$blockParser, &$matches)
+    {
+        list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
+        //    [1] => (title)
+        //    [2] => [class]
+        //    [3] => {style}
+        //    [4] => <>
+        //    [5] => spaces |
+        //    [6] => ... / LINK
+
+        $texy = & $this->texy;
+        $el = &new TexyBlockQuoteElement($texy);
+        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $blockParser->addChildren($el);
+
+        $content = '';
+        $linkTarget = '';
+        $spaces = '';
+        do {
+            if ($mSpaces == ':') $linkTarget = trim($mContent);
+            else {
+                if ($spaces === '') $spaces = strlen($mSpaces);
+                $content .= $mContent . TEXY_NEWLINE;
+            }
+
+            if (!$blockParser->receiveNext("#^>(?:|(\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
+            list($match, $mSpaces, $mContent) = $matches;
+        } while (true);
+
+        if ($linkTarget) {                                  // !!!!!
+            $elx = &new TexyLinkElement($this->texy);
+            $elx->setLinkRaw($linkTarget);
+            $el->cite->set($elx->link->URL);
+        }
+
+        $el->parse($content);
+    }
 
 
 
@@ -143,7 +141,7 @@ class TexyQuoteModule extends TexyModule {
 
 
 /****************************************************************************
-                               TEXY! DOM ELEMENTS                          */
+                                                             TEXY! DOM ELEMENTS                          */
 
 
 
@@ -152,22 +150,21 @@ class TexyQuoteModule extends TexyModule {
  * HTML ELEMENT BLOCKQUOTE
  */
 class TexyBlockQuoteElement extends TexyBlockElement {
-  var $tag = 'blockquote';
-  var $cite;
+    var $cite;
 
 
-  function TexyBlockQuoteElement(&$texy)
-  {
-    parent::TexyBlockElement($texy);
-    $this->cite = & $texy->createURL();
-  }
+    function TexyBlockQuoteElement(&$texy)
+    {
+        parent::TexyBlockElement($texy);
+        $this->cite = & $texy->createURL();
+    }
 
 
-  function generateTag(&$tag, &$attr)
-  {
-    parent::generateTag($tag, $attr);
-    if ($this->cite->URL) $attr['cite'] = $this->cite->URL;
-  }
+    function generateTags(&$tags)
+    {
+        parent::generateTags($tags, 'blockquote');
+        $tags['blockquote']['cite'] = $this->cite->URL;
+    }
 
 } // TexyBlockQuoteElement
 
@@ -179,22 +176,21 @@ class TexyBlockQuoteElement extends TexyBlockElement {
  * HTML TAG QUOTE
  */
 class TexyQuoteElement extends TexyInlineTagElement {
-  var $tag = 'q';
-  var $cite;
+    var $cite;
 
 
-  function TexyQuoteElement(&$texy)
-  {
-    parent::TexyInlineTagElement($texy);
-    $this->cite = & $texy->createURL();
-  }
+    function TexyQuoteElement(&$texy)
+    {
+        parent::TexyInlineTagElement($texy);
+        $this->cite = & $texy->createURL();
+    }
 
 
-  function generateTag(&$tag, &$attr)
-  {
-    parent::generateTag($tag, $attr);
-    if ($this->cite->URL) $attr['cite'] = $this->cite->URL;
-  }
+    function generateTags(&$tags)
+    {
+        parent::generateTags($tags, 'q');
+        $tags['q']['cite'] = $this->cite->URL;
+    }
 
 
 } // TexyBlockQuoteElement

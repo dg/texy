@@ -365,7 +365,7 @@ Quick-corrects
 - vkládání nezalomitelných mezer za jednopísmenné pøedložky
 - acronym NATO((North Atlantic Treaty Organisation))
 - abbr "et al."((a další))
-- náhrady(TM) nebo(R) za pøíslušné entity(C)
+- náhrady(TM) nebo(R) za pøíslušné (C)entity
 - šipky <- a -> a <->
 - tøi teèky...
 - zachování HTML entit &amp;

@@ -48,7 +48,7 @@ require_once($texyPath . 'texy.php');
 // returns false or TexyLinkReference
 
 function &myUserFunc($refName, &$texy) {
-  $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
+  $names = array('Me', 'Punkrats', 'Serwhats', 'Bonnyfats');
 
   if (!isset($names[$refName]))
     return false;              // it's not my job

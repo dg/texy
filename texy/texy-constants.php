@@ -7,31 +7,21 @@
  *
  * Version 1 Release Candidate
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
+ * Copyright (c) 2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
  *
  * Regular Expression patterns for Texy!
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * For the full copyright and license information, please view the COPYRIGHT
+ * file that was distributed with this source code. If the COPYRIGHT file is
+ * missing, please visit the Texy! homepage: http://www.texy.info
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+ * @package Texy
  */
 
 
 // security - include texy.php, not this file
 if (!defined('TEXY')) die();
-
-
-// XHTML
-if (!defined('TEXY_XHTML'))
-  define ('TEXY_XHTML', true);     // for empty elements, like <br /> vs. <br>
 
 
 
@@ -53,16 +43,28 @@ define('TEXY_URL_IMAGE_INLINE', 1 << 3);
 define('TEXY_URL_IMAGE_LINKED', 4 << 3);
 
 
+// TEXY ELEMENT'S CONTENT TYPE
 define('TEXY_CONTENT_NONE',    1);
 define('TEXY_CONTENT_TEXTUAL', 2);
 define('TEXY_CONTENT_BLOCK',   3);
 
 
+// HTML ELEMENT CLASIFICATION
+// notice 1: Constants may only evaluate to scalar values, so use serialize :-(
+// notice 2: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
+define('TEXY_BLOCK_ELEMENTS',  serialize(array_flip(array('address', 'blockquote', 'caption', 'col', 'colgroup', 'dd', 'div', 'dl', 'dt', 'fieldset', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'iframe', 'legend', 'li', 'object', 'ol', 'p', 'param', 'pre', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'ul'))) );
+define('TEXY_INLINE_ELEMENTS', serialize(array_flip(array('a', 'abbr', 'acronym', 'area', 'b', 'big', 'br', 'button', 'cite', 'code', 'del', 'dfn', 'em', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'map', 'noscript', 'optgroup', 'option', 'q', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'tt', 'var'))) );
+define('TEXY_EMPTY_ELEMENTS',  serialize(array_flip(array('img', 'hr', 'br', 'input', 'meta', 'area', 'base', 'col', 'link', 'param'))) );
+define('TEXY_VALID_ELEMENTS',  serialize(array_merge(unserialize(TEXY_BLOCK_ELEMENTS), unserialize(TEXY_INLINE_ELEMENTS))) );
+//define('TEXY_HEAD_ELEMENTS',   serialize(array_flip(array('html', 'head', 'body', 'base', 'meta', 'link', 'title'))) );
 
-define('TEXY_ELEMENT_VALID',   3);
-define('TEXY_ELEMENT_BLOCK',   1 << 0);
-define('TEXY_ELEMENT_INLINE',  1 << 1);
-define('TEXY_ELEMENT_EMPTY',   1 << 2);
+define('TEXY_EMPTY',    '/');
+define('TEXY_CLOSING',  '*');
+
+
+// CONFIGURATION DIRECTIVES
+define('TEXY_ALL',   true);
+define('TEXY_NONE',  false);
 
 
 
@@ -97,22 +99,22 @@ define('TEXY_PATTERN_HALIGN',   '(?:<>|>|=|<)');      //  <  >  =  <>
 define('TEXY_PATTERN_VALIGN',   '(?:\^|\-|\_)');      //  ~ - _
 
 define('TEXY_PATTERN_MODIFIER',         // .(title)[class]{style}
-         '(?:\ ?\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')?'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')?)');
+         '(?:\ *(?<= |^)\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')??'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')??)');
 
 define('TEXY_PATTERN_MODIFIER_H',       // .(title)[class]{style}<>
-         '(?: ?\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')?'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')?'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')?)');
+         '(?:\ *(?<= |^)\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')??'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')??'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')??)');
 
 define('TEXY_PATTERN_MODIFIER_HV',      // .(title)[class]{style}<>^
-         '(?: ?\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')?'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')?'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')?'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')?)');
+         '(?:\ *(?<= |^)\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??'.
+         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??)');
 
 
 
@@ -121,9 +123,9 @@ define('TEXY_PATTERN_MODIFIER_HV',      // .(title)[class]{style}<>^
 // links
 define('TEXY_PATTERN_LINK_REF',        '\[[^\[\]\*\n'.TEXY_HASH.']+\]');    // reference  [refName]
 define('TEXY_PATTERN_LINK_IMAGE',      '\[\*[^\n'.TEXY_HASH.']+\*\]');      // [* ... *]
-define('TEXY_PATTERN_LINK_URL',        '(?:\[[^\]\n]+\]|(?-U)(?!\[)[^\s'.TEXY_HASH.']*[^:);,.!?\s'.TEXY_HASH.'](?U))'); // any url (nekonèí :).,!?
-define('TEXY_PATTERN_LINK',            '(?-U)(?::(?U)('.TEXY_PATTERN_LINK_URL.'))');    // any link
-define('TEXY_PATTERN_LINK_N',          '(?-U)(?::(?U)('.TEXY_PATTERN_LINK_URL.'|:))');  // any link (also unstated)
+define('TEXY_PATTERN_LINK_URL',        '(?:\[[^\]\n]+\]|(?!\[)[^\s'.TEXY_HASH.']*?[^:);,.!?\s'.TEXY_HASH.'])'); // any url (nekonèí :).,!?
+define('TEXY_PATTERN_LINK',            '(?::('.TEXY_PATTERN_LINK_URL.'))');    // any link
+define('TEXY_PATTERN_LINK_N',          '(?::('.TEXY_PATTERN_LINK_URL.'|:))');  // any link (also unstated)
 define('TEXY_PATTERN_EMAIL',           '[a-z0-9.+_-]+@[a-z0-9.+_-]{2,}\.[a-z]{2,}');    // name@exaple.com
 
 ?>

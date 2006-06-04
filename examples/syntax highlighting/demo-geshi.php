@@ -33,13 +33,13 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$texyPath = '../../texy/';
+$texyPath = dirname(__FILE__).'/../../texy/';
 $geshiPath = dirname(__FILE__).'/geshi/';
 
 
 // include libs
 require_once($texyPath . 'texy.php');
-include_once($geshiPath . 'geshi.php');
+if (is_file($geshiPath . 'geshi.php')) include_once($geshiPath . 'geshi.php');
 
 
 if (!class_exists('Geshi'))
@@ -90,6 +90,7 @@ function myUserFunc(&$element) {
     if ($out !== utf8_encode(utf8_decode($out))) return;
 
   $element->setContent($out, true);
+  $element->tag = false;
 }
 
 

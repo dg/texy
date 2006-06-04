@@ -25,7 +25,7 @@
 
 
 // include libs
-require_once('../../texy/texy.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 

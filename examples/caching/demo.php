@@ -33,7 +33,7 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-require_once('mytexy.php');
+require_once dirname(__FILE__).'/mytexy.php';
 
 
 $texy = &new MyTexy();

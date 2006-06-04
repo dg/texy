@@ -362,7 +362,7 @@ Quick-corrects
 - nonbreakable spaces in phone numbers +420 776 552 046
 - acronym NATO((North Atlantic Treaty Organisation))
 - abbr "et al."((and others))
-- quickCorrects like this(TM) this(R) or this(C)
+- quickCorrects like this(TM) this(R) or (C)this
 - arrows <- and -> and <->
 - ellipsis...
 - preserve HTML entities

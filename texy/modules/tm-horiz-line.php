@@ -7,19 +7,14 @@
  *
  * Version 1 Release Candidate
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
+ * Copyright (c) 2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * For the full copyright and license information, please view the COPYRIGHT
+ * file that was distributed with this source code. If the COPYRIGHT file is
+ * missing, please visit the Texy! homepage: http://www.texy.info
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+ * @package Texy
  */
 
 // security - include texy.php, not this file
@@ -36,41 +31,41 @@ if (!defined('TEXY')) die();
 class TexyHorizLineModule extends TexyModule {
 
 
-  /***
-   * Module initialization.
-   */
-  function init()
-  {
-    $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
-  }
+    /***
+     * Module initialization.
+     */
+    function init()
+    {
+        $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
+    }
 
 
 
-  /***
-   * Callback function (for blocks)
-   *
-   *            ---------------------------
-   *
-   *            - - - - - - - - - - - - - -
-   *
-   *            ***************************
-   *
-   *            * * * * * * * * * * * * * *
-   *
-   */
-  function processBlock(&$blockParser, &$matches)
-  {
-    list($match, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
-    //    [1] => ---
-    //    [2] => (title)
-    //    [3] => [class]
-    //    [4] => {style}
-    //    [5] => >
+    /***
+     * Callback function (for blocks)
+     *
+     *            ---------------------------
+     *
+     *            - - - - - - - - - - - - - -
+     *
+     *            ***************************
+     *
+     *            * * * * * * * * * * * * * *
+     *
+     */
+    function processBlock(&$blockParser, &$matches)
+    {
+        list($match, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        //    [1] => ---
+        //    [2] => (title)
+        //    [3] => [class]
+        //    [4] => {style}
+        //    [5] => >
 
-    $el = &new TexyHorizLineElement($this->texy);
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-    $blockParser->addChildren($el);
-  }
+        $el = &new TexyHorizLineElement($this->texy);
+        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $blockParser->addChildren($el);
+    }
 
 
 
@@ -83,7 +78,7 @@ class TexyHorizLineModule extends TexyModule {
 
 
 /****************************************************************************
-                               TEXY! DOM ELEMENTS                          */
+                                                             TEXY! DOM ELEMENTS                          */
 
 
 
@@ -92,7 +87,8 @@ class TexyHorizLineModule extends TexyModule {
  * HTML ELEMENT HORIZONTAL LINE
  */
 class TexyHorizLineElement extends TexyBlockElement {
-  var $tag = 'hr';
+    var $tag = 'hr';
+
 
 } // TexyHorizLineElement
 
