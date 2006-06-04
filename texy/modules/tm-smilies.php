@@ -54,7 +54,8 @@ class TexySmiliesModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     krsort($this->icons);
     $re = array();
     foreach ($this->icons as $key => $value)
@@ -76,7 +77,8 @@ class TexySmiliesModule extends TexyModule {
    * Callback function: :-)
    * @return string
    */
-  function processLine(&$lineParser, &$matches) {
+  function processLine(&$lineParser, &$matches)
+  {
     $match = &$matches[0];
     //    [1] => **
     //    [2] => ...
@@ -86,17 +88,17 @@ class TexySmiliesModule extends TexyModule {
     //    [6] => LINK
 
     $texy = & $this->texy;
-    $el = &new TexyTextualElement($texy);
-    $el->tag = 'img';
-    $el->modifier->extra['alt'] = $match;
+    $el = &new TexyImageElement($texy);
+    $el->modifier->title = $match;
+    $el->modifier->classes[] = $this->class;
+    $el->image->root = $this->root;
 
      // find the closest match
     foreach ($this->icons as $key => $value)
       if (substr($match, 0, strlen($key)) == $key) {
-        $el->modifier->extra['src'] = $this->root . $value;
+        $el->image->set($value);
         break;
       }
-    $el->modifier->classes[] = $this->class;
 
     return $el->addTo($lineParser->element);
   }

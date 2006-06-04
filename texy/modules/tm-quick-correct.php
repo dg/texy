@@ -36,7 +36,8 @@ if (!defined('TEXY')) die();
 class TexyQuickCorrectModule extends TexyModule {
 
 
-  function linePostProcess(&$text) {
+  function linePostProcess(&$text)
+  {
     $HASHS = '(['.TEXY_HASH_SOFT.']*)';
     $CHAR = '['.TEXY_CHAR.']';
     $UTF  = TEXY_PATTERN_UTF;
@@ -59,8 +60,9 @@ class TexyQuickCorrectModule extends TexyModule {
          '#(\S ?)\(TM\)#i'                                    => '$1&trade;',                 // trademark      (TM)
          '#(\S ?)\(R\)#i'                                     => '$1&reg;',                   // registered     (R)
          '#(\S ?)\(C\)#i'                                     => '$1&copy;',                  // copyright      (C)
-         '#(\d{3}) (\d{3}) (\d{3}) (\d{3})#'                  => '$1&nbsp;$2&nbsp;$3&nbsp;$4',// phone number 123 123 123 123
-         '#(\d{3}) (\d{3}) (\d{3})#'                          => '$1&nbsp;$2&nbsp;$3',        // phone number 123 123 123
+         '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'                => '$1&nbsp;$2&nbsp;$3&nbsp;$4',// (phone) number 1 123 123 123
+         '#(\d{1,3}) (\d{3}) (\d{3})#'                        => '$1&nbsp;$2&nbsp;$3',        // (phone) number 1 123 123
+         '#(\d{1,3}) (\d{3})#'                                => '$1&nbsp;$2',                // number 1 123
          "#($CHAR)$HASHS $HASHS(\d)#m$UTF"                    => '$1$2&nbsp;$3$4',            // space before number
          "#(?<=^|[^".TEXY_CHAR."0-9])$HASHS([ksvzouiKSVZOUIA])$HASHS $HASHS($CHAR)#m$UTF"  => '$1$2$3&nbsp;$4$5',  // space after preposition
     );

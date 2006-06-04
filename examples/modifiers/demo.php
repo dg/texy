@@ -31,12 +31,13 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$libs_path = '../../texy/';
-$texy_path = $libs_path;
 
 
 // include Texy!
-require_once($texy_path . 'texy.php');
+$texyPath = '../../texy/';
+require_once($texyPath . 'texy.php');
+
+
 
 $texy = &new Texy();
 $texy->modules['TexyFormatterModule']->baseIndent  = 1;
@@ -64,18 +65,18 @@ function doIt() {
 
 
 echo '<h2>mode: Styles and Classes allowed (default)</h2>';
-$texy->allowClasses = true;
-$texy->allowStyles  = true;
+$texy->allowedClasses = true;
+$texy->allowedStyles  = true;
 doIt();
 
 echo '<h2>mode: Styles and Classes disabled</h2>';
-$texy->allowClasses = false;
-$texy->allowStyles  = false;
+$texy->allowedClasses = false;
+$texy->allowedStyles  = false;
 doIt();
 
 echo '<h2>mode: Custom</h2>';
-$texy->allowClasses = array('one', '#id');
-$texy->allowStyles  = array('color');
+$texy->allowedClasses = array('one', '#id');
+$texy->allowedStyles  = array('color');
 doIt();
 
 ?>

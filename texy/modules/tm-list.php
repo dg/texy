@@ -29,19 +29,17 @@ if (!defined('TEXY')) die();
 
 
 // LIST STYLE
-define('TEXY_LIST_DEFINITION',       1);
-define('TEXY_LIST_UNORDERED',        2);
-define('TEXY_LIST_ORDERED',          3);
-define('TEXY_LIST_MASK',             3);
-define('TEXY_LISTSTYLE_UPPER_ALPHA', 1 << 2);
-define('TEXY_LISTSTYLE_LOWER_ALPHA', 2 << 2);
-define('TEXY_LISTSTYLE_UPPER_ROMAN', 3 << 2);
-define('TEXY_LISTSTYLE_MASK',        3 << 2);
+define('TEXY_LIST_DEFINITION',       'dl');
+define('TEXY_LIST_UNORDERED',        'ul');
+define('TEXY_LIST_ORDERED',          'ol');
+define('TEXY_LISTSTYLE_UPPER_ALPHA', 'upper-alpha');
+define('TEXY_LISTSTYLE_LOWER_ALPHA', 'lower-alpha');
+define('TEXY_LISTSTYLE_UPPER_ROMAN', 'upper-roman');
 
 // LIST ITEM TYPES
-define('TEXY_LISTITEM',              0);
-define('TEXY_LISTITEM_TERM',         1);
-define('TEXY_LISTITEM_DEFINITION',   2);
+define('TEXY_LISTITEM',              'li');
+define('TEXY_LISTITEM_TERM',         'dt');
+define('TEXY_LISTITEM_DEFINITION',   'dd');
 
 
 /**
@@ -54,7 +52,8 @@ class TexyListModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                                                     // .{color: red}
                                               . '(\*|\-|\+|\d+\.|\d+\)|[a-zA-Z]+\)|[IVX]+\.)\ +(.*)MODIFIER_H?()$#mU');   // - item
   }
@@ -71,7 +70,8 @@ class TexyListModule extends TexyModule {
    *            3) ....
    *
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     if (!$this->allowed) return false;
     list($match, $mModList1, $mModList2, $mModList3, $mModList4, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => (title)
@@ -95,9 +95,9 @@ class TexyListModule extends TexyModule {
       $type = '\+';       if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_UNORDERED; break; }
       $type = '\d+\.';    if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; break; }
       $type = '\d+\)';    if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; break; }
-      $type = '[A-Z]+\)'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED | TEXY_LISTSTYLE_UPPER_ALPHA; break; }
-      $type = '[a-z]+\)'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED | TEXY_LISTSTYLE_LOWER_ALPHA; break; }
-      $type = '[IVX]+\.'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED | TEXY_LISTSTYLE_UPPER_ROMAN; break; }
+      $type = '[A-Z]+\)'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; $el->style = TEXY_LISTSTYLE_UPPER_ALPHA; break; }
+      $type = '[a-z]+\)'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; $el->style = TEXY_LISTSTYLE_LOWER_ALPHA; break; }
+      $type = '[IVX]+\.'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; $el->style = TEXY_LISTSTYLE_UPPER_ROMAN; break; }
     } while (false);
 
 
@@ -164,19 +164,23 @@ class TexyListModule extends TexyModule {
  */
 class TexyListElement extends TexyBlockElement {
   var $type;
+  var $style;
 
 
-  function generateTag(&$tag, &$attr) {
-    parent::generateTag($tag, $attr);
+  function generateTag(&$tag, &$attr)
+  {
+    $tag = $this->type;
 
-    $tags = array(TEXY_LIST_UNORDERED => 'ul', TEXY_LIST_ORDERED => 'ol', TEXY_LIST_DEFINITION => 'dl');
-    $tag = $tags[$this->type & TEXY_LIST_MASK];
+    $attr['id']    = $this->modifier->id;
+    $attr['title'] = $this->modifier->title;
+    $attr['class'] = TexyModifier::implodeClasses( $this->modifier->classes );
 
-    $styles = array(0 => '', TEXY_LISTSTYLE_UPPER_ALPHA => 'list-style-type:upper-alpha;', TEXY_LISTSTYLE_LOWER_ALPHA => 'list-style-type:lower-alpha;', TEXY_LISTSTYLE_UPPER_ROMAN => 'list-style-type:upper-roman;');
-
-    if (!isset($attr['style'])) $attr['style'] = '';
-    $attr['style'] .= $styles[$this->type & TEXY_LISTSTYLE_MASK];
+    $styles = $this->modifier->styles;
+    $styles['text-align'] = $this->modifier->hAlign;
+    $styles['list-style-type'] = $this->style;
+    $attr['style'] = TexyModifier::implodeStyles($styles);
   }
+
 
 } // TexyListElement
 
@@ -188,15 +192,15 @@ class TexyListElement extends TexyBlockElement {
  * HTML ELEMENT LI / DL / DT
  */
 class TexyListItemElement extends TexyBlockElement {
-  var $type;
+  var $type = TEXY_LISTITEM;
 
 
-  function generateTag(&$tag, &$attr) {
+  function generateTag(&$tag, &$attr)
+  {
     parent::generateTag($tag, $attr);
-
-    $tags = array(TEXY_LISTITEM => 'li', TEXY_LISTITEM_TERM => 'dt', TEXY_LISTITEM_DEFINITION => 'dd');
-    $tag = $tags[$this->type & 3]; // NOT GOOD!
+    $tag = $this->type;
   }
+
 } // TexyListItemElement
 
 

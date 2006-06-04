@@ -42,7 +42,8 @@ class TexyBlockModule extends TexyModule {
 
 
   // constructor
-  function TexyBlockModule(&$texy) {
+  function TexyBlockModule(&$texy)
+  {
     parent::TexyModule($texy);
   }
 
@@ -50,7 +51,8 @@ class TexyBlockModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlock',   '#^/--+(code|samp|text|html|div|notexy| |$) *(\S*)MODIFIER_H?\n(.*\n)?\\\\--+()$#mUsi');
   }
 
@@ -66,7 +68,8 @@ class TexyBlockModule extends TexyModule {
    *            \----
    *
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     if (!$this->allowed) return false;
     list($match, $mType, $mLang, $mMod1, $mMod2, $mMod3, $mMod4, $mContent) = $matches;
     //    [1] => code
@@ -115,7 +118,6 @@ class TexyBlockModule extends TexyModule {
 
      default: // code | samp
          $el = &new TexyCodeBlockElement($this->texy);
-         $el->modifier->classes[] = $mLang;
          $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
          $el->type = $mType;
          $el->lang = $mLang;
@@ -135,13 +137,15 @@ class TexyBlockModule extends TexyModule {
 
 
 
-  function trustMode() {
+  function trustMode()
+  {
     $this->allowedHTML = true;
   }
 
 
 
-  function safeMode() {
+  function safeMode()
+  {
     $this->allowedHTML = false;
   }
 
@@ -170,7 +174,19 @@ class TexyCodeBlockElement extends TexyTextualElement {
   var $type;
 
 
-  function toHTML() {
+  function generateTag(&$tag, &$attr)
+  {
+    parent::generateTag($tag, $attr);
+
+    $classes = $this->modifier->classes;
+    $classes[] = $this->lang;
+    $attr['class'] = TexyModifier::implodeClasses($classes);
+  }
+
+
+
+  function toHTML()
+  {
     $this->generateTag($tag, $attr);
     if ($this->hidden) return;
 

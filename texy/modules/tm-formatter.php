@@ -38,7 +38,7 @@ if (!defined('TEXY')) die();
 class TexyFormatterModule extends TexyModule {
   var $baseIndent  = 0;               // indent for top elements
   var $lineWrap    = 80;              // line width, doesn't include indent space
-  var $wellForm    = true;
+  var $indent      = true;
 
   // internal
   var $tagStack;
@@ -48,7 +48,8 @@ class TexyFormatterModule extends TexyModule {
 
 
   // constructor
-  function TexyFormatterModule(&$texy) {
+  function TexyFormatterModule(&$texy)
+  {
     parent::TexyModule($texy);
 
     // little trick - isset($array[$item]) is much faster than in_array($item, $array)
@@ -59,11 +60,12 @@ class TexyFormatterModule extends TexyModule {
 
 
 
-  function postProcess(&$text) {
-    if ($this->wellForm)
-      $this->wellForm($text);
+  function postProcess(&$text)
+  {
+    $this->wellForm($text);
 
-    $this->indent($text);
+    if ($this->indent)
+      $this->indent($text);
   }
 
 
@@ -72,7 +74,8 @@ class TexyFormatterModule extends TexyModule {
    * Convert <strong><em> ... </strong> ... </em>
    *    into <strong><em> ... </em></strong><em> ... </em>
    */
-  function wellForm(&$text) {
+  function wellForm(&$text)
+  {
     $this->tagStack = array();
     $this->tagStackAssoc = array();
     $text = preg_replace_callback('#<(/?)([a-z][a-z0-9]*)(|\s.*|:.*)(/?)>()#Uis', array(&$this, '_replaceWellForm'), $text);
@@ -91,7 +94,8 @@ class TexyFormatterModule extends TexyModule {
    * Callback function: <tag> | </tag>
    * @return string
    */
-  function _replaceWellForm(&$matches) {
+  function _replaceWellForm(&$matches)
+  {
     list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
     //    [1] => /
     //    [2] => TAG
@@ -142,7 +146,8 @@ class TexyFormatterModule extends TexyModule {
   /***
    * Output HTML formating
    */
-  function indent(&$text) {
+  function indent(&$text)
+  {
     $text = preg_replace_callback('#<(pre|textarea|script|style)(.*)</\\1>#Uis', array(&$this, '_freeze'), $text);
     $this->_indent = $this->baseIndent;
     $text = str_replace(TEXY_NEWLINE, '', $text);
@@ -158,7 +163,8 @@ class TexyFormatterModule extends TexyModule {
 
   // create new unique key for string $matches[0]
   // and saves pair (key => str) into table $this->hashTable
-  function _freeze(&$matches) {
+  function _freeze(&$matches)
+  {
     $key = Texy::hashKey();
     $this->hashTable[$key] = $matches[0];
     return $key;
@@ -171,7 +177,8 @@ class TexyFormatterModule extends TexyModule {
    * Callback function: Insert \n + spaces into HTML code
    * @return string
    */
-  function _replaceReformat(&$matches) {
+  function _replaceReformat(&$matches)
+  {
     list($match, $mClosing, $mTag) = $matches;
     //    [1] => /  (opening or closing element)
     //    [2] => element
@@ -193,7 +200,8 @@ class TexyFormatterModule extends TexyModule {
    * Callback function: wrap lines
    * @return string
    */
-  function _replaceWrapLines(&$matches) {
+  function _replaceWrapLines(&$matches)
+  {
     list($match, $mSpace, $mContent) = $matches;
     return $mSpace . str_replace(TEXY_NEWLINE, TEXY_NEWLINE.$mSpace, wordwrap($mContent, $this->lineWrap));
   }

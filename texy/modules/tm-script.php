@@ -39,7 +39,8 @@ class TexyScriptModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerLinePattern('processLine', '#\$\{([^\}'.TEXY_HASH.'])+\}()#U');
   }
 
@@ -49,7 +50,8 @@ class TexyScriptModule extends TexyModule {
    * Callback function: ${...}
    * @return string
    */
-  function processLine(&$lineParser, &$matches, $tag) {
+  function processLine(&$lineParser, &$matches, $tag)
+  {
     list($match, $mContent) = $matches;
     //    [1] => ...
 
@@ -78,7 +80,8 @@ class TexyScriptModule extends TexyModule {
  */
 class TexyScriptElement extends TexyTextualElement {
 
-  function generateContent() {
+  function generateContent()
+  {
     return '<--internal use-->';
   }
 

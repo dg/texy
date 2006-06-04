@@ -65,7 +65,8 @@ class TexyHTMLTagModule extends TexyModule {
 
 
   // constructor
-  function TexyHTMLTagModule(&$texy) {
+  function TexyHTMLTagModule(&$texy)
+  {
     parent::TexyModule($texy);
 
     $this->allowed = $texy->validElements;
@@ -78,7 +79,8 @@ class TexyHTMLTagModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $HASH = TEXY_HASH;
     $this->registerLinePattern('processLine', "#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9-]|=\s*\"[^\"$HASH]*\"|=\s*'[^'$HASH]*'|=[^>$HASH]*)*)(/?)>#is");
   }
@@ -89,7 +91,8 @@ class TexyHTMLTagModule extends TexyModule {
    * Callback function: <tag ...>
    * @return string
    */
-  function processLine(&$lineParser, &$matches) {
+  function processLine(&$lineParser, &$matches)
+  {
     list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
     //    [1] => /
     //    [2] => tag
@@ -146,6 +149,26 @@ class TexyHTMLTagModule extends TexyModule {
 
 
     if (!$closing) {
+
+      // apply allowedClasses & allowedStyles
+      $modifier = & $this->texy->createModifier();
+
+      if (isset($attr['class'])) $modifier->parseClasses($attr['class']);
+      $attr['class'] = $modifier->implodeClasses( $modifier->classes );
+
+      if (isset($attr['style'])) $modifier->parseStyles($attr['style']);
+      $attr['style'] = $modifier->implodeStyles( $modifier->styles );
+
+      if (isset($attr['id'])) {
+        if (!$this->texy->allowedClasses)
+          unset($attr['id']);
+        elseif (is_array($this->texy->allowedClasses) && !in_array('#'.$attr['id'], $this->texy->allowedClasses))
+          unset($attr['id']);
+      }
+
+
+
+
       switch ($tag) {
        case 'img':
           if (!isset($attr['src'])) return $match;
@@ -155,7 +178,7 @@ class TexyHTMLTagModule extends TexyModule {
           break;
 
        case 'a':
-          if (count($attr) == 0) return $match;
+          if (!isset($attr['href']) && !isset($attr['name']) && !isset($attr['id'])) return $match;
           if (isset($attr['href'])) {
             $link = &$this->texy->createURL();
             $link->set($attr['href']);
@@ -177,13 +200,15 @@ class TexyHTMLTagModule extends TexyModule {
 
 
 
-  function trustMode($onlyValid = true) {
+  function trustMode($onlyValid = true)
+  {
     $this->allowed = $onlyValid ? $this->texy->validElements : true;
   }
 
 
 
-  function safeMode($allowSafe = true) {
+  function safeMode($allowSafe = true)
+  {
     $this->allowed = $allowSafe ? $this->safeTags : false;
   }
 
@@ -215,7 +240,8 @@ class TexySingleTagElement extends TexyDOMElement {
 
 
   // convert element to HTML string
-  function toHTML() {
+  function toHTML()
+  {
     if ($this->hidden) return;
 
     if ($this->empty || !$this->closing)
@@ -226,7 +252,8 @@ class TexySingleTagElement extends TexyDOMElement {
 
 
 
-  function addTo(&$lineElement) {
+  function addTo(&$lineElement)
+  {
     $key = Texy::hashKey($this->strength);
     $lineElement->children[$key]  = array(&$this, null);
     if ($this->strength == TEXY_HARD)

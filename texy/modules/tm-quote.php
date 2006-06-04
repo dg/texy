@@ -31,16 +31,17 @@ if (!defined('TEXY')) die();
 
 
 /**
- * BLOCKQUOTE MODULE CLASS
+ * QUOTE & BLOCKQUOTE MODULE CLASS
  */
-class TexyBlockQuoteModule extends TexyModule {
+class TexyQuoteModule extends TexyModule {
   var $allowed = true;                  // generally disable / enable
 
 
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
     $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)'.TEXY_PATTERN_LINK.'?()#U', 'q');
   }
@@ -50,7 +51,8 @@ class TexyBlockQuoteModule extends TexyModule {
    * Callback function: >>.... .(title)[class]{style}<<:LINK
    * @return string
    */
-  function processLine(&$lineParser, &$matches, $tag) {
+  function processLine(&$lineParser, &$matches, $tag)
+  {
     list($match, $mMark, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
     //    [1] => **
     //    [2] => ...
@@ -85,7 +87,8 @@ class TexyBlockQuoteModule extends TexyModule {
    *            >:http://www.mycom.com/tolkien/twotowers.html
    *
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     if (!$this->allowed) return false;
     list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
     //    [1] => (title)
@@ -125,7 +128,7 @@ class TexyBlockQuoteModule extends TexyModule {
 
 
 
-} // TexyBlockQuoteModule
+} // TexyQuoteModule
 
 
 
@@ -145,13 +148,15 @@ class TexyBlockQuoteElement extends TexyBlockElement {
   var $cite;
 
 
-  function TexyBlockQuoteElement(&$texy) {
+  function TexyBlockQuoteElement(&$texy)
+  {
     parent::TexyBlockElement($texy);
     $this->cite = & $texy->createURL();
   }
 
 
-  function generateTag(&$tag, &$attr) {
+  function generateTag(&$tag, &$attr)
+  {
     parent::generateTag($tag, $attr);
     if ($this->cite->URL) $attr['cite'] = $this->cite->URL;
   }
@@ -170,7 +175,8 @@ class TexyQuoteElement extends TexyInlineTagElement {
   var $cite;
 
 
-  function generateTag(&$tag, &$attr) {
+  function generateTag(&$tag, &$attr)
+  {
     parent::generateTag($tag, $attr);
     if ($this->cite->URL) $attr['cite'] = $this->cite->URL;
   }

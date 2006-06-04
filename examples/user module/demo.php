@@ -33,20 +33,18 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$libs_path = '../../texy/';
-$texy_path = $libs_path;
-
 
 // include Texy!
-require_once($texy_path . 'texy.php');
+$texyPath = '../../texy/';
+require_once($texyPath . 'texy.php');
 
 // include user module
 require_once('tum_phpblock.php');
 
 
 // DOWNLOAD GESHI FIRST! (http://qbnz.com/highlighter/)
-$geshi_path = dirname(__FILE__).'/geshi/';
-include_once($geshi_path.'geshi.php');
+$geshiPath = dirname(__FILE__).'/geshi/';
+include_once($geshiPath.'geshi.php');
 
 if (!class_exists('Geshi'))
   die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
@@ -61,7 +59,7 @@ $texy->registerModule('TexyPHPCodeUserModule');
 // make shortcut to module ($myModule)
 $myModule = & $texy->modules['TexyPHPCodeUserModule'];
 // configure module
-$myModule->geshiPath = $geshi_path;
+$myModule->geshiPath = $geshiPath;
 
 
 // processing

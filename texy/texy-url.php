@@ -45,17 +45,21 @@ if (!defined('TEXY')) die();
  *
  */
 class TexyURL {
+  var $texy;
   var $URL;
   var $type;
   var $text;
   var $root = '';    // root of relative link
 
 
-  function TexyURL() {
+  function TexyURL(&$texy)
+  {
+    $this->texy = & $texy;
   }
 
 
-  function set($text, $type = null) {
+  function set($text, $type = null)
+  {
     if ($type !== null)
       $this->type = $type;
 
@@ -65,14 +69,16 @@ class TexyURL {
   }
 
 
-  function clear() {
+  function clear()
+  {
     $this->text = '';
     $this->type = 0;
     $this->URL = '';
   }
 
 
-  function copyFrom(&$obj) {
+  function copyFrom(&$obj)
+  {
     $this->text = $obj->text;
     $this->type = $obj->type;
     $this->URL  = $obj->URL;
@@ -80,21 +86,29 @@ class TexyURL {
   }
 
 
-  function analyse() {
+  function analyse()
+  {
     if (preg_match('#^'.TEXY_PATTERN_EMAIL.'$#i', $this->text)) $this->type |= TEXY_URL_EMAIL;
     elseif (preg_match('#(https?://|ftp://|www\.|ftp\.|/)#Ai', $this->text)) $this->type |= TEXY_URL_ABSOLUTE;
     else $this->type |= TEXY_URL_RELATIVE;
   }
 
 
-  function toURL() {
+
+  function toURL()
+  {
     if (!$this->text)
       return $this->URL = '';
 
     if ($this->type & TEXY_URL_EMAIL) {
-      $this->URL = 'mai';
-      $s = 'lto:'.$this->text;
-      for ($i=0; $i<strlen($s); $i++)  $this->URL .= '&#' . ord($s{$i}) . ';';
+      if ($this->texy->obfuscateEmail) {
+        $this->URL = 'mai';
+        $s = 'lto:'.$this->text;
+        for ($i=0; $i<strlen($s); $i++)  $this->URL .= '&#' . ord($s{$i}) . ';';
+
+      } else {
+        $this->URL = 'mailto:'.$this->text;
+      }
       return $this->URL;
     }
 
@@ -116,9 +130,10 @@ class TexyURL {
 
 
 
-  function toString() {
+  function toString()
+  {
     if ($this->type & TEXY_URL_EMAIL) {
-      return strtr($this->text, array('@' => '&nbsp;(at)&nbsp;'));
+      return $this->texy->obfuscateEmail ? strtr($this->text, array('@' => '&nbsp;(at)&nbsp;')) : $this->text;
     }
 
     if ($this->type & TEXY_URL_ABSOLUTE) {

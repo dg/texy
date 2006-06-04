@@ -41,13 +41,15 @@ class TexyGenericBlockModule extends TexyModule {
   /***
    * Module initialization
    */
-  function init() {
+  function init()
+  {
     $this->texy->genericBlock = array(&$this, 'processBlock');
   }
 
 
 
-  function processBlock(&$blockParser, $content) {
+  function processBlock(&$blockParser, $content)
+  {
     $str_blocks = preg_split('#(\n{2,})#', $content);
 
     foreach ($str_blocks as $str) {
@@ -67,7 +69,8 @@ class TexyGenericBlockModule extends TexyModule {
    *             ...
    *
    */
-  function &processSingleBlock(&$blockParser, $content) {
+  function &processSingleBlock(&$blockParser, $content)
+  {
     preg_match('#^(.+)'.TEXY_PATTERN_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
     //    [1] => ...

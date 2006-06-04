@@ -38,7 +38,8 @@ class TexyLongWordsModule extends TexyModule {
   var $shy;
   var $nbsp;
 
-  function linePostProcess(&$text) {
+  function linePostProcess(&$text)
+  {
     $this->shy = TEXY_UTF8 ? "\xC2\xAD" : "\xAD";
     $this->nbsp = TEXY_UTF8 ? "\xC2\xA0" : "\xA0";
     $text = strtr($text, array('&shy;'  => $this->shy, '&nbsp;' => $this->nbsp));
@@ -52,7 +53,8 @@ class TexyLongWordsModule extends TexyModule {
    * (c) David Grudl
    * @return string
    */
-  function _replace(&$matches) {
+  function _replace(&$matches)
+  {
     list($mWord) = $matches;
     //    [0] => lllloooonnnnggggwwwoorrdddd
 

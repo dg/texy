@@ -43,8 +43,8 @@ class TexyHeadingModule extends TexyModule {
   var $top    = 1;                      // number of top heading, 1 - 6
   var $title;                           // textual content of first heading
   var $balancing = TEXY_HEADING_DYNAMIC;
-  var $balanceDelta = array(            // when $balancing = TEXY_HEADING_FIXED
-                         '#' => 0,      //   #  -->  $balanceDelta['#'] + $top = 0 + 1 = 1  --> <h1> ... </h1>
+  var $levels = array(            // when $balancing = TEXY_HEADING_FIXED
+                         '#' => 0,      //   #  -->  $levels['#'] + $top = 0 + 1 = 1  --> <h1> ... </h1>
                          '*' => 1,
                          '=' => 2,
                          '-' => 3,
@@ -67,17 +67,19 @@ class TexyHeadingModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlockUnderline', '#^(\S.*)MODIFIER_H?' . TEXY_NEWLINE
                                                         .'(\#|\*|\=|\-){3,}$#mU');
-    $this->registerBlockPattern('processBlockSurround',  '#^((\#|\=){2,7})(?!\\2)(.*)MODIFIER_H?\\2*()$#mU');
+    $this->registerBlockPattern('processBlockSurround',  '#^((\#|\=){2,7})(?!\\2)(.*)\\2*MODIFIER_H?()$#mU');
   }
 
 
   /***
    * Preprocessing
    */
-  function preProcess(&$text) {
+  function preProcess(&$text)
+  {
     $this->rangeUnderline = array(10, 0);
     $this->rangeSurround    = array(10, 0);
     unset($this->deltaUnderline);
@@ -92,7 +94,8 @@ class TexyHeadingModule extends TexyModule {
    *            -------------------------------
    *
    */
-  function processBlockUnderline(&$blockParser, &$matches) {
+  function processBlockUnderline(&$blockParser, &$matches)
+  {
     if (!$this->allowed) return false;
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mLine) = $matches;
     //  $matches:
@@ -105,7 +108,7 @@ class TexyHeadingModule extends TexyModule {
     //    [6] => ...
 
     $el = &new TexyHeadingElement($this->texy);
-    $el->level = $this->balanceDelta[$mLine];
+    $el->level = $this->levels[$mLine];
     if ($this->balancing == TEXY_HEADING_DYNAMIC)
       $el->deltaLevel = & $this->deltaUnderline;
 
@@ -130,7 +133,8 @@ class TexyHeadingModule extends TexyModule {
    *            ### Heading .(title)[class]{style}>
    *
    */
-  function processBlockSurround(&$blockParser, &$matches) {
+  function processBlockSurround(&$blockParser, &$matches)
+  {
     if (!$this->allowed) return false;
     list($match, $mLine, $mChar, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => ###
@@ -141,7 +145,7 @@ class TexyHeadingModule extends TexyModule {
     //    [6] => >
 
     $el = &new TexyHeadingElement($this->texy);
-    $el->level = $this->balanceDelta[strlen($mLine)];
+    $el->level = $this->levels[strlen($mLine)];
     if ($this->balancing == TEXY_HEADING_DYNAMIC)
       $el->deltaLevel = & $this->deltaSurround;
 
@@ -186,13 +190,15 @@ class TexyHeadingElement extends TexyTextualElement {
 
 
   // constructor
-  function TexyHeadingElement(&$texy) {
+  function TexyHeadingElement(&$texy)
+  {
     parent::TexyTextualElement($texy);
     $this->parentModule = & $texy->modules['TexyHeadingModule'];
   }
 
 
-  function generateTag(&$tag, &$attr) {
+  function generateTag(&$tag, &$attr)
+  {
     parent::generateTag($tag, $attr);
     $tag = 'h' . min(6, max(1, $this->level + $this->deltaLevel + $this->parentModule->top));
   }

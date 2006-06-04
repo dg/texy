@@ -33,16 +33,16 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$libs_path = '../../texy/';
-$texy_path = $libs_path;
+$texyPath = '../../texy/';
+$geshiPath = dirname(__FILE__).'/geshi/';
 
 
 // include Texy!
-require_once($texy_path . 'texy.php');
+require_once($texyPath . 'texy.php');
 
 // DOWNLOAD GESHI FIRST! (http://qbnz.com/highlighter/)
-$geshi_path = dirname(__FILE__).'/geshi/';
-include_once($geshi_path.'geshi.php');
+include_once($geshiPath.'geshi.php');
+
 
 if (!class_exists('Geshi'))
   die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
@@ -68,9 +68,10 @@ if (!class_exists('Geshi'))
 //  Syntax highlighter changes $element->content and sets $element->htmlSafe to true
 //
 function myUserFunc(&$element) {
-  global $geshi_path;
+  global $geshiPath;
 
-  $geshi = new GeSHi($element->content, $element->lang, $geshi_path.'geshi/');
+  if ($element->lang == 'html') $element->lang = 'html4strict';
+  $geshi = new GeSHi($element->content, $element->lang, $geshiPath.'geshi/');
 
   if ($geshi->error)   // GeSHi could not find the language, nothing to do
     return;

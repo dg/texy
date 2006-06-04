@@ -21,26 +21,27 @@
  */
 
 
-$libs_path = '../../texy/';
-$texy_path = $libs_path;
 
 
 // configuration
+$texyPath = '../../texy/';
 define ('TEXY_UTF8', false);  // disable UTF-8
 
+
 // include libs
-require_once($texy_path . 'texy.php');
+require_once($texyPath . 'texy.php');
+
 
 
 // function 'file_put_contents' is missing in PHP 4
 if (!function_exists('file_put_contents')) {
-  function file_put_contents($fileName, $s) {
+  function file_put_contents($fileName, $s)
+  {
     $f = fopen($fileName, 'w');
     fwrite($f, $s);
     fclose($f);
   }
 }
-
 
 
 
@@ -54,7 +55,8 @@ class MyTexy extends Texy {
   var $time;
 
 
-  function MyTexy() {
+  function MyTexy()
+  {
     parent::Texy();
 
     // some configurations
@@ -65,7 +67,8 @@ class MyTexy extends Texy {
 
 
 
-  function process($text, $useCache = true) {
+  function process($text, $useCache = true)
+  {
     $this->time = -$this->getTime();
     if ($useCache) {
       $md5 = md5($text); // md5 is key for caching
@@ -94,7 +97,8 @@ class MyTexy extends Texy {
 
 
 
-  function getTime() {
+  function getTime()
+  {
     list($usec, $sec) = explode(' ',microtime());
     return ((float) $usec + (float) $sec);
   }

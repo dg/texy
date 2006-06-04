@@ -26,22 +26,21 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$libs_path = '../../texy/';
-$texy_path = $libs_path;
 
 
 // global configuration Texy!
+$texyPath = '../../texy/';
 define ('TEXY_UTF8', false);     // disable UTF-8
 
 
 // include Texy!
-require_once($texy_path . 'texy.php');
+require_once($texyPath . 'texy.php');
 
 
 
 $texy = &new Texy();
 
-// user configuration (or retain default values)
+// user configuration (OPTIONALLY)
 $texy->links->root         = '';
 $texy->links->imageOnClick = 'return !popup(this.href)';
 $texy->images->root        = 'images/';

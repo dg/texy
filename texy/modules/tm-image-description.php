@@ -26,7 +26,7 @@
 
 // security - include texy.php, not this file
 if (!defined('TEXY')) die();
-require_once('tm_image.php');
+require_once('tm-image.php');
 
 
 
@@ -35,13 +35,15 @@ require_once('tm_image.php');
  * IMAGE WITH DESCRIPTION MODULE CLASS
  */
 class TexyImageDescModule extends TexyModule {
-  var $imageModuleName = 'images';                    // $texy->modules[NAME]
-
+  var $boxClass   = 'image';        // non-floated box class
+  var $leftClass  = 'image left';   // left-floated box class
+  var $rightClass = 'image right';  // right-floated box class
 
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'? +\*\*\* +(.*)MODIFIER_H?()$#mU');
   }
 
@@ -53,7 +55,8 @@ class TexyImageDescModule extends TexyModule {
    *            [*image*]:link *** .... .(title)[class]{style}>
    *
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     list($match, $mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4, $mLink, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => URLs
     //    [2] => (title)
@@ -68,11 +71,15 @@ class TexyImageDescModule extends TexyModule {
     //    [11] => >
 
     $el = &new TexyImageDescElement($this->texy);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+
     if ($this->texy->images->allowed) {
       $el->children['img']->setImagesRaw($mURLs);
       $el->children['img']->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
+      $el->modifier->hAlign = $el->children['img']->modifier->hAlign;
+      $el->children['img']->modifier->hAlign = null;
     }
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+
     $el->children['desc']->parse(ltrim($mContent));
 
     $blockParser->addChildren($el);
@@ -105,19 +112,41 @@ class TexyImageDescModule extends TexyModule {
  * HTML ELEMENT IMAGE (WITH DESCRIPTION)
  */
 class TexyImageDescElement extends TexyBlockElement {
-  var $tag   = 'div';
-  var $class = 'description';
+  var $parentModule;
 
 
   // constructor
-  function TexyImageDescElement(&$texy) {
+  function TexyImageDescElement(&$texy)
+  {
     parent::TexyBlockElement($texy);
+    $this->parentModule = & $texy->modules['TexyImageDescModule'];
 
-    $this->modifier->classes[] = $this->class;
     $this->children['img'] = &new TexyImageElement($texy);
     $this->children['desc'] = &new TexyGenericBlockElement($texy);
   }
 
+
+
+  function generateTag(&$tag, &$attr)
+  {
+    $tag = 'div';
+
+    $classes = $this->modifier->classes;
+    $styles = $this->modifier->styles;
+
+    if ($this->modifier->hAlign == TEXY_HALIGN_LEFT) {
+      $classes[] = $this->parentModule->leftClass;
+
+    } elseif ($this->modifier->hAlign == TEXY_HALIGN_RIGHT)  {
+      $classes[] = $this->parentModule->rightClass;
+
+    } elseif ($this->parentModule->boxClass)
+      $classes[] = $this->parentModule->boxClass;
+
+    $attr['class'] = TexyModifier::implodeClasses($classes);
+    $attr['style'] = TexyModifier::implodeStyles($styles);
+    $attr['id'] = $this->modifier->id;
+  }
 
 
 

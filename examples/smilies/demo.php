@@ -30,16 +30,15 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$libs_path = '../../texy/';
-$texy_path = $libs_path;
 
 
 // include Texy!
-require_once($texy_path . 'texy.php');
+$texyPath = '../../texy/';
+require_once($texyPath . 'texy.php');
+
 
 
 $texy = &new Texy();
-
 
 
 // SMILIES ARE DISABLED BY DEFAULT!

@@ -26,17 +26,15 @@ if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
 
 
-$libs_path = '../../texy/';
-$texy_path = $libs_path;
-
 
 
 // global configuration Texy!
+$texyPath = '../../texy/';
 define ('TEXY_UTF8', false);     // disable UTF-8
 
 
 // include Texy!
-require_once($texy_path . 'texy.php');
+require_once($texyPath . 'texy.php');
 
 
 
@@ -85,9 +83,9 @@ echo '<hr />';
 
 $texy->headings->top       = 1;   // set headings top limit
 $texy->headings->balancing = TEXY_HEADING_FIXED;
-$texy->headings->balanceDelta['='] = 0;  // = means 0; top=1;       0 + 1 = 1 (h1)
-$texy->headings->balanceDelta['-'] = 1;  // - means 1; top=1;       1 + 1 = 2 (h2)
-$texy->headings->balanceDelta[5] = 2;    // ##### means 2; top=1;   2 + 1 = 3 (h3)
+$texy->headings->levels['='] = 0;  // = means 0; top=1;       0 + 1 = 1 (h1)
+$texy->headings->levels['-'] = 1;  // - means 1; top=1;       1 + 1 = 2 (h2)
+$texy->headings->levels[5] = 2;    // ##### means 2; top=1;   2 + 1 = 3 (h3)
 
 $html = $texy->process($text);  // that's all folks!
 

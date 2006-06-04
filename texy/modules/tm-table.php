@@ -40,7 +40,8 @@ class TexyTableModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_HV\n)?'      // .{color: red}
                                               . '(\|.*)$#mU');              // | ....
   }
@@ -59,7 +60,8 @@ class TexyTableModule extends TexyModule {
    *            | aa  | bb  | cc  |
    *
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     if (!$this->allowed) return false;
     list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5, $mRow) = $matches;
     //    [1] => (title)
@@ -78,6 +80,16 @@ class TexyTableModule extends TexyModule {
     $colModifier = array();
     $elField = null;
     $elRow = null;
+
+/*
+    if (preg_match('#^\|(\#|\=){2,}(?!\\1)(.*)MODIFIER_H?\\1*\|?()$#U', $mRow, $matches)) {
+      list($match, $mChar, $mContent, $mModCap1, $mModCap2, $mModCap3, $mModCap4) = $matches;
+      $el->caption = &new TexyTextualElement();
+      $el->tag = 'caption';
+      $el->parse($mContent);
+      $blockParser->match('#^(\|.*)$#mU', $matches); $mRow = $matches[0];
+    }
+*/
 
     preg_match('#^\|(.+)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $mRow, $matches);
     do {
@@ -202,7 +214,8 @@ class TexyTableFieldElement extends TexyTextualElement {
   var $rowSpan = 1;
   var $isHead;
 
-  function generateTag(&$tag, &$attr) {
+  function generateTag(&$tag, &$attr)
+  {
     parent::generateTag($tag, $attr);
     $tag = $this->isHead ? 'th' : 'td';
     if ($this->colSpan <> 1) $attr['colspan'] = (int) $this->colSpan;

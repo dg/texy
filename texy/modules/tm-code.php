@@ -44,7 +44,8 @@ class TexyCodeModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerLinePattern('processProtect',  '#\`\`(\S[^'.TEXY_HASH.']*)(?<!\ )\`\`()#U', false);
     $this->registerLinePattern('processCode',     '#\`(\S[^'.TEXY_HASH.']*)MODIFIER?(?<!\ )\`()#U');
     $this->registerBlockPattern('processBlock',   '#^`=(none|code|kbd|samp|var|span)$#mUi');
@@ -55,7 +56,8 @@ class TexyCodeModule extends TexyModule {
   /***
    * Callback function `=code
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     list($match, $mTag) = $matches;
     //    [1] => ...
 
@@ -72,7 +74,8 @@ class TexyCodeModule extends TexyModule {
    * Callback function: `.... .(title)[class]{style}`
    * @return string
    */
-  function processCode(&$lineParser, &$matches) {
+  function processCode(&$lineParser, &$matches)
+  {
     if (!$this->allowed) return '';
     list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => ...
@@ -109,12 +112,13 @@ class TexyCodeModule extends TexyModule {
    * User callback - PROTECT PHRASE
    * @return string
    */
-  function processProtect(&$lineParser, &$matches, $isHtmlSafe = false) {
+  function processProtect(&$lineParser, &$matches, $isHtmlSafe = false)
+  {
     list($match, $mContent) = $matches;
 
     $el = &new TexyTextualElement($this->texy);
     $el->contentType = TEXY_CONTENT_TEXTUAL;
-    $el->setContent($mContent, $isHtmlSafe);
+    $el->setContent( Texy::freezeSpaces($mContent), $isHtmlSafe );
 
     return $el->addTo($lineParser->element);
   }

@@ -41,13 +41,13 @@ if (!defined('TEXY_XHTML'))
 
 
 // MODIFIERS - ALIGN
-define('TEXY_HALIGN_LEFT',      1);
-define('TEXY_HALIGN_RIGHT',     2);
-define('TEXY_HALIGN_CENTER',    3);
-define('TEXY_HALIGN_JUSTIFY',   1 << 2);
-define('TEXY_VALIGN_TOP',       2 << 2);
-define('TEXY_VALIGN_MIDDLE',    3 << 2);
-define('TEXY_VALIGN_BOTTOM',    4 << 2);
+define('TEXY_HALIGN_LEFT',      'left');
+define('TEXY_HALIGN_RIGHT',     'right');
+define('TEXY_HALIGN_CENTER',    'center');
+define('TEXY_HALIGN_JUSTIFY',   'justify');
+define('TEXY_VALIGN_TOP',       'top');
+define('TEXY_VALIGN_MIDDLE',    'middle');
+define('TEXY_VALIGN_BOTTOM',    'bottom');
 
 
 // URL TYPES

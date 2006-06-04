@@ -50,7 +50,8 @@ class TexyPhrasesModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $CHAR = '['.TEXY_CHAR.']';
 
     // strong & em speciality *** ... ***
@@ -63,10 +64,10 @@ class TexyPhrasesModule extends TexyModule {
     $this->registerLinePattern('processPhrase', '#(?<!\-)\-\-(?!\ |\-)(.+)MODIFIER?(?<!\ |\-)\-\-(?!\-)()#U', 'del');
 
     // ^^superscript^^
-    $this->registerLinePattern('processPhrase', '#(?<!\^)\^\^(?!\ )([^\^]+)MODIFIER?(?<!\ )\^\^(?!\^\^)()#U', 'sup');
+    $this->registerLinePattern('processPhrase', '#(?<!\^)\^\^(?!\ )([^\^]+)MODIFIER?(?<!\ )\^\^(?!\^)()#U', 'sup');
 
     // __subscript__
-    $this->registerLinePattern('processPhrase', '#(?<!\_)\_\_(?!\ )([^\_]+)MODIFIER?(?<!\ )\_\_(?!\_\_)()#U', 'sub');
+    $this->registerLinePattern('processPhrase', '#(?<!\_)\_\_(?!\ )([^\_]+)MODIFIER?(?<!\ )\_\_(?!\_)()#U', 'sub');
 
     // "span"
     $this->registerLinePattern('processPhrase', '#(?<!\")\"(?!\ )([^\"]+)MODIFIER(?<!\ )\"(?!\")()#U', 'span');
@@ -83,11 +84,11 @@ class TexyPhrasesModule extends TexyModule {
     // *emphasis*
     $this->registerLinePattern('processPhrase', '#(?<!\*)\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*(?!\*)()#U', 'em');
 
-    // abbr "et al."((and others))
-    $this->registerLinePattern('processPhrase', '#(?<!\")\"(?!\ )([^\"]+)MODIFIER?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', 'abbr');
+    // acronym/abbr "et al."((and others))
+    $this->registerLinePattern('processPhrase', '#(?<!\")\"(?!\ )([^\"]+)MODIFIER?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', 'acronym');
 
-    // acronym NATO((North Atlantic Treaty Organisation))
-    $this->registerLinePattern('processAbbr',  "#(?<!$CHAR)($CHAR{2,})\(\((.+)\)\)#U".TEXY_PATTERN_UTF, 'acronym');
+    // acronym/abbr NATO((North Atlantic Treaty Organisation))
+    $this->registerLinePattern('processAcronym',  "#(?<!$CHAR)($CHAR{2,})\(\((.+)\)\)#U".TEXY_PATTERN_UTF, 'acronym');
   }
 
 
@@ -96,7 +97,8 @@ class TexyPhrasesModule extends TexyModule {
    * Callback function: **.... .(title)[class]{style}**
    * @return string
    */
-  function processPhrase(&$lineParser, &$matches, $tag) {
+  function processPhrase(&$lineParser, &$matches, $tag)
+  {
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mAdditional) = $matches;
     //    [1] => ...
     //    [2] => (title)
@@ -106,7 +108,7 @@ class TexyPhrasesModule extends TexyModule {
     $el = &new TexyInlineTagElement($this->texy);
     $el->tag = $tag;
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-    if ($tag == 'abbr') $el->modifier->title = $mAdditional;
+    if ($tag == 'acronym') $el->modifier->title = $mAdditional;
     return $el->addTo($lineParser->element, $mContent);
   }
 
@@ -119,7 +121,8 @@ class TexyPhrasesModule extends TexyModule {
    * Callback function: ***.... .(title)[class]{style}***
    * @return string
    */
-  function processPhraseStrongEm(&$lineParser, &$matches) {
+  function processPhraseStrongEm(&$lineParser, &$matches)
+  {
     list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => ...
     //    [3] => (title)
@@ -147,7 +150,8 @@ class TexyPhrasesModule extends TexyModule {
    * Callback function: NATO(( ... ))
    * @return string
    */
-  function processAbbr(&$lineParser, &$matches) {
+  function processAcronym(&$lineParser, &$matches)
+  {
     list($match, $mAcronym, $mExplain) = $matches;
     //    [1] => NATO
     //    [2] => ....

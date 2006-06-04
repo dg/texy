@@ -39,8 +39,8 @@ class TexyImageModule extends TexyModule {
   var $root       = 'images/';     // root of relative images (http)
   var $linkedRoot = 'images/';     // root of linked images (http)
   var $rootPrefix = '';            // physical location on server
-  var $leftClass  = '';            // left-floated image modifier
-  var $rightClass = '';            // right-floated image modifier
+  var $leftClass  = '';            // left-floated image class
+  var $rightClass = '';            // right-floated image class
   var $defaultAlt = 'image';       // default image alternative text
 
   // private
@@ -54,7 +54,8 @@ class TexyImageModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
     $this->registerLinePattern('processLine',     '#'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?()#U');
 
@@ -69,7 +70,8 @@ class TexyImageModule extends TexyModule {
   /***
    * Add new named image
    */
-  function addReference($name, &$obj) {
+  function addReference($name, &$obj)
+  {
     $name = strtolower($name);
     $this->references[$name] = &$obj;
   }
@@ -81,7 +83,8 @@ class TexyImageModule extends TexyModule {
    * Receive new named link. If not exists, try
    * call user function to create one.
    */
-  function &getReference($name) {
+  function &getReference($name)
+  {
     $name = strtolower($name);
 
     if (isset($this->references[$name]))
@@ -109,7 +112,8 @@ class TexyImageModule extends TexyModule {
   /***
    * Forget all references created during last parse()
    */
-  function forgetReferences() {
+  function forgetReferences()
+  {
     $this->references = $this->_backupReferences;
   }
 
@@ -118,7 +122,8 @@ class TexyImageModule extends TexyModule {
   /***
    * Preprocessing
    */
-  function preProcess(&$text) {
+  function preProcess(&$text)
+  {
     $this->_backupReferences = $this->references;
 
     // [*image*]: urls .(title)[class]{style}
@@ -131,7 +136,8 @@ class TexyImageModule extends TexyModule {
    * Callback function: [*image*]: urls .(title)[class]{style}
    * @return string
    */
-  function _replaceReference(&$matches) {
+  function _replaceReference(&$matches)
+  {
     if (!$this->allowed) return '';
     list($match, $mRef, $mUrls, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => [* (reference) *]
@@ -157,7 +163,8 @@ class TexyImageModule extends TexyModule {
    * Callback function: [* texy.gif *]: small.jpg | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
    * @return string
    */
-  function processLine(&$lineParser, &$matches) {
+  function processLine(&$lineParser, &$matches)
+  {
     if (!$this->allowed) return '';
     list($match, $mURLs, $mMod1, $mMod2, $mMod3, $mMod4, $mLink) = $matches;
     //    [1] => URLs
@@ -206,7 +213,8 @@ class TexyImageReference {
 
 
   // constructor
-  function TexyImageReference(&$texy, $URLs = null) {
+  function TexyImageReference(&$texy, $URLs = null)
+  {
     $this->modifier = & $texy->createModifier();
     $this->URLs = $URLs;
   }
@@ -231,15 +239,17 @@ class TexyImageReference {
  */
 class TexyImageElement extends TexyTextualElement {
   var $parentModule;
-  var $tag = 'img';
 
   var $image;
   var $overImage;
   var $linkImage;
 
+  var $width, $height;
+
 
   // constructor
-  function TexyImageElement(&$texy) {
+  function TexyImageElement(&$texy)
+  {
     parent::TexyTextualElement($texy);
     $this->parentModule = & $texy->modules['TexyImageModule'];
 
@@ -255,7 +265,8 @@ class TexyImageElement extends TexyTextualElement {
 
 
 
-  function setImages($URL = null, $URL_over = null, $URL_link = null) {
+  function setImages($URL = null, $URL_over = null, $URL_link = null)
+  {
     if ($URL)
       $this->image->set($URL, TEXY_URL_IMAGE_INLINE);
     else
@@ -273,22 +284,24 @@ class TexyImageElement extends TexyTextualElement {
   }
 
 
-  function setSize($width, $height) {
+
+  function setSize($width, $height)
+  {
     $width = abs((int) $width);
     $height = abs((int) $height);
 
     if ($width && $height) {
-      $this->modifier->extra['width'] = $width;
-      $this->modifier->extra['height'] = $height;
+      $this->width = $width;
+      $this->height = $height;
     } else {
-      unset($this->modifier->extra['width']);
-      unset($this->modifier->extra['height']);
+      $this->width = $this->height = null;
     }
   }
 
 
   // private
-  function setImagesRaw($URLs) {
+  function setImagesRaw($URLs)
+  {
     $elRef = &$this->parentModule->getReference(trim($URLs));
     if ($elRef) {
       $URLs = $elRef->URLs;
@@ -309,34 +322,39 @@ class TexyImageElement extends TexyTextualElement {
 
 
 
-  function generateTag(&$tag, &$attr) {
-    if (!$this->image->URL) {  // image URL is required
-      $tag = '';
-      return;
-    }
+  function generateTag(&$tag, &$attr)
+  {
+    if (!$this->image->URL) return;  // image URL is required
 
-    // modifiers
-    $modifier = & $this->modifier;
-    if ($modifier->hAlign == TEXY_HALIGN_LEFT) {
+    $tag = 'img';
+
+    // classes & styles
+    $classes = $this->modifier->classes;
+    $styles = $this->modifier->styles;
+
+    if ($this->modifier->hAlign == TEXY_HALIGN_LEFT) {
       if ($this->parentModule->leftClass)
-        $modifier->classes[] = $this->parentModule->leftClass;
+        $classes[] = $this->parentModule->leftClass;
       else
-        $modifier->styles['float'] = 'left';
+        $styles['float'] = 'left';
 
-    } elseif ($modifier->hAlign == TEXY_HALIGN_RIGHT)  {
+    } elseif ($this->modifier->hAlign == TEXY_HALIGN_RIGHT)  {
 
       if ($this->parentModule->rightClass)
-        $modifier->classes[] = $this->parentModule->rightClass;
+        $classes[] = $this->parentModule->rightClass;
       else
-        $modifier->styles['float'] = 'right';
+        $styles['float'] = 'right';
     }
-    unset($modifier->styles['text-align']);
+
+    $styles['vertical-align'] = $this->modifier->vAlign;
+    $attr['class'] = TexyModifier::implodeClasses($classes);
+    $attr['style'] = TexyModifier::implodeStyles($styles);
+    $attr['id'] = $this->modifier->id;
 
     // width x height generate
     $this->requireSize();
-
-    // tag generate
-    parent::generateTag($tag, $attr);
+    $attr['width'] = $this->width;
+    $attr['height'] = $this->height;
 
     // attribute generate
     $this->texy->summary->images[] = $attr['src'] = $this->image->URL;
@@ -349,14 +367,14 @@ class TexyImageElement extends TexyTextualElement {
     }
 
     // alternative text generate
-    $attr['alt'] = $attr['title'] ? $attr['title']  : $this->parentModule->defaultAlt;
-    unset($attr['title']);
+    $attr['alt'] = $this->modifier->title ? $this->modifier->title : $this->parentModule->defaultAlt;
   }
 
 
 
-  function requireSize() {
-    if (isset($this->modifier->extra['width'])) return;
+  function requireSize()
+  {
+    if ($this->width) return;
 
     $file = $this->parentModule->rootPrefix . $this->image->URL;
     if (!is_file($file)) return false;
@@ -368,7 +386,8 @@ class TexyImageElement extends TexyTextualElement {
   }
 
 
-  function requireLinkImage() {
+  function requireLinkImage()
+  {
     if (!$this->linkImage->URL)
       $this->linkImage->set($this->image->text, TEXY_URL_IMAGE_LINKED);
   }

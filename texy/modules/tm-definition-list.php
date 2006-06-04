@@ -28,7 +28,7 @@
 
 // security - include texy.php, not this file
 if (!defined('TEXY')) die();
-require_once('tm_list.php');
+require_once('tm-list.php');
 
 
 
@@ -42,7 +42,8 @@ class TexyDefinitionListModule extends TexyListModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                         // .{color:red}
                                               . '(\S.*)\:\ *MODIFIER_H?\n'                    // Term:
                                               . '(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mU');   //    - description
@@ -59,7 +60,8 @@ class TexyDefinitionListModule extends TexyListModule {
    *              - description 3
    *
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     if (!$this->allowed) return false;
     list($match, $mModList1, $mModList2, $mModList3, $mModList4,
                  $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,

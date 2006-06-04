@@ -53,20 +53,25 @@ class TexyModifier {
   var $texy; // parent Texy! object
   var $id;
   var $classes = array();
+  var $unfilteredClasses = array();
+  var $styles = array();
+  var $unfilteredStyles = array();
   var $hAlign;
   var $vAlign;
   var $title;
-  var $styles = array();
-  var $extra = array(); // some additional attributes
 
 
-  function TexyModifier(& $texy) {
+
+  function TexyModifier(& $texy)
+  {
     $this->texy = & $texy;
   }
 
 
 
-  function setProperties() {
+
+  function setProperties()
+  {
     $classes = '';
     $styles  = '';
 
@@ -86,93 +91,107 @@ class TexyModifier {
       }
     }
 
-    if ($classes && $this->texy->allowClasses) {
-      $classes = trim(str_replace('#', ' #', $classes));
-      foreach (explode(' ', $classes) as $value) {
-        if (is_array($this->texy->allowClasses) &&
-            !in_array($value, $this->texy->allowClasses)) continue;
+    $this->parseStyles($styles);
+    $this->parseClasses($classes);
 
-        if (substr($value, 0, 1) == '#') $this->id = substr($value, 1);
-        else $this->classes[] = $value;
-      }
-    }
-
-
-    if ($styles && $this->texy->allowStyles) {
-      foreach (explode(';', $styles) as $value) {
-        $pair = explode(':', $value.':');
-        $property = strtolower(trim($pair[0]));
-        $value = trim($pair[1]);
-        if (!$property || !$value) continue;
-
-        if (is_array($this->texy->allowStyles) &&
-            !in_array($property, $this->texy->allowStyles)) continue;
-
-        $this->styles[$property] = $value;
-      }
-    }
-
-    switch ($this->hAlign) {
-      case TEXY_HALIGN_LEFT:    $this->styles['text-align'] = 'left'; break;
-      case TEXY_HALIGN_RIGHT:   $this->styles['text-align'] = 'right'; break;
-      case TEXY_HALIGN_CENTER:  $this->styles['text-align'] = 'center'; break;
-      case TEXY_HALIGN_JUSTIFY: $this->styles['text-align'] = 'justify'; break;
-    }
-
-    switch ($this->vAlign) {
-      case TEXY_VALIGN_TOP:     $this->styles['vertical-align'] = 'top'; break;
-      case TEXY_VALIGN_MIDDLE:  $this->styles['vertical-align'] = 'middle'; break;
-      case TEXY_VALIGN_BOTTOM:  $this->styles['vertical-align'] = 'bottom'; break;
+    if (isset($this->classes['id'])) {
+      $this->id = $this->classes['id'];
+      unset($this->classes['id']);
     }
   }
 
 
-  function clear() {
+
+
+  function clear()
+  {
     $this->id = null;
     $this->classes = array();
+    $this->unfilteredClasses = array();
+    $this->styles = array();
+    $this->unfilteredStyles = array();
     $this->hAlign = null;
     $this->vAlign = null;
     $this->title = null;
-    $this->styles = array();
-    $this->extra = array();
   }
 
 
-  function copyFrom(&$modifier) {
-    $this->id = $modifier->id;
+  function copyFrom(&$modifier)
+  {
     $this->classes = $modifier->classes;
+    $this->unfilteredClasses = $modifier->unfilteredClasses;
+    $this->styles = $modifier->styles;
+    $this->unfilteredStyles = $modifier->unfilteredStyles;
+    $this->id = $modifier->id;
     $this->hAlign = $modifier->hAlign;
     $this->vAlign = $modifier->vAlign;
     $this->title = $modifier->title;
-    $this->styles = $modifier->styles;
   }
 
 
-  // generate elements attributes
-  function toAttributes() {
-    $classes = $this->classes;
-    if (isset($this->extra['class']))
-      $classes = array_merge($classes, explode(' ', $this->extra['class']));
-    $classes = implode(' ', array_unique($classes) );
 
-    $style = '';
-    $this->styles = array_change_key_case($this->styles, CASE_LOWER);
-    foreach ($this->styles as $key => $value)
-      $style .= $key . ':' . $value . ';';
-    if (isset($this->extra['style']))
-      $style .= $this->extra['style'];
+  function implodeStyles($styles)
+  {
+    $styles = array_change_key_case($styles, CASE_LOWER);
+    $pairs = array();
+    foreach ($styles as $key => $value)
+      if ($key && $value) $pairs[] = $key.':'.$value;
+    return implode(';', $pairs);
+  }
 
-    return array_merge(
-             array('id'    => $this->id,      // lowest priority
-                   'title' => $this->title,
-             ),
 
-             $this->extra,                    // high priority
 
-             array('class' => $classes,       // highest priority
-                   'style' => $style
-             )
-           );
+  function implodeClasses($classes)
+  {
+    return implode(' ', array_unique($classes) );
+  }
+
+
+
+
+
+  function parseClasses($str)
+  {
+    if (!$str) return;
+
+    $tmp = is_array($this->texy->allowedClasses) ? array_flip($this->texy->allowedClasses) : array(); // little speed-up trick
+
+    foreach (explode(' ', str_replace('#', ' #', $str)) as $value) {
+      if ($value === '') continue;
+
+      if ($value{0} == '#') {
+        $this->unfilteredClasses['id'] = substr($value, 1);
+        if ($this->texy->allowedClasses === true || isset($tmp[$value]))
+          $this->classes['id'] = substr($value, 1);
+
+      } else {
+        $this->unfilteredClasses[] = $value;
+        if ($this->texy->allowedClasses === true || isset($tmp[$value]))
+          $this->classes[] = $value;
+      }
+    }
+  }
+
+
+
+
+
+  function parseStyles($str)
+  {
+    if (!$str) return;
+
+    $tmp = is_array($this->texy->allowedStyles) ? array_flip($this->texy->allowedStyles) : array(); // little speed-up trick
+
+    foreach (explode(';', $str) as $value) {
+      $pair = explode(':', $value.':');
+      $property = strtolower(trim($pair[0]));
+      $value = trim($pair[1]);
+      if (!$property || $value==='') continue;
+
+      $this->unfilteredStyles[$property] = $value;
+      if ($this->texy->allowedStyles === true || isset($tmp[$property]))
+        $this->styles[$property] = $value;
+    }
   }
 
 

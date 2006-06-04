@@ -42,36 +42,42 @@ class TexyModule {
 
 
 
-  function TexyModule(&$texy) {
+  function TexyModule(&$texy)
+  {
     $this->texy = & $texy;
   }
 
 
 
   // register all line & block patterns a routines
-  function init() {
+  function init()
+  {
   }
 
 
   // block's pre-process
-  function preProcess(&$text) {
+  function preProcess(&$text)
+  {
   }
 
 
 
   // block's post-process
-  function postProcess(&$text) {
+  function postProcess(&$text)
+  {
   }
 
 
 /* not used yet
   // single line pre-process
-  function linePreProcess(&$line) {
+  function linePreProcess(&$line)
+  {
   }
 */
 
   // single line post-process
-  function linePostProcess(&$line) {
+  function linePostProcess(&$line)
+  {
   }
 
 
@@ -81,7 +87,8 @@ class TexyModule {
    * @return string
    * @static
    ***/
-  function adjustPattern($pattern) {
+  function adjustPattern($pattern)
+  {
     return strtr($pattern,
                      array('MODIFIER_HV' => TEXY_PATTERN_MODIFIER_HV,
                            'MODIFIER_H'  => TEXY_PATTERN_MODIFIER_H,
@@ -90,7 +97,8 @@ class TexyModule {
   }
 
 
-  function registerLinePattern($func, $pattern, $user_args = null) {
+  function registerLinePattern($func, $pattern, $user_args = null)
+  {
     $this->texy->patternsLine[] = array(
              'replacement' => array(&$this, $func),
              'pattern'     => TexyModule::adjustPattern($pattern) ,
@@ -99,7 +107,8 @@ class TexyModule {
   }
 
 
-  function registerBlockPattern($func, $pattern, $user_args = null) {
+  function registerBlockPattern($func, $pattern, $user_args = null)
+  {
 //    if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Class '.get_class($this).', pattern '.htmlSpecialChars($pattern));
 
     $this->texy->patternsBlock[] = array(

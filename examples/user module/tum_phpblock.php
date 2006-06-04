@@ -40,7 +40,8 @@ class TexyPHPCodeUserModule extends TexyModule {
 
 
   // constructor
-  function TexyPHPCodeUserModule(&$texy) {
+  function TexyPHPCodeUserModule(&$texy)
+  {
     parent::TexyModule($texy);
   }
 
@@ -48,7 +49,8 @@ class TexyPHPCodeUserModule extends TexyModule {
   /***
    * Module initialization.
    */
-  function init() {
+  function init()
+  {
     $this->registerBlockPattern('processBlock',   '#^<\?php\n(.*)\n\?>$#mUs');
   }
 
@@ -64,7 +66,8 @@ class TexyPHPCodeUserModule extends TexyModule {
    *            ?>
    *
    */
-  function processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches)
+  {
     list($match, $mContent) = $matches;
     //    [1] => .... content
 
