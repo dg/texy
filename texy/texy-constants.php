@@ -1,22 +1,18 @@
 <?php
 
 /**
- * ------------------------------
- *   TEXY!  REGULAR EXPRESSIONS
- * ------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * Regular Expression patterns for Texy!
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 
@@ -57,6 +53,7 @@ define('TEXY_INLINE_ELEMENTS', serialize(array_flip(array('a', 'abbr', 'acronym'
 define('TEXY_EMPTY_ELEMENTS',  serialize(array_flip(array('img', 'hr', 'br', 'input', 'meta', 'area', 'base', 'col', 'link', 'param'))) );
 define('TEXY_VALID_ELEMENTS',  serialize(array_merge(unserialize(TEXY_BLOCK_ELEMENTS), unserialize(TEXY_INLINE_ELEMENTS))) );
 //define('TEXY_HEAD_ELEMENTS',   serialize(array_flip(array('html', 'head', 'body', 'base', 'meta', 'link', 'title'))) );
+define('TEXY_ACCEPTED_ATTRS',  serialize(array_flip(array('abbr','accesskey','align','alt','archive','axis','bgcolor','cellpadding','cellspacing','char','charoff','charset','cite','classid','codebase','codetype','colspan','compact','coords','data','datetime','declare','dir','face','frame','headers','href','hreflang','hspace','ismap','lang','longdesc','name','noshade','nowrap','onblur','onclick','ondblclick','onkeydown','onkeypress','onkeyup','onmousedown','onmousemove','onmouseout','onmouseover','onmouseup','rel','rev','rowspan','rules','scope','shape','size','span','src','standby','start','summary','tabindex','target','title','type','usemap','valign','value','vspace'))));
 
 define('TEXY_EMPTY',    '/');
 define('TEXY_CLOSING',  '*');
@@ -91,35 +88,6 @@ define('TEXY_HASH_WC',          "\x1A-\x1F");       // HASHED TAG or ELEMENT (wi
 define('TEXY_PATTERN_ENTITY',   '&amp;([a-z]+|\\#x[0-9a-f]+|\\#[0-9]+);');   // &amp;   |   &#039;   |   &#x1A;
 
 
-// modifiers
-define('TEXY_PATTERN_TITLE',    '\([^\n\)]+\)');      // (...)
-define('TEXY_PATTERN_CLASS',    '\[[^\n\]]+\]');      // [...]
-define('TEXY_PATTERN_STYLE',    '\{[^\n\}]+\}');      // {...}
-define('TEXY_PATTERN_HALIGN',   '(?:<>|>|=|<)');      //  <  >  =  <>
-define('TEXY_PATTERN_VALIGN',   '(?:\^|\-|\_)');      //  ~ - _
-
-define('TEXY_PATTERN_MODIFIER',         // .(title)[class]{style}
-         '(?:\ *(?<= |^)\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')??'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.')??)');
-
-define('TEXY_PATTERN_MODIFIER_H',       // .(title)[class]{style}<>
-         '(?:\ *(?<= |^)\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')??'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')??'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.')??)');
-
-define('TEXY_PATTERN_MODIFIER_HV',      // .(title)[class]{style}<>^
-         '(?:\ *(?<= |^)\.('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??'.
-         '('.TEXY_PATTERN_TITLE.'|'.TEXY_PATTERN_CLASS.'|'.TEXY_PATTERN_STYLE.'|'.TEXY_PATTERN_HALIGN.'|'.TEXY_PATTERN_VALIGN.')??)');
-
-
-
-
-
 // links
 define('TEXY_PATTERN_LINK_REF',        '\[[^\[\]\*\n'.TEXY_HASH.']+\]');    // reference  [refName]
 define('TEXY_PATTERN_LINK_IMAGE',      '\[\*[^\n'.TEXY_HASH.']+\*\]');      // [* ... *]
@@ -128,4 +96,50 @@ define('TEXY_PATTERN_LINK',            '(?::('.TEXY_PATTERN_LINK_URL.'))');    /
 define('TEXY_PATTERN_LINK_N',          '(?::('.TEXY_PATTERN_LINK_URL.'|:))');  // any link (also unstated)
 define('TEXY_PATTERN_EMAIL',           '[a-z0-9.+_-]+@[a-z0-9.+_-]{2,}\.[a-z]{2,}');    // name@exaple.com
 
+
+// modifier .(title)[class]{style}
+define('TEXY_PATTERN_MODIFIER', '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})??)');
+
+// modifier .(title)[class]{style}<>
+define('TEXY_PATTERN_MODIFIER_H', '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??)');
+
+// modifier .(title)[class]{style}<>^
+define('TEXY_PATTERN_MODIFIER_HV', '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??)');
+
+
+/** modifiers patterns generator:
+
+$TITLE =  '\([^\n\)]+\)';      // (...)
+$CLASS =  '\[[^\n\]]+\]';      // [...]
+$STYLE =  '\{[^\n\}]+\}';      // {...}
+$HALIGN = '(?:<>|>|=|<)';      //  <  >  =  <>
+$VALIGN = '(?:\^|\-|\_)';      //  ~ - _
+
+// .(title)[class]{style}
+define('TEXY_PATTERN_MODIFIER',
+         "(?:\\ *(?<= |^)\\.".
+         "($TITLE|$CLASS|$STYLE)".
+         "($TITLE|$CLASS|$STYLE)??".
+         "($TITLE|$CLASS|$STYLE)??)");
+
+
+// .(title)[class]{style}<>
+define('TEXY_PATTERN_MODIFIER_H',
+         "(?:\\ *(?<= |^)\\.".
+         "($TITLE|$CLASS|$STYLE|$HALIGN)".
+         "($TITLE|$CLASS|$STYLE|$HALIGN)??".
+         "($TITLE|$CLASS|$STYLE|$HALIGN)??".
+         "($TITLE|$CLASS|$STYLE|$HALIGN)??)");
+
+
+// .(title)[class]{style}<>^
+define('TEXY_PATTERN_MODIFIER_HV',
+         "(?:\\ *(?<= |^)\\.".
+         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)".
+         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".
+         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".
+         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".
+         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??)");
+
+*/
 ?>

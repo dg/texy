@@ -1,40 +1,23 @@
 <?php
 
 /**
- * ----------------------
- *   TEXY! SMILIES DEMO
- * ----------------------
+ * TEXY! SMILIES DEMO
+ * --------------------------------------
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>. All rights reserved.
- * Web: http://www.texy.info/
+ * This demo shows how enable smilies in Texy!
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This source file is subject to the GNU GPL license.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
  */
-
-/**
- *  This demo shows how enable smilies in Texy!
- */
-
-
-// check required version
-if (version_compare(phpversion(), '4.3.3', '<'))
-  die('Texy! requires PHP version 4.3.3 or higher');
-
-
 
 
 // include Texy!
 $texyPath = '../../texy/';
-require_once($texyPath . 'texy.php');
+require_once ($texyPath . 'texy.php');
 
 
 
@@ -42,7 +25,7 @@ $texy = &new Texy();
 
 
 // SMILIES ARE DISABLED BY DEFAULT!
-$texy->smiliesModule->allowed = true;
+$texy->smiliesModule->allowed = TRUE;
 // configure it
 $texy->smiliesModule->root  = 'images/';
 $texy->smiliesModule->class  = 'smilie';

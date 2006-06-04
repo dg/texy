@@ -1,22 +1,18 @@
 <?php
 
 /**
- * -----------------------------
- *   TEXY! MODULES BASE CLASSE
- * -----------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * Texy! modules base class
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -36,9 +32,18 @@ class TexyModule {
     var $allowed = TEXY_ALL;   // module configuration
 
 
-    function TexyModule(&$texy)
+    // PHP5 constructor
+    function __construct(&$texy)
     {
         $this->texy = & $texy;
+    }
+
+
+    // PHP4 constructor
+    function TexyModule(&$texy)
+    {
+        // call php5 constructor
+        call_user_func_array(array(&$this, '__construct'), array(&$texy));
     }
 
 
@@ -62,18 +67,10 @@ class TexyModule {
     }
 
 
-/* not used yet
-    // single line pre-process
-    function linePreProcess(&$line)
-    {
-    }
-*/
-
     // single line post-process
     function linePostProcess(&$line)
     {
     }
-
 
 
 

@@ -1,20 +1,18 @@
 <?php
 
 /**
- * ------------------------------------------
- *   LONG WORDS WRAP - TEXY! DEFAULT MODULE
- * ------------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -53,7 +51,7 @@ class TexyLongWordsModule extends TexyModule {
                      ));
 
         $text = preg_replace_callback(
-                            $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#UTF'),
+                            $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#<UTF>'),
                             array(&$this, '_replace'),
                             $text);
 
@@ -65,7 +63,7 @@ class TexyLongWordsModule extends TexyModule {
     }
 
 
-    /***
+    /**
      * Callback function: rozdìlí dlouhá slova na slabiky - EXPERIMENTÁLNÍ
      * (c) David Grudl
      * @return string
@@ -77,7 +75,7 @@ class TexyLongWordsModule extends TexyModule {
 
         $chars = array();
         preg_match_all(
-                         $this->texy->translatePattern('#&\\#?[a-z0-9]+;|[:HASH:]+|.#UTF'),
+                         $this->texy->translatePattern('#&\\#?[a-z0-9]+;|[:HASH:]+|.#<UTF>'),
                          $mWord,
                          $chars
         );

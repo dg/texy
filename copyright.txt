@@ -1,7 +1,7 @@
 Copyright notice
 ----------------
 
-Texy! (C) David Grudl, 2004-2005 <dave@dgx.cz>
+Texy! (C) David Grudl, 2004-2006 <dave@dgx.cz>
 
 For more information, visit the homepage http://www.texy.info
 or author's weblog:  http://www.dgx.cz/trine/

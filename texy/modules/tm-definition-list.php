@@ -1,27 +1,23 @@
 <?php
 
 /**
- * ------------------------------------------
- *   DEFINITION LIST - TEXY! DEFAULT MODULE
- * ------------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * DEPENDENCES: tm_list.php
- *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
 if (!defined('TEXY')) die();
-require_once dirname(__FILE__).'/tm-list.php';
+require_once TEXY_DIR.'modules/tm-list.php';
 
 
 
@@ -45,7 +41,7 @@ class TexyDefinitionListModule extends TexyListModule {
 
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
@@ -54,14 +50,14 @@ class TexyDefinitionListModule extends TexyListModule {
         foreach ($this->allowed as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
-        $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                              // .{color:red}
-                                                                                            . '(\S.*)\:\ *MODIFIER_H?\n'                         // Term:
+        $this->registerBlockPattern('processBlock', '#^(?:<MODIFIER_H>\n)?'                              // .{color:red}
+                                                                                            . '(\S.*)\:\ *<MODIFIER_H>?\n'                         // Term:
                                                                                             . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU');   //    - description
     }
 
 
 
-    /***
+    /**
      * Callback function (for blocks)
      *
      *            Term: .(title)[class]{style}>
@@ -102,11 +98,11 @@ class TexyDefinitionListModule extends TexyListModule {
                 break;
             }
 
-        $blockParser->addChildren($el);
+        $blockParser->element->appendChild($el);
 
         $blockParser->moveBackward(2);
 
-        $patternTerm = $texy->translatePattern('#^\n?(\S.*)\:\ *MODIFIER_H?()$#mUA');
+        $patternTerm = $texy->translatePattern('#^\n?(\S.*)\:\ *<MODIFIER_H>?()$#mUA');
         $bullet = preg_quote($mBullet);
 
         while (true) {

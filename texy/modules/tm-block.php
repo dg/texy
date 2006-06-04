@@ -1,20 +1,18 @@
 <?php
 
 /**
- * --------------------------------
- *   BLOCK - TEXY! DEFAULT MODULE
- * --------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -40,7 +38,7 @@ class TexyBlockModule extends TexyModule {
     // constructor
     function TexyBlockModule(&$texy)
     {
-        parent::TexyModule($texy);
+        parent::__construct($texy);
 
         $this->allowed->pre  = true;
         $this->allowed->text = true;  // if false, /--html blocks are parsed as /--text block
@@ -52,19 +50,19 @@ class TexyBlockModule extends TexyModule {
     }
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
     {
         if (isset($this->userFunction)) $this->codeHandler = $this->userFunction;  // !!! back compatibility
 
-        $this->registerBlockPattern('processBlock',   '#^/--+ *(?:(code|samp|text|html|div|form|notexy|source|comment)( .*)?|) *MODIFIER_H?\n(.*\n)?\\\\--+ *\\1?()$#mUsi');
+        $this->registerBlockPattern('processBlock',   '#^/--+ *(?:(code|samp|text|html|div|form|notexy|source|comment)( .*)?|) *<MODIFIER_H>?\n(.*\n)?\\\\--+ *\\1?()$#mUsi');
     }
 
 
 
-    /***
+    /**
      * Callback function (for blocks)
      * @return object
      *
@@ -110,7 +108,7 @@ class TexyBlockModule extends TexyModule {
                      call_user_func_array($this->divHandler, array(&$el, &$mContent));
 
                  $el->parse($mContent);
-                 $blockParser->addChildren($el);
+                 $blockParser->element->appendChild($el);
 
                  break;
 
@@ -123,7 +121,7 @@ class TexyBlockModule extends TexyModule {
                      $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
                  $el->parse($mContent);
-                 $blockParser->addChildren($el);
+                 $blockParser->element->appendChild($el);
                  break;
 
 
@@ -136,7 +134,7 @@ class TexyBlockModule extends TexyModule {
                      $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
                  $el->parse($mContent);
-                 $blockParser->addChildren($el);
+                 $blockParser->element->appendChild($el);
                  break;
 
          case 'comment':
@@ -156,7 +154,7 @@ class TexyBlockModule extends TexyModule {
                  $el->parse($mContent, false);
                  $this->texy->patternsLine = $old;
 
-                 $blockParser->addChildren($el);
+                 $blockParser->element->appendChild($el);
                  break;
 
 
@@ -169,7 +167,7 @@ class TexyBlockModule extends TexyModule {
                                      )
                                 ),
                                 true);
-                 $blockParser->addChildren($el);
+                 $blockParser->element->appendChild($el);
 
                  if ($this->htmlHandler)
                      call_user_func_array($this->htmlHandler, array(&$el, false));
@@ -188,7 +186,7 @@ class TexyBlockModule extends TexyModule {
                      $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
                  $el->setContent($mContent, false); // not html-safe content
-                 $blockParser->addChildren($el);
+                 $blockParser->element->appendChild($el);
 
                  if ($this->codeHandler)
                      call_user_func_array($this->codeHandler, array(&$el));
@@ -292,9 +290,9 @@ class TexyFormElement extends TexyBlockElement {
     var $post = true;
 
 
-    function TexyFormElement(&$texy)
+    function __construct(&$texy)
     {
-        parent::TexyBlockElement($texy);
+        parent::__construct($texy);
         $this->action = & $texy->createURL();
     }
 
@@ -302,11 +300,11 @@ class TexyFormElement extends TexyBlockElement {
     function generateTags(&$tags)
     {
         parent::generateTags($tags);
-        $attr = & $tags['form'];
+        $attrs = & $tags['form'];
 
-        if ($this->action->URL) $attr['action'] = $this->action->URL;
-        $attr['method'] = $this->post ? 'post' : 'get';
-        $attr['enctype'] = $this->post ? 'multipart/form-data' : '';
+        if ($this->action->URL) $attrs['action'] = $this->action->URL;
+        $attrs['method'] = $this->post ? 'post' : 'get';
+        $attrs['enctype'] = $this->post ? 'multipart/form-data' : '';
     }
 
 

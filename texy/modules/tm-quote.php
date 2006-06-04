@@ -1,20 +1,18 @@
 <?php
 
 /**
- * -------------------------------------
- *   BLOCKQUOTE - TEXY! DEFAULT MODULE
- * -------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -36,7 +34,7 @@ class TexyQuoteModule extends TexyModule {
     // constructor
     function TexyQuoteModule(&$texy)
     {
-        parent::TexyModule($texy);
+        parent::__construct($texy);
 
         $this->allowed->line  = true;
         $this->allowed->block = true;
@@ -44,20 +42,20 @@ class TexyQuoteModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
     {
         if ($this->allowed->block)
-            $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
+            $this->registerBlockPattern('processBlock', '#^(?:<MODIFIER_H>\n)?>(\ +|:)(\S.*)$#mU');
 
         if ($this->allowed->line)
-            $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)LINK??()#U', 'q');
+            $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)<MODIFIER>?(?<!\ |\<)\<\<(?!\<)<LINK>??()#U', 'q');
     }
 
 
-    /***
+    /**
      * Callback function: >>.... .(title)[class]{style}<<:LINK
      * @return string
      */
@@ -78,13 +76,13 @@ class TexyQuoteModule extends TexyModule {
         if ($mLink)
             $el->cite->set($mLink);
 
-        return $el->addTo($lineParser->element, $mContent);
+        return $lineParser->element->appendChild($el, $mContent);
     }
 
 
 
 
-    /***
+    /**
      * Callback function (for blocks)
      *
      *            > They went in single file, running like hounds on a strong scent,
@@ -107,7 +105,7 @@ class TexyQuoteModule extends TexyModule {
         $texy = & $this->texy;
         $el = &new TexyBlockQuoteElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $blockParser->addChildren($el);
+        $blockParser->element->appendChild($el);
 
         $content = '';
         $linkTarget = '';
@@ -115,7 +113,7 @@ class TexyQuoteModule extends TexyModule {
         do {
             if ($mSpaces == ':') $linkTarget = trim($mContent);
             else {
-                if ($spaces === '') $spaces = strlen($mSpaces);
+                if ($spaces === '') $spaces = max(1, strlen($mSpaces));
                 $content .= $mContent . TEXY_NEWLINE;
             }
 
@@ -153,9 +151,9 @@ class TexyBlockQuoteElement extends TexyBlockElement {
     var $cite;
 
 
-    function TexyBlockQuoteElement(&$texy)
+    function __construct(&$texy)
     {
-        parent::TexyBlockElement($texy);
+        parent::__construct($texy);
         $this->cite = & $texy->createURL();
     }
 
@@ -179,9 +177,9 @@ class TexyQuoteElement extends TexyInlineTagElement {
     var $cite;
 
 
-    function TexyQuoteElement(&$texy)
+    function __construct(&$texy)
     {
-        parent::TexyInlineTagElement($texy);
+        parent::__construct($texy);
         $this->cite = & $texy->createURL();
     }
 

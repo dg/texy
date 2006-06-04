@@ -1,44 +1,27 @@
 <?php
 
 /**
- * -----------------------------------------
- *   TEXY! THIRD PARTY SYNTAX HIGHLIGHTING
- * -----------------------------------------
+ * TEXY! THIRD PARTY SYNTAX HIGHLIGHTING
+ * --------------------------------------
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>. All rights reserved.
- * Web: http://www.texy.info/
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- */
-
-
-/**
- *  This demo shows how combine Texy! with syntax highlighter FSHL
+ * This demo shows how combine Texy! with syntax highlighter FSHL
  *       - define user callback (for /--code elements)
+ *
+ * This source file is subject to the GNU GPL license.
+ *
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
  */
-
-
-// check required version
-if (version_compare(phpversion(), '4.3.3', '<'))
-  die('Texy! requires PHP version 4.3.3 or higher');
-
 
 $texyPath = dirname(__FILE__).'/../../texy/';
 $fshlPath = dirname(__FILE__).'/fshl/';
 
 
 // include libs
-require_once($texyPath . 'texy.php');
-include_once($fshlPath . 'fshl.php');
+require_once ($texyPath . 'texy.php');
+include_once ($fshlPath . 'fshl.php');
 
 
 
@@ -58,18 +41,18 @@ include_once($fshlPath . 'fshl.php');
 //     $element->type      -  type of content: code | samp | kbd | var | dfn  (or empty value)
 //     $element->lang      -  language (optional)
 //
-//  Syntax highlighter changes $element->content and sets $element->htmlSafe to true
+//  Syntax highlighter changes $element->content and sets $element->htmlSafe to TRUE
 //
 function myUserFunc(&$element) {
-  $lang = strtoupper($element->lang);
-  if ($lang == 'JAVASCRIPT') $lang = 'JS';
-  if (!in_array(
-          $lang,
-          array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
-     ) return;
+    $lang = strtoupper($element->lang);
+    if ($lang == 'JAVASCRIPT') $lang = 'JS';
+    if (!in_array(
+            $lang,
+            array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
+       ) return;
 
-  $parser = new fshlParser($element->texy->utf ? 'HTML_UTF8' : 'HTML', P_TAB_INDENT);
-  $element->setContent($parser->highlightString($lang, $element->content), true);
+    $parser = new fshlParser($element->texy->utf ? 'HTML_UTF8' : 'HTML', P_TAB_INDENT);
+    $element->setContent($parser->highlightString($lang, $element->content), TRUE);
 }
 
 

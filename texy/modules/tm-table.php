@@ -1,20 +1,18 @@
 <?php
 
 /**
- * --------------------------------
- *   TABLE - TEXY! DEFAULT MODULE
- * --------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -40,12 +38,12 @@ class TexyTableModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
     {
-        $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_HV\n)?'      // .{color: red}
+        $this->registerBlockPattern('processBlock', '#^(?:<MODIFIER_HV>\n)?'      // .{color: red}
                                                     . '\|.*()$#mU');                // | ....
     }
 
@@ -53,7 +51,7 @@ class TexyTableModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function (for blocks)
      *
      *            .(title)[class]{style}>
@@ -75,7 +73,7 @@ class TexyTableModule extends TexyModule {
         $texy = & $this->texy;
         $el = &new TexyTableElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-        $blockParser->addChildren($el);
+        $blockParser->element->appendChild($el);
 
         $blockParser->moveBackward();
 
@@ -203,7 +201,7 @@ class TexyTableModule extends TexyModule {
 
 
 
-/****************************************************************************
+/***************************************************************************
                                                              TEXY! DOM ELEMENTS                          */
 
 

@@ -1,22 +1,18 @@
 <?php
 
 /**
- * ----------------------------
- *   TEXY! MODIFIER PROCESSOR
- * ----------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * Syntax modifiers
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -47,6 +43,7 @@ class TexyModifier {
     var $unfilteredClasses = array();
     var $styles = array();
     var $unfilteredStyles = array();
+    var $unfilteredAttrs = array();
     var $hAlign;
     var $vAlign;
     var $title;
@@ -92,6 +89,29 @@ class TexyModifier {
     }
 
 
+    function getAttrs($tag)
+    {
+        if ($this->texy->allowedTags === TEXY_ALL)
+            return $this->unfilteredAttrs;
+
+        if (is_array($this->texy->allowedTags) && isset($this->texy->allowedTags[$tag])) {
+            $allowedAttrs = $this->texy->allowedTags[$tag];
+
+            if ($allowedAttrs === TEXY_ALL)
+                return $this->unfilteredAttrs;
+
+            if (is_array($allowedAttrs) && count($allowedAttrs)) {
+                $attrs = $this->unfilteredAttrs;
+                foreach ($attrs as $key => $foo)
+                    if (!in_array($key, $allowedAttrs)) unset($attrs[$key]);
+
+                return $attrs;
+            }
+
+        }
+
+        return array();
+    }
 
 
     function clear()
@@ -101,6 +121,7 @@ class TexyModifier {
         $this->unfilteredClasses = array();
         $this->styles = array();
         $this->unfilteredStyles = array();
+        $this->unfilteredAttrs = array();
         $this->hAlign = null;
         $this->vAlign = null;
         $this->title = null;
@@ -113,6 +134,7 @@ class TexyModifier {
         $this->unfilteredClasses = $modifier->unfilteredClasses;
         $this->styles = $modifier->styles;
         $this->unfilteredStyles = $modifier->unfilteredStyles;
+        $this->unfilteredAttrs = $modifier->unfilteredAttrs;
         $this->id = $modifier->id;
         $this->hAlign = $modifier->hAlign;
         $this->vAlign = $modifier->vAlign;
@@ -125,7 +147,7 @@ class TexyModifier {
 
     function parseClasses($str)
     {
-        if (!$str) return;
+        if ($str == null) return;
 
         $tmp = is_array($this->texy->allowedClasses) ? array_flip($this->texy->allowedClasses) : array(); // little speed-up trick
 
@@ -151,19 +173,26 @@ class TexyModifier {
 
     function parseStyles($str)
     {
-        if (!$str) return;
+        if ($str == null) return;
 
         $tmp = is_array($this->texy->allowedStyles) ? array_flip($this->texy->allowedStyles) : array(); // little speed-up trick
+        static $TEXY_ACCEPTED_ATTRS;
+        if (!$TEXY_ACCEPTED_ATTRS) $TEXY_ACCEPTED_ATTRS = unserialize(TEXY_ACCEPTED_ATTRS);
 
         foreach (explode(';', $str) as $value) {
             $pair = explode(':', $value.':');
             $property = strtolower(trim($pair[0]));
             $value = trim($pair[1]);
-            if (!$property || $value==='') continue;
+            if ($property == '') continue;
 
-            $this->unfilteredStyles[$property] = $value;
-            if ($this->texy->allowedStyles === TEXY_ALL || isset($tmp[$property]))
-                $this->styles[$property] = $value;
+            if (isset($TEXY_ACCEPTED_ATTRS[$property])) { // attribute
+                $this->unfilteredAttrs[$property] = $value;
+
+            } else { // style
+                $this->unfilteredStyles[$property] = $value;
+                if ($this->texy->allowedStyles === TEXY_ALL || isset($tmp[$property]))
+                    $this->styles[$property] = $value;
+            }
         }
     }
 

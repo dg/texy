@@ -1,27 +1,23 @@
 <?php
 
 /**
- * -------------------------------------------------
- *   IMAGE WITH DESCRIPTION - TEXY! DEFAULT MODULE
- * -------------------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * DEPENDENCES: tm_image.php
- *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
 if (!defined('TEXY')) die();
-require_once dirname(__FILE__).'/tm-image.php';
+require_once TEXY_DIR.'modules/tm-image.php';
 
 
 
@@ -34,17 +30,18 @@ class TexyImageDescModule extends TexyModule {
     var $leftClass  = 'image left';   // left-floated box class
     var $rightClass = 'image right';  // right-floated box class
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
     {
-        $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?? +\*\*\* +(.*)MODIFIER_H?()$#mU');
+        if ($this->texy->imageModule->allowed)
+            $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?? +\*\*\* +(.*)<MODIFIER_H>?()$#mU');
     }
 
 
 
-    /***
+    /**
      * Callback function (for blocks)
      *
      *            [*image*]:link *** .... .(title)[class]{style}>
@@ -67,16 +64,34 @@ class TexyImageDescModule extends TexyModule {
 
         $el = &new TexyImageDescElement($this->texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $blockParser->addChildren($el);
 
-        if ($this->texy->imageModule->allowed) {
-            $el->children['img']->setImagesRaw($mURLs);
-            $el->children['img']->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
-            $el->modifier->hAlign = $el->children['img']->modifier->hAlign;
-            $el->children['img']->modifier->hAlign = null;
+        $elImage = &new TexyImageElement($this->texy);
+        $elImage->setImagesRaw($mURLs);
+        $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
+
+        $el->modifier->hAlign = $elImage->modifier->hAlign;
+        $elImage->modifier->hAlign = null;
+
+        $content = $el->appendChild($elImage);
+
+        if ($mLink) {
+            $elLink = &new TexyLinkElement($this->texy);
+            if ($mLink == ':') {
+                $elImage->requireLinkImage();
+                $elLink->link->copyFrom($elImage->linkImage);
+            } else {
+                $elLink->setLinkRaw($mLink);
+            }
+
+            $content = $el->appendChild($elLink, $content);
         }
 
-        $el->children['desc']->parse(ltrim($mContent));
+        $elDesc = &new TexyGenericBlockElement($this->texy);
+        $elDesc->parse(ltrim($mContent));
+        $content .= $el->appendChild($elDesc);
+        $el->setContent($content, true);
+
+        $blockParser->element->appendChild($el);
     }
 
 
@@ -105,38 +120,27 @@ class TexyImageDescModule extends TexyModule {
 /**
  * HTML ELEMENT IMAGE (WITH DESCRIPTION)
  */
-class TexyImageDescElement extends TexyBlockElement {
-    var $parentModule;
-
-
-    // constructor
-    function TexyImageDescElement(&$texy)
-    {
-        parent::TexyBlockElement($texy);
-        $this->parentModule = & $texy->imageDescModule;
-
-        $this->children['img'] = &new TexyImageElement($texy);
-        $this->children['desc'] = &new TexyGenericBlockElement($texy);
-    }
+class TexyImageDescElement extends TexyTextualElement {
 
 
 
     function generateTags(&$tags)
     {
-        $attr['class'] = $this->modifier->classes;
-        $attr['style'] = $this->modifier->styles;
-        $attr['id'] = $this->modifier->id;
+        $attrs = $this->modifier->getAttrs('div');
+        $attrs['class'] = $this->modifier->classes;
+        $attrs['style'] = $this->modifier->styles;
+        $attrs['id'] = $this->modifier->id;
 
         if ($this->modifier->hAlign == TEXY_HALIGN_LEFT) {
-            $attr['class'][] = $this->parentModule->leftClass;
+            $attrs['class'][] = $this->texy->imageDescModule->leftClass;
 
         } elseif ($this->modifier->hAlign == TEXY_HALIGN_RIGHT)  {
-            $attr['class'][] = $this->parentModule->rightClass;
+            $attrs['class'][] = $this->texy->imageDescModule->rightClass;
 
-        } elseif ($this->parentModule->boxClass)
-            $attr['class'][] = $this->parentModule->boxClass;
+        } elseif ($this->texy->imageDescModule->boxClass)
+            $attrs['class'][] = $this->texy->imageDescModule->boxClass;
 
-        $tags['div'] = $attr;
+        $tags['div'] = $attrs;
     }
 
 

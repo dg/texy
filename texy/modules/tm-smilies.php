@@ -1,20 +1,18 @@
 <?php
 
 /**
- * ----------------------------------
- *   SMILIES - TEXY! DEFAULT MODULE
- * ----------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -47,7 +45,7 @@ class TexySmiliesModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
@@ -71,7 +69,7 @@ class TexySmiliesModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: :-)
      * @return string
      */
@@ -98,7 +96,7 @@ class TexySmiliesModule extends TexyModule {
                 break;
             }
 
-        return $el->addTo($lineParser->element);
+        return $lineParser->element->appendChild($el);
     }
 
 

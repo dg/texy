@@ -1,20 +1,18 @@
 <?php
 
 /**
- * ----------------------------------------------------------
- *   ORDERED / UNORDERED NESTED LIST - TEXY! DEFAULT MODULE
- * ----------------------------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -54,7 +52,7 @@ class TexyListModule extends TexyModule {
             );
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
@@ -63,7 +61,7 @@ class TexyListModule extends TexyModule {
         foreach ($this->allowed as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
-        $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                             // .{color: red}
+        $this->registerBlockPattern('processBlock', '#^(?:<MODIFIER_H>\n)?'                             // .{color: red}
                                                                                             . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mU');  // item (unmatched)
     }
 
@@ -71,7 +69,7 @@ class TexyListModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function (for blocks)
      *
      *            1) .... .(title)[class]{style}>
@@ -113,7 +111,7 @@ class TexyListModule extends TexyModule {
         }
 
         if (!$count) return false;
-        else $blockParser->addChildren($el);
+        else $blockParser->element->appendChild($el);
     }
 
 
@@ -126,7 +124,7 @@ class TexyListModule extends TexyModule {
     function &processItem(&$blockParser, $bullet, $indented = false) {
         $texy = & $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
-        $patternItem = $texy->translatePattern('#^\n?(@1)@2(\n?)(\ +)(\S.*)?MODIFIER_H?()$#mAU', $spacesBase, $bullet);
+        $patternItem = $texy->translatePattern("#^\n?($spacesBase)$bullet(\n?)(\ +)(\S.*)?<MODIFIER_H>?()$#mAU");
 
         // first line (with bullet)
         if (!$blockParser->receiveNext($patternItem, $matches)) {
@@ -161,12 +159,12 @@ class TexyListModule extends TexyModule {
         }
 
         // parse content
-        $mergeLines = & $texy->genericBlock[0]->mergeLines;
-        $tmp = $mergeLines;
-        $mergeLines = false;
+        $mergeMode = & $texy->genericBlock[0]->mergeMode;
+        $tmp = $mergeMode;
+        $mergeMode = false;
 
         $elItem->parse($content);
-        $mergeLines = true;
+        $mergeMode = $tmp;
 
         if (is_a($elItem->children[0], 'TexyGenericBlockElement'))
             $elItem->children[0]->tag = '';
@@ -185,7 +183,7 @@ class TexyListModule extends TexyModule {
 
 
 
-/****************************************************************************
+/***************************************************************************
                                                              TEXY! DOM ELEMENTS                          */
 
 

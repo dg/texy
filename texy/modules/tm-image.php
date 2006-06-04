@@ -1,20 +1,18 @@
 <?php
 
 /**
- * ---------------------------------
- *   IMAGES - TEXY! DEFAULT MODULE
- * ---------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -35,9 +33,9 @@ class TexyImageModule extends TexyModule {
     var $root       = 'images/';     // root of relative images (http)
     var $linkedRoot = 'images/';     // root of linked images (http)
     var $rootPrefix = '';            // physical location on server
-    var $leftClass  = '';            // left-floated image class
-    var $rightClass = '';            // right-floated image class
-    var $defaultAlt = 'image';       // default image alternative text
+    var $leftClass  = null;          // left-floated image class
+    var $rightClass = null;          // right-floated image class
+    var $defaultAlt = '';            // default image alternative text
 
 
 
@@ -46,13 +44,13 @@ class TexyImageModule extends TexyModule {
     // constructor
     function TexyImageModule(&$texy)
     {
-        parent::TexyModule($texy);
+        parent::__construct($texy);
 
 //    $this->rootPrefix = dirname($_SERVER['SCRIPT_NAME']); // physical location on server
     }
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
@@ -68,7 +66,7 @@ class TexyImageModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Add new named image
      */
     function addReference($name, &$obj)
@@ -79,7 +77,7 @@ class TexyImageModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Receive new named link. If not exists, try
      * call user function to create one.
      */
@@ -99,7 +97,7 @@ class TexyImageModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Preprocessing
      */
     function preProcess(&$text)
@@ -110,7 +108,7 @@ class TexyImageModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: [*image*]: urls .(title)[class]{style}
      * @return string
      */
@@ -136,7 +134,7 @@ class TexyImageModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: [* texy.gif *]: small.jpg | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
      * @return string
      */
@@ -164,13 +162,13 @@ class TexyImageModule extends TexyModule {
                 $elLink->setLinkRaw($mLink);
             }
 
-            return $elLink->addTo(
-                                                 $lineParser->element,
-                                                 $elImage->addTo($lineParser->element)
-                                            );
+            return $lineParser->element->appendChild(
+                $elLink,
+                $lineParser->element->appendChild($elImage)
+            );
         }
 
-        return $elImage->addTo($lineParser->element);
+        return $lineParser->element->appendChild($elImage);
     }
 
 
@@ -203,7 +201,7 @@ class TexyImageReference {
 
 
 
-/****************************************************************************
+/***************************************************************************
                                                              TEXY! DOM ELEMENTS                          */
 
 
@@ -214,8 +212,7 @@ class TexyImageReference {
 /**
  * HTML ELEMENT IMAGE
  */
-class TexyImageElement extends TexyTextualElement {
-    var $contentType = TEXY_CONTENT_NONE;
+class TexyImageElement extends TexyHTMLElement {
     var $parentModule;
 
     var $image;
@@ -226,9 +223,9 @@ class TexyImageElement extends TexyTextualElement {
 
 
     // constructor
-    function TexyImageElement(&$texy)
+    function __construct(&$texy)
     {
-        parent::TexyTextualElement($texy);
+        parent::__construct($texy);
         $this->parentModule = & $texy->imageModule;
 
         $this->image = & $texy->createURL();
@@ -295,49 +292,50 @@ class TexyImageElement extends TexyTextualElement {
 
     function generateTags(&$tags)
     {
-        if (!$this->image->URL) return;  // image URL is required
+        if ($this->image->URL == null) return;  // image URL is required
 
         // classes & styles
-        $attr['class'] = $this->modifier->classes;
-        $attr['style'] = $this->modifier->styles;
-        $attr['id'] = $this->modifier->id;
+        $attrs = $this->modifier->getAttrs('img');
+        $attrs['class'] = $this->modifier->classes;
+        $attrs['style'] = $this->modifier->styles;
+        $attrs['id'] = $this->modifier->id;
 
         if ($this->modifier->hAlign == TEXY_HALIGN_LEFT) {
-            if ($this->parentModule->leftClass)
-                $attr['class'][] = $this->parentModule->leftClass;
+            if ($this->parentModule->leftClass != '')
+                $attrs['class'][] = $this->parentModule->leftClass;
             else
-                $attr['style']['float'] = 'left';
+                $attrs['style']['float'] = 'left';
 
         } elseif ($this->modifier->hAlign == TEXY_HALIGN_RIGHT)  {
 
-            if ($this->parentModule->rightClass)
-                $attr['class'][] = $this->parentModule->rightClass;
+            if ($this->parentModule->rightClass != '')
+                $attrs['class'][] = $this->parentModule->rightClass;
             else
-                $attr['style']['float'] = 'right';
+                $attrs['style']['float'] = 'right';
         }
 
         if ($this->modifier->vAlign)
-            $attr['style']['vertical-align'] = $this->modifier->vAlign;
+            $attrs['style']['vertical-align'] = $this->modifier->vAlign;
 
         // width x height generate
         $this->requireSize();
-        if ($this->width) $attr['width'] = $this->width;
-        if ($this->height) $attr['height'] = $this->height;
+        if ($this->width) $attrs['width'] = $this->width;
+        if ($this->height) $attrs['height'] = $this->height;
 
         // attribute generate
-        $this->texy->summary->images[] = $attr['src'] = $this->image->URL;
+        $this->texy->summary->images[] = $attrs['src'] = $this->image->URL;
 
         // onmouseover actions generate
         if ($this->overImage->URL) {
-            $attr['onmouseover'] = 'this.src=\''.$this->overImage->URL.'\'';
-            $attr['onmouseout'] = 'this.src=\''.$this->image->URL.'\'';
+            $attrs['onmouseover'] = 'this.src=\''.$this->overImage->URL.'\'';
+            $attrs['onmouseout'] = 'this.src=\''.$this->image->URL.'\'';
             $this->texy->summary->preload[] = $this->overImage->URL;
         }
 
         // alternative text generate
-        $attr['alt'] = $this->modifier->title ? $this->modifier->title : $this->parentModule->defaultAlt;
+        $attrs['alt'] = $this->modifier->title ? $this->modifier->title : $this->parentModule->defaultAlt;
 
-        $tags['img'] = $attr;
+        $tags['img'] = $attrs;
     }
 
 
@@ -358,7 +356,7 @@ class TexyImageElement extends TexyTextualElement {
 
     function requireLinkImage()
     {
-        if (!$this->linkImage->URL)
+        if ($this->linkImage->URL == null)
             $this->linkImage->set($this->image->text, TEXY_URL_IMAGE_LINKED);
     }
 

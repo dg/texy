@@ -1,20 +1,18 @@
 <?php
 
 /**
- * ----------------------------------------------
- *   PARAGRAPH / GENERIC - TEXY! DEFAULT MODULE
- * ----------------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -29,10 +27,10 @@ if (!defined('TEXY')) die();
  * PARAGRAPH / GENERIC MODULE CLASS
  */
 class TexyGenericBlockModule extends TexyModule {
-    var $mergeLines = true;
+    var $mergeMode = true;
 
 
-    /***
+    /**
      * Module initialization
      */
     function init()
@@ -44,20 +42,20 @@ class TexyGenericBlockModule extends TexyModule {
 
     function processBlock(&$blockParser, $content)
     {
-        $str_blocks = $this->mergeLines
+        $str_blocks = $this->mergeMode
                       ? preg_split('#(\n{2,})#', $content)
                       : preg_split('#(\n(?! )|\n{2,})#', $content);
 
         foreach ($str_blocks as $str) {
             $str = trim($str);
-            if (!$str) continue;
+            if ($str == '') continue;
             $this->processSingleBlock($blockParser, $str);
         }
     }
 
 
 
-    /***
+    /**
      * Callback function (for blocks)
      *
      *            ....  .(title)[class]{style}>
@@ -67,7 +65,7 @@ class TexyGenericBlockModule extends TexyModule {
      */
     function processSingleBlock(&$blockParser, $content)
     {
-        preg_match($this->texy->translatePattern('#^(.*)MODIFIER_H?(\n.*)?()$#sU'), $content, $matches);
+        preg_match($this->texy->translatePattern('#^(.*)<MODIFIER_H>?(\n.*)?()$#sU'), $content, $matches);
         list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
         //    [1] => ...
         //    [2] => (title)
@@ -78,13 +76,16 @@ class TexyGenericBlockModule extends TexyModule {
 
         // ....
         //  ...  => \n
-        $mContent = preg_replace('#\n (\S)#', " \r\\1", trim($mContent . $mContent2));
-        $mContent = strtr($mContent, "\n\r", " \n");
+        $mContent = trim($mContent . $mContent2);
+        if ($this->texy->mergeLines) {
+           $mContent = preg_replace('#\n (\S)#', " \r\\1", $mContent);
+           $mContent = strtr($mContent, "\n\r", " \n");
+        }
 
         $el = &new TexyGenericBlockElement($this->texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse($mContent);
-        $blockParser->addChildren($el);
+        $blockParser->element->appendChild($el);
 
         // specify tag
         if ($el->contentType == TEXY_CONTENT_TEXTUAL) $el->tag = 'p';
@@ -96,7 +97,7 @@ class TexyGenericBlockModule extends TexyModule {
         if ($el->tag && (strpos($el->content, "\n") !== false)) {
             $elBr = &new TexyLineBreakElement($this->texy);
             $el->content = strtr($el->content,
-                              array("\n" => $elBr->addTo($el))
+                              array("\n" => $el->appendChild($elBr))
                            );
         }
     }

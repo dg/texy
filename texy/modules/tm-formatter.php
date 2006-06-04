@@ -1,20 +1,18 @@
 <?php
 
 /**
- * -----------------------------------------
- *   HTML FORMATTER - TEXY! DEFAULT MODULE
- * -----------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -49,7 +47,7 @@ class TexyFormatterModule extends TexyModule {
                                    'dt'         => array('dt', 'dd'),
                                    'li'         => array('li'),
                                    'option'     => array('option'),
-                                   'p'          => array('address', 'blockquote', 'div', 'dl', 'fieldset', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'iframe', 'legend', 'object', 'ol', 'p', 'pre', 'table', 'ul'),
+                                   'p'          => array('address', 'blockquote', 'div', 'dl', 'fieldset', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'legend', 'object', 'ol', 'p', 'pre', 'table', 'ul'),
                                    'td'         => array('th', 'td', 'tr', 'thead', 'tbody', 'tfoot', 'colgoup'),
                                    'tfoot'      => array('thead', 'tbody', 'tfoot', 'colgoup'),
                                    'th'         => array('th', 'td', 'tr', 'thead', 'tbody', 'tfoot', 'colgoup'),
@@ -64,7 +62,7 @@ class TexyFormatterModule extends TexyModule {
     // constructor
     function TexyFormatterModule(&$texy)
     {
-        parent::TexyModule($texy);
+        parent::__construct($texy);
 
         // little trick - isset($array[$item]) is much faster than in_array($item, $array)
         foreach ($this->autoCloseElements as $key => $value)
@@ -89,7 +87,7 @@ class TexyFormatterModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Convert <strong><em> ... </strong> ... </em>
      *    into <strong><em> ... </em></strong><em> ... </em>
      */
@@ -109,7 +107,7 @@ class TexyFormatterModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: <tag> | </tag>
      * @return string
      */
@@ -134,7 +132,7 @@ class TexyFormatterModule extends TexyModule {
                 $pair = prev($this->tagStack);
                 $i++;
             }
-            if ($pair->tag <> $mTag) return '';
+            if ($pair === false) return '';
 
             if (isset($this->TEXY_BLOCK_ELEMENTS[$mTag])) {
                 array_splice($this->tagStack, -$i);
@@ -181,7 +179,7 @@ class TexyFormatterModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Output HTML formating
      */
     function indent(&$text)
@@ -245,7 +243,7 @@ class TexyFormatterModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: Insert \n + spaces into HTML code
      * @return string
      */
@@ -260,7 +258,7 @@ class TexyFormatterModule extends TexyModule {
 
         if ($mTag === 'br')  // exception
             return "\n"
-                   . str_repeat("\t", $this->_indent - 1)
+                   . str_repeat("\t", max(0, $this->_indent - 1))
                    . $match;
 
         if (isset($this->TEXY_EMPTY_ELEMENTS[$mTag]))
@@ -285,7 +283,7 @@ class TexyFormatterModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: wrap lines
      * @return string
      */

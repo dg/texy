@@ -1,20 +1,18 @@
 <?php
 
 /**
- * ------------------------------------
- *   HTML TAGS - TEXY! DEFAULT MODULE
- * ------------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -33,26 +31,26 @@ class TexyHtmlModule extends TexyModule {
                                                  // arrays of safe tags and attributes
     var $allowedComments = true;
     var $safeTags = array(
-                          'a'         => array('href', 'rel', 'title'),
-                          'abbr'      => array('title'),
-                          'acronym'   => array('title'),
-                          'b'         => array(),
-                          'br'        => array(),
-                          'cite'      => array(),
-                          'code'      => array(),
-                          'dfn'       => array(),
-                          'em'        => array(),
-                          'i'         => array(),
-                          'kbd'       => array(),
-                          'q'         => array('cite'),
-                          'samp'      => array(),
-                          'small'     => array(),
-                          'span'      => array('title'),
-                          'strong'    => array(),
-                          'sub'       => array(),
-                          'sup'       => array(),
-                          'var'       => array(),
-                         );
+            'a'         => array('href', 'rel', 'title', 'lang'),
+            'abbr'      => array('title', 'lang'),
+            'acronym'   => array('title', 'lang'),
+            'b'         => array('title', 'lang'),
+            'br'        => array(),
+            'cite'      => array('title', 'lang'),
+            'code'      => array('title', 'lang'),
+            'dfn'       => array('title', 'lang'),
+            'em'        => array('title', 'lang'),
+            'i'         => array('title', 'lang'),
+            'kbd'       => array('title', 'lang'),
+            'q'         => array('cite', 'title', 'lang'),
+            'samp'      => array('title', 'lang'),
+            'small'     => array('title', 'lang'),
+            'span'      => array('title', 'lang'),
+            'strong'    => array('title', 'lang'),
+            'sub'       => array('title', 'lang'),
+            'sup'       => array('title', 'lang'),
+            'var'       => array('title', 'lang'),
+           );
 
 
 
@@ -61,16 +59,16 @@ class TexyHtmlModule extends TexyModule {
     // constructor
     function TexyHtmlModule(&$texy)
     {
-        parent::TexyModule($texy);
+        parent::__construct($texy);
 
-        $this->allowed = unserialize(TEXY_VALID_ELEMENTS);
+        $this->allowed = & $texy->allowedTags;
     }
 
 
 
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
@@ -81,7 +79,7 @@ class TexyHtmlModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: <tag ...>
      * @return string
      */
@@ -117,59 +115,59 @@ class TexyHtmlModule extends TexyModule {
         $el->contentType = isset($TEXY_INLINE_ELEMENTS[$tag]) ? TEXY_CONTENT_NONE : TEXY_CONTENT_BLOCK;
 
         if (!$closing) {  // process attributes
-            $attr = array();
+            $attrs = array();
             $allowedAttrs = is_array($this->allowed) ? $this->allowed[$tag] : null;
             preg_match_all('#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is', $mAttr, $matchesAttr, PREG_SET_ORDER);
             foreach ($matchesAttr as $matchAttr) {
                 $key = strtolower($matchAttr[1]);
                 if (is_array($allowedAttrs) && !in_array($key, $allowedAttrs)) continue;
                 $value = $matchAttr[2];
-                if (!$value) $value = $key;
+                if ($value == null) $value = $key;
                 elseif ($value{0} == '\'' || $value{0} == '"') $value = substr($value, 1, -1);
-                $attr[$key] = $value;
+                $attrs[$key] = $value;
             }
 
 
             // apply allowedClasses & allowedStyles
             $modifier = & $this->texy->createModifier();
 
-            if (isset($attr['class'])) {
-                $modifier->parseClasses($attr['class']);
-                $attr['class'] = $modifier->classes;
+            if (isset($attrs['class'])) {
+                $modifier->parseClasses($attrs['class']);
+                $attrs['class'] = $modifier->classes;
             }
 
-            if (isset($attr['style'])) {
-                $modifier->parseStyles($attr['style']);
-                $attr['style'] = $modifier->styles;
+            if (isset($attrs['style'])) {
+                $modifier->parseStyles($attrs['style']);
+                $attrs['style'] = $modifier->styles;
             }
 
-            if (isset($attr['id'])) {
+            if (isset($attrs['id'])) {
                 if (!$this->texy->allowedClasses)
-                    unset($attr['id']);
-                elseif (is_array($this->texy->allowedClasses) && !in_array('#'.$attr['id'], $this->texy->allowedClasses))
-                    unset($attr['id']);
+                    unset($attrs['id']);
+                elseif (is_array($this->texy->allowedClasses) && !in_array('#'.$attrs['id'], $this->texy->allowedClasses))
+                    unset($attrs['id']);
             }
 
 
             switch ($tag) {
              case 'img':
-                    if (!isset($attr['src'])) return $match;
+                    if (!isset($attrs['src'])) return $match;
                     $link = &$this->texy->createURL();
-                    $link->set($attr['src'], TEXY_URL_IMAGE_INLINE);
-                    $this->texy->summary->images[] = $attr['src'] = $link->URL;
+                    $link->set($attrs['src'], TEXY_URL_IMAGE_INLINE);
+                    $this->texy->summary->images[] = $attrs['src'] = $link->URL;
                     break;
 
              case 'a':
-                    if (!isset($attr['href']) && !isset($attr['name']) && !isset($attr['id'])) return $match;
-                    if (isset($attr['href'])) {
+                    if (!isset($attrs['href']) && !isset($attrs['name']) && !isset($attrs['id'])) return $match;
+                    if (isset($attrs['href'])) {
                         $link = &$this->texy->createURL();
-                        $link->set($attr['href']);
-                        $this->texy->summary->links[] = $attr['href'] = $link->URL;
+                        $link->set($attrs['href']);
+                        $this->texy->summary->links[] = $attrs['href'] = $link->URL;
                     }
             }
 
-            if ($empty) $attr[TEXY_EMPTY] = true;
-            $el->tags[$tag] = $attr;
+            if ($empty) $attrs[TEXY_EMPTY] = true;
+            $el->tags[$tag] = $attrs;
             $el->closing  = false;
 
         } else { // closing element
@@ -177,11 +175,11 @@ class TexyHtmlModule extends TexyModule {
             $el->closing  = true;
         }
 
-        return $el->addTo($lineParser->element);
+        return $lineParser->element->appendChild($el);
     }
 
 
-    /***
+    /**
      * Callback function: <!-- ... -->
      * @return string
      */
@@ -227,7 +225,6 @@ class TexyHtmlModule extends TexyModule {
 class TexyHtmlTagElement extends TexyDOMElement {
     var $tags;
     var $closing;
-    var $contentType;
 
 
 
@@ -243,14 +240,6 @@ class TexyHtmlTagElement extends TexyDOMElement {
     }
 
 
-
-    function addTo(&$lineElement)
-    {
-        $key = Texy::hashKey($this->contentType);
-        $lineElement->children[$key]  = &$this;
-        $lineElement->contentType = max($lineElement->contentType, $this->contentType);
-        return $key;
-    }
 
 
 }  // TexyHtmlTagElement

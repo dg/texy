@@ -1,20 +1,18 @@
 <?php
 
 /**
- * --------------------------------
- *   LINKS - TEXY! DEFAULT MODULE
- * --------------------------------
+ * Texy! universal text -> html converter
+ * --------------------------------------
  *
- * Version 1 Release Candidate
+ * This source file is subject to the GNU GPL license.
  *
- * Copyright (c) 2005, David Grudl <dave@dgx.cz>
- * Web: http://www.texy.info/
- *
- * For the full copyright and license information, please view the COPYRIGHT
- * file that was distributed with this source code. If the COPYRIGHT file is
- * missing, please visit the Texy! homepage: http://www.texy.info
- *
- * @package Texy
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
+ * @package    Texy
+ * @category   Text
+ * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
  */
 
 // security - include texy.php, not this file
@@ -31,7 +29,7 @@ class TexyLinkModule extends TexyModule {
     // options
     var $allowed;
     var $root            = '';                          // root of relative links
-    var $emailOnClick    = '';                          // 'this.href="mailto:"+this.href.match(/./g).reverse().slice(0,-7).join("")';
+    var $emailOnClick    = null;                        // 'this.href="mailto:"+this.href.match(/./g).reverse().slice(0,-7).join("")';
     var $imageOnClick    = 'return !popupImage(this.href)';  // image popup event
     var $popupOnClick    = 'return !popup(this.href)';  // popup popup event
     var $forceNoFollow   = false;                       // always use rel="nofollow" for absolute links
@@ -42,17 +40,18 @@ class TexyLinkModule extends TexyModule {
     // constructor
     function TexyLinkModule(&$texy)
     {
-        parent::TexyModule($texy);
+        parent::__construct($texy);
 
         $this->allowed->link      = true;   // classic link "xxx":url and [reference]
         $this->allowed->email     = true;   // emails replacement
         $this->allowed->url       = true;   // direct url replacement
         $this->allowed->quickLink = true;   // quick link xxx:[url] or [reference]
+        $this->allowed->references = true;  // [ref]: URL  reference definitions
     }
 
 
 
-    /***
+    /**
      * Module initialization.
      */
     function init()
@@ -60,14 +59,14 @@ class TexyLinkModule extends TexyModule {
         Texy::adjustDir($this->root);
 
         if ($this->allowed->quickLink)
-            $this->registerLinePattern('processLineQuick',   '#([^:HASH:\s\[\]"~\(\)]+)(?=:\[)LINK()#U');
+            $this->registerLinePattern('processLineQuick',   '#([:CHAR:0-9@\#$%&.,_-]+)(?=:\[)<LINK>()#U<UTF>');
 
         // [reference]
-        $this->registerLinePattern('processLineReference', '#('.TEXY_PATTERN_LINK_REF.')#U');
+        $this->registerLinePattern('processLineReference',   '#('.TEXY_PATTERN_LINK_REF.')#U');
 
         // direct url and email
         if ($this->allowed->url)
-            $this->registerLinePattern('processLineURL',     '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#i' . ($this->texy->utf ? 'u' : '') );
+            $this->registerLinePattern('processLineURL',     '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#i<UTF>');
         if ($this->allowed->email)
             $this->registerLinePattern('processLineURL',     '#(?<=\s|^|\(|\[|\<|:)'.TEXY_PATTERN_EMAIL.'#i');
     }
@@ -76,7 +75,7 @@ class TexyLinkModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Add new named image
      */
     function addReference($name, &$obj)
@@ -87,7 +86,7 @@ class TexyLinkModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Receive new named link. If not exists, try
      * call user function to create one.
      */
@@ -113,19 +112,20 @@ class TexyLinkModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Preprocessing
      */
     function preProcess(&$text)
     {
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-        $text = preg_replace_callback('#^\[([^\[\]\#\?\*\n]+)\]: +('.TEXY_PATTERN_LINK_IMAGE.'|(?!\[)\S+)(\ .+)?'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, 'processReferenceDefinition'), $text);
+        if ($this->allowed->references)
+            $text = preg_replace_callback('#^\[([^\[\]\#\?\*\n]+)\]: +('.TEXY_PATTERN_LINK_IMAGE.'|(?!\[)\S+)(\ .+)?'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, 'processReferenceDefinition'), $text);
     }
 
 
 
 
-    /***
+    /**
      * Callback function: [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
      * @return string
      */
@@ -154,7 +154,7 @@ class TexyLinkModule extends TexyModule {
 
 
 
-    /***
+    /**
      * Callback function: ....:LINK
      * @return string
      */
@@ -168,14 +168,14 @@ class TexyLinkModule extends TexyModule {
 
         $elLink = &new TexyLinkElement($this->texy);
         $elLink->setLinkRaw($mLink);
-        return $elLink->addTo($lineParser->element, $mContent);
+        return $lineParser->element->appendChild($elLink, $mContent);
     }
 
 
 
 
 
-    /***
+    /**
      * Callback function: [ref]
      * @return string
      */
@@ -189,13 +189,13 @@ class TexyLinkModule extends TexyModule {
         $elLink = &new TexyLinkRefElement($this->texy);
         if ($elLink->setLink($mRef) === false) return $match;
 
-        return $elLink->addTo($lineParser->element);
+        return $lineParser->element->appendChild($elLink);
     }
 
 
 
 
-    /***
+    /**
      * Callback function: http://www.dgx.cz
      * @return string
      */
@@ -206,7 +206,7 @@ class TexyLinkModule extends TexyModule {
 
         $elLink = &new TexyLinkElement($this->texy);
         $elLink->setLinkRaw($mURL);
-        return $elLink->addTo($lineParser->element, $elLink->link->toString());
+        return $lineParser->element->appendChild($elLink, $elLink->link->toString());
     }
 
 
@@ -244,7 +244,7 @@ class TexyLinkReference {
 
 
 
-/****************************************************************************
+/***************************************************************************
                                                              TEXY! DOM ELEMENTS                          */
 
 
@@ -258,9 +258,9 @@ class TexyLinkElement extends TexyInlineTagElement {
 
 
     // constructor
-    function TexyLinkElement(&$texy)
+    function __construct(&$texy)
     {
-        parent::TexyInlineTagElement($texy);
+        parent::__construct($texy);
 
         $this->link = & $texy->createURL();
         $this->link->root = $texy->linkModule->root;
@@ -304,42 +304,43 @@ class TexyLinkElement extends TexyInlineTagElement {
 
     function generateTags(&$tags)
     {
-        if (!$this->link->URL) return;  // dest URL is required
+        if ($this->link->URL == null) return;  // dest URL is required
 
-        $this->texy->summary->links[] = $attr['href'] = $this->link->URL;
+        $attrs = $this->modifier->getAttrs('a');
+        $this->texy->summary->links[] = $attrs['href'] = $this->link->URL;
 
         // rel="nofollow"
         $nofollowClass = in_array('nofollow', $this->modifier->unfilteredClasses);
         if (($this->link->type & TEXY_URL_ABSOLUTE) && ($nofollowClass || $this->nofollow || $this->texy->linkModule->forceNoFollow))
-            $attr['rel'] = 'nofollow';
+            $attrs['rel'] = 'nofollow';
 
-        $attr['id']    = $this->modifier->id;
-        $attr['title'] = $this->modifier->title;
-        $attr['class'] = $this->modifier->classes;
-        $attr['style'] = $this->modifier->styles;
+        $attrs['id']    = $this->modifier->id;
+        $attrs['title'] = $this->modifier->title;
+        $attrs['class'] = $this->modifier->classes;
+        $attrs['style'] = $this->modifier->styles;
         if ($nofollowClass) {
-            if (($pos = array_search('nofollow', $attr['class'])) !== false)
-                 unset($attr['class'][$pos]);
+            if (($pos = array_search('nofollow', $attrs['class'])) !== false)
+                 unset($attrs['class'][$pos]);
         }
 
         // popup on click
         $popup = in_array('popup', $this->modifier->unfilteredClasses);
         if ($popup) {
-            if (($pos = array_search('popup', $attr['class'])) !== false)
-                 unset($attr['class'][$pos]);
-            $attr['onclick'] = $this->texy->linkModule->popupOnClick;
+            if (($pos = array_search('popup', $attrs['class'])) !== false)
+                 unset($attrs['class'][$pos]);
+            $attrs['onclick'] = $this->texy->linkModule->popupOnClick;
         }
 
 
         // email on click
         if ($this->link->type & TEXY_URL_EMAIL)
-            $attr['onclick'] = $this->texy->linkModule->emailOnClick;
+            $attrs['onclick'] = $this->texy->linkModule->emailOnClick;
 
         // image on click
         if ($this->link->type & TEXY_URL_IMAGE_LINKED)
-            $attr['onclick'] = $this->texy->linkModule->imageOnClick;
+            $attrs['onclick'] = $this->texy->linkModule->imageOnClick;
 
-        $tags['a'] = $attr;
+        $tags['a'] = $attrs;
     }
 
 
@@ -380,7 +381,7 @@ class TexyLinkRefElement extends TexyTextualElement {
             $this->setContent($elLink->link->toString(), true);
         }
 
-        $this->content = $elLink->addTo($this, $this->content);
+        $this->content = $this->appendChild($elLink, $this->content);
         $this->texy->_preventCycling = false;
     }
 

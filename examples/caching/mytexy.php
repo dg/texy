@@ -1,23 +1,15 @@
 <?php
 
 /**
- * --------------------
- *   TEXY! CACHE DEMO
- * --------------------
+ * TEXY! CACHE DEMO
+ * --------------------------------------
  *
- * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>. All rights reserved.
- * Web: http://www.texy.info/
+ * This source file is subject to the GNU GPL license.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+ * @link       http://www.texy.info/
+ * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @license    GNU GENERAL PUBLIC LICENSE
  */
 
 
@@ -49,12 +41,12 @@ if (!function_exists('file_put_contents')) {
 class MyTexy extends Texy {
   var $cachePath = './cache/';
   var $time;
-  var $utf = false;
+  var $utf = FALSE;
 
 
-  function MyTexy()
+  function __construct()
   {
-    parent::Texy();
+    parent::__construct();
 
     // some configurations
     $this->imageModule->leftClass   = 'left';
@@ -64,7 +56,7 @@ class MyTexy extends Texy {
 
 
 
-  function process($text, $useCache = true)
+  function process($text, $useCache = TRUE)
   {
     $this->time = -$this->getTime();
     if ($useCache) {
@@ -72,7 +64,7 @@ class MyTexy extends Texy {
 
       // check, if cached file exists
       $cacheFile = $this->cachePath . $md5 . '.html';
-      $content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : null;
+      $content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : NULL;
       if ($content) {         // read from cache
         list($html, $this->styleSheet, $this->headingModule->title) = $content;
 

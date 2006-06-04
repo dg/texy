@@ -41,4 +41,4 @@ najdete v adresáøi /support-us/
 Copyright
 ---------
 
-Texy! (C) David Grudl, 2004-2005
+Texy! (C) David Grudl, 2004-2006
