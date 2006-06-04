@@ -47,6 +47,7 @@ class TexyFormatterModule extends TexyModule {
   var $hashTable = array();
 
 
+
   // constructor
   function TexyFormatterModule(&$texy)
   {
@@ -165,7 +166,7 @@ class TexyFormatterModule extends TexyModule {
   // and saves pair (key => str) into table $this->hashTable
   function _freeze(&$matches)
   {
-    $key = Texy::hashKey();
+    $key = '<'.$matches[1].'>' . Texy::hashKey() . '</'.$matches[1].'>';
     $this->hashTable[$key] = $matches[0];
     return $key;
   }

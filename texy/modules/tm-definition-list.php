@@ -44,9 +44,10 @@ class TexyDefinitionListModule extends TexyListModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                         // .{color:red}
-                                              . '(\S.*)\:\ *MODIFIER_H?\n'                    // Term:
-                                              . '(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mU');   //    - description
+    if ($this->allowed)
+      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                         // .{color:red}
+                                                . '(\S.*)\:\ *MODIFIER_H?\n'                    // Term:
+                                                . '(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mU');   //    - description
   }
 
 
@@ -62,7 +63,6 @@ class TexyDefinitionListModule extends TexyListModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    if (!$this->allowed) return false;
     list($match, $mModList1, $mModList2, $mModList3, $mModList4,
                  $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
                  $mSpaces, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;

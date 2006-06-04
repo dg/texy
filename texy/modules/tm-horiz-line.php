@@ -34,7 +34,6 @@ if (!defined('TEXY')) die();
  * HORIZONTAL LINE MODULE CLASS
  */
 class TexyHorizlineModule extends TexyModule {
-  var $allowed       = true;                  // generally disable / enable
 
 
   /***
@@ -42,7 +41,8 @@ class TexyHorizlineModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
+    if ($this->allowed)
+      $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
   }
 
 
@@ -61,7 +61,6 @@ class TexyHorizlineModule extends TexyModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    if (!$this->allowed) return false;
     list($match, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => ---
     //    [2] => (title)

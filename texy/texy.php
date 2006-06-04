@@ -29,16 +29,16 @@
  */
 
 
-define('TEXY', 'Version 1rc (c) David Grudl, http://www.dgx.cz');
+define('TEXY', 'Version 1rc (c) David Grudl, http://www.texy.info');
 
 
 require_once('texy-constants.php');      // regular expressions & other constants
 require_once('texy-modifier.php');       // modifier processor
 require_once('texy-url.php');            // object encapsulate of URL
-require_once('texy-dom.php');        // Texy! DOM element's base class
+require_once('texy-dom.php');            // Texy! DOM element's base class
 require_once('texy-module.php');         // Texy! module base class
-require_once('modules/tm-code.php');
 require_once('modules/tm-block.php');
+require_once('modules/tm-control.php');
 require_once('modules/tm-definition-list.php');
 require_once('modules/tm-formatter.php');
 require_once('modules/tm-generic-block.php');
@@ -88,7 +88,6 @@ class Texy {
 
 
   // private
-  var $inited = false;
   var $patternsLine = array();
   var $patternsBlock = array();
   var $genericBlock;
@@ -150,7 +149,8 @@ class Texy {
     $this->registerModule('TexyImageModule');
     $this->registerModule('TexyLinkModule');
     $this->registerModule('TexyPhrasesModule');
-    $this->registerModule('TexyCodeModule');
+    $this->registerModule('TexySmiliesModule');
+    $this->registerModule('TexyControlModule');
 
     // block parsing - order is not much important
     $this->registerModule('TexyBlockModule');
@@ -193,8 +193,6 @@ class Texy {
       else
         unset($this->modules[$name]);
     }
-
-    $this->inited = true;
   }
 
 
@@ -228,7 +226,7 @@ class Texy {
   function parse($text)
   {
       // initialization
-    if (!$this->inited) $this->init();
+    $this->init();
 
       ///////////   PROCESS
     $this->DOM = &new TexyDOM($this);
@@ -245,7 +243,7 @@ class Texy {
   function parseLine($text)
   {
       // initialization
-    if (!$this->inited) $this->init();
+    $this->init();
 
       ///////////   PROCESS
     $this->DOM = &new TexyDOMLine($this);

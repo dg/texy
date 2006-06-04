@@ -35,7 +35,6 @@ if (!defined('TEXY')) die();
  */
 class TexyImageModule extends TexyModule {
   // options
-  var $allowed    = true;          // generally disable / enable images
   var $root       = 'images/';     // root of relative images (http)
   var $linkedRoot = 'images/';     // root of linked images (http)
   var $rootPrefix = '';            // physical location on server
@@ -56,12 +55,12 @@ class TexyImageModule extends TexyModule {
    */
   function init()
   {
-    // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
-    $this->registerLinePattern('processLine',     '#'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?()#U');
-
     Texy::adjustDir($this->root);
     Texy::adjustDir($this->linkedRoot);
     Texy::adjustDir($this->rootPrefix);
+
+    // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
+    $this->registerLinePattern('processLine',     '#'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?()#U');
   }
 
 
@@ -119,6 +118,10 @@ class TexyImageModule extends TexyModule {
 
 
 
+
+
+
+
   /***
    * Preprocessing
    */
@@ -138,7 +141,6 @@ class TexyImageModule extends TexyModule {
    */
   function _replaceReference(&$matches)
   {
-    if (!$this->allowed) return '';
     list($match, $mRef, $mUrls, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => [* (reference) *]
     //    [2] => urls

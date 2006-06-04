@@ -34,6 +34,7 @@ if (!defined('TEXY')) die();
  * AUTOMATIC REPLACEMENTS MODULE CLASS
  */
 class TexySmiliesModule extends TexyModule {
+  var $allowed   = false;
   var $icons     = array (
             ':-)'  =>  'smile.gif',
             ':-('  =>  'sad.gif',
@@ -46,7 +47,7 @@ class TexySmiliesModule extends TexyModule {
             ':-P'  =>  'razz.gif',
             ':-|'  =>  'neutral.gif',
       );
-  var $root = 'images/smilies/';
+  var $root      = 'images/smilies/';
   var $class     = '';
 
 
@@ -56,16 +57,18 @@ class TexySmiliesModule extends TexyModule {
    */
   function init()
   {
-    krsort($this->icons);
-    $re = array();
-    foreach ($this->icons as $key => $value)
-      $re[] = preg_quote($key) . '+';
-
-    $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $re) . ')#';
-
-    $this->registerLinePattern('processLine', $crazyRE);
-
     Texy::adjustDir($this->root);
+
+    if ($this->allowed) {
+      krsort($this->icons);
+      $re = array();
+      foreach ($this->icons as $key => $value)
+        $re[] = preg_quote($key) . '+';
+
+      $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $re) . ')#';
+
+      $this->registerLinePattern('processLine', $crazyRE);
+    }
   }
 
 

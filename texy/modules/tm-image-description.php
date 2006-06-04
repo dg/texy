@@ -44,7 +44,8 @@ class TexyImageDescModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'? +\*\*\* +(.*)MODIFIER_H?()$#mU');
+    if ($this->allowed)
+      $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'? +\*\*\* +(.*)MODIFIER_H?()$#mU');
   }
 
 

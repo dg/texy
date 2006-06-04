@@ -34,7 +34,6 @@ if (!defined('TEXY')) die();
  * TABLE MODULE CLASS
  */
 class TexyTableModule extends TexyModule {
-  var $allowed       = true;                  // generally disable / enable
 
 
   /***
@@ -42,8 +41,9 @@ class TexyTableModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_HV\n)?'      // .{color: red}
-                                              . '(\|.*)$#mU');              // | ....
+    if ($this->allowed)
+      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_HV\n)?'      // .{color: red}
+                                                . '(\|.*)$#mU');              // | ....
   }
 
 
@@ -62,7 +62,6 @@ class TexyTableModule extends TexyModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    if (!$this->allowed) return false;
     list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5, $mRow) = $matches;
     //    [1] => (title)
     //    [2] => [class]
@@ -75,21 +74,26 @@ class TexyTableModule extends TexyModule {
     $el = &new TexyTableElement($texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
     $el->colsCount = 0;
+    $blockParser->addChildren($el);
 
     $head = false;
     $colModifier = array();
     $elField = null;
     $elRow = null;
 
-/*
-    if (preg_match('#^\|(\#|\=){2,}(?!\\1)(.*)MODIFIER_H?\\1*\|?()$#U', $mRow, $matches)) {
+
+    if (preg_match('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_PATTERN_MODIFIER_H.'?()$#U', $mRow, $matches)) {
       list($match, $mChar, $mContent, $mModCap1, $mModCap2, $mModCap3, $mModCap4) = $matches;
-      $el->caption = &new TexyTextualElement();
-      $el->tag = 'caption';
-      $el->parse($mContent);
-      $blockParser->match('#^(\|.*)$#mU', $matches); $mRow = $matches[0];
+      $elCaption = &new TexyTextualElement($texy);
+      $elCaption->tag = 'caption';
+      $elCaption->parse($mContent);
+      $elCaption->modifier->setProperties($mModCap1, $mModCap2, $mModCap3, $mModCap4);
+      $el->children[] = & $elCaption;
+
+      if (!$blockParser->match('#^(\|.*)$#mU', $matches)) return;
+      $mRow = $matches[0];
     }
-*/
+
 
     preg_match('#^\|(.+)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $mRow, $matches);
     do {
@@ -160,7 +164,6 @@ class TexyTableModule extends TexyModule {
 
     } while ($blockParser->match('#^\|(.+)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#mUA', $matches));
 
-    $blockParser->addChildren($el);
   }
 
 

@@ -46,7 +46,6 @@ define('TEXY_LISTITEM_DEFINITION',   'dd');
  * ORDERED / UNORDERED NESTED LIST MODULE CLASS
  */
 class TexyListModule extends TexyModule {
-  var $allowed       = true;                  // generally disable / enable
 
 
   /***
@@ -54,8 +53,9 @@ class TexyListModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                                                     // .{color: red}
-                                              . '(\*|\-|\+|\d+\.|\d+\)|[a-zA-Z]+\)|[IVX]+\.)\ +(.*)MODIFIER_H?()$#mU');   // - item
+    if ($this->allowed)
+      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                                                     // .{color: red}
+                                                . '(\*|\-|\+|\d+\.|\d+\)|[a-zA-Z]+\)|[IVX]+\.)\ +(.*)MODIFIER_H?()$#mU');   // - item
   }
 
 
@@ -72,7 +72,6 @@ class TexyListModule extends TexyModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    if (!$this->allowed) return false;
     list($match, $mModList1, $mModList2, $mModList3, $mModList4, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => (title)
     //    [2] => [class]
@@ -110,7 +109,6 @@ class TexyListModule extends TexyModule {
       $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
       $content = ' ';             // trick: don't recognize `- 12. 3.` as three nested lists
       $spaces = '';
-//      $mContent .= TEXY_NEWLINE;  // trick: don't recognize IXV. as second line of paragraph
 
       do {
         $content .= $mContent . TEXY_NEWLINE;

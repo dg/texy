@@ -41,7 +41,8 @@ class TexyScriptModule extends TexyModule {
    */
   function init()
   {
-    $this->registerLinePattern('processLine', '#\$\{([^\}'.TEXY_HASH.'])+\}()#U');
+    if ($this->allowed)
+      $this->registerLinePattern('processLine', '#\$\{([^\}'.TEXY_HASH.'])+\}()#U');
   }
 
 

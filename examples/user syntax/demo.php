@@ -1,9 +1,9 @@
 <?php
 
 /**
- * ----------------------
- *   TEXY! SMILIES DEMO
- * ----------------------
+ * --------------------------
+ *   TEXY! USER SYNTAX DEMO
+ * --------------------------
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>. All rights reserved.
  * Web: http://www.texy.info/
@@ -20,10 +20,6 @@
  *
  */
 
-/**
- *  This demo shows how enable smilies in Texy!
- */
-
 
 // check required version
 if (version_compare(phpversion(), '4.3.3', '<'))
@@ -32,34 +28,36 @@ if (version_compare(phpversion(), '4.3.3', '<'))
 
 
 
-// include Texy!
+// global configuration Texy!
 $texyPath = '../../texy/';
+define ('TEXY_UTF8', false);     // disable UTF-8
+
+
+// include Texy!
 require_once($texyPath . 'texy.php');
 
 
 
 $texy = &new Texy();
 
+// disable *** and ** and * phrases
+$texy->modules['TexyPhrasesModule']->disallow('***');
+$texy->modules['TexyPhrasesModule']->disallow('**');
+$texy->modules['TexyPhrasesModule']->disallow('*');
 
-// SMILIES ARE DISABLED BY DEFAULT!
-$texy->modules['TexySmiliesModule']->allowed = true;
-// configure it
-$texy->modules['TexySmiliesModule']->root  = 'images/';
-$texy->modules['TexySmiliesModule']->class  = 'smilie';
-$texy->modules['TexySmiliesModule']->icons[':oops:'] = 'redface.gif';  // user-defined smilie
+// add new syntax: *bold* _italic_
+$texy->modules['TexyPhrasesModule']->registerLinePattern('processPhrase', '#(?<!\*)\*(?!\ )([^\*]+)MODIFIER?(?<!\ )\*(?!\*)()#U', 'b');
+$texy->modules['TexyPhrasesModule']->registerLinePattern('processPhrase', '#(?<!\_)\_(?!\ )([^\_]+)MODIFIER?(?<!\ )\_(?!\_)()#U', 'i');
+
 
 
 
 // processing
-$text = file_get_contents('sample.texy');
+$text = file_get_contents('syntax.texy');
 $html = $texy->process($text);  // that's all folks!
-
-// CSS style
-echo '<style type="text/css"> .smiley { vertical-align: middle; } </style>';
 
 // echo formated output
 echo $html;
-
 
 // and echo generated HTML code
 echo '<hr />';

@@ -35,16 +35,38 @@ if (!defined('TEXY')) die();
  */
 class TexyLongWordsModule extends TexyModule {
   var $wordLimit = 20;
-  var $shy;
-  var $nbsp;
+  var $shy       = '&shy;';
+  var $nbsp      = '&nbsp;';
+  var $charShy;
+  var $charNbsp;
+
+
+
+  // constructor
+  function TexyLongWordsModule(&$texy)
+  {
+    parent::TexyModule($texy);
+
+    $this->charShy = TEXY_UTF8 ? "\xC2\xAD" : "\xAD";
+    $this->charNbsp = TEXY_UTF8 ? "\xC2\xA0" : "\xA0";
+  }
+
+
 
   function linePostProcess(&$text)
   {
-    $this->shy = TEXY_UTF8 ? "\xC2\xAD" : "\xAD";
-    $this->nbsp = TEXY_UTF8 ? "\xC2\xA0" : "\xA0";
-    $text = strtr($text, array('&shy;'  => $this->shy, '&nbsp;' => $this->nbsp));
+    if (!$this->allowed) return;
+    $text = strtr($text, array(
+                            '&shy;'  => $this->charShy,
+                            '&nbsp;' => $this->charNbsp,
+                         ));
+
     $text = preg_replace_callback('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#'.TEXY_PATTERN_UTF, array(&$this, '_replace'), $text);
-    $text = strtr($text, array($this->shy => '&shy;', $this->nbsp => '&nbsp;'));
+
+    $text = strtr($text, array(
+                            $this->charShy  => $this->shy,
+                            $this->charNbsp => $this->nbsp,
+                         ));
   }
 
 
@@ -183,8 +205,8 @@ class TexyLongWordsModule extends TexyModule {
     }
     $syllables[] = implode('', $chars);
 
-    $text = implode($this->shy, $syllables);
-    $text = strtr($text, array($this->shy.$this->nbsp => ' ', $this->nbsp.$this->shy => ' '));
+    $text = implode($this->charShy, $syllables);
+    $text = strtr($text, array($this->charShy.$this->charNbsp => ' ', $this->charNbsp.$this->charShy => ' '));
 
     return $text;
   }

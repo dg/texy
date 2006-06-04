@@ -38,8 +38,12 @@ define('TEXY_HEADING_FIXED',           2);  // fixed-leveling
  * HEADING MODULE CLASS
  */
 class TexyHeadingModule extends TexyModule {
+  var $allowed = array(
+         'surround'  => true,
+         'underline' => true,
+      );
+
   // options
-  var $allowed = true;                  // generally disable / enable
   var $top    = 1;                      // number of top heading, 1 - 6
   var $title;                           // textual content of first heading
   var $balancing = TEXY_HEADING_DYNAMIC;
@@ -57,10 +61,10 @@ class TexyHeadingModule extends TexyModule {
                        );
 
   // private
-  var $rangeUnderline;
-  var $deltaUnderline;
-  var $rangeSurround;
-  var $deltaSurround;
+  var $_rangeUnderline;
+  var $_deltaUnderline;
+  var $_rangeSurround;
+  var $_deltaSurround;
 
 
 
@@ -69,9 +73,11 @@ class TexyHeadingModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlockUnderline', '#^(\S.*)MODIFIER_H?' . TEXY_NEWLINE
+    if ($this->isAllowed('underline'))
+      $this->registerBlockPattern('processBlockUnderline', '#^(\S.*)MODIFIER_H?' . TEXY_NEWLINE
                                                         .'(\#|\*|\=|\-){3,}$#mU');
-    $this->registerBlockPattern('processBlockSurround',  '#^((\#|\=){2,7})(?!\\2)(.*)\\2*MODIFIER_H?()$#mU');
+    if ($this->isAllowed('surround'))
+      $this->registerBlockPattern('processBlockSurround',  '#^((\#|\=){2,7})(?!\\2)(.*)\\2*MODIFIER_H?()$#mU');
   }
 
 
@@ -80,10 +86,10 @@ class TexyHeadingModule extends TexyModule {
    */
   function preProcess(&$text)
   {
-    $this->rangeUnderline = array(10, 0);
-    $this->rangeSurround    = array(10, 0);
-    unset($this->deltaUnderline);
-    unset($this->deltaSurround);
+    $this->_rangeUnderline = array(10, 0);
+    $this->_rangeSurround    = array(10, 0);
+    unset($this->_deltaUnderline);
+    unset($this->_deltaSurround);
   }
 
 
@@ -96,7 +102,6 @@ class TexyHeadingModule extends TexyModule {
    */
   function processBlockUnderline(&$blockParser, &$matches)
   {
-    if (!$this->allowed) return false;
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mLine) = $matches;
     //  $matches:
     //    [1] => ...
@@ -110,17 +115,17 @@ class TexyHeadingModule extends TexyModule {
     $el = &new TexyHeadingElement($this->texy);
     $el->level = $this->levels[$mLine];
     if ($this->balancing == TEXY_HEADING_DYNAMIC)
-      $el->deltaLevel = & $this->deltaUnderline;
+      $el->deltaLevel = & $this->_deltaUnderline;
 
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     $el->parse(trim($mContent));
     if (!$this->title) $this->title = $el->toText();
 
     // dynamic headings balancing
-    $this->rangeUnderline[0] = min($this->rangeUnderline[0], $el->level);
-    $this->rangeUnderline[1] = max($this->rangeUnderline[1], $el->level);
-    $this->deltaUnderline    = -$this->rangeUnderline[0];
-    $this->deltaSurround     = -$this->rangeSurround[0] + ($this->rangeUnderline[1] ? ($this->rangeUnderline[1] - $this->rangeUnderline[0] + 1) : 0);
+    $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $el->level);
+    $this->_rangeUnderline[1] = max($this->_rangeUnderline[1], $el->level);
+    $this->_deltaUnderline    = -$this->_rangeUnderline[0];
+    $this->_deltaSurround     = -$this->_rangeSurround[0] + ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
     $blockParser->addChildren($el);
   }
@@ -135,7 +140,6 @@ class TexyHeadingModule extends TexyModule {
    */
   function processBlockSurround(&$blockParser, &$matches)
   {
-    if (!$this->allowed) return false;
     list($match, $mLine, $mChar, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => ###
     //    [2] => ...
@@ -147,16 +151,16 @@ class TexyHeadingModule extends TexyModule {
     $el = &new TexyHeadingElement($this->texy);
     $el->level = $this->levels[strlen($mLine)];
     if ($this->balancing == TEXY_HEADING_DYNAMIC)
-      $el->deltaLevel = & $this->deltaSurround;
+      $el->deltaLevel = & $this->_deltaSurround;
 
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     $el->parse(trim($mContent));
     if (!$this->title) $this->title = $el->toText();
 
     // dynamic headings balancing
-    $this->rangeSurround[0] = min($this->rangeSurround[0], $el->level);
-    $this->rangeSurround[1] = max($this->rangeSurround[1], $el->level);
-    $this->deltaSurround    = -$this->rangeSurround[0] + ($this->rangeUnderline[1] ? ($this->rangeUnderline[1] - $this->rangeUnderline[0] + 1) : 0);
+    $this->_rangeSurround[0] = min($this->_rangeSurround[0], $el->level);
+    $this->_rangeSurround[1] = max($this->_rangeSurround[1], $el->level);
+    $this->_deltaSurround    = -$this->_rangeSurround[0] + ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
     $blockParser->addChildren($el);
   }

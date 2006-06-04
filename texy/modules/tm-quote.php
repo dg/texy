@@ -34,7 +34,10 @@ if (!defined('TEXY')) die();
  * QUOTE & BLOCKQUOTE MODULE CLASS
  */
 class TexyQuoteModule extends TexyModule {
-  var $allowed = true;                  // generally disable / enable
+  var $allowed = array(
+         'line'  => true,
+         'block' => true
+         );
 
 
   /***
@@ -42,8 +45,11 @@ class TexyQuoteModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
-    $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)'.TEXY_PATTERN_LINK.'?()#U', 'q');
+    if ($this->isAllowed('block'))
+      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
+
+    if ($this->isAllowed('line'))
+      $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)'.TEXY_PATTERN_LINK.'?()#U', 'q');
   }
 
 
@@ -61,16 +67,13 @@ class TexyQuoteModule extends TexyModule {
     //    [5] => {style}
     //    [6] => LINK
 
-    if (!$this->allowed) return $match;
-
     $texy = & $this->texy;
     $el = &new TexyQuoteElement($texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
 
-    if ($mLink) {
-      $el->cite = & $texy->createURL();
+    if ($mLink)
       $el->cite->set($mLink);
-    }
+
     return $el->addTo($lineParser->element, $mContent);
   }
 
@@ -89,7 +92,6 @@ class TexyQuoteModule extends TexyModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    if (!$this->allowed) return false;
     list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
     //    [1] => (title)
     //    [2] => [class]
@@ -116,10 +118,8 @@ class TexyQuoteModule extends TexyModule {
       list($match, $mSpaces, $mContent) = $matches;
     } while (true);
 
-    if ($linkTarget) {
-      $el->cite = & $texy->createURL();
+    if ($linkTarget)
       $el->cite->set($linkTarget);
-    }
 
     $el->parse($content);
 
@@ -173,6 +173,13 @@ class TexyBlockQuoteElement extends TexyBlockElement {
 class TexyQuoteElement extends TexyInlineTagElement {
   var $tag = 'q';
   var $cite;
+
+
+  function TexyQuoteElement(&$texy)
+  {
+    parent::TexyInlineTagElement($texy);
+    $this->cite = & $texy->createURL();
+  }
 
 
   function generateTag(&$tag, &$attr)

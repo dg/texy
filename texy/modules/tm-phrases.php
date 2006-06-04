@@ -43,8 +43,27 @@ if (!defined('TEXY')) die();
  *   ~~cite~~
  *   "span"
  *   ~span~
+ *   `....`
+ *   ``....``
  */
 class TexyPhrasesModule extends TexyModule {
+   var $allowed = array('***' => 'strong em',
+                        '**'  => 'strong',
+                        '*'   => 'em',
+                        '++'  => 'ins',
+                        '--'  => 'del',
+                        '^^'  => 'sup',
+                        '__'  => 'sub',
+                        '"'   => 'span',
+                        '~'   => 'span',
+                        '~~'  => 'cite',
+                        '()'  => 'acronym',
+                        '`'   => 'code',
+                        '``'  => '',
+                        );
+   var $codeUserFunction;  // function &myUserFunc(&$element)
+
+
 
 
   /***
@@ -55,41 +74,64 @@ class TexyPhrasesModule extends TexyModule {
     $CHAR = '['.TEXY_CHAR.']';
 
     // strong & em speciality *** ... ***
-    $this->registerLinePattern('processPhraseStrongEm', '#(?<!\*)\*\*\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*\*\*(?!\*)()#U');
-
-    // ++inserted++
-    $this->registerLinePattern('processPhrase', '#(?<!\+)\+\+(?!\ |\+)(.+)MODIFIER?(?<!\ |\+)\+\+(?!\+)()#U', 'ins');
-
-    // --deleted--
-    $this->registerLinePattern('processPhrase', '#(?<!\-)\-\-(?!\ |\-)(.+)MODIFIER?(?<!\ |\-)\-\-(?!\-)()#U', 'del');
-
-    // ^^superscript^^
-    $this->registerLinePattern('processPhrase', '#(?<!\^)\^\^(?!\ )([^\^]+)MODIFIER?(?<!\ )\^\^(?!\^)()#U', 'sup');
-
-    // __subscript__
-    $this->registerLinePattern('processPhrase', '#(?<!\_)\_\_(?!\ )([^\_]+)MODIFIER?(?<!\ )\_\_(?!\_)()#U', 'sub');
-
-    // "span"
-    $this->registerLinePattern('processPhrase', '#(?<!\")\"(?!\ )([^\"]+)MODIFIER(?<!\ )\"(?!\")()#U', 'span');
-
-    // ~alternative span~
-    $this->registerLinePattern('processPhrase', '#(?<!\~)\~(?!\ )([^\~]+)MODIFIER(?<!\ )\~(?!\~)()#U', 'span');
-
-    // ~~cite~~
-    $this->registerLinePattern('processPhrase', '#(?<!\~)\~\~(?!\ )([^\~]+)MODIFIER?(?<!\ )\~\~(?!\~)()#U', 'cite');
+    if ($this->isAllowed('***'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\*)\*\*\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*\*\*(?!\*)()#U',   $this->allowed['***']);
 
     // **strong**
-    $this->registerLinePattern('processPhrase', '#(?<!\*)\*\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*\*(?!\*)()#U', 'strong');
+    if ($this->isAllowed('**'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\*)\*\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*\*(?!\*)()#U',       $this->allowed['**']);
 
     // *emphasis*
-    $this->registerLinePattern('processPhrase', '#(?<!\*)\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*(?!\*)()#U', 'em');
+    if ($this->isAllowed('*'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\*)\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*(?!\*)()#U',           $this->allowed['*']);
 
-    // acronym/abbr "et al."((and others))
-    $this->registerLinePattern('processPhrase', '#(?<!\")\"(?!\ )([^\"]+)MODIFIER?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', 'acronym');
+    // ++inserted++
+    if ($this->isAllowed('++'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\+)\+\+(?!\ |\+)(.+)MODIFIER?(?<!\ |\+)\+\+(?!\+)()#U',       $this->allowed['++']);
 
-    // acronym/abbr NATO((North Atlantic Treaty Organisation))
-    $this->registerLinePattern('processAcronym',  "#(?<!$CHAR)($CHAR{2,})\(\((.+)\)\)#U".TEXY_PATTERN_UTF, 'acronym');
+    // --deleted--
+    if ($this->isAllowed('--'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\-)\-\-(?!\ |\-)(.+)MODIFIER?(?<!\ |\-)\-\-(?!\-)()#U',       $this->allowed['--']);
+
+    // ^^superscript^^
+    if ($this->isAllowed('^^'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\^)\^\^(?!\ |\^)(.+)MODIFIER?(?<!\ |\^)\^\^(?!\^)()#U',       $this->allowed['^^']);
+
+    // __subscript__
+    if ($this->isAllowed('__'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\_)\_\_(?!\ |\_)(.+)MODIFIER?(?<!\ |\_)\_\_(?!\_)()#U',       $this->allowed['__']);
+
+    // "span"
+    if ($this->isAllowed('"'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)MODIFIER(?<!\ )\"(?!\"|\:\S)()#U',         $this->allowed['"']);
+
+    // ~alternative span~
+    if ($this->isAllowed('~'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\~)\~(?!\ )([^\~]+)MODIFIER(?<!\ )\~(?!\~|\:\S)()#U',         $this->allowed['~']);
+
+    // ~~cite~~
+    if ($this->isAllowed('~~'))
+      $this->registerLinePattern('processPhrase',  '#(?<!\~)\~\~(?!\ |\~)(.+)MODIFIER?(?<!\ |\~)\~\~(?!\~)()#U',       $this->allowed['~~']);
+
+    if ($this->isAllowed('()')) {
+      // acronym/abbr "et al."((and others))
+      $this->registerLinePattern('processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)MODIFIER?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', $this->allowed['()']);
+      // acronym/abbr NATO((North Atlantic Treaty Organisation))
+      $this->registerLinePattern('processPhrase',  "#(?<!$CHAR)($CHAR{2,})()()()\(\((.+)\)\)#U".TEXY_PATTERN_UTF,      $this->allowed['()']);
+    }
+
+    // ``protected`` (experimental, dont use)
+    if ($this->isAllowed('``'))
+      $this->registerLinePattern('processProtect', '#\`\`(\S[^'.TEXY_HASH.']*)(?<!\ )\`\`()#U', false);
+
+    // `code`
+    if ($this->isAllowed('`'))
+      $this->registerLinePattern('processCode',    '#\`(\S[^'.TEXY_HASH.']*)MODIFIER?(?<!\ )\`()#U');
+
+    // `=samp
+    $this->registerBlockPattern('processBlock',    '#^`=(none|code|kbd|samp|var|span)$#mUi');
   }
+
 
 
 
@@ -97,7 +139,7 @@ class TexyPhrasesModule extends TexyModule {
    * Callback function: **.... .(title)[class]{style}**
    * @return string
    */
-  function processPhrase(&$lineParser, &$matches, $tag)
+  function processPhrase(&$lineParser, &$matches, $tags)
   {
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mAdditional) = $matches;
     //    [1] => ...
@@ -105,11 +147,37 @@ class TexyPhrasesModule extends TexyModule {
     //    [3] => [class]
     //    [4] => {style}
 
-    $el = &new TexyInlineTagElement($this->texy);
-    $el->tag = $tag;
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-    if ($tag == 'acronym') $el->modifier->title = $mAdditional;
-    return $el->addTo($lineParser->element, $mContent);
+    $tags = array_reverse(explode(' ', $tags));
+    $el = null;
+
+    foreach ($tags as $tag) {
+      $el = &new TexyInlineTagElement($this->texy);
+      $el->tag = $tag;
+      if ($tag == 'acronym') $el->modifier->title = $mAdditional;
+
+
+      $mContent = $el->addTo($lineParser->element, $mContent);
+    }
+    if ($el)
+      $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
+
+    return $mContent;
+  }
+
+
+
+
+
+  /***
+   * Callback function `=code
+   */
+  function processBlock(&$blockParser, &$matches)
+  {
+    list($match, $mTag) = $matches;
+    //    [1] => ...
+
+    $this->tag = strtolower($mTag);
+    if ($this->tag == 'none') $this->tag = '';
   }
 
 
@@ -118,28 +186,36 @@ class TexyPhrasesModule extends TexyModule {
 
 
   /***
-   * Callback function: ***.... .(title)[class]{style}***
+   * Callback function: `.... .(title)[class]{style}`
    * @return string
    */
-  function processPhraseStrongEm(&$lineParser, &$matches)
+  function processCode(&$lineParser, &$matches)
   {
     list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => ...
-    //    [3] => (title)
-    //    [2] => [class]
-    //    [3] => {style}
+    //    [2] => (title)
+    //    [3] => [class]
+    //    [4] => {style}
 
-    $el = &new TexyInlineTagElement($this->texy);
-    $el->tag = 'strong';
+    $texy = &$this->texy;
+    $el = &new TexyTextualElement($texy);
+    $el->contentType = TEXY_CONTENT_TEXTUAL;
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-    $el2 = &new TexyInlineTagElement($this->texy);
-    $el2->tag = 'em';
+    $el->setContent($mContent, false);  // content isn't html safe
+    $el->tag = $this->allowed['`'];
 
-    return $el->addTo(
-               $lineParser->element,
-               $el2->addTo($lineParser->element, $mContent)
-    );
+    if ($this->codeUserFunction)
+      call_user_func_array($this->codeUserFunction, array(&$el));
+
+    $el->safeContent(); // ensure that content is HTML safe
+
+    if (isset($texy->modules['TexyLongWordsModule']))
+      $texy->modules['TexyLongWordsModule']->linePostProcess($el->content);
+
+    return $el->addTo($lineParser->element);
   }
+
+
 
 
 
@@ -147,20 +223,20 @@ class TexyPhrasesModule extends TexyModule {
 
 
   /***
-   * Callback function: NATO(( ... ))
+   * User callback - PROTECT PHRASE
    * @return string
    */
-  function processAcronym(&$lineParser, &$matches)
+  function processProtect(&$lineParser, &$matches, $isHtmlSafe = false)
   {
-    list($match, $mAcronym, $mExplain) = $matches;
-    //    [1] => NATO
-    //    [2] => ....
+    list($match, $mContent) = $matches;
 
-    $el = &new TexyInlineTagElement($this->texy);
-    $el->tag = 'acronym';
-    $el->modifier->title = $mExplain;
-    return $el->addTo($lineParser->element, $mAcronym);
+    $el = &new TexyTextualElement($this->texy);
+    $el->contentType = TEXY_CONTENT_TEXTUAL;
+    $el->setContent( Texy::freezeSpaces($mContent), $isHtmlSafe );
+
+    return $el->addTo($lineParser->element);
   }
+
 
 
 

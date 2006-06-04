@@ -138,14 +138,15 @@ class TexyHTMLTagModule extends TexyModule {
 */
 
     if (is_array($this->allowed)) {
-      // is tag allowed?
-      if (!isset($this->allowed[$tag]))
+      if (!$this->isAllowed($tag))
         return $match;
 
-      if (!$closing && is_array($this->allowed[$tag]))
+      $allowedAttrs = $this->allowed[$tag];
+      if (!$closing && is_array($allowedAttrs))
         foreach ($attr as $key => $value)
-          if (!in_array($key, $this->allowed[$tag])) unset($attr[$key]);
+          if (!in_array($key, $allowedAttrs)) unset($attr[$key]);
     }
+
 
 
     if (!$closing) {
@@ -200,16 +201,16 @@ class TexyHTMLTagModule extends TexyModule {
 
 
 
-  function trustMode($onlyValid = true)
+  function trustMode($onlyValidTags = true)
   {
-    $this->allowed = $onlyValid ? $this->texy->validElements : true;
+    $this->allowed = $onlyValidTags ? $this->texy->validElements : true;
   }
 
 
 
-  function safeMode($allowSafe = true)
+  function safeMode($allowSafeTags = true)
   {
-    $this->allowed = $allowSafe ? $this->safeTags : false;
+    $this->allowed = $allowSafeTags ? $this->safeTags : false;
   }
 
 

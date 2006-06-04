@@ -75,8 +75,9 @@ class MyTexy extends Texy {
 
       // check, if cached file exists
       $cacheFile = $this->cachePath . $md5 . '.html';
-      if (is_file($cacheFile)) {         // read from cache
-        list($html, $this->styleSheet, $this->headings->title) = unserialize(file_get_contents($cacheFile));
+      $content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : null;
+      if ($content) {         // read from cache
+        list($html, $this->styleSheet, $this->headings->title) = $content;
 
       } else {                           // doesn't exists
         $html = parent::process($text);

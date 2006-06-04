@@ -37,8 +37,8 @@ if (!defined('TEXY')) die();
  * ------------------------
  */
 class TexyModule {
-  var $texy;  // parent Texy! object (reference to itself is: $texy->modules[__CLASSNAME__])
-
+  var $texy;             // parent Texy! object (reference to itself is: $texy->modules[__CLASSNAME__])
+  var $allowed = true;   // general disable / enable
 
 
 
@@ -119,6 +119,28 @@ class TexyModule {
   }
 
 
+
+
+
+
+
+  function isAllowed($what) {
+    if ($this->allowed === true) return true;
+    return (isset($this->allowed[$what])) ?
+           ($this->allowed[$what] !== false) : false;
+  }
+
+
+  function allow($what = null, $value = true) {
+    if ($what === null) $this->allowed = true;
+    else $this->allowed[$what] = $value;
+  }
+
+
+  function disallow($what = null) {
+    if ($what === null) $this->allowed = false;
+    else $this->allowed[$what] = false;
+  }
 
 
 } // TexyModule

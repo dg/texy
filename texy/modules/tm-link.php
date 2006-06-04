@@ -29,13 +29,16 @@ if (!defined('TEXY')) die();
 
 
 
-
 /**
  * LINKS MODULE CLASS
  */
 class TexyLinkModule extends TexyModule {
   // options
-  var $allowed         = true;                         // generally disable / enable images
+  var $allowed         = array(                       // generally disable / enable links
+          'link'      => true,                        // classic link "xxx":url
+          'reference' => true,                        // [reference]: url
+          'email'     => true,                        // emails replacement
+          'url'       => true);                       // direct url replacement
   var $root            = '';                          // root of relative links
   var $emailOnClick    = '';                          // 'this.href="mailto:"+this.href.match(/./g).reverse().slice(0,-7).join("")';
   var $imageOnClick    = 'return !popup(this.href)';  // image popup event
@@ -49,22 +52,28 @@ class TexyLinkModule extends TexyModule {
   var $_backupReferences;
 
 
+
   /***
    * Module initialization.
    */
   function init()
   {
+    Texy::adjustDir($this->root);
+
     // "... .(title)[class]{style}":LINK    where LINK is:   url | [ref] | [*image*]
     $this->registerLinePattern('processLineQuot',      '#(?<!\")\"(?!\ )([^\n\"]+)MODIFIER?(?<!\ )\"'.TEXY_PATTERN_LINK.'()#U');
     $this->registerLinePattern('processLineQuot',      '#(?<!\~)\~(?!\ )([^\n\~]+)MODIFIER?(?<!\ )\~'.TEXY_PATTERN_LINK.'()#U');
 
-    // [ref]
-    $this->registerLinePattern('processLineReference', '#('.TEXY_PATTERN_LINK_REF.')#U');
+    // [reference]
+    if ($this->isAllowed('reference')) {
+      $this->registerLinePattern('processLineReference', '#('.TEXY_PATTERN_LINK_REF.')#U');
+    }
 
-    $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#i'.TEXY_PATTERN_UTF);
-    $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)'.TEXY_PATTERN_EMAIL.'#i');
-
-    Texy::adjustDir($this->root);
+    // direct url and email
+    if ($this->isAllowed('url'))
+      $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#i'.TEXY_PATTERN_UTF);
+    if ($this->isAllowed('email'))
+      $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)'.TEXY_PATTERN_EMAIL.'#i');
   }
 
 
@@ -140,6 +149,11 @@ class TexyLinkModule extends TexyModule {
 
 
 
+
+
+
+
+
   /***
    * Preprocessing
    */
@@ -194,7 +208,7 @@ class TexyLinkModule extends TexyModule {
     //    [4] => {style}
     //    [5] => url | [ref] | [*image*]
 
-    if (!$this->allowed) return $mContent;
+    if (!$this->isAllowed('link')) return $mContent;
 
     $elLink = &new TexyLinkElement($this->texy);
     $elLink->setLinkRaw($mLink);
@@ -215,8 +229,6 @@ class TexyLinkModule extends TexyModule {
     list($match, $mRef) = $matches;
     //    [1] => [ref]
 
-    if (!$this->allowed) return $match;
-
     $elLink = &new TexyLinkRefElement($this->texy);
     if ($elLink->setLink($mRef) === false) return $match;
 
@@ -234,8 +246,6 @@ class TexyLinkModule extends TexyModule {
   {
     list($mURL) = $matches;
     //    [0] => URL
-
-    if (!$this->allowed) return $mURL;
 
     $elLink = &new TexyLinkElement($this->texy);
     $elLink->setLinkRaw($mURL);
