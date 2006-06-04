@@ -5,7 +5,7 @@
  *   LONG WORDS WRAP - TEXY! DEFAULT MODULE
  * ------------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -38,7 +38,7 @@ class TexyLongWordsModule extends TexyModule {
   var $shy;
   var $nbsp;
 
-  function inlinePostProcess(&$text) {
+  function linePostProcess(&$text) {
     $this->shy = TEXY_UTF8 ? "\xC2\xAD" : "\xAD";
     $this->nbsp = TEXY_UTF8 ? "\xC2\xA0" : "\xA0";
     $text = strtr($text, array('&shy;'  => $this->shy, '&nbsp;' => $this->nbsp));

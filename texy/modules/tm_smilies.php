@@ -2,10 +2,10 @@
 
 /**
  * -------------------------------
- *   SMILEYS - TEXY! USER MODULE
+ *   SMILIES - TEXY! USER MODULE
  * -------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -33,22 +33,21 @@ if (!defined('TEXY')) die();
 /**
  * AUTOMATIC REPLACEMENTS MODULE CLASS
  */
-class TexySmileysModule extends TexyModule {
-  var $icons = array (
-        ':-)'     => 'smile.gif',
-        ':-('     => 'sad.gif',
-        ';-)'     => 'wink.gif',
-        ':oops:'  => 'redface.gif',
-        ':-D'     => 'biggrin.gif',
-        '8-O'     => 'eek.gif',
-        '8-)'     => 'cool.gif',
-        ':-?'     => 'confused.gif',
-        ':-x'     => 'mad.gif',
-        ':-P'     => 'razz.gif',
-        ':-|'     => 'neutral.gif',
-        );
-  var $iconsRoot = 'images/smileys/';
-  var $class = '';
+class TexySmiliesModule extends TexyModule {
+  var $icons     = array (
+            ':-)'  =>  'smile.gif',
+            ':-('  =>  'sad.gif',
+            ';-)'  =>  'wink.gif',
+            ':-D'  =>  'biggrin.gif',
+            '8-O'  =>  'eek.gif',
+            '8-)'  =>  'cool.gif',
+            ':-?'  =>  'confused.gif',
+            ':-x'  =>  'mad.gif',
+            ':-P'  =>  'razz.gif',
+            ':-|'  =>  'neutral.gif',
+      );
+  var $root = 'images/smilies/';
+  var $class     = '';
 
 
 
@@ -56,12 +55,20 @@ class TexySmileysModule extends TexyModule {
    * Module initialization.
    */
   function init() {
+    krsort($this->icons);
     $re = array();
-    foreach ($this->icons as $key => $value) $re[] = preg_quote($key);
+    foreach ($this->icons as $key => $value)
+      $re[] = preg_quote($key) . '+';
+
     $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $re) . ')#';
 
     $this->registerLinePattern('processLine', $crazyRE);
+
+    Texy::adjustDir($this->root);
   }
+
+
+
 
 
 
@@ -79,18 +86,24 @@ class TexySmileysModule extends TexyModule {
     //    [6] => LINK
 
     $texy = & $this->texy;
-    $el = &new TexyInlineElement($texy);
+    $el = &new TexyTextualElement($texy);
     $el->tag = 'img';
     $el->modifier->extra['alt'] = $match;
-    $el->modifier->extra['src'] = $this->iconsRoot . $this->icons[$match];
+
+     // find the closest match
+    foreach ($this->icons as $key => $value)
+      if (substr($match, 0, strlen($key)) == $key) {
+        $el->modifier->extra['src'] = $this->root . $value;
+        break;
+      }
     $el->modifier->classes[] = $this->class;
 
-    return $el->hash($lineParser->element);
+    return $el->addTo($lineParser->element);
   }
 
 
 
-} // TexySmileysModule
+} // TexySmiliesModule
 
 
 

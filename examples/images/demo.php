@@ -29,6 +29,11 @@
  */
 
 
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
+
+
 $libs_path = '../../texy/';
 $texy_path = $libs_path;
 
@@ -48,7 +53,7 @@ function &myUserFunc(&$texy, $refName) {
   $elRef = &new TexyImageReference($texy);
   $elRef->URLs = 'image.gif | '        // image URL
                . 'image-over.gif | '   // onmouseover image
-               . 'image-big.gif';      // linked image
+               . 'big.gif';          // linked image
   $elRef->modifier->title = 'Texy! logo';
   return $elRef;
 }
@@ -57,6 +62,12 @@ function &myUserFunc(&$texy, $refName) {
 
 $texy = &new Texy();
 $texy->images->userReferences = 'myUserFunc';
+$texy->images->root           = 'imagesdir/';          // "in-line" images root
+$texy->images->linkedRoot     = 'imagesdir/big/';      // "linked" images root
+$texy->images->rootPrefix     = '';                 // physical location on server = rootPrefix + root + imageName (for dimension detection)
+$texy->images->leftClass      = 'my-left-class';    // left-floated image modifier
+$texy->images->rightClass     = 'my-right-class';   // right-floated image modifier
+$texy->images->defaultAlt     = 'default alt. text';// default image alternative text
 
 
 // processing
@@ -69,6 +80,11 @@ echo $html;
 
 
 
+// echo generated HTML code
+echo '<hr />';
+echo '<pre>';
+echo htmlSpecialChars($html);
+echo '</pre>';
 
 
 
@@ -80,6 +96,8 @@ print_r($texy->summary->images);
 echo 'onmouseover images:';
 print_r($texy->summary->preload);
 echo '</pre>';
+
+
 
 
 // build preload script!
@@ -96,10 +114,5 @@ echo '</pre>';
 
 
 
-// and echo generated HTML code
-echo '<hr />';
-echo '<pre>';
-echo htmlSpecialChars($html);
-echo '</pre>';
 
 ?>

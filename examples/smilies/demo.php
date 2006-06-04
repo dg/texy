@@ -2,7 +2,7 @@
 
 /**
  * ----------------------
- *   TEXY! SMILEYS DEMO
+ *   TEXY! SMILIES DEMO
  * ----------------------
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>. All rights reserved.
@@ -21,8 +21,13 @@
  */
 
 /**
- *  This demo shows how enable 'smileys' in Texy!
+ *  This demo shows how enable smilies in Texy!
  */
+
+
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
 
 
 $libs_path = '../../texy/';
@@ -37,14 +42,14 @@ $texy = &new Texy();
 
 
 
-// SMILEYS ARE DISABLED BY DEFAULT!
+// SMILIES ARE DISABLED BY DEFAULT!
 // therefore module must be registered
-$texy->registerModule('TexySmileysModule');
+$texy->registerModule('TexySmiliesModule');
 
 // configure it
-$texy->modules['TexySmileysModule']->iconsRoot  = 'images/';
-$texy->modules['TexySmileysModule']->class  = 'smiley';
-
+$texy->modules['TexySmiliesModule']->root  = 'images/';
+$texy->modules['TexySmiliesModule']->class  = 'smilie';
+$texy->modules['TexySmiliesModule']->icons[':oops:'] = 'redface.gif';  // user-defined smilie
 
 
 

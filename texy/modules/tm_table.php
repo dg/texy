@@ -5,7 +5,7 @@
  *   TABLE - TEXY! DEFAULT MODULE
  * --------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -59,7 +59,7 @@ class TexyTableModule extends TexyModule {
    *            | aa  | bb  | cc  |
    *
    */
-  function &processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
     list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5, $mRow) = $matches;
     //    [1] => (title)
@@ -148,7 +148,7 @@ class TexyTableModule extends TexyModule {
 
     } while ($blockParser->match('#^\|(.+)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#mUA', $matches));
 
-    return $el;
+    $blockParser->addChildren($el);
   }
 
 
@@ -197,7 +197,7 @@ class TexyTableRowElement extends TexyBlockElement {
 /**
  * HTML ELEMENT TD / TH
  */
-class TexyTableFieldElement extends TexyInlineElement {
+class TexyTableFieldElement extends TexyTextualElement {
   var $colSpan = 1;
   var $rowSpan = 1;
   var $isHead;

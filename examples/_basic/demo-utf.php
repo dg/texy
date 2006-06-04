@@ -21,6 +21,11 @@
  */
 
 
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
+
+
 $libs_path = '../../texy/';
 $texy_path = $libs_path;
 
@@ -41,8 +46,7 @@ $texy = &new Texy();
 $texy->links->root         = '';
 $texy->links->imageOnClick = 'return !popup(this.href)';
 $texy->images->root        = 'images/';
-$texy->images->linkRoot    = 'images/big/';
-$texy->headings->top       = 2;
+$texy->images->linkedRoot  = 'images/big/';
 $texy->modules['TexyFormatterModule']->baseIndent  = 1;
 $texy->modules['TexyFormatterModule']->lineWrap    = 60;
 

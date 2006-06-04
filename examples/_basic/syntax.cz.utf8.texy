@@ -72,8 +72,13 @@ Vypnutí Texy
 ============
 
 
-/---notexy
-  příklad: **this is not strong**
+/---html
+  <em>příklad</em>: **this is not strong**
+\---
+
+
+/---text
+  <em>příklad</em>: **this is not strong**
 \---
 
 
@@ -194,7 +199,7 @@ What a beautiful logo [*picture*] :-)
 s modifikátorem
 ---------------
 
-[* image.gif .{width:100px} *]
+[* image.gif .{border:2px solid blue} *]
 
 
 

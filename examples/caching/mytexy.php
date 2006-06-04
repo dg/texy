@@ -66,30 +66,27 @@ class MyTexy extends Texy {
 
 
   function process($text, $useCache = true) {
+    $this->time = -$this->getTime();
     if ($useCache) {
       $md5 = md5($text); // md5 is key for caching
-
-      // save Texy to file (only for backuping purposes, can be removed)
-      $origFile = $this->cachePath . $md5 . '.texy';
-      if (!is_file($origFile)) file_put_contents($origFile, $text);
 
       // check, if cached file exists
       $cacheFile = $this->cachePath . $md5 . '.html';
       if (is_file($cacheFile)) {         // read from cache
-        $html = file_get_contents($cacheFile);
-        $this->time = null;     // null mean 'from cache'
+        list($html, $this->styleSheet, $this->headings->title) = unserialize(file_get_contents($cacheFile));
 
       } else {                           // doesn't exists
-        $this->time = -$this->getTime();
         $html = parent::process($text);
-        $this->time += $this->getTime();
-        file_put_contents($cacheFile, $html);
+        file_put_contents($cacheFile,
+          serialize( array($html, $this->styleSheet, $this->headings->title) )
+        );
       }
 
     } else { // if caching is disabled
       $html = parent::process($text);
     }
 
+    $this->time += $this->getTime();
     return $html;
   }
 

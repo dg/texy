@@ -3,6 +3,8 @@ This <strong>example</strong> shows how <a href=http://www.texy.info title='Texy
 Dangerous <span onmouseover="alert('onmouseover')">span</span>
 
 <div id="page">
-  Hello!
+ Hello!
 </div>
 
+
+<myExtraTag attr1="10" />

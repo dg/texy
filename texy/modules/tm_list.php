@@ -5,7 +5,7 @@
  *   ORDERED / UNORDERED NESTED LIST - TEXY! DEFAULT MODULE
  * ----------------------------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -71,7 +71,7 @@ class TexyListModule extends TexyModule {
    *            3) ....
    *
    */
-  function &processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
     list($match, $mModList1, $mModList2, $mModList3, $mModList4, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => (title)
@@ -110,7 +110,7 @@ class TexyListModule extends TexyModule {
       $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
       $content = ' ';             // trick: don't recognize `- 12. 3.` as three nested lists
       $spaces = '';
-      $mContent .= TEXY_NEWLINE;  // trick: don't recognize IXV. as second line of paragraph
+//      $mContent .= TEXY_NEWLINE;  // trick: don't recognize IXV. as second line of paragraph
 
       do {
         $content .= $mContent . TEXY_NEWLINE;
@@ -140,7 +140,7 @@ class TexyListModule extends TexyModule {
     } while (true);
 
 
-    return $el;
+    $blockParser->addChildren($el);
   }
 
 

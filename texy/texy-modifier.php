@@ -5,7 +5,7 @@
  *   TEXY! MODIFIER PROCESSOR
  * ----------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -87,7 +87,8 @@ class TexyModifier {
     }
 
     if ($classes && $this->texy->allowClasses) {
-      foreach (explode(' ', trim($classes)) as $value) {
+      $classes = trim(str_replace('#', ' #', $classes));
+      foreach (explode(' ', $classes) as $value) {
         if (is_array($this->texy->allowClasses) &&
             !in_array($value, $this->texy->allowClasses)) continue;
 
@@ -155,6 +156,7 @@ class TexyModifier {
     $classes = implode(' ', array_unique($classes) );
 
     $style = '';
+    $this->styles = array_change_key_case($this->styles, CASE_LOWER);
     foreach ($this->styles as $key => $value)
       $style .= $key . ':' . $value . ';';
     if (isset($this->extra['style']))

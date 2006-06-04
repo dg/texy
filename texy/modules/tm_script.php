@@ -5,7 +5,7 @@
  *   SCRIPTS - TEXY! DEFAULT MODULES
  * -----------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -54,7 +54,7 @@ class TexyScriptModule extends TexyModule {
     //    [1] => ...
 
     $el = &new TexyScriptElement($this->texy);
-    return $el->hash($lineParser->element);
+    return $el->addTo($lineParser->element);
   }
 
 
@@ -76,7 +76,7 @@ class TexyScriptModule extends TexyModule {
 /**
  * Texy! ELEMENT SCRIPTS + VARIABLES
  */
-class TexyScriptElement extends TexyInlineElement {
+class TexyScriptElement extends TexyTextualElement {
 
   function generateContent() {
     return '<--internal use-->';

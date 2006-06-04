@@ -5,7 +5,7 @@
  *   TEXY! DOM ELEMENTS BASE CLASSES
  * -----------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -52,21 +52,10 @@ class TexyDOMElement {
   }
 
 
-  // used for serializing/unserializing
-  function broadcast(&$texy) {
-    $this->texy = &$texy;
-    $this->texy->elements[] = &$this;
-
-    if (is_a($this->modifier, 'TexyModifier')) {
-      $this->modifier->texy = &$texy;
-      if ($this->modifier->id)
-        $this->texy->elementsById[$this->modifier->id] = &$this;
-    }
-
-    if (is_array($this->children)) {
-      foreach (array_keys($this->children) as $key)
-        $this->children[$key]->broadcast($texy);
-    }
+  // for easy Texy! DOM manipulation
+  function broadcast() {
+    // build DOM->elements list
+    $this->texy->DOM->elements[] = &$this;
   }
 
 
@@ -122,6 +111,19 @@ class TexyHTMLElement extends TexyDOMElement {
 
 
 
+  function broadcast() {
+    parent::broadcast();
+
+    // build $texy->DOM->elementsById list
+    if ($this->modifier->id)
+      $this->texy->DOM->elementsById[$this->modifier->id] = &$this;
+
+    // build $texy->DOM->elementsByClass list
+    if ($this->modifier->classes)
+      foreach ($this->modifier->classes as $class)
+        $this->texy->DOM->elementsByClass[$class][] = &$this;
+  }
+
 
 }  // TexyHTMLElement
 
@@ -169,6 +171,13 @@ class TexyBlockElement extends TexyHTMLElement {
 
 
 
+  function broadcast() {
+    parent::broadcast();
+
+    // apply to all children
+    foreach (array_keys($this->children) as $key)
+      $this->children[$key]->broadcast();
+  }
 
 }  // TexyBlockElement
 
@@ -182,37 +191,58 @@ class TexyBlockElement extends TexyHTMLElement {
 
 
 /**
- * LINE OF TEXT ELEMENT
- * --------------------
+ * LINE OF TEXT
+ * ------------
  *
  * This element represent one line of text.
  * Text represents $content and $children is array of TexyInlineTagElement
  *
  */
-class TexyInlineElement extends TexyHTMLElement {
-  var $children = array();   // of TexyInlineElement
-  var $content;              // string
-  var $strength = TEXY_HARD; // when used as child of TexyInlineElement
-                             // SOFT hasn't any visible content, HARD has (images, break-lines (!), ....)
-  var $textualContent = false;
+class TexyTextualElement extends TexyHTMLElement {
+  var $children    = array();      // of TexyTextualElement
+
+  var $content;                    // string
+  var $contentType = TEXY_CONTENT_NONE;
+  var $htmlSafe    = false;        // is content HTML-safe?
+
+  var $strength    = TEXY_HARD;    // when used as child of TexyTextualElement
+                                   // SOFT hasn't any visible content, HARD has (images, break-lines (!), ....)
 
 
-  function setContent($text) {
-    $this->content = Texy::htmlChars($text);
+
+
+  function setContent($text, $isHtmlSafe = false) {
+    $this->content = $text;
+    $this->htmlSafe = $isHtmlSafe;
   }
 
 
 
+  function safeContent($onlyReturn = false) {
+    $safeContent = $this->htmlSafe ? $this->content : htmlSpecialChars($this->content, ENT_QUOTES);
+
+    if ($onlyReturn) return $safeContent;
+    else {
+      $this->content = $safeContent;
+      $this->htmlSafe = true;
+    }
+  }
+
+
+
+
   function generateContent() {
+    $content = $this->safeContent(true);
+
     if ($this->children) {
       $table = array();
       foreach (array_keys($this->children) as $key)
-        $table[$key] = $this->children[$key][0]->toHTML($this->children[$key][1]);
+        $table[$key] = $this->children[$key][0]->toHTML( $this->children[$key][1] );
 
-      return strtr($this->content, $table);
+      return strtr($content, $table);
     }
 
-    return $this->content;
+    return $content;
   }
 
 
@@ -227,20 +257,31 @@ class TexyInlineElement extends TexyHTMLElement {
 
 
 
-  function hash(&$ownerElement) {
-    $key = Texy::hashKey($this->strength);
-    $ownerElement->children[$key]  = array(&$this, null);
-    $ownerElement->textualContent = $ownerElement->textualContent || $this->textualContent;
-    return $key;
-  }
-
 
   function toText() {
     return preg_replace('#['.TEXY_HASH.']+#', '', $this->content);
   }
 
 
-}  // TexyInlineElement
+  function broadcast() {
+    parent::broadcast();
+
+    // apply to all children
+    foreach (array_keys($this->children) as $key)
+      $this->children[$key][0]->broadcast();
+  }
+
+
+
+
+  function addTo(&$ownerElement) {
+    $key = Texy::hashKey($this->strength);
+    $ownerElement->children[$key]  = array(&$this, null);
+    $ownerElement->contentType = max($ownerElement->contentType, $this->contentType);
+    return $key;
+  }
+
+}  // TexyTextualElement
 
 
 
@@ -253,7 +294,7 @@ class TexyInlineElement extends TexyHTMLElement {
  * -----------------------------
  *
  * Represent HTML tags (elements without content)
- * Used as children of TexyInlineElement
+ * Used as children of TexyTextualElement
  *
  */
 class TexyInlineTagElement extends TexyHTMLElement {
@@ -278,13 +319,13 @@ class TexyInlineTagElement extends TexyHTMLElement {
 
 
 
-  function hash(&$ownerElement, $nonHashedContent = null) {
+  function addTo(&$ownerElement, $elementContent = null) {
     $keyOpen = Texy::hashKey($this->strength);
     $keyClose = Texy::hashKey($this->strength);
 
     $ownerElement->children[$keyOpen]  = array(&$this, TEXY_OPEN);
     $ownerElement->children[$keyClose] = array(&$this, TEXY_CLOSE);
-    return $keyOpen . $nonHashedContent . $keyClose;
+    return $keyOpen . $elementContent . $keyClose;
   }
 
 
@@ -313,6 +354,9 @@ class TexyInlineTagElement extends TexyHTMLElement {
  * ---------
  */
 class TexyDOM extends TexyBlockElement {
+  var  $elements;
+  var  $elementsById;
+  var  $elementsByClass;
 
 
   /***
@@ -326,7 +370,7 @@ class TexyDOM extends TexyBlockElement {
       ///////////   STANDARDIZE LINE ENDINGS TO UNIX-LIKE  (DOS, MAC)
     $text = str_replace("\r\n", TEXY_NEWLINE, $text); // DOS
     $text = str_replace("\r", TEXY_NEWLINE, $text); // Mac
-    $text = preg_replace("#[\t ]+\n#", TEXY_NEWLINE, $text); // right trim
+    $text = preg_replace("#[\t ]+(\n|$)#", TEXY_NEWLINE, $text); // right trim
 
       ///////////   REPLACE TABS WITH SPACES
     $tabWidth = $this->texy->tabWidth;
@@ -375,6 +419,19 @@ class TexyDOM extends TexyBlockElement {
 
 
 
+
+  /***
+   * Build list for easy access to DOM structure
+   ***/
+  function buildLists() {
+    $this->elements = array();
+    $this->elementsById = array();
+    $this->elementsByClass = array();
+    $this->broadcast();
+  }
+
+
+
 }  // TexyDOM
 
 
@@ -392,7 +449,10 @@ class TexyDOM extends TexyBlockElement {
  * Texy! DOM for single line
  * -------------------------
  */
-class TexyDOMLine extends TexyInlineElement {
+class TexyDOMLine extends TexyTextualElement {
+  var  $elements;
+  var  $elementsById;
+  var  $elementsByClass;
 
 
   /***
@@ -422,6 +482,20 @@ class TexyDOMLine extends TexyInlineElement {
     $text = Texy::unfreezeSpaces($text);
     return $text;
   }
+
+
+
+
+  /***
+   * Build list for easy access to DOM structure
+   ***/
+  function buildLists() {
+    $this->elements = array();
+    $this->elementsById = array();
+    $this->elementsByClass = array();
+    $this->broadcast();
+  }
+
 
 
 } // TexyDOMLine

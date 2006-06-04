@@ -5,7 +5,7 @@
  *   BLOCKQUOTE - TEXY! DEFAULT MODULE
  * -------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -69,7 +69,7 @@ class TexyBlockQuoteModule extends TexyModule {
       $el->cite = & $texy->createURL();
       $el->cite->set($mLink);
     }
-    return $el->hash($lineParser->element, $mContent);
+    return $el->addTo($lineParser->element, $mContent);
   }
 
 
@@ -85,7 +85,7 @@ class TexyBlockQuoteModule extends TexyModule {
    *            >:http://www.mycom.com/tolkien/twotowers.html
    *
    */
-  function &processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
     list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
     //    [1] => (title)
@@ -120,7 +120,7 @@ class TexyBlockQuoteModule extends TexyModule {
 
     $el->parse($content);
 
-    return $el;
+    $blockParser->addChildren($el);
   }
 
 

@@ -5,7 +5,7 @@
  *   TEXY! URL PROCESSING
  * ------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -55,17 +55,13 @@ class TexyURL {
   }
 
 
-  function set($text, $type = 0) {
-    $this->text = trim($text);
-    if (!$this->text) {
-      $this->type = 0;
-      $this->URL = '';
-      return;
-    }
+  function set($text, $type = null) {
+    if ($type !== null)
+      $this->type = $type;
 
-    $this->type = $type;
+    $this->text = trim($text);
     $this->analyse();
-    $this->translate();
+    $this->toURL();
   }
 
 
@@ -79,7 +75,7 @@ class TexyURL {
   function copyFrom(&$obj) {
     $this->text = $obj->text;
     $this->type = $obj->type;
-    $this->URL = $obj->URL;
+    $this->URL  = $obj->URL;
     $this->root = $obj->root;
   }
 
@@ -91,7 +87,10 @@ class TexyURL {
   }
 
 
-  function translate() {
+  function toURL() {
+    if (!$this->text)
+      return $this->URL = '';
+
     if ($this->type & TEXY_URL_EMAIL) {
       $this->URL = 'mai';
       $s = 'lto:'.$this->text;
@@ -138,9 +137,6 @@ class TexyURL {
 
       if (isset($parts['path']))
         $res .=  (strlen($parts['path']) > 16 ? ('/...' . preg_replace('#^.*(.{0,12})$#U', '$1', $parts['path'])) : $parts['path']);
-      else
-//        $res .= '/';
-        $res .= '';
 
       if (isset($parts['query'])) {
         $res .= strlen($parts['query']) > 4 ? '?...' : ('?'.$parts['query']);

@@ -5,7 +5,7 @@
  *   DEFINITION LIST - TEXY! DEFAULT MODULE
  * ------------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * DEPENDENCES: tm_list.php
  *
@@ -59,7 +59,7 @@ class TexyDefinitionListModule extends TexyListModule {
    *              - description 3
    *
    */
-  function &processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
     list($match, $mModList1, $mModList2, $mModList3, $mModList4,
                  $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
@@ -150,7 +150,7 @@ class TexyDefinitionListModule extends TexyListModule {
     } while (true);
 
 
-    return $el;
+    $blockParser->addChildren($el);
   }
 
 } // TexyDefinitionListModule

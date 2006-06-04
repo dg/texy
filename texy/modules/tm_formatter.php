@@ -5,7 +5,7 @@
  *   HTML FORMATTER - TEXY! DEFAULT MODULE
  * -----------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -43,8 +43,6 @@ class TexyFormatterModule extends TexyModule {
   // internal
   var $tagStack;
   var $tagStackAssoc;
-  var $emptyElements = array('img', 'hr', 'br', 'input', 'meta', 'area', 'base', 'col', 'link', 'param');
-  var $blockElements = array('div', 'table', 'tr', 'dl', 'ol', 'ul', 'blockquote', 'p', 'li', 'dt', 'dd', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre');
   var $nestedElements = array('div', 'dl', 'ol', 'ul', 'blockquote', 'li', 'dd');
   var $hashTable = array();
 
@@ -54,8 +52,6 @@ class TexyFormatterModule extends TexyModule {
     parent::TexyModule($texy);
 
     // little trick - isset($array[$item]) is much faster than in_array($item, $array)
-    $this->emptyElements = array_flip($this->emptyElements);
-    $this->blockElements = array_flip($this->blockElements);
     $this->nestedElements = array_flip($this->nestedElements);
   }
 
@@ -79,7 +75,7 @@ class TexyFormatterModule extends TexyModule {
   function wellForm(&$text) {
     $this->tagStack = array();
     $this->tagStackAssoc = array();
-    $text = preg_replace_callback('#<(/?)([a-z0-9]+)(|\s.*)(/?)>()#Uis', array(&$this, '_replaceWellForm'), $text);
+    $text = preg_replace_callback('#<(/?)([a-z][a-z0-9]*)(|\s.*|:.*)(/?)>()#Uis', array(&$this, '_replaceWellForm'), $text);
     if ($this->tagStack) {
       $pair = end($this->tagStack);
       while ($pair !== false) {
@@ -100,12 +96,10 @@ class TexyFormatterModule extends TexyModule {
     //    [1] => /
     //    [2] => TAG
     //    [3] => ... (attributes)
-    //    [4] => /   (closed)
+    //    [4] => /   (empty)
 
 
-    $mTag = strtolower($mTag);
-
-    if (isset($this->emptyElements[$mTag]) || $mEmpty) return $match;
+    if (isset($this->texy->emptyElements[$mTag]) || $mEmpty) return $mClosing ? '' : $match;
 
     if ($mClosing) {  // closing
       $pair = end($this->tagStack);
@@ -120,7 +114,7 @@ class TexyFormatterModule extends TexyModule {
       if ($pair[0] <> $mTag) return '';
       if (!$pair[2]) unset($this->tagStackAssoc[$mTag]);
 
-      if (isset($this->blockElements[$mTag])) {
+      if (isset($this->texy->blockElements[$mTag])) {
         array_splice($this->tagStack, -$i);
         return $s;
       }
@@ -152,7 +146,8 @@ class TexyFormatterModule extends TexyModule {
     $text = preg_replace_callback('#<(pre|textarea|script|style)(.*)</\\1>#Uis', array(&$this, '_freeze'), $text);
     $this->_indent = $this->baseIndent;
     $text = str_replace(TEXY_NEWLINE, '', $text);
-    $text = preg_replace_callback('#<(/?)(pre|div|table|tr|td|th|dl|ol|ul|blockquote|p|li|dt|dd|h1|h2|h3|h4|h5|h6|hr|br)(>| .*>)#U', array(&$this, '_replaceReformat'), $text);
+    $text = preg_replace('# +#', ' ', $text);
+    $text = preg_replace_callback('# *<(/?)(' . implode(array_keys($this->texy->blockElements), '|') . '|br)(>| [^>]*>) *#', array(&$this, '_replaceReformat'), $text);
     $text = preg_replace('#(?<=\S)\t+#m', '', $text);
     $text = preg_replace_callback('#^(\t*)(.*)$#m', array(&$this, '_replaceWrapLines'), $text);
 
@@ -181,12 +176,12 @@ class TexyFormatterModule extends TexyModule {
     //    [1] => /  (opening or closing element)
     //    [2] => element
     //    [3] => attributes>
-
+    $match = trim($match);
     if ($mClosing == '/') {
       return str_repeat("\t", --$this->_indent) . $match . TEXY_NEWLINE;
     } else {
       if ($mTag == 'hr') return TEXY_NEWLINE . str_repeat("\t", $this->_indent) . $match . TEXY_NEWLINE;
-      if (isset($this->emptyElements[$mTag])) $this->_indent--;
+      if (isset($this->texy->emptyElements[$mTag])) $this->_indent--;
       return TEXY_NEWLINE . str_repeat("\t", max(0, $this->_indent++)) . $match;
     }
   }

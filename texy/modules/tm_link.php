@@ -5,7 +5,7 @@
  *   LINKS - TEXY! DEFAULT MODULE
  * --------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -62,6 +62,8 @@ class TexyLinkModule extends TexyModule {
 
     $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#i'.TEXY_PATTERN_UTF);
     $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)'.TEXY_PATTERN_EMAIL.'#i');
+
+    Texy::adjustDir($this->root);
   }
 
 
@@ -190,7 +192,7 @@ class TexyLinkModule extends TexyModule {
     $elLink = &new TexyLinkElement($this->texy);
     $elLink->setLinkRaw($mLink);
     $elLink->modifier->setProperties($mMod1, $mMod2, $mMod3);
-    return $elLink->hash($lineParser->element, $mContent);
+    return $elLink->addTo($lineParser->element, $mContent);
   }
 
 
@@ -210,7 +212,7 @@ class TexyLinkModule extends TexyModule {
     $elLink = &new TexyLinkRefElement($this->texy);
     if ($elLink->setLink($mRef) === false) return $match;
 
-    return $elLink->hash($lineParser->element);
+    return $elLink->addTo($lineParser->element);
   }
 
 
@@ -228,7 +230,7 @@ class TexyLinkModule extends TexyModule {
 
     $elLink = &new TexyLinkElement($this->texy);
     $elLink->setLinkRaw($mURL);
-    return $elLink->hash($lineParser->element, $elLink->link->toString());
+    return $elLink->addTo($lineParser->element, $elLink->link->toString());
   }
 
 
@@ -356,19 +358,19 @@ class TexyLinkElement extends TexyInlineTagElement {
 /**
  * HTML ELEMENT ANCHOR (with content)
  */
-class TexyLinkRefElement extends TexyInlineElement {
+class TexyLinkRefElement extends TexyTextualElement {
   var $parentModule;
   var $tag = 'a';
   var $link;
   var $refName;
-  var $textualContent = true;
+  var $contentType = TEXY_CONTENT_TEXTUAL;
 
   // private
 
 
   // constructor
   function TexyLinkRefElement(&$texy) {
-    parent::TexyInlineElement($texy);
+    parent::TexyTextualElement($texy);
     $this->parentModule = & $texy->modules['TexyLinkModule'];
 
     $this->link = & $texy->createURL();

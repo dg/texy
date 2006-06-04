@@ -23,9 +23,14 @@
 
 /**
  *  This demo shows how combine Texy! with syntax highlighter GESHI
- *       - define user callback (for @code elements)
+ *       - define user callback (for /--code elements)
  *       - load language, highlight and retun stylesheet + html output
  */
+
+
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
 
 
 $libs_path = '../../texy/';
@@ -35,27 +40,43 @@ $texy_path = $libs_path;
 // include Texy!
 require_once($texy_path . 'texy.php');
 
-// !!!!!!!!!!! DOWNLOAD GESHI FIRST! (http://qbnz.com/highlighter/)
-$geshi_path = 'geshi/';
-require_once($geshi_path.'geshi.php');
+// DOWNLOAD GESHI FIRST! (http://qbnz.com/highlighter/)
+$geshi_path = dirname(__FILE__).'/geshi/';
+include_once($geshi_path.'geshi.php');
+
+if (!class_exists('Geshi'))
+  die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
 
 
 
 
 
-// this is user callback function for processing inlin `code` or block /---code
+// this is user callback function for processing blocks
+//
+//    /---code lang
+//      ......
+//      ......
+//    \---
+//
+// $element is TexyCodeBlockElement object
+//     $element->content   -  content of element
+//     $element->htmlSafe  -  is content HTML safe?
+//     $element->tag       -  parent HTML tag, default value is 'pre'
+//     $element->type      -  type of content: code | samp | kbd | var | dfn  (or empty value)
+//     $element->lang      -  language (optional)
+//
+//  Syntax highlighter changes $element->content and sets $element->htmlSafe to true
+//
 function myUserFunc(&$element) {
-  global $geshi_path, $styleSheet;
+  global $geshi_path;
 
   $geshi = new GeSHi($element->content, $element->lang, $geshi_path.'geshi/');
 
-  if ($geshi->error) {  // GeSHi could not find the language
-    $element->setContent($element->content);
+  if ($geshi->error)   // GeSHi could not find the language, nothing to do
     return;
-  }
 
   // do syntax-highlighting
-  $geshi->set_encoding('iso-8859-1');
+  $geshi->set_encoding(TEXY_UTF8 ? 'UTF-8' : 'ISO-8859-1');
   $geshi->set_header_type(GESHI_HEADER_PRE);
   $geshi->enable_classes();
   $geshi->set_overall_style('color: #000066; border: 1px solid #d0d0d0; background-color: #f0f0f0;', true);
@@ -65,30 +86,36 @@ function myUserFunc(&$element) {
   $geshi->set_link_styles(GESHI_HOVER, 'background-color: #f0f000;');
 
   // save generated stylesheet
-  $styleSheet .= $geshi->get_stylesheet();
+  $element->texy->styleSheet .= $geshi->get_stylesheet();
 
-  // change element's content
-  $element->content = $geshi->parse_code();
+  $out = $geshi->parse_code();
+  if (TEXY_UTF8)  // double-check buggy GESHI, it sometimes produce not UTF-8 valid code :-((
+    if ($out !== utf8_encode(utf8_decode($out))) return;
+
+  $element->setContent($out, true);
 }
 
 
 
 
-$styleSheet = 'pre { padding:10px } ';
-$texy = &new Texy();
-$texy->modules['TexyBlockModule']->userFunction = 'myUserFunc';
 
+
+$texy = &new Texy();
+
+// set user callback function for /-- code blocks
+$texy->modules['TexyBlockModule']->userFunction = 'myUserFunc';
+// prepare CSS stylesheet
+$texy->styleSheet = 'pre { padding:10px } ';
 
 // processing
 $text = file_get_contents('sample.texy');
 $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
-echo '<style type="text/css">'. $styleSheet . '</style>';
+echo '<style type="text/css">'. $texy->styleSheet . '</style>';
 echo '<title>' . $texy->headings->title . '</title>';
 // echo formated output
 echo $html;
-
 
 // and echo generated HTML code
 echo '<hr />';

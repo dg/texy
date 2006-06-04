@@ -5,7 +5,7 @@
  *   CODE - TEXY! DEFAULT MODULE
  * ----------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -33,16 +33,19 @@ if (!defined('TEXY')) die();
 /**
  * CODE PHRASE MODULE CLASS
  *
- *   `....`
+ *   `....` or ``....``
  */
 class TexyCodeModule extends TexyModule {
-  var $tag = 'code';  // default tag for `...`
+  var $allowed = true;          // generally disable / enable
+  var $userFunction;            // function &myUserFunc(&$element)
+  var $tag = 'code';            // default tag for `...`
 
 
   /***
    * Module initialization.
    */
   function init() {
+    $this->registerLinePattern('processProtect',  '#\`\`(\S[^'.TEXY_HASH.']*)(?<!\ )\`\`()#U', false);
     $this->registerLinePattern('processCode',     '#\`(\S[^'.TEXY_HASH.']*)MODIFIER?(?<!\ )\`()#U');
     $this->registerBlockPattern('processBlock',   '#^`=(none|code|kbd|samp|var|span)$#mUi');
   }
@@ -52,14 +55,15 @@ class TexyCodeModule extends TexyModule {
   /***
    * Callback function `=code
    */
-  function &processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches) {
     list($match, $mTag) = $matches;
     //    [1] => ...
 
     $this->tag = strtolower($mTag);
     if ($this->tag == 'none') $this->tag = '';
-    return $el;
   }
+
+
 
 
 
@@ -69,6 +73,7 @@ class TexyCodeModule extends TexyModule {
    * @return string
    */
   function processCode(&$lineParser, &$matches) {
+    if (!$this->allowed) return '';
     list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => ...
     //    [2] => (title)
@@ -76,20 +81,43 @@ class TexyCodeModule extends TexyModule {
     //    [4] => {style}
 
     $texy = &$this->texy;
-    $el = &new TexyInlineElement($texy);
-    $el->textualContent = true;
+    $el = &new TexyTextualElement($texy);
+    $el->contentType = TEXY_CONTENT_TEXTUAL;
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-    $el->setContent($mContent);
+    $el->setContent($mContent, false);  // content isn't html safe
     $el->tag = $this->tag;
 
-    if (isset($texy->modules['TexyLongWordsModule']))
-      $texy->modules['TexyLongWordsModule']->inlinePostProcess($el->content);
+    if ($this->userFunction)
+      call_user_func_array($this->userFunction, array(&$el));
 
-    return $el->hash($lineParser->element);
+    $el->safeContent(); // ensure that content is HTML safe
+
+    if (isset($texy->modules['TexyLongWordsModule']))
+      $texy->modules['TexyLongWordsModule']->linePostProcess($el->content);
+
+    return $el->addTo($lineParser->element);
   }
 
 
 
+
+
+
+
+
+  /***
+   * User callback - PROTECT PHRASE
+   * @return string
+   */
+  function processProtect(&$lineParser, &$matches, $isHtmlSafe = false) {
+    list($match, $mContent) = $matches;
+
+    $el = &new TexyTextualElement($this->texy);
+    $el->contentType = TEXY_CONTENT_TEXTUAL;
+    $el->setContent($mContent, $isHtmlSafe);
+
+    return $el->addTo($lineParser->element);
+  }
 
 
 

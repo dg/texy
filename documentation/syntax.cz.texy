@@ -72,8 +72,13 @@ Vypnutí Texy
 ============
 
 
-/---notexy
-  pøíklad: **this is not strong**
+/---html
+  <em>pøíklad</em>: **this is not strong**
+\---
+
+
+/---text
+  <em>pøíklad</em>: **this is not strong**
 \---
 
 

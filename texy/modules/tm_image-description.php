@@ -5,7 +5,7 @@
  *   IMAGE WITH DESCRIPTION - TEXY! DEFAULT MODULE
  * -------------------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * DEPENDENCES: tm_image.php
  *
@@ -53,7 +53,7 @@ class TexyImageDescModule extends TexyModule {
    *            [*image*]:link *** .... .(title)[class]{style}>
    *
    */
-  function &processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches) {
     list($match, $mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4, $mLink, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => URLs
     //    [2] => (title)
@@ -75,7 +75,7 @@ class TexyImageDescModule extends TexyModule {
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     $el->children['desc']->parse(ltrim($mContent));
 
-    return $el;
+    $blockParser->addChildren($el);
   }
 
 

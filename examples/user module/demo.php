@@ -1,9 +1,9 @@
 <?php
 
 /**
- * --------------
- *   TEXY! DEMO
- * --------------
+ * -------------------------------------------------
+ *   TEXY! THIRD PARTY SYNTAX HIGHLIGHTING FOR PHP
+ * -------------------------------------------------
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>. All rights reserved.
  * Web: http://www.texy.info/
@@ -21,6 +21,13 @@
  */
 
 
+/**
+ *  This demo shows how create new module for Texy!
+ *       - this module accepts block <?php ... ?>
+ *       - and highlight code by third-party highlighter
+ */
+
+
 // check required version
 if (version_compare(phpversion(), '4.3.3', '<'))
   die('Texy! requires PHP version 4.3.3 or higher');
@@ -30,35 +37,42 @@ $libs_path = '../../texy/';
 $texy_path = $libs_path;
 
 
-// global configuration Texy!
-define ('TEXY_UTF8', false);     // disable UTF-8
-
-
 // include Texy!
 require_once($texy_path . 'texy.php');
+
+// include user module
+require_once('tum_phpblock.php');
+
+
+// DOWNLOAD GESHI FIRST! (http://qbnz.com/highlighter/)
+$geshi_path = dirname(__FILE__).'/geshi/';
+include_once($geshi_path.'geshi.php');
+
+if (!class_exists('Geshi'))
+  die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
+
 
 
 
 $texy = &new Texy();
 
-// user configuration (or retain default values)
-$texy->links->root         = '';
-$texy->links->imageOnClick = 'return !popup(this.href)';
-$texy->images->root        = 'images/';
-$texy->images->linkedRoot  = 'images/big/';
-$texy->modules['TexyFormatterModule']->baseIndent  = 1;
-$texy->modules['TexyFormatterModule']->lineWrap    = 60;
+// register my module
+$texy->registerModule('TexyPHPCodeUserModule');
+// make shortcut to module ($myModule)
+$myModule = & $texy->modules['TexyPHPCodeUserModule'];
+// configure module
+$myModule->geshiPath = $geshi_path;
 
 
 // processing
-$text = file_get_contents('syntax.texy');
+$text = file_get_contents('sample.texy');
 $html = $texy->process($text);  // that's all folks!
 
 
-// echo formated output
-header('Content-type: text/html; charset=windows-1250');
-echo '<link rel="stylesheet" type="text/css" media="all" href="style.css" />';
+// echo Geshi Stylesheet
+echo '<style type="text/css">'. $texy->styleSheet . '</style>';
 echo '<title>' . $texy->headings->title . '</title>';
+// echo formated output
 echo $html;
 
 

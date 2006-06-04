@@ -5,7 +5,7 @@
  *   PARAGRAPH / GENERIC - TEXY! DEFAULT MODULE
  * ----------------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -36,13 +36,26 @@ if (!defined('TEXY')) die();
 class TexyGenericBlockModule extends TexyModule {
 
 
+
+
   /***
-   * Module initialization.
+   * Module initialization
    */
   function init() {
-    $this->registerBlockPattern('processBlock', '#^(.+)MODIFIER_H?()$#mU');
+    $this->texy->genericBlock = array(&$this, 'processBlock');
   }
 
+
+
+  function processBlock(&$blockParser, $content) {
+    $str_blocks = preg_split('#(\n{2,})#', $content);
+
+    foreach ($str_blocks as $str) {
+      $str = trim($str);
+      if (!$str) continue;
+      $this->processSingleBlock($blockParser, $str);
+    }
+  }
 
 
 
@@ -54,8 +67,9 @@ class TexyGenericBlockModule extends TexyModule {
    *             ...
    *
    */
-  function &processBlock(&$blockParser, &$matches) {
-    list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+  function &processSingleBlock(&$blockParser, $content) {
+    preg_match('#^(.+)'.TEXY_PATTERN_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
+    list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
     //    [1] => ...
     //    [2] => (title)
     //    [3] => [class]
@@ -68,22 +82,28 @@ class TexyGenericBlockModule extends TexyModule {
     $el = &new TexyGenericBlockElement($this->texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
-    $text = trim($mContent);
-    while ($blockParser->match('#^(['.TEXY_CHAR.'].*| \S.*)$#mUA'.TEXY_PATTERN_UTF, $matches)) {
-      if ($matches[1]{0} == ' ') {
-        $br = &new TexyLineBreakElement($this->texy);
-        $text .= $br->hash($el) . trim($matches[1]);
-      } else {
-        $text .= ' ' . trim($matches[1]);
-      }
+    // ....
+    //  ...  => \n
+    $mContent = preg_replace('#\n (\S)#', " \r\\1", trim($mContent . $mContent2));
+    $mContent = strtr($mContent, "\n\r", " \n");
+
+    $el->parse($mContent);
+
+    // specify tag
+    if ($el->contentType == TEXY_CONTENT_TEXTUAL) $el->tag = 'p';
+    elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
+    elseif ($el->contentType == TEXY_CONTENT_HTML) $el->tag = '';
+    else $el->tag = 'div';
+
+    // add <br />
+    if ($el->tag && (strpos($el->content, "\n") !== false)) {
+      $elBr = &new TexyLineBreakElement($this->texy);
+      $el->content = strtr($el->content,
+                        array("\n" => $elBr->addTo($el))
+                     );
     }
 
-    $el->parse($text);
-    if ($el->textualContent) $el->tag = 'p';
-    elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
-    else $el->tag = '';
-
-    return $el;
+    $blockParser->addChildren($el);
   }
 
 
@@ -104,11 +124,10 @@ class TexyGenericBlockModule extends TexyModule {
 
 
 
-
 /**
  * HTML ELEMENT LINE BREAK
  */
-class TexyLineBreakElement extends TexyInlineElement {
+class TexyLineBreakElement extends TexyTextualElement {
   var $tag = 'br';
 
 } // TexyLineBreakElement
@@ -119,7 +138,7 @@ class TexyLineBreakElement extends TexyInlineElement {
 /**
  * HTML ELEMENT PARAGRAPH / DIV / TRANSPARENT
  */
-class TexyGenericBlockElement extends TexyInlineElement {
+class TexyGenericBlockElement extends TexyTextualElement {
   var $tag = 'p';
 
 } // TexyGenericBlockElement

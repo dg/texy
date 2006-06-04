@@ -29,6 +29,11 @@
  */
 
 
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
+
+
 $libs_path = '../../texy/';
 $texy_path = $libs_path;
 
@@ -73,13 +78,10 @@ $texy = &new Texy();
 
 // configuration
 $texy->links->userReferences = 'myUserFunc';  // references link [1] [2] will be processed through user function
-$texy->links->forceNoFollow = true;           // force rel="nofollow"
-$texy->modules['TexyHTMLTagModule']->level = TEXY_LEVEL_SAFE; // only specified HTML tags and attributes are allowed
-$texy->allowClasses = array('about');        // only this one class is allowed
-$texy->allowStyles  = false;                 // style modifiers are disabled
+$texy->safeMode();                            // safe mode prevets attacker to inject some HTML code and disable images
 
-// how generally disable images or links? here is a way:
-//      $texy->images->allowed = false;
+// how generally disable links or enable images? here is a way:
+//      $texy->images->allowed = true;
 //      $texy->links->allowed = false;
 
 

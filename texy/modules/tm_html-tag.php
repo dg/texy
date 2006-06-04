@@ -5,7 +5,7 @@
  *   HTML TAGS - TEXY! DEFAULT MODULE
  * ------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -34,11 +34,11 @@ if (!defined('TEXY')) die();
  * HTML TAGS MODULE CLASS
  */
 class TexyHTMLTagModule extends TexyModule {
-  var $allowed       = true;                  // generally disable / enable
-  var $userFunction;                 // function &myUserFunc(&$texy, &$tag, &$attr)  $attr = false --> closing tag
-  var $level = TEXY_LEVEL_TRUST_ME;   // level of benevolence
+  var $allowed;          // allowed tags (true -> all, or array, or false -> none)
+//  var $userFunction;   // function &myUserFunc(&$texy, &$tag, &$attr)  $attr = false --> closing tag
 
-  var $safeTags = array(             // array of tags and attributes accepted in TEXY_LEVEL_SAFE level
+                         // arrays of safe tags and attributes
+  var $safeTags = array(
                      'a'         => array('href', 'rel', 'title'),
                      'abbr'      => array('title'),
                      'acronym'   => array('title'),
@@ -58,41 +58,18 @@ class TexyHTMLTagModule extends TexyModule {
                      'sub'       => array(),
                      'sup'       => array(),
                      'var'       => array(),
-// and these are disabled
-//                   'img'       => array('src', 'alt'),
-//                   'input'     => array('type', 'name', 'value'),
-//                   'label'     => array('for'),
-//                   'select'    => array('name'),
-//                   'button'    => array(),
-//                   'big'       => array(),
-//                   'textarea'  => array('name'),
-//                   'address'   => array(),
-//                   'blockquote'=> array('cite'),
-//                   'div'       => array('class','id'),
-//                   'dl'        => array(),
-//                   'fieldset'  => array(),
-//                   'form'      => array('action', 'method'),
-//                   'h1'        => array(),
-//                   'h2'        => array(),
-//                   'h3'        => array(),
-//                   'h4'        => array(),
-//                   'h5'        => array(),
-//                   'h6'        => array(),
-//                   'hr'        => array(),
-//                   'ol'        => array(),
-//                   'p'         => array(),
-//                   'pre'       => array(),
-//                   'table'     => array('width'),
-//                   'ul'        => array(),
-//                   'dd'        => array(),
-//                   'dt'        => array(),
-//                   'li'        => array(),
-//                   'td'        => array(),
-//                   'th'        => array(),
-//                   'tr'        => array(),
-//                   'script'    => array(),
-//                   'style'     => array(),
                     );
+
+
+
+
+
+  // constructor
+  function TexyHTMLTagModule(&$texy) {
+    parent::TexyModule($texy);
+
+    $this->allowed = $texy->validElements;
+  }
 
 
 
@@ -102,7 +79,8 @@ class TexyHTMLTagModule extends TexyModule {
    * Module initialization.
    */
   function init() {
-    $this->registerLinePattern('processLine', '#<(/?)([a-z0-9]+)(|\s(?:[\sa-z0-9-]|=\s*"[^"]*"|=\s*\'[^\']*\'|=[^>]*)*)/?>#is');
+    $HASH = TEXY_HASH;
+    $this->registerLinePattern('processLine', "#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9-]|=\s*\"[^\"$HASH]*\"|=\s*'[^'$HASH]*'|=[^>$HASH]*)*)(/?)>#is");
   }
 
 
@@ -112,21 +90,30 @@ class TexyHTMLTagModule extends TexyModule {
    * @return string
    */
   function processLine(&$lineParser, &$matches) {
-    list($match, $mClosing, $mTag, $mAttr) = $matches;
+    list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
     //    [1] => /
     //    [2] => tag
     //    [3] => attributes
 
-    if (!$this->allowed) return $match;
-
-    if ($this->level == TEXY_LEVEL_DENIED)   // disabled
-      return $match;
+    if (!$this->allowed) return $match;   // disabled
 
     $tag = strtolower($mTag);
+    $empty = $mEmpty == '/';
     $closing = $mClosing == '/';
+    $classify = Texy::classifyElement($tag);
+    if ($classify & TEXY_ELEMENT_VALID) {
+      $empty = $classify & TEXY_ELEMENT_EMPTY;
+    } else {
+      $tag = $mTag;  // undo lowercase
+    }
+
+    if ($empty && $closing)  // error - can't close empty element
+      return $match;
+
+
     if (!$closing) {
       $attr = array();
-      preg_match_all('#([a-z0-9-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?#is', $mAttr, $matchesAttr, PREG_SET_ORDER);
+      preg_match_all('#([a-z0-9-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is', $mAttr, $matchesAttr, PREG_SET_ORDER);
       foreach ($matchesAttr as $matchAttr) {
         $key = strtolower($matchAttr[1]);
         $value = $matchAttr[2];
@@ -134,70 +121,77 @@ class TexyHTMLTagModule extends TexyModule {
         elseif ($value{0} == '\'' || $value{0} == '"') $value = substr($value, 1, -1);
         $attr[$key] = $value;
       }
-    } else $attr = false;
-
-
-    if ($this->level == TEXY_LEVEL_SAFE) {
-      // is tag allowed?
-      if (!isset($this->safeTags[$tag]))
-        return $match;
-
-      if (!$closing)
-        foreach ($attr as $key => $value)
-          if (!in_array($key, $this->safeTags[$tag])) unset($attr[$key]);
+    } else {
+      $attr = false;
     }
 
-
+/*
     if ($this->userFunction)  // call user function?
       call_user_func_array(
             $this->userFunction,
             array(&$this->texy, &$tag, &$attr)
       );
-
-
     if (!$tag) return $match;
+*/
+
+    if (is_array($this->allowed)) {
+      // is tag allowed?
+      if (!isset($this->allowed[$tag]))
+        return $match;
+
+      if (!$closing && is_array($this->allowed[$tag]))
+        foreach ($attr as $key => $value)
+          if (!in_array($key, $this->allowed[$tag])) unset($attr[$key]);
+    }
+
+
     if (!$closing) {
       switch ($tag) {
        case 'img':
           if (!isset($attr['src'])) return $match;
-          $url = &$this->texy->createURL();
-          $url->set($attr['src'], TEXY_URL_IMAGE_INLINE);
-          $this->texy->summary->images[] = $attr['src'] = $url->translate();
+          $link = &$this->texy->createURL();
+          $link->set($attr['src'], TEXY_URL_IMAGE_INLINE);
+          $this->texy->summary->images[] = $attr['src'] = $link->URL;
           break;
 
        case 'a':
           if (count($attr) == 0) return $match;
           if (isset($attr['href'])) {
-            $url = &$this->texy->createURL();
-            $url->set($attr['href']);
-            $this->texy->summary->links[] = $attr['href'] = $url->URL;
+            $link = &$this->texy->createURL();
+            $link->set($attr['href']);
+            $this->texy->summary->links[] = $attr['href'] = $link->URL;
           }
       }
     }
 
     $el = &new TexySingleTagElement($this->texy);
-    if ($el === false) return $match;
+    $el->attr     = $attr;
+    $el->tag      = $tag;
+    $el->closing  = $closing;
+    $el->empty    = $empty;
+    $el->strength = ($classify & TEXY_ELEMENT_INLINE) ? TEXY_SOFT : TEXY_HARD;
 
-    $el->attr = $attr;
-    $el->tag = $tag;
-    $el->closing = $closing;
-
-    return $el->hash($lineParser->element);
+    return $el->addTo($lineParser->element);
   }
 
 
 
 
-  /***
-   * USER Callback function (default)
-   * @return boolean
-   */
-  function userFunction(&$texy, &$tag, &$attr) {
+  function trustMode($onlyValid = true) {
+    $this->allowed = $onlyValid ? $this->texy->validElements : true;
+  }
+
+
+
+  function safeMode($allowSafe = true) {
+    $this->allowed = $allowSafe ? $this->safeTags : false;
   }
 
 
 
 } // TexyHTMLTagModule
+
+
 
 
 
@@ -215,6 +209,7 @@ class TexySingleTagElement extends TexyDOMElement {
   var $tag;
   var $attr;
   var $closing;
+  var $empty;
   var $strength = TEXY_SOFT;
 
 
@@ -223,17 +218,19 @@ class TexySingleTagElement extends TexyDOMElement {
   function toHTML() {
     if ($this->hidden) return;
 
-    if ($this->closing)
-      return Texy::closingTag($this->tag);
+    if ($this->empty || !$this->closing)
+      return Texy::openingTag($this->tag, $this->attr, $this->empty);
     else
-      return Texy::openingTag($this->tag, $this->attr);
+      return Texy::closingTag($this->tag);
   }
 
 
 
-  function hash(&$lineElement) {
+  function addTo(&$lineElement) {
     $key = Texy::hashKey($this->strength);
     $lineElement->children[$key]  = array(&$this, null);
+    if ($this->strength == TEXY_HARD)
+      $lineElement->contentType = max($lineElement->contentType, TEXY_CONTENT_HTML);
     return $key;
   }
 

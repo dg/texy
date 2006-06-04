@@ -28,6 +28,11 @@
 
 
 
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
+
+
 require_once('mytexy.php');
 
 
@@ -40,17 +45,11 @@ $html = $texy->process($text);
 
 // echo formated output
 header("Content-type: text/html; charset=windows-1250");
-
+echo '<title>' . $texy->headings->title . '</title>';
 
 // echo $texy->time
-echo '<strong>';
-
-if ($texy->time === null)
-  echo 'From cache';
-else
-  echo number_format($texy->time, 3, ',', ' ') . 'sec';
-
-echo '</strong><br />';
+echo '<strong>' . number_format($texy->time, 3, ',', ' ') . 'sec</strong>';
+echo '<br />';
 
 
 // echo formated output

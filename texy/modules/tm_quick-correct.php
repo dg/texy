@@ -5,7 +5,7 @@
  *   AUTOMATIC REPLACEMENTS - TEXY! DEFAULT MODULE
  * -------------------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -36,7 +36,7 @@ if (!defined('TEXY')) die();
 class TexyQuickCorrectModule extends TexyModule {
 
 
-  function inlinePostProcess(&$text) {
+  function linePostProcess(&$text) {
     $HASHS = '(['.TEXY_HASH_SOFT.']*)';
     $CHAR = '['.TEXY_CHAR.']';
     $UTF  = TEXY_PATTERN_UTF;
@@ -46,7 +46,7 @@ class TexyQuickCorrectModule extends TexyModule {
                                                               => '&bdquo;$1&ldquo;',          // double ""
          "#(?<!&\#039;|\w)&\#039;(?!\ |&\#039;)(.+)(?<!\ |&\#039;)&\#039;(?!&\#039;)()#U$UTF"
                                                               => '&sbquo;$1&lsquo;',          // single ''
-         '#(\S) ?\.{3}#'                                      => '$1&#8230;',                 // ellipsis  ...
+         '#(\S|^) ?\.{3}#m'                                   => '$1&#8230;',                 // ellipsis  ...
          '#(\d| )-(\d| )#'                                    => '$1&ndash;$2',               // en dash    -
          '#,-#'                                               => ',&ndash;',                  // en dash    ,-
          '#(\d{1,2}\.) (\d{1,2}\.) (\d\d)#'                   => '$1&nbsp;$2&nbsp;$3',        // date 23. 1. 1998
@@ -61,7 +61,7 @@ class TexyQuickCorrectModule extends TexyModule {
          '#(\S ?)\(C\)#i'                                     => '$1&copy;',                  // copyright      (C)
          '#(\d{3}) (\d{3}) (\d{3}) (\d{3})#'                  => '$1&nbsp;$2&nbsp;$3&nbsp;$4',// phone number 123 123 123 123
          '#(\d{3}) (\d{3}) (\d{3})#'                          => '$1&nbsp;$2&nbsp;$3',        // phone number 123 123 123
-         "#($CHAR)$HASHS $HASHS(\d)#m$UTF"                    => '$1$2&nbsp;$3$4',      // space before number
+         "#($CHAR)$HASHS $HASHS(\d)#m$UTF"                    => '$1$2&nbsp;$3$4',            // space before number
          "#(?<=^|[^".TEXY_CHAR."0-9])$HASHS([ksvzouiKSVZOUIA])$HASHS $HASHS($CHAR)#m$UTF"  => '$1$2$3&nbsp;$4$5',  // space after preposition
     );
 

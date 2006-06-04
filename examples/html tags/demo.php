@@ -30,6 +30,11 @@
  */
 
 
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
+
+
 $libs_path = '../../texy/';
 $texy_path = $libs_path;
 
@@ -37,14 +42,13 @@ $texy_path = $libs_path;
 // include Texy!
 require_once($texy_path . 'texy.php');
 
+$texy = &new Texy();
+$texy->modules['TexyFormatterModule']->baseIndent  = 1;
 
 
 
-function doIt($level, $which = null) {
-  $texy = &new Texy();
-  $texy->modules['TexyHTMLTagModule']->level = $level;
-  $texy->modules['TexyFormatterModule']->baseIndent  = 1;
-  if ($which) $texy->modules['TexyHTMLTagModule']->safeTags = $which;
+function doIt() {
+  global $texy;
 
   // processing
   $text = file_get_contents('sample.texy');
@@ -63,20 +67,28 @@ function doIt($level, $which = null) {
 
 
 
-echo '<h2>mode: TEXY_LEVEL_TRUST_ME</h2>';
-doIt(TEXY_LEVEL_TRUST_ME);
+echo '<h2>trustMode() - enable all valid tags</h2>';
+$texy->modules['TexyHTMLTagModule']->trustMode();
+doIt();
 
-echo '<h2>mode: TEXY_LEVEL_SAFE</h2>';
-doIt(TEXY_LEVEL_SAFE);
+echo '<h2>trustMode(false) - enable all tags</h2>';
+$texy->modules['TexyHTMLTagModule']->trustMode(false);
+doIt();
 
-echo '<h2>mode: TEXY_LEVEL_DENIED</h2>';
-doIt(TEXY_LEVEL_DENIED);
+echo '<h2>safeMode() - enable only "safe" tags</h2>';
+$texy->modules['TexyHTMLTagModule']->safeMode();
+doIt();
 
-echo '<h2>mode: CUSTOM</h2>';
-doIt(TEXY_LEVEL_SAFE,
+echo '<h2>safeMode(false) - disable all tags</h2>';
+$texy->modules['TexyHTMLTagModule']->safeMode(false);
+doIt();
+
+echo '<h2>custom</h2>';
+$texy->modules['TexyHTMLTagModule']->allowed =
      array(            // enable only tags <a> (with attributes href, rel, title) and <strong>
-         'a'         => array('href', 'rel', 'title'),
-         'strong'    => array(),
-     ));
+         'myExtraTag' => array('attr1'),
+         'strong'     => array(),
+     );
+doIt();
 
 ?>

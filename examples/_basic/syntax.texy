@@ -11,10 +11,10 @@ links (anchors), nested lists, tables and has full support for CSS((Cascade Styl
 
 
 
-Headers
-=======
+Headers (underlined)
+====================
 
-=== Low Level Header ====
+=== Low Level Header (surrounded) ====
 
 
 
@@ -71,8 +71,13 @@ Disable Texy
 ============
 
 
-/---notexy
-  example: **this is not strong**
+/---html
+  <em>example</em>: **this is not strong**
+\---
+
+
+/---text
+  <em>example</em>: **this is not strong**
 \---
 
 
@@ -193,7 +198,7 @@ What a beautiful logo [*picture*] :-)
 with modifiers
 --------------
 
-[* image.gif .{width:100px} *]
+[* image.gif .{border:2px solid blue} *]
 
 
 

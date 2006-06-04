@@ -5,7 +5,7 @@
  *   TEXY! MODULES BASE CLASSE
  * -----------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -64,13 +64,23 @@ class TexyModule {
   }
 
 
+/* not used yet
+  // single line pre-process
+  function linePreProcess(&$line) {
+  }
+*/
 
   // single line post-process
-  function inlinePostProcess(&$line) {
+  function linePostProcess(&$line) {
   }
 
 
 
+  /***
+   * For easier regular expression writing
+   * @return string
+   * @static
+   ***/
   function adjustPattern($pattern) {
     return strtr($pattern,
                      array('MODIFIER_HV' => TEXY_PATTERN_MODIFIER_HV,
@@ -83,7 +93,7 @@ class TexyModule {
   function registerLinePattern($func, $pattern, $user_args = null) {
     $this->texy->patternsLine[] = array(
              'replacement' => array(&$this, $func),
-             'pattern'     => $this->adjustPattern($pattern) ,
+             'pattern'     => TexyModule::adjustPattern($pattern) ,
              'user'        => $user_args
     );
   }
@@ -94,7 +104,7 @@ class TexyModule {
 
     $this->texy->patternsBlock[] = array(
              'func'    => array(&$this, $func),
-             'pattern' => $this->adjustPattern($pattern)  . 'm',  // multiline!
+             'pattern' => TexyModule::adjustPattern($pattern)  . 'm',  // force multiline!
              'user'    => $user_args
     );
   }

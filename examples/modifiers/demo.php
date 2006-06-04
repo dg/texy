@@ -26,6 +26,11 @@
  */
 
 
+// check required version
+if (version_compare(phpversion(), '4.3.3', '<'))
+  die('Texy! requires PHP version 4.3.3 or higher');
+
+
 $libs_path = '../../texy/';
 $texy_path = $libs_path;
 
@@ -33,14 +38,13 @@ $texy_path = $libs_path;
 // include Texy!
 require_once($texy_path . 'texy.php');
 
+$texy = &new Texy();
+$texy->modules['TexyFormatterModule']->baseIndent  = 1;
 
 
 
-function doIt($styles, $classes) {
-  $texy = &new Texy();
-  $texy->modules['TexyFormatterModule']->baseIndent  = 1;
-  $texy->allowClasses = $classes;   // true or list of allowed classes
-  $texy->allowStyles  = $styles;    // true or list of allowed styles
+function doIt() {
+  global $texy;
 
   // processing
   $text = file_get_contents('sample.texy');
@@ -60,15 +64,18 @@ function doIt($styles, $classes) {
 
 
 echo '<h2>mode: Styles and Classes allowed (default)</h2>';
-doIt(true, true);
+$texy->allowClasses = true;
+$texy->allowStyles  = true;
+doIt();
 
 echo '<h2>mode: Styles and Classes disabled</h2>';
-doIt(false, false);
+$texy->allowClasses = false;
+$texy->allowStyles  = false;
+doIt();
 
-echo '<h2>mode: Selective</h2>';
-doIt(
-  array('color'),
-  array('one', '#id')
-);
+echo '<h2>mode: Custom</h2>';
+$texy->allowClasses = array('one', '#id');
+$texy->allowStyles  = array('color');
+doIt();
 
 ?>

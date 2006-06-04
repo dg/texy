@@ -5,7 +5,7 @@
  *   TEXY!  REGULAR EXPRESSIONS
  * ------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -39,11 +39,6 @@ if (!defined('TEXY_XHTML'))
   define ('TEXY_XHTML', true);     // for empty elements, like <br /> vs. <br>
 
 
-// SECURITY LEVELS
-define('TEXY_LEVEL_TRUST_ME',         1);  // all possibilites are permitted
-define('TEXY_LEVEL_SAFE',             2);  // only explicitly defined possibilites are permitted
-define('TEXY_LEVEL_DENIED',           3);  // all is denied
-
 
 // MODIFIERS - ALIGN
 define('TEXY_HALIGN_LEFT',      1);
@@ -68,6 +63,16 @@ define('TEXY_WHOLE',           1);
 define('TEXY_OPEN',            2);
 define('TEXY_CLOSE',           3);
 
+define('TEXY_CONTENT_NONE',    1);
+define('TEXY_CONTENT_TEXTUAL', 2);
+define('TEXY_CONTENT_HTML',    3);
+
+
+
+define('TEXY_ELEMENT_VALID',   3);
+define('TEXY_ELEMENT_BLOCK',   1 << 0);
+define('TEXY_ELEMENT_INLINE',  1 << 1);
+define('TEXY_ELEMENT_EMPTY',   1 << 2);
 
 
 

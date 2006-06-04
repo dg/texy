@@ -5,7 +5,7 @@
  *   HORIZONTAL LINE - TEXY! DEFAULT MODULE
  * ------------------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -58,7 +58,7 @@ class TexyHorizlineModule extends TexyModule {
    *            * * * * * * * * * * * * * *
    *
    */
-  function &processBlock(&$blockParser, &$matches) {
+  function processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
     list($match, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => ---
@@ -69,7 +69,7 @@ class TexyHorizlineModule extends TexyModule {
 
     $el = &new TexyHorizLineElement($this->texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-    return $el;
+    $blockParser->addChildren($el);
   }
 
 

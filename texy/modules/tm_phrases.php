@@ -5,7 +5,7 @@
  *   PHRASES - TEXY! DEFAULT MODULE
  * ----------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -107,7 +107,7 @@ class TexyPhrasesModule extends TexyModule {
     $el->tag = $tag;
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
     if ($tag == 'abbr') $el->modifier->title = $mAdditional;
-    return $el->hash($lineParser->element, $mContent);
+    return $el->addTo($lineParser->element, $mContent);
   }
 
 
@@ -132,9 +132,9 @@ class TexyPhrasesModule extends TexyModule {
     $el2 = &new TexyInlineTagElement($this->texy);
     $el2->tag = 'em';
 
-    return $el->hash(
+    return $el->addTo(
                $lineParser->element,
-               $el2->hash($lineParser->element, $mContent)
+               $el2->addTo($lineParser->element, $mContent)
     );
   }
 
@@ -155,27 +155,9 @@ class TexyPhrasesModule extends TexyModule {
     $el = &new TexyInlineTagElement($this->texy);
     $el->tag = 'acronym';
     $el->modifier->title = $mExplain;
-    return $el->hash($lineParser->element, $mAcronym);
+    return $el->addTo($lineParser->element, $mAcronym);
   }
 
-
-
-
-
-  /***
-   * User callback - PROTECT PHRASE
-   * not used by Texy!
-   * @return string
-   */
-  function protectPhrase(&$lineParser, &$matches, $dohtmlChars = true) {
-    list($match) = $matches;
-
-    $el = &new TexyInlineElement($this->texy);
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-    $el->content = $dohtmlChars ? Texy::htmlChars($match) : $match;
-
-    return $el->hash($lineParser->element);
-  }
 
 
 } // TexyPhrasesModule

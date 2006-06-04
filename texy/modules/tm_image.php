@@ -5,7 +5,7 @@
  *   IMAGES - TEXY! DEFAULT MODULE
  * ---------------------------------
  *
- * Version 0.9 beta
+ * Version 1 Release Candidate
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>
  * Web: http://www.texy.info/
@@ -36,12 +36,12 @@ if (!defined('TEXY')) die();
 class TexyImageModule extends TexyModule {
   // options
   var $allowed    = true;          // generally disable / enable images
-  var $root       = 'images/';     // root for relative images
-  var $linkRoot   = 'images/';     // root for linked images
+  var $root       = 'images/';     // root of relative images (http)
+  var $linkedRoot = 'images/';     // root of linked images (http)
+  var $rootPrefix = '';            // physical location on server
   var $leftClass  = '';            // left-floated image modifier
   var $rightClass = '';            // right-floated image modifier
   var $defaultAlt = 'image';       // default image alternative text
-
 
   // private
   var $references  = array();      // references: 'home' => TexyImageReference
@@ -57,6 +57,10 @@ class TexyImageModule extends TexyModule {
   function init() {
     // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
     $this->registerLinePattern('processLine',     '#'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?()#U');
+
+    Texy::adjustDir($this->root);
+    Texy::adjustDir($this->linkedRoot);
+    Texy::adjustDir($this->rootPrefix);
   }
 
 
@@ -172,16 +176,17 @@ class TexyImageModule extends TexyModule {
       if ($mLink == ':') {
         $elImage->requireLinkImage();
         $elLink->link->copyFrom($elImage->linkImage);
-      } else
+      } else {
         $elLink->setLinkRaw($mLink);
+      }
 
-      return $elLink->hash(
+      return $elLink->addTo(
                          $lineParser->element,
-                         $elImage->hash($lineParser->element)
+                         $elImage->addTo($lineParser->element)
                       );
     }
 
-    return $elImage->hash($lineParser->element);
+    return $elImage->addTo($lineParser->element);
   }
 
 
@@ -224,7 +229,7 @@ class TexyImageReference {
 /**
  * HTML ELEMENT IMAGE
  */
-class TexyImageElement extends TexyInlineElement {
+class TexyImageElement extends TexyTextualElement {
   var $parentModule;
   var $tag = 'img';
 
@@ -235,7 +240,7 @@ class TexyImageElement extends TexyInlineElement {
 
   // constructor
   function TexyImageElement(&$texy) {
-    parent::TexyInlineElement($texy);
+    parent::TexyTextualElement($texy);
     $this->parentModule = & $texy->modules['TexyImageModule'];
 
     $this->image = & $texy->createURL();
@@ -245,7 +250,7 @@ class TexyImageElement extends TexyInlineElement {
     $this->overImage->root = $this->parentModule->root;
 
     $this->linkImage = & $texy->createURL();
-    $this->linkImage->root = $this->parentModule->linkRoot;
+    $this->linkImage->root = $this->parentModule->linkedRoot;
   }
 
 
@@ -268,6 +273,19 @@ class TexyImageElement extends TexyInlineElement {
   }
 
 
+  function setSize($width, $height) {
+    $width = abs((int) $width);
+    $height = abs((int) $height);
+
+    if ($width && $height) {
+      $this->modifier->extra['width'] = $width;
+      $this->modifier->extra['height'] = $height;
+    } else {
+      unset($this->modifier->extra['width']);
+      unset($this->modifier->extra['height']);
+    }
+  }
+
 
   // private
   function setImagesRaw($URLs) {
@@ -278,6 +296,13 @@ class TexyImageElement extends TexyInlineElement {
     }
 
     $URLs = explode('|', $URLs . '||');
+
+    // dimensions
+    if (preg_match('#^(.*) (\d+) *x *(\d+) *()$#U', $URLs[0], $matches)) {
+      $URLs[0] = $matches[1];
+      $this->setSize($matches[2], $matches[3]);
+    }
+
     $this->setImages($URLs[0], $URLs[1], $URLs[2]);
   }
 
@@ -285,11 +310,12 @@ class TexyImageElement extends TexyInlineElement {
 
 
   function generateTag(&$tag, &$attr) {
-    if (!$this->image->URL) {
+    if (!$this->image->URL) {  // image URL is required
       $tag = '';
       return;
     }
 
+    // modifiers
     $modifier = & $this->modifier;
     if ($modifier->hAlign == TEXY_HALIGN_LEFT) {
       if ($this->parentModule->leftClass)
@@ -306,20 +332,40 @@ class TexyImageElement extends TexyInlineElement {
     }
     unset($modifier->styles['text-align']);
 
+    // width x height generate
+    $this->requireSize();
+
+    // tag generate
     parent::generateTag($tag, $attr);
 
+    // attribute generate
     $this->texy->summary->images[] = $attr['src'] = $this->image->URL;
+
+    // onmouseover actions generate
     if ($this->overImage->URL) {
       $attr['onmouseover'] = 'this.src=\''.$this->overImage->URL.'\'';
       $attr['onmouseout'] = 'this.src=\''.$this->image->URL.'\'';
       $this->texy->summary->preload[] = $this->overImage->URL;
     }
 
+    // alternative text generate
     $attr['alt'] = $attr['title'] ? $attr['title']  : $this->parentModule->defaultAlt;
     unset($attr['title']);
   }
 
 
+
+  function requireSize() {
+    if (isset($this->modifier->extra['width'])) return;
+
+    $file = $this->parentModule->rootPrefix . $this->image->URL;
+    if (!is_file($file)) return false;
+
+    $size = getImageSize($file);
+    if (!is_array($size)) return false;
+
+    $this->setSize($size[0], $size[1]);
+  }
 
 
   function requireLinkImage() {
