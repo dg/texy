@@ -128,7 +128,6 @@ class TexyImageModule extends TexyModule
 
 
 //        $elImage = &$this->handleReference($mURLs,
-
         $elImage = &new TexyImageElement($this->texy);
         $elImage->setImagesRaw($mURLs);
         $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);

@@ -31,6 +31,7 @@ class TexyDOMElement
 {
     var $texy; // parent Texy! object
     var $contentType = TEXY_CONTENT_NONE;
+    var $hash;
 
 
     function __construct(&$texy)
@@ -61,6 +62,19 @@ class TexyDOMElement
     function toHTML()
     {
     }
+
+
+    /**
+     * @return string
+     */
+    function toString($opening = NULL)
+    {
+        if (!$this->hash)
+            return $this->hash = $this->texy->generateHash($this, $this->contentType, $opening);
+
+        return $this->hash;
+    }
+
 
 
     // for easy Texy! DOM manipulation
@@ -244,7 +258,6 @@ class TexyBlockElement extends TexyHTMLElement
  */
 class TexyTextualElement extends TexyHTMLElement
 {
-    var $_children = array();
     var $content;                    // string
     var $htmlSafe    = FALSE;        // is content HTML-safe?
 
@@ -280,7 +293,7 @@ class TexyTextualElement extends TexyHTMLElement
         if ($this->_children) {
             $table = array();
             foreach (array_keys($this->_children) as $key) {
-                $this->_children[$key]->behaveAsOpening = TexyTextualElement::isHashOpening($key);
+                $this->_children[$key]->behaveAsOpening = Texy::isHashOpening($key);
                 $table[$key] = $this->_children[$key]->toHTML();
             }
 

@@ -338,6 +338,16 @@ class Texy
      */
     function toHTML()
     {
+        if ($this->hashList) {
+            $table = array();
+            foreach (array_keys($this->_children) as $key) {
+                $this->hashList[$key]->behaveAsOpening = Texy::isHashOpening($key);
+                $table[$key] = $this->_children[$key]->toHTML();
+            }
+
+            return strtr($content, $table);
+        }
+
         return $this->DOM->toHTML();
     }
 
@@ -486,6 +496,34 @@ class Texy
             $this->$key = NULL;
 
         if (PHP_VERSION < 5) ${'this'.''} = NULL;
+    }
+
+
+
+
+
+    var $hashList = array();
+    /**
+     * Generate unique HASH key - useful for freezing (folding) some substrings
+     * Key consist of unique chars \x19, \x1B-\x1E (noncontent) (or \x1F detect opening tag)
+     *                             \x1A, \x1B-\x1E (with content)
+     * @return string
+     */
+    function generateHash($element, $contentType = NULL, $opening = NULL)
+    {
+        $border = ($contentType == TEXY_CONTENT_NONE) ? "\x19" : "\x1A";
+        $hash = $border . ($opening ? "\x1F" : "") . strtr(base_convert(count($this->hashList), 10, 4), '0123', "\x1B\x1C\x1D\x1E") . $border;
+        $this->hashList[$hash] = $element;
+        return $hash;
+    }
+
+
+    /**
+     * @static
+     */
+    function isHashOpening($hash)
+    {
+        return $hash{1} == "\x1F";
     }
 
 
