@@ -45,8 +45,8 @@ class TexyLinkModule extends TexyModule {
   var $references      = array();                     // references: 'home' => TexyLinkReference
   var $userReferences;                                // function &myUserFunc(&$texy, $refName): returns TexyLinkReference (or false)
   var $imageModuleName = 'images';                    // $texy->modules[NAME]
-  var $_disableRefs = false;                          // prevent recurse calling
-
+  var $_disableRefs    = false;                       // prevent recurse calling
+  var $_backupReferences;
 
 
   /***
@@ -125,11 +125,21 @@ class TexyLinkModule extends TexyModule {
 
 
 
+  /***
+   * Forget all references created during last parse()
+   */
+  function forgetReferences() {
+    $this->references = $this->_backupReferences;
+  }
+
+
 
   /***
    * Preprocessing
    */
   function preProcess(&$text) {
+    $this->_backupReferences = $this->references;
+
     // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
     $text = preg_replace_callback('#^\[([^\[\]\#\?\*\n]+)\]: +('.TEXY_PATTERN_LINK_IMAGE.'|(?-U)(?!\[)\S+(?U))(\ .+)?\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, '_replaceReference'), $text);
   }

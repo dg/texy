@@ -133,6 +133,7 @@ class TexyModifier {
     $this->vAlign = null;
     $this->title = null;
     $this->styles = array();
+    $this->extra = array();
   }
 
 

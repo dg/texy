@@ -166,10 +166,12 @@ class TexyHTMLTagModule extends TexyModule {
           break;
 
        case 'a':
-          if (!isset($attr['href'])) return $match;
-          $url = &$this->texy->createURL();
-          $url->set($attr['href']);
-          $this->texy->summary->links[] = $attr['href'] = $url->URL;
+          if (count($attr) == 0) return $match;
+          if (isset($attr['href'])) {
+            $url = &$this->texy->createURL();
+            $url->set($attr['href']);
+            $this->texy->summary->links[] = $attr['href'] = $url->URL;
+          }
       }
     }
 

@@ -55,7 +55,8 @@ class TexyListModule extends TexyModule {
    * Module initialization.
    */
   function init() {
-    $this->registerBlockPattern('processBlock', '#^(\*|\-|\+|\d+\.|\d+\)|[a-zA-Z]+\)|[IVX]+\.)\ +(.*)MODIFIER_H?()$#mU');
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                                                     // .{color: red}
+                                              . '(\*|\-|\+|\d+\.|\d+\)|[a-zA-Z]+\)|[IVX]+\.)\ +(.*)MODIFIER_H?()$#mU');   // - item
   }
 
 
@@ -72,17 +73,22 @@ class TexyListModule extends TexyModule {
    */
   function &processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
-    list($match, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
-    //    [1] => * + - 1. 1) a) A) IV.
-    //    [2] => ...
-    //    [3] => (title)
-    //    [4] => [class]
-    //    [5] => {style}
-    //    [6] => >
+    list($match, $mModList1, $mModList2, $mModList3, $mModList4, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+    //    [1] => (title)
+    //    [2] => [class]
+    //    [3] => {style}
+    //    [4] => >
+
+    //    [5] => * + - 1. 1) a) A) IV.
+    //    [6] => ...
+    //    [7] => (title)
+    //    [8] => [class]
+    //    [9] => {style}
+    //   [10] => >
 
     $texy = & $this->texy;
     $el = &new TexyListElement($texy);
-    $el->modifier->copyFrom($blockParser->modifier);
+    $el->modifier->setProperties($mModList1, $mModList2, $mModList3, $mModList4);
     do {
       $type = '\*';       if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_UNORDERED; break; }
       $type = '\-';       if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_UNORDERED; break; }

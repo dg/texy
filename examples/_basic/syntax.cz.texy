@@ -216,6 +216,11 @@ A další: ^^superscript^^ vs. __subscript__
 
 Kód: `<br />`
 
+Zmìna znaèky pro frázi 'kód':
+`=kbd
+
+A pak: `Ctrl-Alt-Del`
+
 
 s modifikátory
 --------------

@@ -41,7 +41,8 @@ class TexyTableModule extends TexyModule {
    * Module initialization.
    */
   function init() {
-    $this->registerBlockPattern('processBlock', '#^\|(.+)(?:|\|\ *MODIFIER_HV?)()$#mU');
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_HV\n)?'      // .{color: red}
+                                              . '(\|.*)$#mU');              // | ....
   }
 
 
@@ -60,10 +61,17 @@ class TexyTableModule extends TexyModule {
    */
   function &processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
+    list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5, $mRow) = $matches;
+    //    [1] => (title)
+    //    [2] => [class]
+    //    [3] => {style}
+    //    [4] => >
+    //    [5] => _
+    //    [6] => | ....
 
     $texy = & $this->texy;
     $el = &new TexyTableElement($texy);
-    $el->modifier->copyFrom($blockParser->modifier);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
     $el->colsCount = 0;
 
     $head = false;
@@ -71,6 +79,7 @@ class TexyTableModule extends TexyModule {
     $elField = null;
     $elRow = null;
 
+    preg_match('#^\|(.+)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $mRow, $matches);
     do {
       list($match, $mContent, $mModRow1, $mModRow2, $mModRow3, $mModRow4, $mModRow5) = $matches;
       //    [1] => ....

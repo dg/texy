@@ -45,7 +45,6 @@ if (!defined('TEXY')) die();
  *   ~span~
  */
 class TexyPhrasesModule extends TexyModule {
-  var $codeTag = 'code';  // default tag for `...`
 
 
   /***
@@ -53,9 +52,6 @@ class TexyPhrasesModule extends TexyModule {
    */
   function init() {
     $CHAR = '['.TEXY_CHAR.']';
-
-    // code phrase ` .... `
-    $this->registerLinePattern('processCode',     '#\`(\S[^'.TEXY_HASH.']*)MODIFIER?(?<!\ )\`()#U');
 
     // strong & em speciality *** ... ***
     $this->registerLinePattern('processPhraseStrongEm', '#(?<!\*)\*\*\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*\*\*(?!\*)()#U');
@@ -117,32 +113,6 @@ class TexyPhrasesModule extends TexyModule {
 
 
 
-  /***
-   * Callback function: `.... .(title)[class]{style}`
-   * @return string
-   */
-  function processCode(&$lineParser, &$matches) {
-    list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
-    //    [1] => ...
-    //    [2] => (title)
-    //    [3] => [class]
-    //    [4] => {style}
-
-    $texy = &$this->texy;
-    $el = &new TexyInlineElement($texy);
-    $el->textualContent = true;
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-    $el->setContent($mContent);
-    $el->tag = $this->codeTag;
-
-    if (isset($texy->modules['TexyLongWordsModule']))
-      $texy->modules['TexyLongWordsModule']->inlinePostProcess($el->content);
-
-    return $el->hash($lineParser->element);
-  }
-
-
-
 
 
   /***
@@ -193,7 +163,7 @@ class TexyPhrasesModule extends TexyModule {
 
 
   /***
-   * User callback - PROTECT CODE
+   * User callback - PROTECT PHRASE
    * not used by Texy!
    * @return string
    */

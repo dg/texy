@@ -40,7 +40,7 @@ class TexyGenericBlockModule extends TexyModule {
    * Module initialization.
    */
   function init() {
-    $this->registerBlockPattern('processBlock', '#^(.*)MODIFIER_H?(?<!^)()$#mU');
+    $this->registerBlockPattern('processBlock', '#^(.+)MODIFIER_H?()$#mU');
   }
 
 
@@ -55,7 +55,7 @@ class TexyGenericBlockModule extends TexyModule {
    *
    */
   function &processBlock(&$blockParser, &$matches) {
-    list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+    list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
     //    [1] => ...
     //    [2] => (title)
     //    [3] => [class]
@@ -63,18 +63,9 @@ class TexyGenericBlockModule extends TexyModule {
     //    [5] => >
 
 
-    if ($match == '') return;  // BLANK LINE
-
-    if ($mContent == '') {     // MODIFIER LINE     .(title)[class]{style}<
-      $blockParser->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-      $blockParser->modifierJustUpdated = 1;
-      return;
-    }
-
     // PARAGRAPH or DIV
 
     $el = &new TexyGenericBlockElement($this->texy);
-    $el->modifier->copyFrom($blockParser->modifier);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
     $text = trim($mContent);
@@ -89,7 +80,7 @@ class TexyGenericBlockModule extends TexyModule {
 
     $el->parse($text);
     if ($el->textualContent) $el->tag = 'p';
-    elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4 || $mMod5) $el->tag = 'div';
+    elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
     else $el->tag = '';
 
     return $el;

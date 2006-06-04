@@ -46,6 +46,7 @@ class TexyImageModule extends TexyModule {
   // private
   var $references  = array();      // references: 'home' => TexyImageReference
   var $userReferences;             // function &myUserFunc(&$texy, $refName): returns TexyImageReference (or false)
+  var $_backupReferences;
 
 
 
@@ -102,9 +103,20 @@ class TexyImageModule extends TexyModule {
 
 
   /***
+   * Forget all references created during last parse()
+   */
+  function forgetReferences() {
+    $this->references = $this->_backupReferences;
+  }
+
+
+
+  /***
    * Preprocessing
    */
   function preProcess(&$text) {
+    $this->_backupReferences = $this->references;
+
     // [*image*]: urls .(title)[class]{style}
     $text = preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, '_replaceReference'), $text);
   }

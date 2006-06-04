@@ -1,9 +1,9 @@
 <?php
 
 /**
- * -------------------------------
+ * ----------------------------------
  *   CODE - TEXY! DEFAULT MODULE
- * -------------------------------
+ * ----------------------------------
  *
  * Version 0.9 beta
  *
@@ -30,156 +30,71 @@ if (!defined('TEXY')) die();
 
 
 
-
-
 /**
- * CODE MODULE CLASS
+ * CODE PHRASE MODULE CLASS
+ *
+ *   `....`
  */
 class TexyCodeModule extends TexyModule {
-  var $userFunction;                          // function &myUserFunc(&$element)
-  var $level         = TEXY_LEVEL_TRUST_ME;   // level of benevolence
-
-
-  // constructor
-  function TexyCodeModule(&$texy) {
-    parent::TexyModule($texy);
-    $this->userFunction = array(&$this, 'userFunction');
-  }
+  var $tag = 'code';  // default tag for `...`
 
 
   /***
    * Module initialization.
    */
   function init() {
-    $this->registerBlockPattern('processBlock',   '#^/--+(code|samp|kbd|var|dfn|notexy|div| |$) *(\S*)MODIFIER_H?\n(.*\n)?\\\\--+$()#mUsi');
+    $this->registerLinePattern('processCode',     '#\`(\S[^'.TEXY_HASH.']*)MODIFIER?(?<!\ )\`()#U');
+    $this->registerBlockPattern('processBlock',   '#^`=(none|code|kbd|samp|var|span)$#mUi');
   }
 
 
 
   /***
-   * Callback function (for blocks)
-   * @return object
-   *
-   *            /-----code html .(title)[class]{style}
-   *              ....
-   *              ....
-   *            \----
-   *
+   * Callback function `=code
    */
   function &processBlock(&$blockParser, &$matches) {
-    list($match, $mType, $mLang, $mMod1, $mMod2, $mMod3, $mMod4, $mContent) = $matches;
-    //    [1] => code
-    //    [2] => lang ?
-    //    [3] => (title)
-    //    [4] => [class]
-    //    [5] => {style}
-    //    [6] => >
-    //    [7] => .... content
+    list($match, $mTag) = $matches;
+    //    [1] => ...
 
-    $mType = strtolower($mType);
-    $mLang = strtolower($mLang);
-    if ($mType==' ') $mType = 'pre';
-    $mContent = trim($mContent, "\n");
-
-    switch ($mType) {
-     case 'div':
-         $el = &new TexyBlockElement($this->texy);
-         $el->tag = 'div';
-         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-         // outdent
-         $spaces = 0; while ($mContent{$spaces} == ' ') $spaces++;
-         if ($spaces) $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
-
-         $el->parse($mContent);
-         return $el;
-
-     case 'notexy':
-         $el = &new TexyNoTexyElement($this->texy);
-         if ($this->level == TEXY_LEVEL_SAFE) $mContent = Texy::htmlChars($mContent);
-         $el->content = $mLang == 'br' ? nl2br($mContent) : $mContent;
-         return $el;
-
-     default:
-         $el = &new TexyCodeBlockElement($this->texy);
-         $el->modifier->classes[] = $mLang;
-         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-         $el->type = $mType;
-         $el->lang = $mLang;
-         // outdent
-         $spaces = 0; while ($mContent{$spaces} == ' ') $spaces++;
-         if ($spaces) $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
-         $el->content = $mContent;
-
-         call_user_func_array($this->userFunction, array(&$el));
-
-         return $el;
-
-    } // switch
+    $this->tag = strtolower($mTag);
+    if ($this->tag == 'none') $this->tag = '';
+    return $el;
   }
+
 
 
 
   /***
-   * USER Callback function (default)
+   * Callback function: `.... .(title)[class]{style}`
+   * @return string
    */
-  function userFunction(&$element) {
-    $element->setContent($element->content);
+  function processCode(&$lineParser, &$matches) {
+    list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
+    //    [1] => ...
+    //    [2] => (title)
+    //    [3] => [class]
+    //    [4] => {style}
+
+    $texy = &$this->texy;
+    $el = &new TexyInlineElement($texy);
+    $el->textualContent = true;
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
+    $el->setContent($mContent);
+    $el->tag = $this->tag;
+
+    if (isset($texy->modules['TexyLongWordsModule']))
+      $texy->modules['TexyLongWordsModule']->inlinePostProcess($el->content);
+
+    return $el->hash($lineParser->element);
   }
+
+
+
+
 
 
 } // TexyCodeModule
 
 
-
-
-
-
-
-/****************************************************************************
-                               TEXY! DOM ELEMENTS                          */
-
-
-
-
-
-/**
- * HTML ELEMENT PRE + CODE
- */
-class TexyCodeBlockElement extends TexyInlineElement {
-  var $tag = 'pre';
-  var $lang;
-  var $type;
-
-
-  function toHTML() {
-    $this->generateTag($tag, $attr);
-    if ($this->hidden) return;
-
-    return   Texy::openingTag($tag, $attr)
-           . Texy::openingTag($this->type)
-           . $this->content
-           . Texy::closingTag($this->type)
-           . Texy::closingTag($tag);
-  }
-
-} // TexyCodeBlockElement
-
-
-
-
-
-
-/**
- * NO-TEXY (unformatted text)
- */
-class TexyNoTexyElement extends TexyDOMElement {
-  var $content;
-
-
-  function toHTML() {
-    return $this->content;
-  }
-
-} // TexyNoTexyElement
 
 ?>

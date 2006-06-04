@@ -215,6 +215,11 @@ And other: ^^superscript^^ vs. __subscript__
 
 Code: `<br />`
 
+Change code-phrases's tag:
+`=kbd
+
+And now: `Ctrl-Alt-Del`
+
 
 with modifiers
 --------------

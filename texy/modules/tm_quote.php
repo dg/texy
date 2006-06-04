@@ -41,7 +41,7 @@ class TexyBlockQuoteModule extends TexyModule {
    * Module initialization.
    */
   function init() {
-    $this->registerBlockPattern('processBlock', '#^>(\ +|:)(\S.*)$#mU');
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
     $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)'.TEXY_PATTERN_LINK.'?()#U', 'q');
   }
 
@@ -63,6 +63,8 @@ class TexyBlockQuoteModule extends TexyModule {
 
     $texy = & $this->texy;
     $el = &new TexyQuoteElement($texy);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
+
     if ($mLink) {
       $el->cite = & $texy->createURL();
       $el->cite->set($mLink);
@@ -85,13 +87,17 @@ class TexyBlockQuoteModule extends TexyModule {
    */
   function &processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
-    list($match, $mSpaces, $mContent) = $matches;
-    //    [1] => spaces |
-    //    [2] => ... / LINK
+    list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
+    //    [1] => (title)
+    //    [2] => [class]
+    //    [3] => {style}
+    //    [4] => <>
+    //    [5] => spaces |
+    //    [6] => ... / LINK
 
     $texy = & $this->texy;
     $el = &new TexyBlockQuoteElement($texy);
-    $el->modifier->copyFrom($blockParser->modifier);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
     $content = '';
     $linkTarget = '';

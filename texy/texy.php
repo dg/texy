@@ -38,6 +38,7 @@ require_once('texy-url.php');            // object encapsulate of URL
 require_once('texy-element.php');        // Texy! DOM element's base class
 require_once('texy-module.php');         // Texy! module base class
 require_once('modules/tm_code.php');
+require_once('modules/tm_block.php');
 require_once('modules/tm_definition-list.php');
 require_once('modules/tm_formatter.php');
 require_once('modules/tm_generic-block.php');
@@ -137,6 +138,7 @@ class Texy {
     $this->registerModule('TexyCodeModule');
 
     // block parsing - order is not much important
+    $this->registerModule('TexyBlockModule');
     $this->registerModule('TexyHeadingModule');
     $this->registerModule('TexyHorizlineModule');
     $this->registerModule('TexyBlockQuoteModule');
@@ -169,11 +171,10 @@ class Texy {
 
     foreach (array_keys($this->modules) as $name) {
       $module = & $this->modules[$name];
-      if (is_a($module, 'TexyModule')) {
-        $this->modules[$name]->texy = & $this; // TextPattern bug !!!
-
-        $this->modules[$name]->init();    // init modules
-      } else unset($this->modules[$name]);
+      if (is_a($module, 'TexyModule'))
+        $module->init();    // init modules
+      else
+        unset($this->modules[$name]);
     }
 
     $this->inited = true;
@@ -407,9 +408,6 @@ class TexyBlockParser {
   var $text;      // text splited in array of lines
   var $offset;
 
-  var $modifier;  // TexyModifier
-  var $modifierJustUpdated;
-
 
   // constructor
   function TexyBlockParser(& $element) {
@@ -442,14 +440,11 @@ class TexyBlockParser {
     $this->offset = 0;
     $children = & $this->element->children;
     $children = array();
-    $this->modifier = & $texy->createModifier();
 
     $arrPos = array_fill(0, count($texy->patternsBlock), -1);
     $arrMatches = array();
 
     do {
-      if (($this->modifierJustUpdated--) == 0) $this->modifier->clear();
-
       $minKey = -1;
       $minPos = strlen($this->text);
 

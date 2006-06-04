@@ -43,8 +43,9 @@ class TexyDefinitionListModule extends TexyListModule {
    * Module initialization.
    */
   function init() {
-    $this->registerBlockPattern('processBlock', '#^(\S.*)\:\ *MODIFIER_H?' . TEXY_NEWLINE
-                                               .'(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mU');
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                         // .{color:red}
+                                              . '(\S.*)\:\ *MODIFIER_H?\n'                    // Term:
+                                              . '(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mU');   //    - description
   }
 
 
@@ -60,25 +61,32 @@ class TexyDefinitionListModule extends TexyListModule {
    */
   function &processBlock(&$blockParser, &$matches) {
     if (!$this->allowed) return false;
-    list($match, $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4, $mSpaces, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
-    //    [1] => ...
-    //    [2] => (title)
-    //    [3] => [class]
-    //    [4] => {style}
-    //    [5] => >
+    list($match, $mModList1, $mModList2, $mModList3, $mModList4,
+                 $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
+                 $mSpaces, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+    //    [1] => (title)
+    //    [2] => [class]
+    //    [3] => {style}
+    //    [4] => >
 
-    //    [6] => space
-    //    [7] => - * +
-    //    [8] => ...
-    //    [9] => (title)
-    //    [10] => [class]
-    //    [11] => {style}
-    //    [12] => >
+    //    [5] => ...
+    //    [6] => (title)
+    //    [7] => [class]
+    //    [8] => {style}
+    //    [9] => >
+
+    //   [10] => space
+    //   [11] => - * +
+    //   [12] => ...
+    //   [13] => (title)
+    //   [14] => [class]
+    //   [15] => {style}
+    //   [16] => >
 
     $texy = & $this->texy;
     $el = &new TexyListElement($texy);
     $el->type = TEXY_LIST_DEFINITION;
-    $el->modifier->copyFrom($blockParser->modifier);
+    $el->modifier->setProperties($mModList1, $mModList2, $mModList3, $mModList4);
 
     $reTerm = '#^(\S.*)\:\ *MODIFIER_H?' . TEXY_NEWLINE .'(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mUA';
 

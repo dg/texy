@@ -76,7 +76,7 @@ function myUserFunc(&$element) {
 
 $styleSheet = 'pre { padding:10px } ';
 $texy = &new Texy();
-$texy->modules['TexyCodeModule']->userFunction = 'myUserFunc';
+$texy->modules['TexyBlockModule']->userFunction = 'myUserFunc';
 
 
 // processing
