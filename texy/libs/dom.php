@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -24,12 +24,12 @@ if (!defined('TEXY')) die();
 
 
 /**
- * Texy! ELEMENT BASE CLASS
- * ------------------------
+ * DOM element base class
+ * @abstract
  */
-class TexyDOMElement {
+class TexyDOMElement
+{
     var $texy; // parent Texy! object
-    var $hidden;
     var $contentType = TEXY_CONTENT_NONE;
 
 
@@ -40,13 +40,13 @@ class TexyDOMElement {
 
 
     /**
-     * PHP4 compatible constructor
+     * PHP4-only constructor
      * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
      */
     function TexyDOMElement(&$texy)
     {
         // generate references
-        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
 
         // call PHP5 constructor
         call_user_func_array(array(&$this, '__construct'), array(&$texy));
@@ -54,7 +54,10 @@ class TexyDOMElement {
 
 
 
-    // convert element to HTML string
+    /**
+     * Convert element to HTML string
+     * @abstract
+     */
     function toHTML()
     {
     }
@@ -78,13 +81,11 @@ class TexyDOMElement {
 
 
 /**
- * HTML ELEMENT BASE CLASS
- * -----------------------
- *
  * This elements represents one HTML element
- *
+ * @abstract
  */
-class TexyHTMLElement extends TexyDOMElement {
+class TexyHTMLElement extends TexyDOMElement
+{
     var $modifier;
     var $tag;
 
@@ -98,6 +99,9 @@ class TexyHTMLElement extends TexyDOMElement {
 
 
 
+    /**
+     * Generate HTML element tags
+     */
     function generateTags(&$tags)
     {
         $tags = (array) $tags;
@@ -117,14 +121,21 @@ class TexyHTMLElement extends TexyDOMElement {
     }
 
 
+
+    /**
+     * Generate HTML element content
+     * @abstract
+     */
     function generateContent() { }
 
 
-    // convert element to HTML string
+
+    /**
+     * Convert element to HTML string
+     */
     function toHTML()
     {
         $this->generateTags($tags);
-        if ($this->hidden) return;
 
         return TexyHTML::openingTags($tags)
                      . $this->generateContent()
@@ -161,21 +172,23 @@ class TexyHTMLElement extends TexyDOMElement {
 
 
 /**
- * BLOCK ELEMENT BASE CLASS
- * ------------------------
- *
  * This element represent array of other blocks (TexyHTMLElement)
  *
  */
-class TexyBlockElement extends TexyHTMLElement {
-    var $children = array(); // of TexyBlockElement
+class TexyBlockElement extends TexyHTMLElement
+{
+    var $_children = array();
 
 
 
 
+    // $child must be TexyBlockElement or TexyTextualElement
     function appendChild(&$child)
     {
-        $this->children[] = &$child;
+        if (!is_a($child, 'TexyBlockElement') && !is_a($child, 'TexyTextualElement'))
+            die('Only TexyInlineTagElement allowed.');
+
+        $this->_children[] = &$child;
         $this->contentType = max($this->contentType, $child->contentType);
     }
 
@@ -183,8 +196,8 @@ class TexyBlockElement extends TexyHTMLElement {
     function generateContent()
     {
         $html = '';
-        foreach (array_keys($this->children) as $key)
-            $html .= $this->children[$key]->toHTML();
+        foreach (array_keys($this->_children) as $key)
+            $html .= $this->_children[$key]->toHTML();
 
         return $html;
     }
@@ -209,8 +222,8 @@ class TexyBlockElement extends TexyHTMLElement {
         parent::broadcast();
 
         // apply to all children
-        foreach (array_keys($this->children) as $key)
-            $this->children[$key]->broadcast();
+        foreach (array_keys($this->_children) as $key)
+            $this->_children[$key]->broadcast();
     }
 
 }  // TexyBlockElement
@@ -225,14 +238,13 @@ class TexyBlockElement extends TexyHTMLElement {
 
 
 /**
- * LINE OF TEXT
- * ------------
- *
  * This element represent one line of text.
  * Text represents $content and $children is array of TexyInlineTagElement
  *
  */
-class TexyTextualElement extends TexyBlockElement {
+class TexyTextualElement extends TexyHTMLElement
+{
+    var $_children = array();
     var $content;                    // string
     var $htmlSafe    = FALSE;        // is content HTML-safe?
 
@@ -265,10 +277,12 @@ class TexyTextualElement extends TexyBlockElement {
     {
         $content = $this->safeContent(TRUE);
 
-        if ($this->children) {
+        if ($this->_children) {
             $table = array();
-            foreach (array_keys($this->children) as $key)
-                $table[$key] = $this->children[$key]->toHTML( TexyTextualElement::isHashOpening($key) );
+            foreach (array_keys($this->_children) as $key) {
+                $this->_children[$key]->behaveAsOpening = TexyTextualElement::isHashOpening($key);
+                $table[$key] = $this->_children[$key]->toHTML();
+            }
 
             return strtr($content, $table);
         }
@@ -300,7 +314,7 @@ class TexyTextualElement extends TexyBlockElement {
     function hashKey($contentType = NULL, $opening = NULL)
     {
         $border = ($contentType == TEXY_CONTENT_NONE) ? "\x19" : "\x1A";
-        return $border . ($opening ? "\x1F" : "") . strtr(base_convert(count($this->children), 10, 4), '0123', "\x1B\x1C\x1D\x1E") . $border;
+        return $border . ($opening ? "\x1F" : "") . strtr(base_convert(count($this->_children), 10, 4), '0123', "\x1B\x1C\x1D\x1E") . $border;
     }
 
 
@@ -322,16 +336,26 @@ class TexyTextualElement extends TexyBlockElement {
             $keyOpen  = $this->hashKey($child->contentType, TRUE);
             $keyClose = $this->hashKey($child->contentType, FALSE);
 
-            $this->children[$keyOpen]  = &$child;
-            $this->children[$keyClose] = &$child;
+            $this->_children[$keyOpen]  = &$child;
+            $this->_children[$keyClose] = &$child;
             return $keyOpen . $innerText . $keyClose;
         }
 
         $key = $this->hashKey($child->contentType);
-        $this->children[$key] = &$child;
+        $this->_children[$key] = &$child;
         return $key;
     }
 
+
+
+    function broadcast()
+    {
+        parent::broadcast();
+
+        // apply to all children
+        foreach (array_keys($this->_children) as $key)
+            $this->_children[$key]->broadcast();
+    }
 
 
 }  // TexyTextualElement
@@ -343,24 +367,22 @@ class TexyTextualElement extends TexyBlockElement {
 
 
 /**
- * INLINE TAG ELEMENT BASE CLASS
- * -----------------------------
- *
  * Represent HTML tags (elements without content)
  * Used as children of TexyTextualElement
  *
  */
-class TexyInlineTagElement extends TexyHTMLElement {
+class TexyInlineTagElement extends TexyHTMLElement
+{
+    var $behaveAsOpening;
     var $_closingTag;
 
 
 
     // convert element to HTML string
-    function toHTML($opening)
+    function toHTML()
     {
-        if ($opening) {
+        if ($this->behaveAsOpening) {
             $this->generateTags($tags);
-            if ($this->hidden) return;
             $this->_closingTag = TexyHTML::closingTags($tags);
             return TexyHTML::openingTags($tags);
 
@@ -395,7 +417,8 @@ class TexyInlineTagElement extends TexyHTMLElement {
  * Texy! DOM
  * ---------
  */
-class TexyDOM extends TexyBlockElement {
+class TexyDOM extends TexyBlockElement
+{
     var  $elements;
     var  $elementsById;
     var  $elementsByClass;
@@ -450,6 +473,9 @@ class TexyDOM extends TexyBlockElement {
     {
         $html = parent::toHTML();
 
+        $wf = new TexyWellForm();
+        $html = $wf->process($html);
+
             ///////////   POST-PROCESS
         foreach ($this->texy->modules as $id => $foo)
             $this->texy->modules[$id]->postProcess($html);
@@ -499,7 +525,8 @@ class TexyDOM extends TexyBlockElement {
  * Texy! DOM for single line
  * -------------------------
  */
-class TexyDOMLine extends TexyTextualElement {
+class TexyDOMLine extends TexyTextualElement
+{
     var  $elements;
     var  $elementsById;
     var  $elementsByClass;
@@ -529,6 +556,8 @@ class TexyDOMLine extends TexyTextualElement {
     function toHTML()
     {
         $html = parent::toHTML();
+        $wf = new TexyWellForm();
+        $html = $wf->process($html);
         $html = Texy::unfreezeSpaces($html);
         return $html;
     }

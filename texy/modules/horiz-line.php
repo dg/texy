@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,8 +26,10 @@ if (!defined('TEXY')) die();
 /**
  * HORIZONTAL LINE MODULE CLASS
  */
-class TexyHorizLineModule extends TexyModule {
-
+class TexyHorizLineModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
 
     /**
      * Module initialization.
@@ -60,8 +62,13 @@ class TexyHorizLineModule extends TexyModule {
         //    [4] => {style}
         //    [5] => >
 
-        $el = &new TexyHorizLineElement($this->texy);
+        $el = &new TexyBlockElement($this->texy);
+        $el->tag = 'hr';
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+
         $parser->element->appendChild($el);
     }
 
@@ -69,27 +76,6 @@ class TexyHorizLineModule extends TexyModule {
 
 
 } // TexyHorizlineModule
-
-
-
-
-
-
-/***************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
-
-
-
-/**
- * HTML ELEMENT HORIZONTAL LINE
- */
-class TexyHorizLineElement extends TexyBlockElement {
-    var $tag = 'hr';
-
-
-} // TexyHorizLineElement
-
 
 
 

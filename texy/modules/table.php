@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,7 +26,11 @@ if (!defined('TEXY')) die();
 /**
  * TABLE MODULE CLASS
  */
-class TexyTableModule extends TexyModule {
+class TexyTableModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $oddClass     = '';
     var $evenClass    = '';
 
@@ -43,8 +47,12 @@ class TexyTableModule extends TexyModule {
      */
     function init()
     {
-        $this->texy->registerBlockPattern($this, 'processBlock', '#^(?:<MODIFIER_HV>\n)?'      // .{color: red}
-                                                    . '\|.*()$#mU');                // | ....
+        $this->texy->registerBlockPattern(
+            $this,
+            'processBlock',
+            '#^(?:<MODIFIER_HV>\n)?'      // .{color: red}
+          . '\|.*()$#mU'                  // | ....
+        );
     }
 
 
@@ -73,7 +81,6 @@ class TexyTableModule extends TexyModule {
         $texy = & $this->texy;
         $el = &new TexyTableElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-        $parser->element->appendChild($el);
 
         $parser->moveBackward();
 
@@ -104,6 +111,9 @@ class TexyTableModule extends TexyModule {
             }
 
             if ($elRow = &$this->processRow($parser)) {
+                if ($this->handler)
+                    if (call_user_func_array($this->handler, array(&$elRow, 'row')) === FALSE) continue;
+
                 $el->appendChild($elRow);
                 $this->row++;
                 continue;
@@ -111,6 +121,11 @@ class TexyTableModule extends TexyModule {
 
             break;
         }
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el, 'table')) === FALSE) return;
+
+        $parser->element->appendChild($el);
     }
 
 
@@ -186,7 +201,6 @@ class TexyTableModule extends TexyModule {
                 $elField->modifier->copyFrom($this->colModifier[$col]);
             $elField->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
             $elField->parse($mContent);
-//            $elRow->children[$col] = $elField;
             $elRow->appendChild($elField);
             $this->last[$col] = &$elField;
             $col++;
@@ -203,9 +217,6 @@ class TexyTableModule extends TexyModule {
 
 
 
-/***************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
 
 
 
@@ -213,7 +224,8 @@ class TexyTableModule extends TexyModule {
 /**
  * HTML ELEMENT TABLE
  */
-class TexyTableElement extends TexyBlockElement {
+class TexyTableElement extends TexyBlockElement
+{
     var $tag = 'table';
     var $caption;
 
@@ -239,7 +251,8 @@ class TexyTableElement extends TexyBlockElement {
 /**
  * HTML ELEMENT TR
  */
-class TexyTableRowElement extends TexyBlockElement {
+class TexyTableRowElement extends TexyBlockElement
+{
     var $tag = 'tr';
 
 } // TexyTableRowElement
@@ -252,7 +265,8 @@ class TexyTableRowElement extends TexyBlockElement {
 /**
  * HTML ELEMENT TD / TH
  */
-class TexyTableFieldElement extends TexyTextualElement {
+class TexyTableFieldElement extends TexyTextualElement
+{
     var $colSpan = 1;
     var $rowSpan = 1;
     var $isHead;

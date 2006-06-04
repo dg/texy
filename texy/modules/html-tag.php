@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,31 +26,35 @@ if (!defined('TEXY')) die();
 /**
  * HTML TAGS MODULE CLASS
  */
-class TexyHtmlModule extends TexyModule {
+class TexyHtmlModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $allowed;          // allowed tags (TRUE -> all, or array, or FALSE -> none)
                                                  // arrays of safe tags and attributes
     var $allowedComments = TRUE;
     var $safeTags = array(
-            'a'         => array('href', 'rel', 'title', 'lang'),
-            'abbr'      => array('title', 'lang'),
-            'acronym'   => array('title', 'lang'),
-            'b'         => array('title', 'lang'),
-            'br'        => array(),
-            'cite'      => array('title', 'lang'),
-            'code'      => array('title', 'lang'),
-            'dfn'       => array('title', 'lang'),
-            'em'        => array('title', 'lang'),
-            'i'         => array('title', 'lang'),
-            'kbd'       => array('title', 'lang'),
-            'q'         => array('cite', 'title', 'lang'),
-            'samp'      => array('title', 'lang'),
-            'small'     => array('title', 'lang'),
-            'span'      => array('title', 'lang'),
-            'strong'    => array('title', 'lang'),
-            'sub'       => array('title', 'lang'),
-            'sup'       => array('title', 'lang'),
-            'var'       => array('title', 'lang'),
-           );
+        'a'         => array('href', 'rel', 'title', 'lang'),
+        'abbr'      => array('title', 'lang'),
+        'acronym'   => array('title', 'lang'),
+        'b'         => array('title', 'lang'),
+        'br'        => array(),
+        'cite'      => array('title', 'lang'),
+        'code'      => array('title', 'lang'),
+        'dfn'       => array('title', 'lang'),
+        'em'        => array('title', 'lang'),
+        'i'         => array('title', 'lang'),
+        'kbd'       => array('title', 'lang'),
+        'q'         => array('cite', 'title', 'lang'),
+        'samp'      => array('title', 'lang'),
+        'small'     => array('title', 'lang'),
+        'span'      => array('title', 'lang'),
+        'strong'    => array('title', 'lang'),
+        'sub'       => array('title', 'lang'),
+        'sup'       => array('title', 'lang'),
+        'var'       => array('title', 'lang'),
+    );
 
 
 
@@ -98,9 +102,9 @@ class TexyHtmlModule extends TexyModule {
         if (!isset($GLOBALS['TexyHTML::$valid'][$tag])) $tag = $mTag;  // undo lowercase
 
         $empty = ($mEmpty == '/') || isset($GLOBALS['TexyHTML::$empty'][$tag]);
-        $closing = $mClosing == '/';
+        $isOpening = $mClosing != '/';
 
-        if ($empty && $closing)  // error - can't close empty element
+        if ($empty && !$isOpening)  // error - can't close empty element
             return $match;
 
         if (is_array($this->allowed) && !isset($this->allowed[$tag]))  // is element allowed?
@@ -110,7 +114,7 @@ class TexyHtmlModule extends TexyModule {
         $el = &new TexyHtmlTagElement($this->texy);
         $el->contentType = isset($GLOBALS['TexyHTML::$inline'][$tag]) ? TEXY_CONTENT_NONE : TEXY_CONTENT_BLOCK;
 
-        if (!$closing) {  // process attributes
+        if ($isOpening) {  // process attributes
             $attrs = array();
             $allowedAttrs = is_array($this->allowed) ? $this->allowed[$tag] : NULL;
             preg_match_all('#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is', $mAttr, $matchesAttr, PREG_SET_ORDER);
@@ -170,12 +174,15 @@ class TexyHtmlModule extends TexyModule {
 
             if ($empty) $attrs[TEXY_EMPTY] = TRUE;
             $el->tags[$tag] = $attrs;
-            $el->closing  = FALSE;
+            $el->isOpening  = TRUE;
 
         } else { // closing element
             $el->tags[$tag] = FALSE;
-            $el->closing  = TRUE;
+            $el->isOpening  = FALSE;
         }
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return '';
 
         return $parser->element->appendChild($el);
     }
@@ -231,27 +238,22 @@ class TexyHtmlModule extends TexyModule {
 
 
 
-/****************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
 
 
-
-
-class TexyHtmlTagElement extends TexyDOMElement {
+class TexyHtmlTagElement extends TexyDOMElement
+{
     var $tags;
-    var $closing;
+    var $isOpening;
 
 
 
     // convert element to HTML string
     function toHTML()
     {
-        if ($this->hidden) return;
-
-        if ($this->closing)
-            return TexyHTML::closingTags($this->tags);
-        else
+        if ($this->isOpening)
             return TexyHTML::openingTags($this->tags);
+        else
+            return TexyHTML::closingTags($this->tags);
     }
 
 

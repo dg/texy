@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,7 +26,8 @@ if (!defined('TEXY')) die();
 /**
  * AUTOMATIC REPLACEMENTS MODULE CLASS
  */
-class TexyQuickCorrectModule extends TexyModule {
+class TexyQuickCorrectModule extends TexyModule
+{
     // options
     var $doubleQuotes = array('&#8222;', '&#8220;');  // left & right double quote (&bdquo; &ldquo;)
     var $singleQuotes = array('&#8218;', '&#8216;');  // left & right single quote (&sbquo; &lsquo;)

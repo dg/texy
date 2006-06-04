@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -24,7 +24,11 @@ if (!defined('TEXY')) die();
 /**
  * IMAGE WITH DESCRIPTION MODULE CLASS
  */
-class TexyImageDescModule extends TexyModule {
+class TexyImageDescModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $boxClass   = 'image';        // non-floated box class
     var $leftClass  = 'image left';   // left-floated box class
     var $rightClass = 'image right';  // right-floated box class
@@ -35,7 +39,11 @@ class TexyImageDescModule extends TexyModule {
     function init()
     {
         if ($this->texy->imageModule->allowed)
-            $this->texy->registerBlockPattern($this, 'processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?? +\*\*\* +(.*)<MODIFIER_H>?()$#mU');
+            $this->texy->registerBlockPattern(
+                $this,
+                'processBlock',
+                '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?? +\*\*\* +(.*)<MODIFIER_H>?()$#mU'
+            );
     }
 
 
@@ -90,6 +98,9 @@ class TexyImageDescModule extends TexyModule {
         $content .= $el->appendChild($elDesc);
         $el->setContent($content, TRUE);
 
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+
         $parser->element->appendChild($el);
     }
 
@@ -107,11 +118,6 @@ class TexyImageDescModule extends TexyModule {
 
 
 
-/****************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
-
-
 
 
 
@@ -119,7 +125,8 @@ class TexyImageDescModule extends TexyModule {
 /**
  * HTML ELEMENT IMAGE (WITH DESCRIPTION)
  */
-class TexyImageDescElement extends TexyTextualElement {
+class TexyImageDescElement extends TexyTextualElement
+{
 
 
 

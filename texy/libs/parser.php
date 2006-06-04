@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -24,7 +24,8 @@ if (!defined('TEXY')) die();
  * INTERNAL PARSING BLOCK STRUCTURE
  * --------------------------------
  */
-class TexyBlockParser {
+class TexyBlockParser
+{
     var $element;     // TexyBlockElement
     var $text;        // text splited in array of lines
     var $offset;
@@ -37,13 +38,13 @@ class TexyBlockParser {
 
 
     /**
-     * PHP4 compatible constructor
+     * PHP4-only constructor
      * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
      */
     function TexyBlockParser(&$element)
     {
         // generate references
-        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
 
         // call PHP5 constructor
         call_user_func_array(array(&$this, '__construct'), array(&$element));
@@ -163,7 +164,8 @@ class TexyBlockParser {
  * INTERNAL PARSING LINE STRUCTURE
  * -------------------------------
  */
-class TexyLineParser {
+class TexyLineParser
+{
     var $element;   // TexyTextualElement
 
 
@@ -174,13 +176,13 @@ class TexyLineParser {
 
 
     /**
-     * PHP4 compatible constructor
+     * PHP4-only constructor
      * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
      */
     function TexyLineParser(&$element)
     {
         // generate references
-        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
 
         // call PHP5 constructor
         call_user_func_array(array(&$this, '__construct'), array(&$element));

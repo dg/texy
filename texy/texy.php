@@ -12,14 +12,14 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 
 if (version_compare(PHP_VERSION , '4.3.3', '<'))
     die('Texy!: too old version of PHP!');
 
-define('TEXY', 'Version 1.0 (c) David Grudl, http://www.texy.info');
+define('TEXY', 'Version 1.2 (c) David Grudl, http://www.texy.info');
 
 /**
  * Absolute filesystem path to the Texy package
@@ -34,6 +34,7 @@ require_once TEXY_DIR.'libs/module.php';         // Texy! module base class
 require_once TEXY_DIR.'libs/entity.php';         // HTML entity => chars
 require_once TEXY_DIR.'libs/parser.php';         // Texy! parser
 require_once TEXY_DIR.'libs/html.php';
+require_once TEXY_DIR.'libs/wellform.php';
 require_once TEXY_DIR.'modules/block.php';
 require_once TEXY_DIR.'modules/formatter.php';
 require_once TEXY_DIR.'modules/generic-block.php';
@@ -62,87 +63,47 @@ require_once TEXY_DIR.'modules/smilies.php';
  *     $html = $texy->process($text);
  * </code>
  */
-class Texy {
+class Texy
+{
 
-    /**
-     * Use UTF-8? (texy configuration)
-     * @var boolean
-     */
+    /** @var boolean    Use UTF-8? (texy configuration) */
     var $utf = FALSE;
 
-    /**
-     * TAB width (for converting tabs to spaces)
-     * @var int
-     */
+    /** @var int    TAB width (for converting tabs to spaces) */
     var $tabWidth = 8;
 
-    /**
-     * Allowed classes
-     * @var TRUE|FALSE|array
-     */
-    var $allowedClasses;
+    /** @var TRUE|FALSE|array    Allowed classes */
+    var $allowedClasses = TEXY_ALL;
 
-    /**
-     * Allowed inline CSS style
-     * @var TRUE|FALSE|array
-     */
-    var $allowedStyles;
+    /** @var TRUE|FALSE|array    Allowed inline CSS style */
+    var $allowedStyles = TEXY_ALL;
 
-    /**
-     * Allowed HTML tags
-     * @var TRUE|FALSE|array
-     */
+    /** @var TRUE|FALSE|array    Allowed HTML tags */
     var $allowedTags;
 
-    /**
-     * Do obfuscate e-mail addresses?
-     * @var boolean
-     */
+    /** @var boolean    Do obfuscate e-mail addresses? */
     var $obfuscateEmail = TRUE;
 
-    /**
-     * Reference handler
-     * @var callback function &myUserFunc($refName, &$texy): returns object or FALSE
-     */
-    var $referenceHandler;
+    /** @var array    function &myUserFunc($refName, $isImage, &$contentEl, &$texy): returns object or FALSE    Reference handler */
+    var $referenceHandlers = array();
 
-    /**
-     * List of all used modules
-     * @var array
-     */
-    var $modules;
+    var $elementHandlers = array();
 
-    /**
-     * DOM structure for parsed text
-     * @var object
-     */
+    /** @var object    DOM structure for parsed text */
     var $DOM;
 
-    /**
-     * Parsing summary
-     * @var object
-     */
+    /** @var object    Parsing summary */
     var $summary;
 
-    /**
-     * Generated stylesheet
-     * @var string
-     */
-    var $styleSheet;
+    /** @var string    Generated stylesheet */
+    var $styleSheet = '';
 
-    /**
-     * Merge lines mode
-     * @var bool
-     */
+    /** @var bool    Merge lines mode */
     var $mergeLines = TRUE;
 
+    /** @var mixed    User data */
+    var $tag;
 
-    /**
-     * Is already initialized?
-     * @var boolean
-     * @private
-     */
-    var $inited;
 
     /**
      * Registered regexps and associated handlers for inline parsing
@@ -151,7 +112,7 @@ class Texy {
      *                     'user'    => user arguments)
      * @private
      */
-    var $patternsLine     = array();
+    var $patternsLine;
 
     /**
      * Registered regexps and associated handlers for block parsing
@@ -160,7 +121,7 @@ class Texy {
      *                     'user'    => user arguments)
      * @private
      */
-    var $patternsBlock    = array();
+    var $patternsBlock;
 
     /**
      * Handler for generic block (not matched by any regexp from $patternsBlock
@@ -169,21 +130,10 @@ class Texy {
      */
     var $genericBlock;
 
-    /**
-     * Reference stack
-     * @var array Format: ('home' => TexyLinkReference, ...)
-     * @private
-     */
-    var $references       = array();
+    /** @var array    List of all used modules */
+    var $modules;
 
-    /**
-     * prevent recursive calling
-     * @var boolean
-     * @private
-     */
-    var $_preventCycling  = FALSE;
-
-
+    /** @var object    Default modules */
     var
         $scriptModule,
         $htmlModule,
@@ -213,30 +163,29 @@ class Texy {
         $this->summary->images  = array();
         $this->summary->links   = array();
         $this->summary->preload = array();
-        $this->styleSheet = '';
 
-        $this->allowedClasses = TEXY_ALL;                   // classes and id are allowed
-        $this->allowedStyles  = TEXY_ALL;                   // inline styles are allowed
         $this->allowedTags    = $GLOBALS['TexyHTML::$valid']; // full support for HTML tags
 
         // load all modules
         $this->loadModules();
 
+/*
         // example of link reference ;-)
         $elRef = &new TexyLinkReference($this, 'http://www.texy.info/', 'Texy!');
         $elRef->modifier->title = 'Text to HTML converter and formatter';
         $this->addReference('texy', $elRef);
+*/
     }
 
 
     /**
-     * PHP4 compatible constructor
+     * PHP4-only constructor
      * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
      */
     function Texy()
     {
         // generate references
-        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
 
         // call PHP5 constructor
         $args = func_get_args();
@@ -315,32 +264,15 @@ class Texy {
      */
     function init()
     {
-        $this->refQueries = array();
-
-        if ($this->inited) return;
+        $this->patternsLine   = array();
+        $this->patternsBlock  = array();
+        $this->genericBlock   = NULL;
 
         if (!$this->modules) die('Texy: No modules installed');
 
         // init modules
         foreach ($this->modules as $id => $foo)
             $this->modules[$id]->init();
-
-        $this->inited = TRUE;
-    }
-
-
-
-
-    /**
-     * Re-Initialization
-     */
-    function reinit()
-    {
-        $this->patternsLine   = array();
-        $this->patternsBlock  = array();
-        $this->genericBlock   = NULL;
-        $this->inited = FALSE;
-        $this->init();
     }
 
 
@@ -518,53 +450,6 @@ class Texy {
     }
 
 
-
-
-    /**
-     * Add new named reference
-     */
-    function addReference($name, &$obj)
-    {
-        $name = strtolower($name);
-        $this->references[$name] = &$obj;
-    }
-
-
-
-
-    /**
-     * Receive new named link. If not exists, try
-     * call user function to create one.
-     */
-    var $refQueries;
-    function &getReference($name)
-    {
-        $name = strtolower($name);
-        $FALSE = FALSE; // php4_sucks
-
-        if ($this->_preventCycling) {
-            if (isset($this->refQueries[$name])) return $FALSE;
-            $this->refQueries[$name] = TRUE;
-        } else $this->refQueries = array();
-
-
-        if (isset($this->references[$name]))
-            return $this->references[$name];
-
-
-        if ($this->referenceHandler) {
-            $this->_disableReferences = TRUE;
-            $this->references[$name] = call_user_func_array(
-                                     $this->referenceHandler,
-                                     array($name, &$this)
-            );
-            $this->_disableReferences = FALSE;
-
-            return $this->references[$name];
-        }
-
-        return $FALSE;
-    }
 
 
 

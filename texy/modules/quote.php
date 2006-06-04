@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,7 +26,11 @@ if (!defined('TEXY')) die();
 /**
  * QUOTE & BLOCKQUOTE MODULE CLASS
  */
-class TexyQuoteModule extends TexyModule {
+class TexyQuoteModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $allowed;
 
 
@@ -48,10 +52,18 @@ class TexyQuoteModule extends TexyModule {
     function init()
     {
         if ($this->allowed->block)
-            $this->texy->registerBlockPattern($this, 'processBlock', '#^(?:<MODIFIER_H>\n)?>(\ +|:)(\S.*)$#mU');
+            $this->texy->registerBlockPattern(
+                $this,
+                'processBlock',
+                '#^(?:<MODIFIER_H>\n)?>(\ +|:)(\S.*)$#mU'
+            );
 
         if ($this->allowed->line)
-            $this->texy->registerLinePattern($this, 'processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)<MODIFIER>?(?<!\ |\<)\<\<(?!\<)<LINK>??()#U', 'q');
+            $this->texy->registerLinePattern(
+                $this,
+                'processLine',
+                '#(?<!\>)(\>\>)(?!\ |\>)(.+)<MODIFIER>?(?<!\ |\<)\<\<(?!\<)<LINK>??()#U', 'q'
+            );
     }
 
 
@@ -75,6 +87,9 @@ class TexyQuoteModule extends TexyModule {
 
         if ($mLink)
             $el->cite->set($mLink);
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return '';
 
         return $parser->element->appendChild($el, $mContent);
     }
@@ -127,6 +142,10 @@ class TexyQuoteModule extends TexyModule {
         }
 
         $el->parse($content);
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+
         $parser->element->appendChild($el);
     }
 
@@ -138,16 +157,14 @@ class TexyQuoteModule extends TexyModule {
 
 
 
-/****************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
 
 
 
 /**
  * HTML ELEMENT BLOCKQUOTE
  */
-class TexyBlockQuoteElement extends TexyBlockElement {
+class TexyBlockQuoteElement extends TexyBlockElement
+{
     var $tag = 'blockquote';
     var $cite;
 
@@ -174,7 +191,8 @@ class TexyBlockQuoteElement extends TexyBlockElement {
 /**
  * HTML TAG QUOTE
  */
-class TexyQuoteElement extends TexyInlineTagElement {
+class TexyQuoteElement extends TexyInlineTagElement
+{
     var $tag = 'q';
     var $cite;
 

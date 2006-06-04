@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -25,31 +25,35 @@ if (!defined('TEXY')) die();
 /**
  * ORDERED / UNORDERED NESTED LIST MODULE CLASS
  */
-class TexyListModule extends TexyModule {
+class TexyListModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $allowed = array(
-                 '*'            => TRUE,
-                 '-'            => TRUE,
-                 '+'            => TRUE,
-                 '1.'           => TRUE,
-                 '1)'           => TRUE,
-                 'I.'           => TRUE,
-                 'I)'           => TRUE,
-                 'a)'           => TRUE,
-                 'A)'           => TRUE,
+        '*'            => TRUE,
+        '-'            => TRUE,
+        '+'            => TRUE,
+        '1.'           => TRUE,
+        '1)'           => TRUE,
+        'I.'           => TRUE,
+        'I)'           => TRUE,
+        'a)'           => TRUE,
+        'A)'           => TRUE,
     );
 
     // private
     var $translate = array(    //  rexexp       class   list-style-type  tag
-                 '*'            => array('\*',          '',    '',              'ul'),
-                 '-'            => array('\-',          '',    '',              'ul'),
-                 '+'            => array('\+',          '',    '',              'ul'),
-                 '1.'           => array('\d+\.\ ',     '',    '',              'ol'),
-                 '1)'           => array('\d+\)',       '',    '',              'ol'),
-                 'I.'           => array('[IVX]+\.\ ',  '',    'upper-roman',   'ol'),   // place romans before alpha
-                 'I)'           => array('[IVX]+\)',    '',    'upper-roman',   'ol'),
-                 'a)'           => array('[a-z]\)',     '',    'lower-alpha',   'ol'),
-                 'A)'           => array('[A-Z]\)',     '',    'upper-alpha',   'ol'),
-            );
+        '*'            => array('\*',          '',    '',              'ul'),
+        '-'            => array('\-',          '',    '',              'ul'),
+        '+'            => array('\+',          '',    '',              'ul'),
+        '1.'           => array('\d+\.\ ',     '',    '',              'ol'),
+        '1)'           => array('\d+\)',       '',    '',              'ol'),
+        'I.'           => array('[IVX]+\.\ ',  '',    'upper-roman',   'ol'),   // place romans before alpha
+        'I)'           => array('[IVX]+\)',    '',    'upper-roman',   'ol'),
+        'a)'           => array('[a-z]\)',     '',    'lower-alpha',   'ol'),
+        'A)'           => array('[A-Z]\)',     '',    'upper-alpha',   'ol'),
+    );
 
 
     /**
@@ -61,8 +65,12 @@ class TexyListModule extends TexyModule {
         foreach ($this->allowed as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
-        $this->texy->registerBlockPattern($this, 'processBlock', '#^(?:<MODIFIER_H>\n)?'                             // .{color: red}
-                                                                                            . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mU');  // item (unmatched)
+        $this->texy->registerBlockPattern(
+            $this,
+            'processBlock',
+            '#^(?:<MODIFIER_H>\n)?'                         // .{color: red}
+          . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mU'  // item (unmatched)
+        );
     }
 
 
@@ -111,7 +119,11 @@ class TexyListModule extends TexyModule {
         }
 
         if (!$count) return FALSE;
-        else $parser->element->appendChild($el);
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+
+        $parser->element->appendChild($el);
     }
 
 
@@ -166,8 +178,9 @@ class TexyListModule extends TexyModule {
         $elItem->parse($content);
         $mergeMode = $tmp;
 
-        if (is_a($elItem->children[0], 'TexyGenericBlockElement'))
-            $elItem->children[0]->tag = '';
+        // !!! children is protected
+        if (is_a($elItem->_children[0], 'TexyGenericBlockElement'))
+            $elItem->_children[0]->tag = '';
 
         return $elItem;
     }
@@ -181,20 +194,12 @@ class TexyListModule extends TexyModule {
 
 
 
-
-
-/***************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
-
-
-
 /**
  * HTML ELEMENT OL / UL / DL
  */
-class TexyListElement extends TexyBlockElement {
-
-} // TexyListElement
+class TexyListElement extends TexyBlockElement
+{
+}
 
 
 
@@ -203,11 +208,9 @@ class TexyListElement extends TexyBlockElement {
 /**
  * HTML ELEMENT LI / DL
  */
-class TexyListItemElement extends TexyBlockElement {
-
-} // TexyListItemElement
-
-
+class TexyListItemElement extends TexyBlockElement
+{
+}
 
 
 

@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,20 +26,24 @@ if (!defined('TEXY')) die();
 /**
  * AUTOMATIC REPLACEMENTS MODULE CLASS
  */
-class TexySmiliesModule extends TexyModule {
+class TexySmiliesModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $allowed   = FALSE;
     var $icons     = array (
-                        ':-)'  =>  'smile.gif',
-                        ':-('  =>  'sad.gif',
-                        ';-)'  =>  'wink.gif',
-                        ':-D'  =>  'biggrin.gif',
-                        '8-O'  =>  'eek.gif',
-                        '8-)'  =>  'cool.gif',
-                        ':-?'  =>  'confused.gif',
-                        ':-x'  =>  'mad.gif',
-                        ':-P'  =>  'razz.gif',
-                        ':-|'  =>  'neutral.gif',
-            );
+        ':-)'  =>  'smile.gif',
+        ':-('  =>  'sad.gif',
+        ';-)'  =>  'wink.gif',
+        ':-D'  =>  'biggrin.gif',
+        '8-O'  =>  'eek.gif',
+        '8-)'  =>  'cool.gif',
+        ':-?'  =>  'confused.gif',
+        ':-x'  =>  'mad.gif',
+        ':-P'  =>  'razz.gif',
+        ':-|'  =>  'neutral.gif',
+    );
     var $root      = 'images/smilies/';
     var $class     = '';
 
@@ -94,6 +98,9 @@ class TexySmiliesModule extends TexyModule {
                 $el->image->set($value, $this->root, TRUE);
                 break;
             }
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return '';
 
         return $parser->element->appendChild($el);
     }

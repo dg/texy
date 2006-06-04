@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,7 +26,12 @@ if (!defined('TEXY')) die();
 /**
  * PARAGRAPH / GENERIC MODULE CLASS
  */
-class TexyGenericBlockModule extends TexyModule {
+class TexyGenericBlockModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
+    /** @var bool    ... */
     var $mergeMode = TRUE;
 
 
@@ -94,11 +99,15 @@ class TexyGenericBlockModule extends TexyModule {
 
         // add <br />
         if ($el->tag && (strpos($el->content, "\n") !== FALSE)) {
-            $elBr = &new TexyLineBreakElement($this->texy);
+            $elBr = &new TexyTextualElement($this->texy);
+            $elBr->tag = 'br';
             $el->content = strtr($el->content,
                               array("\n" => $el->appendChild($elBr))
                            );
         }
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
 
         $parser->element->appendChild($el);
     }
@@ -113,29 +122,11 @@ class TexyGenericBlockModule extends TexyModule {
 
 
 
-
-
-
-/****************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
-
-
-/**
- * HTML ELEMENT LINE BREAK
- */
-class TexyLineBreakElement extends TexyTextualElement {
-    var $tag = 'br';
-
-} // TexyLineBreakElement
-
-
-
-
 /**
  * HTML ELEMENT PARAGRAPH / DIV / TRANSPARENT
  */
-class TexyGenericBlockElement extends TexyTextualElement {
+class TexyGenericBlockElement extends TexyTextualElement
+{
     var $tag = 'p';
 
 

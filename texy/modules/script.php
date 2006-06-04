@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -26,7 +26,9 @@ if (!defined('TEXY')) die();
 /**
  * SCRIPTS MODULE CLASS
  */
-class TexyScriptModule extends TexyModule {
+class TexyScriptModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
     var $handler;             // function &myUserFunc(&$element, string $identifier, array/NULL $args)
 
 
@@ -41,7 +43,7 @@ class TexyScriptModule extends TexyModule {
 
 
     /**
-     * Callback function: ${...}
+     * Callback function: {{...}}
      * @return string
      */
     function processLine(&$parser, $matches, $tag)
@@ -106,25 +108,12 @@ class TexyScriptModule extends TexyModule {
 
 
 
-
-
-
-
-/***************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
-
-
-
 /**
  * Texy! ELEMENT SCRIPTS + VARIABLES
  */
-class TexyScriptElement extends TexyTextualElement {
-
-
-}  // TexyScriptElement
-
-
+class TexyScriptElement extends TexyTextualElement
+{
+}
 
 
 

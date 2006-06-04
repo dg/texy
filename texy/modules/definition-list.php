@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -24,18 +24,22 @@ if (!defined('TEXY')) die();
 /**
  * DEFINITION LIST MODULE CLASS
  */
-class TexyDefinitionListModule extends TexyListModule {
+class TexyDefinitionListModule extends TexyListModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $allowed = array(
-           '*'            => TRUE,
-           '-'            => TRUE,
-           '+'            => TRUE,
+        '*'            => TRUE,
+        '-'            => TRUE,
+        '+'            => TRUE,
     );
 
     // private
     var $translate = array(    //  rexexp  class
-           '*'            => array('\*',   ''),
-           '-'            => array('\-',   ''),
-           '+'            => array('\+',   ''),
+        '*'            => array('\*',   ''),
+        '-'            => array('\-',   ''),
+        '+'            => array('\+',   ''),
     );
 
 
@@ -49,9 +53,13 @@ class TexyDefinitionListModule extends TexyListModule {
         foreach ($this->allowed as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
-        $this->texy->registerBlockPattern($this, 'processBlock', '#^(?:<MODIFIER_H>\n)?'                              // .{color:red}
-                                                                                            . '(\S.*)\:\ *<MODIFIER_H>?\n'                         // Term:
-                                                                                            . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU');   //    - description
+        $this->texy->registerBlockPattern(
+            $this,
+            'processBlock',
+            '#^(?:<MODIFIER_H>\n)?'                          // .{color:red}
+          . '(\S.*)\:\ *<MODIFIER_H>?\n'                     // Term:
+          . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU'   //    - description
+        );
     }
 
 
@@ -97,8 +105,6 @@ class TexyDefinitionListModule extends TexyListModule {
                 break;
             }
 
-        $parser->element->appendChild($el);
-
         $parser->moveBackward(2);
 
         $patternTerm = $texy->translatePattern('#^\n?(\S.*)\:\ *<MODIFIER_H>?()$#mUA');
@@ -128,6 +134,11 @@ class TexyDefinitionListModule extends TexyListModule {
 
             break;
         }
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+
+        $parser->element->appendChild($el);
     }
 
 } // TexyDefinitionListModule

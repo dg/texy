@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -30,7 +30,11 @@ define('TEXY_HEADING_FIXED',           2);  // fixed-leveling
 /**
  * HEADING MODULE CLASS
  */
-class TexyHeadingModule extends TexyModule {
+class TexyHeadingModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     var $allowed;
 
     // options
@@ -38,11 +42,11 @@ class TexyHeadingModule extends TexyModule {
     var $title;                           // textual content of first heading
     var $balancing = TEXY_HEADING_DYNAMIC;
     var $levels = array(                  // when $balancing = TEXY_HEADING_FIXED
-                           '#' => 0,      //   #  -->  $levels['#'] + $top = 0 + 1 = 1  --> <h1> ... </h1>
-                           '*' => 1,
-                           '=' => 2,
-                           '-' => 3,
-                       );
+        '#' => 0,      //   #  -->  $levels['#'] + $top = 0 + 1 = 1  --> <h1> ... </h1>
+        '*' => 1,
+        '=' => 2,
+        '-' => 3,
+    );
 
     // private
     var $_rangeUnderline;
@@ -68,10 +72,19 @@ class TexyHeadingModule extends TexyModule {
     function init()
     {
         if ($this->allowed->underlined)
-            $this->texy->registerBlockPattern($this, 'processBlockUnderline', '#^(\S.*)<MODIFIER_H>?\n'
-                                                                                                                    .'(\#|\*|\=|\-){3,}$#mU');
+            $this->texy->registerBlockPattern(
+                $this,
+                'processBlockUnderline',
+                '#^(\S.*)<MODIFIER_H>?\n'
+              . '(\#|\*|\=|\-){3,}$#mU'
+            );
+
         if ($this->allowed->surrounded)
-            $this->texy->registerBlockPattern($this, 'processBlockSurround',  '#^((\#|\=){2,})(?!\\2)(.+)\\2*<MODIFIER_H>?()$#mU');
+            $this->texy->registerBlockPattern(
+                $this,
+                'processBlockSurround',
+                '#^((\#|\=){2,})(?!\\2)(.+)\\2*<MODIFIER_H>?()$#mU'
+            );
     }
 
 
@@ -115,6 +128,10 @@ class TexyHeadingModule extends TexyModule {
 
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse(trim($mContent));
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+
         $parser->element->appendChild($el);
 
         // document title
@@ -152,6 +169,10 @@ class TexyHeadingModule extends TexyModule {
 
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse(trim($mContent));
+
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+
         $parser->element->appendChild($el);
 
         // document title
@@ -175,18 +196,13 @@ class TexyHeadingModule extends TexyModule {
 
 
 
-/****************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
-
-
-
-
 
 
 /**
  * HTML ELEMENT H1-6
  */
-class TexyHeadingElement extends TexyTextualElement {
+class TexyHeadingElement extends TexyTextualElement
+{
     var $level = 0;        // 0 .. ?
     var $deltaLevel = 0;
 

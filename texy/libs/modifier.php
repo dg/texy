@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -36,7 +36,8 @@ if (!defined('TEXY')) die();
  *   ^ - _     vertical align modifier
  *
  */
-class TexyModifier {
+class TexyModifier
+{
     var $texy; // parent Texy! object
     var $id;
     var $classes = array();
@@ -57,13 +58,13 @@ class TexyModifier {
 
 
     /**
-     * PHP4 compatible constructor
+     * PHP4-only constructor
      * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
      */
     function TexyModifier(&$texy)
     {
         // generate references
-        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
 
         // call PHP5 constructor
         call_user_func_array(array(&$this, '__construct'), array(&$texy));

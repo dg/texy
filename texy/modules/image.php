@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
  */
 
 // security - include texy.php, not this file
@@ -28,7 +28,11 @@ define('TEXY_PATTERN_IMAGE',    '\[\*([^\n'.TEXY_HASH.']+)'.TEXY_PATTERN_MODIFIE
 /**
  * IMAGES MODULE CLASS
  */
-class TexyImageModule extends TexyModule {
+class TexyImageModule extends TexyModule
+{
+    /** @var callback    Callback that will be called with newly created element */
+    var $handler;
+
     // options
     var $root       = 'images/';     // root of relative images (http)
     var $linkedRoot = 'images/';     // root of linked images (http)
@@ -65,34 +69,6 @@ class TexyImageModule extends TexyModule {
 
 
 
-    /**
-     * Add new named image
-     */
-    function addReference($name, &$obj)
-    {
-        $this->texy->addReference('*'.$name.'*', $obj);
-    }
-
-
-
-
-    /**
-     * Receive new named link. If not exists, try
-     * call user function to create one.
-     */
-    function &getReference($name)
-    {
-        $el = $this->texy->getReference('*'.$name.'*');
-        if (is_a($el, 'TexyImageReference')) return $el;
-        else {
-          $FALSE = FALSE; // php4_sucks
-          return $FALSE;
-        }
-    }
-
-
-
-
 
 
 
@@ -120,11 +96,12 @@ class TexyImageModule extends TexyModule {
         //    [4] => [class]
         //    [5] => {style}
 
+/*
         $elRef = &new TexyImageReference($this->texy, $mURLs);
         $elRef->modifier->setProperties($mMod1, $mMod2, $mMod3);
 
-        $this->addReference($mRef, $elRef);
-
+        $this->texy->addReference($mRef, $elRef);
+*/
         return '';
     }
 
@@ -134,7 +111,7 @@ class TexyImageModule extends TexyModule {
 
 
     /**
-     * Callback function: [* texy.gif *]: small.jpg | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
+     * Callback function: [* small.jpg | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
      * @return string
      */
     function processLine(&$parser, $matches)
@@ -148,6 +125,9 @@ class TexyImageModule extends TexyModule {
         //    [4] => {style}
         //    [5] => >
         //    [6] => url | [ref] | [*image*]
+
+
+//        $elImage = &$this->handleReference($mURLs,
 
         $elImage = &new TexyImageElement($this->texy);
         $elImage->setImagesRaw($mURLs);
@@ -168,6 +148,9 @@ class TexyImageModule extends TexyModule {
             );
         }
 
+        if ($this->handler)
+            if (call_user_func_array($this->handler, array(&$elImage)) === FALSE) return '';
+
         return $parser->element->appendChild($elImage);
     }
 
@@ -182,40 +165,7 @@ class TexyImageModule extends TexyModule {
 
 
 
-class TexyImageReference {
-    var $URLs;
-    var $modifier;
 
-
-    function __construct(&$texy, $URLs = NULL)
-    {
-        $this->modifier = &new TexyModifier($texy);
-        $this->URLs = $URLs;
-    }
-
-
-    /**
-     * PHP4 compatible constructor
-     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
-     */
-    function TexyImageReference(&$texy, $URLs = NULL)
-    {
-        // generate references
-        if (PHP_VERSION < 5) foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call PHP5 constructor
-        call_user_func_array(array(&$this, '__construct'), array(&$texy, $URLs));
-    }
-
-}
-
-
-
-
-
-
-/***************************************************************************
-                                                             TEXY! DOM ELEMENTS                          */
 
 
 
@@ -225,7 +175,8 @@ class TexyImageReference {
 /**
  * HTML ELEMENT IMAGE
  */
-class TexyImageElement extends TexyHTMLElement {
+class TexyImageElement extends TexyHTMLElement
+{
     var $image;
     var $overImage;
     var $linkImage;
@@ -263,12 +214,13 @@ class TexyImageElement extends TexyHTMLElement {
     // private
     function setImagesRaw($URLs)
     {
+/*
         $elRef = &$this->texy->imageModule->getReference(trim($URLs));
         if ($elRef) {
             $URLs = $elRef->URLs;
             $this->modifier->copyFrom($elRef->modifier);
         }
-
+*/
         $URLs = explode('|', $URLs . '||');
 
         // dimensions
