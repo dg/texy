@@ -37,35 +37,30 @@ class TexyLongWordsModule extends TexyModule {
   var $wordLimit = 20;
   var $shy       = '&shy;';
   var $nbsp      = '&nbsp;';
-  var $charShy;
-  var $charNbsp;
 
-
-
-  // constructor
-  function TexyLongWordsModule(&$texy)
-  {
-    parent::TexyModule($texy);
-
-    $this->charShy = TEXY_UTF8 ? "\xC2\xAD" : "\xAD";
-    $this->charNbsp = TEXY_UTF8 ? "\xC2\xA0" : "\xA0";
-  }
 
 
 
   function linePostProcess(&$text)
   {
     if (!$this->allowed) return;
+
+    $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
+    $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
+
     $text = strtr($text, array(
-                            '&shy;'  => $this->charShy,
-                            '&nbsp;' => $this->charNbsp,
+                            '&shy;'  => $charShy,
+                            '&nbsp;' => $charNbsp,
                          ));
 
-    $text = preg_replace_callback('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#'.TEXY_PATTERN_UTF, array(&$this, '_replace'), $text);
+    $text = preg_replace_callback(
+                         $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#UTF'),
+                         array(&$this, '_replace'),
+                         $text);
 
     $text = strtr($text, array(
-                            $this->charShy  => $this->shy,
-                            $this->charNbsp => $this->nbsp,
+                            $charShy  => $this->shy,
+                            $charNbsp => $this->nbsp,
                          ));
   }
 
@@ -81,7 +76,12 @@ class TexyLongWordsModule extends TexyModule {
     //    [0] => lllloooonnnnggggwwwoorrdddd
 
     $chars = array();
-    preg_match_all('#&\\#?[a-z0-9]+;|['.TEXY_HASH.']+|.#'.TEXY_PATTERN_UTF, $mWord, $chars);
+    preg_match_all(
+             $this->texy->translatePattern('#&\\#?[a-z0-9]+;|[:HASH:]+|.#UTF'),
+             $mWord,
+             $chars
+    );
+
     $chars = $chars[0];
     if (count($chars) < $this->wordLimit) return $mWord;
 
@@ -205,8 +205,12 @@ class TexyLongWordsModule extends TexyModule {
     }
     $syllables[] = implode('', $chars);
 
-    $text = implode($this->charShy, $syllables);
-    $text = strtr($text, array($this->charShy.$this->charNbsp => ' ', $this->charNbsp.$this->charShy => ' '));
+
+    $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
+    $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
+
+    $text = implode($charShy, $syllables);
+    $text = strtr($text, array($charShy.$charNbsp => ' ', $charNbsp.$charShy => ' '));
 
     return $text;
   }

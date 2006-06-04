@@ -35,7 +35,6 @@ if (version_compare(phpversion(), '4.3.3', '<'))
 
 
 
-
 // include Texy!
 $texyPath = '../../texy/';
 require_once($texyPath . 'texy.php');
@@ -45,8 +44,8 @@ require_once($texyPath . 'texy.php');
 // this is user callback function for processing 'image references' [*xxxx*]
 // returns false or TexyImageReference
 
-function &myUserFunc(&$texy, $refName) {
-  if ($refName != 'user')  // accept only [* user *]
+function &myUserFunc($refName, &$texy) {
+  if ($refName != '*user*')  // accept only [* user *]
     return false;
 
   $elRef = &new TexyImageReference($texy);
@@ -60,13 +59,12 @@ function &myUserFunc(&$texy, $refName) {
 
 
 $texy = &new Texy();
-$texy->images->userReferences = 'myUserFunc';
-$texy->images->root           = 'imagesdir/';          // "in-line" images root
-$texy->images->linkedRoot     = 'imagesdir/big/';      // "linked" images root
-$texy->images->rootPrefix     = '';                 // physical location on server = rootPrefix + root + imageName (for dimension detection)
-$texy->images->leftClass      = 'my-left-class';    // left-floated image modifier
-$texy->images->rightClass     = 'my-right-class';   // right-floated image modifier
-$texy->images->defaultAlt     = 'default alt. text';// default image alternative text
+$texy->referenceHandler            = 'myUserFunc';
+$texy->imageModule->root           = 'imagesdir/';          // "in-line" images root
+$texy->imageModule->linkedRoot     = 'imagesdir/big/';      // "linked" images root
+$texy->imageModule->leftClass      = 'my-left-class';    // left-floated image modifier
+$texy->imageModule->rightClass     = 'my-right-class';   // right-floated image modifier
+$texy->imageModule->defaultAlt     = 'default alt. text';// default image alternative text
 
 
 // processing

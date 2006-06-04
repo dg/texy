@@ -34,10 +34,19 @@ if (!defined('TEXY')) die();
  * QUOTE & BLOCKQUOTE MODULE CLASS
  */
 class TexyQuoteModule extends TexyModule {
-  var $allowed = array(
-         'line'  => true,
-         'block' => true
-         );
+  var $allowed;
+
+
+
+  // constructor
+  function TexyQuoteModule(&$texy)
+  {
+    parent::TexyModule($texy);
+
+    $this->allowed->line  = true;
+    $this->allowed->block = true;
+  }
+
 
 
   /***
@@ -45,10 +54,10 @@ class TexyQuoteModule extends TexyModule {
    */
   function init()
   {
-    if ($this->isAllowed('block'))
+    if ($this->allowed->block)
       $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
 
-    if ($this->isAllowed('line'))
+    if ($this->allowed->line)
       $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)'.TEXY_PATTERN_LINK.'?()#U', 'q');
   }
 
@@ -103,6 +112,7 @@ class TexyQuoteModule extends TexyModule {
     $texy = & $this->texy;
     $el = &new TexyBlockQuoteElement($texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+    $blockParser->addChildren($el);
 
     $content = '';
     $linkTarget = '';
@@ -114,7 +124,7 @@ class TexyQuoteModule extends TexyModule {
         $content .= $mContent . TEXY_NEWLINE;
       }
 
-      if (!$blockParser->match("#^>(?:|(\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
+      if (!$blockParser->receiveNext("#^>(?:|(\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
       list($match, $mSpaces, $mContent) = $matches;
     } while (true);
 
@@ -122,8 +132,6 @@ class TexyQuoteModule extends TexyModule {
       $el->cite->set($linkTarget);
 
     $el->parse($content);
-
-    $blockParser->addChildren($el);
   }
 
 

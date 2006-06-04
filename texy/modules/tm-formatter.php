@@ -43,7 +43,7 @@ class TexyFormatterModule extends TexyModule {
   // internal
   var $tagStack;
   var $tagStackAssoc;
-  var $nestedElements = array('div', 'dl', 'ol', 'ul', 'blockquote', 'li', 'dd');
+  var $nestedElements = array('div', 'dl', 'ol', 'ul', 'blockquote', 'li', 'dd', 'span');
   var $hashTable = array();
 
 

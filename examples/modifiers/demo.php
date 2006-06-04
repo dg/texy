@@ -40,7 +40,7 @@ require_once($texyPath . 'texy.php');
 
 
 $texy = &new Texy();
-$texy->modules['TexyFormatterModule']->baseIndent  = 1;
+$texy->formatterModule->baseIndent  = 1;
 
 
 

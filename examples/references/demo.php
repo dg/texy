@@ -1,9 +1,9 @@
 <?php
 
 /**
- * -----------------------
- *   TEXY! COMMENTS DEMO
- * -----------------------
+ * -------------------------
+ *   TEXY! REFERENCES DEMO
+ * -------------------------
  *
  * Copyright (c) 2004-2005, David Grudl <dave@dgx.cz>. All rights reserved.
  * Web: http://www.texy.info/
@@ -47,7 +47,7 @@ require_once($texyPath . 'texy.php');
 // this is user callback function for processing 'link references' [xxxx]
 // returns false or TexyLinkReference
 
-function &myUserFunc(&$texy, $refName) {
+function &myUserFunc($refName, &$texy) {
   $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 
   if (!isset($names[$refName]))
@@ -75,12 +75,12 @@ function &myUserFunc(&$texy, $refName) {
 $texy = &new Texy();
 
 // configuration
-$texy->links->userReferences = 'myUserFunc';  // references link [1] [2] will be processed through user function
+$texy->referenceHandler = 'myUserFunc';         // references link [1] [2] will be processed through user function
 $texy->safeMode();                            // safe mode prevets attacker to inject some HTML code and disable images
 
 // how generally disable links or enable images? here is a way:
-//      $texy->images->allowed = true;
-//      $texy->links->allowed = false;
+//      $texy->imageModule->allowed = true;
+//      $texy->linkModule->allowed = false;
 
 
 // processing

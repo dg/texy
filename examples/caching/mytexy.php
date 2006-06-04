@@ -23,13 +23,9 @@
 
 
 
-// configuration
-$texyPath = '../../texy/';
-define ('TEXY_UTF8', false);  // disable UTF-8
-
 
 // include libs
-require_once($texyPath . 'texy.php');
+require_once('../../texy/texy.php');
 
 
 
@@ -53,6 +49,7 @@ if (!function_exists('file_put_contents')) {
 class MyTexy extends Texy {
   var $cachePath = './cache/';
   var $time;
+  var $utf = false;
 
 
   function MyTexy()
@@ -60,8 +57,8 @@ class MyTexy extends Texy {
     parent::Texy();
 
     // some configurations
-    $this->images->leftClass   = 'left';
-    $this->images->rightClass  = 'right';
+    $this->imageModule->leftClass   = 'left';
+    $this->imageModule->rightClass  = 'right';
   }
 
 
@@ -77,12 +74,12 @@ class MyTexy extends Texy {
       $cacheFile = $this->cachePath . $md5 . '.html';
       $content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : null;
       if ($content) {         // read from cache
-        list($html, $this->styleSheet, $this->headings->title) = $content;
+        list($html, $this->styleSheet, $this->headingModule->title) = $content;
 
       } else {                           // doesn't exists
         $html = parent::process($text);
         file_put_contents($cacheFile,
-          serialize( array($html, $this->styleSheet, $this->headings->title) )
+          serialize( array($html, $this->styleSheet, $this->headingModule->title) )
         );
       }
 

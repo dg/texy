@@ -36,20 +36,23 @@ if (!defined('TEXY')) die();
  * BLOCK MODULE CLASS
  */
 class TexyBlockModule extends TexyModule {
-  var $allowed = array(
-         'pre'  => true,
-         'text' => true,
-         'html' => true,         // if false, /--html blocks are parsed as /--text block
-         'div'  => true,
-         'form' => true,
-      );
-  var $userFunction;             // function &myUserFunc(&$element)
+  var $allowed;
+  var $codeHandler;               // function &myUserFunc(&$element)
+  var $divHandler;                // function &myUserFunc(&$element, $nonParsedContent)
+  var $htmlHandler;               // function &myUserFunc(&$element, $isHtml)
 
 
   // constructor
   function TexyBlockModule(&$texy)
   {
     parent::TexyModule($texy);
+
+    $this->allowed->pre  = true;
+    $this->allowed->text = true;  // if false, /--html blocks are parsed as /--text block
+    $this->allowed->html = true;
+    $this->allowed->div  = true;
+    $this->allowed->form = true;
+    $this->allowed->source = true;
   }
 
 
@@ -58,7 +61,9 @@ class TexyBlockModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock',   '#^/--+ *(?:(code|samp|text|html|div|form|notexy)( +\S*)?|) *MODIFIER_H?\n(.*\n)?\\\\--+()$#mUsi');
+    if (isset($this->userFunction)) $this->codeHandler = $this->userFunction;  // !!! back compatibility
+
+    $this->registerBlockPattern('processBlock',   '#^/--+ *(?:(code|samp|text|html|div|form|notexy|source)( +\S*)?|) *MODIFIER_H?\n(.*\n)?\\\\--+()$#mUsi');
   }
 
 
@@ -90,16 +95,32 @@ class TexyBlockModule extends TexyModule {
 
     if (!$mType) $mType = 'pre';                // default type
     if ($mType == 'notexy') $mType = 'html'; // backward compatibility
-    if ($mType == 'html' && !$this->isAllowed('html')) $mType = 'text';
+    if ($mType == 'html' && !$this->allowed->html) $mType = 'text';
     if ($mType == 'code' || $mType == 'samp')
-      $mType = $this->isAllowed('pre') ? $mType : 'none';
-    elseif (!$this->isAllowed($mType)) $mType = 'none'; // transparent block
+      $mType = $this->allowed->pre ? $mType : 'none';
+    elseif (!$this->allowed->$mType) $mType = 'none'; // transparent block
 
     switch ($mType) {
      case 'none':
      case 'div':
          $el = &new TexyBlockElement($this->texy);
-         $el->tag = $mType;
+         $el->tag = 'div';
+         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+         // outdent
+         if ($spaces = strspn($mContent, ' '))
+           $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
+
+         if ($this->divHandler)
+           call_user_func_array($this->divHandler, array(&$el, &$mContent));
+
+         $el->parse($mContent);
+         $blockParser->addChildren($el);
+
+         break;
+
+
+     case 'source':
+         $el = &new TexySourceBlockElement($this->texy);
          $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
          // outdent
          if ($spaces = strspn($mContent, ' '))
@@ -127,6 +148,9 @@ class TexyBlockModule extends TexyModule {
          $el = &new TexyTextualElement($this->texy);
          $el->setContent($mContent, true);
          $blockParser->addChildren($el);
+
+         if ($this->htmlHandler)
+           call_user_func_array($this->htmlHandler, array(&$el, true));
          break;
 
 
@@ -140,7 +164,11 @@ class TexyBlockModule extends TexyModule {
                 ),
                 true);
          $blockParser->addChildren($el);
+
+         if ($this->htmlHandler)
+           call_user_func_array($this->htmlHandler, array(&$el, false));
          break;
+
 
 
      default: // pre | code | samp
@@ -154,12 +182,10 @@ class TexyBlockModule extends TexyModule {
            $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
          $el->setContent($mContent, false); // not html-safe content
-
-         if ($this->userFunction)
-           call_user_func_array($this->userFunction, array(&$el));
-
          $blockParser->addChildren($el);
 
+         if ($this->codeHandler)
+           call_user_func_array($this->codeHandler, array(&$el));
     } // switch
   }
 
@@ -167,16 +193,16 @@ class TexyBlockModule extends TexyModule {
 
   function trustMode()
   {
-    $this->allow('html');
-    $this->allow('form');
+    $this->allowed->html = true;
+    $this->allowed->form = true;
   }
 
 
 
   function safeMode()
   {
-    $this->disallow('html');
-    $this->disallow('form');
+    $this->allowed->html = false;
+    $this->allowed->form = false;
   }
 
 
@@ -230,6 +256,35 @@ class TexyCodeBlockElement extends TexyTextualElement {
   }
 
 } // TexyCodeBlockElement
+
+
+
+
+
+
+
+class TexySourceBlockElement extends TexyBlockElement {
+  var $tag  = 'pre';
+
+
+  function generateContent()
+  {
+    $html = parent::generateContent();
+    if ($this->texy->formatterModule)
+      $this->texy->formatterModule->indent($html);
+
+    $el = &new TexyCodeBlockElement($this->texy);
+    $el->lang = 'html';
+    $el->type = 'code';
+    $el->setContent($html, false);
+
+    if ($this->texy->blockModule->codeHandler)
+      call_user_func_array($this->texy->blockModule->codeHandler, array(&$el));
+
+    return $el->safeContent();
+  }
+
+} // TexySourceBlockElement
 
 
 

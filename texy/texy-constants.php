@@ -29,11 +29,6 @@
 if (!defined('TEXY')) die();
 
 
-// UNICODE
-if (!defined('TEXY_UTF8'))
-  define ('TEXY_UTF8', false);     // UTF-8 input, slightly slower
-
-
 // XHTML
 if (!defined('TEXY_XHTML'))
   define ('TEXY_XHTML', true);     // for empty elements, like <br /> vs. <br>
@@ -58,14 +53,9 @@ define('TEXY_URL_IMAGE_INLINE', 1 << 3);
 define('TEXY_URL_IMAGE_LINKED', 4 << 3);
 
 
-// INLINE ELEMENTS PARTS
-define('TEXY_WHOLE',           1);
-define('TEXY_OPEN',            2);
-define('TEXY_CLOSE',           3);
-
 define('TEXY_CONTENT_NONE',    1);
 define('TEXY_CONTENT_TEXTUAL', 2);
-define('TEXY_CONTENT_HTML',    3);
+define('TEXY_CONTENT_BLOCK',   3);
 
 
 
@@ -85,18 +75,16 @@ define('TEXY_ELEMENT_EMPTY',   1 << 2);
 //     control                  \x00 - \x31  (without spaces)
 //     others                   !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
 
-define ('TEXY_PATTERN_UTF',     TEXY_UTF8 ? 'u' : '');
 
 // character classes
-define('TEXY_CHAR',             TEXY_UTF8 ? 'A-Za-z\x86-\x{ffff}' : 'A-Za-z\x86-\xff');   // INTERNATIONAL CHAR - USE INSTEAD OF \w (with TEXY_PATTERN_UTF)
+define('TEXY_CHAR',             'A-Za-z\x86-\xff');       // INTERNATIONAL CHAR - USE INSTEAD OF \w
+define('TEXY_CHAR_UTF',         'A-Za-z\x86-\x{ffff}');
 define('TEXY_NEWLINE',          "\n");
 // hashing meta-charakters
-define('TEXY_SOFT',             0);
-define('TEXY_HARD',             1);
 define('TEXY_HASH',             "\x15-\x1F");       // ANY HASH CHAR
-define('TEXY_HASH_SPACES',      "\x15-\x19");       // HASHED SPACE
-define('TEXY_HASH_SOFT',        "\x1A\x1C-\x1F");   // HASHED TAG or ELEMENT (soft)
-define('TEXY_HASH_HARD',        "\x1B-\x1F");       // HASHED TAG or ELEMENT (hard)
+define('TEXY_HASH_SPACES',      "\x15-\x18");       // HASHED SPACE
+define('TEXY_HASH_NC',          "\x19\x1B-\x1F");   // HASHED TAG or ELEMENT (without content)
+define('TEXY_HASH_WC',          "\x1A-\x1F");       // HASHED TAG or ELEMENT (with content)
 // HTML tag & entity
 define('TEXY_PATTERN_ENTITY',   '&amp;([a-z]+|\\#x[0-9a-f]+|\\#[0-9]+);');   // &amp;   |   &#039;   |   &#x1A;
 
@@ -128,8 +116,6 @@ define('TEXY_PATTERN_MODIFIER_HV',      // .(title)[class]{style}<>^
 
 
 
-// images   [* urls .(title)[class]{style} >]
-define('TEXY_PATTERN_IMAGE',    '\[\*([^\n'.TEXY_HASH.']+)'.TEXY_PATTERN_MODIFIER.'? *(\*|>|<)\]');
 
 
 // links

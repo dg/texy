@@ -269,10 +269,6 @@ or
 èíslované
 ---------
 
-1.  Bird
-2.  McHale
-3.  Parish
-
 1)  Bird
 2)  McHale
 3)  Parish
@@ -281,13 +277,13 @@ a)  Bird
 b)  McHale
 c)  Parish
 
+I)  Bird
+II)  McHale
+III)  Parish
+
 A)  Bird
 B)  McHale
 C)  Parish
-
-I.  Bird
-II.  McHale
-III.  Parish
 
 
 
@@ -296,12 +292,12 @@ vnoøené
 
 
 a)  Bird
-  I.  Bird
+  I)  Bird
     +   Red
     +   Green
     +   Blue
-  II.  McHale
-  III.  Parish
+  II)  McHale
+  III)  Parish
 b)  McHale
 c)  Parish
       1)  Bird
@@ -425,6 +421,17 @@ slouèení øádkù
 | Bill       | Gates     | 50
 |^           | Clinton   | 52
 | Jim        | Beam      | 70
+
+
+slouèení øádkù a sloupcù
+------------------------
+
+|-----------------------------
+| First Name | Last Name | Age
+|----------------------------
+| Bill                  || 50
+|^                       | 52
+|^                       | 70
 
 
 modifikátory

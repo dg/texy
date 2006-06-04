@@ -22,9 +22,8 @@
 
 
 /**
- *  This demo shows how combine Texy! with syntax highlighter GESHI
+ *  This demo shows how combine Texy! with syntax highlighter FSHL
  *       - define user callback (for /--code elements)
- *       - load language, highlight and retun stylesheet + html output
  */
 
 
@@ -34,12 +33,12 @@ if (version_compare(phpversion(), '4.3.3', '<'))
 
 
 $texyPath = '../../texy/';
-$geshiPath = dirname(__FILE__).'/geshi/';
+$fshlPath = dirname(__FILE__).'/fshl/fshl/';
 
 
 // include libs
 require_once($texyPath . 'texy.php');
-include_once($geshiPath.'geshi.php');
+include_once($fshlPath.'fshl.php');
 
 
 
@@ -62,32 +61,15 @@ include_once($geshiPath.'geshi.php');
 //  Syntax highlighter changes $element->content and sets $element->htmlSafe to true
 //
 function myUserFunc(&$element) {
-  global $geshiPath;
+  $lang = strtoupper($element->lang);
+  if ($lang == 'JAVASCRIPT') $lang = 'JS';
+  if (!in_array(
+          $lang,
+          array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS'))
+     ) return;
 
-  if ($element->lang == 'html') $element->lang = 'html4strict';
-  $geshi = new GeSHi($element->content, $element->lang, $geshiPath.'geshi/');
-
-  if ($geshi->error)   // GeSHi could not find the language, nothing to do
-    return;
-
-  // do syntax-highlighting
-  $geshi->set_encoding(TEXY_UTF8 ? 'UTF-8' : 'ISO-8859-1');
-  $geshi->set_header_type(GESHI_HEADER_PRE);
-  $geshi->enable_classes();
-  $geshi->set_overall_style('color: #000066; border: 1px solid #d0d0d0; background-color: #f0f0f0;', true);
-  $geshi->set_line_style('font: normal normal 95% \'Courier New\', Courier, monospace; color: #003030;', 'font-weight: bold; color: #006060;', true);
-  $geshi->set_code_style('color: #000020;', 'color: #000020;');
-  $geshi->set_link_styles(GESHI_LINK, 'color: #000060;');
-  $geshi->set_link_styles(GESHI_HOVER, 'background-color: #f0f000;');
-
-  // save generated stylesheet
-  $element->texy->styleSheet .= $geshi->get_stylesheet();
-
-  $out = $geshi->parse_code();
-  if (TEXY_UTF8)  // double-check buggy GESHI, it sometimes produce not UTF-8 valid code :-((
-    if ($out !== utf8_encode(utf8_decode($out))) return;
-
-  $element->setContent($out, true);
+  $parser = new fshlParser($element->texy->utf ? 'HTML_UTF8' : 'HTML', P_TAB_INDENT);
+  $element->setContent($parser->highlightString($lang, $element->content), true);
 }
 
 
@@ -98,17 +80,15 @@ function myUserFunc(&$element) {
 $texy = &new Texy();
 
 // set user callback function for /-- code blocks
-$texy->modules['TexyBlockModule']->userFunction = 'myUserFunc';
-// prepare CSS stylesheet
-$texy->styleSheet = 'pre { padding:10px } ';
+$texy->blockModule->codeHandler = 'myUserFunc';
 
 // processing
 $text = file_get_contents('sample.texy');
 $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
-echo '<style type="text/css">'. $texy->styleSheet . '</style>';
-echo '<title>' . $texy->headings->title . '</title>';
+echo '<style type="text/css">'. file_get_contents($fshlPath.'styles/COHEN_style.css') . '</style>';
+echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
 echo $html;
 

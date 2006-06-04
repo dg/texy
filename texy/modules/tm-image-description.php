@@ -44,8 +44,7 @@ class TexyImageDescModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'? +\*\*\* +(.*)MODIFIER_H?()$#mU');
+    $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'? +\*\*\* +(?U)(.*)MODIFIER_H?()$#mU');
   }
 
 
@@ -73,8 +72,9 @@ class TexyImageDescModule extends TexyModule {
 
     $el = &new TexyImageDescElement($this->texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+    $blockParser->addChildren($el);
 
-    if ($this->texy->images->allowed) {
+    if ($this->texy->imageModule->allowed) {
       $el->children['img']->setImagesRaw($mURLs);
       $el->children['img']->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
       $el->modifier->hAlign = $el->children['img']->modifier->hAlign;
@@ -82,8 +82,6 @@ class TexyImageDescModule extends TexyModule {
     }
 
     $el->children['desc']->parse(ltrim($mContent));
-
-    $blockParser->addChildren($el);
   }
 
 
@@ -120,7 +118,7 @@ class TexyImageDescElement extends TexyBlockElement {
   function TexyImageDescElement(&$texy)
   {
     parent::TexyBlockElement($texy);
-    $this->parentModule = & $texy->modules['TexyImageDescModule'];
+    $this->parentModule = & $texy->imageDescModule;
 
     $this->children['img'] = &new TexyImageElement($texy);
     $this->children['desc'] = &new TexyGenericBlockElement($texy);

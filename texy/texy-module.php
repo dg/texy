@@ -37,9 +37,8 @@ if (!defined('TEXY')) die();
  * ------------------------
  */
 class TexyModule {
-  var $texy;             // parent Texy! object (reference to itself is: $texy->modules[__CLASSNAME__])
-  var $allowed = true;   // general disable / enable
-
+  var $texy;             // parent Texy! object (reference to itself is: $texy->modules->__CLASSNAME__)
+  var $allowed = true;   // module configuration
 
 
   function TexyModule(&$texy)
@@ -82,26 +81,12 @@ class TexyModule {
 
 
 
-  /***
-   * For easier regular expression writing
-   * @return string
-   * @static
-   ***/
-  function adjustPattern($pattern)
-  {
-    return strtr($pattern,
-                     array('MODIFIER_HV' => TEXY_PATTERN_MODIFIER_HV,
-                           'MODIFIER_H'  => TEXY_PATTERN_MODIFIER_H,
-                           'MODIFIER'    => TEXY_PATTERN_MODIFIER,
-                     ));
-  }
-
 
   function registerLinePattern($func, $pattern, $user_args = null)
   {
     $this->texy->patternsLine[] = array(
              'replacement' => array(&$this, $func),
-             'pattern'     => TexyModule::adjustPattern($pattern) ,
+             'pattern'     => $this->texy->translatePattern($pattern) ,
              'user'        => $user_args
     );
   }
@@ -113,7 +98,7 @@ class TexyModule {
 
     $this->texy->patternsBlock[] = array(
              'func'    => array(&$this, $func),
-             'pattern' => TexyModule::adjustPattern($pattern)  . 'm',  // force multiline!
+             'pattern' => $this->texy->translatePattern($pattern)  . 'm',  // force multiline!
              'user'    => $user_args
     );
   }
@@ -123,24 +108,6 @@ class TexyModule {
 
 
 
-
-  function isAllowed($what) {
-    if ($this->allowed === true) return true;
-    return (isset($this->allowed[$what])) ?
-           ($this->allowed[$what] !== false) : false;
-  }
-
-
-  function allow($what = null, $value = true) {
-    if ($what === null) $this->allowed = true;
-    else $this->allowed[$what] = $value;
-  }
-
-
-  function disallow($what = null) {
-    if ($what === null) $this->allowed = false;
-    else $this->allowed[$what] = false;
-  }
 
 
 } // TexyModule

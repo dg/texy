@@ -34,8 +34,7 @@ if (!defined('TEXY')) die();
  * PARAGRAPH / GENERIC MODULE CLASS
  */
 class TexyGenericBlockModule extends TexyModule {
-
-
+  var $mergeLines;
 
 
   /***
@@ -44,13 +43,16 @@ class TexyGenericBlockModule extends TexyModule {
   function init()
   {
     $this->texy->genericBlock = array(&$this, 'processBlock');
+    $this->mergeLines = true;
   }
 
 
 
   function processBlock(&$blockParser, $content)
   {
-    $str_blocks = preg_split('#(\n{2,})#', $content);
+    $str_blocks = $this->mergeLines ?
+                  preg_split('#(\n{2,})#', $content) :
+                  preg_split('#(\n(?! )|\n{2,})#', $content);
 
     foreach ($str_blocks as $str) {
       $str = trim($str);
@@ -71,7 +73,7 @@ class TexyGenericBlockModule extends TexyModule {
    */
   function &processSingleBlock(&$blockParser, $content)
   {
-    preg_match('#^(.+)'.TEXY_PATTERN_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
+    preg_match($this->texy->translatePattern('#^(.*)MODIFIER_H?(\n.*)?()$#sU'), $content, $matches);
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
     //    [1] => ...
     //    [2] => (title)
@@ -80,22 +82,20 @@ class TexyGenericBlockModule extends TexyModule {
     //    [5] => >
 
 
-    // PARAGRAPH or DIV
-
-    $el = &new TexyGenericBlockElement($this->texy);
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-
     // ....
     //  ...  => \n
     $mContent = preg_replace('#\n (\S)#', " \r\\1", trim($mContent . $mContent2));
     $mContent = strtr($mContent, "\n\r", " \n");
 
+    $el = &new TexyGenericBlockElement($this->texy);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     $el->parse($mContent);
+    $blockParser->addChildren($el);
 
     // specify tag
     if ($el->contentType == TEXY_CONTENT_TEXTUAL) $el->tag = 'p';
     elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
-    elseif ($el->contentType == TEXY_CONTENT_HTML) $el->tag = '';
+    elseif ($el->contentType == TEXY_CONTENT_BLOCK) $el->tag = '';
     else $el->tag = 'div';
 
     // add <br />
@@ -105,8 +105,6 @@ class TexyGenericBlockModule extends TexyModule {
                         array("\n" => $elBr->addTo($el))
                      );
     }
-
-    $blockParser->addChildren($el);
   }
 
 

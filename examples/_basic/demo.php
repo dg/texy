@@ -28,25 +28,16 @@ if (version_compare(phpversion(), '4.3.3', '<'))
 
 
 
-// global configuration Texy!
-$texyPath = '../../texy/';
-define ('TEXY_UTF8', false);     // disable UTF-8
-
-
 // include Texy!
-require_once($texyPath . 'texy.php');
+require_once('../../texy/texy.php');
 
 
 
 $texy = &new Texy();
 
-// user configuration (OPTIONALLY)
-$texy->links->root         = '';
-$texy->links->imageOnClick = 'return !popup(this.href)';
-$texy->images->root        = 'images/';
-$texy->images->linkedRoot  = 'images/big/';
-$texy->modules['TexyFormatterModule']->baseIndent  = 1;
-$texy->modules['TexyFormatterModule']->lineWrap    = 60;
+// other OPTIONAL configuration
+$texy->utf = false;                    // disable UTF-8
+$texy->imageModule->root = 'images/';  // specify image folder
 
 
 // processing
@@ -57,7 +48,7 @@ $html = $texy->process($text);  // that's all folks!
 // echo formated output
 header('Content-type: text/html; charset=windows-1250');
 echo '<link rel="stylesheet" type="text/css" media="all" href="style.css" />';
-echo '<title>' . $texy->headings->title . '</title>';
+echo '<title>' . $texy->headingModule->title . '</title>';
 echo $html;
 
 

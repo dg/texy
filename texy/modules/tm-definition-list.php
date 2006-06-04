@@ -37,6 +37,19 @@ require_once('tm-list.php');
  * DEFINITION LIST MODULE CLASS
  */
 class TexyDefinitionListModule extends TexyListModule {
+  var $allowed = array(
+         '*'            => true,
+         '-'            => true,
+         '+'            => true,
+  );
+
+  // private
+  var $translate = array(    //  rexexp  class
+         '*'            => array('\*',   ''),
+         '-'            => array('\-',   ''),
+         '+'            => array('\+',   ''),
+      );
+
 
 
   /***
@@ -44,10 +57,13 @@ class TexyDefinitionListModule extends TexyListModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                         // .{color:red}
-                                                . '(\S.*)\:\ *MODIFIER_H?\n'                    // Term:
-                                                . '(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mU');   //    - description
+    $bullets = array();
+    foreach ($this->allowed as $bullet => $allowed)
+      if ($allowed) $bullets[] = $this->translate[$bullet][0];
+
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                              // .{color:red}
+                                              . '(\S.*)\:\ *MODIFIER_H?\n'                         // Term:
+                                              . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU');   //    - description
   }
 
 
@@ -63,9 +79,9 @@ class TexyDefinitionListModule extends TexyListModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    list($match, $mModList1, $mModList2, $mModList3, $mModList4,
+    list($match, $mMod1, $mMod2, $mMod3, $mMod4,
                  $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
-                 $mSpaces, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+                 $mSpaces, $mBullet) = $matches;
     //    [1] => (title)
     //    [2] => [class]
     //    [3] => {style}
@@ -79,83 +95,56 @@ class TexyDefinitionListModule extends TexyListModule {
 
     //   [10] => space
     //   [11] => - * +
-    //   [12] => ...
-    //   [13] => (title)
-    //   [14] => [class]
-    //   [15] => {style}
-    //   [16] => >
 
     $texy = & $this->texy;
     $el = &new TexyListElement($texy);
-    $el->type = TEXY_LIST_DEFINITION;
-    $el->modifier->setProperties($mModList1, $mModList2, $mModList3, $mModList4);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+    $el->tag = 'dl';
 
-    $reTerm = '#^(\S.*)\:\ *MODIFIER_H?' . TEXY_NEWLINE .'(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mUA';
-
-    do {
-      $mType = preg_quote($mType);
-      $spacesBase = strlen($mSpaces);
-      $reItem = "#^(\ {1,$spacesBase})$mType\ +(.*)".TEXY_PATTERN_MODIFIER_H."?()$#mA";
-
-      $elItem = &new TexyListItemElement($texy);
-      $elItem->type = TEXY_LISTITEM_TERM;
-      $el->children[] = & $elItem;
-      $elItem->modifier->setProperties($mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4);
-      $elItem->parse($mContentTerm);
-      if (is_a($elItem->children[0], 'TexyGenericBlockElement')) $elItem->children[0]->tag = '';
-
-      do {
-        $elItem = &new TexyListItemElement($texy);
-        $elItem->type = TEXY_LISTITEM_DEFINITION;
-        $el->children[] = & $elItem;
-        $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $content = '';
-        $spaces = '';
-
-        do {
-          $content .= $mContent . TEXY_NEWLINE;
-
-          if ($blockParser->match("#^(?:|\ \{$spacesBase}(\ {1,$spaces})(.*))()$#Am", $matches)) {
-            list($match, $mSpaces, $mContent) = $matches;
-            //    [1] => SPACE2
-            //    [2] => ...
-            if ($match != '' && $spaces === '') $spaces = strlen($mSpaces);
-            continue;
-          }
-
-          break;
-        } while (true);
-
-        $elItem->parse($content);
-        if (is_a($elItem->children[0], 'TexyGenericBlockElement')) $elItem->children[0]->tag = '';
-
-        if ($blockParser->match($reItem, $matches)) {
-          list($match, $mSpaces, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
-          //    [1] => SPACE
-          //    [2] => ...
-          //    [3] => (title)
-          //    [4] => [class]
-          //    [5] => {style}
-          //    [6] => >
-          continue;
-        }
-
+    $bullet = '';
+    foreach ($this->translate as $type)
+      if (preg_match('#'.$type[0].'#A', $mBullet)) {
+        $bullet = $type[0];
+        $el->modifier->classes[] = $type[1];
         break;
-      } while (true);
+      }
 
-      if ($blockParser->match($reTerm, $matches)) {
-        list($match, $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4, $mSpaces, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+    $blockParser->addChildren($el);
+
+    $blockParser->moveBackward(2);
+
+    $patternTerm = $texy->translatePattern('#^\n?(\S.*)\:\ *MODIFIER_H?()$#mUA');
+    $bullet = preg_quote($mBullet);
+
+    while (true) {
+      if ($elItem = &$this->processItem($blockParser, preg_quote($mBullet), true)) {
+        $elItem->tag = 'dd';
+        $el->children[] = & $elItem;
+        continue;
+      }
+
+      if ($blockParser->receiveNext($patternTerm, $matches)) {
+        list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        //    [1] => ...
+        //    [2] => (title)
+        //    [3] => [class]
+        //    [4] => {style}
+        //    [5] => >
+        $elItem = &new TexyTextualElement($texy);
+        $elItem->tag = 'dt';
+        $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $elItem->parse($mContent);
+        $el->children[] = & $elItem;
         continue;
       }
 
       break;
-    } while (true);
-
-
-    $blockParser->addChildren($el);
+    }
   }
 
 } // TexyDefinitionListModule
+
+
 
 
 

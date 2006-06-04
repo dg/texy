@@ -33,11 +33,10 @@ if (!defined('TEXY')) die();
 /**
  * HTML TAGS MODULE CLASS
  */
-class TexyHTMLTagModule extends TexyModule {
+class TexyHTMLModule extends TexyModule {
   var $allowed;          // allowed tags (true -> all, or array, or false -> none)
-//  var $userFunction;   // function &myUserFunc(&$texy, &$tag, &$attr)  $attr = false --> closing tag
-
                          // arrays of safe tags and attributes
+  var $allowedComments = true;
   var $safeTags = array(
                      'a'         => array('href', 'rel', 'title'),
                      'abbr'      => array('title'),
@@ -65,7 +64,7 @@ class TexyHTMLTagModule extends TexyModule {
 
 
   // constructor
-  function TexyHTMLTagModule(&$texy)
+  function TexyHTMLModule(&$texy)
   {
     parent::TexyModule($texy);
 
@@ -81,8 +80,8 @@ class TexyHTMLTagModule extends TexyModule {
    */
   function init()
   {
-    $HASH = TEXY_HASH;
-    $this->registerLinePattern('processLine', "#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9-]|=\s*\"[^\"$HASH]*\"|=\s*'[^'$HASH]*'|=[^>$HASH]*)*)(/?)>#is");
+    $this->registerLinePattern('processTag',     '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9-]|=\s*"[^":HASH:]*"|=\s*\'[^\':HASH:]*\'|=[^>:HASH:]*)*)(/?)>#is');
+    $this->registerLinePattern('processComment', '#<!--([^:HASH:]*)-->#Uis');
   }
 
 
@@ -91,7 +90,7 @@ class TexyHTMLTagModule extends TexyModule {
    * Callback function: <tag ...>
    * @return string
    */
-  function processLine(&$lineParser, &$matches)
+  function processTag(&$lineParser, &$matches)
   {
     list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
     //    [1] => /
@@ -128,17 +127,9 @@ class TexyHTMLTagModule extends TexyModule {
       $attr = false;
     }
 
-/*
-    if ($this->userFunction)  // call user function?
-      call_user_func_array(
-            $this->userFunction,
-            array(&$this->texy, &$tag, &$attr)
-      );
-    if (!$tag) return $match;
-*/
 
     if (is_array($this->allowed)) {
-      if (!$this->isAllowed($tag))
+      if (!isset($this->allowed[$tag]))
         return $match;
 
       $allowedAttrs = $this->allowed[$tag];
@@ -193,11 +184,23 @@ class TexyHTMLTagModule extends TexyModule {
     $el->tag      = $tag;
     $el->closing  = $closing;
     $el->empty    = $empty;
-    $el->strength = ($classify & TEXY_ELEMENT_INLINE) ? TEXY_SOFT : TEXY_HARD;
+    $el->contentType = ($classify & TEXY_ELEMENT_INLINE) ? TEXY_CONTENT_NONE : TEXY_CONTENT_BLOCK;
 
     return $el->addTo($lineParser->element);
   }
 
+
+
+  /***
+   * Callback function: <!-- ... -->
+   * @return string
+   */
+  function processComment(&$lineParser, &$matches)
+  {
+    list($match, $mContent) = $matches;
+    if ($this->allowedComments) return ' ';
+    else return $match;   // disabled
+  }
 
 
 
@@ -215,7 +218,7 @@ class TexyHTMLTagModule extends TexyModule {
 
 
 
-} // TexyHTMLTagModule
+} // TexyHTMLModule
 
 
 
@@ -236,7 +239,7 @@ class TexySingleTagElement extends TexyDOMElement {
   var $attr;
   var $closing;
   var $empty;
-  var $strength = TEXY_SOFT;
+  var $contentType;
 
 
 
@@ -255,10 +258,9 @@ class TexySingleTagElement extends TexyDOMElement {
 
   function addTo(&$lineElement)
   {
-    $key = Texy::hashKey($this->strength);
-    $lineElement->children[$key]  = array(&$this, null);
-    if ($this->strength == TEXY_HARD)
-      $lineElement->contentType = max($lineElement->contentType, TEXY_CONTENT_HTML);
+    $key = Texy::hashKey($this->contentType);
+    $lineElement->children[$key]  = &$this;
+    $lineElement->contentType = max($lineElement->contentType, $this->contentType);
     return $key;
   }
 

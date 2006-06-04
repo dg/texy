@@ -36,19 +36,18 @@ if (!defined('TEXY')) die();
  * CONTROL MODULE CLASS - EXPERIMENTAL !!!
  */
 class TexyControlModule extends TexyModule {
-  var $allowed = array(
-         'text'      => true,
-         'select'    => true,
-         'radio'     => true,
-         'checkbox'  => true,
-         'button'    => true,
-      );
+  var $allowed;
 
 
   // constructor
   function TexyControlModule(&$texy)
   {
     parent::TexyModule($texy);
+    $this->allowed->text = true;
+    $this->allowed->select = true;
+    $this->allowed->radio = true;
+    $this->allowed->checkbox = true;
+    $this->allowed->button = true;
   }
 
 

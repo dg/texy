@@ -28,6 +28,8 @@ if (!defined('TEXY')) die();
 
 
 
+// images   [* urls .(title)[class]{style} >]
+define('TEXY_PATTERN_IMAGE',    '\[\*([^\n'.TEXY_HASH.']+)'.TEXY_PATTERN_MODIFIER.'? *(\*|>|<)\]');
 
 
 /**
@@ -42,12 +44,17 @@ class TexyImageModule extends TexyModule {
   var $rightClass = '';            // right-floated image class
   var $defaultAlt = 'image';       // default image alternative text
 
-  // private
-  var $references  = array();      // references: 'home' => TexyImageReference
-  var $userReferences;             // function &myUserFunc(&$texy, $refName): returns TexyImageReference (or false)
-  var $_backupReferences;
 
 
+
+
+  // constructor
+  function TexyImageModule(&$texy)
+  {
+    parent::TexyModule($texy);
+
+//    $this->rootPrefix = dirname($_SERVER['SCRIPT_FILENAME']); // physical location on server
+  }
 
 
   /***
@@ -71,8 +78,7 @@ class TexyImageModule extends TexyModule {
    */
   function addReference($name, &$obj)
   {
-    $name = strtolower($name);
-    $this->references[$name] = &$obj;
+    $this->texy->addReference('*'.$name.'*', $obj);
   }
 
 
@@ -84,36 +90,9 @@ class TexyImageModule extends TexyModule {
    */
   function &getReference($name)
   {
-    $name = strtolower($name);
-
-    if (isset($this->references[$name]))
-      return $this->references[$name];
-
-
-    if ($this->userReferences) {
-      $obj = &call_user_func_array(
-                   $this->userReferences,
-                   array(&$this->texy, $name)
-      );
-
-      if ($obj) {
-        $this->references[$name] = & $obj; // save for next time
-        return $obj;
-      }
-    }
-
-    return false;
-  }
-
-
-
-
-  /***
-   * Forget all references created during last parse()
-   */
-  function forgetReferences()
-  {
-    $this->references = $this->_backupReferences;
+    $el = $this->texy->getReference('*'.$name.'*');
+    if (is_a($el, 'TexyImageReference')) return $el;
+    else return false;
   }
 
 
@@ -127,10 +106,8 @@ class TexyImageModule extends TexyModule {
    */
   function preProcess(&$text)
   {
-    $this->_backupReferences = $this->references;
-
     // [*image*]: urls .(title)[class]{style}
-    $text = preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, '_replaceReference'), $text);
+    $text = preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, 'processReferenceDefinition'), $text);
   }
 
 
@@ -139,7 +116,7 @@ class TexyImageModule extends TexyModule {
    * Callback function: [*image*]: urls .(title)[class]{style}
    * @return string
    */
-  function _replaceReference(&$matches)
+  function processReferenceDefinition(&$matches)
   {
     list($match, $mRef, $mUrls, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => [* (reference) *]
@@ -240,6 +217,7 @@ class TexyImageReference {
  * HTML ELEMENT IMAGE
  */
 class TexyImageElement extends TexyTextualElement {
+  var $contentType = TEXY_CONTENT_NONE;
   var $parentModule;
 
   var $image;
@@ -253,7 +231,7 @@ class TexyImageElement extends TexyTextualElement {
   function TexyImageElement(&$texy)
   {
     parent::TexyTextualElement($texy);
-    $this->parentModule = & $texy->modules['TexyImageModule'];
+    $this->parentModule = & $texy->imageModule;
 
     $this->image = & $texy->createURL();
     $this->image->root = $this->parentModule->root;
@@ -289,15 +267,8 @@ class TexyImageElement extends TexyTextualElement {
 
   function setSize($width, $height)
   {
-    $width = abs((int) $width);
-    $height = abs((int) $height);
-
-    if ($width && $height) {
-      $this->width = $width;
-      $this->height = $height;
-    } else {
-      $this->width = $this->height = null;
-    }
+    $this->width = abs((int) $width);
+    $this->height = abs((int) $height);
   }
 
 
@@ -313,7 +284,7 @@ class TexyImageElement extends TexyTextualElement {
     $URLs = explode('|', $URLs . '||');
 
     // dimensions
-    if (preg_match('#^(.*) (\d+) *x *(\d+) *()$#U', $URLs[0], $matches)) {
+    if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $URLs[0], $matches)) {
       $URLs[0] = $matches[1];
       $this->setSize($matches[2], $matches[3]);
     }
@@ -348,15 +319,15 @@ class TexyImageElement extends TexyTextualElement {
         $styles['float'] = 'right';
     }
 
-    $styles['vertical-align'] = $this->modifier->vAlign;
+//    $styles['vertical-align'] = $this->modifier->vAlign;
     $attr['class'] = TexyModifier::implodeClasses($classes);
     $attr['style'] = TexyModifier::implodeStyles($styles);
     $attr['id'] = $this->modifier->id;
 
     // width x height generate
     $this->requireSize();
-    $attr['width'] = $this->width;
-    $attr['height'] = $this->height;
+    if ($this->width) $attr['width'] = $this->width;
+    if ($this->height) $attr['height'] = $this->height;
 
     // attribute generate
     $this->texy->summary->images[] = $attr['src'] = $this->image->URL;

@@ -28,26 +28,21 @@ if (version_compare(phpversion(), '4.3.3', '<'))
 
 
 
-// global configuration Texy!
-$texyPath = '../../texy/';
-define ('TEXY_UTF8', false);     // disable UTF-8
-
-
 // include Texy!
-require_once($texyPath . 'texy.php');
+require_once('../../texy/texy.php');
 
 
 
 $texy = &new Texy();
 
 // disable *** and ** and * phrases
-$texy->modules['TexyPhrasesModule']->disallow('***');
-$texy->modules['TexyPhrasesModule']->disallow('**');
-$texy->modules['TexyPhrasesModule']->disallow('*');
+$texy->phraseModule->allowed['***'] = false;
+$texy->phraseModule->allowed['**'] = false;
+$texy->phraseModule->allowed['*'] = false;
 
 // add new syntax: *bold* _italic_
-$texy->modules['TexyPhrasesModule']->registerLinePattern('processPhrase', '#(?<!\*)\*(?!\ )([^\*]+)MODIFIER?(?<!\ )\*(?!\*)()#U', 'b');
-$texy->modules['TexyPhrasesModule']->registerLinePattern('processPhrase', '#(?<!\_)\_(?!\ )([^\_]+)MODIFIER?(?<!\ )\_(?!\_)()#U', 'i');
+$texy->phraseModule->registerLinePattern('processPhrase', '#(?<!\*)\*(?!\ )([^\*]+)MODIFIER?(?<!\ )\*(?!\*)()#U', 'b');
+$texy->phraseModule->registerLinePattern('processPhrase', '#(?<!\_)\_(?!\ )([^\_]+)MODIFIER?(?<!\ )\_(?!\_)()#U', 'i');
 
 
 

@@ -42,11 +42,11 @@ $texy = &new Texy();
 
 
 // SMILIES ARE DISABLED BY DEFAULT!
-$texy->modules['TexySmiliesModule']->allowed = true;
+$texy->smiliesModule->allowed = true;
 // configure it
-$texy->modules['TexySmiliesModule']->root  = 'images/';
-$texy->modules['TexySmiliesModule']->class  = 'smilie';
-$texy->modules['TexySmiliesModule']->icons[':oops:'] = 'redface.gif';  // user-defined smilie
+$texy->smiliesModule->root  = 'images/';
+$texy->smiliesModule->class  = 'smilie';
+$texy->smiliesModule->icons[':oops:'] = 'redface.gif';  // user-defined smilie
 
 
 

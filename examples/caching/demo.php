@@ -45,7 +45,7 @@ $html = $texy->process($text);
 
 // echo formated output
 header("Content-type: text/html; charset=windows-1250");
-echo '<title>' . $texy->headings->title . '</title>';
+echo '<title>' . $texy->headingModule->title . '</title>';
 
 // echo $texy->time
 echo '<strong>' . number_format($texy->time, 3, ',', ' ') . 'sec</strong>';

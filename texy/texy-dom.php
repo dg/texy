@@ -182,8 +182,8 @@ class TexyBlockElement extends TexyHTMLElement {
    ***/
   function parse($text)
   {
-    $block = &new TexyBlockParser($this);
-    $block->parse($text);
+    $blockParser = &new TexyBlockParser($this);
+    $blockParser->parse($text);
   }
 
 
@@ -219,12 +219,9 @@ class TexyBlockElement extends TexyHTMLElement {
 class TexyTextualElement extends TexyHTMLElement {
   var $children    = array();      // of TexyTextualElement
 
-  var $content;                    // string
   var $contentType = TEXY_CONTENT_NONE;
+  var $content;                    // string
   var $htmlSafe    = false;        // is content HTML-safe?
-
-  var $strength    = TEXY_HARD;    // when used as child of TexyTextualElement
-                                   // SOFT hasn't any visible content, HARD has (images, break-lines (!), ....)
 
 
 
@@ -243,8 +240,8 @@ class TexyTextualElement extends TexyHTMLElement {
 
     if ($onlyReturn) return $safeContent;
     else {
-      $this->content = $safeContent;
       $this->htmlSafe = true;
+      return $this->content = $safeContent;
     }
   }
 
@@ -258,7 +255,7 @@ class TexyTextualElement extends TexyHTMLElement {
     if ($this->children) {
       $table = array();
       foreach (array_keys($this->children) as $key)
-        $table[$key] = $this->children[$key][0]->toHTML( $this->children[$key][1] );
+        $table[$key] = $this->children[$key]->toHTML( Texy::isHashOpening($key) );
 
       return strtr($content, $table);
     }
@@ -273,8 +270,8 @@ class TexyTextualElement extends TexyHTMLElement {
    ***/
   function parse($text)
   {
-    $line = &new TexyLineParser($this);
-    $line->parse($text);
+    $lineParser = &new TexyLineParser($this);
+    $lineParser->parse($text);
   }
 
 
@@ -286,13 +283,14 @@ class TexyTextualElement extends TexyHTMLElement {
   }
 
 
+
   function broadcast()
   {
     parent::broadcast();
 
     // apply to all children
     foreach (array_keys($this->children) as $key)
-      $this->children[$key][0]->broadcast();
+      $this->children[$key]->broadcast();
   }
 
 
@@ -300,8 +298,8 @@ class TexyTextualElement extends TexyHTMLElement {
 
   function addTo(&$ownerElement)
   {
-    $key = Texy::hashKey($this->strength);
-    $ownerElement->children[$key]  = array(&$this, null);
+    $key = Texy::hashKey($this->contentType);
+    $ownerElement->children[$key]  = &$this;
     $ownerElement->contentType = max($ownerElement->contentType, $this->contentType);
     return $key;
   }
@@ -323,23 +321,22 @@ class TexyTextualElement extends TexyHTMLElement {
  *
  */
 class TexyInlineTagElement extends TexyHTMLElement {
-  var $strength = TEXY_SOFT;
+  var $contentType = TEXY_CONTENT_NONE;
   var $_closingTag;
 
 
 
   // convert element to HTML string
-  function toHTML($which)
+  function toHTML($opening)
   {
-    switch ($which) {
-      case TEXY_OPEN:
-        $this->generateTag($tag, $attr);
-        if ($this->hidden) return;
-        $this->_closingTag = Texy::closingTag($tag);
-        return Texy::openingTag($tag, $attr);
+    if ($opening) {
+      $this->generateTag($tag, $attr);
+      if ($this->hidden) return;
+      $this->_closingTag = Texy::closingTag($tag);
+      return Texy::openingTag($tag, $attr);
 
-      case TEXY_CLOSE:
-        return $this->_closingTag;
+    } else {
+      return $this->_closingTag;
     }
   }
 
@@ -347,11 +344,11 @@ class TexyInlineTagElement extends TexyHTMLElement {
 
   function addTo(&$ownerElement, $elementContent = null)
   {
-    $keyOpen = Texy::hashKey($this->strength);
-    $keyClose = Texy::hashKey($this->strength);
+    $keyOpen  = Texy::hashKey($this->contentType, true);
+    $keyClose = Texy::hashKey($this->contentType, false);
 
-    $ownerElement->children[$keyOpen]  = array(&$this, TEXY_OPEN);
-    $ownerElement->children[$keyClose] = array(&$this, TEXY_CLOSE);
+    $ownerElement->children[$keyOpen]  = &$this;
+    $ownerElement->children[$keyClose] = &$this;
     return $keyOpen . $elementContent . $keyClose;
   }
 
@@ -392,13 +389,12 @@ class TexyDOM extends TexyBlockElement {
    ***/
   function parse($text)
   {
-      ///////////   REMOVE SPECIAL CHARS (used by Texy!)
-    $text = strtr($text, "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", '           ');
+      ///////////   REMOVE SPECIAL CHARS, NORMALIZE LINES
+    $text = Texy::wash($text);
 
       ///////////   STANDARDIZE LINE ENDINGS TO UNIX-LIKE  (DOS, MAC)
     $text = str_replace("\r\n", TEXY_NEWLINE, $text); // DOS
     $text = str_replace("\r", TEXY_NEWLINE, $text); // Mac
-    $text = preg_replace("#[\t ]+(\n|$)#", TEXY_NEWLINE, $text); // right trim
 
       ///////////   REPLACE TABS WITH SPACES
     $tabWidth = $this->texy->tabWidth;
@@ -407,10 +403,17 @@ class TexyDOM extends TexyBlockElement {
                  create_function('&$matches', "return \$matches[1] . str_repeat(' ', $tabWidth - strlen(\$matches[1]) % $tabWidth);"),
                  $text);
 
+      ///////////   REMOVE TEXY! COMMENTS
+    $commentChars = $this->texy->utf ? "\xC2\xA7" : "\xA7";
+    $text = preg_replace('#'.$commentChars.'{2,}(?!'.$commentChars.').*('.$commentChars.'{2,}|$)(?!'.$commentChars.')#mU', '', $text);
+
+      ///////////   RIGHT TRIM
+    $text = preg_replace("#[\t ]+(\n|$)#", TEXY_NEWLINE, $text); // right trim
+
 
       ///////////   PRE-PROCESSING
-    foreach (array_keys($this->texy->modules) as $name)
-      $this->texy->modules[$name]->preProcess($text);
+    foreach ($this->texy->modules as $name => $moduleX)
+      $this->texy->modules->$name->preProcess($text);
 
       ///////////   PROCESS
     parent::parse($text);
@@ -430,8 +433,8 @@ class TexyDOM extends TexyBlockElement {
     $text = parent::toHTML();
 
       ///////////   POST-PROCESS
-    foreach (array_keys($this->texy->modules) as $name)
-      $this->texy->modules[$name]->postProcess($text);
+    foreach ($this->texy->modules as $name => $moduleX)
+      $this->texy->modules->$name->postProcess($text);
 
       ///////////   UNFREEZE SPACES
     $text = Texy::unfreezeSpaces($text);
@@ -490,10 +493,8 @@ class TexyDOMLine extends TexyTextualElement {
    ***/
   function parse($text)
   {
-      ///////////   REMOVE SPECIAL CHARS (used by Texy!)
-    $text = strtr($text, "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", '           ');
-
-      ///////////   REMOVE LINE ENDINGS
+      ///////////   REMOVE SPECIAL CHARS AND LINE ENDINGS
+    $text = Texy::wash($text);
     $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
 
       ///////////   PROCESS

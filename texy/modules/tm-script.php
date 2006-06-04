@@ -34,6 +34,7 @@ if (!defined('TEXY')) die();
  * SCRIPTS MODULE CLASS
  */
 class TexyScriptModule extends TexyModule {
+  var $handler;             // function &myUserFunc(&$element)
 
 
   /***
@@ -41,8 +42,7 @@ class TexyScriptModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerLinePattern('processLine', '#\$\{([^\}'.TEXY_HASH.'])+\}()#U');
+    $this->registerLinePattern('processLine', '#\$\{([^\}:HASH:]+)\}()#U');
   }
 
 
@@ -57,8 +57,27 @@ class TexyScriptModule extends TexyModule {
     //    [1] => ...
 
     $el = &new TexyScriptElement($this->texy);
+    $mContent = trim($mContent);
+
+    if (preg_match('#^(.*)\((.*)\)$#', $mContent, $matches)) {
+      $el->function = $matches[1];
+      foreach (explode(',', $matches[2]) as $arg) {
+        $arg = trim($arg);
+        if ($arg) $el->args[] = $arg;
+      }
+
+    } else {
+      $el->var = $mContent;
+    }
+
+    $el->content = '<-internal->';
+
+    if ($this->handler)
+      call_user_func_array($this->handler, array(&$el));
+
     return $el->addTo($lineParser->element);
   }
+
 
 
 
@@ -80,11 +99,10 @@ class TexyScriptModule extends TexyModule {
  * Texy! ELEMENT SCRIPTS + VARIABLES
  */
 class TexyScriptElement extends TexyTextualElement {
+  var $function;
+  var $args;
+  var $var;
 
-  function generateContent()
-  {
-    return '<--internal use-->';
-  }
 
 }  // TexyScriptElement
 

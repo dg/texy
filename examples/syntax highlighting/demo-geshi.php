@@ -24,7 +24,7 @@
 /**
  *  This demo shows how combine Texy! with syntax highlighter GESHI
  *       - define user callback (for /--code elements)
- *       - load language, highlight and retun stylesheet + html output
+ *       - load language, highlight and return stylesheet + html output
  */
 
 
@@ -39,9 +39,11 @@ $geshiPath = dirname(__FILE__).'/geshi/';
 
 // include libs
 require_once($texyPath . 'texy.php');
-include_once($geshiPath.'geshi.php');
+include_once($geshiPath . 'geshi.php');
 
 
+if (!class_exists('Geshi'))
+  die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
 
 
 
@@ -71,7 +73,7 @@ function myUserFunc(&$element) {
     return;
 
   // do syntax-highlighting
-  $geshi->set_encoding(TEXY_UTF8 ? 'UTF-8' : 'ISO-8859-1');
+  $geshi->set_encoding($element->texy->utf ? 'UTF-8' : 'ISO-8859-1');
   $geshi->set_header_type(GESHI_HEADER_PRE);
   $geshi->enable_classes();
   $geshi->set_overall_style('color: #000066; border: 1px solid #d0d0d0; background-color: #f0f0f0;', true);
@@ -84,7 +86,7 @@ function myUserFunc(&$element) {
   $element->texy->styleSheet .= $geshi->get_stylesheet();
 
   $out = $geshi->parse_code();
-  if (TEXY_UTF8)  // double-check buggy GESHI, it sometimes produce not UTF-8 valid code :-((
+  if ($element->texy->utf)  // double-check buggy GESHI, it sometimes produce not UTF-8 valid code :-((
     if ($out !== utf8_encode(utf8_decode($out))) return;
 
   $element->setContent($out, true);
@@ -98,7 +100,7 @@ function myUserFunc(&$element) {
 $texy = &new Texy();
 
 // set user callback function for /-- code blocks
-$texy->modules['TexyBlockModule']->userFunction = 'myUserFunc';
+$texy->blockModule->codeHandler = 'myUserFunc';
 // prepare CSS stylesheet
 $texy->styleSheet = 'pre { padding:10px } ';
 
@@ -108,7 +110,7 @@ $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
 echo '<style type="text/css">'. $texy->styleSheet . '</style>';
-echo '<title>' . $texy->headings->title . '</title>';
+echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
 echo $html;
 

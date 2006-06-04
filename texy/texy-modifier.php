@@ -135,7 +135,7 @@ class TexyModifier {
     $styles = array_change_key_case($styles, CASE_LOWER);
     $pairs = array();
     foreach ($styles as $key => $value)
-      if ($key && $value) $pairs[] = $key.':'.$value;
+      if ($key && ($value !== '') && ($value !== null)) $pairs[] = $key.':'.$value;
     return implode(';', $pairs);
   }
 

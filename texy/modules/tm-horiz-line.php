@@ -33,7 +33,7 @@ if (!defined('TEXY')) die();
 /**
  * HORIZONTAL LINE MODULE CLASS
  */
-class TexyHorizlineModule extends TexyModule {
+class TexyHorizLineModule extends TexyModule {
 
 
   /***
@@ -41,8 +41,7 @@ class TexyHorizlineModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
+    $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
   }
 
 

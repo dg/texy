@@ -1,9 +1,9 @@
 <?php
 
 /**
- * -------------------------------
- *   SMILIES - TEXY! USER MODULE
- * -------------------------------
+ * ----------------------------------
+ *   SMILIES - TEXY! DEFAULT MODULE
+ * ----------------------------------
  *
  * Version 1 Release Candidate
  *
@@ -61,11 +61,11 @@ class TexySmiliesModule extends TexyModule {
 
     if ($this->allowed) {
       krsort($this->icons);
-      $re = array();
+      $pattern = array();
       foreach ($this->icons as $key => $value)
-        $re[] = preg_quote($key) . '+';
+        $pattern[] = preg_quote($key) . '+';
 
-      $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $re) . ')#';
+      $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
 
       $this->registerLinePattern('processLine', $crazyRE);
     }

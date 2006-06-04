@@ -44,7 +44,7 @@ require_once($texyPath . 'texy.php');
 
 
 $texy = &new Texy();
-$texy->modules['TexyFormatterModule']->baseIndent  = 1;
+$texy->formatterModule->baseIndent  = 1;
 
 
 
@@ -69,23 +69,23 @@ function doIt() {
 
 
 echo '<h2>trustMode() - enable all valid tags</h2>';
-$texy->modules['TexyHTMLTagModule']->trustMode();
+$texy->modules->TexyHTMLModule->trustMode();
 doIt();
 
 echo '<h2>trustMode(false) - enable all tags</h2>';
-$texy->modules['TexyHTMLTagModule']->trustMode(false);
+$texy->modules->TexyHTMLModule->trustMode(false);
 doIt();
 
 echo '<h2>safeMode() - enable only "safe" tags</h2>';
-$texy->modules['TexyHTMLTagModule']->safeMode();
+$texy->modules->TexyHTMLModule->safeMode();
 doIt();
 
 echo '<h2>safeMode(false) - disable all tags</h2>';
-$texy->modules['TexyHTMLTagModule']->safeMode(false);
+$texy->modules->TexyHTMLModule->safeMode(false);
 doIt();
 
 echo '<h2>custom</h2>';
-$texy->modules['TexyHTMLTagModule']->allowed =
+$texy->modules->TexyHTMLModule->allowed =
      array(            // enable only tags <a> (with attributes href, rel, title) and <strong>
          'myExtraTag' => array('attr1'),
          'strong'     => array(),

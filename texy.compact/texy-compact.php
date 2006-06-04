@@ -35,11 +35,6 @@ define('TEXY', 'Version 1rc (c) David Grudl, http://www.texy.info');
 
 
 
-// UNICODE
-if (!defined('TEXY_UTF8'))
-  define ('TEXY_UTF8', false);     // UTF-8 input, slightly slower
-
-
 // XHTML
 if (!defined('TEXY_XHTML'))
   define ('TEXY_XHTML', true);     // for empty elements, like <br /> vs. <br>
@@ -64,14 +59,9 @@ define('TEXY_URL_IMAGE_INLINE', 1 << 3);
 define('TEXY_URL_IMAGE_LINKED', 4 << 3);
 
 
-// INLINE ELEMENTS PARTS
-define('TEXY_WHOLE',           1);
-define('TEXY_OPEN',            2);
-define('TEXY_CLOSE',           3);
-
 define('TEXY_CONTENT_NONE',    1);
 define('TEXY_CONTENT_TEXTUAL', 2);
-define('TEXY_CONTENT_HTML',    3);
+define('TEXY_CONTENT_BLOCK',   3);
 
 
 
@@ -91,18 +81,16 @@ define('TEXY_ELEMENT_EMPTY',   1 << 2);
 //     control                  \x00 - \x31  (without spaces)
 //     others                   !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
 
-define ('TEXY_PATTERN_UTF',     TEXY_UTF8 ? 'u' : '');
 
 // character classes
-define('TEXY_CHAR',             TEXY_UTF8 ? 'A-Za-z\x86-\x{ffff}' : 'A-Za-z\x86-\xff');   // INTERNATIONAL CHAR - USE INSTEAD OF \w (with TEXY_PATTERN_UTF)
+define('TEXY_CHAR',             'A-Za-z\x86-\xff');       // INTERNATIONAL CHAR - USE INSTEAD OF \w
+define('TEXY_CHAR_UTF',         'A-Za-z\x86-\x{ffff}');
 define('TEXY_NEWLINE',          "\n");
 // hashing meta-charakters
-define('TEXY_SOFT',             0);
-define('TEXY_HARD',             1);
 define('TEXY_HASH',             "\x15-\x1F");       // ANY HASH CHAR
-define('TEXY_HASH_SPACES',      "\x15-\x19");       // HASHED SPACE
-define('TEXY_HASH_SOFT',        "\x1A\x1C-\x1F");   // HASHED TAG or ELEMENT (soft)
-define('TEXY_HASH_HARD',        "\x1B-\x1F");       // HASHED TAG or ELEMENT (hard)
+define('TEXY_HASH_SPACES',      "\x15-\x18");       // HASHED SPACE
+define('TEXY_HASH_NC',          "\x19\x1B-\x1F");   // HASHED TAG or ELEMENT (without content)
+define('TEXY_HASH_WC',          "\x1A-\x1F");       // HASHED TAG or ELEMENT (with content)
 // HTML tag & entity
 define('TEXY_PATTERN_ENTITY',   '&amp;([a-z]+|\\#x[0-9a-f]+|\\#[0-9]+);');   // &amp;   |   &#039;   |   &#x1A;
 
@@ -134,8 +122,6 @@ define('TEXY_PATTERN_MODIFIER_HV',      // .(title)[class]{style}<>^
 
 
 
-// images   [* urls .(title)[class]{style} >]
-define('TEXY_PATTERN_IMAGE',    '\[\*([^\n'.TEXY_HASH.']+)'.TEXY_PATTERN_MODIFIER.'? *(\*|>|<)\]');
 
 
 // links
@@ -253,7 +239,7 @@ class TexyModifier {
     $styles = array_change_key_case($styles, CASE_LOWER);
     $pairs = array();
     foreach ($styles as $key => $value)
-      if ($key && $value) $pairs[] = $key.':'.$value;
+      if ($key && ($value !== '') && ($value !== null)) $pairs[] = $key.':'.$value;
     return implode(';', $pairs);
   }
 
@@ -622,8 +608,8 @@ class TexyBlockElement extends TexyHTMLElement {
    ***/
   function parse($text)
   {
-    $block = &new TexyBlockParser($this);
-    $block->parse($text);
+    $blockParser = &new TexyBlockParser($this);
+    $blockParser->parse($text);
   }
 
 
@@ -659,12 +645,9 @@ class TexyBlockElement extends TexyHTMLElement {
 class TexyTextualElement extends TexyHTMLElement {
   var $children    = array();      // of TexyTextualElement
 
-  var $content;                    // string
   var $contentType = TEXY_CONTENT_NONE;
+  var $content;                    // string
   var $htmlSafe    = false;        // is content HTML-safe?
-
-  var $strength    = TEXY_HARD;    // when used as child of TexyTextualElement
-                                   // SOFT hasn't any visible content, HARD has (images, break-lines (!), ....)
 
 
 
@@ -683,8 +666,8 @@ class TexyTextualElement extends TexyHTMLElement {
 
     if ($onlyReturn) return $safeContent;
     else {
-      $this->content = $safeContent;
       $this->htmlSafe = true;
+      return $this->content = $safeContent;
     }
   }
 
@@ -698,7 +681,7 @@ class TexyTextualElement extends TexyHTMLElement {
     if ($this->children) {
       $table = array();
       foreach (array_keys($this->children) as $key)
-        $table[$key] = $this->children[$key][0]->toHTML( $this->children[$key][1] );
+        $table[$key] = $this->children[$key]->toHTML( Texy::isHashOpening($key) );
 
       return strtr($content, $table);
     }
@@ -713,8 +696,8 @@ class TexyTextualElement extends TexyHTMLElement {
    ***/
   function parse($text)
   {
-    $line = &new TexyLineParser($this);
-    $line->parse($text);
+    $lineParser = &new TexyLineParser($this);
+    $lineParser->parse($text);
   }
 
 
@@ -726,13 +709,14 @@ class TexyTextualElement extends TexyHTMLElement {
   }
 
 
+
   function broadcast()
   {
     parent::broadcast();
 
     // apply to all children
     foreach (array_keys($this->children) as $key)
-      $this->children[$key][0]->broadcast();
+      $this->children[$key]->broadcast();
   }
 
 
@@ -740,8 +724,8 @@ class TexyTextualElement extends TexyHTMLElement {
 
   function addTo(&$ownerElement)
   {
-    $key = Texy::hashKey($this->strength);
-    $ownerElement->children[$key]  = array(&$this, null);
+    $key = Texy::hashKey($this->contentType);
+    $ownerElement->children[$key]  = &$this;
     $ownerElement->contentType = max($ownerElement->contentType, $this->contentType);
     return $key;
   }
@@ -763,23 +747,22 @@ class TexyTextualElement extends TexyHTMLElement {
  *
  */
 class TexyInlineTagElement extends TexyHTMLElement {
-  var $strength = TEXY_SOFT;
+  var $contentType = TEXY_CONTENT_NONE;
   var $_closingTag;
 
 
 
   // convert element to HTML string
-  function toHTML($which)
+  function toHTML($opening)
   {
-    switch ($which) {
-      case TEXY_OPEN:
-        $this->generateTag($tag, $attr);
-        if ($this->hidden) return;
-        $this->_closingTag = Texy::closingTag($tag);
-        return Texy::openingTag($tag, $attr);
+    if ($opening) {
+      $this->generateTag($tag, $attr);
+      if ($this->hidden) return;
+      $this->_closingTag = Texy::closingTag($tag);
+      return Texy::openingTag($tag, $attr);
 
-      case TEXY_CLOSE:
-        return $this->_closingTag;
+    } else {
+      return $this->_closingTag;
     }
   }
 
@@ -787,11 +770,11 @@ class TexyInlineTagElement extends TexyHTMLElement {
 
   function addTo(&$ownerElement, $elementContent = null)
   {
-    $keyOpen = Texy::hashKey($this->strength);
-    $keyClose = Texy::hashKey($this->strength);
+    $keyOpen  = Texy::hashKey($this->contentType, true);
+    $keyClose = Texy::hashKey($this->contentType, false);
 
-    $ownerElement->children[$keyOpen]  = array(&$this, TEXY_OPEN);
-    $ownerElement->children[$keyClose] = array(&$this, TEXY_CLOSE);
+    $ownerElement->children[$keyOpen]  = &$this;
+    $ownerElement->children[$keyClose] = &$this;
     return $keyOpen . $elementContent . $keyClose;
   }
 
@@ -832,13 +815,12 @@ class TexyDOM extends TexyBlockElement {
    ***/
   function parse($text)
   {
-      ///////////   REMOVE SPECIAL CHARS (used by Texy!)
-    $text = strtr($text, "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", '           ');
+      ///////////   REMOVE SPECIAL CHARS, NORMALIZE LINES
+    $text = Texy::wash($text);
 
       ///////////   STANDARDIZE LINE ENDINGS TO UNIX-LIKE  (DOS, MAC)
     $text = str_replace("\r\n", TEXY_NEWLINE, $text); // DOS
     $text = str_replace("\r", TEXY_NEWLINE, $text); // Mac
-    $text = preg_replace("#[\t ]+(\n|$)#", TEXY_NEWLINE, $text); // right trim
 
       ///////////   REPLACE TABS WITH SPACES
     $tabWidth = $this->texy->tabWidth;
@@ -847,10 +829,17 @@ class TexyDOM extends TexyBlockElement {
                  create_function('&$matches', "return \$matches[1] . str_repeat(' ', $tabWidth - strlen(\$matches[1]) % $tabWidth);"),
                  $text);
 
+      ///////////   REMOVE TEXY! COMMENTS
+    $commentChars = $this->texy->utf ? "\xC2\xA7" : "\xA7";
+    $text = preg_replace('#'.$commentChars.'{2,}(?!'.$commentChars.').*('.$commentChars.'{2,}|$)(?!'.$commentChars.')#mU', '', $text);
+
+      ///////////   RIGHT TRIM
+    $text = preg_replace("#[\t ]+(\n|$)#", TEXY_NEWLINE, $text); // right trim
+
 
       ///////////   PRE-PROCESSING
-    foreach (array_keys($this->texy->modules) as $name)
-      $this->texy->modules[$name]->preProcess($text);
+    foreach ($this->texy->modules as $name => $moduleX)
+      $this->texy->modules->$name->preProcess($text);
 
       ///////////   PROCESS
     parent::parse($text);
@@ -870,8 +859,8 @@ class TexyDOM extends TexyBlockElement {
     $text = parent::toHTML();
 
       ///////////   POST-PROCESS
-    foreach (array_keys($this->texy->modules) as $name)
-      $this->texy->modules[$name]->postProcess($text);
+    foreach ($this->texy->modules as $name => $moduleX)
+      $this->texy->modules->$name->postProcess($text);
 
       ///////////   UNFREEZE SPACES
     $text = Texy::unfreezeSpaces($text);
@@ -930,10 +919,8 @@ class TexyDOMLine extends TexyTextualElement {
    ***/
   function parse($text)
   {
-      ///////////   REMOVE SPECIAL CHARS (used by Texy!)
-    $text = strtr($text, "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", '           ');
-
-      ///////////   REMOVE LINE ENDINGS
+      ///////////   REMOVE SPECIAL CHARS AND LINE ENDINGS
+    $text = Texy::wash($text);
     $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
 
       ///////////   PROCESS
@@ -986,9 +973,8 @@ class TexyDOMLine extends TexyTextualElement {
  * ------------------------
  */
 class TexyModule {
-  var $texy;             // parent Texy! object (reference to itself is: $texy->modules[__CLASSNAME__])
-  var $allowed = true;   // general disable / enable
-
+  var $texy;             // parent Texy! object (reference to itself is: $texy->modules->__CLASSNAME__)
+  var $allowed = true;   // module configuration
 
 
   function TexyModule(&$texy)
@@ -1031,26 +1017,12 @@ class TexyModule {
 
 
 
-  /***
-   * For easier regular expression writing
-   * @return string
-   * @static
-   ***/
-  function adjustPattern($pattern)
-  {
-    return strtr($pattern,
-                     array('MODIFIER_HV' => TEXY_PATTERN_MODIFIER_HV,
-                           'MODIFIER_H'  => TEXY_PATTERN_MODIFIER_H,
-                           'MODIFIER'    => TEXY_PATTERN_MODIFIER,
-                     ));
-  }
-
 
   function registerLinePattern($func, $pattern, $user_args = null)
   {
     $this->texy->patternsLine[] = array(
              'replacement' => array(&$this, $func),
-             'pattern'     => TexyModule::adjustPattern($pattern) ,
+             'pattern'     => $this->texy->translatePattern($pattern) ,
              'user'        => $user_args
     );
   }
@@ -1062,7 +1034,7 @@ class TexyModule {
 
     $this->texy->patternsBlock[] = array(
              'func'    => array(&$this, $func),
-             'pattern' => TexyModule::adjustPattern($pattern)  . 'm',  // force multiline!
+             'pattern' => $this->texy->translatePattern($pattern)  . 'm',  // force multiline!
              'user'    => $user_args
     );
   }
@@ -1072,24 +1044,6 @@ class TexyModule {
 
 
 
-
-  function isAllowed($what) {
-    if ($this->allowed === true) return true;
-    return (isset($this->allowed[$what])) ?
-           ($this->allowed[$what] !== false) : false;
-  }
-
-
-  function allow($what = null, $value = true) {
-    if ($what === null) $this->allowed = true;
-    else $this->allowed[$what] = $value;
-  }
-
-
-  function disallow($what = null) {
-    if ($what === null) $this->allowed = false;
-    else $this->allowed[$what] = false;
-  }
 
 
 } // TexyModule
@@ -1112,20 +1066,23 @@ class TexyModule {
  * BLOCK MODULE CLASS
  */
 class TexyBlockModule extends TexyModule {
-  var $allowed = array(
-         'pre'  => true,
-         'text' => true,
-         'html' => true,         // if false, /--html blocks are parsed as /--text block
-         'div'  => true,
-         'form' => true,
-      );
-  var $userFunction;             // function &myUserFunc(&$element)
+  var $allowed;
+  var $codeHandler;               // function &myUserFunc(&$element)
+  var $divHandler;                // function &myUserFunc(&$element, $nonParsedContent)
+  var $htmlHandler;               // function &myUserFunc(&$element, $isHtml)
 
 
   // constructor
   function TexyBlockModule(&$texy)
   {
     parent::TexyModule($texy);
+
+    $this->allowed->pre  = true;
+    $this->allowed->text = true;  // if false, /--html blocks are parsed as /--text block
+    $this->allowed->html = true;
+    $this->allowed->div  = true;
+    $this->allowed->form = true;
+    $this->allowed->source = true;
   }
 
 
@@ -1134,7 +1091,9 @@ class TexyBlockModule extends TexyModule {
    */
   function init()
   {
-    $this->registerBlockPattern('processBlock',   '#^/--+ *(?:(code|samp|text|html|div|form|notexy)( +\S*)?|) *MODIFIER_H?\n(.*\n)?\\\\--+()$#mUsi');
+    if (isset($this->userFunction)) $this->codeHandler = $this->userFunction;  // !!! back compatibility
+
+    $this->registerBlockPattern('processBlock',   '#^/--+ *(?:(code|samp|text|html|div|form|notexy|source)( +\S*)?|) *MODIFIER_H?\n(.*\n)?\\\\--+()$#mUsi');
   }
 
 
@@ -1166,16 +1125,32 @@ class TexyBlockModule extends TexyModule {
 
     if (!$mType) $mType = 'pre';                // default type
     if ($mType == 'notexy') $mType = 'html'; // backward compatibility
-    if ($mType == 'html' && !$this->isAllowed('html')) $mType = 'text';
+    if ($mType == 'html' && !$this->allowed->html) $mType = 'text';
     if ($mType == 'code' || $mType == 'samp')
-      $mType = $this->isAllowed('pre') ? $mType : 'none';
-    elseif (!$this->isAllowed($mType)) $mType = 'none'; // transparent block
+      $mType = $this->allowed->pre ? $mType : 'none';
+    elseif (!$this->allowed->$mType) $mType = 'none'; // transparent block
 
     switch ($mType) {
      case 'none':
      case 'div':
          $el = &new TexyBlockElement($this->texy);
-         $el->tag = $mType;
+         $el->tag = 'div';
+         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+         // outdent
+         if ($spaces = strspn($mContent, ' '))
+           $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
+
+         if ($this->divHandler)
+           call_user_func_array($this->divHandler, array(&$el, &$mContent));
+
+         $el->parse($mContent);
+         $blockParser->addChildren($el);
+
+         break;
+
+
+     case 'source':
+         $el = &new TexySourceBlockElement($this->texy);
          $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
          // outdent
          if ($spaces = strspn($mContent, ' '))
@@ -1203,6 +1178,9 @@ class TexyBlockModule extends TexyModule {
          $el = &new TexyTextualElement($this->texy);
          $el->setContent($mContent, true);
          $blockParser->addChildren($el);
+
+         if ($this->htmlHandler)
+           call_user_func_array($this->htmlHandler, array(&$el, true));
          break;
 
 
@@ -1216,7 +1194,11 @@ class TexyBlockModule extends TexyModule {
                 ),
                 true);
          $blockParser->addChildren($el);
+
+         if ($this->htmlHandler)
+           call_user_func_array($this->htmlHandler, array(&$el, false));
          break;
+
 
 
      default: // pre | code | samp
@@ -1230,12 +1212,10 @@ class TexyBlockModule extends TexyModule {
            $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
          $el->setContent($mContent, false); // not html-safe content
-
-         if ($this->userFunction)
-           call_user_func_array($this->userFunction, array(&$el));
-
          $blockParser->addChildren($el);
 
+         if ($this->codeHandler)
+           call_user_func_array($this->codeHandler, array(&$el));
     } // switch
   }
 
@@ -1243,16 +1223,16 @@ class TexyBlockModule extends TexyModule {
 
   function trustMode()
   {
-    $this->allow('html');
-    $this->allow('form');
+    $this->allowed->html = true;
+    $this->allowed->form = true;
   }
 
 
 
   function safeMode()
   {
-    $this->disallow('html');
-    $this->disallow('form');
+    $this->allowed->html = false;
+    $this->allowed->form = false;
   }
 
 
@@ -1312,6 +1292,35 @@ class TexyCodeBlockElement extends TexyTextualElement {
 
 
 
+
+class TexySourceBlockElement extends TexyBlockElement {
+  var $tag  = 'pre';
+
+
+  function generateContent()
+  {
+    $html = parent::generateContent();
+    if ($this->texy->formatterModule)
+      $this->texy->formatterModule->indent($html);
+
+    $el = &new TexyCodeBlockElement($this->texy);
+    $el->lang = 'html';
+    $el->type = 'code';
+    $el->setContent($html, false);
+
+    if ($this->texy->blockModule->codeHandler)
+      call_user_func_array($this->texy->blockModule->codeHandler, array(&$el));
+
+    return $el->safeContent();
+  }
+
+} // TexySourceBlockElement
+
+
+
+
+
+
 /**
  * HTML ELEMENT FORM
  */
@@ -1358,19 +1367,18 @@ class TexyFormElement extends TexyBlockElement {
  * CONTROL MODULE CLASS - EXPERIMENTAL !!!
  */
 class TexyControlModule extends TexyModule {
-  var $allowed = array(
-         'text'      => true,
-         'select'    => true,
-         'radio'     => true,
-         'checkbox'  => true,
-         'button'    => true,
-      );
+  var $allowed;
 
 
   // constructor
   function TexyControlModule(&$texy)
   {
     parent::TexyModule($texy);
+    $this->allowed->text = true;
+    $this->allowed->select = true;
+    $this->allowed->radio = true;
+    $this->allowed->checkbox = true;
+    $this->allowed->button = true;
   }
 
 
@@ -1414,24 +1422,35 @@ class TexyControlModule extends TexyModule {
 
 
 
-// LIST STYLE
-define('TEXY_LIST_DEFINITION',       'dl');
-define('TEXY_LIST_UNORDERED',        'ul');
-define('TEXY_LIST_ORDERED',          'ol');
-define('TEXY_LISTSTYLE_UPPER_ALPHA', 'upper-alpha');
-define('TEXY_LISTSTYLE_LOWER_ALPHA', 'lower-alpha');
-define('TEXY_LISTSTYLE_UPPER_ROMAN', 'upper-roman');
-
-// LIST ITEM TYPES
-define('TEXY_LISTITEM',              'li');
-define('TEXY_LISTITEM_TERM',         'dt');
-define('TEXY_LISTITEM_DEFINITION',   'dd');
-
 
 /**
  * ORDERED / UNORDERED NESTED LIST MODULE CLASS
  */
 class TexyListModule extends TexyModule {
+  var $allowed = array(
+         '*'            => true,
+         '-'            => true,
+         '+'            => true,
+         '1.'           => true,
+         '1)'           => true,
+         'I.'           => true,
+         'I)'           => true,
+         'a)'           => true,
+         'A)'           => true,
+  );
+
+  // private
+  var $translate = array(    //  rexexp       class   list-style-type  tag
+         '*'            => array('\*',          '',    '',              'ul'),
+         '-'            => array('\-',          '',    '',              'ul'),
+         '+'            => array('\+',          '',    '',              'ul'),
+         '1.'           => array('\d+\.\ ',     '',    '',              'ol'),
+         '1)'           => array('\d+\)',       '',    '',              'ol'),
+         'I.'           => array('[IVX]+\.\ ',  '',    'upper-roman',   'ol'),   // place romans before alpha
+         'I)'           => array('[IVX]+\)',    '',    'upper-roman',   'ol'),
+         'a)'           => array('[a-z]\)',     '',    'lower-alpha',   'ol'),
+         'A)'           => array('[A-Z]\)',     '',    'upper-alpha',   'ol'),
+      );
 
 
   /***
@@ -1439,10 +1458,15 @@ class TexyListModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                                                     // .{color: red}
-                                                . '(\*|\-|\+|\d+\.|\d+\)|[a-zA-Z]+\)|[IVX]+\.)\ +(.*)MODIFIER_H?()$#mU');   // - item
+    $bullets = array();
+    foreach ($this->allowed as $bullet => $allowed)
+      if ($allowed) $bullets[] = $this->translate[$bullet][0];
+
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                             // .{color: red}
+                                              . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mU');  // item (unmatched)
   }
+
+
 
 
 
@@ -1458,74 +1482,93 @@ class TexyListModule extends TexyModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    list($match, $mModList1, $mModList2, $mModList3, $mModList4, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+    list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mBullet, $mNewLine) = $matches;
     //    [1] => (title)
     //    [2] => [class]
     //    [3] => {style}
     //    [4] => >
-
-    //    [5] => * + - 1. 1) a) A) IV.
-    //    [6] => ...
-    //    [7] => (title)
-    //    [8] => [class]
-    //    [9] => {style}
-    //   [10] => >
+    //    [5] => bullet * + - 1) a) A) IV)
 
     $texy = & $this->texy;
     $el = &new TexyListElement($texy);
-    $el->modifier->setProperties($mModList1, $mModList2, $mModList3, $mModList4);
-    do {
-      $type = '\*';       if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_UNORDERED; break; }
-      $type = '\-';       if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_UNORDERED; break; }
-      $type = '\+';       if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_UNORDERED; break; }
-      $type = '\d+\.';    if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; break; }
-      $type = '\d+\)';    if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; break; }
-      $type = '[A-Z]+\)'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; $el->style = TEXY_LISTSTYLE_UPPER_ALPHA; break; }
-      $type = '[a-z]+\)'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; $el->style = TEXY_LISTSTYLE_LOWER_ALPHA; break; }
-      $type = '[IVX]+\.'; if (preg_match("#$type#A", $mType)) { $el->type = TEXY_LIST_ORDERED; $el->style = TEXY_LISTSTYLE_UPPER_ROMAN; break; }
-    } while (false);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
-
-    $reItem = "#^$type\ +(.*)".TEXY_PATTERN_MODIFIER_H.'?()$#AUm';
-
-
-    do {
-      $elItem = &new TexyListItemElement($texy);
-      $el->children[] = & $elItem;
-      $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-      $content = ' ';             // trick: don't recognize `- 12. 3.` as three nested lists
-      $spaces = '';
-
-      do {
-        $content .= $mContent . TEXY_NEWLINE;
-
-        if ($blockParser->match("#^(?:|(\ {1,$spaces})(.*))()$#Am", $matches)) {
-          list($match, $mSpaces, $mContent) = $matches;
-          //    [1] => SPACES
-          //    [2] => ...
-          if ($match != '' && $spaces === '') $spaces = strlen($mSpaces);
-          continue;
-        }
-
+    $bullet = '';
+    foreach ($this->translate as $type)
+      if (preg_match('#'.$type[0].'#A', $mBullet)) {
+        $bullet = $type[0];
+        $el->tag = $type[3];
+        $el->modifier->styles['list-style-type'] = $type[2];
+        $el->modifier->classes[] = $type[1];
         break;
-      } while (true);
+      }
 
-      $elItem->parse($content);
-      if (is_a($elItem->children[0], 'TexyGenericBlockElement')) $elItem->children[0]->tag = '';
+    $blockParser->moveBackward($mNewLine ? 2 : 1);
 
-      if (!$blockParser->match($reItem, $matches)) break;
-      list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
-        //    [1] => ...
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
-        //    [5] => >
+    $count = 0;
+    while ($elItem = &$this->processItem($blockParser, $bullet)) {
+      $el->children[] = & $elItem;
+      $count++;
+    }
 
-    } while (true);
-
-
-    $blockParser->addChildren($el);
+    if (!$count) return false;
+    else $blockParser->addChildren($el);
   }
+
+
+
+
+
+
+
+
+  function &processItem(&$blockParser, $bullet, $indented = false) {
+    $texy = & $this->texy;
+    $spacesBase = $indented ? ('\ {1,}') : '';
+    $patternItem = $texy->translatePattern('#^\n?(@1)@2(\n?)(\ +)(\S.*)?MODIFIER_H?()$#mAU', $spacesBase, $bullet);
+
+    // first line (with bullet)
+    if (!$blockParser->receiveNext($patternItem, $matches)) return false;
+    list($match, $mIndent, $mNewLine, $mSpace, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+      //    [1] => indent
+      //    [2] => \n
+      //    [3] => space
+      //    [4] => ...
+      //    [5] => (title)
+      //    [6] => [class]
+      //    [7] => {style}
+      //    [8] => >
+
+    $elItem = &new TexyListItemElement($texy);
+    $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+
+    // next lines
+    $spaces = $mNewLine ? strlen($mSpace) : '';
+    $content = ' ' . $mContent; // trick
+    while ($blockParser->receiveNext('#^(\n*)'.$mIndent.'(\ {1,'.$spaces.'})(.*)()$#Am', $matches)) {
+      list($match, $mBlank, $mSpaces, $mContent) = $matches;
+      //    [1] => blank line?
+      //    [2] => spaces
+      //    [3] => ...
+
+      if ($spaces === '') $spaces = strlen($mSpaces);
+      $content .= TEXY_NEWLINE . $mBlank . $mContent;
+    }
+
+    // parse content
+    $mergeLines = & $texy->genericBlock[0]->mergeLines;
+    $tmp = $mergeLines;
+    $mergeLines = false;
+
+    $elItem->parse($content);
+    $mergeLines = true;
+
+    if (is_a($elItem->children[0], 'TexyGenericBlockElement'))
+      $elItem->children[0]->tag = '';
+
+    return $elItem;
+  }
+
 
 
 
@@ -1547,23 +1590,7 @@ class TexyListModule extends TexyModule {
  * HTML ELEMENT OL / UL / DL
  */
 class TexyListElement extends TexyBlockElement {
-  var $type;
-  var $style;
 
-
-  function generateTag(&$tag, &$attr)
-  {
-    $tag = $this->type;
-
-    $attr['id']    = $this->modifier->id;
-    $attr['title'] = $this->modifier->title;
-    $attr['class'] = TexyModifier::implodeClasses( $this->modifier->classes );
-
-    $styles = $this->modifier->styles;
-    $styles['text-align'] = $this->modifier->hAlign;
-    $styles['list-style-type'] = $this->style;
-    $attr['style'] = TexyModifier::implodeStyles($styles);
-  }
 
 
 } // TexyListElement
@@ -1573,17 +1600,11 @@ class TexyListElement extends TexyBlockElement {
 
 
 /**
- * HTML ELEMENT LI / DL / DT
+ * HTML ELEMENT LI / DL
  */
 class TexyListItemElement extends TexyBlockElement {
-  var $type = TEXY_LISTITEM;
+  var $tag = 'li';
 
-
-  function generateTag(&$tag, &$attr)
-  {
-    parent::generateTag($tag, $attr);
-    $tag = $this->type;
-  }
 
 } // TexyListItemElement
 
@@ -1600,6 +1621,19 @@ class TexyListItemElement extends TexyBlockElement {
  * DEFINITION LIST MODULE CLASS
  */
 class TexyDefinitionListModule extends TexyListModule {
+  var $allowed = array(
+         '*'            => true,
+         '-'            => true,
+         '+'            => true,
+  );
+
+  // private
+  var $translate = array(    //  rexexp  class
+         '*'            => array('\*',   ''),
+         '-'            => array('\-',   ''),
+         '+'            => array('\+',   ''),
+      );
+
 
 
   /***
@@ -1607,10 +1641,13 @@ class TexyDefinitionListModule extends TexyListModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                         // .{color:red}
-                                                . '(\S.*)\:\ *MODIFIER_H?\n'                    // Term:
-                                                . '(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mU');   //    - description
+    $bullets = array();
+    foreach ($this->allowed as $bullet => $allowed)
+      if ($allowed) $bullets[] = $this->translate[$bullet][0];
+
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?'                              // .{color:red}
+                                              . '(\S.*)\:\ *MODIFIER_H?\n'                         // Term:
+                                              . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU');   //    - description
   }
 
 
@@ -1626,9 +1663,9 @@ class TexyDefinitionListModule extends TexyListModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    list($match, $mModList1, $mModList2, $mModList3, $mModList4,
+    list($match, $mMod1, $mMod2, $mMod3, $mMod4,
                  $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
-                 $mSpaces, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+                 $mSpaces, $mBullet) = $matches;
     //    [1] => (title)
     //    [2] => [class]
     //    [3] => {style}
@@ -1642,83 +1679,56 @@ class TexyDefinitionListModule extends TexyListModule {
 
     //   [10] => space
     //   [11] => - * +
-    //   [12] => ...
-    //   [13] => (title)
-    //   [14] => [class]
-    //   [15] => {style}
-    //   [16] => >
 
     $texy = & $this->texy;
     $el = &new TexyListElement($texy);
-    $el->type = TEXY_LIST_DEFINITION;
-    $el->modifier->setProperties($mModList1, $mModList2, $mModList3, $mModList4);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+    $el->tag = 'dl';
 
-    $reTerm = '#^(\S.*)\:\ *MODIFIER_H?' . TEXY_NEWLINE .'(\ +)(\*|\-|\+)\ +(.*)MODIFIER_H?()$#mUA';
-
-    do {
-      $mType = preg_quote($mType);
-      $spacesBase = strlen($mSpaces);
-      $reItem = "#^(\ {1,$spacesBase})$mType\ +(.*)".TEXY_PATTERN_MODIFIER_H."?()$#mA";
-
-      $elItem = &new TexyListItemElement($texy);
-      $elItem->type = TEXY_LISTITEM_TERM;
-      $el->children[] = & $elItem;
-      $elItem->modifier->setProperties($mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4);
-      $elItem->parse($mContentTerm);
-      if (is_a($elItem->children[0], 'TexyGenericBlockElement')) $elItem->children[0]->tag = '';
-
-      do {
-        $elItem = &new TexyListItemElement($texy);
-        $elItem->type = TEXY_LISTITEM_DEFINITION;
-        $el->children[] = & $elItem;
-        $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $content = '';
-        $spaces = '';
-
-        do {
-          $content .= $mContent . TEXY_NEWLINE;
-
-          if ($blockParser->match("#^(?:|\ \{$spacesBase}(\ {1,$spaces})(.*))()$#Am", $matches)) {
-            list($match, $mSpaces, $mContent) = $matches;
-            //    [1] => SPACE2
-            //    [2] => ...
-            if ($match != '' && $spaces === '') $spaces = strlen($mSpaces);
-            continue;
-          }
-
-          break;
-        } while (true);
-
-        $elItem->parse($content);
-        if (is_a($elItem->children[0], 'TexyGenericBlockElement')) $elItem->children[0]->tag = '';
-
-        if ($blockParser->match($reItem, $matches)) {
-          list($match, $mSpaces, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
-          //    [1] => SPACE
-          //    [2] => ...
-          //    [3] => (title)
-          //    [4] => [class]
-          //    [5] => {style}
-          //    [6] => >
-          continue;
-        }
-
+    $bullet = '';
+    foreach ($this->translate as $type)
+      if (preg_match('#'.$type[0].'#A', $mBullet)) {
+        $bullet = $type[0];
+        $el->modifier->classes[] = $type[1];
         break;
-      } while (true);
+      }
 
-      if ($blockParser->match($reTerm, $matches)) {
-        list($match, $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4, $mSpaces, $mType, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+    $blockParser->addChildren($el);
+
+    $blockParser->moveBackward(2);
+
+    $patternTerm = $texy->translatePattern('#^\n?(\S.*)\:\ *MODIFIER_H?()$#mUA');
+    $bullet = preg_quote($mBullet);
+
+    while (true) {
+      if ($elItem = &$this->processItem($blockParser, preg_quote($mBullet), true)) {
+        $elItem->tag = 'dd';
+        $el->children[] = & $elItem;
+        continue;
+      }
+
+      if ($blockParser->receiveNext($patternTerm, $matches)) {
+        list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        //    [1] => ...
+        //    [2] => (title)
+        //    [3] => [class]
+        //    [4] => {style}
+        //    [5] => >
+        $elItem = &new TexyTextualElement($texy);
+        $elItem->tag = 'dt';
+        $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $elItem->parse($mContent);
+        $el->children[] = & $elItem;
         continue;
       }
 
       break;
-    } while (true);
-
-
-    $blockParser->addChildren($el);
+    }
   }
 
 } // TexyDefinitionListModule
+
+
 
 
 
@@ -1744,7 +1754,7 @@ class TexyFormatterModule extends TexyModule {
   // internal
   var $tagStack;
   var $tagStackAssoc;
-  var $nestedElements = array('div', 'dl', 'ol', 'ul', 'blockquote', 'li', 'dd');
+  var $nestedElements = array('div', 'dl', 'ol', 'ul', 'blockquote', 'li', 'dd', 'span');
   var $hashTable = array();
 
 
@@ -1927,8 +1937,7 @@ class TexyFormatterModule extends TexyModule {
  * PARAGRAPH / GENERIC MODULE CLASS
  */
 class TexyGenericBlockModule extends TexyModule {
-
-
+  var $mergeLines;
 
 
   /***
@@ -1937,13 +1946,16 @@ class TexyGenericBlockModule extends TexyModule {
   function init()
   {
     $this->texy->genericBlock = array(&$this, 'processBlock');
+    $this->mergeLines = true;
   }
 
 
 
   function processBlock(&$blockParser, $content)
   {
-    $str_blocks = preg_split('#(\n{2,})#', $content);
+    $str_blocks = $this->mergeLines ?
+                  preg_split('#(\n{2,})#', $content) :
+                  preg_split('#(\n(?! )|\n{2,})#', $content);
 
     foreach ($str_blocks as $str) {
       $str = trim($str);
@@ -1964,7 +1976,7 @@ class TexyGenericBlockModule extends TexyModule {
    */
   function &processSingleBlock(&$blockParser, $content)
   {
-    preg_match('#^(.+)'.TEXY_PATTERN_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
+    preg_match($this->texy->translatePattern('#^(.*)MODIFIER_H?(\n.*)?()$#sU'), $content, $matches);
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
     //    [1] => ...
     //    [2] => (title)
@@ -1973,22 +1985,20 @@ class TexyGenericBlockModule extends TexyModule {
     //    [5] => >
 
 
-    // PARAGRAPH or DIV
-
-    $el = &new TexyGenericBlockElement($this->texy);
-    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-
     // ....
     //  ...  => \n
     $mContent = preg_replace('#\n (\S)#', " \r\\1", trim($mContent . $mContent2));
     $mContent = strtr($mContent, "\n\r", " \n");
 
+    $el = &new TexyGenericBlockElement($this->texy);
+    $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     $el->parse($mContent);
+    $blockParser->addChildren($el);
 
     // specify tag
     if ($el->contentType == TEXY_CONTENT_TEXTUAL) $el->tag = 'p';
     elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
-    elseif ($el->contentType == TEXY_CONTENT_HTML) $el->tag = '';
+    elseif ($el->contentType == TEXY_CONTENT_BLOCK) $el->tag = '';
     else $el->tag = 'div';
 
     // add <br />
@@ -1998,8 +2008,6 @@ class TexyGenericBlockModule extends TexyModule {
                         array("\n" => $elBr->addTo($el))
                      );
     }
-
-    $blockParser->addChildren($el);
   }
 
 
@@ -2059,10 +2067,7 @@ define('TEXY_HEADING_FIXED',           2);  // fixed-leveling
  * HEADING MODULE CLASS
  */
 class TexyHeadingModule extends TexyModule {
-  var $allowed = array(
-         'surround'  => true,
-         'underline' => true,
-      );
+  var $allowed;
 
   // options
   var $top    = 1;                      // number of top heading, 1 - 6
@@ -2089,22 +2094,30 @@ class TexyHeadingModule extends TexyModule {
 
 
 
+  // constructor
+  function TexyHeadingModule(&$texy)
+  {
+    parent::TexyModule($texy);
+
+    $this->allowed->surrounded  = true;
+    $this->allowed->underlined  = true;
+  }
+
+
   /***
    * Module initialization.
    */
   function init()
   {
-    if ($this->isAllowed('underline'))
-      $this->registerBlockPattern('processBlockUnderline', '#^(\S.*)MODIFIER_H?' . TEXY_NEWLINE
-                                                        .'(\#|\*|\=|\-){3,}$#mU');
-    if ($this->isAllowed('surround'))
+    if ($this->allowed->underlined)
+      $this->registerBlockPattern('processBlockUnderline', '#^(\S.*)MODIFIER_H?\n'
+                                                          .'(\#|\*|\=|\-){3,}$#mU');
+    if ($this->allowed->surrounded)
       $this->registerBlockPattern('processBlockSurround',  '#^((\#|\=){2,7})(?!\\2)(.*)\\2*MODIFIER_H?()$#mU');
   }
 
 
-  /***
-   * Preprocessing
-   */
+
   function preProcess(&$text)
   {
     $this->_rangeUnderline = array(10, 0);
@@ -2112,6 +2125,8 @@ class TexyHeadingModule extends TexyModule {
     unset($this->_deltaUnderline);
     unset($this->_deltaSurround);
   }
+
+
 
 
   /***
@@ -2140,6 +2155,9 @@ class TexyHeadingModule extends TexyModule {
 
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     $el->parse(trim($mContent));
+    $blockParser->addChildren($el);
+
+    // document title
     if (!$this->title) $this->title = $el->toText();
 
     // dynamic headings balancing
@@ -2147,8 +2165,6 @@ class TexyHeadingModule extends TexyModule {
     $this->_rangeUnderline[1] = max($this->_rangeUnderline[1], $el->level);
     $this->_deltaUnderline    = -$this->_rangeUnderline[0];
     $this->_deltaSurround     = -$this->_rangeSurround[0] + ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
-
-    $blockParser->addChildren($el);
   }
 
 
@@ -2176,6 +2192,9 @@ class TexyHeadingModule extends TexyModule {
 
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     $el->parse(trim($mContent));
+    $blockParser->addChildren($el);
+
+    // document title
     if (!$this->title) $this->title = $el->toText();
 
     // dynamic headings balancing
@@ -2183,7 +2202,6 @@ class TexyHeadingModule extends TexyModule {
     $this->_rangeSurround[1] = max($this->_rangeSurround[1], $el->level);
     $this->_deltaSurround    = -$this->_rangeSurround[0] + ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
-    $blockParser->addChildren($el);
   }
 
 
@@ -2209,24 +2227,16 @@ class TexyHeadingModule extends TexyModule {
  * HTML ELEMENT H1-6
  */
 class TexyHeadingElement extends TexyTextualElement {
-  var $parentModule;
   var $level = 0;        // 0 .. ?
   var $deltaLevel = 0;
-
-
-  // constructor
-  function TexyHeadingElement(&$texy)
-  {
-    parent::TexyTextualElement($texy);
-    $this->parentModule = & $texy->modules['TexyHeadingModule'];
-  }
 
 
   function generateTag(&$tag, &$attr)
   {
     parent::generateTag($tag, $attr);
-    $tag = 'h' . min(6, max(1, $this->level + $this->deltaLevel + $this->parentModule->top));
+    $tag = 'h' . min(6, max(1, $this->level + $this->deltaLevel + $this->texy->headingModule->top));
   }
+
 
 } // TexyHeadingElement
 
@@ -2249,7 +2259,7 @@ class TexyHeadingElement extends TexyTextualElement {
 /**
  * HORIZONTAL LINE MODULE CLASS
  */
-class TexyHorizlineModule extends TexyModule {
+class TexyHorizLineModule extends TexyModule {
 
 
   /***
@@ -2257,8 +2267,7 @@ class TexyHorizlineModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
+    $this->registerBlockPattern('processBlock', '#^(\- |\-|\* |\*){3,}\ *MODIFIER_H?()$#mU');
   }
 
 
@@ -2327,11 +2336,10 @@ class TexyHorizLineElement extends TexyBlockElement {
 /**
  * HTML TAGS MODULE CLASS
  */
-class TexyHTMLTagModule extends TexyModule {
+class TexyHTMLModule extends TexyModule {
   var $allowed;          // allowed tags (true -> all, or array, or false -> none)
-//  var $userFunction;   // function &myUserFunc(&$texy, &$tag, &$attr)  $attr = false --> closing tag
-
                          // arrays of safe tags and attributes
+  var $allowedComments = true;
   var $safeTags = array(
                      'a'         => array('href', 'rel', 'title'),
                      'abbr'      => array('title'),
@@ -2359,7 +2367,7 @@ class TexyHTMLTagModule extends TexyModule {
 
 
   // constructor
-  function TexyHTMLTagModule(&$texy)
+  function TexyHTMLModule(&$texy)
   {
     parent::TexyModule($texy);
 
@@ -2375,8 +2383,8 @@ class TexyHTMLTagModule extends TexyModule {
    */
   function init()
   {
-    $HASH = TEXY_HASH;
-    $this->registerLinePattern('processLine', "#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9-]|=\s*\"[^\"$HASH]*\"|=\s*'[^'$HASH]*'|=[^>$HASH]*)*)(/?)>#is");
+    $this->registerLinePattern('processTag',     '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9-]|=\s*"[^":HASH:]*"|=\s*\'[^\':HASH:]*\'|=[^>:HASH:]*)*)(/?)>#is');
+    $this->registerLinePattern('processComment', '#<!--([^:HASH:]*)-->#Uis');
   }
 
 
@@ -2385,7 +2393,7 @@ class TexyHTMLTagModule extends TexyModule {
    * Callback function: <tag ...>
    * @return string
    */
-  function processLine(&$lineParser, &$matches)
+  function processTag(&$lineParser, &$matches)
   {
     list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
     //    [1] => /
@@ -2422,17 +2430,9 @@ class TexyHTMLTagModule extends TexyModule {
       $attr = false;
     }
 
-/*
-    if ($this->userFunction)  // call user function?
-      call_user_func_array(
-            $this->userFunction,
-            array(&$this->texy, &$tag, &$attr)
-      );
-    if (!$tag) return $match;
-*/
 
     if (is_array($this->allowed)) {
-      if (!$this->isAllowed($tag))
+      if (!isset($this->allowed[$tag]))
         return $match;
 
       $allowedAttrs = $this->allowed[$tag];
@@ -2487,11 +2487,23 @@ class TexyHTMLTagModule extends TexyModule {
     $el->tag      = $tag;
     $el->closing  = $closing;
     $el->empty    = $empty;
-    $el->strength = ($classify & TEXY_ELEMENT_INLINE) ? TEXY_SOFT : TEXY_HARD;
+    $el->contentType = ($classify & TEXY_ELEMENT_INLINE) ? TEXY_CONTENT_NONE : TEXY_CONTENT_BLOCK;
 
     return $el->addTo($lineParser->element);
   }
 
+
+
+  /***
+   * Callback function: <!-- ... -->
+   * @return string
+   */
+  function processComment(&$lineParser, &$matches)
+  {
+    list($match, $mContent) = $matches;
+    if ($this->allowedComments) return ' ';
+    else return $match;   // disabled
+  }
 
 
 
@@ -2509,7 +2521,7 @@ class TexyHTMLTagModule extends TexyModule {
 
 
 
-} // TexyHTMLTagModule
+} // TexyHTMLModule
 
 
 
@@ -2530,7 +2542,7 @@ class TexySingleTagElement extends TexyDOMElement {
   var $attr;
   var $closing;
   var $empty;
-  var $strength = TEXY_SOFT;
+  var $contentType;
 
 
 
@@ -2549,10 +2561,9 @@ class TexySingleTagElement extends TexyDOMElement {
 
   function addTo(&$lineElement)
   {
-    $key = Texy::hashKey($this->strength);
-    $lineElement->children[$key]  = array(&$this, null);
-    if ($this->strength == TEXY_HARD)
-      $lineElement->contentType = max($lineElement->contentType, TEXY_CONTENT_HTML);
+    $key = Texy::hashKey($this->contentType);
+    $lineElement->children[$key]  = &$this;
+    $lineElement->contentType = max($lineElement->contentType, $this->contentType);
     return $key;
   }
 
@@ -2571,6 +2582,8 @@ class TexySingleTagElement extends TexyDOMElement {
 
 
 
+// images   [* urls .(title)[class]{style} >]
+define('TEXY_PATTERN_IMAGE',    '\[\*([^\n'.TEXY_HASH.']+)'.TEXY_PATTERN_MODIFIER.'? *(\*|>|<)\]');
 
 
 /**
@@ -2585,12 +2598,17 @@ class TexyImageModule extends TexyModule {
   var $rightClass = '';            // right-floated image class
   var $defaultAlt = 'image';       // default image alternative text
 
-  // private
-  var $references  = array();      // references: 'home' => TexyImageReference
-  var $userReferences;             // function &myUserFunc(&$texy, $refName): returns TexyImageReference (or false)
-  var $_backupReferences;
 
 
+
+
+  // constructor
+  function TexyImageModule(&$texy)
+  {
+    parent::TexyModule($texy);
+
+//    $this->rootPrefix = dirname($_SERVER['SCRIPT_FILENAME']); // physical location on server
+  }
 
 
   /***
@@ -2614,8 +2632,7 @@ class TexyImageModule extends TexyModule {
    */
   function addReference($name, &$obj)
   {
-    $name = strtolower($name);
-    $this->references[$name] = &$obj;
+    $this->texy->addReference('*'.$name.'*', $obj);
   }
 
 
@@ -2627,36 +2644,9 @@ class TexyImageModule extends TexyModule {
    */
   function &getReference($name)
   {
-    $name = strtolower($name);
-
-    if (isset($this->references[$name]))
-      return $this->references[$name];
-
-
-    if ($this->userReferences) {
-      $obj = &call_user_func_array(
-                   $this->userReferences,
-                   array(&$this->texy, $name)
-      );
-
-      if ($obj) {
-        $this->references[$name] = & $obj; // save for next time
-        return $obj;
-      }
-    }
-
-    return false;
-  }
-
-
-
-
-  /***
-   * Forget all references created during last parse()
-   */
-  function forgetReferences()
-  {
-    $this->references = $this->_backupReferences;
+    $el = $this->texy->getReference('*'.$name.'*');
+    if (is_a($el, 'TexyImageReference')) return $el;
+    else return false;
   }
 
 
@@ -2670,10 +2660,8 @@ class TexyImageModule extends TexyModule {
    */
   function preProcess(&$text)
   {
-    $this->_backupReferences = $this->references;
-
     // [*image*]: urls .(title)[class]{style}
-    $text = preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, '_replaceReference'), $text);
+    $text = preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, 'processReferenceDefinition'), $text);
   }
 
 
@@ -2682,7 +2670,7 @@ class TexyImageModule extends TexyModule {
    * Callback function: [*image*]: urls .(title)[class]{style}
    * @return string
    */
-  function _replaceReference(&$matches)
+  function processReferenceDefinition(&$matches)
   {
     list($match, $mRef, $mUrls, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => [* (reference) *]
@@ -2783,6 +2771,7 @@ class TexyImageReference {
  * HTML ELEMENT IMAGE
  */
 class TexyImageElement extends TexyTextualElement {
+  var $contentType = TEXY_CONTENT_NONE;
   var $parentModule;
 
   var $image;
@@ -2796,7 +2785,7 @@ class TexyImageElement extends TexyTextualElement {
   function TexyImageElement(&$texy)
   {
     parent::TexyTextualElement($texy);
-    $this->parentModule = & $texy->modules['TexyImageModule'];
+    $this->parentModule = & $texy->imageModule;
 
     $this->image = & $texy->createURL();
     $this->image->root = $this->parentModule->root;
@@ -2832,15 +2821,8 @@ class TexyImageElement extends TexyTextualElement {
 
   function setSize($width, $height)
   {
-    $width = abs((int) $width);
-    $height = abs((int) $height);
-
-    if ($width && $height) {
-      $this->width = $width;
-      $this->height = $height;
-    } else {
-      $this->width = $this->height = null;
-    }
+    $this->width = abs((int) $width);
+    $this->height = abs((int) $height);
   }
 
 
@@ -2856,7 +2838,7 @@ class TexyImageElement extends TexyTextualElement {
     $URLs = explode('|', $URLs . '||');
 
     // dimensions
-    if (preg_match('#^(.*) (\d+) *x *(\d+) *()$#U', $URLs[0], $matches)) {
+    if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $URLs[0], $matches)) {
       $URLs[0] = $matches[1];
       $this->setSize($matches[2], $matches[3]);
     }
@@ -2891,15 +2873,15 @@ class TexyImageElement extends TexyTextualElement {
         $styles['float'] = 'right';
     }
 
-    $styles['vertical-align'] = $this->modifier->vAlign;
+//    $styles['vertical-align'] = $this->modifier->vAlign;
     $attr['class'] = TexyModifier::implodeClasses($classes);
     $attr['style'] = TexyModifier::implodeStyles($styles);
     $attr['id'] = $this->modifier->id;
 
     // width x height generate
     $this->requireSize();
-    $attr['width'] = $this->width;
-    $attr['height'] = $this->height;
+    if ($this->width) $attr['width'] = $this->width;
+    if ($this->height) $attr['height'] = $this->height;
 
     // attribute generate
     $this->texy->summary->images[] = $attr['src'] = $this->image->URL;
@@ -2967,8 +2949,7 @@ class TexyImageDescModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'? +\*\*\* +(.*)MODIFIER_H?()$#mU');
+    $this->registerBlockPattern('processBlock', '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'? +\*\*\* +(?U)(.*)MODIFIER_H?()$#mU');
   }
 
 
@@ -2996,8 +2977,9 @@ class TexyImageDescModule extends TexyModule {
 
     $el = &new TexyImageDescElement($this->texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+    $blockParser->addChildren($el);
 
-    if ($this->texy->images->allowed) {
+    if ($this->texy->imageModule->allowed) {
       $el->children['img']->setImagesRaw($mURLs);
       $el->children['img']->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
       $el->modifier->hAlign = $el->children['img']->modifier->hAlign;
@@ -3005,8 +2987,6 @@ class TexyImageDescModule extends TexyModule {
     }
 
     $el->children['desc']->parse(ltrim($mContent));
-
-    $blockParser->addChildren($el);
   }
 
 
@@ -3043,7 +3023,7 @@ class TexyImageDescElement extends TexyBlockElement {
   function TexyImageDescElement(&$texy)
   {
     parent::TexyBlockElement($texy);
-    $this->parentModule = & $texy->modules['TexyImageDescModule'];
+    $this->parentModule = & $texy->imageDescModule;
 
     $this->children['img'] = &new TexyImageElement($texy);
     $this->children['desc'] = &new TexyGenericBlockElement($texy);
@@ -3089,22 +3069,26 @@ class TexyImageDescElement extends TexyBlockElement {
  */
 class TexyLinkModule extends TexyModule {
   // options
-  var $allowed         = array(                       // generally disable / enable links
-          'link'      => true,                        // classic link "xxx":url
-          'reference' => true,                        // [reference]: url
-          'email'     => true,                        // emails replacement
-          'url'       => true);                       // direct url replacement
+  var $allowed;
   var $root            = '';                          // root of relative links
   var $emailOnClick    = '';                          // 'this.href="mailto:"+this.href.match(/./g).reverse().slice(0,-7).join("")';
   var $imageOnClick    = 'return !popup(this.href)';  // image popup event
+  var $popupOnClick    = 'return !popup(this.href)';  // popup popup event
   var $forceNoFollow   = false;                       // always use rel="nofollow" for absolute links
 
-  // private
-  var $references      = array();                     // references: 'home' => TexyLinkReference
-  var $userReferences;                                // function &myUserFunc(&$texy, $refName): returns TexyLinkReference (or false)
-  var $imageModuleName = 'images';                    // $texy->modules[NAME]
-  var $_disableRefs    = false;                       // prevent recurse calling
-  var $_backupReferences;
+
+
+
+
+  // constructor
+  function TexyLinkModule(&$texy)
+  {
+    parent::TexyModule($texy);
+
+    $this->allowed->link      = true;   // classic link "xxx":url and [reference]
+    $this->allowed->email     = true;   // emails replacement
+    $this->allowed->url       = true;   // direct url replacement
+  }
 
 
 
@@ -3120,27 +3104,25 @@ class TexyLinkModule extends TexyModule {
     $this->registerLinePattern('processLineQuot',      '#(?<!\~)\~(?!\ )([^\n\~]+)MODIFIER?(?<!\ )\~'.TEXY_PATTERN_LINK.'()#U');
 
     // [reference]
-    if ($this->isAllowed('reference')) {
-      $this->registerLinePattern('processLineReference', '#('.TEXY_PATTERN_LINK_REF.')#U');
-    }
+    $this->registerLinePattern('processLineReference', '#('.TEXY_PATTERN_LINK_REF.')#U');
 
     // direct url and email
-    if ($this->isAllowed('url'))
-      $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#i'.TEXY_PATTERN_UTF);
-    if ($this->isAllowed('email'))
+    if ($this->allowed->url)
+      $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#i' . ($this->texy->utf ? 'u' : '') );
+    if ($this->allowed->email)
       $this->registerLinePattern('processLineURL',       '#(?<=\s|^|\(|\[|\<|:)'.TEXY_PATTERN_EMAIL.'#i');
   }
 
 
 
 
+
   /***
-   * Add new named link
+   * Add new named image
    */
   function addReference($name, &$obj)
   {
-    $name = strtolower($name);
-    $this->references[$name] = &$obj;
+    $this->texy->addReference($name, $obj);
   }
 
 
@@ -3150,62 +3132,24 @@ class TexyLinkModule extends TexyModule {
    * Receive new named link. If not exists, try
    * call user function to create one.
    */
-  function &getReference($name)
-  {
-    if ($this->_disableRefs) return false;
+  function getReference($refName) {
+    $el = & $this->texy->getReference($refName);
+    $query = '';
 
-    $name = strtolower($name);
-
-    if (isset($this->references[$name]))
-      return $this->references[$name];
-
-
-    $queryPos = strpos($name, '?');
-    if ($queryPos === false) $queryPos = strpos($name, '#');
-    if ($queryPos !== false) { // try to extract ?... #... part
-      $nameX = substr($name, 0, $queryPos);
-
-      if (isset($this->references[$nameX])) {
-        $obj = clone ($this->references[$nameX]);
-        unset($obj->modifier); // for PHP4
-        $obj->modifier = clone ($this->references[$nameX]->modifier);
-        $obj->URL .= substr($name, $queryPos);
-        return $obj;
+    if (!$el) {
+      $queryPos = strpos($refName, '?');
+      if ($queryPos === false) $queryPos = strpos($refName, '#');
+      if ($queryPos !== false) { // try to extract ?... #... part
+        $el = & $this->texy->getReference(substr($refName, 0, $queryPos));
+        $query = substr($refName, $queryPos);
       }
     }
 
-    if ($this->userReferences) {
-      $this->_disableRefs = true;
-      $obj = &call_user_func_array(
-                   $this->userReferences,
-                   array(&$this->texy, $name)
-      );
-      $this->_disableRefs = false;
+    if (!is_a($el, 'TexyLinkReference')) return false;
 
-      if ($obj) {
-        $this->references[$name] = & $obj; // save for next time
-        return $obj;
-      }
-    }
-
-    return false;
+    $el->query = $query;
+    return $el;
   }
-
-
-
-
-  /***
-   * Forget all references created during last parse()
-   */
-  function forgetReferences()
-  {
-    $this->references = $this->_backupReferences;
-  }
-
-
-
-
-
 
 
 
@@ -3214,10 +3158,8 @@ class TexyLinkModule extends TexyModule {
    */
   function preProcess(&$text)
   {
-    $this->_backupReferences = $this->references;
-
     // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-    $text = preg_replace_callback('#^\[([^\[\]\#\?\*\n]+)\]: +('.TEXY_PATTERN_LINK_IMAGE.'|(?-U)(?!\[)\S+(?U))(\ .+)?\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, '_replaceReference'), $text);
+    $text = preg_replace_callback('#^\[([^\[\]\#\?\*\n]+)\]: +('.TEXY_PATTERN_LINK_IMAGE.'|(?-U)(?!\[)\S+(?U))(\ .+)?\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array(&$this, 'processReferenceDefinition'), $text);
   }
 
 
@@ -3227,7 +3169,7 @@ class TexyLinkModule extends TexyModule {
    * Callback function: [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
    * @return string
    */
-  function _replaceReference(&$matches)
+  function processReferenceDefinition(&$matches)
   {
     list($match, $mRef, $mLink, $mLabel, $mMod1, $mMod2, $mMod3) = $matches;
     //    [1] => [ (reference) ]
@@ -3263,7 +3205,7 @@ class TexyLinkModule extends TexyModule {
     //    [4] => {style}
     //    [5] => url | [ref] | [*image*]
 
-    if (!$this->isAllowed('link')) return $mContent;
+    if (!$this->allowed->link) return $mContent;
 
     $elLink = &new TexyLinkElement($this->texy);
     $elLink->setLinkRaw($mLink);
@@ -3283,6 +3225,8 @@ class TexyLinkModule extends TexyModule {
   {
     list($match, $mRef) = $matches;
     //    [1] => [ref]
+
+    if (!$this->allowed->link) return $match;
 
     $elLink = &new TexyLinkRefElement($this->texy);
     if ($elLink->setLink($mRef) === false) return $match;
@@ -3310,6 +3254,7 @@ class TexyLinkModule extends TexyModule {
 
 
 
+
 } // TexyLinkModule
 
 
@@ -3319,6 +3264,7 @@ class TexyLinkModule extends TexyModule {
 
 class TexyLinkReference {
   var $URL;
+  var $query;
   var $label;
   var $modifier;
 
@@ -3329,8 +3275,8 @@ class TexyLinkReference {
     $this->modifier = & $texy->createModifier();
 
     if (strlen($URL) > 1)  if ($URL{0} == '\'' || $URL{0} == '"') $URL = substr($URL, 1, -1);
-    $this->URL = $URL;
-    $this->label = $label;
+    $this->URL = trim($URL);
+    $this->label = trim($label);
   }
 
 }
@@ -3349,7 +3295,6 @@ class TexyLinkReference {
  * HTML TAG ANCHOR
  */
 class TexyLinkElement extends TexyInlineTagElement {
-  var $parentModule;
   var $link;
   var $nofollow = false;
 
@@ -3358,10 +3303,9 @@ class TexyLinkElement extends TexyInlineTagElement {
   function TexyLinkElement(&$texy)
   {
     parent::TexyInlineTagElement($texy);
-    $this->parentModule = & $texy->modules['TexyLinkModule'];
 
     $this->link = & $texy->createURL();
-    $this->link->root = $this->parentModule->root;
+    $this->link->root = $texy->linkModule->root;
   }
 
 
@@ -3374,10 +3318,10 @@ class TexyLinkElement extends TexyInlineTagElement {
   function setLinkRaw($link)
   {
     if (@$link{0} == '[' && @$link{1} != '*') {
-      $elRef = & $this->parentModule->getReference( substr($link, 1, -1) );
+      $elRef = & $this->texy->linkModule->getReference( substr($link, 1, -1) );
       if ($elRef) {
         $this->modifier->copyFrom($elRef->modifier);
-        $link = $elRef->URL;
+        $link = $elRef->URL . $elRef->query;
 
       } else {
         $this->setLink(substr($link, 1, -1));
@@ -3410,16 +3354,25 @@ class TexyLinkElement extends TexyInlineTagElement {
 
     // rel="nofollow"
     $nofollowClass = in_array('nofollow', $this->modifier->unfilteredClasses);
-    if (($this->link->type & TEXY_URL_ABSOLUTE) && ($nofollowClass || $this->nofollow || $this->parentModule->forceNoFollow))
+    if (($this->link->type & TEXY_URL_ABSOLUTE) && ($nofollowClass || $this->nofollow || $this->texy->linkModule->forceNoFollow))
       $attr['rel'] = 'nofollow';
 
     $attr['id']    = $this->modifier->id;
     $attr['title'] = $this->modifier->title;
     $classes = $this->modifier->classes;
     if ($nofollowClass) {
-      $nofollowClass = array_search('nofollow', $classes);
-      if ($nofollowClass !== false) unset($classes[$nofollowClass]);
+      if (($pos = array_search('nofollow', $classes)) !== false)
+         unset($classes[$pos]);
     }
+
+    // popup on click
+    $popup = in_array('popup', $this->modifier->unfilteredClasses);
+    if ($popup) {
+      if (($pos = array_search('popup', $classes)) !== false)
+         unset($classes[$pos]);
+      $attr['onclick'] = $this->texy->linkModule->popupOnClick;
+    }
+
     $attr['class'] = TexyModifier::implodeClasses($classes);
 
     $styles = $this->modifier->styles;
@@ -3427,11 +3380,11 @@ class TexyLinkElement extends TexyInlineTagElement {
 
     // email on click
     if ($this->link->type & TEXY_URL_EMAIL)
-      $attr['onclick'] = $this->parentModule->emailOnClick;
+      $attr['onclick'] = $this->texy->linkModule->emailOnClick;
 
     // image on click
     if ($this->link->type & TEXY_URL_IMAGE_LINKED)
-      $attr['onclick'] = $this->parentModule->imageOnClick;
+      $attr['onclick'] = $this->texy->linkModule->imageOnClick;
   }
 
 
@@ -3449,100 +3402,35 @@ class TexyLinkElement extends TexyInlineTagElement {
  * HTML ELEMENT ANCHOR (with content)
  */
 class TexyLinkRefElement extends TexyTextualElement {
-  var $parentModule;
-  var $tag = 'a';
-  var $link;
-  var $nofollow = false;
   var $refName;
   var $contentType = TEXY_CONTENT_TEXTUAL;
 
-  // private
 
 
-  // constructor
-  function TexyLinkRefElement(&$texy)
+
+
+  function setLink($refRaw)
   {
-    parent::TexyTextualElement($texy);
-    $this->parentModule = & $texy->modules['TexyLinkModule'];
-
-    $this->link = & $texy->createURL();
-    $this->link->root = $this->parentModule->root;
-  }
-
-
-
-  function setLink($refName)
-  {
-    $elRef = & $this->parentModule->getReference( substr($refName, 1, -1) );
+    $this->refName = substr($refRaw, 1, -1);
+    $elRef = & $this->texy->linkModule->getReference($this->refName);
     if (!$elRef) return false;
 
-    $this->refName = $refName;
-    $this->modifier->copyFrom($elRef->modifier);
+    $this->texy->_preventCycling = true;
+    $elLink = &new TexyLinkElement($this->texy);
+    $elLink->setLinkRaw($refRaw);
 
-    $this->parentModule->_disableRefs = true;
-    $this->parse($elRef->label);
-    $this->parentModule->_disableRefs = false;
-
-    if (@$elRef->URL{0} == '[' && @$elRef->URL{1} == '*') {
-      $elImage = &new TexyImageElement($this->texy);
-      $elImage->setImagesRaw(substr($elRef->URL, 2, -2));
-      $elImage->requireLinkImage();
-      $this->link->copyFrom($elImage->linkImage);
-      return;
+    if ($elRef->label) {
+      $this->parse($elRef->label);
+    } else {
+      $this->setContent($elLink->link->toString(), true);
     }
 
-    $this->link->set($elRef->URL);
+    $this->content = $elLink->addTo($this, $this->content);
+    $this->texy->_preventCycling = false;
   }
 
 
 
-
-
-  function generateTag(&$tag, &$attr)
-  {
-    if (!$this->link->URL) return;  // image URL is required
-
-    $tag  = 'a';
-
-    $this->texy->summary->links[] = $attr['href'] = $this->link->URL;
-
-    // rel="nofollow"
-    $nofollowClass = in_array('nofollow', $this->modifier->unfilteredClasses);
-    if (($this->link->type & TEXY_URL_ABSOLUTE) && ($nofollowClass || $this->nofollow || $this->parentModule->forceNoFollow))
-      $attr['rel'] = 'nofollow';
-
-    $attr['id']    = $this->modifier->id;
-    $attr['title'] = $this->modifier->title;
-    $classes = $this->modifier->classes;
-    if ($nofollowClass) {
-      $nofollowClass = array_search('nofollow', $classes);
-      if ($nofollowClass !== false) unset($classes[$nofollowClass]);
-    }
-    $attr['class'] = TexyModifier::implodeClasses($classes);
-
-    $styles = $this->modifier->styles;
-    $attr['style'] = TexyModifier::implodeStyles($styles);
-
-    // email on click
-    if ($this->link->type & TEXY_URL_EMAIL)
-      $attr['onclick'] = $this->parentModule->emailOnClick;
-
-    // image on click
-    if ($this->link->type & TEXY_URL_IMAGE_LINKED)
-      $attr['onclick'] = $this->parentModule->imageOnClick;
-  }
-
-
-
-
-
-  function generateContent()
-  {
-    if ($this->content)
-      return parent::generateContent();
-    else
-      return Texy::htmlChars($this->link->toString());
-  }
 
 } // TexyLinkRefElement
 
@@ -3566,35 +3454,30 @@ class TexyLongWordsModule extends TexyModule {
   var $wordLimit = 20;
   var $shy       = '&shy;';
   var $nbsp      = '&nbsp;';
-  var $charShy;
-  var $charNbsp;
 
-
-
-  // constructor
-  function TexyLongWordsModule(&$texy)
-  {
-    parent::TexyModule($texy);
-
-    $this->charShy = TEXY_UTF8 ? "\xC2\xAD" : "\xAD";
-    $this->charNbsp = TEXY_UTF8 ? "\xC2\xA0" : "\xA0";
-  }
 
 
 
   function linePostProcess(&$text)
   {
     if (!$this->allowed) return;
+
+    $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
+    $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
+
     $text = strtr($text, array(
-                            '&shy;'  => $this->charShy,
-                            '&nbsp;' => $this->charNbsp,
+                            '&shy;'  => $charShy,
+                            '&nbsp;' => $charNbsp,
                          ));
 
-    $text = preg_replace_callback('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#'.TEXY_PATTERN_UTF, array(&$this, '_replace'), $text);
+    $text = preg_replace_callback(
+                         $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#UTF'),
+                         array(&$this, '_replace'),
+                         $text);
 
     $text = strtr($text, array(
-                            $this->charShy  => $this->shy,
-                            $this->charNbsp => $this->nbsp,
+                            $charShy  => $this->shy,
+                            $charNbsp => $this->nbsp,
                          ));
   }
 
@@ -3610,7 +3493,12 @@ class TexyLongWordsModule extends TexyModule {
     //    [0] => lllloooonnnnggggwwwoorrdddd
 
     $chars = array();
-    preg_match_all('#&\\#?[a-z0-9]+;|['.TEXY_HASH.']+|.#'.TEXY_PATTERN_UTF, $mWord, $chars);
+    preg_match_all(
+             $this->texy->translatePattern('#&\\#?[a-z0-9]+;|[:HASH:]+|.#UTF'),
+             $mWord,
+             $chars
+    );
+
     $chars = $chars[0];
     if (count($chars) < $this->wordLimit) return $mWord;
 
@@ -3734,8 +3622,12 @@ class TexyLongWordsModule extends TexyModule {
     }
     $syllables[] = implode('', $chars);
 
-    $text = implode($this->charShy, $syllables);
-    $text = strtr($text, array($this->charShy.$this->charNbsp => ' ', $this->charNbsp.$this->charShy => ' '));
+
+    $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
+    $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
+
+    $text = implode($charShy, $syllables);
+    $text = strtr($text, array($charShy.$charNbsp => ' ', $charNbsp.$charShy => ' '));
 
     return $text;
   }
@@ -3770,7 +3662,7 @@ class TexyLongWordsModule extends TexyModule {
  *   `....`
  *   ``....``
  */
-class TexyPhrasesModule extends TexyModule {
+class TexyPhraseModule extends TexyModule {
    var $allowed = array('***' => 'strong em',
                         '**'  => 'strong',
                         '*'   => 'em',
@@ -3781,11 +3673,12 @@ class TexyPhrasesModule extends TexyModule {
                         '"'   => 'span',
                         '~'   => 'span',
                         '~~'  => 'cite',
+                        '""()'=> 'acronym',
                         '()'  => 'acronym',
                         '`'   => 'code',
                         '``'  => '',
                         );
-   var $codeUserFunction;  // function &myUserFunc(&$element)
+   var $codeHandler;  // function &myUserFunc(&$element)
 
 
 
@@ -3795,62 +3688,64 @@ class TexyPhrasesModule extends TexyModule {
    */
   function init()
   {
-    $CHAR = '['.TEXY_CHAR.']';
 
     // strong & em speciality *** ... ***
-    if ($this->isAllowed('***'))
+    if (@$this->allowed['***'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\*)\*\*\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*\*\*(?!\*)()#U',   $this->allowed['***']);
 
     // **strong**
-    if ($this->isAllowed('**'))
+    if (@$this->allowed['**'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\*)\*\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*\*(?!\*)()#U',       $this->allowed['**']);
 
     // *emphasis*
-    if ($this->isAllowed('*'))
+    if (@$this->allowed['*'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\*)\*(?!\ |\*)(.+)MODIFIER?(?<!\ |\*)\*(?!\*)()#U',           $this->allowed['*']);
 
     // ++inserted++
-    if ($this->isAllowed('++'))
+    if (@$this->allowed['++'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\+)\+\+(?!\ |\+)(.+)MODIFIER?(?<!\ |\+)\+\+(?!\+)()#U',       $this->allowed['++']);
 
     // --deleted--
-    if ($this->isAllowed('--'))
+    if (@$this->allowed['--'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\-)\-\-(?!\ |\-)(.+)MODIFIER?(?<!\ |\-)\-\-(?!\-)()#U',       $this->allowed['--']);
 
     // ^^superscript^^
-    if ($this->isAllowed('^^'))
+    if (@$this->allowed['^^'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\^)\^\^(?!\ |\^)(.+)MODIFIER?(?<!\ |\^)\^\^(?!\^)()#U',       $this->allowed['^^']);
 
     // __subscript__
-    if ($this->isAllowed('__'))
+    if (@$this->allowed['__'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\_)\_\_(?!\ |\_)(.+)MODIFIER?(?<!\ |\_)\_\_(?!\_)()#U',       $this->allowed['__']);
 
     // "span"
-    if ($this->isAllowed('"'))
+    if (@$this->allowed['"'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)MODIFIER(?<!\ )\"(?!\"|\:\S)()#U',         $this->allowed['"']);
+//      $this->registerLinePattern('processPhrase',  '#()(?<!\")\"(?!\ )(?:.|(?R))+MODIFIER(?<!\ )\"(?!\"|\:\S)()#',         $this->allowed['"']);
 
     // ~alternative span~
-    if ($this->isAllowed('~'))
+    if (@$this->allowed['~'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\~)\~(?!\ )([^\~]+)MODIFIER(?<!\ )\~(?!\~|\:\S)()#U',         $this->allowed['~']);
 
     // ~~cite~~
-    if ($this->isAllowed('~~'))
+    if (@$this->allowed['~~'] !== false)
       $this->registerLinePattern('processPhrase',  '#(?<!\~)\~\~(?!\ |\~)(.+)MODIFIER?(?<!\ |\~)\~\~(?!\~)()#U',       $this->allowed['~~']);
 
-    if ($this->isAllowed('()')) {
+    if (@$this->allowed['""()'] !== false)
       // acronym/abbr "et al."((and others))
-      $this->registerLinePattern('processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)MODIFIER?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', $this->allowed['()']);
+      $this->registerLinePattern('processPhrase',  '#(?<!\")\"(?!\ )([^\"]+)MODIFIER?(?<!\ )\"(?!\")\(\((.+)\)\)()#U', $this->allowed['""()']);
+
+    if (@$this->allowed['()'] !== false)
       // acronym/abbr NATO((North Atlantic Treaty Organisation))
-      $this->registerLinePattern('processPhrase',  "#(?<!$CHAR)($CHAR{2,})()()()\(\((.+)\)\)#U".TEXY_PATTERN_UTF,      $this->allowed['()']);
-    }
+      $this->registerLinePattern('processPhrase',  '#(?<![:CHAR:])([:CHAR:]{2,})()()()\(\((.+)\)\)#UUTF',              $this->allowed['()']);
+
 
     // ``protected`` (experimental, dont use)
-    if ($this->isAllowed('``'))
-      $this->registerLinePattern('processProtect', '#\`\`(\S[^'.TEXY_HASH.']*)(?<!\ )\`\`()#U', false);
+    if (@$this->allowed['``'] !== false)
+      $this->registerLinePattern('processProtect', '#\`\`(\S[^:HASH:]*)(?<!\ )\`\`()#U',                               false);
 
     // `code`
-    if ($this->isAllowed('`'))
-      $this->registerLinePattern('processCode',    '#\`(\S[^'.TEXY_HASH.']*)MODIFIER?(?<!\ )\`()#U');
+    if (@$this->allowed['`'] !== false)
+      $this->registerLinePattern('processCode',    '#\`(\S[^:HASH:]*)MODIFIER?(?<!\ )\`()#U');
 
     // `=samp
     $this->registerBlockPattern('processBlock',    '#^`=(none|code|kbd|samp|var|span)$#mUi');
@@ -3866,6 +3761,10 @@ class TexyPhrasesModule extends TexyModule {
   function processPhrase(&$lineParser, &$matches, $tags)
   {
     list($match, $mContent, $mMod1, $mMod2, $mMod3, $mAdditional) = $matches;
+    if (!$mContent) {
+      preg_match('#^(.)+(.+)'.TEXY_PATTERN_MODIFIER.'?\\1+()$#U', $match, $matches);
+      list($match, $mDelim, $mContent, $mMod1, $mMod2, $mMod3, $mAdditional) = $matches;
+    }
     //    [1] => ...
     //    [2] => (title)
     //    [3] => [class]
@@ -3923,18 +3822,18 @@ class TexyPhrasesModule extends TexyModule {
 
     $texy = &$this->texy;
     $el = &new TexyTextualElement($texy);
-    $el->contentType = TEXY_CONTENT_TEXTUAL;
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
+    $el->contentType = TEXY_CONTENT_TEXTUAL;
     $el->setContent($mContent, false);  // content isn't html safe
     $el->tag = $this->allowed['`'];
 
-    if ($this->codeUserFunction)
-      call_user_func_array($this->codeUserFunction, array(&$el));
+    if ($this->codeHandler)
+      call_user_func_array($this->codeHandler, array(&$el));
 
     $el->safeContent(); // ensure that content is HTML safe
 
-    if (isset($texy->modules['TexyLongWordsModule']))
-      $texy->modules['TexyLongWordsModule']->linePostProcess($el->content);
+    if (isset($texy->longWordsModule))
+      $texy->longWordsModule->linePostProcess($el->content);
 
     return $el->addTo($lineParser->element);
   }
@@ -3964,7 +3863,7 @@ class TexyPhrasesModule extends TexyModule {
 
 
 
-} // TexyPhrasesModule
+} // TexyPhraseModule
 
 
 
@@ -3992,35 +3891,45 @@ class TexyQuickCorrectModule extends TexyModule {
   {
     if (!$this->allowed) return;
 
-    $HASHS   = '(['.TEXY_HASH_SOFT.']*)';
-    $CHAR    = TEXY_CHAR;
-    $UTF     = TEXY_PATTERN_UTF;
-    $DASH    = $this->dash;
+    static $replace;
+    if (!$replace) {
+      $replaceTmp = array(
+           '#(?<!&quot;|\w)&quot;(?!\ |&quot;)(.+)(?<!\ |&quot;)&quot;(?!&quot;)()#U'      // double ""
+                                                     => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
 
-    $replace = array(
-         '#(?<!&quot;|\w)&quot;(?!\ |&quot;)(.+)(?<!\ |&quot;)&quot;(?!&quot;)()#U'
-                              => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],          // double ""
-         "#(?<!&\#039;|\w)&\#039;(?!\ |&\#039;)(.+)(?<!\ |&\#039;)&\#039;(?!&\#039;)()#U$UTF"
-                              => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],          // single ''
-         '#(\S|^) ?\.{3}#m'                                   => '$1&#8230;',                 // ellipsis  ...
-         '#(\d| )-(\d| )#'                                    => "\$1$DASH\$2",               // en dash    -
-         '#,-#'                                               => ",$DASH",                    // en dash    ,-
-         '#(\d{1,2}\.) (\d{1,2}\.) (\d\d)#'                   => '$1&nbsp;$2&nbsp;$3',        // date 23. 1. 1998
-         '#(\d{1,2}\.) (\d{1,2}\.)#'                          => '$1&nbsp;$2',                // date 23. 1.
-         '# -- #'                                             => " $DASH ",                   // en dash    --
-         '# -&gt; #'                                          => ' &#8594; ',                 // right arrow ->
-         '# &lt;- #'                                          => ' &#8592; ',                 // left arrow ->
-         '# &lt;-&gt; #'                                      => ' &#8596; ',                 // left right arrow <->
-         '#(\d+) ?x ?(\d+)#'                                  => '$1&#215;$2',                // dimension sign x
-         '#(\S ?)\(TM\)#i'                                    => '$1&trade;',                 // trademark      (TM)
-         '#(\S ?)\(R\)#i'                                     => '$1&reg;',                   // registered     (R)
-         '#(\S ?)\(C\)#i'                                     => '$1&copy;',                  // copyright      (C)
-         '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'                => '$1&nbsp;$2&nbsp;$3&nbsp;$4',// (phone) number 1 123 123 123
-         '#(\d{1,3}) (\d{3}) (\d{3})#'                        => '$1&nbsp;$2&nbsp;$3',        // (phone) number 1 123 123
-         '#(\d{1,3}) (\d{3})#'                                => '$1&nbsp;$2',                // number 1 123
-         "#(?<=^| )(\d+)$HASHS $HASHS([$CHAR])#m$UTF"         => '$1$2&nbsp;$3$4',            // space after number
-         "#(?<=^|[^0-9$CHAR])$HASHS([ksvzouiKSVZOUIA])$HASHS $HASHS([0-9$CHAR])#m$UTF"  => '$1$2$3&nbsp;$4$5',  // space after preposition
-    );
+           '#(?<!&\#039;|\w)&\#039;(?!\ |&\#039;)(.+)(?<!\ |&\#039;)&\#039;(?!&\#039;)()#UUTF'  // single ''
+                                                     => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
+
+           '#(\S|^) ?\.{3}#m'                        => '$1&#8230;',                       // ellipsis  ...
+           '#(\d| )-(\d| )#'                         => "\$1$this->dash\$2",               // en dash    -
+           '#,-#'                                    => ",$this->dash",                    // en dash    ,-
+           '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => '$1&nbsp;$2&nbsp;$3',              // date 23. 1. 1978
+           '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => '$1&nbsp;$2',                      // date 23. 1.
+           '# -- #'                                  => " $this->dash ",                   // en dash    --
+           '# -&gt; #'                               => ' &#8594; ',                       // right arrow ->
+           '# &lt;- #'                               => ' &#8592; ',                       // left arrow ->
+           '# &lt;-&gt; #'                           => ' &#8596; ',                       // left right arrow <->
+           '#(\d+) ?x ?(\d+) ?x ?(\d+)#'             => '$1&#215;$2&#215;$3',              // dimension sign x
+           '#(\d+) ?x ?(\d+)#'                       => '$1&#215;$2',                      // dimension sign x
+           '#(?<=\d)x(?= |,|.|$)#m'                  => '&#215;',                          // 10x
+           '#(\S ?)\(TM\)#i'                         => '$1&trade;',                       // trademark  (TM)
+           '#(\S ?)\(R\)#i'                          => '$1&reg;',                         // registered (R)
+           '#(\S ?)\(C\)#i'                          => '$1&copy;',                        // copyright  (C)
+           '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => '$1&nbsp;$2&nbsp;$3&nbsp;$4',      // (phone) number 1 123 123 123
+           '#(\d{1,3}) (\d{3}) (\d{3})#'             => '$1&nbsp;$2&nbsp;$3',              // (phone) number 1 123 123
+           '#(\d{1,3}) (\d{3})#'                     => '$1&nbsp;$2',                      // number 1 123
+
+           '#(?<=^| |\.|,|-|\+)(\d+)([:HASHSOFT:]*) ([:HASHSOFT:]*)([:CHAR:])#mUTF'        // space between number and word
+                                                     => '$1$2&nbsp;$3$4',
+
+           '#(?<=^|[^0-9:CHAR:])([:HASHSOFT:]*)([ksvzouiKSVZOUIA])([:HASHSOFT:]*) ([:HASHSOFT:]*)([0-9:CHAR:])#mUTF'
+                                                     => '$1$2$3&nbsp;$4$5',                // space between preposition and word
+      );
+
+      $replace = array();
+      foreach ($replaceTmp as $pattern => $replacement)
+        $replace[ $this->texy->translatePattern($pattern) ] = $replacement;
+    }
 
     $text = preg_replace(array_keys($replace), array_values($replace), $text);
   }
@@ -4046,10 +3955,19 @@ class TexyQuickCorrectModule extends TexyModule {
  * QUOTE & BLOCKQUOTE MODULE CLASS
  */
 class TexyQuoteModule extends TexyModule {
-  var $allowed = array(
-         'line'  => true,
-         'block' => true
-         );
+  var $allowed;
+
+
+
+  // constructor
+  function TexyQuoteModule(&$texy)
+  {
+    parent::TexyModule($texy);
+
+    $this->allowed->line  = true;
+    $this->allowed->block = true;
+  }
+
 
 
   /***
@@ -4057,10 +3975,10 @@ class TexyQuoteModule extends TexyModule {
    */
   function init()
   {
-    if ($this->isAllowed('block'))
+    if ($this->allowed->block)
       $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_H\n)?>(\ +|:)(\S.*)$#mU');
 
-    if ($this->isAllowed('line'))
+    if ($this->allowed->line)
       $this->registerLinePattern('processLine', '#(?<!\>)(\>\>)(?!\ |\>)(.+)MODIFIER?(?<!\ |\<)\<\<(?!\<)'.TEXY_PATTERN_LINK.'?()#U', 'q');
   }
 
@@ -4115,6 +4033,7 @@ class TexyQuoteModule extends TexyModule {
     $texy = & $this->texy;
     $el = &new TexyBlockQuoteElement($texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+    $blockParser->addChildren($el);
 
     $content = '';
     $linkTarget = '';
@@ -4126,7 +4045,7 @@ class TexyQuoteModule extends TexyModule {
         $content .= $mContent . TEXY_NEWLINE;
       }
 
-      if (!$blockParser->match("#^>(?:|(\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
+      if (!$blockParser->receiveNext("#^>(?:|(\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
       list($match, $mSpaces, $mContent) = $matches;
     } while (true);
 
@@ -4134,8 +4053,6 @@ class TexyQuoteModule extends TexyModule {
       $el->cite->set($linkTarget);
 
     $el->parse($content);
-
-    $blockParser->addChildren($el);
   }
 
 
@@ -4220,6 +4137,7 @@ class TexyQuoteElement extends TexyInlineTagElement {
  * SCRIPTS MODULE CLASS
  */
 class TexyScriptModule extends TexyModule {
+  var $handler;             // function &myUserFunc(&$element)
 
 
   /***
@@ -4227,8 +4145,7 @@ class TexyScriptModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerLinePattern('processLine', '#\$\{([^\}'.TEXY_HASH.'])+\}()#U');
+    $this->registerLinePattern('processLine', '#\$\{([^\}:HASH:]+)\}()#U');
   }
 
 
@@ -4243,8 +4160,27 @@ class TexyScriptModule extends TexyModule {
     //    [1] => ...
 
     $el = &new TexyScriptElement($this->texy);
+    $mContent = trim($mContent);
+
+    if (preg_match('#^(.*)\((.*)\)$#', $mContent, $matches)) {
+      $el->function = $matches[1];
+      foreach (explode(',', $matches[2]) as $arg) {
+        $arg = trim($arg);
+        if ($arg) $el->args[] = $arg;
+      }
+
+    } else {
+      $el->var = $mContent;
+    }
+
+    $el->content = '<-internal->';
+
+    if ($this->handler)
+      call_user_func_array($this->handler, array(&$el));
+
     return $el->addTo($lineParser->element);
   }
+
 
 
 
@@ -4266,11 +4202,10 @@ class TexyScriptModule extends TexyModule {
  * Texy! ELEMENT SCRIPTS + VARIABLES
  */
 class TexyScriptElement extends TexyTextualElement {
+  var $function;
+  var $args;
+  var $var;
 
-  function generateContent()
-  {
-    return '<--internal use-->';
-  }
 
 }  // TexyScriptElement
 
@@ -4290,6 +4225,15 @@ class TexyScriptElement extends TexyTextualElement {
  * TABLE MODULE CLASS
  */
 class TexyTableModule extends TexyModule {
+  var $oddClass     = '';
+  var $evenClass    = '';
+
+  // private
+  var $isHead;
+  var $colModifier;
+  var $last;
+  var $row;
+
 
 
   /***
@@ -4297,9 +4241,8 @@ class TexyTableModule extends TexyModule {
    */
   function init()
   {
-    if ($this->allowed)
-      $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_HV\n)?'      // .{color: red}
-                                                . '(\|.*)$#mU');              // | ....
+    $this->registerBlockPattern('processBlock', '#^(?:MODIFIER_HV\n)?'      // .{color: red}
+                                              . '\|.*()$#mU');                // | ....
   }
 
 
@@ -4318,110 +4261,132 @@ class TexyTableModule extends TexyModule {
    */
   function processBlock(&$blockParser, &$matches)
   {
-    list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5, $mRow) = $matches;
+    list($match, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
     //    [1] => (title)
     //    [2] => [class]
     //    [3] => {style}
     //    [4] => >
     //    [5] => _
-    //    [6] => | ....
 
     $texy = & $this->texy;
     $el = &new TexyTableElement($texy);
     $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-    $el->colsCount = 0;
     $blockParser->addChildren($el);
 
-    $head = false;
-    $colModifier = array();
-    $elField = null;
-    $elRow = null;
+    $blockParser->moveBackward();
 
+    if ($blockParser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_PATTERN_MODIFIER_H.'?()$#Um', $matches)) {
+      list($match, $mChar, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+      //    [1] => # / =
+      //    [2] => ....
+      //    [3] => (title)
+      //    [4] => [class]
+      //    [5] => {style}
+      //    [6] => >
 
-    if (preg_match('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_PATTERN_MODIFIER_H.'?()$#U', $mRow, $matches)) {
-      list($match, $mChar, $mContent, $mModCap1, $mModCap2, $mModCap3, $mModCap4) = $matches;
-      $elCaption = &new TexyTextualElement($texy);
-      $elCaption->tag = 'caption';
-      $elCaption->parse($mContent);
-      $elCaption->modifier->setProperties($mModCap1, $mModCap2, $mModCap3, $mModCap4);
-      $el->children[] = & $elCaption;
-
-      if (!$blockParser->match('#^(\|.*)$#mU', $matches)) return;
-      $mRow = $matches[0];
+      $el->caption = &new TexyTextualElement($texy);
+      $el->caption->tag = 'caption';
+      $el->caption->parse($mContent);
+      $el->caption->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
     }
 
+    $this->isHead = false;
+    $this->colModifier = array();
+    $this->last = array();
+    $this->row = 0;
 
-    preg_match('#^\|(.+)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $mRow, $matches);
-    do {
-      list($match, $mContent, $mModRow1, $mModRow2, $mModRow3, $mModRow4, $mModRow5) = $matches;
-      //    [1] => ....
-      //    [2] => (title)
-      //    [3] => [class]
-      //    [4] => {style}
-      //    [5] => >
-      //    [6] => _
-
-      if (preg_match('#\|\-{3,}$#AU', $match)) {
-        $head = !$head;
+    while (true) {
+      if ($blockParser->receiveNext('#^\|\-{3,}$#Um', $matches)) {
+        $this->isHead = !$this->isHead;
         continue;
       }
 
-      $elLastRow = & $elRow->children;
-      $elRow = &new TexyTableRowElement($texy);
-      $elRow->modifier->setProperties($mModRow1, $mModRow2, $mModRow3, $mModRow4, $mModRow5);
-      $elRow->isHead = $head;
-      $el->children[] = & $elRow;
+      if ($elRow = &$this->processRow($blockParser)) {
+        $el->children[$this->row++] = & $elRow;
+        continue;
+      }
 
-      $cols = explode('|', $mContent);
-      $col = 0;
-      foreach ($cols as $key => $s) {
-        $col++;
-
-        if (($s == '') && $elField) { // colspan
-          $elField->colSpan++;
-          continue;
-        }
-
-        if (!preg_match('#(?-U)(\*|\^)?\ *'.TEXY_PATTERN_MODIFIER_HV.'?(?U)(.*)'.TEXY_PATTERN_MODIFIER_HV.'?\ *()$#AU', $s, $matchesC)) break;
-        list($match, $mHead, $mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matchesC;
-        //    [1] => * ^
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
-        //    [5] => <
-        //    [6] => ^
-        //    [7] => ....
-        //    [8] => (title)
-        //    [9] => [class]
-        //    [10] => {style}
-        //    [11] => <>
-        //    [12] => ^
-
-        if (($mHead == '^') && $elLastRow) {  // rowspan
-          if (isset($elLastRow[$col]))  $elLastRow[$col]->rowSpan++;
-          continue;
-        }
-
-        if (!isset($colModifier[$col])) { $colModifier[$col] = &$texy->createModifier(); }
-        if ($mModCol1 || $mModCol2 || $mModCol3 || $mModCol4 || $mModCol5) {
-          $colModifier[$col]->clear();
-          $colModifier[$col]->setProperties($mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5);
-        }
-
-        $elField = &new TexyTableFieldElement($texy);
-        $elField->isHead = ($head || ($mHead == '*'));
-        $elField->modifier->copyFrom($colModifier[$col]);
-        $elField->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-        $elField->parse($mContent);
-        $elRow->children[$col] = & $elField;
-      } // foreach
-
-      $el->colsCount = max($el->colsCount, $col);
-
-    } while ($blockParser->match('#^\|(.+)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#mUA', $matches));
-
+      break;
+    }
   }
 
+
+
+
+
+
+  function &processRow(&$blockParser) {
+    $texy = & $this->texy;
+
+    if (!$blockParser->receiveNext('#^\|(.*)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $matches)) return false;
+    list($match, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+    //    [1] => ....
+    //    [2] => (title)
+    //    [3] => [class]
+    //    [4] => {style}
+    //    [5] => >
+    //    [6] => _
+
+    $elRow = &new TexyTableRowElement($this->texy);
+    $elRow->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+    if ($this->row % 2 == 0) {
+      if ($this->oddClass) $elRow->modifier->classes[] = $this->oddClass;
+    } else {
+      if ($this->evenClass) $elRow->modifier->classes[] = $this->evenClass;
+    }
+
+    $col = 0;
+    $elField = null;
+    foreach (explode('|', $mContent) as $field) {
+      if (($field == '') && $elField) { // colspan
+        $elField->colSpan++;
+        unset($this->last[$col]);
+        $col++;
+        continue;
+      }
+
+      $field = rtrim($field);
+      if ($field == '^') { // rowspan
+        if (isset($this->last[$col])) {
+          $this->last[$col]->rowSpan++;
+          $col += $this->last[$col]->colSpan;
+          continue;
+        }
+      }
+
+      if (!preg_match('#(?-U)(\*?)\ *'.TEXY_PATTERN_MODIFIER_HV.'?(?U)(.*)'.TEXY_PATTERN_MODIFIER_HV.'?()$#AU', $field, $matches)) continue;
+      list($match, $mHead, $mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+      //    [1] => * ^
+      //    [2] => (title)
+      //    [3] => [class]
+      //    [4] => {style}
+      //    [5] => <
+      //    [6] => ^
+      //    [7] => ....
+      //    [8] => (title)
+      //    [9] => [class]
+      //    [10] => {style}
+      //    [11] => <>
+      //    [12] => ^
+
+      if ($mModCol1 || $mModCol2 || $mModCol3 || $mModCol4 || $mModCol5) {
+        $this->colModifier[$col] = &$texy->createModifier();
+        $this->colModifier[$col]->setProperties($mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5);
+      }
+
+      $elField = &new TexyTableFieldElement($texy);
+      $elField->isHead = ($this->isHead || ($mHead == '*'));
+      if (isset($this->colModifier[$col]))
+        $elField->modifier->copyFrom($this->colModifier[$col]);
+      $elField->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+      $elField->parse($mContent);
+      $elRow->children[$col] = & $elField;
+      $this->last[$col] = & $elField;
+      $col++;
+    }
+
+    return $elRow;
+  }
 
 
 } // TexyTableModule
@@ -4443,6 +4408,18 @@ class TexyTableModule extends TexyModule {
  */
 class TexyTableElement extends TexyBlockElement {
   var $tag = 'table';
+  var $caption;
+
+  function generateContent()
+  {
+    $html = parent::generateContent();
+
+    if ($this->caption)
+      $html = $this->caption->toHTML() . $html;
+
+    return $html;
+  }
+
 
 } // TexyTableElement
 
@@ -4456,7 +4433,6 @@ class TexyTableElement extends TexyBlockElement {
  */
 class TexyTableRowElement extends TexyBlockElement {
   var $tag = 'tr';
-  var $isHead;  // not used yet
 
 } // TexyTableRowElement
 
@@ -4528,11 +4504,11 @@ class TexySmiliesModule extends TexyModule {
 
     if ($this->allowed) {
       krsort($this->icons);
-      $re = array();
+      $pattern = array();
       foreach ($this->icons as $key => $value)
-        $re[] = preg_quote($key) . '+';
+        $pattern[] = preg_quote($key) . '+';
 
-      $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $re) . ')#';
+      $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
 
       $this->registerLinePattern('processLine', $crazyRE);
     }
@@ -4597,10 +4573,6 @@ class TexySmiliesModule extends TexyModule {
 class Texy {
   // modules
   var $modules;
-  // shortcuts to modules
-  var $images;       // shortcut to $modules[....]
-  var $links;        // shortcut to $modules[....]
-  var $headings;     // shortcut to $modules[....]
 
   // parsed text - DOM structure
   var $DOM;
@@ -4608,21 +4580,28 @@ class Texy {
   var $styleSheet;
 
   // options
-  var $tabWidth     = 8;      // all tabs are converted to spaces
-  var $allowedClasses = true;   // true or list of allowed classes
-  var $allowedStyles  = true;   // true or list of allowed styles
-  var $obfuscateEmail = true;
-
+  var $utf              = false;
+  var $tabWidth         = 8;      // all tabs are converted to spaces
+  var $allowedClasses   = true;   // true or list of allowed classes
+  var $allowedStyles    = true;   // true or list of allowed styles
+  var $forgetReferences = false;
+  var $obfuscateEmail   = true;
+  var $referenceHandler;          // function &myUserFunc($refName, &$texy): returns object or false
 
   // private
-  var $patternsLine = array();
-  var $patternsBlock = array();
+  var $inited;
+  var $patternsLine     = array();
+  var $patternsBlock    = array();
   var $genericBlock;
-  var $blockElements  = array('address', 'blockquote', 'caption', 'col', 'colgroup', 'dd', 'div', 'dl', 'dt', 'fieldset', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'iframe', 'legend', 'li', 'object', 'ol', 'p', 'param', 'pre', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'ul');
-  var $inlineElements = array('a', 'abbr', 'acronym', 'area', 'b', 'big', 'br', 'button', 'cite', 'code', 'del', 'dfn', 'em', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'map', 'noscript', 'optgroup', 'option', 'q', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'tt', 'var');
-  var $emptyElements  = array('img', 'hr', 'br', 'input', 'meta', 'area', 'base', 'col', 'link', 'param');
+
+  var $blockElements    = array('address', 'blockquote', 'caption', 'col', 'colgroup', 'dd', 'div', 'dl', 'dt', 'fieldset', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'iframe', 'legend', 'li', 'object', 'ol', 'p', 'param', 'pre', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'ul');
+  var $inlineElements   = array('a', 'abbr', 'acronym', 'area', 'b', 'big', 'br', 'button', 'cite', 'code', 'del', 'dfn', 'em', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'map', 'noscript', 'optgroup', 'option', 'q', 'samp', 'script', 'select', 'small', 'span', 'strong', 'sub', 'sup', 'textarea', 'tt', 'var');
+  var $emptyElements    = array('img', 'hr', 'br', 'input', 'meta', 'area', 'base', 'col', 'link', 'param');
   var $validElements;
 
+  var $references       = array();  // references: 'home' => TexyLinkReference
+  var $_preventCycling  = false;    // prevent recursive calling
+  var $_backupReferences;
 
 
 
@@ -4634,28 +4613,24 @@ class Texy {
   function Texy()
   {
     // init some other variables
-    $this->summary->images = array();
-    $this->summary->links = array();
+    $this->summary->images  = array();
+    $this->summary->links   = array();
     $this->summary->preload = array();
     $this->styleSheet = '';
+
     // little trick - isset($array[$item]) is much faster than in_array($item, $array)
-    $this->blockElements = array_flip($this->blockElements);
+    $this->blockElements  = array_flip($this->blockElements);
     $this->inlineElements = array_flip($this->inlineElements);
-    $this->emptyElements = array_flip($this->emptyElements);
-    $this->validElements = array_merge($this->inlineElements, $this->blockElements);
+    $this->emptyElements  = array_flip($this->emptyElements);
+    $this->validElements  = array_merge($this->inlineElements, $this->blockElements);
 
     // load all modules
     $this->loadModules();
 
-    // this is shortcuts for easier configuration ( use e.g. $texy->image->root instead of $texy->modules['TexyImageModule']->root
-    $this->images   = & $this->modules['TexyImageModule'];
-    $this->links    = & $this->modules['TexyLinkModule'];
-    $this->headings = & $this->modules['TexyHeadingModule'];
-
     // example of link reference ;-)
     $elRef = &new TexyLinkReference($this, 'http://www.texy.info/', 'Texy!');
     $elRef->modifier->title = 'Text to HTML converter and formatter';
-    $this->links->addReference('texy', $elRef);
+    $this->addReference('texy', $elRef);
   }
 
 
@@ -4672,17 +4647,17 @@ class Texy {
   {
     // Line parsing - order is not much important
     $this->registerModule('TexyScriptModule');
-    $this->registerModule('TexyHTMLTagModule');
+    $this->registerModule('TexyHTMLModule');
     $this->registerModule('TexyImageModule');
     $this->registerModule('TexyLinkModule');
-    $this->registerModule('TexyPhrasesModule');
+    $this->registerModule('TexyPhraseModule');
     $this->registerModule('TexySmiliesModule');
     $this->registerModule('TexyControlModule');
 
     // block parsing - order is not much important
     $this->registerModule('TexyBlockModule');
     $this->registerModule('TexyHeadingModule');
-    $this->registerModule('TexyHorizlineModule');
+    $this->registerModule('TexyHorizLineModule');
     $this->registerModule('TexyQuoteModule');
     $this->registerModule('TexyListModule');
     $this->registerModule('TexyDefinitionListModule');
@@ -4700,7 +4675,12 @@ class Texy {
 
   function registerModule($className)
   {
-    $this->modules[$className] = &new $className($this);
+    $this->modules->$className = &new $className($this);
+
+    // universal shortcuts
+    $name = (substr($className, 0, 4) == 'Texy') ? substr($className, 4) : $className;
+    $name{0} = strtolower($name{0});
+    if (!isset($this->$name)) $this->$name = & $this->modules->$className;
   }
 
 
@@ -4711,18 +4691,31 @@ class Texy {
    ***/
   function init()
   {
+    if ($this->inited) return;
+
     if (!$this->modules) die('Texy: No modules installed');
 
-    foreach (array_keys($this->modules) as $name) {
-      $module = & $this->modules[$name];
-      if (is_a($module, 'TexyModule'))
-        $module->init();    // init modules
-      else
-        unset($this->modules[$name]);
-    }
+    // init modules
+    foreach ($this->modules as $name => $tmp)
+      $this->modules->$name->init();
+
+    $this->inited = true;
   }
 
 
+
+
+  /***
+   * Re-Initialization
+   ***/
+  function reinit()
+  {
+    $this->patternsLine   = array();
+    $this->patternsBlock  = array();
+    $this->genericBlock   = null;
+    $this->inited = false;
+    $this->init();
+  }
 
 
 
@@ -4798,12 +4791,12 @@ class Texy {
    ***/
   function safeMode()
   {
-    $this->allowedClasses = false;                                     // no class or ID are allowed
-    $this->allowedStyles  = false;                                     // style modifiers are disabled
-    $this->modules['TexyHTMLTagModule']->safeMode();                   // only HTML tags and attributes specified in $safeTags array are allowed
-    $this->modules['TexyBlockModule']->safeMode();                     // make /--html blocks HTML safe
-    $this->images->allowed = false;                                    // disable images
-    $this->links->forceNoFollow = true;                                // force rel="nofollow"
+    $this->allowedClasses = false;                      // no class or ID are allowed
+    $this->allowedStyles  = false;                      // style modifiers are disabled
+    $this->modules->TexyHTMLModule->safeMode();      // only HTML tags and attributes specified in $safeTags array are allowed
+    $this->blockModule->safeMode();                     // make /--html blocks HTML safe
+    $this->imageModule->allowed = false;                // disable images
+    $this->linkModule->forceNoFollow = true;            // force rel="nofollow"
   }
 
 
@@ -4814,12 +4807,12 @@ class Texy {
    ***/
   function trustMode()
   {
-    $this->allowedClasses = true;                                          // classes and id are allowed
-    $this->allowedStyles  = true;                                          // inline styles are allowed
-    $this->modules['TexyHTMLTagModule']->trustMode();                      // full support for HTML tags
-    $this->modules['TexyBlockModule']->trustMode();                        // no-texy blocks are free of use
-    $this->images->allowed = true;                                         // enable images
-    $this->links->forceNoFollow = false;                                   // disable automatic rel="nofollow"
+    $this->allowedClasses = true;                       // classes and id are allowed
+    $this->allowedStyles  = true;                       // inline styles are allowed
+    $this->modules->TexyHTMLModule->trustMode();     // full support for HTML tags
+    $this->blockModule->trustMode();                    // no-texy blocks are free of use
+    $this->imageModule->allowed = true;                 // enable images
+    $this->linkModule->forceNoFollow = false;           // disable automatic rel="nofollow"
   }
 
 
@@ -4952,14 +4945,14 @@ class Texy {
 
 
   /***
-   * Translate all white spaces (\t \n \r space) to meta-spaces \x16-\x19
+   * Translate all white spaces (\t \n \r space) to meta-spaces \x15-\x18
    * which are ignored by some formatting functions
    * @return string
    * @static
    ***/
   function freezeSpaces($s)
   {
-    return strtr($s, " \t\r\n", "\x16\x17\x18\x19");
+    return strtr($s, " \t\r\n", "\x15\x16\x17\x18");
   }
 
 
@@ -4970,28 +4963,148 @@ class Texy {
    ***/
   function unfreezeSpaces($s)
   {
-    return strtr($s, "\x16\x17\x18\x19", " \t\r\n");
+    return strtr($s, "\x15\x16\x17\x18", " \t\r\n");
   }
 
 
 
   /***
-   * Generate unique HASH key - useful for freezing (folding) some substrings
-   * Key consist of unique chars \x1A, \x1C-\x1F (soft)
-   *                             \x1B, \x1C-\x1F (hard)
-   * Special mark:               \x15 (not used)
+   * remove special controls chars used by Texy!
    * @return string
    * @static
    ***/
-  function hashKey($strength = null)
+  function wash($text)
   {
-    static $counter;
-    $border = ($strength == TEXY_SOFT) ? "\x1A" : "\x1B";
-    return $border . strtr(base_convert(++$counter, 10, 4), '0123', "\x1C\x1D\x1E\x1F") . $border;
+      ///////////   REMOVE SPECIAL CHARS (used by Texy!)
+    return strtr($text, "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", '           ');
   }
 
 
 
+
+  /***
+   * Generate unique HASH key - useful for freezing (folding) some substrings
+   * Key consist of unique chars \x19, \x1B-\x1E (noncontent) (or \x1F detect opening tag)
+   *                             \x1A, \x1B-\x1E (with content)
+   * @return string
+   * @static
+   ***/
+  function hashKey($contentType = null, $opening = null)
+  {
+    static $counter;
+    $border = ($contentType == TEXY_CONTENT_NONE) ? "\x19" : "\x1A";
+    return $border . ($opening ? "\x1F" : "") . strtr(base_convert(++$counter, 10, 4), '0123', "\x1B\x1C\x1D\x1E") . $border;
+  }
+
+
+  /***
+   * @static
+   ***/
+  function isHashOpening($hash) {
+    return $hash{1} == "\x1F";
+  }
+
+
+  /***
+   * Add new named reference
+   */
+  function addReference($name, &$obj)
+  {
+    $name = strtolower($name);
+    $this->references[$name] = &$obj;
+  }
+
+
+
+
+  /***
+   * Receive new named link. If not exists, try
+   * call user function to create one.
+   */
+  function &getReference($name)
+  {
+    $name = strtolower($name);
+
+    static $queries;
+    if ($this->_preventCycling) {
+      if (isset($queries[$name])) return false;
+      $queries[$name] = true;
+    } else $queries = array();
+
+
+    if (isset($this->references[$name]))
+      return $this->references[$name];
+
+
+    if ($this->referenceHandler) {
+      $this->_disableReferences = true;
+      $this->references[$name] = &call_user_func_array(
+                   $this->referenceHandler,
+                   array($name, &$this)
+      );
+      $this->_disableReferences = false;
+
+      return $this->references[$name];
+    }
+
+    return false;
+  }
+
+
+
+
+  /***
+   * Forget all references created during last parse()
+   */
+  function forgetReferences()
+  {
+    $this->references = $this->_backupReferences;
+  }
+
+
+
+
+
+
+  /***
+   * For easier regular expression writing
+   * @return string
+   ***/
+  function translatePattern($pattern, $param1 = '', $param2 = '')
+  {
+    return strtr($pattern,
+                     array('MODIFIER_HV' => TEXY_PATTERN_MODIFIER_HV,
+                           'MODIFIER_H'  => TEXY_PATTERN_MODIFIER_H,
+                           'MODIFIER'    => TEXY_PATTERN_MODIFIER,
+                           'UTF'         => ($this->utf ? 'u' : ''),
+                           ':CHAR:'      => ($this->utf ? TEXY_CHAR_UTF : TEXY_CHAR),
+                           ':HASH:'      => TEXY_HASH,
+                           ':HASHSOFT:'  => TEXY_HASH_NC,
+                           '@1'          => $param1,
+                           '@2'          => $param2,
+                     ));
+  }
+
+
+
+
+
+  function __sleep() {
+    return array('DOM', 'modules', 'styleSheet', 'utf', 'tabWidth', 'allowedClasses', 'allowedStyles', 'obfuscateEmail');
+  }
+
+
+
+  function __wakeup() {
+    $this->blockElements  = array_flip($this->blockElements);
+    $this->inlineElements = array_flip($this->inlineElements);
+    $this->emptyElements  = array_flip($this->emptyElements);
+    $this->validElements  = array_merge($this->inlineElements, $this->blockElements);
+
+    $this->images   = & $this->imageModule;
+    $this->links    = & $this->linkModule;
+    $this->headings = & $this->headingModule;
+  }
 
 
 } // Texy
@@ -5015,8 +5128,8 @@ class Texy {
  * --------------------------------
  */
 class TexyBlockParser {
-  var $element;   // TexyBlockElement
-  var $text;      // text splited in array of lines
+  var $element;     // TexyBlockElement
+  var $text;        // text splited in array of lines
   var $offset;
 
 
@@ -5029,20 +5142,31 @@ class TexyBlockParser {
 
   // match current line against RE.
   // if succesfull, increments current position and returns true
-  function match($pattern, &$matches)
+  function receiveNext($pattern, &$matches)
   {
     $ok = preg_match(
-                $pattern . 'A', // anchored
+                $pattern . 'Am', // anchored & multiline
                 $this->text,
                 $matches,
                 PREG_OFFSET_CAPTURE,
                 $this->offset);
     if ($ok) {
-      $this->offset += strlen($matches[0][0]) + 1; // 1 = "\x"
+      $this->offset += strlen($matches[0][0]) + 1;  // 1 = "\n"
       foreach ($matches as $key => $value) $matches[$key] = $value[0];
     }
     return $ok;
   }
+
+
+
+  function moveBackward($linesCount = 1) {
+    while (--$this->offset > 0)
+     if ($this->text{ $this->offset-1 } == TEXY_NEWLINE)
+       if (--$linesCount < 1) break;
+
+    $this->offset = max($this->offset, 0);
+  }
+
 
 
   function addChildren(&$el)
@@ -5062,6 +5186,7 @@ class TexyBlockParser {
     $keys = array_keys($texy->patternsBlock);
     $arrMatches = $arrPos = array();
     foreach ($keys as $key) $arrPos[$key] = -1;
+
 
       ///////////   PARSING
     do {
@@ -5109,7 +5234,7 @@ class TexyBlockParser {
       $matches = & $arrMatches[$minKey];
       $this->offset = $arrPos[$minKey] + strlen($matches[0]) + 1;   // 1 = \n
       $ok = call_user_func_array($px['func'], array(&$this, $matches, $px['user']));
-      if ($ok === false) { // module rejects text
+      if ($ok === false || ( $this->offset <= $arrPos[$minKey] )) { // module rejects text
         $this->offset = $arrPos[$minKey]; // turn offset back
         $arrPos[$minKey] = -2;
         continue;
@@ -5220,9 +5345,8 @@ class TexyLineParser {
       if (strlen($s)) $element->contentType = TEXY_CONTENT_TEXTUAL;
     }
 
-    $modules = &$texy->modules;
-    foreach (array_keys($modules) as $name)
-      $modules[$name]->linePostProcess($text);
+    foreach ($texy->modules as $name => $moduleX)
+      $texy->modules->$name->linePostProcess($text);
   }
 
 } // TexyLineParser
