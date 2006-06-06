@@ -370,12 +370,15 @@ class Texy
         $text = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $text);
         $text = strip_tags($text);
         $text = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $text);
-        $text = strtr($text, array('&amp;'=>'&','&quot;'=>'"','&lt;'=>'<','&gt;'=>'>'));  
 
         // entities -> chars
         if ((int) PHP_VERSION > 4 && $this->utf) { // fastest way for PHP 5 & UTF-8
-            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8'); 
-        } else {        
+            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        } else {
+            // only allowed named entities
+            $text = strtr($text, array('&amp;'=>'&', '&quot;'=>'"', '&lt;'=>'<', '&gt;'=>'>'));
+
+            // numeric
             $text = preg_replace_callback(
                 '#&(\\#x[0-9a-fA-F]+|\\#[0-9]+);#',
                 array(&$this, '_entityCallback'),
@@ -406,10 +409,10 @@ class Texy
     {
         list(, $entity) = $matches;
 
-        $ord = ($entity{1} == 'x') 
-             ? hexdec(substr($entity, 2)) 
+        $ord = ($entity{1} == 'x')
+             ? hexdec(substr($entity, 2))
              : (int) substr($entity, 1);
-                
+
         if ($ord<128)  // ASCII
             return chr($ord);
 
@@ -422,12 +425,12 @@ class Texy
 
         if (function_exists('iconv')) {
             return (string) iconv(
-                'UCS-2', 
-                'CP1250//TRANSLIT', 
+                'UCS-2',
+                'WINDOWS-1250//TRANSLIT',
                 pack('n', $ord)
             );
         }
-        
+
         return '?';
     }
 

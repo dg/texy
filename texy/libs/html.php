@@ -32,38 +32,25 @@ class TexyHTML
     public static $accepted_attrs;
 
 
+
     /**
      * Like htmlSpecialChars, but can preserve entities
      * @param  string  input string
      * @param  bool    for using inside quotes?
-     * @param  bool    preserve entities? 
+     * @param  bool    preserve entities?
      * @return string
      * @static
      */
     function htmlChars($s, $inQuotes = false, $entity = false)
     {
-        static $table = array(
-            0 => array(
-                '&'=>'&#38;',
-                '<'=>'&#60;',
-                '>'=>'&#62;',   // can be disabled - modify quickcorrect
-            ),
-            1 => array(
-                '&'=>'&#38;',
-                '"'=>'&#34;',
-                '<'=>'&#60;',
-                '>'=>'&#62;',
-            ),     
-        );
-
-        // my version of htmlSpecialChars()
-        $s = strtr($s, $table[$inQuotes ? 1 : 0]);
+        $s = htmlSpecialChars($s, $inQuotes ? ENT_COMPAT : ENT_NOQUOTES);
 
         if ($entity) // preserve numeric entities?
-            return preg_replace('~&#38;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', $s);
+            return preg_replace('~&amp;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', $s);
         else
             return $s;
     }
+
 
 
 
@@ -106,12 +93,17 @@ class TexyHTML
             '&ugrave;'=>'&#249;','&uml;'=>'&#168;','&upsih;'=>'&#978;','&upsilon;'=>'&#965;','&uuml;'=>'&#252;','&weierp;'=>'&#8472;','&xi;'=>'&#958;','&yacute;'=>'&#253;',
             '&yen;'=>'&#165;','&yuml;'=>'&#255;','&zeta;'=>'&#950;','&zwj;'=>'&#8205;','&zwnj;'=>'&#8204;',
         );
-        
-        // preserve and decode(!) named entities
+
+        static $allowed = array('&#38;'=>'&amp;', '&#34;'=>'&quot;', '&#60;'=>'&lt;', '&#62;'=>'&gt;');
+
+        // decode(!) named entities to numeric
         $html = strtr($html, $entity);
-        
+
         // preserve numeric entities
-        return preg_replace('#&([a-zA-Z0-9]+);#', '&#38;$1;', $html);
+        $html = preg_replace('#&([a-zA-Z0-9]+);#', '&amp;$1;', $html);
+
+        // only allowed named entites are these:
+        return strtr($html, $allowed);
     }
 
 
