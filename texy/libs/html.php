@@ -33,18 +33,37 @@ class TexyHTML
 
 
     /**
-     * Like htmlSpecialChars, but preserve entities
+     * Like htmlSpecialChars, but can preserve entities
+     * @param  string  input string
+     * @param  bool    for using inside quotes?
+     * @param  bool    preserve entities? 
      * @return string
      * @static
      */
-    function htmlChars($s, $quotes = false)
+    function htmlChars($s, $inQuotes = false, $entity = false)
     {
-        $s = htmlSpecialChars($s, $quotes ? ENT_COMPAT : ENT_NOQUOTES);
-        
-        // preserve numeric entities
-        return preg_replace('#&amp;([a-zA-Z0-9]+|\\#x[0-9a-fA-F]+|\\#[0-9]+);#', '&$1;', $s);
-    }
+        static $table = array(
+            0 => array(
+                '&'=>'&#38;',
+                '<'=>'&#60;',
+                '>'=>'&#62;',   // can be disabled - modify quickcorrect
+            ),
+            1 => array(
+                '&'=>'&#38;',
+                '"'=>'&#34;',
+                '<'=>'&#60;',
+                '>'=>'&#62;',
+            ),     
+        );
 
+        // my version of htmlSpecialChars()
+        $s = strtr($s, $table[$inQuotes ? 1 : 0]);
+
+        if ($entity) // preserve numeric entities?
+            return preg_replace('~&#38;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', $s);
+        else
+            return $s;
+    }
 
 
 
@@ -134,7 +153,7 @@ class TexyHTML
                     $attrStr .= ' '
                               . TexyHTML::htmlChars($name)
                               . '="'
-                              . Texy::freezeSpaces(TexyHTML::htmlChars($value, true))   // freezed spaces will be preserved during reformating
+                              . Texy::freezeSpaces(TexyHTML::htmlChars($value, true, true))   // freezed spaces will be preserved during reformating
                               . '"';
                 }
             }

@@ -274,7 +274,7 @@ class TexyTextualElement extends TexyHTMLElement
 
     function safeContent($onlyReturn = FALSE)
     {
-        $safeContent = $this->htmlSafe ? $this->content : htmlSpecialChars($this->content, ENT_NOQUOTES);
+        $safeContent = $this->htmlSafe ? $this->content : TexyHTML::htmlChars($this->content);
 
         if ($onlyReturn) return $safeContent;
         else {

@@ -256,7 +256,7 @@ class TexyLineParser
 
         } while (1);
 
-        $text = TexyHTML::htmlChars($text);
+        $text = TexyHTML::htmlChars($text, false, true);
 
         if ($postProcess)
             foreach ($texy->modules as $id => $foo)

@@ -100,7 +100,7 @@ class TexyScriptModule extends TexyModule
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->setContent('<texy:script content="'.htmlSpecialChars($identifier, ENT_COMPAT).'" />', TRUE);
+        $element->setContent('<texy:script content="'.TexyHTML::htmlChars($identifier, true).'" />', TRUE);
     }
 
 
