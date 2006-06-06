@@ -398,12 +398,11 @@ class Texy {
 
 
         // entities -> chars
-
         if ((int) PHP_VERSION > 4 && $this->utf) { // fastest way for PHP 5 & UTF-8
             $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
         } else {
             // only allowed named entities
-            $text = strtr($text, array('&amp;'=>'&', '&quot;'=>'"', '&lt;'=>'<', '&gt;'=>'>'));
+            $text = strtr($text, array('&amp;'=>'&#38;', '&quot;'=>'&#34;', '&lt;'=>'&#60;', '&gt;'=>'&#62;'));
 
             // numeric
             $text = preg_replace_callback(
@@ -432,8 +431,10 @@ class Texy {
      *
      * @param array    matched entity
      * @return string  decoded entity
+     * @static
+     * @private
      */
-    /*static private*/ function _entityCallback($matches)
+    function _entityCallback($matches)
     {
         list(, $entity) = $matches;
 
