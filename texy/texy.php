@@ -12,14 +12,14 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.2 for PHP4 & PHP5 (released 2006/06/01)
+ * @version    1.5 for PHP4 & PHP5 $Date$ $Revision$
  */
 
 
 if (version_compare(PHP_VERSION , '4.3.3', '<'))
     die('Texy!: too old version of PHP!');
 
-define('TEXY', 'Version 1.2 (c) David Grudl, http://www.texy.info');
+define('TEXY', 'Texy! (c) David Grudl, http://www.texy.info');
 
 /**
  * Absolute filesystem path to the Texy package
@@ -31,7 +31,6 @@ require_once TEXY_DIR.'libs/modifier.php';       // modifier processor
 require_once TEXY_DIR.'libs/url.php';            // object encapsulate of URL
 require_once TEXY_DIR.'libs/dom.php';            // Texy! DOM element's base class
 require_once TEXY_DIR.'libs/module.php';         // Texy! module base class
-require_once TEXY_DIR.'libs/entity.php';         // HTML entity => chars
 require_once TEXY_DIR.'libs/parser.php';         // Texy! parser
 require_once TEXY_DIR.'libs/html.php';
 require_once TEXY_DIR.'libs/wellform.php';
@@ -360,8 +359,8 @@ class Texy
     function toText()
     {
         // generate output
-        $saveLineWrap = $this->formatterModule->lineWrap = FALSE;
-        $this->formatterModule->lineWrap = FALSE;
+        $saveLineWrap = $this->formatterModule->lineWrap = false;
+        $this->formatterModule->lineWrap = false;
 
         $text = $this->toHTML();
 
@@ -371,13 +370,68 @@ class Texy
         $text = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $text);
         $text = strip_tags($text);
         $text = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $text);
+        $text = strtr($text, array('&amp;'=>'&','&quot;'=>'"','&lt;'=>'<','&gt;'=>'>'));  
 
         // entities -> chars
-        $entity = new TexyHtmlEntity();
-        $text = $entity->decode($text, $this->utf ? 'UTF-8' : 'CP1250');
+        if ((int) PHP_VERSION > 4 && $this->utf) { // fastest way for PHP 5 & UTF-8
+            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8'); 
+        } else {        
+            $text = preg_replace_callback(
+                '#&(\\#x[0-9a-fA-F]+|\\#[0-9]+);#',
+                array(&$this, '_entityCallback'),
+                $text
+            );
+        }
+
+        // convert nbsp to normal space and remove shy
+        $text = strtr($text, array(
+            $this->utf ? "\xC2\xAD" : "\xAD" => '',  // shy
+            $this->utf ? "\xC2\xA0" : "\xA0" => ' ', // nbsp
+        ));
 
         return $text;
     }
+
+
+
+
+
+    /**
+     * Callback for preg_replace_callback() in toText()
+     *
+     * @param array    matched entity
+     * @return string  decoded entity
+     */
+    /*static private*/ function _entityCallback($matches)
+    {
+        list(, $entity) = $matches;
+
+        $ord = ($entity{1} == 'x') 
+             ? hexdec(substr($entity, 2)) 
+             : (int) substr($entity, 1);
+                
+        if ($ord<128)  // ASCII
+            return chr($ord);
+
+        if ($this->utf) {
+            if ($ord<2048) return chr(($ord>>6)+192) . chr(($ord&63)+128);
+            if ($ord<65536) return chr(($ord>>12)+224) . chr((($ord>>6)&63)+128) . chr(($ord&63)+128);
+            if ($ord<2097152) return chr(($ord>>18)+240) . chr((($ord>>12)&63)+128) . chr((($ord>>6)&63)+128) . chr(($ord&63)+128);
+            return $match; // invalid entity
+        }
+
+        if (function_exists('iconv')) {
+            return (string) iconv(
+                'UCS-2', 
+                'CP1250//TRANSLIT', 
+                pack('n', $ord)
+            );
+        }
+        
+        return '?';
+    }
+
+
 
 
     /**
