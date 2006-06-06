@@ -245,7 +245,7 @@ class TexyTextualElement extends TexyBlockElement {
 
     function safeContent($onlyReturn = false)
     {
-        $safeContent = $this->htmlSafe ? $this->content : htmlSpecialChars($this->content, ENT_NOQUOTES);
+        $safeContent = $this->htmlSafe ? $this->content : Texy::htmlChars($this->content);
 
         if ($onlyReturn) return $safeContent;
         else {

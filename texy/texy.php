@@ -395,7 +395,7 @@ class Texy {
         $text = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $text);
         $text = strip_tags($text);
         $text = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $text);
-        $text = strtr($text, array('&amp;'=>'&','&quot;'=>'"','&lt;'=>'<','&gt;'=>'>'));  
+        //$text = strtr($text, array('&amp;'=>'&','&quot;'=>'"','&lt;'=>'<','&gt;'=>'>'));  
 
         // entities -> chars
         if ((int) PHP_VERSION > 4 && $this->utf) { // fastest way for PHP 5 & UTF-8
@@ -453,7 +453,7 @@ class Texy {
         if (function_exists('iconv')) {
             return (string) iconv(
                 'UCS-2', 
-                'CP1250//TRANSLIT', 
+                'WINDOWS-1250//TRANSLIT', 
                 pack('n', $ord)
             );
         }
@@ -500,16 +500,36 @@ class Texy {
 
 
     /**
-     * Like htmlSpecialChars, but preserve entities
+     * Like htmlSpecialChars, but can preserve entities
+     * @param  string  input string
+     * @param  bool    for using inside quotes?
+     * @param  bool    preserve entities? 
      * @return string
      * @static
      */
-    function htmlChars($s, $quotes = false)
+    function htmlChars($s, $inQuotes = false, $entity = false)
     {
-        $s = htmlSpecialChars($s, $quotes ? ENT_COMPAT : ENT_NOQUOTES);
-        
-        // preserve numeric entities
-        return preg_replace('#&amp;([a-zA-Z0-9]+|\\#x[0-9a-fA-F]+|\\#[0-9]+);#', '&$1;', $s);
+        static $table = array(
+            0 => array(
+                '&'=>'&#38;',
+                '<'=>'&#60;',
+                '>'=>'&#62;',   // can be disabled - modify quickcorrect
+            ),
+            1 => array(
+                '&'=>'&#38;',
+                '"'=>'&#34;',
+                '<'=>'&#60;',
+                '>'=>'&#62;',
+            ),     
+        );
+
+        // my version of htmlSpecialChars()
+        $s = strtr($s, $table[$inQuotes ? 1 : 0]);
+
+        if ($entity) // preserve numeric entities?
+            return preg_replace('~&#38;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', $s);
+        else
+            return $s;
     }
 
 
@@ -634,7 +654,7 @@ class Texy {
                     $attrStr .= ' '
                               . Texy::htmlChars($name)
                               . '="'
-                              . Texy::freezeSpaces(Texy::htmlChars($value, true))   // freezed spaces will be preserved during reformating
+                              . Texy::freezeSpaces(Texy::htmlChars($value, true, true))   // freezed spaces will be preserved during reformating
                               . '"';
                 }
             }
@@ -1048,7 +1068,7 @@ class TexyLineParser {
 
         } while (1);
 
-        $text = Texy::htmlChars($text);
+        $text = Texy::htmlChars($text, false, true);
 
         if ($postProcess)
             foreach ($texy->modules as $name => $foo)

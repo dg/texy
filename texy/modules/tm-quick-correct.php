@@ -52,9 +52,9 @@ class TexyQuickCorrectModule extends TexyModule {
           '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => '$1&#160;$2&#160;$3',              // date 23. 1. 1978
           '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => '$1&#160;$2',                      // date 23. 1.
           '# -- #'                                  => " $this->dash ",                   // en dash    --
-          '# -&gt; #'                               => ' &#8594; ',                       // right arrow ->
-          '# &lt;- #'                               => ' &#8592; ',                       // left arrow ->
-          '# &lt;-&gt; #'                           => ' &#8596; ',                       // left right arrow <->
+          '# -&\\#62; #'                            => ' &#8594; ',                       // right arrow ->
+          '# &\\#60;- #'                            => ' &#8592; ',                       // left arrow ->
+          '# &\\#60;-&\\#62; #'                     => ' &#8596; ',                       // left right arrow <->
           '#(\d+) ?x ?(\d+) ?x ?(\d+)#'             => '$1&#215;$2&#215;$3',              // dimension sign x
           '#(\d+) ?x ?(\d+)#'                       => '$1&#215;$2',                      // dimension sign x
           '#(?<=\d)x(?= |,|.|$)#m'                  => '&#215;',                          // 10x
