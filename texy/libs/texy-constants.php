@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.1 for PHP4 & PHP5 $Date$ $Revision$
  */
 
 
@@ -84,8 +84,6 @@ define('TEXY_HASH',             "\x15-\x1F");       // ANY HASH CHAR
 define('TEXY_HASH_SPACES',      "\x15-\x18");       // HASHED SPACE
 define('TEXY_HASH_NC',          "\x19\x1B-\x1F");   // HASHED TAG or ELEMENT (without content)
 define('TEXY_HASH_WC',          "\x1A-\x1F");       // HASHED TAG or ELEMENT (with content)
-// HTML tag & entity
-define('TEXY_PATTERN_ENTITY',   '&amp;([a-z]+|\\#x[0-9a-f]+|\\#[0-9]+);');   // &amp;   |   &#039;   |   &#x1A;
 
 
 // links

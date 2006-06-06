@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.0 for PHP4 & PHP5 (released 2006/04/18)
+ * @version    1.1 for PHP4 & PHP5 $Date$ $Revision$
  */
 
 // security - include texy.php, not this file
@@ -98,7 +98,7 @@ class TexyScriptModule extends TexyModule {
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->setContent('<texy:script content="'.htmlSpecialChars($identifier).'" />', true);
+        $element->setContent('<texy:script content="'.htmlSpecialChars($identifier, ENT_COMPAT).'" />', true);
     }
 
 
