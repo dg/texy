@@ -19,7 +19,7 @@
 if (version_compare(PHP_VERSION , '4.3.3', '<'))
     die('Texy!: too old version of PHP!');
 
-define('TEXY', 'Texy! (c) David Grudl, http://www.texy.info');
+define('TEXY', 'Version 1.1 for PHP4 & PHP5 $Revision$');
 
 /**
  * Absolute filesystem path to the Texy package
