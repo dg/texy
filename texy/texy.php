@@ -395,14 +395,15 @@ class Texy {
         $text = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $text);
         $text = strip_tags($text);
         $text = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $text);
-        //$text = strtr($text, array('&amp;'=>'&','&quot;'=>'"','&lt;'=>'<','&gt;'=>'>'));  
+
 
         // entities -> chars
+
         if ((int) PHP_VERSION > 4 && $this->utf) { // fastest way for PHP 5 & UTF-8
-            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8'); 
-        } else {        
-            // named
-//            $text = strtr($text, array('&amp;'=>'&','&quot;'=>'"','&lt;'=>'<','&gt;'=>'>'));  
+            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        } else {
+            // only allowed named entities
+            $text = strtr($text, array('&amp;'=>'&', '&quot;'=>'"', '&lt;'=>'<', '&gt;'=>'>'));
 
             // numeric
             $text = preg_replace_callback(
@@ -436,10 +437,10 @@ class Texy {
     {
         list(, $entity) = $matches;
 
-        $ord = ($entity{1} == 'x') 
-             ? hexdec(substr($entity, 2)) 
+        $ord = ($entity{1} == 'x')
+             ? hexdec(substr($entity, 2))
              : (int) substr($entity, 1);
-                
+
         if ($ord<128)  // ASCII
             return chr($ord);
 
@@ -452,12 +453,12 @@ class Texy {
 
         if (function_exists('iconv')) {
             return (string) iconv(
-                'UCS-2', 
-                'WINDOWS-1250//TRANSLIT', 
+                'UCS-2',
+                'WINDOWS-1250//TRANSLIT',
                 pack('n', $ord)
             );
         }
-        
+
         return '?';
     }
 
@@ -503,31 +504,16 @@ class Texy {
      * Like htmlSpecialChars, but can preserve entities
      * @param  string  input string
      * @param  bool    for using inside quotes?
-     * @param  bool    preserve entities? 
+     * @param  bool    preserve entities?
      * @return string
      * @static
      */
     function htmlChars($s, $inQuotes = false, $entity = false)
     {
-        static $table = array(
-            0 => array(
-                '&'=>'&#38;',
-                '<'=>'&#60;',
-                '>'=>'&#62;',   // can be disabled - modify quickcorrect
-            ),
-            1 => array(
-                '&'=>'&#38;',
-                '"'=>'&#34;',
-                '<'=>'&#60;',
-                '>'=>'&#62;',
-            ),     
-        );
-
-        // my version of htmlSpecialChars()
-        $s = strtr($s, $table[$inQuotes ? 1 : 0]);
+        $s = htmlSpecialChars($s, $inQuotes ? ENT_COMPAT : ENT_NOQUOTES);
 
         if ($entity) // preserve numeric entities?
-            return preg_replace('~&#38;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', $s);
+            return preg_replace('~&amp;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', $s);
         else
             return $s;
     }
@@ -574,14 +560,17 @@ class Texy {
             '&ugrave;'=>'&#249;','&uml;'=>'&#168;','&upsih;'=>'&#978;','&upsilon;'=>'&#965;','&uuml;'=>'&#252;','&weierp;'=>'&#8472;','&xi;'=>'&#958;','&yacute;'=>'&#253;',
             '&yen;'=>'&#165;','&yuml;'=>'&#255;','&zeta;'=>'&#950;','&zwj;'=>'&#8205;','&zwnj;'=>'&#8204;',
         );
-        
-        // preserve and decode(!) named entities
-        $html = strtr($html, $entity);
-        
-        // preserve numeric entities
-        return preg_replace('#&([a-zA-Z0-9]+);#', '&#38;$1;', $html);
 
-        //strtr($html, array('&#38;'=>'&amp;','&#34;'=>'&quot;','&#60;'=>'&lt;','&#62;'=>'&gt;'));
+        static $allowed = array('&#38;'=>'&amp;', '&#34;'=>'&quot;', '&#60;'=>'&lt;', '&#62;'=>'&gt;');
+
+        // decode(!) named entities to numeric
+        $html = strtr($html, $entity);
+
+        // preserve numeric entities
+        $html = preg_replace('#&([a-zA-Z0-9]+);#', '&amp;$1;', $html);
+
+        // only allowed named entites are these:
+        return strtr($html, $allowed);
     }
 
 
