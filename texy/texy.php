@@ -12,7 +12,7 @@
  * @license    GNU GENERAL PUBLIC LICENSE
  * @package    Texy
  * @category   Text
- * @version    1.5 for PHP4 & PHP5 $Date$ $Revision$
+ * @version    1.5 for PHP4 & PHP5 $Revision$ $Date$
  */
 
 
