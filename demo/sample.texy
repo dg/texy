@@ -1,0 +1,19 @@
+Texy! je sexy!
+==============
+
+Texy! je převaděč textu do formátovaného HTML kódu. Díky němu můžete psát strukturované dokumenty i bez znalosti nebo použití jazyka HTML. Dokument napíšete v přehledné, čistě textové, formě a Texy! jej automaticky převede do validního (X)HTML kódu. 
+
+Texy! je jedním z **nejkomplexnějších** formátovačů. Umí zpracovávat obrázky, odkazy, vnořené seznamy, tabulky a má také plnou podporu CSS(Kaskádové styly).
+
+[* logo <] Texy! formátuje text v souladu s typografickými pravidly. Zvláštní pozornost je věnována národním specifikům. Texy! přetahuje jednopísmenné předložky a spojky z konců řádků na řádek následující, rozděluje příliš dlouhá slova podle slabik a podobně.
+
+Kód je napsán v PHP a je plně objektový. Je navržen tak, aby jej bylo možné snadno rozšířit nebo přizpůsobit specifickým potřebám bez zásahu do zdrojového kódu. 
+
+Copyright
+---------
+
+[Texy] (C) "David Grudl aka -dgx-":[dgx], 2003-2005
+
+[*logo*]: logo-small.gif .(logo Texy!) 
+[texy]: http://www.texy.info Texy!
+[dgx]: http://www.dgx.cz/trine/
