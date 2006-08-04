@@ -2,7 +2,7 @@ What is Texy! software licensing model?
 =======================================
 
 Texy! uses a "dual licensing" business model. Users may choose to use Texy!
-products under the free software GNU General Public License (GPL) or under a
+products under the free software GNU General Public License v2 (GPL) or under a
 commercial license.
 
 

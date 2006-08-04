@@ -8,7 +8,7 @@
  * @link       http://www.texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    1.1 for PHP4 & PHP5 $Date: 2006-06-06 22:12:22 +0200 (út, 06 VI 2006) $ $Revision: 36 $
