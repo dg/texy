@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -26,34 +26,22 @@ if (!defined('TEXY')) die();
  */
 class TexyBlockParser
 {
-    var $element;     // TexyBlockElement
-    var $text;        // text splited in array of lines
-    var $offset;
+    public $element;     // TexyBlockElement
+    private $text;        // text splited in array of lines
+    private $offset;
 
 
-    function __construct(&$element)
+    public function __construct($element)
     {
-        $this->element = &$element;
+        $this->element = $element;
     }
 
 
-    /**
-     * PHP4-only constructor
-     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
-     */
-    function TexyBlockParser(&$element)
-    {
-        // generate references
-        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call PHP5 constructor
-        call_user_func_array(array(&$this, '__construct'), array(&$element));
-    }
 
 
     // match current line against RE.
     // if succesfull, increments current position and returns TRUE
-    function receiveNext($pattern, &$matches)
+    public function receiveNext($pattern, &$matches)
     {
         $ok = preg_match(
                    $pattern . 'Am', // anchored & multiline
@@ -70,7 +58,7 @@ class TexyBlockParser
 
 
 
-    function moveBackward($linesCount = 1)
+    public function moveBackward($linesCount = 1)
     {
         while (--$this->offset > 0)
          if ($this->text{ $this->offset-1 } == TEXY_NEWLINE)
@@ -82,12 +70,13 @@ class TexyBlockParser
 
 
 
-    function parse($text)
+    public function parse($text)
     {
             ///////////   INITIALIZATION
-        $texy = &$this->element->texy;
+        $texy = $this->element->texy;
         $this->text = & $text;
         $this->offset = 0;
+        // $this->element->children = array(); // !!!
 
         $patternKeys = array_keys($texy->patternsBlock);
         $arrMatches = $arrPos = array();
@@ -132,14 +121,14 @@ class TexyBlockParser
             if ($next > $this->offset) {
                 $str = substr($text, $this->offset, $next - $this->offset);
                 $this->offset = $next;
-                call_user_func_array($texy->genericBlock, array(&$this, $str));
+                call_user_func_array(array($texy->genericBlockModule, 'processBlock'), array($this, $str));
                 continue;
             }
 
             $px = & $texy->patternsBlock[$minKey];
             $matches = & $arrMatches[$minKey];
             $this->offset = $arrPos[$minKey] + strlen($matches[0]) + 1;   // 1 = \n
-            $ok = call_user_func_array($px['handler'], array(&$this, $matches, $px['user']));
+            $ok = call_user_func_array($px['handler'], array($this, $matches, $px['user']));
             if ($ok === FALSE || ( $this->offset <= $arrPos[$minKey] )) { // module rejects text
                 $this->offset = $arrPos[$minKey]; // turn offset back
                 $arrPos[$minKey] = -2;
@@ -151,6 +140,13 @@ class TexyBlockParser
         } while (1);
     }
 
+    /**
+     * Undefined property usage prevention
+     */
+    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    private function __isset($nm) { return FALSE; }
 } // TexyBlockParser
 
 
@@ -166,35 +162,21 @@ class TexyBlockParser
  */
 class TexyLineParser
 {
-    var $element;   // TexyTextualElement
+    public $element;   // TexyTextualElement
 
 
-    function __construct(&$element)
+    public function __construct($element)
     {
-        $this->element = &$element;
-    }
-
-
-    /**
-     * PHP4-only constructor
-     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
-     */
-    function TexyLineParser(&$element)
-    {
-        // generate references
-        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call PHP5 constructor
-        call_user_func_array(array(&$this, '__construct'), array(&$element));
+        $this->element = $element;
     }
 
 
 
-    function parse($text, $postProcess = TRUE)
+    public function parse($text)
     {
             ///////////   INITIALIZATION
-        $element = &$this->element;
-        $texy = &$element->texy;
+        $element = $this->element;
+        $texy = $element->texy;
 
         $offset = 0;
         $hashStrLen = 0;
@@ -238,7 +220,7 @@ class TexyLineParser
 
             $px = & $texy->patternsLine[$minKey];
             $offset = $arrPos[$minKey];
-            $replacement = call_user_func_array($px['handler'], array(&$this, $arrMatches[$minKey], $px['user']));
+            $replacement = call_user_func_array($px['handler'], array($this, $arrMatches[$minKey], $px['user']));
             $len = strlen($arrMatches[$minKey][0]);
             $text = substr_replace(
                         $text,
@@ -256,23 +238,24 @@ class TexyLineParser
 
         } while (1);
 
-        $text = TexyHTML::htmlChars($text, false, true);
+        $text = TexyHtml::htmlChars($text, FALSE, TRUE);
 
-        if ($postProcess)
-            foreach ($texy->modules as $id => $foo)
-                $texy->modules[$id]->linePostProcess($text);
+        foreach ($texy->getModules() as $module)
+            $module->linePostProcess($text);
 
         $element->setContent($text, TRUE);
 
-        if ($element->contentType == TEXY_CONTENT_NONE) {
+        if ($element->contentType == TexyDomElement::CONTENT_NONE) {
             $s = trim( preg_replace('#['.TEXY_HASH.']+#', '', $text) );
-            if (strlen($s)) $element->contentType = TEXY_CONTENT_TEXTUAL;
+            if (strlen($s)) $element->contentType = TexyDomElement::CONTENT_TEXTUAL;
         }
     }
 
+    /**
+     * Undefined property usage prevention
+     */
+    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    private function __isset($nm) { return FALSE; }
 } // TexyLineParser
-
-
-
-
-?>

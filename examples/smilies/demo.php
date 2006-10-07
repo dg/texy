@@ -8,10 +8,10 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  */
 
 
@@ -21,7 +21,7 @@ require_once ($texyPath . 'texy.php');
 
 
 
-$texy = &new Texy();
+$texy = new Texy();
 
 
 // SMILIES ARE DISABLED BY DEFAULT!

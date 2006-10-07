@@ -143,7 +143,7 @@ nested
 Links
 =====
 
-- Look at "homepage":http://www.texy.info.
+- Look at "homepage":http://texy.info.
 - Do you know "La Trine":[http://www.dgx.cz/trine/]?
 - This picture [* image.gif *]:www.texy.info is clickable
 
@@ -151,7 +151,7 @@ Links
 using references
 ----------------
 
-[homepage]:  http://www.texy.info/ Texy! .(this is homepage)
+[homepage]:  http://texy.info/ Texy! .(this is homepage)
 [email]:     me@example.com
 
 

@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,14 +29,14 @@ if (!defined('TEXY')) die();
 class TexyQuickCorrectModule extends TexyModule
 {
     // options
-    var $doubleQuotes = array('&#8222;', '&#8220;');  // left & right double quote (&bdquo; &ldquo;)
-    var $singleQuotes = array('&#8218;', '&#8216;');  // left & right single quote (&sbquo; &lsquo;)
-    var $dash         = '&#8211;';                    // dash (&ndash;)
+    public $doubleQuotes = array('&#8222;', '&#8220;');  // left & right double quote (&bdquo; &ldquo;)
+    public $singleQuotes = array('&#8218;', '&#8216;');  // left & right single quote (&sbquo; &lsquo;)
+    public $dash         = '&#8211;';                    // dash (&ndash;)
 
 
 
 
-    function linePostProcess(&$text)
+    public function linePostProcess(&$text)
     {
         if (!$this->allowed) return;
 
@@ -83,10 +83,3 @@ class TexyQuickCorrectModule extends TexyModule
 
 
 } // TexyQuickCorrectModule
-
-
-
-
-
-
-?>

@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -42,9 +42,10 @@ if (!defined('TEXY')) die();
 class TexyPhraseModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $codeHandler;  // function &myUserFunc($element)
+    public $handler;
 
-    var $allowed = array(
+    public $allowed = array(
         '***'  => 'strong em',
         '**'  => 'strong',
         '*'   => 'em',
@@ -67,7 +68,7 @@ class TexyPhraseModule extends TexyModule
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
 
         // strong & em speciality *** ... *** !!! its not good!
@@ -212,7 +213,7 @@ class TexyPhraseModule extends TexyModule
      * Callback function: **.... .(title)[class]{style}**
      * @return string
      */
-    function processPhrase(&$parser, $matches, $tags)
+    public function processPhrase($parser, $matches, $tags)
     {
         list($match, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         if ($mContent == NULL) {
@@ -230,18 +231,18 @@ class TexyPhraseModule extends TexyModule
         $el = NULL;
 
         foreach ($tags as $tag) {
-            $el = &new TexyInlineTagElement($this->texy);
+            $el = new TexyInlineTagElement($this->texy);
             $el->tag = $tag;
             if ($tag == 'acronym' || $tag == 'abbr') { $el->modifier->title = $mLink; $mLink=''; }
 
             if ($this->handler)
-                if (call_user_func_array($this->handler, array(&$el, $tags)) === FALSE) return '';
+                if (call_user_func_array($this->handler, array($el, $tags)) === FALSE) return '';
 
             $mContent = $parser->element->appendChild($el, $mContent);
         }
 
         if ($mLink) {
-            $el = &new TexyLinkElement($this->texy);
+            $el = new TexyLinkElement($this->texy);
             $el->setLinkRaw($mLink);
             $mContent = $parser->element->appendChild($el, $mContent);
         }
@@ -260,7 +261,7 @@ class TexyPhraseModule extends TexyModule
     /**
      * Callback function `=code
      */
-    function processBlock(&$parser, $matches)
+    public function processBlock($parser, $matches)
     {
         list(, $mTag) = $matches;
         //    [1] => ...
@@ -278,7 +279,7 @@ class TexyPhraseModule extends TexyModule
      * Callback function: `.... .(title)[class]{style}`
      * @return string
      */
-    function processCode(&$parser, $matches)
+    public function processCode($parser, $matches)
     {
         list(, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
         //    [1] => ...
@@ -286,15 +287,15 @@ class TexyPhraseModule extends TexyModule
         //    [3] => [class]
         //    [4] => {style}
 
-        $texy = &$this->texy;
-        $el = &new TexyTextualElement($texy);
+        $texy = $this->texy;
+        $el = new TexyTextualElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-        $el->contentType = TEXY_CONTENT_TEXTUAL;
+        $el->contentType = TexyDomElement::CONTENT_TEXTUAL;
         $el->setContent($mContent, FALSE);  // content isn't html safe
         $el->tag = $this->allowed['`'];
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el, 'code')) === FALSE) return '';
+        if ($this->codeHandler)
+            if (call_user_func_array($this->codeHandler, array($el, 'code')) === FALSE) return '';
 
         $el->safeContent(); // ensure that content is HTML safe
 
@@ -312,13 +313,13 @@ class TexyPhraseModule extends TexyModule
      * User callback - PROTECT PHRASE
      * @return string
      */
-    function processProtect(&$parser, $matches, $isHtmlSafe = FALSE)
+    public function processProtect($parser, $matches, $isHtmlSafe = FALSE)
     {
         list(, $mContent) = $matches;
 
-        $el = &new TexyTextualElement($this->texy);
-        $el->contentType = TEXY_CONTENT_TEXTUAL;
-//    $el->contentType = TEXY_CONTENT_BLOCK;
+        $el = new TexyTextualElement($this->texy);
+        $el->contentType = TexyDomElement::CONTENT_TEXTUAL;
+//    $el->contentType = TexyDomElement::CONTENT_BLOCK;
         $el->setContent( Texy::freezeSpaces($mContent), $isHtmlSafe );
 
         return $parser->element->appendChild($el);
@@ -328,7 +329,3 @@ class TexyPhraseModule extends TexyModule
 
 
 } // TexyPhraseModule
-
-
-
-?>

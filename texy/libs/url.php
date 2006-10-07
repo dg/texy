@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -26,42 +26,33 @@ if (!defined('TEXY')) die();
  *
  * Analyse type of URL and convert it to valid URL or textual representation
  */
-class TexyURL
+class TexyUrl
 {
-    var //protected
-        $texy;  // root Texy object association
+    protected $texy;  // root Texy object association
 
-    var
-        $value,
-        $flags,
-        $root,
-        $URL;
+    public $value;
+    protected $flags;
+    protected $root;
+    protected $URL;
+
+    const ABSOLUTE = 1;
+    const RELATIVE = 2;
+    const EMAIL = 4;
+    const IMAGE = 8;
+
 
 
 
     /**
-     * Creates a new TexyURL object
+     * Creates a new TexyUrl object
      *
      * @param object  association with root Texy object
      */
-    function __construct(&$texy)
+    public function __construct($texy)
     {
-        $this->texy = & $texy;
+        $this->texy =  $texy;
     }
 
-
-    /**
-     * PHP4-only constructor
-     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
-     */
-    function TexyURL(&$texy)
-    {
-        // generate references
-        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call PHP5 constructor
-        call_user_func_array(array(&$this, '__construct'), array(&$texy));
-    }
 
 
 
@@ -74,21 +65,23 @@ class TexyURL
      * @param bool    image indicator (user usage)
      * @return void
      */
-    function set($value, $root = '', $isImage = FALSE)
+    public function set($value, $root = '', $isImage = FALSE)
     {
         $this->value = trim($value);
-        $this->root = (string) $root;
+        if ($root <> NULL) $root = rtrim($root, '/\\') . '/';
+        $this->root = $root;
+
 
         // will be completed on demand
         $this->URL = NULL;
 
         // detect URL type
         if (preg_match('#^'.TEXY_PATTERN_EMAIL.'$#i', $this->value)) // email
-            $this->flags = TEXY_URL_EMAIL;
+            $this->flags = self::EMAIL;
         elseif (preg_match('#^(https?://|ftp://|www\.|ftp\.|/)#i', $this->value))  // absolute URL
-            $this->flags = TEXY_URL_ABSOLUTE | ($isImage ? TEXY_URL_IMAGE : 0);
+            $this->flags = self::ABSOLUTE | ($isImage ? self::IMAGE : 0);
         else  // relative
-            $this->flags = TEXY_URL_RELATIVE | ($isImage ? TEXY_URL_IMAGE : 0);
+            $this->flags = self::RELATIVE | ($isImage ? self::IMAGE : 0);
     }
 
 
@@ -97,9 +90,9 @@ class TexyURL
      * Indicates whether URL is absolute
      * @return bool
      */
-    function isAbsolute()
+    public function isAbsolute()
     {
-        return (bool) ($this->flags & TEXY_URL_ABSOLUTE);
+        return (bool) ($this->flags & self::ABSOLUTE);
     }
 
 
@@ -108,9 +101,9 @@ class TexyURL
      * Indicates whether URL is email address (mailto://)
      * @return bool
      */
-    function isEmail()
+    public function isEmail()
     {
-        return (bool) ($this->flags & TEXY_URL_EMAIL);
+        return (bool) ($this->flags & self::EMAIL);
     }
 
 
@@ -119,15 +112,15 @@ class TexyURL
      * Indicates whether URL is marked as 'image'
      * @return bool
      */
-    function isImage()
+    public function isImage()
     {
-        return (bool) ($this->flags & TEXY_URL_IMAGE);
+        return (bool) ($this->flags & self::IMAGE);
     }
 
 
 
 
-    function copyFrom(&$obj)
+    public function copyFrom($obj)
     {
         $this->value = $obj->value;
         $this->flags = $obj->flags;
@@ -141,7 +134,7 @@ class TexyURL
      * Returns URL formatted for HTML attributes etc.
      * @return string
      */
-    function asURL()
+    public function asURL()
     {
         // output is cached
         if ($this->URL !== NULL)
@@ -151,7 +144,7 @@ class TexyURL
             return $this->URL = $this->value;
 
         // email URL
-        if ($this->flags & TEXY_URL_EMAIL) {
+        if ($this->flags & self::EMAIL) {
             // obfuscating against spam robots
             if ($this->texy->obfuscateEmail) {
                 $this->URL = 'mai';
@@ -166,7 +159,7 @@ class TexyURL
         }
 
         // absolute URL
-        if ($this->flags & TEXY_URL_ABSOLUTE) {
+        if ($this->flags & self::ABSOLUTE) {
             $lower = strtolower($this->value);
 
             // must begins with 'http://' or 'ftp://'
@@ -179,7 +172,7 @@ class TexyURL
         }
 
         // relative URL
-        if ($this->flags & TEXY_URL_RELATIVE) {
+        if ($this->flags & self::RELATIVE) {
             return $this->URL = $this->root . $this->value;
         }
     }
@@ -190,15 +183,15 @@ class TexyURL
      * Returns textual representation of URL
      * @return string
      */
-    function asTextual()
+    public function asTextual()
     {
-        if ($this->flags & TEXY_URL_EMAIL) {
+        if ($this->flags & self::EMAIL) {
             return $this->texy->obfuscateEmail
                    ? strtr($this->value, array('@' => "&#160;(at)&#160;"))
                    : $this->value;
         }
 
-        if ($this->flags & TEXY_URL_ABSOLUTE) {
+        if ($this->flags & self::ABSOLUTE) {
             $URL = $this->value;
             $lower = strtolower($URL);
             if (substr($lower, 0, 4) == 'www.') $URL = 'none://'.$URL;
@@ -230,9 +223,11 @@ class TexyURL
 
 
 
-} // TexyURL
-
-
-
-
-?>
+    /**
+     * Undefined property usage prevention
+     */
+    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    private function __isset($nm) { return FALSE; }
+} // TexyUrl

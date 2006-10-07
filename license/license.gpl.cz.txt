@@ -9,9 +9,8 @@ lépe porozumìt licenci GNU GPL.
                     GNU GENERAL PUBLIC LICENSE
                  Èeský pøeklad verze 2, èerven 1991
 
- Copyright (C) 1989, 1991 Free Software Foundation, Inc.
-                          675 Mass Ave, Cambridge, MA 02139, USA
-
+ Copyright (C) 1989, 1991 Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  Kopírování a distribuce doslovných kopií tohoto licenèního dokumentu jsou
  dovoleny komukoliv, jeho zmìny jsou v¹ak zakázány.
 

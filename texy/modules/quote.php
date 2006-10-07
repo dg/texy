@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,13 +29,13 @@ if (!defined('TEXY')) die();
 class TexyQuoteModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
-    var $allowed;
+    public $allowed;
 
 
 
-    function __construct(&$texy)
+    public function __construct($texy)
     {
         parent::__construct($texy);
 
@@ -49,13 +49,13 @@ class TexyQuoteModule extends TexyModule
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         if ($this->allowed->block)
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlock',
-                '#^(?:<MODIFIER_H>\n)?>(\ +|:)(\S.*)$#mU'
+                '#^(?:<MODIFIER_H>\n)?\>(\ +|:)(\S.*)$#mU'
             );
 
         if ($this->allowed->line)
@@ -71,7 +71,7 @@ class TexyQuoteModule extends TexyModule
      * Callback function: >>.... .(title)[class]{style}<<:LINK
      * @return string
      */
-    function processLine(&$parser, $matches, $tag)
+    public function processLine($parser, $matches, $tag)
     {
         list(, $mMark, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         //    [1] => **
@@ -81,15 +81,15 @@ class TexyQuoteModule extends TexyModule
         //    [5] => {style}
         //    [6] => LINK
 
-        $texy = & $this->texy;
-        $el = &new TexyQuoteElement($texy);
+        $texy =  $this->texy;
+        $el = new TexyQuoteElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
 
         if ($mLink)
             $el->cite->set($mLink);
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return '';
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
         return $parser->element->appendChild($el, $mContent);
     }
@@ -107,7 +107,7 @@ class TexyQuoteModule extends TexyModule
      *            >:http://www.mycom.com/tolkien/twotowers.html
      *
      */
-    function processBlock(&$parser, $matches)
+    public function processBlock($parser, $matches)
     {
         list(, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
         //    [1] => (title)
@@ -117,8 +117,8 @@ class TexyQuoteModule extends TexyModule
         //    [5] => spaces |
         //    [6] => ... / LINK
 
-        $texy = & $this->texy;
-        $el = &new TexyBlockQuoteElement($texy);
+        $texy = $this->texy;
+        $el = new TexyBlockQuoteElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         $content = '';
@@ -136,7 +136,7 @@ class TexyQuoteModule extends TexyModule
         } while (TRUE);
 
         if ($linkTarget) {                                  // !!!!!
-            $elx = &new TexyLinkElement($this->texy);
+            $elx = new TexyLinkElement($this->texy);
             $elx->setLinkRaw($linkTarget);
             $el->cite->set($elx->link->asURL());
         }
@@ -144,7 +144,7 @@ class TexyQuoteModule extends TexyModule
         $el->parse($content);
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
 
         $parser->element->appendChild($el);
     }
@@ -165,18 +165,18 @@ class TexyQuoteModule extends TexyModule
  */
 class TexyBlockQuoteElement extends TexyBlockElement
 {
-    var $tag = 'blockquote';
-    var $cite;
+    public $tag = 'blockquote';
+    public $cite;
 
 
-    function __construct(&$texy)
+    public function __construct($texy)
     {
         parent::__construct($texy);
-        $this->cite = &new TexyURL($texy);
+        $this->cite = new TexyUrl($texy);
     }
 
 
-    function generateTags(&$tags)
+    protected function generateTags(&$tags)
     {
         parent::generateTags($tags);
         $tags[$this->tag]['cite'] = $this->cite->asURL();
@@ -193,18 +193,18 @@ class TexyBlockQuoteElement extends TexyBlockElement
  */
 class TexyQuoteElement extends TexyInlineTagElement
 {
-    var $tag = 'q';
-    var $cite;
+    public $tag = 'q';
+    public $cite;
 
 
-    function __construct(&$texy)
+    public function __construct($texy)
     {
         parent::__construct($texy);
-        $this->cite = &new TexyURL($texy);
+        $this->cite = new TexyUrl($texy);
     }
 
 
-    function generateTags(&$tags)
+    protected function generateTags(&$tags)
     {
         parent::generateTags($tags);
         $tags[$this->tag]['cite'] = $this->cite->asURL();
@@ -212,10 +212,3 @@ class TexyQuoteElement extends TexyInlineTagElement
 
 
 } // TexyBlockQuoteElement
-
-
-
-
-
-
-?>

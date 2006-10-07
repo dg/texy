@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,23 +29,14 @@ if (!defined('TEXY')) die();
 class TexyGenericBlockModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
     /** @var bool    ... */
-    var $mergeMode = TRUE;
-
-
-    /**
-     * Module initialization
-     */
-    function init()
-    {
-        $this->texy->genericBlock = array(&$this, 'processBlock');
-    }
+    public $mergeMode = TRUE;
 
 
 
-    function processBlock(&$parser, $content)
+    public function processBlock($parser, $content)
     {
         $str_blocks = $this->mergeMode
                       ? preg_split('#(\n{2,})#', $content)
@@ -68,7 +59,7 @@ class TexyGenericBlockModule extends TexyModule
      *             ...
      *
      */
-    function processSingleBlock(&$parser, $content)
+    public function processSingleBlock($parser, $content)
     {
         preg_match($this->texy->translatePattern('#^(.*)<MODIFIER_H>?(\n.*)?()$#sU'), $content, $matches);
         list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
@@ -87,27 +78,27 @@ class TexyGenericBlockModule extends TexyModule
            $mContent = strtr($mContent, "\n\r", " \n");
         }
 
-        $el = &new TexyGenericBlockElement($this->texy);
+        $el = new TexyGenericBlockElement($this->texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse($mContent);
 
         // specify tag
-        if ($el->contentType == TEXY_CONTENT_TEXTUAL) $el->tag = 'p';
+        if ($el->contentType == TexyDomElement::CONTENT_TEXTUAL) $el->tag = 'p';
         elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
-        elseif ($el->contentType == TEXY_CONTENT_BLOCK) $el->tag = '';
+        elseif ($el->contentType == TexyDomElement::CONTENT_BLOCK) $el->tag = '';
         else $el->tag = 'div';
 
         // add <br />
-        if ($el->tag && (strpos($el->content, "\n") !== FALSE)) {
-            $elBr = &new TexyTextualElement($this->texy);
+        if ($el->tag && (strpos($el->getContent(), "\n") !== FALSE)) {
+            $elBr = new TexyTextualElement($this->texy);
             $elBr->tag = 'br';
-            $el->content = strtr($el->content,
+            $el->setContent(strtr($el->getContent(),
                               array("\n" => $el->appendChild($elBr))
-                           );
+                           ), TRUE);
         }
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
 
         $parser->element->appendChild($el);
     }
@@ -127,13 +118,7 @@ class TexyGenericBlockModule extends TexyModule
  */
 class TexyGenericBlockElement extends TexyTextualElement
 {
-    var $tag = 'p';
+    public $tag = 'p';
 
 
 } // TexyGenericBlockElement
-
-
-
-
-
-?>

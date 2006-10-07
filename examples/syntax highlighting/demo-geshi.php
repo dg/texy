@@ -10,10 +10,10 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  */
 
 
@@ -47,11 +47,11 @@ if (!class_exists('Geshi'))
 //
 //  Syntax highlighter changes $element->content and sets $element->htmlSafe to TRUE
 //
-function myUserFunc(&$element) {
+function myUserFunc($element) {
     global $geshiPath;
 
     if ($element->lang == 'html') $element->lang = 'html4strict';
-    $geshi = new GeSHi($element->content, $element->lang, $geshiPath.'geshi/');
+    $geshi = new GeSHi($element->getContent(), $element->lang, $geshiPath.'geshi/');
 
     if ($geshi->error)   // GeSHi could not find the language, nothing to do
         return;
@@ -81,7 +81,7 @@ function myUserFunc(&$element) {
 
 
 
-$texy = &new Texy();
+$texy = new Texy();
 
 // set user callback function for /-- code blocks
 $texy->blockModule->codeHandler = 'myUserFunc';

@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -28,9 +28,9 @@ if (!defined('TEXY')) die();
 class TexyListModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
-    var $allowed = array(
+    public $allowed = array(
         '*'            => TRUE,
         '-'            => TRUE,
         '+'            => TRUE,
@@ -43,7 +43,7 @@ class TexyListModule extends TexyModule
     );
 
     // private
-    var $translate = array(    //  rexexp       class   list-style-type  tag
+    public $translate = array(    //  rexexp       class   list-style-type  tag
         '*'            => array('\*',          '',    '',              'ul'),
         '-'            => array('\-',          '',    '',              'ul'),
         '+'            => array('\+',          '',    '',              'ul'),
@@ -59,7 +59,7 @@ class TexyListModule extends TexyModule
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         $bullets = array();
         foreach ($this->allowed as $bullet => $allowed)
@@ -87,7 +87,7 @@ class TexyListModule extends TexyModule
      *            3) ....
      *
      */
-    function processBlock(&$parser, $matches)
+    public function processBlock($parser, $matches)
     {
         list(, $mMod1, $mMod2, $mMod3, $mMod4, $mBullet, $mNewLine) = $matches;
         //    [1] => (title)
@@ -96,8 +96,8 @@ class TexyListModule extends TexyModule
         //    [4] => >
         //    [5] => bullet * + - 1) a) A) IV)
 
-        $texy = & $this->texy;
-        $el = &new TexyListElement($texy);
+        $texy =  $this->texy;
+        $el = new TexyListElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         $bullet = '';
@@ -113,7 +113,7 @@ class TexyListModule extends TexyModule
         $parser->moveBackward($mNewLine ? 2 : 1);
 
         $count = 0;
-        while ($elItem = &$this->processItem($parser, $bullet)) {
+        while ($elItem = $this->processItem($parser, $bullet)) {
             $el->appendChild($elItem);
             $count++;
         }
@@ -121,7 +121,7 @@ class TexyListModule extends TexyModule
         if (!$count) return FALSE;
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
 
         $parser->element->appendChild($el);
     }
@@ -133,15 +133,14 @@ class TexyListModule extends TexyModule
 
 
 
-    function &processItem(&$parser, $bullet, $indented = FALSE) {
-        $texy = & $this->texy;
+    public function processItem($parser, $bullet, $indented = FALSE) {
+        $texy =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
         $patternItem = $texy->translatePattern("#^\n?($spacesBase)$bullet(\n?)(\ +)(\S.*)?<MODIFIER_H>?()$#mAU");
 
         // first line (with bullet)
         if (!$parser->receiveNext($patternItem, $matches)) {
-            $FALSE = FALSE; // php4_sucks
-            return $FALSE;
+            return FALSE;
         }
         list(, $mIndent, $mNewLine, $mSpace, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
             //    [1] => indent
@@ -153,7 +152,7 @@ class TexyListModule extends TexyModule
             //    [7] => {style}
             //    [8] => >
 
-        $elItem = &new TexyListItemElement($texy);
+        $elItem = new TexyListItemElement($texy);
         $elItem->tag = 'li';
         $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
@@ -171,7 +170,7 @@ class TexyListModule extends TexyModule
         }
 
         // parse content
-        $mergeMode = & $texy->genericBlock[0]->mergeMode;
+        $mergeMode = & $texy->genericBlockModule->mergeMode;
         $tmp = $mergeMode;
         $mergeMode = FALSE;
 
@@ -179,8 +178,8 @@ class TexyListModule extends TexyModule
         $mergeMode = $tmp;
 
         // !!! children is protected
-        if (is_a($elItem->_children[0], 'TexyGenericBlockElement'))
-            $elItem->_children[0]->tag = '';
+        if ($elItem->getChild(0) instanceof TexyGenericBlockElement)
+            $elItem->getChild(0)->tag = '';
 
         return $elItem;
     }
@@ -211,7 +210,3 @@ class TexyListElement extends TexyBlockElement
 class TexyListItemElement extends TexyBlockElement
 {
 }
-
-
-
-?>

@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -28,14 +28,14 @@ if (!defined('TEXY')) die();
  */
 class TexyLongWordsModule extends TexyModule
 {
-    var $wordLimit = 20;
-    var $shy       = '&#173;'; // eq &shy;
-    var $nbsp      = '&#160;'; // eq &nbsp;
+    public $wordLimit = 20;
+    public $shy       = '&#173;'; // eq &shy;
+    public $nbsp      = '&#160;'; // eq &nbsp;
 
 
 
 
-    function linePostProcess(&$text)
+    public function linePostProcess(&$text)
     {
         if (!$this->allowed) return;
 
@@ -53,7 +53,7 @@ class TexyLongWordsModule extends TexyModule
 
         $text = preg_replace_callback(
                             $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#<UTF>'),
-                            array(&$this, '_replace'),
+                            array($this, '_replace'),
                             $text);
 
         // revert nbsp + shy back to user defined entities
@@ -69,7 +69,7 @@ class TexyLongWordsModule extends TexyModule
      * (c) David Grudl
      * @return string
      */
-    function _replace($matches)
+    private function _replace($matches)
     {
         list($mWord) = $matches;
         //    [0] => lllloooonnnnggggwwwoorrdddd
@@ -218,6 +218,3 @@ class TexyLongWordsModule extends TexyModule
 
 
 } // TexyLongWordsModule
-
-
-?>

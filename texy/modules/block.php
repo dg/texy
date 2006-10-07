@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -30,16 +30,13 @@ if (!defined('TEXY')) die();
  */
 class TexyBlockModule extends TexyModule
 {
-    var $allowed;
-
-    /**
-     * Callback that will be called with newly created element: function &myUserFunc(&$element, $type, $content)
-     * @var callback
-     */
-    var $handler;
+    public $allowed;
+    public $codeHandler;               // function &myUserFunc($element)
+    public $divHandler;                // function &myUserFunc($element, $nonParsedContent)
+    public $htmlHandler;               // function &myUserFunc($element, $isHtml)
 
 
-    function __construct(&$texy)
+    public function __construct($texy)
     {
         parent::__construct($texy);
 
@@ -56,7 +53,7 @@ class TexyBlockModule extends TexyModule
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         $this->texy->registerBlockPattern(
             $this,
@@ -77,7 +74,7 @@ class TexyBlockModule extends TexyModule
      *            \----
      *
      */
-    function processBlock(&$parser, $matches)
+    public function processBlock($parser, $matches)
     {
         list(, $mType, $mSecond, $mMod1, $mMod2, $mMod3, $mMod4, $mContent) = $matches;
         //    [1] => code
@@ -102,17 +99,17 @@ class TexyBlockModule extends TexyModule
         switch ($mType) {
         case 'none':
         case 'div':
-                $el = &new TexyBlockElement($this->texy);
+                $el = new TexyBlockElement($this->texy);
                 $el->tag = 'div';
                 $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                 // outdent
                 if ($spaces = strspn($mContent, ' '))
                     $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-                $el->parse($mContent);
+                if ($this->divHandler)
+                     if (call_user_func_array($this->divHandler, array($el, &$mContent)) === FALSE) return;
 
-                if ($this->handler)
-                    if (call_user_func_array($this->handler, array(&$el, $mType, $mContent)) === FALSE) return;
+                $el->parse($mContent);
 
                 $parser->element->appendChild($el);
 
@@ -120,16 +117,13 @@ class TexyBlockModule extends TexyModule
 
 
         case 'source':
-                $el = &new TexySourceBlockElement($this->texy);
+                $el = new TexySourceBlockElement($this->texy);
                 $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                 // outdent
                 if ($spaces = strspn($mContent, ' '))
                     $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
                 $el->parse($mContent);
-
-                if ($this->handler)
-                    if (call_user_func_array($this->handler, array(&$el, $mType, $mContent)) === FALSE) return;
 
                 $parser->element->appendChild($el);
                 break;
@@ -140,33 +134,42 @@ class TexyBlockModule extends TexyModule
 
 
         case 'html':
-                $el = &new TexyTextualElement($this->texy);
+                $el = new TexyTextualElement($this->texy);
 
+                // strasny hnusny hack !!!
                 $old = $this->texy->patternsLine;
+                $oldm = $this->texy->modules;
+                foreach ($this->texy->modules as $key => $module) {
+                        if ($module instanceof TexyLongWordsModule) unset($this->texy->modules[$key]);
+                        if ($module instanceof TexyQuickCorrectModule) unset($this->texy->modules[$key]);
+                }
                 $this->texy->patternsLine = array();
                 $this->texy->htmlModule->init();
-                $el->parse($mContent, FALSE);
-                $this->texy->patternsLine = $old;
 
-                if ($this->handler)
-                    if (call_user_func_array($this->handler, array(&$el, $mType, $mContent)) === FALSE) return;
+                $el->parse($mContent);
+
+                $this->texy->patternsLine = $old;
+                $this->texy->modules = $oldm;
+
+                if ($this->htmlHandler)
+                    if (call_user_func_array($this->htmlHandler, array($el, true)) === FALSE) return;
 
                 $parser->element->appendChild($el);
                 break;
 
 
         case 'text':
-                $el = &new TexyTextualElement($this->texy);
+                $el = new TexyTextualElement($this->texy);
                 $el->setContent(
                                (
                                     nl2br(
-                                        TexyHTML::htmlChars($mContent)
+                                        TexyHtml::htmlChars($mContent)
                                     )
                                ),
                                TRUE);
 
-                if ($this->handler)
-                    if (call_user_func_array($this->handler, array(&$el, $mType, $mContent)) === FALSE) return;
+                if ($this->htmlHandler)
+                    if (call_user_func_array($this->htmlHandler, array($el, false)) === FALSE) return;
 
                 $parser->element->appendChild($el);
                 break;
@@ -174,7 +177,7 @@ class TexyBlockModule extends TexyModule
 
 
         default: // pre | code | samp
-                $el = &new TexyCodeBlockElement($this->texy);
+                $el = new TexyCodeBlockElement($this->texy);
                 $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                 $el->type = $mType;
                 $el->lang = $mSecond;
@@ -185,8 +188,8 @@ class TexyBlockModule extends TexyModule
 
                 $el->setContent($mContent, FALSE); // not html-safe content
 
-                if ($this->handler)
-                    if (call_user_func_array($this->handler, array(&$el, $mType, $mContent)) === FALSE) return;
+                if ($this->codeHandler)
+                    if (call_user_func_array($this->codeHandler, array($el)) === FALSE) return;
 
                 $parser->element->appendChild($el);
 
@@ -215,12 +218,12 @@ class TexyBlockModule extends TexyModule
  */
 class TexyCodeBlockElement extends TexyTextualElement
 {
-    var $tag = 'pre';
-    var $lang;
-    var $type;
+    public $tag = 'pre';
+    public $lang;
+    public $type;
 
 
-    function generateTags(&$tags)
+    protected function generateTags(&$tags)
     {
         parent::generateTags($tags);
 
@@ -243,31 +246,24 @@ class TexyCodeBlockElement extends TexyTextualElement
 
 class TexySourceBlockElement extends TexyBlockElement
 {
-    var $tag  = 'pre';
+    public $tag  = 'pre';
 
 
-    function generateContent()
+    protected function generateContent()
     {
         $html = parent::generateContent();
         if ($this->texy->formatterModule)
             $this->texy->formatterModule->indent($html);
 
-        $el = &new TexyCodeBlockElement($this->texy);
+        $el = new TexyCodeBlockElement($this->texy);
         $el->lang = 'html';
         $el->type = 'code';
         $el->setContent($html, FALSE);
 
         if ($this->texy->blockModule->codeHandler)
-            call_user_func_array($this->texy->blockModule->codeHandler, array(&$el));
+            call_user_func_array($this->texy->blockModule->codeHandler, array($el));
 
         return $el->safeContent();
     }
 
 } // TexySourceBlockElement
-
-
-
-
-
-
-?>

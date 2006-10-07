@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,12 +29,12 @@ if (!defined('TEXY')) die();
 class TexyHorizLineModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         $this->texy->registerBlockPattern($this, 'processBlock', '#^(\- |\-|\* |\*){3,}\ *<MODIFIER_H>?()$#mU');
     }
@@ -53,7 +53,7 @@ class TexyHorizLineModule extends TexyModule
      *            * * * * * * * * * * * * * *
      *
      */
-    function processBlock(&$parser, $matches)
+    public function processBlock($parser, $matches)
     {
         list(, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
         //    [1] => ---
@@ -62,12 +62,12 @@ class TexyHorizLineModule extends TexyModule
         //    [4] => {style}
         //    [5] => >
 
-        $el = &new TexyBlockElement($this->texy);
+        $el = new TexyBlockElement($this->texy);
         $el->tag = 'hr';
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
 
         $parser->element->appendChild($el);
     }
@@ -76,7 +76,3 @@ class TexyHorizLineModule extends TexyModule
 
 
 } // TexyHorizlineModule
-
-
-
-?>

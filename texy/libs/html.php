@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -22,14 +22,16 @@
  */
 
 
-class TexyHTML
+class TexyHtml
 {
-/*
-    public static $block;
-    public static $inline;
-    public static $empty;
-    public static $meta;
-    public static $accepted_attrs;
+    const EMPTYTAG = '/';
+
+    static public $block;
+    static public $inline;
+    static public $empty;
+    static public $meta;
+    static public $accepted_attrs;
+    static public $valid;
 
 
 
@@ -41,7 +43,7 @@ class TexyHTML
      * @return string
      * @static
      */
-    function htmlChars($s, $inQuotes = false, $entity = false)
+    static public function htmlChars($s, $inQuotes = false, $entity = false)
     {
         $s = htmlSpecialChars($s, $inQuotes ? ENT_COMPAT : ENT_NOQUOTES);
 
@@ -58,7 +60,7 @@ class TexyHTML
      * @return string
      * @static
      */
-    function checkEntities($html)
+    static public function checkEntities($html)
     {
         static $entity=array('&AElig;'=>'&#198;','&Aacute;'=>'&#193;','&Acirc;'=>'&#194;','&Agrave;'=>'&#192;','&Alpha;'=>'&#913;','&Aring;'=>'&#197;','&Atilde;'=>'&#195;','&Auml;'=>'&#196;',
             '&Beta;'=>'&#914;','&Ccedil;'=>'&#199;','&Chi;'=>'&#935;','&Dagger;'=>'&#8225;','&Delta;'=>'&#916;','&ETH;'=>'&#208;','&Eacute;'=>'&#201;','&Ecirc;'=>'&#202;',
@@ -116,18 +118,18 @@ class TexyHTML
      * @return string
      * @static
      */
-    function openingTags($tags)
+    static public function openingTags($tags)
     {
         $result = '';
         foreach ((array)$tags as $tag => $attrs) {
 
             if ($tag == NULL) continue;
 
-            $empty = isset($GLOBALS['TexyHTML::$empty'][$tag]) || isset($attrs[TEXY_EMPTY]);
+            $empty = isset(self::$empty[$tag]) || isset($attrs[self::EMPTYTAG]);
 
             $attrStr = '';
             if (is_array($attrs)) {
-                unset($attrs[TEXY_EMPTY]);
+                unset($attrs[self::EMPTYTAG]);
 
                 foreach (array_change_key_case($attrs, CASE_LOWER) as $name => $value) {
                     if (is_array($value)) {
@@ -143,9 +145,9 @@ class TexyHTML
                     if ($value === NULL || $value === FALSE) continue;
                     $value = trim($value);
                     $attrStr .= ' '
-                              . TexyHTML::htmlChars($name)
+                              . self::htmlChars($name)
                               . '="'
-                              . Texy::freezeSpaces(TexyHTML::htmlChars($value, true, true))   // freezed spaces will be preserved during reformating
+                              . Texy::freezeSpaces(self::htmlChars($value, true, true))   // freezed spaces will be preserved during reformating
                               . '"';
                 }
             }
@@ -163,12 +165,12 @@ class TexyHTML
      * @return string
      * @static
      */
-    function closingTags($tags)
+    static public function closingTags($tags)
     {
         $result = '';
         foreach (array_reverse((array) $tags, TRUE) as $tag => $attrs) {
             if ($tag == '') continue;
-            if ( isset($GLOBALS['TexyHTML::$empty'][$tag]) || isset($attrs[TEXY_EMPTY]) ) continue;
+            if ( isset(self::$empty[$tag]) || isset($attrs[self::EMPTYTAG]) ) continue;
 
             $result .= '</'.$tag.'>';
         }
@@ -178,126 +180,38 @@ class TexyHTML
 
 
 
-
-/*
-    var $tagUsed;
-    var $dontNestElements  = array('a'          => array('a'),
-                                   'pre'        => array('img', 'object', 'big', 'small', 'sub', 'sup'),
-                                   'button'     => array('input', 'select', 'textarea', 'label', 'button', 'form', 'fieldset', 'iframe', 'isindex'),
-                                   'label'      => array('label'),
-                                   'form'       => array('form'),
-                                   );
-*/
-
-    // internal
-    var $tagStack;
-    var $autoCloseElements = array('tbody'      => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-                                   'colgroup'   => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-                                   'dd'         => array('dt'=>1, 'dd'=>1),
-                                   'dt'         => array('dt'=>1, 'dd'=>1),
-                                   'li'         => array('li'=>1),
-                                   'option'     => array('option'=>1),
-                                   'p'          => array('address'=>1, 'applet'=>1, 'blockquote'=>1, 'center'=>1, 'dir'=>1, 'div'=>1, 'dl'=>1, 'fieldset'=>1, 'form'=>1, 'h1'=>1, 'h2'=>1, 'h3'=>1, 'h4'=>1, 'h5'=>1, 'h6'=>1, 'hr'=>1, 'isindex'=>1, 'menu'=>1, 'object'=>1, 'ol'=>1, 'p'=>1, 'pre'=>1, 'table'=>1, 'ul'=>1),
-                                   'td'         => array('th'=>1, 'td'=>1, 'tr'=>1, 'thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-                                   'tfoot'      => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-                                   'th'         => array('th'=>1, 'td'=>1, 'tr'=>1, 'thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-                                   'thead'      => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-                                   'tr'         => array('tr'=>1, 'thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-                                   );
-
-
-
-
     /**
-     * Convert <strong><em> ... </strong> ... </em>
-     *    into <strong><em> ... </em></strong><em> ... </em>
+     * Undefined property usage prevention
      */
-    function wellForm($text)
-    {
-        $this->tagStack = array();
-//        $this->tagUsed  = array();
-        $text = preg_replace_callback('#<(/?)([a-z_:][a-z0-9._:-]*)(|\s.*)(/?)>()#Uis', array(&$this, '_replaceWellForm'), $text);
-        if ($this->tagStack) {
-            $pair = end($this->tagStack);
-            while ($pair !== FALSE) {
-                $text .= '</'.$pair['tag'].'>';
-                $pair = prev($this->tagStack);
-            }
-        }
-        return $text;
-    }
-
-
-
-    /**
-     * Callback function: <tag> | </tag>
-     * @return string
-     */
-    function _replaceWellForm($matches)
-    {
-        list(, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
-        //    [1] => /
-        //    [2] => TAG
-        //    [3] => ... (attributes)
-        //    [4] => /   (empty)
-
-        if (isset($GLOBALS['TexyHTML::$empty'][$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.' />';
-
-        if ($mClosing) {  // closing
-            $pair = end($this->tagStack);
-            $s = '';
-            $i = 1;
-            while ($pair !== FALSE) {
-                $s .= '</'.$pair['tag'].'>';
-                if ($pair['tag'] == $mTag) break;
-                $pair = prev($this->tagStack);
-                $i++;
-            }
-            if ($pair === FALSE) return '';
-
-            if (isset($GLOBALS['TexyHTML::$block'][$mTag])) {
-                array_splice($this->tagStack, -$i);
-                return $s;
-            }
-
-            // not work in PHP 4.4.1 due bug #35063
-            unset($this->tagStack[key($this->tagStack)]);
-            $pair = current($this->tagStack);
-            while ($pair !== FALSE) {
-                $s .= '<'.$pair['tag'].$pair['attr'].'>';
-                $pair = next($this->tagStack);
-            }
-            return $s;
-
-        } else {        // opening
-
-            $s = '';
-
-            $pair = end($this->tagStack);
-            while ($pair &&
-                    isset($this->autoCloseElements[$pair['tag']]) &&
-                    isset($this->autoCloseElements[$pair['tag']][$mTag]) ) {
-
-                $s .= '</'.$pair['tag'].'>';
-                unset($this->tagStack[key($this->tagStack)]);
-
-                $pair = end($this->tagStack);
-            }
-
-            $pair = array(
-                'attr' => $mAttr,
-                'tag' => $mTag,
-            );
-            $this->tagStack[] = $pair;
-
-
-            $s .= '<'.$mTag.$mAttr.'>';
-            return $s;
-        }
-    }
-
-
+    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    private function __isset($nm) { return FALSE; }
 }
 
 
-?>
+
+// HTML ELEMENT CLASIFICATION
+// notice: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
+
+TexyHtml::$block = array_flip(array(
+    'address','blockquote','caption','col','colgroup','dd','div','dl','dt','fieldset','form','h1','h2','h3','h4','h5','h6','hr','iframe','legend','li','object','ol','p','param','pre','table','tbody','td','tfoot','th','thead','tr','ul',/*'embed',*/
+));
+
+TexyHtml::$inline = array_flip(array(
+    'a','abbr','acronym','area','b','big','br','button','cite','code','del','dfn','em','i','img','input','ins','kbd','label','map','noscript','optgroup','option','q','samp','script','select','small','span','strong','sub','sup','textarea','tt','var',
+));
+
+TexyHtml::$empty = array_flip(array(
+    'img','hr','br','input','meta','area','base','col','link','param',
+));
+/*
+TexyHtml::$meta = array_flip(array(
+    'html','head','body','base','meta','link','title',
+));
+*/
+TexyHtml::$valid = array_merge(TexyHtml::$block, TexyHtml::$inline);
+
+TexyHtml::$accepted_attrs = array_flip(array(
+    'abbr','accesskey','align','alt','archive','axis','bgcolor','cellpadding','cellspacing','char','charoff','charset','cite','classid','codebase','codetype','colspan','compact','coords','data','datetime','declare','dir','face','frame','headers','href','hreflang','hspace','ismap','lang','longdesc','name','noshade','nowrap','onblur','onclick','ondblclick','onkeydown','onkeypress','onkeyup','onmousedown','onmousemove','onmouseout','onmouseover','onmouseup','rel','rev','rowspan','rules','scope','shape','size','span','src','standby','start','summary','tabindex','target','title','type','usemap','valign','value','vspace',
+));

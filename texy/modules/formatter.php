@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -24,27 +24,27 @@ if (!defined('TEXY')) die();
 
 class TexyFormatterModule extends TexyModule
 {
-    var $baseIndent  = 0;               // indent for top elements
-    var $lineWrap    = 80;              // line width, doesn't include indent space
-    var $indent      = TRUE;
-    var $_indent;
+    public $baseIndent  = 0;               // indent for top elements
+    public $lineWrap    = 80;              // line width, doesn't include indent space
+    public $indent      = TRUE;
 
-    var $hashTable = array();
-
-
+    private $space;
+    private $hashTable = array();
 
 
 
-    function postProcess(&$text)
+
+
+    public function postProcess(&$text)
     {
         if (!$this->allowed) return;
 
-        $this->_indent = $this->baseIndent;
+        $this->space = $this->baseIndent;
 
         // freeze all pre, textarea, script and style elements
         $text = preg_replace_callback(
                        '#<(pre|textarea|script|style)(.*)</\\1>#Uis',
-                       array(&$this, '_freeze'),
+                       array($this, '_freeze'),
                        $text
         );
 
@@ -56,8 +56,8 @@ class TexyFormatterModule extends TexyModule
 
         // indent all block elements + br
         $text = preg_replace_callback(
-                       '# *<(/?)(' . implode(array_keys($GLOBALS['TexyHTML::$block']), '|') . '|br)(>| [^>]*>) *#i',
-                       array(&$this, '_replaceReformat'),
+                       '# *<(/?)(' . implode(array_keys(TexyHtml::$block), '|') . '|br)(>| [^>]*>) *#i',
+                       array($this, 'indent'),
                        $text
         );
 
@@ -74,7 +74,7 @@ class TexyFormatterModule extends TexyModule
         if ($this->lineWrap > 0)
             $text = preg_replace_callback(
                              '#^(\t*)(.*)$#m',
-                             array(&$this, '_replaceWrapLines'),
+                             array($this, 'wrap'),
                              $text
             );
 
@@ -88,7 +88,7 @@ class TexyFormatterModule extends TexyModule
 
     // create new unique key for string $matches[0]
     // and saves pair (key => str) into table $this->hashTable
-    function _freeze($matches)
+    private function _freeze($matches)
     {
         static $counter = 0;
         $key = '<'.$matches[1].'>'
@@ -105,7 +105,7 @@ class TexyFormatterModule extends TexyModule
      * Callback function: Insert \n + spaces into HTML code
      * @return string
      */
-    function _replaceReformat($matches)
+    private function indent($matches)
     {
         list($match, $mClosing, $mTag) = $matches;
         //    [1] => /  (opening or closing element)
@@ -116,25 +116,25 @@ class TexyFormatterModule extends TexyModule
 
         if ($mTag === 'br')  // exception
             return "\n"
-                   . str_repeat("\t", max(0, $this->_indent - 1))
+                   . str_repeat("\t", max(0, $this->space - 1))
                    . $match;
 
-        if (isset($GLOBALS['TexyHTML::$empty'][$mTag]))
+        if (isset(TexyHtml::$empty[$mTag]))
             return "\r"
-                   . str_repeat("\t", $this->_indent)
+                   . str_repeat("\t", $this->space)
                    . $match
                    . "\r"
-                   . str_repeat("\t", $this->_indent);
+                   . str_repeat("\t", $this->space);
 
         if ($mClosing === '/') {
             return "\x08"   // backspace
                    . $match
                    . "\n"
-                   . str_repeat("\t", --$this->_indent);
+                   . str_repeat("\t", --$this->space);
         }
 
         return "\n"
-               . str_repeat("\t", $this->_indent++)
+               . str_repeat("\t", $this->space++)
                . $match;
     }
 
@@ -145,7 +145,7 @@ class TexyFormatterModule extends TexyModule
      * Callback function: wrap lines
      * @return string
      */
-    function _replaceWrapLines($matches)
+    private function wrap($matches)
     {
         list(, $mSpace, $mContent) = $matches;
         return $mSpace
@@ -159,8 +159,3 @@ class TexyFormatterModule extends TexyModule
 
 
 } // TexyFormatterModule
-
-
-
-
-?>

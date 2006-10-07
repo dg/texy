@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -27,16 +27,16 @@ if (!defined('TEXY')) die();
 class TexyImageDescModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
-    var $boxClass   = 'image';        // non-floated box class
-    var $leftClass  = 'image left';   // left-floated box class
-    var $rightClass = 'image right';  // right-floated box class
+    public $boxClass   = 'image';        // non-floated box class
+    public $leftClass  = 'image left';   // left-floated box class
+    public $rightClass = 'image right';  // right-floated box class
 
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         if ($this->texy->imageModule->allowed)
             $this->texy->registerBlockPattern(
@@ -54,7 +54,7 @@ class TexyImageDescModule extends TexyModule
      *            [*image*]:link *** .... .(title)[class]{style}>
      *
      */
-    function processBlock(&$parser, $matches)
+    public function processBlock($parser, $matches)
     {
         list(, $mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4, $mLink, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
         //    [1] => URLs
@@ -69,10 +69,10 @@ class TexyImageDescModule extends TexyModule
         //    [10] => {style}
         //    [11] => >
 
-        $el = &new TexyImageDescElement($this->texy);
+        $el = new TexyImageDescElement($this->texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
-        $elImage = &new TexyImageElement($this->texy);
+        $elImage = new TexyImageElement($this->texy);
         $elImage->setImagesRaw($mURLs);
         $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
@@ -82,7 +82,7 @@ class TexyImageDescModule extends TexyModule
         $content = $el->appendChild($elImage);
 
         if ($mLink) {
-            $elLink = &new TexyLinkElement($this->texy);
+            $elLink = new TexyLinkElement($this->texy);
             if ($mLink == ':') {
                 $elImage->requireLinkImage();
                 $elLink->link->copyFrom($elImage->linkImage);
@@ -93,13 +93,13 @@ class TexyImageDescModule extends TexyModule
             $content = $el->appendChild($elLink, $content);
         }
 
-        $elDesc = &new TexyGenericBlockElement($this->texy);
+        $elDesc = new TexyGenericBlockElement($this->texy);
         $elDesc->parse(ltrim($mContent));
         $content .= $el->appendChild($elDesc);
         $el->setContent($content, TRUE);
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
 
         $parser->element->appendChild($el);
     }
@@ -130,17 +130,17 @@ class TexyImageDescElement extends TexyTextualElement
 
 
 
-    function generateTags(&$tags)
+    protected function generateTags(&$tags)
     {
         $attrs = $this->modifier->getAttrs('div');
         $attrs['class'] = $this->modifier->classes;
         $attrs['style'] = $this->modifier->styles;
         $attrs['id'] = $this->modifier->id;
 
-        if ($this->modifier->hAlign == TEXY_HALIGN_LEFT) {
+        if ($this->modifier->hAlign == TexyModifier::HALIGN_LEFT) {
             $attrs['class'][] = $this->texy->imageDescModule->leftClass;
 
-        } elseif ($this->modifier->hAlign == TEXY_HALIGN_RIGHT)  {
+        } elseif ($this->modifier->hAlign == TexyModifier::HALIGN_RIGHT)  {
             $attrs['class'][] = $this->texy->imageDescModule->rightClass;
 
         } elseif ($this->texy->imageDescModule->boxClass)
@@ -152,6 +152,3 @@ class TexyImageDescElement extends TexyTextualElement
 
 
 }  // TexyImageDescElement
-
-
-?>

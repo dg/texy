@@ -9,17 +9,17 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  */
 
 
 require_once dirname(__FILE__).'/mytexy.php';
 
 
-$texy = &new MyTexy();
+$texy = new MyTexy();
 
 // processing
 $text = file_get_contents('sample.texy');

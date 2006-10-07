@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -38,41 +38,36 @@ if (!defined('TEXY')) die();
  */
 class TexyModifier
 {
-    var $texy; // parent Texy! object
-    var $id;
-    var $classes = array();
-    var $unfilteredClasses = array();
-    var $styles = array();
-    var $unfilteredStyles = array();
-    var $unfilteredAttrs = array();
-    var $hAlign;
-    var $vAlign;
-    var $title;
+    const HALIGN_LEFT =      'left';
+    const HALIGN_RIGHT =     'right';
+    const HALIGN_CENTER =    'center';
+    const HALIGN_JUSTIFY =   'justify';
+    const VALIGN_TOP =       'top';
+    const VALIGN_MIDDLE =    'middle';
+    const VALIGN_BOTTOM =    'bottom';
+
+    protected $texy; // parent Texy! object
+    public $id;
+    public $classes = array();
+    public $unfilteredClasses = array();
+    public $styles = array();
+    public $unfilteredStyles = array();
+    public $unfilteredAttrs = array();
+    public $hAlign;
+    public $vAlign;
+    public $title;
 
 
 
-    function __construct(&$texy)
+    public function __construct($texy)
     {
-        $this->texy = & $texy;
-    }
-
-
-    /**
-     * PHP4-only constructor
-     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
-     */
-    function TexyModifier(&$texy)
-    {
-        // generate references
-        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call PHP5 constructor
-        call_user_func_array(array(&$this, '__construct'), array(&$texy));
+        $this->texy =  $texy;
     }
 
 
 
-    function setProperties()
+
+    public function setProperties()
     {
         $classes = '';
         $styles  = '';
@@ -84,12 +79,12 @@ class TexyModifier
                 case '{':  $styles .= $argX . ';';  break;
                 case '(':  $this->title = $argX; break;
                 case '[':  $classes .= ' '.$argX; break;
-                case '^':  $this->vAlign = TEXY_VALIGN_TOP; break;
-                case '-':  $this->vAlign = TEXY_VALIGN_MIDDLE; break;
-                case '_':  $this->vAlign = TEXY_VALIGN_BOTTOM; break;
-                case '=':  $this->hAlign = TEXY_HALIGN_JUSTIFY; break;
-                case '>':  $this->hAlign = TEXY_HALIGN_RIGHT; break;
-                case '<':  $this->hAlign = $arg == '<>' ? TEXY_HALIGN_CENTER : TEXY_HALIGN_LEFT; break;
+                case '^':  $this->vAlign = self::VALIGN_TOP; break;
+                case '-':  $this->vAlign = self::VALIGN_MIDDLE; break;
+                case '_':  $this->vAlign = self::VALIGN_BOTTOM; break;
+                case '=':  $this->hAlign = self::HALIGN_JUSTIFY; break;
+                case '>':  $this->hAlign = self::HALIGN_RIGHT; break;
+                case '<':  $this->hAlign = $arg == '<>' ? self::HALIGN_CENTER : self::HALIGN_LEFT; break;
             }
         }
 
@@ -103,15 +98,15 @@ class TexyModifier
     }
 
 
-    function getAttrs($tag)
+    public function getAttrs($tag)
     {
-        if ($this->texy->allowedTags === TEXY_ALL)
+        if ($this->texy->allowedTags === Texy::ALL)
             return $this->unfilteredAttrs;
 
         if (is_array($this->texy->allowedTags) && isset($this->texy->allowedTags[$tag])) {
             $allowedAttrs = $this->texy->allowedTags[$tag];
 
-            if ($allowedAttrs === TEXY_ALL)
+            if ($allowedAttrs === Texy::ALL)
                 return $this->unfilteredAttrs;
 
             if (is_array($allowedAttrs) && count($allowedAttrs)) {
@@ -128,7 +123,7 @@ class TexyModifier
     }
 
 
-    function clear()
+    public function clear()
     {
         $this->id = NULL;
         $this->classes = array();
@@ -142,7 +137,7 @@ class TexyModifier
     }
 
 
-    function copyFrom(&$modifier)
+    public function copyFrom($modifier)
     {
         $this->classes = $modifier->classes;
         $this->unfilteredClasses = $modifier->unfilteredClasses;
@@ -159,7 +154,7 @@ class TexyModifier
 
 
 
-    function parseClasses($str)
+    public function parseClasses($str)
     {
         if ($str == NULL) return;
 
@@ -170,12 +165,12 @@ class TexyModifier
 
             if ($value{0} == '#') {
                 $this->unfilteredClasses['id'] = substr($value, 1);
-                if ($this->texy->allowedClasses === TEXY_ALL || isset($tmp[$value]))
+                if ($this->texy->allowedClasses === Texy::ALL || isset($tmp[$value]))
                     $this->classes['id'] = substr($value, 1);
 
             } else {
                 $this->unfilteredClasses[] = $value;
-                if ($this->texy->allowedClasses === TEXY_ALL || isset($tmp[$value]))
+                if ($this->texy->allowedClasses === Texy::ALL || isset($tmp[$value]))
                     $this->classes[] = $value;
             }
         }
@@ -185,7 +180,7 @@ class TexyModifier
 
 
 
-    function parseStyles($str)
+    public function parseStyles($str)
     {
         if ($str == NULL) return;
 
@@ -197,23 +192,24 @@ class TexyModifier
             $value = trim($pair[1]);
             if ($property == '') continue;
 
-            if (isset($GLOBALS['TexyHTML::$accepted_attrs'][$property])) { // attribute
+            if (isset(TexyHtml::$accepted_attrs[$property])) { // attribute
                 $this->unfilteredAttrs[$property] = $value;
 
             } else { // style
                 $this->unfilteredStyles[$property] = $value;
-                if ($this->texy->allowedStyles === TEXY_ALL || isset($tmp[$property]))
+                if ($this->texy->allowedStyles === Texy::ALL || isset($tmp[$property]))
                     $this->styles[$property] = $value;
             }
         }
     }
 
 
+    /**
+     * Undefined property usage prevention
+     */
+    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    private function __isset($nm) { return FALSE; }
+
 } // TexyModifier
-
-
-
-
-
-
-?>

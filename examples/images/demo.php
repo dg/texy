@@ -11,10 +11,10 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  */
 
 
@@ -28,13 +28,13 @@ require_once ($texyPath . 'texy.php');
 // this is user callback function for processing 'image references' [*xxxx*]
 // returns FALSE or TexyImageReference
 
-function &myUserFunc($refName, &$texy) {
+function myUserFunc($refName, $texy) {
     if ($refName != '*user*') { // accept only [* user *]
         $FALSE = FALSE; // php4_sucks
         return $FALSE;
     }
 
-    $elRef = &new TexyImageReference($texy);
+    $elRef = new TexyImageReference($texy);
     $elRef->URLs = 'image.gif | '        // image URL
                  . 'image-over.gif | '   // onmouseover image
                  . 'big.gif';          // linked image
@@ -44,7 +44,7 @@ function &myUserFunc($refName, &$texy) {
 
 
 
-$texy = &new Texy();
+$texy = new Texy();
 $texy->referenceHandler        = 'myUserFunc';       // callback
 $texy->imageModule->root       = 'imagesdir/';       // "in-line" images root
 $texy->imageModule->linkedRoot = 'imagesdir/big/';   // "linked" images root
@@ -75,9 +75,9 @@ echo '</pre>';
 echo '<hr />';
 echo '<pre>';
 echo 'used images:';
-print_r($texy->summary->images);
+print_r($texy->summary['images']);
 echo 'onmouseover images:';
-print_r($texy->summary->preload);
+print_r($texy->summary['preload']);
 echo '</pre>';
 
 
@@ -85,7 +85,7 @@ echo '</pre>';
 
 // build preload script!
 $script = "var preloadImg = new Array();\n";
-foreach ($texy->summary->preload as $key => $image)
+foreach ($texy->summary['preload'] as $key => $image)
     $script .= "preloadImg[$key] = new Image(); preloadImg[$key].src='".htmlSpecialChars($image, ENT_QUOTES)."';\n";
 
 echo '<pre>';

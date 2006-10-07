@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,13 +29,13 @@ if (!defined('TEXY')) die();
 class TexyScriptModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;             // function &myUserFunc(&$element, string $identifier, array/NULL $args)
+    public $handler;             // function myUserFunc($element, string $identifier, array/NULL $args)
 
 
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         $this->texy->registerLinePattern($this, 'processLine', '#\{\{([^:HASH:]+)\}\}()#U');
     }
@@ -46,7 +46,7 @@ class TexyScriptModule extends TexyModule
      * Callback function: {{...}}
      * @return string
      */
-    function processLine(&$parser, $matches, $tag)
+    public function processLine($parser, $matches, $tag)
     {
         list(, $mContent) = $matches;
         //    [1] => ...
@@ -63,7 +63,7 @@ class TexyScriptModule extends TexyModule
             );
         }
 
-        $el = &new TexyScriptElement($this->texy);
+        $el = new TexyScriptElement($this->texy);
 
         do {
             if ($this->handler === NULL) break;
@@ -75,10 +75,10 @@ class TexyScriptModule extends TexyModule
                     break;
                 }
 
-                if (is_array($args) && is_callable( array(&$this->handler, $identifier) ))  {
+                if (is_array($args) && is_callable( array($this->handler, $identifier) ))  {
                     array_unshift($args, NULL);
-                    $args[0] = &$el;
-                    call_user_func_array( array(&$this->handler, $identifier), $args);
+                    $args[0] = $el;
+                    call_user_func_array( array($this->handler, $identifier), $args);
                     break;
                 }
 
@@ -86,7 +86,7 @@ class TexyScriptModule extends TexyModule
             }
 
             if (is_callable( $this->handler) )
-                call_user_func_array($this->handler, array(&$el, $identifier, $args));
+                call_user_func_array($this->handler, array($el, $identifier, $args));
 
         } while(0);
 
@@ -95,12 +95,12 @@ class TexyScriptModule extends TexyModule
 
 
 
-    function defaultHandler(&$element, $identifier, $args)
+    public function defaultHandler($element, $identifier, $args)
     {
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->setContent('<texy:script content="'.TexyHTML::htmlChars($identifier, true).'" />', TRUE);
+        $element->setContent('<texy:script content="'.TexyHtml::htmlChars($identifier, true).'" />', TRUE);
     }
 
 
@@ -114,7 +114,3 @@ class TexyScriptModule extends TexyModule
 class TexyScriptElement extends TexyTextualElement
 {
 }
-
-
-
-?>

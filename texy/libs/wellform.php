@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -24,7 +24,6 @@
 class TexyWellForm
 {
 /*
-    var $tagUsed;
     var $dontNestElements  = array(
         'a'          => array('a'),
         'pre'        => array('img', 'object', 'big', 'small', 'sub', 'sup'),
@@ -35,8 +34,9 @@ class TexyWellForm
 */
 
     // internal
-    var $tagStack;
-    var $autoClose = array(
+    private $tagUsed;
+    private $tagStack;
+    private $autoClose = array(
         'tbody'      => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
         'colgroup'   => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
         'dd'         => array('dt'=>1, 'dd'=>1),
@@ -58,11 +58,11 @@ class TexyWellForm
      * Convert <strong><em> ... </strong> ... </em>
      *    into <strong><em> ... </em></strong><em> ... </em>
      */
-    function process($text)
+    public function process($text)
     {
         $this->tagStack = array();
-//        $this->tagUsed  = array();
-        $text = preg_replace_callback('#<(/?)([a-z_:][a-z0-9._:-]*)(|\s.*)(/?)>()#Uis', array(&$this, '_replaceWellForm'), $text);
+        $this->tagUsed  = array();
+        $text = preg_replace_callback('#<(/?)([a-z_:][a-z0-9._:-]*)(|\s.*)(/?)>()#Uis', array($this, 'cb'), $text);
         if ($this->tagStack) {
             $pair = end($this->tagStack);
             while ($pair !== FALSE) {
@@ -79,7 +79,7 @@ class TexyWellForm
      * Callback function: <tag> | </tag>
      * @return string
      */
-    function _replaceWellForm($matches)
+    private function cb($matches)
     {
         list(, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
@@ -87,7 +87,7 @@ class TexyWellForm
         //    [3] => ... (attributes)
         //    [4] => /   (empty)
 
-        if (isset($GLOBALS['TexyHTML::$empty'][$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.' />';
+        if (isset(TexyHtml::$empty[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.'/>';
 
         if ($mClosing) {  // closing
             $pair = end($this->tagStack);
@@ -96,12 +96,13 @@ class TexyWellForm
             while ($pair !== FALSE) {
                 $s .= '</'.$pair['tag'].'>';
                 if ($pair['tag'] == $mTag) break;
+                $this->tagUsed[$pair['tag']]--;
                 $pair = prev($this->tagStack);
                 $i++;
             }
             if ($pair === FALSE) return '';
 
-            if (isset($GLOBALS['TexyHTML::$block'][$mTag])) {
+            if (isset(TexyHtml::$block[$mTag])) {
                 array_splice($this->tagStack, -$i);
                 return $s;
             }
@@ -111,6 +112,7 @@ class TexyWellForm
             $pair = current($this->tagStack);
             while ($pair !== FALSE) {
                 $s .= '<'.$pair['tag'].$pair['attr'].'>';
+                @$this->tagUsed[$pair['tag']]++;
                 $pair = next($this->tagStack);
             }
             return $s;
@@ -125,6 +127,7 @@ class TexyWellForm
                     isset($this->autoClose[$pair['tag']][$mTag]) ) {
 
                 $s .= '</'.$pair['tag'].'>';
+                $this->tagUsed[$pair['tag']]--;
                 unset($this->tagStack[key($this->tagStack)]);
 
                 $pair = end($this->tagStack);
@@ -135,6 +138,7 @@ class TexyWellForm
                 'tag' => $mTag,
             );
             $this->tagStack[] = $pair;
+            @$this->tagUsed[$pair['tag']]++;
 
 
             $s .= '<'.$mTag.$mAttr.'>';
@@ -143,7 +147,11 @@ class TexyWellForm
     }
 
 
+    /**
+     * Undefined property usage prevention
+     */
+    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    private function __isset($nm) { return FALSE; }
 }
-
-
-?>

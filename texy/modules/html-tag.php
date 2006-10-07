@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,12 +29,12 @@ if (!defined('TEXY')) die();
 class TexyHtmlModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
-    var $allowed;          // allowed tags (TRUE -> all, or array, or FALSE -> none)
+    public $allowed;          // allowed tags (TRUE -> all, or array, or FALSE -> none)
                                                  // arrays of safe tags and attributes
-    var $allowedComments = TRUE;
-    var $safeTags = array(
+    public $allowedComments = TRUE;
+    public $safeTags = array(
         'a'         => array('href', 'rel', 'title', 'lang'),
         'abbr'      => array('title', 'lang'),
         'acronym'   => array('title', 'lang'),
@@ -60,7 +60,7 @@ class TexyHtmlModule extends TexyModule
 
 
 
-    function __construct(&$texy)
+    public function __construct($texy)
     {
         parent::__construct($texy);
 
@@ -74,7 +74,7 @@ class TexyHtmlModule extends TexyModule
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         $this->texy->registerLinePattern($this, 'processTag',     '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^":HASH:]*"|=\s*\'[^\':HASH:]*\'|=[^>:HASH:]*)*)(/?)>#is');
         $this->texy->registerLinePattern($this, 'processComment', '#<!--([^:HASH:]*)-->#Uis');
@@ -87,7 +87,7 @@ class TexyHtmlModule extends TexyModule
      * Callback function: <tag ...>
      * @return string
      */
-    function processTag(&$parser, $matches)
+    public function processTag($parser, $matches)
     {
         list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
@@ -99,9 +99,9 @@ class TexyHtmlModule extends TexyModule
         if (!$allowedTags) return $match;   // disabled
 
         $tag = strtolower($mTag);
-        if (!isset($GLOBALS['TexyHTML::$valid'][$tag])) $tag = $mTag;  // undo lowercase
+        if (!isset(TexyHtml::$valid[$tag])) $tag = $mTag;  // undo lowercase
 
-        $empty = ($mEmpty == '/') || isset($GLOBALS['TexyHTML::$empty'][$tag]);
+        $empty = ($mEmpty == '/') || isset(TexyHtml::$empty[$tag]);
         $isOpening = $mClosing != '/';
 
         if ($empty && !$isOpening)  // error - can't close empty element
@@ -111,8 +111,8 @@ class TexyHtmlModule extends TexyModule
             return $match;
 
 
-        $el = &new TexyHtmlTagElement($this->texy);
-        $el->contentType = isset($GLOBALS['TexyHTML::$inline'][$tag]) ? TEXY_CONTENT_NONE : TEXY_CONTENT_BLOCK;
+        $el = new TexyHtmlTagElement($this->texy);
+        $el->contentType = isset(TexyHtml::$inline[$tag]) ? TexyDomElement::CONTENT_NONE : TexyDomElement::CONTENT_BLOCK;
 
         if ($isOpening) {  // process attributes
             $attrs = array();
@@ -129,7 +129,7 @@ class TexyHtmlModule extends TexyModule
 
 
             // apply allowedClasses & allowedStyles
-            $modifier = &new TexyModifier($this->texy);
+            $modifier = new TexyModifier($this->texy);
 
             if (isset($attrs['class'])) {
                 $modifier->parseClasses($attrs['class']);
@@ -151,28 +151,18 @@ class TexyHtmlModule extends TexyModule
 
             switch ($tag) {
              case 'img':
-                    if (!isset($attrs['src'])) return $match;
-                $this->texy->summary->images[] = $attrs['src'];
-                    break;
-                /*
-                $link = &new TexyURL($this->texy);
-                $link->set($attrs['src']);
-                $this->texy->summary->images[] = $attrs['src'] = $link->asURL();
-                */
+                if (!isset($attrs['src'])) return $match;
+                $this->texy->summary['images'][] = $attrs['src'];
+                break;
 
              case 'a':
-                    if (!isset($attrs['href']) && !isset($attrs['name']) && !isset($attrs['id'])) return $match;
-                    if (isset($attrs['href'])) {
-                    $this->texy->summary->links[] = $attrs['href'];
-                    /*
-                    $link = new TexyURL($this->texy);
-                        $link->set($attrs['href']);
-                    $this->texy->summary->links[] = $attrs['href'] = $link->asURL();
-                    */
-                    }
+                if (!isset($attrs['href']) && !isset($attrs['name']) && !isset($attrs['id'])) return $match;
+                if (isset($attrs['href'])) {
+                $this->texy->summary['links'][] = $attrs['href'];
+                }
             }
 
-            if ($empty) $attrs[TEXY_EMPTY] = TRUE;
+            if ($empty) $attrs[TexyHtml::EMPTYTAG] = TRUE;
             $el->tags[$tag] = $attrs;
             $el->isOpening  = TRUE;
 
@@ -182,7 +172,7 @@ class TexyHtmlModule extends TexyModule
         }
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return '';
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
         return $parser->element->appendChild($el);
     }
@@ -192,7 +182,7 @@ class TexyHtmlModule extends TexyModule
      * Callback function: <!-- ... -->
      * @return string
      */
-    function processComment(&$parser, $matches)
+    public function processComment($parser, $matches)
     {
         list($match, $mContent) = $matches;
         if ($this->allowedComments) return ' ';
@@ -206,7 +196,7 @@ class TexyHtmlModule extends TexyModule
      * @return string
      */
 /*
-    function processEntity($parser, $matches)
+    public function processEntity($parser, $matches)
     {
         list($mEntity) = $matches;
         return html_entity_decode($mEntity, ENT_QUOTES, 'UTF-8');
@@ -214,16 +204,16 @@ class TexyHtmlModule extends TexyModule
 */
 
 
-    function trustMode($onlyValidTags = TRUE)
+    public function trustMode($onlyValidTags = TRUE)
     {
-        $this->texy->allowedTags = $onlyValidTags ? $GLOBALS['TexyHTML::$valid'] : TEXY_ALL;
+        $this->texy->allowedTags = $onlyValidTags ? TexyHtml::$valid : Texy::ALL;
     }
 
 
 
-    function safeMode($allowSafeTags = TRUE)
+    public function safeMode($allowSafeTags = TRUE)
     {
-        $this->texy->allowedTags = $allowSafeTags ? $this->safeTags : TEXY_NONE;
+        $this->texy->allowedTags = $allowSafeTags ? $this->safeTags : Texy::NONE;
     }
 
 
@@ -240,31 +230,23 @@ class TexyHtmlModule extends TexyModule
 
 
 
-class TexyHtmlTagElement extends TexyDOMElement
+class TexyHtmlTagElement extends TexyDomElement
 {
-    var $tags;
-    var $isOpening;
+    public $tags;
+    public $isOpening;
 
 
 
     // convert element to HTML string
-    function toHTML()
+    public function toHtml()
     {
         if ($this->isOpening)
-            return TexyHTML::openingTags($this->tags);
+            return TexyHtml::openingTags($this->tags);
         else
-            return TexyHTML::closingTags($this->tags);
+            return TexyHtml::closingTags($this->tags);
     }
 
 
 
 
 }  // TexyHtmlTagElement
-
-
-
-
-
-
-
-?>

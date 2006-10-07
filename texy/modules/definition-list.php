@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -27,16 +27,16 @@ if (!defined('TEXY')) die();
 class TexyDefinitionListModule extends TexyListModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
-    var $allowed = array(
+    public $allowed = array(
         '*'            => TRUE,
         '-'            => TRUE,
         '+'            => TRUE,
     );
 
     // private
-    var $translate = array(    //  rexexp  class
+    public $translate = array(    //  rexexp  class
         '*'            => array('\*',   ''),
         '-'            => array('\-',   ''),
         '+'            => array('\+',   ''),
@@ -47,7 +47,7 @@ class TexyDefinitionListModule extends TexyListModule
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
         $bullets = array();
         foreach ($this->allowed as $bullet => $allowed)
@@ -73,7 +73,7 @@ class TexyDefinitionListModule extends TexyListModule
      *              - description 3
      *
      */
-    function processBlock(&$parser, $matches)
+    public function processBlock($parser, $matches)
     {
         list(, $mMod1, $mMod2, $mMod3, $mMod4,
                                  $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
@@ -92,8 +92,8 @@ class TexyDefinitionListModule extends TexyListModule
         //   [10] => space
         //   [11] => - * +
 
-        $texy = & $this->texy;
-        $el = &new TexyListElement($texy);
+        $texy =  $this->texy;
+        $el = new TexyListElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->tag = 'dl';
 
@@ -111,7 +111,7 @@ class TexyDefinitionListModule extends TexyListModule
         $bullet = preg_quote($mBullet);
 
         while (TRUE) {
-            if ($elItem = &$this->processItem($parser, preg_quote($mBullet), TRUE)) {
+            if ($elItem = $this->processItem($parser, preg_quote($mBullet), TRUE)) {
                 $elItem->tag = 'dd';
                 $el->appendChild($elItem);
                 continue;
@@ -124,7 +124,7 @@ class TexyDefinitionListModule extends TexyListModule
                 //    [3] => [class]
                 //    [4] => {style}
                 //    [5] => >
-                $elItem = &new TexyTextualElement($texy);
+                $elItem = new TexyTextualElement($texy);
                 $elItem->tag = 'dt';
                 $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                 $elItem->parse($mContent);
@@ -136,18 +136,9 @@ class TexyDefinitionListModule extends TexyListModule
         }
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return;
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
 
         $parser->element->appendChild($el);
     }
 
 } // TexyDefinitionListModule
-
-
-
-
-
-
-
-
-?>

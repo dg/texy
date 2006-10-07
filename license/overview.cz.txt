@@ -2,7 +2,7 @@ Jakou má Texy! licenèní politiku?
 =================================
 
 Texy! používá model "duální licence". Uživatelé se mohou rozhodnout, za budou
-produkt užívat v souladu se svobodnou GNU General Public License (GPL) nebo
+produkt užívat v souladu se svobodnou GNU General Public License v2 (GPL) nebo
 komerèní licencí.
 
 

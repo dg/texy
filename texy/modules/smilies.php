@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,10 +29,10 @@ if (!defined('TEXY')) die();
 class TexySmiliesModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    var $handler;
+    public $handler;
 
-    var $allowed   = FALSE;
-    var $icons     = array (
+    public $allowed   = FALSE;
+    public $icons     = array (
         ':-)'  =>  'smile.gif',
         ':-('  =>  'sad.gif',
         ';-)'  =>  'wink.gif',
@@ -44,18 +44,16 @@ class TexySmiliesModule extends TexyModule
         ':-P'  =>  'razz.gif',
         ':-|'  =>  'neutral.gif',
     );
-    var $root      = 'images/smilies/';
-    var $class     = '';
+    public $root      = 'images/smilies/';
+    public $class     = '';
 
 
 
     /**
      * Module initialization.
      */
-    function init()
+    public function init()
     {
-        Texy::adjustDir($this->root);
-
         if ($this->allowed) {
             krsort($this->icons);
             $pattern = array();
@@ -77,7 +75,7 @@ class TexySmiliesModule extends TexyModule
      * Callback function: :-)
      * @return string
      */
-    function processLine(&$parser, $matches)
+    public function processLine($parser, $matches)
     {
         $match = $matches[0];
         //    [1] => **
@@ -87,8 +85,8 @@ class TexySmiliesModule extends TexyModule
         //    [5] => {style}
         //    [6] => LINK
 
-        $texy = & $this->texy;
-        $el = &new TexyImageElement($texy);
+        $texy =  $this->texy;
+        $el = new TexyImageElement($texy);
         $el->modifier->title = $match;
         $el->modifier->classes[] = $this->class;
 
@@ -100,7 +98,7 @@ class TexySmiliesModule extends TexyModule
             }
 
         if ($this->handler)
-            if (call_user_func_array($this->handler, array(&$el)) === FALSE) return '';
+            if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
         return $parser->element->appendChild($el);
     }
@@ -108,10 +106,3 @@ class TexySmiliesModule extends TexyModule
 
 
 } // TexySmiliesModule
-
-
-
-
-
-
-?>

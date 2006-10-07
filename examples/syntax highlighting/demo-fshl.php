@@ -9,10 +9,10 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  */
 
 $texyPath = dirname(__FILE__).'/../../texy/';
@@ -43,7 +43,7 @@ include_once ($fshlPath . 'fshl.php');
 //
 //  Syntax highlighter changes $element->content and sets $element->htmlSafe to TRUE
 //
-function myUserFunc(&$element) {
+function myUserFunc($element) {
     $lang = strtoupper($element->lang);
     if ($lang == 'JAVASCRIPT') $lang = 'JS';
     if (!in_array(
@@ -52,7 +52,7 @@ function myUserFunc(&$element) {
        ) return;
 
     $parser = new fshlParser($element->texy->utf ? 'HTML_UTF8' : 'HTML', P_TAB_INDENT);
-    $element->setContent($parser->highlightString($lang, $element->content), TRUE);
+    $element->setContent($parser->highlightString($lang, $element->getContent()), TRUE);
 }
 
 
@@ -60,7 +60,7 @@ function myUserFunc(&$element) {
 
 
 
-$texy = &new Texy();
+$texy = new Texy();
 
 // set user callback function for /-- code blocks
 $texy->blockModule->codeHandler = 'myUserFunc';

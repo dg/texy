@@ -7,9 +7,9 @@
  * This source file is subject to the GNU GPL license.
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://www.texy.info/
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE
+ * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
  * @version    $Revision$ $Date$
@@ -29,63 +29,51 @@ if (!defined('TEXY')) die();
  */
 class TexyModule
 {
-    var $texy;             // parent Texy! object
-    var $allowed = TEXY_ALL;   // module configuration
+    protected $texy;             // parent Texy! object
+    public $allowed = Texy::ALL;   // module configuration
 
 
-    function __construct(&$texy)
+    public function __construct($texy)
     {
-        $this->texy = & $texy;
+        $this->texy =  $texy;
         $texy->registerModule($this);
     }
 
 
-    /**
-     * PHP4-only constructor
-     * @see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4
-     */
-    function TexyModule(&$texy)
-    {
-        // generate references
-        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call PHP5 constructor
-        call_user_func_array(array(&$this, '__construct'), array(&$texy));
-    }
-
 
 
     // register all line & block patterns a routines
-    function init()
+    public function init()
     {
     }
 
 
     // block's pre-process
-    function preProcess(&$text)
+    public function preProcess(&$text)
     {
     }
 
 
 
     // block's post-process
-    function postProcess(&$text)
+    public function postProcess(&$text)
     {
     }
 
 
     // single line post-process
-    function linePostProcess(&$line)
+    public function linePostProcess(&$line)
     {
     }
 
 
 
 
+    /**
+     * Undefined property usage prevention
+     */
+    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
+    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    private function __isset($nm) { return FALSE; }
 } // TexyModule
-
-
-
-
-
-?>
