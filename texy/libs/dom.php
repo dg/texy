@@ -27,7 +27,7 @@ if (!defined('TEXY')) die();
  * DOM element base class
  * @abstract
  */
-class TexyDomElement
+abstract class TexyDomElement
 {
     const CONTENT_NONE =    1;
     const CONTENT_TEXTUAL = 2;
@@ -40,7 +40,7 @@ class TexyDomElement
 
     public function __construct($texy)
     {
-        $this->texy =  $texy;
+        $this->texy = $texy;
     }
 
 
@@ -49,9 +49,7 @@ class TexyDomElement
      * Convert element to HTML string
      * @abstract
      */
-    public function toHtml()
-    {
-    }
+    abstract public function toHtml();
 
 
 
@@ -67,9 +65,9 @@ class TexyDomElement
     /**
      * Undefined property usage prevention
      */
-    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    function __set($nm, $val)     { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    function __get($nm)           { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    private function __unset($nm) { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
     private function __isset($nm) { return FALSE; }
 
 }  // TexyDomElement
@@ -105,8 +103,6 @@ class TexyHtmlElement extends TexyDomElement
      */
     protected function generateTags(&$tags)
     {
-        $tags = (array) $tags;
-
         if ($this->tag) {
             $attrs = $this->modifier->getAttrs($this->tag);
             $attrs['id']    = $this->modifier->id;
@@ -252,7 +248,7 @@ class TexyBlockElement extends TexyHtmlElement
 class TexyTextualElement extends TexyBlockElement
 {
     public $content;                    // string
-    protected $htmlSafe    = FALSE;        // is content HTML-safe?
+    protected $htmlSafe = FALSE;        // is content HTML-safe?
 
 
 
@@ -420,9 +416,9 @@ class TexyInlineTagElement extends TexyHtmlElement
  */
 class TexyDom extends TexyBlockElement
 {
-    public  $elements;
-    public  $elementsById;
-    public  $elementsByClass;
+    public $elements;
+    public $elementsById;
+    public $elementsByClass;
 
 
     /**
@@ -455,7 +451,7 @@ class TexyDom extends TexyBlockElement
 
             ///////////   PRE-PROCESSING
         foreach ($this->texy->getModules() as $module)
-            $module->preProcess($text);
+            $text = $module->preProcess($text);
 
             ///////////   PROCESS
         parent::parse($text);
@@ -474,15 +470,12 @@ class TexyDom extends TexyBlockElement
     {
         $html = parent::toHtml();
 
+        $obj = new TexyHtmlWellForm();
+        $html = $obj->process($html);
+
             ///////////   POST-PROCESS
         foreach ($this->texy->getModules() as $module)
-            if (!($module instanceof TexyFormatterModule)) $module->postProcess($html);
-
-        $wf = new TexyWellForm();
-        $html = $wf->process($html);
-
-        foreach ($this->texy->getModules() as $module)
-            if ($module instanceof TexyFormatterModule) $module->postProcess($html);
+            $html = $module->postProcess($html);
 
             ///////////   UNFREEZE SPACES
         $html = Texy::unfreezeSpaces($html);

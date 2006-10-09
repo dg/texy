@@ -42,7 +42,7 @@ if (!defined('TEXY')) die();
 class TexyPhraseModule extends TexyModule
 {
     /** @var callback    Callback that will be called with newly created element */
-    public $codeHandler;  // function &myUserFunc($element)
+    public $codeHandler;  // function myUserFunc($element)
     public $handler;
 
     public $allowed = array(
@@ -243,7 +243,7 @@ class TexyPhraseModule extends TexyModule
 
         if ($mLink) {
             $el = new TexyLinkElement($this->texy);
-            $el->setLinkRaw($mLink);
+            $el->setLinkRaw($mLink, $mContent);
             $mContent = $parser->element->appendChild($el, $mContent);
         }
 

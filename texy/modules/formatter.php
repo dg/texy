@@ -35,9 +35,9 @@ class TexyFormatterModule extends TexyModule
 
 
 
-    public function postProcess(&$text)
+    public function postProcess($text)
     {
-        if (!$this->allowed) return;
+        if (!$this->allowed) return $text;
 
         $this->space = $this->baseIndent;
 
@@ -80,6 +80,7 @@ class TexyFormatterModule extends TexyModule
 
         // unfreeze pre, textarea, script and style elements
         $text = strtr($text, $this->hashTable);
+        return $text;
     }
 
 

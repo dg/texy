@@ -31,9 +31,9 @@ if (!defined('TEXY')) die();
 class TexyBlockModule extends TexyModule
 {
     public $allowed;
-    public $codeHandler;               // function &myUserFunc($element)
-    public $divHandler;                // function &myUserFunc($element, $nonParsedContent)
-    public $htmlHandler;               // function &myUserFunc($element, $isHtml)
+    public $codeHandler;               // function myUserFunc($element)
+    public $divHandler;                // function myUserFunc($element, $nonParsedContent)
+    public $htmlHandler;               // function myUserFunc($element, $isHtml)
 
 
     public function __construct($texy)
@@ -58,7 +58,7 @@ class TexyBlockModule extends TexyModule
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^/--+ *(?:(code|samp|text|html|div|notexy|source|comment)( .*)?|) *<MODIFIER_H>?\n(.*\n)?\\\\--+ *\\1?()$#mUsi'
+            '#^/--+ *(?:(code|samp|text|html|div|notexy|source|comment)( .*)?|) *<MODIFIER_H>?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi'
         );
     }
 
@@ -134,25 +134,11 @@ class TexyBlockModule extends TexyModule
 
 
         case 'html':
-                $el = new TexyTextualElement($this->texy);
-
-                // strasny hnusny hack !!!
-                $old = $this->texy->patternsLine;
-                $oldm = $this->texy->modules;
-                foreach ($this->texy->modules as $key => $module) {
-                        if ($module instanceof TexyLongWordsModule) unset($this->texy->modules[$key]);
-                        if ($module instanceof TexyQuickCorrectModule) unset($this->texy->modules[$key]);
-                }
-                $this->texy->patternsLine = array();
-                $this->texy->htmlModule->init();
-
+                $el = new TexyHtmlBlockElement($this->texy);
                 $el->parse($mContent);
 
-                $this->texy->patternsLine = $old;
-                $this->texy->modules = $oldm;
-
                 if ($this->htmlHandler)
-                    if (call_user_func_array($this->htmlHandler, array($el, true)) === FALSE) return;
+                    if (call_user_func_array($this->htmlHandler, array($el, TRUE)) === FALSE) return;
 
                 $parser->element->appendChild($el);
                 break;
@@ -169,7 +155,7 @@ class TexyBlockModule extends TexyModule
                                TRUE);
 
                 if ($this->htmlHandler)
-                    if (call_user_func_array($this->htmlHandler, array($el, false)) === FALSE) return;
+                    if (call_user_func_array($this->htmlHandler, array($el, FALSE)) === FALSE) return;
 
                 $parser->element->appendChild($el);
                 break;
@@ -241,6 +227,20 @@ class TexyCodeBlockElement extends TexyTextualElement
 
 
 
+/**
+ * HTML ELEMENT
+ */
+class TexyHtmlBlockElement extends TexyTextualElement
+{
+
+    public function parse($text)
+    {
+        $parser = new TexyHtmlParser($this);
+        $parser->parse($text);
+    }
+
+
+} // TexyHtmlBlockElement
 
 
 
@@ -253,7 +253,7 @@ class TexySourceBlockElement extends TexyBlockElement
     {
         $html = parent::generateContent();
         if ($this->texy->formatterModule)
-            $this->texy->formatterModule->indent($html);
+            $html = $this->texy->formatterModule->postProcess($html);
 
         $el = new TexyCodeBlockElement($this->texy);
         $el->lang = 'html';

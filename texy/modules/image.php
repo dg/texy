@@ -95,10 +95,10 @@ class TexyImageModule extends TexyModule
     /**
      * Preprocessing
      */
-    public function preProcess(&$text)
+    public function preProcess($text)
     {
         // [*image*]: urls .(title)[class]{style}
-        $text = preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array($this, 'processReferenceDefinition'), $text);
+        return preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array($this, 'processReferenceDefinition'), $text);
     }
 
 
@@ -190,7 +190,7 @@ class TexyImageReference {
 
 
     // constructor
-    public function __construct($texy, $URLs = null)
+    public function __construct($texy, $URLs = NULL)
     {
         $this->modifier = new TexyModifier($texy);
         $this->URLs = $URLs;

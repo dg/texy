@@ -35,9 +35,9 @@ class TexyLongWordsModule extends TexyModule
 
 
 
-    public function linePostProcess(&$text)
+    public function linePostProcess($text)
     {
-        if (!$this->allowed) return;
+        if (!$this->allowed) return $text;
 
         $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
         $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
@@ -61,6 +61,7 @@ class TexyLongWordsModule extends TexyModule
                             $charShy  => $this->shy,
                             $charNbsp => $this->nbsp,
                      ));
+        return $text;
     }
 
 

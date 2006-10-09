@@ -177,7 +177,6 @@ class TexyListModule extends TexyModule
         $elItem->parse($content);
         $mergeMode = $tmp;
 
-        // !!! children is protected
         if ($elItem->getChild(0) instanceof TexyGenericBlockElement)
             $elItem->getChild(0)->tag = '';
 

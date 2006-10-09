@@ -57,10 +57,8 @@ class TexyScriptModule extends TexyModule
         $args = NULL;
         if (preg_match('#^([a-z_][a-z0-9_]*)\s*\(([^()]*)\)$#i', $identifier, $matches)) {
             $identifier = $matches[1];
-            array_walk(
-                 $args = explode(',', $matches[2]),
-                 'trim'
-            );
+            $args = explode(',', $matches[2]);
+            array_walk($args, 'trim');
         }
 
         $el = new TexyScriptElement($this->texy);
@@ -100,7 +98,7 @@ class TexyScriptModule extends TexyModule
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->setContent('<texy:script content="'.TexyHtml::htmlChars($identifier, true).'" />', TRUE);
+        $element->setContent('<texy:script content="'.TexyHtml::htmlChars($identifier, TRUE).'" />', TRUE);
     }
 
 

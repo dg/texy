@@ -76,24 +76,32 @@ class TexyHtmlModule extends TexyModule
      */
     public function init()
     {
-        $this->texy->registerLinePattern($this, 'processTag',     '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^":HASH:]*"|=\s*\'[^\':HASH:]*\'|=[^>:HASH:]*)*)(/?)>#is');
-        $this->texy->registerLinePattern($this, 'processComment', '#<!--([^:HASH:]*)-->#Uis');
-        //$this->texy->registerLinePattern($this, 'processEntity',    '#&([a-z]+|\\#x[0-9a-f]+|\\#[0-9]+);#i');
+        $this->texy->registerLinePattern($this, 'process', '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^":HASH:]*"|=\s*\'[^\':HASH:]*\'|=[^>:HASH:]*)*)(/?)>|<!--([^:HASH:]*?)-->#is');
     }
 
 
 
     /**
-     * Callback function: <tag ...>
+     * Callback function: <tag ...>  | <!-- comment -->
      * @return string
      */
-    public function processTag($parser, $matches)
+    public function process($parser, $matches)
     {
-        list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
+        list($match, $mClosing, $mTag, $mAttr, $mEmpty/*, $mComment*/) = $matches;
         //    [1] => /
         //    [2] => tag
         //    [3] => attributes
         //    [4] => /
+        //    [5] => comment
+
+        if ($mTag == '') { // comment
+            if (!$this->allowedComments) return substr($matches[5], 0, 1) == '[' ? $match : '';
+
+            $el = new TexyTextualElement($this->texy);
+            $el->contentType = TexyDomElement::CONTENT_NONE;
+            $el->setContent($match, TRUE);
+            return $parser->element->appendChild($el);
+        }
 
         $allowedTags = & $this->texy->allowedTags;
         if (!$allowedTags) return $match;   // disabled
@@ -107,7 +115,7 @@ class TexyHtmlModule extends TexyModule
         if ($empty && !$isOpening)  // error - can't close empty element
             return $match;
 
-        if (is_array($this->allowed) && !isset($this->allowed[$tag]))  // is element allowed?
+        if (is_array($allowedTags) && !isset($allowedTags[$tag]))  // is element allowed?
             return $match;
 
 
@@ -116,7 +124,7 @@ class TexyHtmlModule extends TexyModule
 
         if ($isOpening) {  // process attributes
             $attrs = array();
-            $allowedAttrs = is_array($this->allowed) ? $this->allowed[$tag] : NULL;
+            $allowedAttrs = is_array($allowedTags) ? $allowedTags[$tag] : NULL;
             preg_match_all('#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is', $mAttr, $matchesAttr, PREG_SET_ORDER);
             foreach ($matchesAttr as $matchAttr) {
                 $key = strtolower($matchAttr[1]);
@@ -177,31 +185,6 @@ class TexyHtmlModule extends TexyModule
         return $parser->element->appendChild($el);
     }
 
-
-    /**
-     * Callback function: <!-- ... -->
-     * @return string
-     */
-    public function processComment($parser, $matches)
-    {
-        list($match, $mContent) = $matches;
-        if ($this->allowedComments) return ' ';
-        else return $match;   // disabled
-    }
-
-
-
-    /**
-     * Callback function: &amp;  |  &#039;  |  &#x1A;
-     * @return string
-     */
-/*
-    public function processEntity($parser, $matches)
-    {
-        list($mEntity) = $matches;
-        return html_entity_decode($mEntity, ENT_QUOTES, 'UTF-8');
-    }
-*/
 
 
     public function trustMode($onlyValidTags = TRUE)

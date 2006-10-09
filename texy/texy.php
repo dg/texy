@@ -33,7 +33,7 @@ require_once TEXY_DIR.'libs/dom.php';            // Texy! DOM element's base cla
 require_once TEXY_DIR.'libs/module.php';         // Texy! module base class
 require_once TEXY_DIR.'libs/parser.php';         // Texy! parser
 require_once TEXY_DIR.'libs/html.php';
-require_once TEXY_DIR.'libs/wellform.php';
+require_once TEXY_DIR.'libs/html.wellform.php';
 require_once TEXY_DIR.'modules/block.php';
 require_once TEXY_DIR.'modules/formatter.php';
 require_once TEXY_DIR.'modules/generic-block.php';
@@ -99,41 +99,9 @@ class Texy
     public $mergeLines = TRUE;
 
 
-    /**
-     * Registered regexps and associated handlers for inline parsing
-     * @var array Format: ('handler' => callback,
-     *                     'pattern' => regular expression,
-     *                     'user'    => user arguments)
-     */
-    public $patternsLine;
-
-    /**
-     * Registered regexps and associated handlers for block parsing
-     * @var array Format: ('handler' => callback,
-     *                     'pattern' => regular expression,
-     *                     'user'    => user arguments)
-     */
-    public $patternsBlock;
-
-
-    /** @var array    List of all used modules */
-    public $modules;
-
-    /**
-     * Reference stack
-     * @var array Format: ('home' => TexyLinkReference, ...)
-     */
-    private $references       = array();
-
     public $referenceHandler;
 
-    /**
-     * prevent recursive calling
-     * @var boolean
-     */
-    public $preventCycling  = false;
-
-    /** @var object    Default modules */
+    /** @var TexyModule Default modules */
     public
         $scriptModule,
         $htmlModule,
@@ -156,6 +124,35 @@ class Texy
 
 
 
+
+    /**
+     * Registered regexps and associated handlers for inline parsing
+     * @var array Format: ('handler' => callback,
+     *                     'pattern' => regular expression,
+     *                     'user'    => user arguments)
+     */
+    private $linePatterns = array();
+
+    /**
+     * Registered regexps and associated handlers for block parsing
+     * @var array Format: ('handler' => callback,
+     *                     'pattern' => regular expression,
+     *                     'user'    => user arguments)
+     */
+    private $blockPatterns = array();
+
+
+    /** @var TexyModule[]  List of all used modules */
+    private $modules;
+
+    /**
+     * Reference stack
+     * @var array Format: ('home' => TexyLinkReference, ...)
+     */
+    private $references = array();
+
+
+
     public function __construct()
     {
         // init some other variables
@@ -163,8 +160,7 @@ class Texy
         $this->summary['links']   = array();
         $this->summary['preload'] = array();
 
-        // !!!
-        $this->allowedTags    = TexyHtml::$valid; // full support for HTML tags
+        $this->allowedTags = TexyHtml::$valid; // full support for HTML tags
 
         // load all modules
         $this->loadModules();
@@ -174,6 +170,12 @@ class Texy
         $elRef = new TexyLinkReference($this, 'http://texy.info/', 'Texy!');
         $elRef->modifier->title = 'Text to HTML converter and formatter';
         $this->addReference('Texy', $elRef);
+
+        $elRef = new TexyLinkReference($this, 'http://www.google.com/search?q=%s');
+        $this->addReference('google', $elRef);
+
+        $elRef = new TexyLinkReference($this, 'http://en.wikipedia.org/wiki/Special:Search?search=%s');
+        $this->addReference('wikipedia', $elRef);
         */
     }
 
@@ -209,7 +211,7 @@ class Texy
         // post process
         $this->quickCorrectModule = new TexyQuickCorrectModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
-        $this->formatterModule = new TexyFormatterModule($this);  // should be last post-processing module!
+        $this->formatterModule = new TexyFormatterModule($this);
     }
 
 
@@ -223,7 +225,7 @@ class Texy
 
     public function registerLinePattern($module, $method, $pattern, $user_args = NULL)
     {
-        $this->patternsLine[] = array(
+        $this->linePatterns[] = array(
             'handler'     => array($module, $method),
             'pattern'     => $this->translatePattern($pattern),
             'user'        => $user_args
@@ -235,21 +237,35 @@ class Texy
     {
 //    if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
 
-        $this->patternsBlock[] = array(
+        $this->blockPatterns[] = array(
             'handler'     => array($module, $method),
             'pattern'     => $this->translatePattern($pattern)  . 'm',  // force multiline!
             'user'        => $user_args
         );
     }
 
+
+    public function getLinePatterns()
+    {
+        return $this->linePatterns;
+    }
+
+
+    public function getBlockPatterns()
+    {
+        return $this->blockPatterns;
+    }
+
+
     /**
      * Initialization
      * It is called between constructor and first use (method parse)
      */
-    private function init()
+    protected function init()
     {
-        $this->patternsLine   = array();
-        $this->patternsBlock  = array();
+        $this->cache = array();
+        $this->linePatterns  = array();
+        $this->blockPatterns = array();
 
         if (!$this->modules) die('Texy: No modules installed');
 
@@ -334,8 +350,8 @@ class Texy
     public function toText()
     {
         // generate output
-        $saveLineWrap = $this->formatterModule->lineWrap = false;
-        $this->formatterModule->lineWrap = false;
+        $saveLineWrap = $this->formatterModule->lineWrap;
+        $this->formatterModule->lineWrap = FALSE;
 
         $text = $this->toHtml();
 
@@ -477,8 +493,7 @@ class Texy
      */
     static public function wash($text)
     {
-            ///////////   REMOVE SPECIAL CHARS (used by Texy!)
-        return strtr($text, "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", '           ');
+        return preg_replace('#[\x15-\x1F]+#', '', $text);
     }
 
 
@@ -502,7 +517,7 @@ class Texy
      */
     public function addReference($name, $obj)
     {
-        if (!$this->utf) $name = strtolower($name);
+        $name = strtolower($name); // pozor na UTF8 !
         $this->references[$name] = $obj;
     }
 
@@ -513,31 +528,16 @@ class Texy
      * Receive new named link. If not exists, try
      * call user function to create one.
      */
-    private $_disableReferences;
-    private $refQueries;
     function getReference($name)
     {
-        if (!$this->utf) $name = strtolower($name);
+        $lowName = strtolower($name); // pozor na UTF8 !
 
-        if ($this->preventCycling) {
-            if (isset($this->refQueries[$name])) return FALSE;
-            $this->refQueries[$name] = true;
-        } else $this->refQueries = array();
-
-        if (isset($this->references[$name]))
-            return $this->references[$name];
+        if (isset($this->references[$lowName]))
+            return $this->references[$lowName];
 
 
-        if ($this->referenceHandler) {
-            $this->_disableReferences = true;
-            $this->references[$name] = call_user_func_array(
-                                     $this->referenceHandler,
-                                     array($name, $this)
-            );
-            $this->_disableReferences = false;
-
-            return $this->references[$name];
-        }
+        if ($this->referenceHandler)
+            return call_user_func_array($this->referenceHandler, array($name, $this));
 
         return FALSE;
     }
@@ -548,9 +548,12 @@ class Texy
      * For easier regular expression writing
      * @return string
      */
-    public function translatePattern($pattern)
+    private $cache;
+    public function translatePattern($re)
     {
-        return strtr($pattern, array(
+        if (isset($this->cache[$re])) return $this->cache[$re];
+
+        return $this->cache[$re] = strtr($re, array(
             '<MODIFIER_HV>' => TEXY_PATTERN_MODIFIER_HV,
             '<MODIFIER_H>'  => TEXY_PATTERN_MODIFIER_H,
             '<MODIFIER>'    => TEXY_PATTERN_MODIFIER,
@@ -584,9 +587,9 @@ class Texy
     /**
      * Undefined property usage prevention
      */
-    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    function __set($nm, $val)     { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    function __get($nm)           { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    private function __unset($nm) { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
     private function __isset($nm) { return FALSE; }
 
 } // Texy

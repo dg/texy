@@ -207,9 +207,9 @@ class TexyModifier
     /**
      * Undefined property usage prevention
      */
-    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    function __set($nm, $val)     { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    function __get($nm)           { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    private function __unset($nm) { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
     private function __isset($nm) { return FALSE; }
 
 } // TexyModifier

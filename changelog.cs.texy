@@ -1,0 +1,135 @@
+Changelog
+=========
+
+Verze 1.2
+---------
+
+sobota 7. 10. 2006 .[date]
+
+- přepis pro PHP 5 (pro PHP 4 používejte verzi 1.1)
+- navíc podporuje "proměnné v odkazech":http://forum.texy.info/viewtopic.php?id=316
+- změna: Texy::summary je nyní pole
+- změna: konstany TEXY_ALL, TEXY_NONE, TEXY_HEADING_DYNAMIC a TEXY_HEADING_FIXED jsou nyní: Texy::ALL, Texy:NONE, TexyHeadingModule::DYNAMIC a TexyHeadingModule::FIXED
+- odstraněno: Texy::reinit(), podpora pro `/--form`
+- atributy `href` a `src` u HTML značek se nyní nezpracovávají 
+
+
+
+Verze 1.1 
+----------
+
+úterý 6. 6. 2006 .[date]
+
+Opraveno a vylepšeno zpracování entit:
+- Texy! nyní "ignoruje":try?id=a7b09446df0eae8c19564fed7fd49e84f01263dd neznámé jmenné entity (tohle byla asi jediná věc, co mohla způsobit non-well-formed výstup, proto určitě na 1.1 upgradujte).
+- ve výstup jsou nyní veškeré entity posílány v numerické podobě `&#**;`, s výjimkou `&amp; &quot; &lt; &gt;`. Řeší to problémy s určitými RSS čtečkami apod.
+- opraveno chybné zpracování entit v toText()
+- toText() také odstraní `&shy;` a `&nbsp;` převádí na obyčejné mezery
+- **upozornění:** pokud nepoužíváte kódování UTF-8, tak toText() bude vyžadovat rozšíření "iconv":www.php.net/iconv. V PHP 5 je dostupné standardně.
+
+
+Verze 1.0 Final
+------------------
+
+pondělí 18. 4. 2006 .[date]
+
+Opravy:
+- "toText() odstraní křížek":http://forum.texy.info/viewtopic.php?id=221
+- "odkaz bez uvozovek v code tagu":http://forum.texy.info/viewtopic.php?id=244
+- "klikatelný obrázek s popiskem":http://forum.texy.info/viewtopic.php?id=108 (a "také":http://forum.texy.info/viewtopic.php?id=182)
+- "kompatibilita s novými verzemi PHP":http://forum.texy.info/viewtopic.php?id=171
+- nevypouští prázdné attributy ("demo":try?id=abe2922bc45eb4ca6a515f1698ac375165652b03)
+- znak pro trademark změněn z `&#153;` na `&#8482;`
+- výchozí `alt` pro obrázky je nyní prázdný řetězec
+
+
+Rozšíření funkcí:
+- "uživatelské atributy":http://forum.texy.info/viewtopic.php?id=250
+- povolené tagy dostupné přes `$texy->allowedTags`, mělo by v budoucnu nahradit `$texy->htmlModule->allowed`
+- nový režim "zalamování řádků":http://forum.texy.info/viewtopic.php?pid=893 via `$texy->mergeLines = false`
+- PHP5-like constructors
+
+
+Fix pro 1.0rc5
+---------------------------
+
+dne 22. 7. 2005 .[date]
+
+- kompatibilita s *divnou* verzí PHP 4.3.11 a 4.4.0 ("viz fórum":http://forum.texy.info/viewtopic.php?pid=534)
+
+
+Fix pro 1.0rc5
+---------------------------
+
+dne 30. 5. 2005 .[date]
+
+- `<td></td>` upraveno na `<td>&nbsp;</td>`
+
+
+Verze 1.0rc5 
+---------------------------
+
+dne 25. 5. 2005 .[date]
+
+- **pozor:** změny názvů pro callbacky:
+   - `$texy->blockModule->codeHandler` namísto `$texy->blockModule->userFunction`
+   - `$texy->referenceHandler` namísto `$texy->userReferences`
+- **pozor:** modifikátor vždy musí předcházet mezera (demo:[try?id=81a5b1bb936ee439290acdca0ab7ed0c27399e74])
+- podpora Texy! komentářů &sect;&sect; (demo:[try?id=79163529ad0c233f984a38fb0dc7a9ecaa39ee81])
+- rychlé odkazy `test :[url]` (demo:[try?id=bb283084709bd23213a607694c303c8a7b483ced])
+- dokonalejší přeformátování HTML (demo:[try?id=a26ee827a8bc2daeb60b8d494ec7c041344cb9c7], fórum:[http://forum.texy.info/viewtopic.php?id=105])
+- vkládání externích dat jako `{{ getPrice(produkt) }}` (fórum:[http://forum.texy.info/viewtopic.php?id=128]) *(sponzorem vývoje této funkce je společnost "Internet Mall":www.MALL.cz, a.s.)*
+
+
+
+Verze 1.0rc4
+----------------------
+
+dne 16. 3. 2005 .[date]
+
++ nová "vychytávka":http://texy.info/cs/try?id=536f01dd3b1ddfd1dbf3373541eff94e49c66123 - blok `/-- source`
++ každý modul má zkratku (referenci) ve formátu `$texy->xyzModule`
++ **aktivace UTF** přes `$texy->utf = true;` 
++ vylepšení tabulek
++ **úprava syntaxe** číslovaných seznamů:
+   - je možnost syntaxi konfigurovat, např. `$texy->listModule->allowed['*'] = false`
+   - upraven zápis v "podobě":try?id=40f7b51586de09962391f21faf10f887d477a124 1. .... 2. ...., protože kolidoval se zápisem data na začátku řádku
+   - upraven zápis v "podobě":try?id=11605cb8aa20298253edbe56d88dd9e3cd23effc I. .... II. ...., protože kolidoval s iniciálou na začátku řádku
+   - buď použijte 1) ..... 2) ..... I) ..... II) ......
+   - nebo "tečkovaný" zápis, ale **následovaný nejméně "dvěma mezerami":try?id=a78070d6946e6209bb69faeacfbf3ea517c20a81**
+
+
+
+Verze 1.0rc3 
+---------------------------
+
+dne 9. 3. 2005 .[date]
+
++ podpora `<caption>`, "demo":try?id=0e7130f3c86663d632b2c86d90ff0b782053e63b
++ nový příklad "user syntax" ukazuje, jak změnit nebo doplnit syntax
++ **kompaktní** jednosouborová verze, ideální pokud nechcete kód upravovat, ale jen používat na serveru
++ modul TexySmiliesModule se aktivuje přes `$allowed = true;`, viz příklad "smilies"
++ další drobné úpravy v chování `$allowed` u dalších modulů
+
+
+
+Verze 1.0rc2 
+---------------------------------
+
+dne 27. 2. 2005 .[date]
+
++ metody `safeMode()` a `trustMode()`
++ modul **TexyHtmlModule:** - seznam všech povolených tagů určuje proměnná $allowed
++ modul **TexyBlockModule:** 
+   - ukázalo se, že blok `/--notexy` nevyhovuje všem požadavkům, takže je nahrazen bloky `/--text` a `/--html`. "Demo":try?id=1a32233a5f8f0031952a34cd9179b0c7b1334a7b
+   
+
+
+Verze 1.0rc1 
+-----------------------
+
+dne 23. 2. 2005 .[date]
+
++ obrázky podporují **width & height** atributy, včetně autodetekce nebo manuálního zadání. Syntax je `[* image.gif 50x30 *]`
++ kromě dynamických titulků lze použít i **fixní**. Další informace najdete v příkladu 'Headings'
++ podpora pro "dlouhé smajlíky" jako `:-)))))` 

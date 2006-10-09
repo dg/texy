@@ -17,19 +17,28 @@
 require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
+class MyTexy extends Texy
+{
 
-$texy = new Texy();
+    protected function init()
+    {
+        // disable *** and ** and * phrases
+        $this->phraseModule->allowed['***'] = false;
+        $this->phraseModule->allowed['**'] = false;
+        $this->phraseModule->allowed['*'] = false;
 
-// disable *** and ** and * phrases
-$texy->phraseModule->allowed['***'] = false;
-$texy->phraseModule->allowed['**'] = false;
-$texy->phraseModule->allowed['*'] = false;
+        parent::init();
 
-// add new syntax: *bold* _italic_
-$texy->registerLinePattern($texy->phraseModule, 'processPhrase', '#(?<!\*)\*(?!\ )([^\*]+)<MODIFIER>?(?<!\ )\*(?!\*)()#U', 'b');
-$texy->registerLinePattern($texy->phraseModule, 'processPhrase', '#(?<!\_)\_(?!\ )([^\_]+)<MODIFIER>?(?<!\ )\_(?!\_)()#U', 'i');
+        // add new syntax: *bold* _italic_
+        $this->registerLinePattern($this->phraseModule, 'processPhrase', '#(?<!\*)\*(?!\ )([^\*]+)<MODIFIER>?(?<!\ )\*(?!\*)()#U', 'b');
+        $this->registerLinePattern($this->phraseModule, 'processPhrase', '#(?<!\_)\_(?!\ )([^\_]+)<MODIFIER>?(?<!\ )\_(?!\_)()#U', 'i');
+    }
+
+}
 
 
+
+$texy = new MyTexy();
 
 // processing
 $text = file_get_contents('syntax.texy');

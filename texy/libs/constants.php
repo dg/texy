@@ -6,13 +6,13 @@
  *
  * This source file is subject to the GNU GPL license.
  *
- * @link       http://texy.info/
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
+ * @link       http://texy.info/
  * @copyright  Copyright (c) 2004-2006 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
- * @version    1.1 for PHP4 & PHP5 $Date$ $Revision$
+ * @version    $Revision$ $Date$
  */
 
 
@@ -97,5 +97,12 @@ define('TEXY_PATTERN_MODIFIER_HV',
          "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".
          "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??)");
 
+
+foreach (get_defined_constants() as $name => $value) {
+    $value = exportStr($value);
+    if (substr($name, 0, 5) === 'TEXY_')
+       echo "define('$name', '$value');\n";
+}
 */
+
 ?>

@@ -33,14 +33,15 @@ class TexyQuickCorrectModule extends TexyModule
     public $singleQuotes = array('&#8218;', '&#8216;');  // left & right single quote (&sbquo; &lsquo;)
     public $dash         = '&#8211;';                    // dash (&ndash;)
 
+    private $from, $to;
 
 
-
-    public function linePostProcess(&$text)
+    /**
+     * Module initialization.
+     */
+    public function init()
     {
-        if (!$this->allowed) return;
-
-        $replaceTmp = array(
+        $pairs = array(
           '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
                                                     => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
 
@@ -73,11 +74,18 @@ class TexyQuickCorrectModule extends TexyModule
                                                     => '$1$2$3&#160;$4$5',                // space between preposition and word
         );
 
-        $replace = array();
-        foreach ($replaceTmp as $pattern => $replacement)
-            $replace[ $this->texy->translatePattern($pattern) ] = $replacement;
+        $this->from = $this->to = array();
+        foreach ($pairs as $pattern => $replacement) {
+            $this->from[] = $this->texy->translatePattern($pattern);
+            $this->to[] = $replacement;
+        }
+    }
 
-        $text = preg_replace(array_keys($replace), array_values($replace), $text);
+
+    public function linePostProcess($text)
+    {
+        if (!$this->allowed) return $text;
+        return preg_replace($this->from, $this->to, $text);
     }
 
 

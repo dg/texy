@@ -91,7 +91,7 @@ class TexyHeadingModule extends TexyModule
 
 
 
-    public function preProcess(&$text)
+    public function preProcess($text)
     {
         $this->_rangeUnderline = array(10, 0);
         $this->_rangeSurround    = array(10, 0);
@@ -99,6 +99,7 @@ class TexyHeadingModule extends TexyModule
 
         $foo = NULL; $this->_deltaUnderline = & $foo;
         $bar = NULL; $this->_deltaSurround = & $bar;
+        return $text;
     }
 
 
@@ -126,7 +127,7 @@ class TexyHeadingModule extends TexyModule
         $el = new TexyHeadingElement($this->texy);
         $el->level = $this->levels[$mLine];
         if ($this->balancing == self::DYNAMIC)
-            $el->deltaLevel = & $this->_deltaUnderline; /* & !!! */
+            $el->deltaLevel = & $this->_deltaUnderline;
 
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse(trim($mContent));
@@ -167,7 +168,7 @@ class TexyHeadingModule extends TexyModule
         $el = new TexyHeadingElement($this->texy);
         $el->level = 7 - min(7, max(2, strlen($mLine)));
         if ($this->balancing == self::DYNAMIC)
-            $el->deltaLevel = & $this->_deltaSurround;  /* & !!! */
+            $el->deltaLevel = & $this->_deltaSurround;
 
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse(trim($mContent));

@@ -117,8 +117,8 @@ class TexyLinkModule extends TexyModule
 
         if (!$el) {
             $queryPos = strpos($refName, '?');
-            if ($queryPos === false) $queryPos = strpos($refName, '#');
-            if ($queryPos !== false) { // try to extract ?... #... part
+            if ($queryPos === FALSE) $queryPos = strpos($refName, '#');
+            if ($queryPos !== FALSE) { // try to extract ?... #... part
                 $el = $this->texy->getReference(substr($refName, 0, $queryPos));
                 $query = substr($refName, $queryPos);
             }
@@ -135,15 +135,16 @@ class TexyLinkModule extends TexyModule
     /**
      * Preprocessing
      */
-    public function preProcess(&$text)
+    public function preProcess($text)
     {
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
         if ($this->allowed->references)
-            $text = preg_replace_callback(
+            return preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +('.TEXY_PATTERN_LINK_IMAGE.'|(?!\[)\S+)(\ .+)?'.TEXY_PATTERN_MODIFIER.'?()$#mU',
                 array($this, 'processReferenceDefinition'),
                 $text
             );
+        return $text;
     }
 
 
@@ -192,7 +193,7 @@ class TexyLinkModule extends TexyModule
         if (!$this->allowed->quickLink) return $mContent;
 
         $elLink = new TexyLinkElement($this->texy);
-        $elLink->setLinkRaw($mLink);
+        $elLink->setLinkRaw($mLink, $mContent);
         return $parser->element->appendChild($elLink, $mContent);
     }
 
@@ -253,7 +254,7 @@ class TexyLinkReference {
 
 
     // constructor
-    public function __construct($texy, $URL = null, $label = null)
+    public function __construct($texy, $URL = NULL, $label = NULL)
     {
         $this->modifier = new TexyModifier($texy);
 
@@ -293,7 +294,7 @@ class TexyLinkElement extends TexyInlineTagElement
     }
 
 
-    public function setLinkRaw($link)
+    public function setLinkRaw($link, $text='')
     {
         if (@$link{0} == '[' && @$link{1} != '*') {
             $elRef =  $this->texy->linkModule->getReference( substr($link, 1, -1) );
@@ -301,6 +302,7 @@ class TexyLinkElement extends TexyInlineTagElement
             if ($elRef) {
                 $this->modifier->copyFrom($elRef->modifier);
                 $link = $elRef->URL . $elRef->query;
+                $link = str_replace('%s', urlencode(Texy::wash($text)), $link);
 
             } else {
                 $this->setLink(substr($link, 1, -1));
@@ -340,7 +342,7 @@ class TexyLinkElement extends TexyInlineTagElement
         $attrs['class'] = $this->modifier->classes;
         $attrs['style'] = $this->modifier->styles;
         if ($nofollowClass) {
-            if (($pos = array_search('nofollow', $attrs['class'])) !== false)
+            if (($pos = array_search('nofollow', $attrs['class'])) !== FALSE)
                  unset($attrs['class'][$pos]);
         }
 
@@ -384,27 +386,32 @@ class TexyLinkRefElement extends TexyTextualElement
     public $contentType = TexyDomElement::CONTENT_TEXTUAL;
 
 
-
+    static private $callstack;
 
 
     public function setLink($refRaw)
     {
         $this->refName = substr($refRaw, 1, -1);
+        $lowName = strtolower($this->refName); // pozor na UTF8 !
+        // prevent cycling
+        if (isset(self::$callstack[$lowName])) return FALSE;
+
         $elRef =  $this->texy->linkModule->getReference($this->refName);
         if (!$elRef) return FALSE;
 
-        $this->texy->preventCycling = TRUE;
         $elLink = new TexyLinkElement($this->texy);
         $elLink->setLinkRaw($refRaw);
 
         if ($elRef->label) {
+            self::$callstack[$lowName] = TRUE;
             $this->parse($elRef->label);
+            unset(self::$callstack[$lowName]);
+
         } else {
             $this->setContent($elLink->link->asTextual(), TRUE);
         }
 
         $this->setContent($this->appendChild($elLink, $this->content), TRUE);
-        $this->texy->preventCycling = FALSE;
     }
 
 

@@ -27,7 +27,7 @@ if (!defined('TEXY')) die();
  * Texy! MODULES BASE CLASS
  * ------------------------
  */
-class TexyModule
+abstract class TexyModule
 {
     protected $texy;             // parent Texy! object
     public $allowed = Texy::ALL;   // module configuration
@@ -49,21 +49,24 @@ class TexyModule
 
 
     // block's pre-process
-    public function preProcess(&$text)
+    public function preProcess($text)
     {
+        return $text;
     }
 
 
 
     // block's post-process
-    public function postProcess(&$text)
+    public function postProcess($text)
     {
+        return $text;
     }
 
 
     // single line post-process
-    public function linePostProcess(&$line)
+    public function linePostProcess($line)
     {
+        return $line;
     }
 
 
@@ -72,8 +75,8 @@ class TexyModule
     /**
      * Undefined property usage prevention
      */
-    function __set($nm, $val)     { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    function __get($nm)           { $c=get_class($this); die("Undefined property '$c::$$nm'"); }
-    private function __unset($nm) { $c=get_class($this); die("Cannot unset property '$c::$$nm'."); }
+    function __set($nm, $val)     { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    function __get($nm)           { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
+    private function __unset($nm) { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
     private function __isset($nm) { return FALSE; }
 } // TexyModule
