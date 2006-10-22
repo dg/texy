@@ -296,8 +296,8 @@ class TexyLinkElement extends TexyInlineTagElement
 
     public function setLinkRaw($link, $text='')
     {
-        if (@$link{0} == '[' && @$link{1} != '*') {
-            $elRef =  $this->texy->linkModule->getReference( substr($link, 1, -1) );
+        if (strlen($link)>1 && $link{0} == '[' && $link{1} != '*') {
+            $elRef = $this->texy->linkModule->getReference( substr($link, 1, -1) );
 
             if ($elRef) {
                 $this->modifier->copyFrom($elRef->modifier);

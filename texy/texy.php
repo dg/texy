@@ -257,6 +257,12 @@ class Texy
     }
 
 
+    public function getDOM()
+    {
+        return $this->DOM;
+    }
+
+
     /**
      * Initialization
      * It is called between constructor and first use (method parse)

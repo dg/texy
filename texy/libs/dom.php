@@ -58,7 +58,7 @@ abstract class TexyDomElement
     protected function broadcast()
     {
         // build DOM->elements list
-        $this->texy->DOM->elements[] = $this;
+        $this->texy->getDOM()->elements[] = $this;
     }
 
 
@@ -147,12 +147,12 @@ class TexyHtmlElement extends TexyDomElement
 
         // build $texy->DOM->elementsById list
         if ($this->modifier->id)
-            $this->texy->DOM->elementsById[$this->modifier->id] = $this;
+            $this->texy->getDOM()->elementsById[$this->modifier->id] = $this;
 
         // build $texy->DOM->elementsByClass list
         if ($this->modifier->classes)
             foreach ($this->modifier->classes as $class)
-                $this->texy->DOM->elementsByClass[$class][] = $this;
+                $this->texy->getDOM()->elementsByClass[$class][] = $this;
     }
 
 
@@ -555,7 +555,7 @@ class TexyDomLine extends TexyTextualElement
     public function toHtml()
     {
         $html = parent::toHtml();
-        $wf = new TexyWellForm();
+        $wf = new TexyHtmlWellForm();
         $html = $wf->process($html);
         $html = Texy::unfreezeSpaces($html);
         $html = TexyHtml::checkEntities($html);
