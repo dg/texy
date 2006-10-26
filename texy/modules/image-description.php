@@ -73,8 +73,8 @@ class TexyImageDescModule extends TexyModule
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         $elImage = new TexyImageElement($this->texy);
-        $elImage->setImagesRaw($mURLs);
         $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
+        $elImage->setImagesRaw($mURLs);
 
         $el->modifier->hAlign = $elImage->modifier->hAlign;
         $elImage->modifier->hAlign = NULL;

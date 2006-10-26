@@ -150,8 +150,8 @@ class TexyHtmlWellForm
     /**
      * Undefined property usage prevention
      */
-    function __set($nm, $val)     { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
-    function __get($nm)           { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
-    private function __unset($nm) { $c=get_class($this); trigger_error("Undefined property '$c::$$nm'", E_USER_ERROR); }
-    private function __isset($nm) { return FALSE; }
+    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
+    function __set($nm, $val) { $this->__get($nm); }
+    private function __unset($nm) { $this->__get($nm); }
+    private function __isset($nm) { $this->__get($nm); }
 }

@@ -146,8 +146,8 @@ class TexyImageModule extends TexyModule
 
 
         $elImage = new TexyImageElement($this->texy);
-        $elImage->setImagesRaw($mURLs);
         $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $elImage->setImagesRaw($mURLs);
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);
@@ -243,7 +243,6 @@ class TexyImageElement extends TexyHtmlElement
     }
 
 
-    // private
     public function setImagesRaw($URLs)
     {
 
