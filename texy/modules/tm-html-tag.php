@@ -185,9 +185,13 @@ class TexyHtmlModule extends TexyModule {
      */
     function processComment(&$lineParser, &$matches)
     {
-        list($match, $mContent) = $matches;
-        if ($this->allowedComments) return ' ';
-        else return $match;   // disabled
+        // changed 16. 1. 2007
+        if (!$this->allowedComments) return '';
+
+        $el = &new TexyTextualElement($this->texy);
+        $el->contentType = TEXY_CONTENT_NONE;
+        $el->setContent($matches[0], TRUE);
+        return $lineParser->element->appendChild($el);
     }
 
 
