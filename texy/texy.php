@@ -12,14 +12,14 @@
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
- * @version    1.2 for PHP5 ONLY $Revision$ $Date$
+ * @version    1.2a for PHP5 ONLY $Revision$ $Date$
  */
 
 
 if (version_compare(PHP_VERSION , '5.0.0', '<'))
     die('Texy!: too old version of PHP!');
 
-define('TEXY', 'Version 1.2 for PHP5 $Revision$');
+define('TEXY', 'Version 1.2a for PHP5 $Revision$');
 
 /**
  * Absolute filesystem path to the Texy package

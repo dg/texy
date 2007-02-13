@@ -87,31 +87,30 @@ class TexyLongWordsModule extends TexyModule
 
                 // little trick - isset($array[$item]) is much faster than in_array($item, $array)
         $consonants = array_flip(array(
-                        'b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','y','z',
-                        'B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Y','Z',
-                        'Ë','Ô','Ú','¯','ö','ù','˝','û',            //czech windows-1250
-                        '»','œ','“','ÿ','ä','ç','›','é',
-                        'ƒç','ƒè','≈à','≈ô','≈°','≈•','√Ω','≈æ',    //czech utf-8
-                        'ƒå','ƒé','≈á','≈ò','≈†','≈§','√ù','≈Ω'));
+                        'b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','z',
+                        'B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Z',
+                        "\xe8","\xef","\xf2","\xf8","\x9a","\x9d","\x9e",  //czech windows-1250
+                        "\xc8","\xcf","\xd2","\xd8","\x8a","\x8d","\x8e",
+                        "\xc4\x8d","\xc4\x8f","\xc5\x88","\xc5\x99","\xc5\xa1","\xc5\xa5","\xc5\xbe", //czech utf-8
+                        "\xc4\x8c","\xc4\x8e","\xc5\x87","\xc5\x98","\xc5\xa0","\xc5\xa4","\xc5\xbd"));
+
         $vowels     = array_flip(array(
-                        'a','e','i','o','y','u',
-                        'A','E','I','O','Y','U',
-                        '·','È','Ï','Ì','Û','˝','˙','˘',            //czech windows-1250
-                        '¡','…','Ã','Õ','”','›','⁄','Ÿ',
-                        '√°','√©','ƒõ','√≠','√≥','√Ω','√∫','≈Ø',    //czech utf-8
-                        '√Å','√â','ƒö','√ç','√ì','√ù','√ö','≈Æ'));
+                        'a','e','i','o','u','y',
+                        'A','E','I','O','U','Y',
+                        "\xe1","\xe9","\xec","\xed","\xf3","\xfa","\xf9","\xfd",  //czech windows-1250
+                        "\xc1","\xc9","\xcc","\xcd","\xd3","\xda","\xd9","\xdd",
+                        "\xc3\xa1","\xc3\xa9","\xc4\x9b","\xc3\xad","\xc3\xb3","\xc3\xba","\xc5\xaf","\xc3\xbd", //czech utf-8
+                        "\xc3\x81","\xc3\x89","\xc4\x9a","\xc3\x8d","\xc3\x93","\xc3\x9a","\xc5\xae","\xc3\x9d"));
 
         $before_r   = array_flip(array(
                         'b','B','c','C','d','D','f','F','g','G','k','K','p','P','r','R','t','T','v','V',
-                        'Ë','»','Ô','œ','¯','ÿ','ù','ç',                  //czech windows-1250
-                        'ƒç','ƒå','ƒè','ƒé','≈t','≈_','≈•','≈§',          //czech utf-8
-                        ));
+                        "\xe8","\xc8","\xef","\xcf","\xf8","\xd8","\x9d","\x8d",  //czech windows-1250
+                        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4"));
 
         $before_l   = array_flip(array(
                         'b','B','c','C','d','D','f','F','g','G','k','K','l','L','p','P','t','T','v','V',
-                        'Ë','»','Ô','œ','ù','ç',                          //czech windows-1250
-                        'ƒç','ƒå','ƒè','ƒé','≈•','≈§',                    //czech utf-8
-                        ));
+                        "\xe8","\xc8","\xef","\xcf","\x9d","\x8d",  //czech windows-1250
+                        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\xa5","\xc5\xa4")); //czech utf-8
 
         $before_h   = array_flip(array('c', 'C', 's', 'S'));
 

@@ -555,7 +555,7 @@ class TexyDomLine extends TexyTextualElement
     public function toHtml()
     {
         $html = parent::toHtml();
-        $wf = new TexyWellForm();
+        $wf = new TexyHtmlWellForm();
         $html = $wf->process($html);
         $html = Texy::unfreezeSpaces($html);
         $html = TexyHtml::checkEntities($html);
