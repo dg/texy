@@ -8,7 +8,7 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
@@ -93,7 +93,7 @@ class TexyDefinitionListModule extends TexyListModule
         //   [11] => - * +
 
         $texy =  $this->texy;
-        $el = new TexyListElement($texy);
+        $el = new TexyBlockElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->tag = 'dl';
 

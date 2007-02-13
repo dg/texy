@@ -8,7 +8,7 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
@@ -70,7 +70,6 @@ class TexyPhraseModule extends TexyModule
      */
     public function init()
     {
-
         // strong & em speciality *** ... *** !!! its not good!
         if (@$this->allowed['***'] !== FALSE)
             $this->texy->registerLinePattern(
@@ -79,6 +78,23 @@ class TexyPhraseModule extends TexyModule
                 '#(?<!\*)\*\*\*(?!\ |\*)(.+)<MODIFIER>?(?<!\ |\*)\*\*\*(?!\*)()<LINK>??()#U',
                 $this->allowed['***']
             );
+
+        /*
+                '#((?>(?:[*+-^_"~`])+))(\S.+)<MODIFIER>?(?<!\ )(?1)<LINK>?#'
+                '#(?<!$ch)\*\*\*(?!\ |\*)(.+)<MODIFIER>?    (?<!\ |\*)\*\*\*(?!\*)()<LINK>??()#U',
+                '#(?<!\*)\*\*\*(?!\ |\*)(.+)<MODIFIER>?    (?<!\ |\*)\*\*\*(?!\*)()<LINK>??()#U',
+                '#(?<!\*)\*\*  (?!\ |\*)(.+)<MODIFIER>?    (?<!\ |\*)\*\*  (?!\*)<LINK>??()#U',
+                '#(?<!\*)\*    (?!\ |\*)(.+)<MODIFIER>?    (?<!\ |\*)\*    (?!\*)<LINK>??()#U',
+                '#(?<!\+)\+\+  (?!\ |\+)(.+)<MODIFIER>?    (?<!\ |\+)\+\+  (?!\+)()#U',
+                '#(?<!\-)\-\-  (?!\ |\-)(.+)<MODIFIER>?    (?<!\ |\-)\-\-  (?!\-)()#U',
+                '#(?<!\^)\^\^  (?!\ |\^)(.+)<MODIFIER>?    (?<!\ |\^)\^\^  (?!\^)()#U',
+                '#(?<!\_)\_\_  (?!\ |\_)(.+)<MODIFIER>?    (?<!\ |\_)\_\_  (?!\_)()#U',
+                '#(?<!\")\"    (?!\ )   ([^\"]+)<MODIFIER>?(?<!\ )\"       (?!\")<LINK>??()#U',
+                '#(?<!\~)\~    (?!\ )   ([^\~]+)<MODIFIER>?(?<!\ )\~       (?!\~)<LINK>??()#U',
+                '#(?<!\~)\~\~  (?!\ |\~)(.+)<MODIFIER>?    (?<!\ |\~)\~\~  (?!\~)<LINK>??()#U',
+                '#       \`\`           (\S[^:HASH:]*)     (?<!\ )\`\`                   ()#U',
+                '#       \`             (\S[^:HASH:]*)<MODIFIER>?(?<!\ )\`               ()#U'
+        */
 
         // **strong**
         if (@$this->allowed['**'] !== FALSE)

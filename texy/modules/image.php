@@ -8,7 +8,7 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
@@ -146,8 +146,9 @@ class TexyImageModule extends TexyModule
 
 
         $elImage = new TexyImageElement($this->texy);
-        $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $elImage->setImagesRaw($mURLs);
+        $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        //$elImage->setImagesRaw($mURLs);
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);

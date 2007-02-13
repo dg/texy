@@ -8,7 +8,7 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
@@ -73,8 +73,9 @@ class TexyImageDescModule extends TexyModule
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         $elImage = new TexyImageElement($this->texy);
-        $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
         $elImage->setImagesRaw($mURLs);
+        $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
+        //$elImage->setImagesRaw($mURLs);
 
         $el->modifier->hAlign = $elImage->modifier->hAlign;
         $elImage->modifier->hAlign = NULL;

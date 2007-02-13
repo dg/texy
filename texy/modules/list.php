@@ -8,7 +8,7 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
@@ -97,7 +97,7 @@ class TexyListModule extends TexyModule
         //    [5] => bullet * + - 1) a) A) IV)
 
         $texy =  $this->texy;
-        $el = new TexyListElement($texy);
+        $el = new TexyBlockElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         $bullet = '';
@@ -152,7 +152,7 @@ class TexyListModule extends TexyModule
             //    [7] => {style}
             //    [8] => >
 
-        $elItem = new TexyListItemElement($texy);
+        $elItem = new TexyBlockElement($texy);
         $elItem->tag = 'li';
         $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
@@ -190,22 +190,3 @@ class TexyListModule extends TexyModule
 } // TexyListModule
 
 
-
-
-/**
- * HTML ELEMENT OL / UL / DL
- */
-class TexyListElement extends TexyBlockElement
-{
-}
-
-
-
-
-
-/**
- * HTML ELEMENT LI / DL
- */
-class TexyListItemElement extends TexyBlockElement
-{
-}

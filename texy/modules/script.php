@@ -8,7 +8,7 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
@@ -61,7 +61,7 @@ class TexyScriptModule extends TexyModule
             array_walk($args, 'trim');
         }
 
-        $el = new TexyScriptElement($this->texy);
+        $el = new TexyTextualElement($this->texy);
 
         do {
             if ($this->handler === NULL) break;
@@ -105,10 +105,3 @@ class TexyScriptModule extends TexyModule
 } // TexyScriptModule
 
 
-
-/**
- * Texy! ELEMENT SCRIPTS + VARIABLES
- */
-class TexyScriptElement extends TexyTextualElement
-{
-}

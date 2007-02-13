@@ -8,7 +8,7 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
@@ -146,7 +146,8 @@ class TexyTableModule extends TexyModule
         //    [5] => >
         //    [6] => _
 
-        $elRow = new TexyTableRowElement($this->texy);
+        $elRow = new TexyBlockElement($this->texy);
+        $elRow->tag = 'tr';
         $elRow->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
         if ($this->row % 2 == 0) {
             if ($this->oddClass) $elRow->modifier->classes[] = $this->oddClass;
@@ -194,7 +195,7 @@ class TexyTableModule extends TexyModule
             }
 
             $elField = new TexyTableFieldElement($texy);
-            $elField->isHead = ($this->isHead || ($mHead == '*'));
+            $elField->tag = ($this->isHead || ($mHead == '*')) ? 'th' : 'td';
             if (isset($this->colModifier[$col]))
                 $elField->modifier->copyFrom($this->colModifier[$col]);
             $elField->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
@@ -246,19 +247,6 @@ class TexyTableElement extends TexyBlockElement
 
 
 
-/**
- * HTML ELEMENT TR
- */
-class TexyTableRowElement extends TexyBlockElement
-{
-    public $tag = 'tr';
-
-} // TexyTableRowElement
-
-
-
-
-
 
 /**
  * HTML ELEMENT TD / TH
@@ -267,11 +255,9 @@ class TexyTableFieldElement extends TexyTextualElement
 {
     public $colSpan = 1;
     public $rowSpan = 1;
-    public $isHead;
 
     protected function generateTags(&$tags)
     {
-        $this->tag = $this->isHead ? 'th' : 'td';
         parent::generateTags($tags);
         if ($this->colSpan <> 1) $tags[$this->tag]['colspan'] = (int) $this->colSpan;
         if ($this->rowSpan <> 1) $tags[$this->tag]['rowspan'] = (int) $this->rowSpan;

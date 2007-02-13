@@ -39,4 +39,4 @@ Choose buttons and look at exemplary HTML code in directory /support-us/
 Copyright
 ---------
 
-Texy! (C) David Grudl, 2004-2006
+Texy! (C) David Grudl, 2004-2007

@@ -8,18 +8,18 @@
  *
  * @author     David Grudl aka -dgx- <dave@dgx.cz>
  * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2006 David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
- * @version    1.2 for PHP5 ONLY $Revision$ $Date$
+ * @version    2.0beta for PHP5 $Revision$ $Date$
  */
 
 
 if (version_compare(PHP_VERSION , '5.0.0', '<'))
     die('Texy!: too old version of PHP!');
 
-define('TEXY', 'Version 1.2 for PHP5 $Revision$');
+define('TEXY', 'Version 2.0beta for PHP5 $Revision$');
 
 /**
  * Absolute filesystem path to the Texy package
@@ -359,7 +359,7 @@ class Texy
         $saveLineWrap = $this->formatterModule->lineWrap;
         $this->formatterModule->lineWrap = FALSE;
 
-        $text = $this->toHtml();
+        $text = $this->DOM->toHtml();
 
         $this->formatterModule->lineWrap = $saveLineWrap;
 
