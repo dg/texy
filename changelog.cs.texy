@@ -1,0 +1,140 @@
+Changelog
+=========
+
+Verze 1.1b
+----------
+
+1. 2. 2007 .[date]
+
+- FIX: opraveny tabulky v TexyLongWordsModule & TexyQuickCorrectModule
+- FIX: oprava TexyFormatterModule (chybějící mezery v HTML blocks)
+- CHG: zobrazují se HTML komentáře
+- NEW: verze 1.1 nyní také podporuje "proměnné v odkazech":http://forum.texy.info/viewtopic.php?id=316
+
+
+Verze 1.1 
+----------
+
+6. 6. 2006 .[date]
+
+Opraveno a vylepšeno zpracování entit:
+- FIX: Texy! nyní "ignoruje":[TryPage?bookmark=ggis3] neznámé jmenné entity (tohle byla asi jediná věc, co mohla způsobit non-well-formed výstup, proto určitě na 1.1 upgradujte).
+- CHG: ve výstup jsou nyní veškeré entity posílány v numerické podobě `&#**;`, s výjimkou `&amp; &quot; &lt; &gt;`. Řeší to problémy s určitými RSS čtečkami apod.
+- FIX: opraveno chybné zpracování entit v toText()
+- CHG: toText() také odstraní `&shy;` a `&nbsp;` převádí na obyčejné mezery
+- **upozornění:** pokud nepoužíváte kódování UTF-8, tak toText() bude vyžadovat rozšíření "iconv":www.php.net/iconv. V PHP 5 je dostupné standardně.
+
+
+Verze 1.0 Final
+------------------
+
+18. 4. 2006 .[date]
+
+- FIX: "toText() odstraní křížek":http://forum.texy.info/viewtopic.php?id=221
+- FIX: "odkaz bez uvozovek v code tagu":http://forum.texy.info/viewtopic.php?id=244
+- FIX: "klikatelný obrázek s popiskem":http://forum.texy.info/viewtopic.php?id=108 (a "také":http://forum.texy.info/viewtopic.php?id=182)
+- FIX: "kompatibilita s novými verzemi PHP":http://forum.texy.info/viewtopic.php?id=171
+- FIX: nevypouští prázdné attributy ("demo":[TryPage?bookmark=fvogb])
+- CHG: znak pro trademark změněn z `&#153;` na `&#8482;`
+- CHG: výchozí `alt` pro obrázky je nyní prázdný řetězec
+
+
+Rozšíření funkcí:
+- NEW: "uživatelské atributy":http://forum.texy.info/viewtopic.php?id=250
+- CHG: povolené tagy dostupné přes `$texy->allowedTags`, mělo by v budoucnu nahradit `$texy->htmlModule->allowed`
+- NEW: nový režim "zalamování řádků":http://forum.texy.info/viewtopic.php?pid=893 via `$texy->mergeLines = false`
+- INT: PHP5-like constructors
+
+
+Fix pro 1.0rc5
+---------------------------
+
+22. 7. 2005 .[date]
+
+- FIX: kompatibilita s *divnou* verzí PHP 4.3.11 a 4.4.0 ("viz fórum":http://forum.texy.info/viewtopic.php?pid=534)
+
+
+Fix pro 1.0rc5
+---------------------------
+
+30. 5. 2005 .[date]
+
+- CHG: `<td></td>` upraveno na `<td>&nbsp;</td>`
+
+
+Verze 1.0rc5 
+---------------------------
+
+25. 5. 2005 .[date]
+
+- CHG: **pozor:** změny názvů pro callbacky:
+   - `$texy->blockModule->codeHandler` namísto `$texy->blockModule->userFunction`
+   - `$texy->referenceHandler` namísto `$texy->userReferences`
+- CHG: **pozor:** modifikátor vždy musí předcházet mezera (demo:[TryPage?bookmark=32wpp])
+- NEW: podpora Texy! komentářů &sect;&sect; (demo:[TryPage?bookmark=61quw])
+- NEW: rychlé odkazy `test :[url]` (demo:[TryPage?bookmark=anq0p])
+- NEW: dokonalejší přeformátování HTML (demo:[TryPage?bookmark=icsh4], fórum:http://forum.texy.info/viewtopic.php?id=105)
+- NEW: vkládání externích dat jako `{{ getPrice(produkt) }}` (fórum:http://forum.texy.info/viewtopic.php?id=128) *(sponzorem vývoje této funkce je společnost "Internet Mall":www.MALL.cz, a.s.)*
+
+
+
+Verze 1.0rc4
+----------------------
+
+16. 3. 2005 .[date]
+
+- NEW: nová "vychytávka":[TryPage?bookmark=qqa7q] - blok `/-- source`
+- CHG: každý modul má zkratku (referenci) ve formátu `$texy->xyzModule`
+- CHG: **aktivace UTF** přes `$texy->utf = true;` 
+- CHG: vylepšení tabulek
+- CHG: **úprava syntaxe** číslovaných seznamů:
+   - je možnost syntaxi konfigurovat, např. `$texy->listModule->allowed['*'] = false`
+   - upraven zápis v "podobě":[TryPage?bookmark=xf3av] 1. .... 2. ...., protože kolidoval se zápisem data na začátku řádku
+   - upraven zápis v "podobě":[TryPage?bookmark=dap6f] I. .... II. ...., protože kolidoval s iniciálou na začátku řádku
+   - buď použijte 1) ..... 2) ..... I) ..... II) ......
+   - nebo "tečkovaný" zápis, ale **následovaný nejméně "dvěma mezerami":[TryPage?bookmark=zdxwb]**
+
+
+
+Verze 1.0rc3 
+---------------------------
+
+9. 3. 2005 .[date]
+
+- NEW: podpora `<caption>`, "demo":[TryPage?bookmark=21eq4]
+- NEW: nový příklad "user syntax" ukazuje, jak změnit nebo doplnit syntax
+- NEW: **kompaktní** jednosouborová verze, ideální pokud nechcete kód upravovat, ale jen používat na serveru
+- CHG: modul TexySmiliesModule se aktivuje přes `$allowed = true;`, viz příklad "smilies"
+- další drobné úpravy v chování `$allowed` u dalších modulů
+
+
+
+Verze 1.0rc2 
+---------------------------------
+
+27. 2. 2005 .[date]
+
+- NEW: metody `safeMode()` a `trustMode()`
+- NEW: modul **TexyHtmlModule:** - seznam všech povolených tagů určuje proměnná $allowed
+- CHG: modul **TexyBlockModule:** 
+   - ukázalo se, že blok `/--notexy` nevyhovuje všem požadavkům, takže je nahrazen bloky `/--text` a `/--html`. "Demo":[TryPage?bookmark=nwpm1]
+   
+
+
+Verze 1.0rc1 
+-----------------------
+
+23. 2. 2005 .[date]
+
+- NEW: obrázky podporují **width & height** atributy, včetně autodetekce nebo manuálního zadání. Syntax je `[* image.gif 50x30 *]`
+- NEW: kromě dynamických titulků lze použít i **fixní**. Další informace najdete v příkladu 'Headings'
+- FIX: podpora pro "dlouhé smajlíky" jako `:-)))))` 
+
+
+<!--
+NEW: New functionality
+FIX: Fixed bug
+CHG: Changed functionality or behaviour
+INT: Internal change
+P45: Migration from PHP 4 to PHP 5
+-->

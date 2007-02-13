@@ -162,7 +162,7 @@ class TexyPhraseModule extends TexyModule {
 
         if ($mLink) {
             $el = &new TexyLinkElement($this->texy);
-            $el->setLinkRaw($mLink);
+            $el->setLinkRaw($mLink, $mContent);
             $mContent = $lineParser->element->appendChild($el, $mContent);
         }
 

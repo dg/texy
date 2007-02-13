@@ -194,7 +194,7 @@ class TexyFormatterModule extends TexyModule {
         );
 
         // remove \n
-        $text = str_replace("\n", '', $text);
+        $text = str_replace("\n", ' ', $text);
 
         // shrink multiple spaces
         $text = preg_replace('# +#', ' ', $text);

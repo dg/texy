@@ -12,14 +12,14 @@
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
- * @version    1.1 for PHP4 & PHP5 $Date$ $Revision$
+ * @version    1.1b for PHP4 & PHP5 $Date$ $Revision$
  */
 
 
 if (version_compare(PHP_VERSION , '4.3.3', '<'))
     die('Texy!: too old version of PHP!');
 
-define('TEXY', 'Version 1.1 for PHP4 & PHP5 $Revision$');
+define('TEXY', 'Version 1.1b for PHP4 & PHP5 $Revision$');
 
 /**
  * Absolute filesystem path to the Texy package
@@ -724,7 +724,7 @@ class Texy {
     function wash($text)
     {
             ///////////   REMOVE SPECIAL CHARS (used by Texy!)
-        return strtr($text, "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", '           ');
+        return preg_replace('#[\x15-\x1F]+#', '', $text);
     }
 
 

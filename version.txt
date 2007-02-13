@@ -1,1 +1,1 @@
-Texy! Version 1.1 for PHP4 & PHP5 (released 2006/06/06 DIABLO!)
+Texy! Version 1.1b for PHP4 & PHP5 (released 2007/02/01)

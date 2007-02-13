@@ -167,7 +167,7 @@ class TexyLinkModule extends TexyModule {
         if (!$this->allowed->quickLink) return $mContent;
 
         $elLink = &new TexyLinkElement($this->texy);
-        $elLink->setLinkRaw($mLink);
+        $elLink->setLinkRaw($mLink, $mContent);
         return $lineParser->element->appendChild($elLink, $mContent);
     }
 
@@ -273,13 +273,14 @@ class TexyLinkElement extends TexyInlineTagElement {
     }
 
 
-    function setLinkRaw($link)
+    function setLinkRaw($link, $text='')
     {
         if (@$link{0} == '[' && @$link{1} != '*') {
             $elRef = & $this->texy->linkModule->getReference( substr($link, 1, -1) );
             if ($elRef) {
                 $this->modifier->copyFrom($elRef->modifier);
                 $link = $elRef->URL . $elRef->query;
+                $link = str_replace('%s', urlencode(Texy::wash($text)), $link);
 
             } else {
                 $this->setLink(substr($link, 1, -1));
