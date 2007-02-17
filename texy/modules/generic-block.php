@@ -82,18 +82,31 @@ class TexyGenericBlockModule extends TexyModule
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $el->parse($mContent);
 
+        // check content type
+        $contentType = TexyDomElement::CONTENT_NONE;
+        if (strpos($el->content, "\x17") !== FALSE) {
+            $contentType = TexyDomElement::CONTENT_BLOCK;
+        } elseif (strpos($el->content, "\x16") !== FALSE) {
+            $contentType = TexyDomElement::CONTENT_TEXTUAL;
+        } else {
+            if (strpos($el->content, "\x15") !== FALSE) $contentType = TexyDomElement::CONTENT_INLINE;
+            $s = trim( preg_replace('#['.TEXY_HASH.']+#', '', $el->content) );
+            if (strlen($s)) $contentType = TexyDomElement::CONTENT_TEXTUAL;
+        }
+
         // specify tag
-        if ($el->contentType == TexyDomElement::CONTENT_TEXTUAL) $el->tag = 'p';
+        if ($contentType == TexyDomElement::CONTENT_TEXTUAL) $el->tag = 'p';
         elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
-        elseif ($el->contentType == TexyDomElement::CONTENT_BLOCK) $el->tag = '';
+        elseif ($contentType == TexyDomElement::CONTENT_BLOCK) $el->tag = '';
         else $el->tag = 'div';
 
         // add <br />
         if ($el->tag && (strpos($el->getContent(), "\n") !== FALSE)) {
             $elBr = new TexyTextualElement($this->texy);
             $elBr->tag = 'br';
+            $key = $this->texy->hashKey($elBr, TexyDomElement::CONTENT_NONE); // !!!
             $el->setContent(strtr($el->getContent(),
-                              array("\n" => $el->appendChild($elBr))
+                              array("\n" => $key)
                            ), TRUE);
         }
 

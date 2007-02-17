@@ -175,6 +175,7 @@ class TexyUrl
         if ($this->flags & self::RELATIVE) {
             return $this->URL = $this->root . $this->value;
         }
+        return NULL;
     }
 
 

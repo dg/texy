@@ -33,12 +33,20 @@ class TexyImageDescModule extends TexyModule
     public $leftClass  = 'image left';   // left-floated box class
     public $rightClass = 'image right';  // right-floated box class
 
+
+    public function __construct($texy)
+    {
+        parent::__construct($texy);
+        $this->texy->allowed['Image.desc'] = TRUE;
+    }
+
+
     /**
      * Module initialization.
      */
     public function init()
     {
-        if ($this->texy->imageModule->allowed)
+        if ($this->texy->allowed['Image.desc'])
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlock',
@@ -80,7 +88,7 @@ class TexyImageDescModule extends TexyModule
         $el->modifier->hAlign = $elImage->modifier->hAlign;
         $elImage->modifier->hAlign = NULL;
 
-        $content = $el->appendChild($elImage);
+        $content = $this->texy->hashKey($elImage, TexyDomElement::CONTENT_NONE); // !!!
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);
@@ -91,13 +99,19 @@ class TexyImageDescModule extends TexyModule
                 $elLink->setLinkRaw($mLink);
             }
 
-            $content = $el->appendChild($elLink, $content);
+            $elLink->behaveAsOpening = TRUE;
+            $keyOpen  = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
+            $elLink->behaveAsOpening = FALSE;
+            $keyClose = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
+            $content = $keyOpen . $content . $keyClose;
         }
+        $elImg = new TexyTextualElement($this->texy);
+        $elImg->setContent($content, TRUE);
+        $el->appendChild($elImg);
 
         $elDesc = new TexyGenericBlockElement($this->texy);
         $elDesc->parse(ltrim($mContent));
-        $content .= $el->appendChild($elDesc);
-        $el->setContent($content, TRUE);
+        $el->appendChild($elDesc);
 
         if ($this->handler)
             if (call_user_func_array($this->handler, array($el)) === FALSE) return;
@@ -126,7 +140,7 @@ class TexyImageDescModule extends TexyModule
 /**
  * HTML ELEMENT IMAGE (WITH DESCRIPTION)
  */
-class TexyImageDescElement extends TexyTextualElement
+class TexyImageDescElement extends TexyBlockElement
 {
 
 

@@ -46,7 +46,7 @@ class TexyScriptModule extends TexyModule
      * Callback function: {{...}}
      * @return string
      */
-    public function processLine($parser, $matches, $tag)
+    public function processLine($parser, $matches)
     {
         list(, $mContent) = $matches;
         //    [1] => ...
@@ -88,7 +88,8 @@ class TexyScriptModule extends TexyModule
 
         } while(0);
 
-        return $parser->element->appendChild($el);
+        return $this->texy->hashKey($el, $contentType); // !!!
+        return $this->texy->hashKey($el, $el->contentType);
     }
 
 

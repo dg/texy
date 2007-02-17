@@ -30,69 +30,18 @@ if (!defined('TEXY')) die();
 abstract class TexyDomElement
 {
     const CONTENT_NONE =    1;
-    const CONTENT_TEXTUAL = 2;
-    const CONTENT_BLOCK =   3;
+    const CONTENT_INLINE =  2;
+    const CONTENT_TEXTUAL = 3;
+    const CONTENT_BLOCK =   4;
 
     public $texy; // parent Texy! object
-    public $contentType = TexyDomElement::CONTENT_NONE;
-    public $behaveAsOpening; // !!!
+    public $modifier;
+    public $tag;
 
 
     public function __construct($texy)
     {
         $this->texy = $texy;
-    }
-
-
-
-    /**
-     * Convert element to HTML string
-     * @abstract
-     */
-    abstract public function toHtml();
-
-
-
-
-    // for easy Texy! DOM manipulation
-    protected function broadcast()
-    {
-        // build DOM->elements list
-        $this->texy->getDOM()->elements[] = $this;
-    }
-
-
-    /**
-     * Undefined property usage prevention
-     */
-    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
-    function __set($nm, $val) { $this->__get($nm); }
-    private function __unset($nm) { $this->__get($nm); }
-    private function __isset($nm) { $this->__get($nm); }
-
-}  // TexyDomElement
-
-
-
-
-
-
-
-
-/**
- * This elements represents one HTML element
- * @abstract
- */
-class TexyHtmlElement extends TexyDomElement
-{
-    public $modifier;
-    public $tag;
-
-
-    // constructor
-    public function __construct($texy)
-    {
-        $this->texy =  $texy;
         $this->modifier = new TexyModifier($texy);
     }
 
@@ -118,7 +67,6 @@ class TexyHtmlElement extends TexyDomElement
     }
 
 
-
     /**
      * Generate HTML element content
      * @abstract
@@ -130,8 +78,9 @@ class TexyHtmlElement extends TexyDomElement
     /**
      * Convert element to HTML string
      */
-    public function toHtml()
+    public function __toString()
     {
+        $tags = array();
         $this->generateTags($tags);
 
         return TexyHtml::openingTags($tags)
@@ -141,24 +90,16 @@ class TexyHtmlElement extends TexyDomElement
 
 
 
-    protected function broadcast()
-    {
-        parent::broadcast();
 
-        // build $texy->DOM->elementsById list
-        if ($this->modifier->id)
-            $this->texy->getDOM()->elementsById[$this->modifier->id] = $this;
+    /**
+     * Undefined property usage prevention
+     */
+    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
+    function __set($nm, $val) { $this->__get($nm); }
+    private function __unset($nm) { $this->__get($nm); }
+    private function __isset($nm) { $this->__get($nm); }
 
-        // build $texy->DOM->elementsByClass list
-        if ($this->modifier->classes)
-            foreach ($this->modifier->classes as $class)
-                $this->texy->getDOM()->elementsByClass[$class][] = $this;
-    }
-
-
-}  // TexyHtmlElement
-
-
+}  // TexyDomElement
 
 
 
@@ -169,10 +110,10 @@ class TexyHtmlElement extends TexyDomElement
 
 
 /**
- * This element represent array of other blocks (TexyHtmlElement)
+ * This element represent array of other blocks (TexyDomElement)
  *
  */
-class TexyBlockElement extends TexyHtmlElement
+class TexyBlockElement extends TexyDomElement
 {
     protected $children = array();
 
@@ -182,25 +123,24 @@ class TexyBlockElement extends TexyHtmlElement
     // $child must be TexyBlockElement or TexyTextualElement
     public function appendChild($child)
     {
-/* !!!
         if (!($child instanceof TexyBlockElement) && !($child instanceof TexyTextualElement))
             die('Only TexyInlineTagElement allowed.');
-*/
+
         $this->children[] = $child;
-        $this->contentType = max($this->contentType, $child->contentType);
     }
 
     public function getChild($key)
     {
         if (isset($this->children[$key]))
            return $this->children[$key];
+        return NULL;
     }
 
     protected function generateContent()
     {
         $html = '';
         foreach ($this->children as $child)
-            $html .= $child->toHtml();
+            $html .= $child->__toString();
 
         return $html;
     }
@@ -220,15 +160,6 @@ class TexyBlockElement extends TexyHtmlElement
 
 
 
-    protected function broadcast()
-    {
-        parent::broadcast();
-
-        // apply to all children
-        foreach ($this->children as $child)
-            $child->broadcast();
-    }
-
 }  // TexyBlockElement
 
 
@@ -245,12 +176,10 @@ class TexyBlockElement extends TexyHtmlElement
  * Text represents $content and $children is array of TexyInlineTagElement
  *
  */
-class TexyTextualElement extends TexyBlockElement
+class TexyTextualElement extends TexyDomElement
 {
     public $content;                    // string
     protected $htmlSafe = FALSE;        // is content HTML-safe?
-
-
 
 
     public function setContent($text, $isHtmlSafe = FALSE)
@@ -283,17 +212,7 @@ class TexyTextualElement extends TexyBlockElement
     protected function generateContent()
     {
         $content = $this->safeContent(TRUE);
-
-        if ($this->children) {
-            $table = array();
-            foreach ($this->children as $key => $child) {
-                $child->behaveAsOpening = Texy::isHashOpening($key);
-                $table[$key] = $child->toHtml();
-            }
-
-            return strtr($content, $table);
-        }
-
+        $content = $this->texy->hashReplace($content);
         return $content;
     }
 
@@ -310,52 +229,6 @@ class TexyTextualElement extends TexyBlockElement
 
 
 
-
-    /**
-     * Generate unique HASH key - useful for freezing (folding) some substrings
-     * Key consist of unique chars \x19, \x1B-\x1E (noncontent) (or \x1F detect opening tag)
-     *                             \x1A, \x1B-\x1E (with content)
-     * @return string
-     * @static
-     */
-    protected function hashKey($contentType = NULL, $opening = NULL)
-    {
-        $border = ($contentType == self::CONTENT_NONE) ? "\x19" : "\x1A";
-        return $border . ($opening ? "\x1F" : "") . strtr(base_convert(count($this->children), 10, 4), '0123', "\x1B\x1C\x1D\x1E") . $border;
-    }
-
-
-    /**
-     *
-     */
-    protected function isHashOpening($hash)
-    {
-        return $hash{1} == "\x1F";
-    }
-
-
-
-    public function appendChild($child, $innerText = NULL)
-    {
-        $this->contentType = max($this->contentType, $child->contentType);
-
-        if ($child instanceof TexyInlineTagElement) {
-            $keyOpen  = $this->hashKey($child->contentType, TRUE);
-            $keyClose = $this->hashKey($child->contentType, FALSE);
-
-            $this->children[$keyOpen]  = $child;
-            $this->children[$keyClose] = $child;
-            return $keyOpen . $innerText . $keyClose;
-        }
-
-        $key = $this->hashKey($child->contentType);
-        $this->children[$key] = $child;
-        return $key;
-    }
-
-
-
-
 }  // TexyTextualElement
 
 
@@ -369,16 +242,18 @@ class TexyTextualElement extends TexyBlockElement
  * Used as children of TexyTextualElement
  *
  */
-class TexyInlineTagElement extends TexyHtmlElement
+class TexyInlineTagElement extends TexyDomElement
 {
     private $closingTag;
+    public $behaveAsOpening;
 
 
 
     // convert element to HTML string
-    public function toHtml()
+    public function __toString()
     {
         if ($this->behaveAsOpening) {
+            $tags = array();
             $this->generateTags($tags);
             $this->closingTag = TexyHtml::closingTags($tags);
             return TexyHtml::openingTags($tags);
@@ -431,8 +306,8 @@ class TexyDom extends TexyBlockElement
         $text = Texy::wash($text);
 
             ///////////   STANDARDIZE LINE ENDINGS TO UNIX-LIKE  (DOS, MAC)
-        $text = str_replace("\r\n", TEXY_NEWLINE, $text); // DOS
-        $text = str_replace("\r", TEXY_NEWLINE, $text); // Mac
+        $text = str_replace("\r\n", "\n", $text); // DOS
+        $text = strtr($text, "\r", "\n"); // Mac
 
             ///////////   REPLACE TABS WITH SPACES
         $tabWidth = $this->texy->tabWidth;
@@ -466,9 +341,9 @@ class TexyDom extends TexyBlockElement
      * and call all post-processing modules
      * @return string
      */
-    public function toHtml()
+    public function __toString()
     {
-        $html = parent::toHtml();
+        $html = parent::__toString();
 
         $obj = new TexyHtmlWellForm();
         $html = $obj->process($html);
@@ -491,20 +366,6 @@ class TexyDom extends TexyBlockElement
         return $html;
     }
 
-
-
-
-
-    /**
-     * Build list for easy access to DOM structure
-     */
-    public function buildLists()
-    {
-        $this->elements = array();
-        $this->elementsById = array();
-        $this->elementsByClass = array();
-        $this->broadcast();
-    }
 
 
 
@@ -552,28 +413,14 @@ class TexyDomLine extends TexyTextualElement
      * Convert DOM structure to (X)HTML code
      * @return string
      */
-    public function toHtml()
+    public function __toString()
     {
-        $html = parent::toHtml();
+        $html = parent::__toString();
         $wf = new TexyHtmlWellForm();
         $html = $wf->process($html);
         $html = Texy::unfreezeSpaces($html);
         $html = TexyHtml::checkEntities($html);
         return $html;
-    }
-
-
-
-
-    /**
-     * Build list for easy access to DOM structure
-     */
-    public function buildLists()
-    {
-        $this->elements = array();
-        $this->elementsById = array();
-        $this->elementsByClass = array();
-        $this->broadcast();
     }
 
 

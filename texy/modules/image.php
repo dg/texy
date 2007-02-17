@@ -45,6 +45,7 @@ class TexyImageModule extends TexyModule
     public function __construct($texy)
     {
         parent::__construct($texy);
+        $this->texy->allowed['Image.normal'] = TRUE;
 
         if (isset($_SERVER['SCRIPT_NAME'])) {
             $this->rootPrefix = dirname($_SERVER['SCRIPT_NAME']).'/'; // physical location on server
@@ -134,7 +135,7 @@ class TexyImageModule extends TexyModule
      */
     public function processLine($parser, $matches)
     {
-        if (!$this->allowed) return '';
+        if (!$this->texy->allowed['Image.normal']) return '';
 
         list(, $mURLs, $mMod1, $mMod2, $mMod3, $mMod4, $mLink) = $matches;
         //    [1] => URLs
@@ -144,11 +145,15 @@ class TexyImageModule extends TexyModule
         //    [5] => >
         //    [6] => url | [ref] | [*image*]
 
+        //foreach ($this->handlers as $handler)
+        //    if (call_user_func_array($this->handler, array($elImage)) === FALSE) return '';
 
         $elImage = new TexyImageElement($this->texy);
         $elImage->setImagesRaw($mURLs);
         $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         //$elImage->setImagesRaw($mURLs);
+
+        $keyImage = $this->texy->hashKey($elImage, TexyDomElement::CONTENT_NONE); // !!!
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);
@@ -159,16 +164,17 @@ class TexyImageModule extends TexyModule
                 $elLink->setLinkRaw($mLink);
             }
 
-            return $parser->element->appendChild(
-                $elLink,
-                $parser->element->appendChild($elImage)
-            );
+            $elLink->behaveAsOpening = TRUE;
+            $keyOpen  = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
+            $elLink->behaveAsOpening = FALSE;
+            $keyClose = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
+            return $keyOpen . $keyImage . $keyClose;
         }
 
         if ($this->handler)
             if (call_user_func_array($this->handler, array($elImage)) === FALSE) return '';
 
-        return $parser->element->appendChild($elImage);
+        return $keyImage;
     }
 
 
@@ -208,7 +214,7 @@ class TexyImageReference {
 /**
  * HTML ELEMENT IMAGE
  */
-class TexyImageElement extends TexyHtmlElement
+class TexyImageElement extends TexyDomElement
 {
     public $image;
     public $overImage;
@@ -319,7 +325,7 @@ class TexyImageElement extends TexyHtmlElement
 
     protected function requireSize()
     {
-        if ($this->width) return;
+        if ($this->width) return TRUE;
 
         $file = $this->texy->imageModule->rootPrefix . '/' . $this->image->asURL();
         if (!is_file($file)) return FALSE;
@@ -328,6 +334,7 @@ class TexyImageElement extends TexyHtmlElement
         if (!is_array($size)) return FALSE;
 
         $this->setSize($size[0], $size[1]);
+        return TRUE;
     }
 
 

@@ -192,7 +192,7 @@ class TexyPhraseModule extends TexyModule
             $this->texy->registerLinePattern(
                 $this,
                 'processPhrase',
-                '#(?<![:CHAR:])([:CHAR:]{2,})()()()\(\((.+)\)\)#U<UTF>',
+                '#(?<![:CHAR:])([:CHAR:]{2,})()()()\(\((.+)\)\)#Uu',
                 $this->allowed['()']
             );
 
@@ -234,7 +234,7 @@ class TexyPhraseModule extends TexyModule
         list($match, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         if ($mContent == NULL) {
             preg_match('#^(.)+(.+)'.TEXY_PATTERN_MODIFIER.'?\\1+()$#U', $match, $matches);
-            list($match, $mDelim, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
+            list($match, , $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         }
         //    [1] => ...
         //    [2] => (title)
@@ -246,6 +246,9 @@ class TexyPhraseModule extends TexyModule
         $tags = array_reverse(explode(' ', $tags));
         $el = NULL;
 
+        //$modifier = new TexyModifier($this->texy);
+        //$modifier->setProperties($mMod1, $mMod2, $mMod3);
+
         foreach ($tags as $tag) {
             $el = new TexyInlineTagElement($this->texy);
             $el->tag = $tag;
@@ -254,17 +257,36 @@ class TexyPhraseModule extends TexyModule
             if ($this->handler)
                 if (call_user_func_array($this->handler, array($el, $tags)) === FALSE) return '';
 
-            $mContent = $parser->element->appendChild($el, $mContent);
+            $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
+            $el->behaveAsOpening = TRUE;
+            $keyOpen  = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+            $el->behaveAsOpening = FALSE;
+            $keyClose = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+            $mContent = $keyOpen . $mContent . $keyClose;
+/*
+            $el = NHtml::el($tag);
+            if ($tag == 'acronym' || $tag == 'abbr') { $modifier->title = $mLink; $mLink=''; }
+            $el->setContent($mContent, TRUE);
+            $mContent = $el->__toString();
+*/
         }
+
+        if ($el) {
+  //          $modifier->decorate($el);
+  //          $mContent = $el->__toString();
+  //          $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
+        }
+
 
         if ($mLink) {
             $el = new TexyLinkElement($this->texy);
             $el->setLinkRaw($mLink, $mContent);
-            $mContent = $parser->element->appendChild($el, $mContent);
+            $el->behaveAsOpening = TRUE;
+            $keyOpen  = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+            $el->behaveAsOpening = FALSE;
+            $keyClose = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+            $mContent = $keyOpen . $mContent . $keyClose;
         }
-
-        if ($el)
-            $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
 
 
         return $mContent;
@@ -306,7 +328,6 @@ class TexyPhraseModule extends TexyModule
         $texy = $this->texy;
         $el = new TexyTextualElement($texy);
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
-        $el->contentType = TexyDomElement::CONTENT_TEXTUAL;
         $el->setContent($mContent, FALSE);  // content isn't html safe
         $el->tag = $this->allowed['`'];
 
@@ -315,7 +336,7 @@ class TexyPhraseModule extends TexyModule
 
         $el->safeContent(); // ensure that content is HTML safe
 
-        return $parser->element->appendChild($el);
+        return $this->texy->hashKey($el, TexyDomElement::CONTENT_TEXTUAL);
     }
 
 
@@ -334,11 +355,9 @@ class TexyPhraseModule extends TexyModule
         list(, $mContent) = $matches;
 
         $el = new TexyTextualElement($this->texy);
-        $el->contentType = TexyDomElement::CONTENT_TEXTUAL;
-//    $el->contentType = TexyDomElement::CONTENT_BLOCK;
         $el->setContent( Texy::freezeSpaces($mContent), $isHtmlSafe );
 
-        return $parser->element->appendChild($el);
+        return $this->texy->hashKey($el, TexyDomElement::CONTENT_TEXTUAL);
     }
 
 

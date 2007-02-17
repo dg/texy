@@ -34,32 +34,38 @@ class TexyLongWordsModule extends TexyModule
 
 
 
+    public function __construct($texy)
+    {
+        parent::__construct($texy);
+        $this->texy->allowed['LongWord'] = TRUE;
+    }
+
 
     public function linePostProcess($text)
     {
-        if (!$this->allowed) return $text;
+        if (empty($this->texy->allowed['LongWord'])) return $text;
 
         $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
         $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
 
         // convert nbsp + shy to single chars
         $text = strtr($text, array(
-                            '&shy;'  => $charShy,
-                            '&#173;' => $charShy,  // and &#xAD;, &#xad;, ...
+                            '&shy;'  => "\xC2\xAD",
+                            '&#173;' => "\xC2\xAD",  // and &#xAD;, &#xad;, ...
 
-                            '&nbsp;' => $charNbsp,
-                            '&#160;' => $charNbsp, // and &#xA0;
+                            '&nbsp;' => "\xC2\xA0",
+                            '&#160;' => "\xC2\xA0", // and &#xA0;
                      ));
 
         $text = preg_replace_callback(
-                            $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#<UTF>'),
+                            $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#u'),
                             array($this, '_replace'),
                             $text);
 
         // revert nbsp + shy back to user defined entities
         $text = strtr($text, array(
-                            $charShy  => $this->shy,
-                            $charNbsp => $this->nbsp,
+                            "\xC2\xAD"  => $this->shy,
+                            "\xC2\xA0" => $this->nbsp,
                      ));
         return $text;
     }
@@ -77,7 +83,7 @@ class TexyLongWordsModule extends TexyModule
 
         $chars = array();
         preg_match_all(
-                         $this->texy->translatePattern('#&\\#?[a-z0-9]+;|[:HASH:]+|.#<UTF>'),
+                         $this->texy->translatePattern('#&\\#?[a-z0-9]+;|[:HASH:]+|.#u'),
                          $mWord,
                          $chars
         );
@@ -121,7 +127,6 @@ class TexyLongWordsModule extends TexyModule
 
         $s[] = '';
         $trans[] = -1;
-        $hashCounter = $len = $counter = 0;
         foreach ($chars as $key => $char) {
             if (ord($char{0}) < 32) continue;
             $s[] = $char;
@@ -200,11 +205,8 @@ class TexyLongWordsModule extends TexyModule
         $syllables[] = implode('', $chars);
 
 
-        $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
-        $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
-
-        $text = implode($charShy, $syllables);
-        $text = strtr($text, array($charShy.$charNbsp => ' ', $charNbsp.$charShy => ' '));
+        $text = implode("\xC2\xAD", $syllables); // shy
+        $text = strtr($text, array("\xC2\xAD\xC2\xA0" => ' ', "\xC2\xA0\xC2\xAD" => ' '));
 
         return $text;
     }

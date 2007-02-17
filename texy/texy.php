@@ -26,6 +26,7 @@ define('TEXY', 'Version 2.0beta for PHP5 $Revision$');
  */
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
+require_once TEXY_DIR.'NHtml.php';
 require_once TEXY_DIR.'libs/constants.php';      // regular expressions & other constants
 require_once TEXY_DIR.'libs/modifier.php';       // modifier processor
 require_once TEXY_DIR.'libs/url.php';            // object encapsulate of URL
@@ -47,7 +48,7 @@ require_once TEXY_DIR.'modules/list.php';
 require_once TEXY_DIR.'modules/definition-list.php';
 require_once TEXY_DIR.'modules/long-words.php';
 require_once TEXY_DIR.'modules/phrase.php';
-require_once TEXY_DIR.'modules/quick-correct.php';
+require_once TEXY_DIR.'modules/typography.php';
 require_once TEXY_DIR.'modules/quote.php';
 require_once TEXY_DIR.'modules/script.php';
 require_once TEXY_DIR.'modules/table.php';
@@ -68,8 +69,8 @@ class Texy
     const ALL = TRUE;
     const NONE = FALSE;
 
-    /** @var boolean  Use UTF-8? (texy configuration) */
-    public $utf = FALSE;
+    public $encoding = 'utf-8';
+    public $utf = TRUE;
 
     /** @var int  TAB width (for converting tabs to spaces) */
     public $tabWidth = 8;
@@ -82,6 +83,8 @@ class Texy
 
     /** @var TRUE|FALSE|array  Allowed HTML tags */
     public $allowedTags;
+
+    public $allowed = array();
 
     /** @var boolean  Do obfuscate e-mail addresses? */
     public $obfuscateEmail = TRUE;
@@ -118,7 +121,7 @@ class Texy
         $tableModule,
         $imageDescModule,
         $genericBlockModule,
-        $quickCorrectModule,
+        $typographyModule,
         $longWordsModule,
         $formatterModule;
 
@@ -209,7 +212,7 @@ class Texy
         $this->genericBlockModule = new TexyGenericBlockModule($this);
 
         // post process
-        $this->quickCorrectModule = new TexyQuickCorrectModule($this);
+        $this->typographyModule = new TexyTypographyModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
         $this->formatterModule = new TexyFormatterModule($this);
     }
@@ -269,6 +272,7 @@ class Texy
      */
     protected function init()
     {
+        $this->hashes = array();
         $this->cache = array();
         $this->linePatterns  = array();
         $this->blockPatterns = array();
@@ -289,12 +293,28 @@ class Texy
      */
     public function process($text, $singleLine = FALSE)
     {
+        if (strcasecmp($this->encoding, 'utf-8') !== 0)
+            $text = iconv($this->encoding, 'utf-8', $text);
+
         if ($singleLine)
             $this->parseLine($text);
         else
             $this->parse($text);
 
-        return $this->DOM->toHtml();
+
+        $html = $this->DOM->__toString();
+
+        if (strcasecmp($this->encoding, 'utf-8') !== 0) {
+            $html = mb_convert_encoding($html, 'HTML-ENTITIES', "UTF-8");
+
+            /*
+            foreach ($i=128; $i<256; $i++) {
+                $s = iconv($this->encoding, 'UCS-2', chr($i));
+            }
+            */
+        }
+
+        return $html;
  }
 
 
@@ -336,18 +356,6 @@ class Texy
 
 
 
-    /**
-     * Convert internal DOM structure ($this->DOM) to (X)HTML code
-     * and call all post-processing modules
-     * @return string
-     */
-    public function toHtml()
-    {
-        return $this->DOM->toHtml();
-    }
-
-
-
 
     /**
      * Convert internal DOM structure ($this->DOM) to pure Text
@@ -359,7 +367,7 @@ class Texy
         $saveLineWrap = $this->formatterModule->lineWrap;
         $this->formatterModule->lineWrap = FALSE;
 
-        $text = $this->DOM->toHtml();
+        $text = $this->DOM->__toString();
 
         $this->formatterModule->lineWrap = $saveLineWrap;
 
@@ -369,67 +377,21 @@ class Texy
         $text = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $text);
 
         // entities -> chars
-        if ((int) PHP_VERSION > 4 && $this->utf) { // fastest way for PHP 5 & UTF-8
-            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-        } else {
-            // only allowed named entities
-            $text = strtr($text, array('&amp;'=>'&#38;', '&quot;'=>'&#34;', '&lt;'=>'&#60;', '&gt;'=>'&#62;'));
-
-            // numeric
-            $text = preg_replace_callback(
-                '#&(\\#x[0-9a-fA-F]+|\\#[0-9]+);#',
-                array($this, '_entityCallback'),
-                $text
-            );
-        }
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
 
         // convert nbsp to normal space and remove shy
         $text = strtr($text, array(
-            $this->utf ? "\xC2\xAD" : "\xAD" => '',  // shy
-            $this->utf ? "\xC2\xA0" : "\xA0" => ' ', // nbsp
+            "\xC2\xAD" => '',  // shy
+            "\xC2\xA0" => ' ', // nbsp
         ));
+
+        if (strcasecmp($this->encoding, 'utf-8') !== 0)
+            $text = iconv('utf-8', $this->encoding, $text);
 
         return $text;
     }
 
 
-
-
-
-    /**
-     * Callback for preg_replace_callback() in toText()
-     *
-     * @param array    matched entity
-     * @return string  decoded entity
-     */
-    private function _entityCallback($matches)
-    {
-        list(, $entity) = $matches;
-
-        $ord = ($entity{1} == 'x')
-             ? hexdec(substr($entity, 2))
-             : (int) substr($entity, 1);
-
-        if ($ord<128)  // ASCII
-            return chr($ord);
-
-        if ($this->utf) {
-            if ($ord<2048) return chr(($ord>>6)+192) . chr(($ord&63)+128);
-            if ($ord<65536) return chr(($ord>>12)+224) . chr((($ord>>6)&63)+128) . chr(($ord&63)+128);
-            if ($ord<2097152) return chr(($ord>>18)+240) . chr((($ord>>12)&63)+128) . chr((($ord>>6)&63)+128) . chr(($ord&63)+128);
-            return $match; // invalid entity
-        }
-
-        if (function_exists('iconv')) {
-            return (string) iconv(
-                'UCS-2',
-                'WINDOWS-1250//TRANSLIT',
-                pack('n', $ord)
-            );
-        }
-
-        return '?';
-    }
 
 
 
@@ -443,7 +405,7 @@ class Texy
         $this->allowedClasses = Texy::NONE;                  // no class or ID are allowed
         $this->allowedStyles  = Texy::NONE;                  // style modifiers are disabled
         $this->htmlModule->safeMode();                      // only HTML tags and attributes specified in $safeTags array are allowed
-        $this->imageModule->allowed = FALSE;                // disable images
+        $this->allowed['Image.normal'] = FALSE;                // disable images
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
     }
 
@@ -458,7 +420,7 @@ class Texy
         $this->allowedClasses = Texy::ALL;                   // classes and id are allowed
         $this->allowedStyles  = Texy::ALL;                   // inline styles are allowed
         $this->htmlModule->trustMode();                     // full support for HTML tags
-        $this->imageModule->allowed = TRUE;                 // enable images
+        $this->allowed['Image.normal'] = TRUE;                 // enable images
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
     }
 
@@ -469,14 +431,14 @@ class Texy
 
 
     /**
-     * Translate all white spaces (\t \n \r space) to meta-spaces \x15-\x18
+     * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04
      * which are ignored by some formatting functions
      * @return string
      * @static
      */
     static public function freezeSpaces($s)
     {
-        return strtr($s, " \t\r\n", "\x15\x16\x17\x18");
+        return strtr($s, " \t\r\n", "\x01\x02\x03\x04");
     }
 
 
@@ -487,7 +449,7 @@ class Texy
      */
     static public function unfreezeSpaces($s)
     {
-        return strtr($s, "\x15\x16\x17\x18", " \t\r\n");
+        return strtr($s, "\x01\x02\x03\x04", " \t\r\n");
     }
 
 
@@ -499,21 +461,10 @@ class Texy
      */
     static public function wash($text)
     {
-        return preg_replace('#[\x15-\x1F]+#', '', $text);
+        return preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $text);
     }
 
 
-
-
-
-
-    /**
-     * @static
-     */
-    static public function isHashOpening($hash)
-    {
-        return $hash{1} == "\x1F";
-    }
 
 
 
@@ -564,10 +515,9 @@ class Texy
             '<MODIFIER_H>'  => TEXY_PATTERN_MODIFIER_H,
             '<MODIFIER>'    => TEXY_PATTERN_MODIFIER,
             '<LINK>'        => TEXY_PATTERN_LINK,
-            '<UTF>'         => ($this->utf ? 'u' : ''),
-            ':CHAR:'        => ($this->utf ? TEXY_CHAR_UTF : TEXY_CHAR),
+            ':CHAR:'        => TEXY_CHAR_UTF,
             ':HASH:'        => TEXY_HASH,
-            ':HASHSOFT:'    => TEXY_HASH_NC,
+            ':HASH_N:'      => TEXY_HASH_N,
         ));
     }
 
@@ -586,6 +536,41 @@ class Texy
     {
         foreach (array_keys(get_object_vars($this)) as $key)
             $this->$key = NULL;
+    }
+
+
+    public function handle($class, $el)
+    {
+    }
+
+    private $hashes = array();
+
+    /**
+     * Generate unique HASH key - useful for freezing (folding) some substrings
+     * @return string
+     * @static
+     */
+    public function hashKey($child, $contentType)
+    {
+        static $borders = array(
+            TexyDomElement::CONTENT_NONE => "\x14",
+            TexyDomElement::CONTENT_INLINE => "\x15",
+            TexyDomElement::CONTENT_TEXTUAL => "\x16",
+            TexyDomElement::CONTENT_BLOCK => "\x17",
+        );
+        $key = $borders[$contentType]
+            . strtr(base_convert(count($this->hashes), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
+            . $borders[$contentType];
+
+        $this->hashes[$key] = $child->__toString();
+
+        return $key;
+    }
+
+
+    public function hashReplace($text)
+    {
+        return strtr($text, $this->hashes);
     }
 
 

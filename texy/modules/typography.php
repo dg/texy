@@ -26,21 +26,28 @@ if (!defined('TEXY')) die();
 /**
  * AUTOMATIC REPLACEMENTS MODULE CLASS
  */
-class TexyQuickCorrectModule extends TexyModule
+class TexyTypographyModule extends TexyModule
 {
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
-    // Czech Republic 
-    public $doubleQuotes = array('&#8222;', '&#8220;');  // left & right double quote (&bdquo; &ldquo;)
-    public $singleQuotes = array('&#8218;', '&#8216;');  // left & right single quote (&sbquo; &lsquo;)
+    // Czech Republic
+    public $doubleQuotes = array('&#8222;', '&#8220;');  // left & right double quote
+    public $singleQuotes = array('&#8218;', '&#8216;');  // left & right single quote
 
 /*
-    // UK 
-    public $doubleQuotes = array('&#8220;', '&#8221;');  // left & right double quote (&bdquo; &ldquo;)
-    public $singleQuotes = array('&#8216;', '&#8217;');  // left & right single quote (&sbquo; &lsquo;)
+    // UK
+    public $doubleQuotes = array('&#8220;', '&#8221;');  // left & right double quote
+    public $singleQuotes = array('&#8216;', '&#8217;');  // left & right single quote
 */
 
     private $from, $to;
+
+
+    public function __construct($texy)
+    {
+        parent::__construct($texy);
+        $this->texy->allowed['Typography'] = TRUE;
+    }
 
 
     /**
@@ -52,7 +59,7 @@ class TexyQuickCorrectModule extends TexyModule
           '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
                                                     => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
 
-          '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#U<UTF>'  // single ''
+          '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'  // single ''
                                                     => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
 
           '#(\S|^) ?\.{3}#m'                        => '$1&#8230;',                       // ellipsis  ...
@@ -75,10 +82,10 @@ class TexyQuickCorrectModule extends TexyModule
           '#(\d{1,3}) (\d{3}) (\d{3})#'             => '$1&#160;$2&#160;$3',              // (phone) number 1 123 123
           '#(\d{1,3}) (\d{3})#'                     => '$1&#160;$2',                      // number 1 123
 
-          '#(?<=^| |\.|,|-|\+)(\d+)([:HASHSOFT:]*) ([:HASHSOFT:]*)([:CHAR:])#m<UTF>'        // space between number and word
+          '#(?<=^| |\.|,|-|\+)(\d+)([:HASH_N:]*) ([:HASH_N:]*)([:CHAR:])#mu'        // space between number and word
                                                     => '$1$2&#160;$3$4',
 
-          '#(?<=^|[^0-9:CHAR:])([:HASHSOFT:]*)([ksvzouiKSVZOUIA])([:HASHSOFT:]*) ([:HASHSOFT:]*)([0-9:CHAR:])#m<UTF>'
+          '#(?<=^|[^0-9:CHAR:])([:HASH_N:]*)([ksvzouiKSVZOUIA])([:HASH_N:]*) ([:HASH_N:]*)([0-9:CHAR:])#mu'
                                                     => '$1$2$3&#160;$4$5',                // space between preposition and word
         );
 
@@ -92,10 +99,10 @@ class TexyQuickCorrectModule extends TexyModule
 
     public function linePostProcess($text)
     {
-        if (!$this->allowed) return $text;
+        if (!$this->texy->allowed['Typography']) return $text;
         return preg_replace($this->from, $this->to, $text);
     }
 
 
 
-} // TexyQuickCorrectModule
+} // TexyTypographyModule

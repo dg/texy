@@ -55,7 +55,7 @@ class TexyHorizLineModule extends TexyModule
      */
     public function processBlock($parser, $matches)
     {
-        list(, $mLine, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, , $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
         //    [1] => ---
         //    [2] => (title)
         //    [3] => [class]

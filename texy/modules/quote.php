@@ -31,7 +31,6 @@ class TexyQuoteModule extends TexyModule
     /** @var callback    Callback that will be called with newly created element */
     public $handler;
 
-    public $allowed;
 
 
 
@@ -39,9 +38,10 @@ class TexyQuoteModule extends TexyModule
     {
         parent::__construct($texy);
 
-        $this->allowed = (object) NULL;
-        $this->allowed->line  = TRUE;
-        $this->allowed->block = TRUE;
+        
+        $allowed = & $this->texy->allowed;
+        $allowed['Quote.line']  = TRUE;
+        $allowed['Quote.block'] = TRUE;
     }
 
 
@@ -51,18 +51,18 @@ class TexyQuoteModule extends TexyModule
      */
     public function init()
     {
-        if ($this->allowed->block)
+        if ($this->texy->allowed['Quote.block'])
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlock',
                 '#^(?:<MODIFIER_H>\n)?\>(\ +|:)(\S.*)$#mU'
             );
 
-        if ($this->allowed->line)
+        if ($this->texy->allowed['Quote.line'])
             $this->texy->registerLinePattern(
                 $this,
                 'processLine',
-                '#(?<!\>)(\>\>)(?!\ |\>)(.+)<MODIFIER>?(?<!\ |\<)\<\<(?!\<)<LINK>??()#U', 'q'
+                '#(?<!\>)(\>\>)(?!\ |\>)(.+)<MODIFIER>?(?<!\ |\<)\<\<(?!\<)<LINK>??()#U'
             );
     }
 
@@ -71,9 +71,9 @@ class TexyQuoteModule extends TexyModule
      * Callback function: >>.... .(title)[class]{style}<<:LINK
      * @return string
      */
-    public function processLine($parser, $matches, $tag)
+    public function processLine($parser, $matches)
     {
-        list(, $mMark, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
+        list(, , $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         //    [1] => **
         //    [2] => ...
         //    [3] => (title)
@@ -91,7 +91,11 @@ class TexyQuoteModule extends TexyModule
         if ($this->handler)
             if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
-        return $parser->element->appendChild($el, $mContent);
+        $el->behaveAsOpening = TRUE;
+        $keyOpen  = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+        $el->behaveAsOpening = FALSE;
+        $keyClose = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+        return $keyOpen . $mContent . $keyClose;
     }
 
 
@@ -131,7 +135,7 @@ class TexyQuoteModule extends TexyModule
                 $content .= $mContent . TEXY_NEWLINE;
             }
 
-            if (!$parser->receiveNext("#^>(?:|(\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
+            if (!$parser->receiveNext("#^>(?:|(\\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
             list(, $mSpaces, $mContent) = $matches;
         } while (TRUE);
 

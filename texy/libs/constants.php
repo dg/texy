@@ -32,14 +32,16 @@ if (!defined('TEXY')) die();
 
 
 // character classes
-define('TEXY_CHAR',             'A-Za-z\x86-\xff');       // INTERNATIONAL CHAR - USE INSTEAD OF \w
 define('TEXY_CHAR_UTF',         'A-Za-z\x86-\x{ffff}');
 define('TEXY_NEWLINE',          "\n");
 // hashing meta-charakters
-define('TEXY_HASH',             "\x15-\x1F");       // ANY HASH CHAR
-define('TEXY_HASH_SPACES',      "\x15-\x18");       // HASHED SPACE
-define('TEXY_HASH_NC',          "\x19\x1B-\x1F");   // HASHED TAG or ELEMENT (without content)
-define('TEXY_HASH_WC',          "\x1A-\x1F");       // HASHED TAG or ELEMENT (with content)
+define('TEXY_HASH',             "\x01-\x04\x14-\x1F");       // ANY HASH CHAR
+define('TEXY_HASH_SPACES',      "\x01-\x04");       // HASHED SPACE
+
+define('TEXY_HASH_N',          "\x14\x18-\x1F");    // hashed CONTENT_NONE
+define('TEXY_HASH_I',          "\x15\x18-\x1F");    // hashed CONTENT_INLINE 
+define('TEXY_HASH_T',          "\x16\x18-\x1F");    // hashed CONTENT_TEXTUAL
+define('TEXY_HASH_B',          "\x17\x18-\x1F");    // hashed CONTENT_BLOCK
 
 
 // links
@@ -105,4 +107,3 @@ foreach (get_defined_constants() as $name => $value) {
 }
 */
 
-?>

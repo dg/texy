@@ -31,7 +31,6 @@ class TexySmiliesModule extends TexyModule
     /** @var callback    Callback that will be called with newly created element */
     public $handler;
 
-    public $allowed   = FALSE;
     public $icons     = array (
         ':-)'  =>  'smile.gif',
         ':-('  =>  'sad.gif',
@@ -54,10 +53,10 @@ class TexySmiliesModule extends TexyModule
      */
     public function init()
     {
-        if ($this->allowed) {
+        if (!empty($this->texy->allowed['Image.smilies'])) {
             krsort($this->icons);
             $pattern = array();
-            foreach ($this->icons as $key => $value)
+            foreach ($this->icons as $key => $foo)
                 $pattern[] = preg_quote($key, '#') . '+';
 
             $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
@@ -100,7 +99,7 @@ class TexySmiliesModule extends TexyModule
         if ($this->handler)
             if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
-        return $parser->element->appendChild($el);
+        return $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE); // !!!
     }
 
 

@@ -30,7 +30,6 @@ if (!defined('TEXY')) die();
  */
 class TexyBlockModule extends TexyModule
 {
-    public $allowed;
     public $codeHandler;               // function myUserFunc($element)
     public $divHandler;                // function myUserFunc($element, $nonParsedContent)
     public $htmlHandler;               // function myUserFunc($element, $isHtml)
@@ -40,13 +39,13 @@ class TexyBlockModule extends TexyModule
     {
         parent::__construct($texy);
 
-        $this->allowed = (object) NULL;
-        $this->allowed->pre  = TRUE;
-        $this->allowed->text = TRUE;  // if FALSE, /--html blocks are parsed as /--text block
-        $this->allowed->html = TRUE;
-        $this->allowed->div  = TRUE;
-        $this->allowed->source = TRUE;
-        $this->allowed->comment = TRUE;
+        $allowed = & $this->texy->allowed;
+        $allowed['Block.pre']  = TRUE;
+        $allowed['Block.text'] = TRUE;  // if FALSE, /--html blocks are parsed as /--text block
+        $allowed['Block.html'] = TRUE;
+        $allowed['Block.div']  = TRUE;
+        $allowed['Block.source'] = TRUE;
+        $allowed['Block.comment'] = TRUE;
     }
 
 
@@ -91,10 +90,10 @@ class TexyBlockModule extends TexyModule
 
         if (!$mType) $mType = 'pre';                // default type
         if ($mType == 'notexy') $mType = 'html'; // backward compatibility
-        if ($mType == 'html' && !$this->allowed->html) $mType = 'text';
+        if ($mType == 'html' && !$this->texy->allowed['Block.html']) $mType = 'text';
         if ($mType == 'code' || $mType == 'samp')
-            $mType = $this->allowed->pre ? $mType : 'none';
-        elseif (!$this->allowed->$mType) $mType = 'none'; // transparent block
+            $mType = $this->texy->allowed['Block.pre'] ? $mType : 'none';
+        elseif (!$this->texy->allowed['Block.' . $mType]) $mType = 'none'; // transparent block
 
         switch ($mType) {
         case 'none':

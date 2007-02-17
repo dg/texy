@@ -33,11 +33,16 @@ class TexyFormatterModule extends TexyModule
 
 
 
+    public function __construct($texy)
+    {
+        parent::__construct($texy);
+        $this->texy->allowed['Formatter'] = TRUE;
+    }
 
 
     public function postProcess($text)
     {
-        if (!$this->allowed) return $text;
+        if (!$this->texy->allowed['Formatter']) return $text;
 
         $this->space = $this->baseIndent;
 

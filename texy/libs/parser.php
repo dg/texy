@@ -21,7 +21,7 @@ if (!defined('TEXY')) die();
 
 abstract class TexyParser
 {
-    public $element;   // TexyTextualElement
+    public $element;
 
 
     public function __construct($element)
@@ -31,7 +31,6 @@ abstract class TexyParser
 
 
     abstract public function parse($text);
-
 
 
     /**
@@ -182,7 +181,6 @@ class TexyLineParser extends TexyParser
         $texy = $element->texy;
 
         $offset = 0;
-        $hashStrLen = 0;
         $pl = $texy->getLinePatterns();
         $keys = array_keys($pl);
         $arrMatches = $arrPos = array();
@@ -244,17 +242,18 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        $text = TexyHtml::htmlChars($text, FALSE, TRUE);
+
+
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
 
         foreach ($texy->getModules() as $module)
             $text = $module->linePostProcess($text);
 
-        $element->setContent($text, TRUE);
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $text = htmlspecialchars($text);
+        //$text = TexyHtml::htmlChars($text, FALSE, TRUE);
 
-        if ($element->contentType == TexyDomElement::CONTENT_NONE) {
-            $s = trim( preg_replace('#['.TEXY_HASH.']+#', '', $text) );
-            if (strlen($s)) $element->contentType = TexyDomElement::CONTENT_TEXTUAL;
-        }
+        $element->setContent($text, TRUE);
     }
 
 } // TexyLineParser
@@ -297,7 +296,6 @@ class TexyHtmlParser extends TexyParser
         $text = TexyHtml::htmlChars($text, FALSE, TRUE);
 
         $element->setContent($text, TRUE);
-        $element->contentType == TexyDomElement::CONTENT_BLOCK;
     }
 
 } // TexyHtmlParser

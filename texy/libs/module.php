@@ -30,7 +30,6 @@ if (!defined('TEXY')) die();
 abstract class TexyModule
 {
     protected $texy;             // parent Texy! object
-    public $allowed = Texy::ALL;   // module configuration
 
 
     public function __construct($texy)

@@ -62,9 +62,10 @@ class TexyHeadingModule extends TexyModule
     {
         parent::__construct($texy);
 
-        $this->allowed = (object) NULL;
-        $this->allowed->surrounded  = TRUE;
-        $this->allowed->underlined  = TRUE;
+        
+        $allowed = & $this->texy->allowed;
+        $allowed['Heading.surrounded']  = TRUE;
+        $allowed['Heading.underlined']  = TRUE;
     }
 
 
@@ -73,7 +74,7 @@ class TexyHeadingModule extends TexyModule
      */
     public function init()
     {
-        if ($this->allowed->underlined)
+        if ($this->texy->allowed['Heading.underlined'])
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlockUnderline',
@@ -81,7 +82,7 @@ class TexyHeadingModule extends TexyModule
               . '(\#|\*|\=|\-){3,}$#mU'
             );
 
-        if ($this->allowed->surrounded)
+        if ($this->texy->allowed['Heading.surrounded'])
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlockSurround',
@@ -138,7 +139,7 @@ class TexyHeadingModule extends TexyModule
         $parser->element->appendChild($el);
 
         // document title
-        if ($this->title === NULL) $this->title = strip_tags($el->toHtml());
+        if ($this->title === NULL) $this->title = strip_tags($el->__toString());
 
         // dynamic headings balancing
         $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $el->level);
@@ -157,7 +158,7 @@ class TexyHeadingModule extends TexyModule
      */
     public function processBlockSurround($parser, $matches)
     {
-        list(, $mLine, $mChar, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, $mLine, , $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
         //    [1] => ###
         //    [2] => ...
         //    [3] => (title)
@@ -179,7 +180,7 @@ class TexyHeadingModule extends TexyModule
         $parser->element->appendChild($el);
 
         // document title
-        if ($this->title === NULL) $this->title = strip_tags($el->toHtml());
+        if ($this->title === NULL) $this->title = strip_tags($el->__toString());
 
         // dynamic headings balancing
         $this->_rangeSurround[0] = min($this->_rangeSurround[0], $el->level);

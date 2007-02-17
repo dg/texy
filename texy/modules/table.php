@@ -84,7 +84,7 @@ class TexyTableModule extends TexyModule
         $parser->moveBackward();
 
         if ($parser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_PATTERN_MODIFIER_H.'?()$#Um', $matches)) {
-            list(, $mChar, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+            list(, , $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
             //    [1] => # / =
             //    [2] => ....
             //    [3] => (title)
@@ -234,7 +234,7 @@ class TexyTableElement extends TexyBlockElement
         $html = parent::generateContent();
 
         if ($this->caption)
-            $html = $this->caption->toHtml() . $html;
+            $html = $this->caption->__toString() . $html;
 
         return $html;
     }

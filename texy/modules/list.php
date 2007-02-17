@@ -136,7 +136,7 @@ class TexyListModule extends TexyModule
     public function processItem($parser, $bullet, $indented = FALSE) {
         $texy =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
-        $patternItem = $texy->translatePattern("#^\n?($spacesBase)$bullet(\n?)(\ +)(\S.*)?<MODIFIER_H>?()$#mAU");
+        $patternItem = $texy->translatePattern("#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?<MODIFIER_H>?()$#mAU");
 
         // first line (with bullet)
         if (!$parser->receiveNext($patternItem, $matches)) {

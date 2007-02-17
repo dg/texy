@@ -31,9 +31,6 @@ class TexyHtmlModule extends TexyModule
     /** @var callback    Callback that will be called with newly created element */
     public $handler;
 
-    public $allowed;          // allowed tags (TRUE -> all, or array, or FALSE -> none)
-                                                 // arrays of safe tags and attributes
-    public $allowedComments = TRUE;
     public $safeTags = array(
         'a'         => array('href', 'rel', 'title', 'lang'),
         'abbr'      => array('title', 'lang'),
@@ -63,9 +60,9 @@ class TexyHtmlModule extends TexyModule
     public function __construct($texy)
     {
         parent::__construct($texy);
-
-        $this->allowed = & $texy->allowedTags;
+        $this->texy->allowed['HTML.comments'] = TRUE;
     }
+    
 
 
 
@@ -95,12 +92,11 @@ class TexyHtmlModule extends TexyModule
         //    [5] => comment
 
         if ($mTag == '') { // comment
-            if (!$this->allowedComments) return substr($matches[5], 0, 1) == '[' ? $match : '';
+            if (!$this->texy->allowed['HTML.comments']) return substr($matches[5], 0, 1) == '[' ? $match : '';
 
             $el = new TexyTextualElement($this->texy);
-            $el->contentType = TexyDomElement::CONTENT_NONE;
             $el->setContent($match, TRUE);
-            return $parser->element->appendChild($el);
+            return $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
         }
 
         $allowedTags = & $this->texy->allowedTags;
@@ -120,7 +116,6 @@ class TexyHtmlModule extends TexyModule
 
 
         $el = new TexyHtmlTagElement($this->texy);
-        $el->contentType = isset(TexyHtml::$inline[$tag]) ? TexyDomElement::CONTENT_NONE : TexyDomElement::CONTENT_BLOCK;
 
         if ($isOpening) {  // process attributes
             $attrs = array();
@@ -182,7 +177,8 @@ class TexyHtmlModule extends TexyModule
         if ($this->handler)
             if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
-        return $parser->element->appendChild($el);
+        $contentType = isset(TexyHtml::$inline[$tag]) ? TexyDomElement::CONTENT_NONE : TexyDomElement::CONTENT_BLOCK;
+        return $this->texy->hashKey($el, $contentType);
     }
 
 
@@ -221,7 +217,7 @@ class TexyHtmlTagElement extends TexyDomElement
 
 
     // convert element to HTML string
-    public function toHtml()
+    public function __toString()
     {
         if ($this->isOpening)
             return TexyHtml::openingTags($this->tags);
