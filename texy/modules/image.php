@@ -59,7 +59,7 @@ class TexyImageModule extends TexyModule
     public function init()
     {
         // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
-        $this->texy->registerLinePattern($this, 'processLine',     '#'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'??()#U');
+        $this->texy->registerLinePattern($this, 'processLine',     '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U');
     }
 
 
@@ -99,7 +99,7 @@ class TexyImageModule extends TexyModule
     public function preProcess($text)
     {
         // [*image*]: urls .(title)[class]{style}
-        return preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_PATTERN_MODIFIER.'?()$#mU', array($this, 'processReferenceDefinition'), $text);
+        return preg_replace_callback('#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?()$#mU', array($this, 'processReferenceDefinition'), $text);
     }
 
 
@@ -153,7 +153,7 @@ class TexyImageModule extends TexyModule
         $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         //$elImage->setImagesRaw($mURLs);
 
-        $keyImage = $this->texy->hashKey($elImage, TexyDomElement::CONTENT_NONE); // !!!
+        $keyImage = $this->texy->hash($elImage->toHtml(), TexyDomElement::CONTENT_NONE); // !!!
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);
@@ -164,10 +164,8 @@ class TexyImageModule extends TexyModule
                 $elLink->setLinkRaw($mLink);
             }
 
-            $elLink->behaveAsOpening = TRUE;
-            $keyOpen  = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
-            $elLink->behaveAsOpening = FALSE;
-            $keyClose = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
+            $keyOpen  = $this->texy->hash($elLink->opening(), TexyDomElement::CONTENT_NONE);
+            $keyClose = $this->texy->hash($elLink->closing(), TexyDomElement::CONTENT_NONE);
             return $keyOpen . $keyImage . $keyClose;
         }
 
@@ -214,7 +212,7 @@ class TexyImageReference {
 /**
  * HTML ELEMENT IMAGE
  */
-class TexyImageElement extends TexyDomElement
+class TexyImageElement extends TexyTextualElement
 {
     public $image;
     public $overImage;

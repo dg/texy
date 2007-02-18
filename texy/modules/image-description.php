@@ -50,7 +50,7 @@ class TexyImageDescModule extends TexyModule
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlock',
-                '#^'.TEXY_PATTERN_IMAGE.TEXY_PATTERN_LINK_N.'?? +\*\*\* +(.*)<MODIFIER_H>?()$#mU'
+                '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU'
             );
     }
 
@@ -88,7 +88,7 @@ class TexyImageDescModule extends TexyModule
         $el->modifier->hAlign = $elImage->modifier->hAlign;
         $elImage->modifier->hAlign = NULL;
 
-        $content = $this->texy->hashKey($elImage, TexyDomElement::CONTENT_NONE); // !!!
+        $content = $this->texy->hash($elImage->toHtml(), TexyDomElement::CONTENT_NONE); // !!!
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);
@@ -99,14 +99,12 @@ class TexyImageDescModule extends TexyModule
                 $elLink->setLinkRaw($mLink);
             }
 
-            $elLink->behaveAsOpening = TRUE;
-            $keyOpen  = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
-            $elLink->behaveAsOpening = FALSE;
-            $keyClose = $this->texy->hashKey($elLink, TexyDomElement::CONTENT_NONE);
+            $keyOpen  = $this->texy->hash($elLink->opening(), TexyDomElement::CONTENT_NONE);
+            $keyClose = $this->texy->hash($elLink->closing(), TexyDomElement::CONTENT_NONE);
             $content = $keyOpen . $content . $keyClose;
         }
         $elImg = new TexyTextualElement($this->texy);
-        $elImg->setContent($content, TRUE);
+        $elImg->content = $content;
         $el->appendChild($elImg);
 
         $elDesc = new TexyGenericBlockElement($this->texy);

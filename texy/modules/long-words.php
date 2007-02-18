@@ -58,7 +58,7 @@ class TexyLongWordsModule extends TexyModule
                      ));
 
         $text = preg_replace_callback(
-                            $this->texy->translatePattern('#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#u'),
+                            '#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#u',
                             array($this, '_replace'),
                             $text);
 
@@ -83,7 +83,7 @@ class TexyLongWordsModule extends TexyModule
 
         $chars = array();
         preg_match_all(
-                         $this->texy->translatePattern('#&\\#?[a-z0-9]+;|[:HASH:]+|.#u'),
+                         '#&\\#?[a-z0-9]+;|['.TEXY_HASH.']+|.#u',
                          $mWord,
                          $chars
         );

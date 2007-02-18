@@ -32,37 +32,38 @@ if (!defined('TEXY')) die();
 
 
 // character classes
-define('TEXY_CHAR_UTF',         'A-Za-z\x86-\x{ffff}');
-define('TEXY_NEWLINE',          "\n");
-// hashing meta-charakters
-define('TEXY_HASH',             "\x01-\x04\x14-\x1F");       // ANY HASH CHAR
-define('TEXY_HASH_SPACES',      "\x01-\x04");       // HASHED SPACE
+define('TEXY_CHAR',            'A-Za-z\x86-\x{ffff}');
 
+// hashing meta-charakters
+define('TEXY_HASH',            "\x01-\x04\x14-\x1F");       // ANY HASH CHAR
+define('TEXY_HASH_SPACES',     "\x01-\x04");       // HASHED SPACE
 define('TEXY_HASH_N',          "\x14\x18-\x1F");    // hashed CONTENT_NONE
 define('TEXY_HASH_I',          "\x15\x18-\x1F");    // hashed CONTENT_INLINE 
 define('TEXY_HASH_T',          "\x16\x18-\x1F");    // hashed CONTENT_TEXTUAL
 define('TEXY_HASH_B',          "\x17\x18-\x1F");    // hashed CONTENT_BLOCK
 
 
-// links
-define('TEXY_PATTERN_LINK_REF',        '\[[^\[\]\*\n'.TEXY_HASH.']+\]');    // reference  [refName]
-define('TEXY_PATTERN_LINK_IMAGE',      '\[\*[^\n'.TEXY_HASH.']+\*\]');      // [* ... *]
-define('TEXY_PATTERN_LINK_URL',        '(?:\[[^\]\n]+\]|(?!\[)[^\s'.TEXY_HASH.']*?[^:);,.!?\s'.TEXY_HASH.'])'); // any url (nekonèí :).,!?
-define('TEXY_PATTERN_LINK',            '(?::('.TEXY_PATTERN_LINK_URL.'))');    // any link
-define('TEXY_PATTERN_LINK_N',          '(?::('.TEXY_PATTERN_LINK_URL.'|:))');  // any link (also unstated)
-define('TEXY_PATTERN_EMAIL',           '[a-z0-9.+_-]+@[a-z0-9.+_-]{2,}\.[a-z]{2,}');    // name@exaple.com
-
 // modifier .(title)[class]{style}
-define('TEXY_PATTERN_MODIFIER', '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})??)');
+define('TEXY_MODIFIER',        '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\})??)');
 
 // modifier .(title)[class]{style}<>
-define('TEXY_PATTERN_MODIFIER_H', '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??)');
-
+define('TEXY_MODIFIER_H',      '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??)');
+                               
 // modifier .(title)[class]{style}<>^
-define('TEXY_PATTERN_MODIFIER_HV', '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??)');
+define('TEXY_MODIFIER_HV',     '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??)');
+
 
 // images   [* urls .(title)[class]{style} >]
-define('TEXY_PATTERN_IMAGE',    '\[\*([^\n'.TEXY_HASH.']+)'.TEXY_PATTERN_MODIFIER.'? *(\*|>|<)\]');
+define('TEXY_IMAGE',           '\[\*([^\n'.TEXY_HASH.']+)'.TEXY_MODIFIER.'? *(\*|>|<)\]');
+
+
+// links
+define('TEXY_LINK_REF',        '\[[^\[\]\*\n'.TEXY_HASH.']+\]');    // reference  [refName]
+define('TEXY_LINK_IMAGE',      '\[\*[^\n'.TEXY_HASH.']+\*\]');      // [* ... *]
+define('TEXY_LINK_URL',        '(?:\[[^\]\n]+\]|(?!\[)[^\s'.TEXY_HASH.']*?[^:);,.!?\s'.TEXY_HASH.'])'); // any url (nekonèí :).,!?
+define('TEXY_LINK',            '(?::('.TEXY_LINK_URL.'))');    // any link
+define('TEXY_LINK_N',          '(?::('.TEXY_LINK_URL.'|:))');  // any link (also unstated)
+define('TEXY_EMAIL',           '[a-z0-9.+_-]+@[a-z0-9.+_-]{2,}\.[a-z]{2,}');    // name@exaple.com
 
 
 /** modifiers patterns generator:
@@ -74,7 +75,7 @@ $HALIGN = '(?:<>|>|=|<)';      //  <  >  =  <>
 $VALIGN = '(?:\^|\-|\_)';      //  ~ - _
 
 // .(title)[class]{style}
-define('TEXY_PATTERN_MODIFIER',
+define('TEXY_MODIFIER',
          "(?:\\ *(?<= |^)\\.".
          "($TITLE|$CLASS|$STYLE)".
          "($TITLE|$CLASS|$STYLE)??".
@@ -82,7 +83,7 @@ define('TEXY_PATTERN_MODIFIER',
 
 
 // .(title)[class]{style}<>
-define('TEXY_PATTERN_MODIFIER_H',
+define('TEXY_MODIFIER_H',
          "(?:\\ *(?<= |^)\\.".
          "($TITLE|$CLASS|$STYLE|$HALIGN)".
          "($TITLE|$CLASS|$STYLE|$HALIGN)??".
@@ -91,7 +92,7 @@ define('TEXY_PATTERN_MODIFIER_H',
 
 
 // .(title)[class]{style}<>^
-define('TEXY_PATTERN_MODIFIER_HV',
+define('TEXY_MODIFIER_HV',
          "(?:\\ *(?<= |^)\\.".
          "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)".
          "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".

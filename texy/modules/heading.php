@@ -78,7 +78,7 @@ class TexyHeadingModule extends TexyModule
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlockUnderline',
-                '#^(\S.*)<MODIFIER_H>?\n'
+                '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
               . '(\#|\*|\=|\-){3,}$#mU'
             );
 
@@ -86,7 +86,7 @@ class TexyHeadingModule extends TexyModule
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlockSurround',
-                '#^((\#|\=){2,})(?!\\2)(.+)\\2*<MODIFIER_H>?()$#mU'
+                '#^((\#|\=){2,})(?!\\2)(.+)\\2*'.TEXY_MODIFIER_H.'?()$#mU'
             );
     }
 

@@ -76,7 +76,7 @@ class TexyUrl
         $this->URL = NULL;
 
         // detect URL type
-        if (preg_match('#^'.TEXY_PATTERN_EMAIL.'$#i', $this->value)) // email
+        if (preg_match('#^'.TEXY_EMAIL.'$#i', $this->value)) // email
             $this->flags = self::EMAIL;
         elseif (preg_match('#^(https?://|ftp://|www\.|ftp\.|/)#i', $this->value))  // absolute URL
             $this->flags = self::ABSOLUTE | ($isImage ? self::IMAGE : 0);

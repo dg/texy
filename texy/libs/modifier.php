@@ -76,9 +76,9 @@ class TexyModifier
             if ($arg == '') continue;
             $argX = trim(substr($arg, 1, -1));
             switch ($arg{0}) {
-                case '{':  $styles .= html_entity_decode($argX) . ';';  break;
+                case '{':  $styles .= $argX . ';';  break;
                 case '(':  $this->title = html_entity_decode($argX); break;
-                case '[':  $classes .= ' ' . html_entity_decode($argX); break;
+                case '[':  $classes .= ' ' . $argX; break;
                 case '^':  $this->vAlign = self::VALIGN_TOP; break;
                 case '-':  $this->vAlign = self::VALIGN_MIDDLE; break;
                 case '_':  $this->vAlign = self::VALIGN_BOTTOM; break;
@@ -207,7 +207,7 @@ class TexyModifier
     public function decorate(NHtml $el)
     {
         $attrs = $this->getAttrs($el->element);
-
+        // !!!
         $el->id = $this->id;
         $el->title = $this->title;
         $el->class = $this->classes;

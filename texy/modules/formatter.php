@@ -48,9 +48,9 @@ class TexyFormatterModule extends TexyModule
 
         // freeze all pre, textarea, script and style elements
         $text = preg_replace_callback(
-                       '#<(pre|textarea|script|style)(.*)</\\1>#Uis',
-                       array($this, '_freeze'),
-                       $text
+            '#<(pre|textarea|script|style)(.*)</\\1>#Uis',
+            array($this, '_freeze'),
+            $text
         );
 
         // remove \n
@@ -61,9 +61,9 @@ class TexyFormatterModule extends TexyModule
 
         // indent all block elements + br
         $text = preg_replace_callback(
-                       '# *<(/?)(' . implode(array_keys(TexyHtml::$block), '|') . '|br)(>| [^>]*>) *#i',
-                       array($this, 'indent'),
-                       $text
+            '# *<(/?)(' . implode(array_keys(TexyHtml::$block), '|') . '|br)(>| [^>]*>) *#i',
+            array($this, 'indent'),
+            $text
         );
 
         // right trim
@@ -78,9 +78,9 @@ class TexyFormatterModule extends TexyModule
         // line wrap
         if ($this->lineWrap > 0)
             $text = preg_replace_callback(
-                             '#^(\t*)(.*)$#m',
-                             array($this, 'wrap'),
-                             $text
+                '#^(\t*)(.*)$#m',
+                array($this, 'wrap'),
+                $text
             );
 
         // unfreeze pre, textarea, script and style elements

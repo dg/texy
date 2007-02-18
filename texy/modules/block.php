@@ -57,7 +57,7 @@ class TexyBlockModule extends TexyModule
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^/--+ *(?:(code|samp|text|html|div|notexy|source|comment)( .*)?|) *<MODIFIER_H>?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi'
+            '#^/--+ *(?:(code|samp|text|html|div|notexy|source|comment)( .*)?|) *'.TEXY_MODIFIER_H.'?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi'
         );
     }
 
@@ -98,85 +98,107 @@ class TexyBlockModule extends TexyModule
         switch ($mType) {
         case 'none':
         case 'div':
-                $el = new TexyBlockElement($this->texy);
-                $el->tag = 'div';
-                $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-                // outdent
-                if ($spaces = strspn($mContent, ' '))
-                    $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
+            $el = new TexyBlockElement($this->texy);
+            $el->tag = 'div';
+            $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            // outdent
+            if ($spaces = strspn($mContent, ' '))
+                $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-                if ($this->divHandler)
-                     if (call_user_func_array($this->divHandler, array($el, &$mContent)) === FALSE) return;
+            if ($this->divHandler)
+                 if (call_user_func_array($this->divHandler, array($el, &$mContent)) === FALSE) return;
 
-                $el->parse($mContent);
+            $el->parse($mContent);
 
-                $parser->element->appendChild($el);
+            $parser->element->appendChild($el);
 
-                break;
+            break;
 
 
         case 'source':
-                $el = new TexySourceBlockElement($this->texy);
-                $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-                // outdent
-                if ($spaces = strspn($mContent, ' '))
-                    $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
+            $el = new TexySourceBlockElement($this->texy);
+            $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            // outdent
+            if ($spaces = strspn($mContent, ' '))
+                $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-                $el->parse($mContent);
+            $el->parse($mContent);
 
-                $parser->element->appendChild($el);
-                break;
+            $parser->element->appendChild($el);
+            break;
 
 
         case 'comment':
-                break;
+            break;
 
 
         case 'html':
-                $el = new TexyHtmlBlockElement($this->texy);
-                $el->parse($mContent);
+            ///////////   INITIALIZATION
+            $el = new TexyTextualElement($this->texy);
 
-                if ($this->htmlHandler)
-                    if (call_user_func_array($this->htmlHandler, array($el, TRUE)) === FALSE) return;
+            preg_match_all(
+                '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_HASH.']*"|=\s*\'[^\''.TEXY_HASH.']*\'|=[^>'.TEXY_HASH.']*)*)(/?)>|<!--([^'.TEXY_HASH.']*?)-->#is',
+                $mContent,
+                $matches,
+                PREG_OFFSET_CAPTURE | PREG_SET_ORDER
+            );
 
-                $parser->element->appendChild($el);
-                break;
+            foreach(array_reverse($matches) as $m) {
+                $offset = $m[0][1];
+                foreach ($m as $key => $val) $m[$key] = $val[0];
+
+                $mContent = substr_replace(
+                    $mContent,
+                    $this->texy->htmlModule->process($this, $m),
+                    $offset,
+                    strlen($m[0])
+                );
+            }
+            $mContent = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8');
+            $mContent = htmlspecialchars($mContent);
+            $mContent = $this->texy->hashReplace($mContent);
+            $mContent = $this->texy->hash($mContent, TexyDomElement::CONTENT_BLOCK);
+            $el->content = $mContent;
+
+            if ($this->htmlHandler)
+                if (call_user_func_array($this->htmlHandler, array($el, TRUE)) === FALSE) return;
+
+            $parser->element->appendChild($el);
+            break;
 
 
         case 'text':
-                $el = new TexyTextualElement($this->texy);
-                $el->setContent(
-                               (
-                                    nl2br(
-                                        TexyHtml::htmlChars($mContent)
-                                    )
-                               ),
-                               TRUE);
+            $el = new TexyTextualElement($this->texy);
+            $mContent = nl2br(TexyHtml::htmlChars($mContent));
+            $mContent = $this->texy->hash($mContent, TexyDomElement::CONTENT_BLOCK);
+            $el->content = $mContent;
 
-                if ($this->htmlHandler)
-                    if (call_user_func_array($this->htmlHandler, array($el, FALSE)) === FALSE) return;
+            if ($this->htmlHandler)
+                if (call_user_func_array($this->htmlHandler, array($el, FALSE)) === FALSE) return;
 
-                $parser->element->appendChild($el);
-                break;
+            $parser->element->appendChild($el);
+            break;
 
 
 
         default: // pre | code | samp
-                $el = new TexyCodeBlockElement($this->texy);
-                $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-                $el->type = $mType;
-                $el->lang = $mSecond;
+            $el = new TexyCodeBlockElement($this->texy);
+            $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $el->type = $mType;
+            $el->lang = $mSecond;
 
-                // outdent
-                if ($spaces = strspn($mContent, ' '))
-                    $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
+            // outdent
+            if ($spaces = strspn($mContent, ' '))
+                $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-                $el->setContent($mContent, FALSE); // not html-safe content
+            $mContent = htmlSpecialChars($mContent);
+            $mContent = $this->texy->hash($mContent, TexyDomElement::CONTENT_BLOCK);
+            $el->content = $mContent;
 
-                if ($this->codeHandler)
-                    if (call_user_func_array($this->codeHandler, array($el)) === FALSE) return;
+            if ($this->codeHandler)
+                if (call_user_func_array($this->codeHandler, array($el)) === FALSE) return;
 
-                $parser->element->appendChild($el);
+            $parser->element->appendChild($el);
 
         } // switch
 
@@ -226,23 +248,6 @@ class TexyCodeBlockElement extends TexyTextualElement
 
 
 
-/**
- * HTML ELEMENT
- */
-class TexyHtmlBlockElement extends TexyTextualElement
-{
-
-    public function parse($text)
-    {
-        $parser = new TexyHtmlParser($this);
-        $parser->parse($text);
-    }
-
-
-} // TexyHtmlBlockElement
-
-
-
 class TexySourceBlockElement extends TexyBlockElement
 {
     public $tag  = 'pre';
@@ -257,7 +262,7 @@ class TexySourceBlockElement extends TexyBlockElement
         $el = new TexyCodeBlockElement($this->texy);
         $el->lang = 'html';
         $el->type = 'code';
-        $el->setContent($html, FALSE);
+        $el->content = $html;
 
         if ($this->texy->blockModule->codeHandler)
             call_user_func_array($this->texy->blockModule->codeHandler, array($el));

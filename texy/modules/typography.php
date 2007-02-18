@@ -40,7 +40,7 @@ class TexyTypographyModule extends TexyModule
     public $singleQuotes = array('&#8216;', '&#8217;');  // left & right single quote
 */
 
-    private $from, $to;
+    private $pattern, $replace;
 
 
     public function __construct($texy)
@@ -54,7 +54,7 @@ class TexyTypographyModule extends TexyModule
      * Module initialization.
      */
     public function init()
-    {                                
+    {
         $pairs = array(
           '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
                                                     => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
@@ -82,25 +82,22 @@ class TexyTypographyModule extends TexyModule
           '#(\d{1,3}) (\d{3}) (\d{3})#'             => '$1&#160;$2&#160;$3',              // (phone) number 1 123 123
           '#(\d{1,3}) (\d{3})#'                     => '$1&#160;$2',                      // number 1 123
 
-          '#(?<=^| |\.|,|-|\+)(\d+)([:HASH_N:]*) ([:HASH_N:]*)([:CHAR:])#mu'        // space between number and word
+          '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_HASH_N.']*) (['.TEXY_HASH_N.']*)(['.TEXY_CHAR.'])#mu'        // space between number and word
                                                     => '$1$2&#160;$3$4',
 
-          '#(?<=^|[^0-9:CHAR:])([:HASH_N:]*)([ksvzouiKSVZOUIA])([:HASH_N:]*) ([:HASH_N:]*)([0-9:CHAR:])#mu'
+          '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_HASH_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_HASH_N.']*) (['.TEXY_HASH_N.']*)([0-9'.TEXY_CHAR.'])#mu'
                                                     => '$1$2$3&#160;$4$5',                // space between preposition and word
         );
 
-        $this->from = $this->to = array();
-        foreach ($pairs as $pattern => $replacement) {
-            $this->from[] = $this->texy->translatePattern($pattern);
-            $this->to[] = $replacement;
-        }
+        $this->pattern = array_keys($pairs);
+	    $this->replace = array_values($pairs);
     }
 
 
     public function linePostProcess($text)
     {
         if (!$this->texy->allowed['Typography']) return $text;
-        return preg_replace($this->from, $this->to, $text);
+        return preg_replace($this->pattern, $this->replace, $text);
     }
 
 

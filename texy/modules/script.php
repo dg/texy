@@ -37,7 +37,7 @@ class TexyScriptModule extends TexyModule
      */
     public function init()
     {
-        $this->texy->registerLinePattern($this, 'processLine', '#\{\{([^:HASH:]+)\}\}()#U');
+        $this->texy->registerLinePattern($this, 'processLine', '#\{\{([^'.TEXY_HASH.']+)\}\}()#U');
     }
 
 
@@ -69,7 +69,7 @@ class TexyScriptModule extends TexyModule
             if (is_object($this->handler)) {
 
                 if ($args === NULL && isset($this->handler->$identifier)) {
-                    $el->setContent($this->handler->$identifier);
+                    $el->content = $this->handler->$identifier;
                     break;
                 }
 
@@ -88,8 +88,8 @@ class TexyScriptModule extends TexyModule
 
         } while(0);
 
-        return $this->texy->hashKey($el, $contentType); // !!!
-        return $this->texy->hashKey($el, $el->contentType);
+        return ''; // !!!
+        return $this->texy->hash($el, $el->contentType);
     }
 
 
@@ -99,7 +99,7 @@ class TexyScriptModule extends TexyModule
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->setContent('<texy:script content="'.TexyHtml::htmlChars($identifier, TRUE).'" />', TRUE);
+        $element->content = $element->texy->hash('<texy:script content="'.TexyHtml::htmlChars($identifier, TRUE).'" />', TexyDomElement::CONTENT_TEXTUAL);
     }
 
 

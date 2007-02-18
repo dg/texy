@@ -99,7 +99,7 @@ class TexySmiliesModule extends TexyModule
         if ($this->handler)
             if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
-        return $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE); // !!!
+        return $this->texy->hash($el->toHtml(), TexyDomElement::CONTENT_NONE); // !!!
     }
 
 

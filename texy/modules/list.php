@@ -68,7 +68,7 @@ class TexyListModule extends TexyModule
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^(?:<MODIFIER_H>\n)?'                         // .{color: red}
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                         // .{color: red}
           . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mU'  // item (unmatched)
         );
     }
@@ -136,7 +136,7 @@ class TexyListModule extends TexyModule
     public function processItem($parser, $bullet, $indented = FALSE) {
         $texy =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
-        $patternItem = $texy->translatePattern("#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?<MODIFIER_H>?()$#mAU");
+        $patternItem = "#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAU";
 
         // first line (with bullet)
         if (!$parser->receiveNext($patternItem, $matches)) {
@@ -166,7 +166,7 @@ class TexyListModule extends TexyModule
             //    [3] => ...
 
             if ($spaces === '') $spaces = strlen($mSpaces);
-            $content .= TEXY_NEWLINE . $mBlank . $mContent;
+            $content .= "\n" . $mBlank . $mContent;
         }
 
         // parse content

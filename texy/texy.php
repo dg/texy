@@ -154,6 +154,8 @@ class Texy
      */
     private $references = array();
 
+    private $hashes = array();
+
 
 
     public function __construct()
@@ -230,7 +232,7 @@ class Texy
     {
         $this->linePatterns[] = array(
             'handler'     => array($module, $method),
-            'pattern'     => $this->translatePattern($pattern),
+            'pattern'     => $pattern,
             'user'        => $user_args
         );
     }
@@ -242,7 +244,7 @@ class Texy
 
         $this->blockPatterns[] = array(
             'handler'     => array($module, $method),
-            'pattern'     => $this->translatePattern($pattern)  . 'm',  // force multiline!
+            'pattern'     => $pattern  . 'm',  // force multiline!
             'user'        => $user_args
         );
     }
@@ -273,15 +275,13 @@ class Texy
     protected function init()
     {
         $this->hashes = array();
-        $this->cache = array();
         $this->linePatterns  = array();
         $this->blockPatterns = array();
 
         if (!$this->modules) die('Texy: No modules installed');
 
         // init modules
-        foreach ($this->modules as $module)
-            $module->init();
+        foreach ($this->modules as $module) $module->init();
     }
 
 
@@ -386,7 +386,7 @@ class Texy
         ));
 
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
-            $text = iconv('utf-8', $this->encoding, $text);
+            $text = iconv('utf-8', $this->encoding.'//TRANSLATE', $text);
 
         return $text;
     }
@@ -501,28 +501,6 @@ class Texy
 
 
 
-    /**
-     * For easier regular expression writing
-     * @return string
-     */
-    private $cache;
-    public function translatePattern($re)
-    {
-        if (isset($this->cache[$re])) return $this->cache[$re];
-
-        return $this->cache[$re] = strtr($re, array(
-            '<MODIFIER_HV>' => TEXY_PATTERN_MODIFIER_HV,
-            '<MODIFIER_H>'  => TEXY_PATTERN_MODIFIER_H,
-            '<MODIFIER>'    => TEXY_PATTERN_MODIFIER,
-            '<LINK>'        => TEXY_PATTERN_LINK,
-            ':CHAR:'        => TEXY_CHAR_UTF,
-            ':HASH:'        => TEXY_HASH,
-            ':HASH_N:'      => TEXY_HASH_N,
-        ));
-    }
-
-
-
     public function getModules()
     {
         return $this->modules;
@@ -543,14 +521,13 @@ class Texy
     {
     }
 
-    private $hashes = array();
 
     /**
      * Generate unique HASH key - useful for freezing (folding) some substrings
      * @return string
      * @static
      */
-    public function hashKey($child, $contentType)
+    public function hash($child, $contentType)
     {
         static $borders = array(
             TexyDomElement::CONTENT_NONE => "\x14",
@@ -558,11 +535,13 @@ class Texy
             TexyDomElement::CONTENT_TEXTUAL => "\x16",
             TexyDomElement::CONTENT_BLOCK => "\x17",
         );
+
         $key = $borders[$contentType]
             . strtr(base_convert(count($this->hashes), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
             . $borders[$contentType];
 
-        $this->hashes[$key] = $child->__toString();
+        if (is_object($child)) $this->hashes[$key] = $child->__toString();
+        else $this->hashes[$key] = $child;
 
         return $key;
     }

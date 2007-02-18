@@ -49,7 +49,7 @@ class TexyTableModule extends TexyModule
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^(?:<MODIFIER_HV>\n)?'      // .{color: red}
+            '#^(?:'.TEXY_MODIFIER_HV.'\n)?'      // .{color: red}
           . '\|.*()$#mU'                  // | ....
         );
     }
@@ -83,7 +83,7 @@ class TexyTableModule extends TexyModule
 
         $parser->moveBackward();
 
-        if ($parser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_PATTERN_MODIFIER_H.'?()$#Um', $matches)) {
+        if ($parser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
             list(, , $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
             //    [1] => # / =
             //    [2] => ....
@@ -135,7 +135,7 @@ class TexyTableModule extends TexyModule
     protected function processRow($parser) {
         $texy =  $this->texy;
 
-        if (!$parser->receiveNext('#^\|(.*)(?:|\|\ *'.TEXY_PATTERN_MODIFIER_HV.'?)()$#U', $matches)) {
+        if (!$parser->receiveNext('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
             return FALSE;
         }
         list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
@@ -174,7 +174,7 @@ class TexyTableModule extends TexyModule
                 }
             }
 
-            if (!preg_match('#(\*??)\ *'.TEXY_PATTERN_MODIFIER_HV.'??(.*)'.TEXY_PATTERN_MODIFIER_HV.'?()$#AU', $field, $matches)) continue;
+            if (!preg_match('#(\*??)\ *'.TEXY_MODIFIER_HV.'??(.*)'.TEXY_MODIFIER_HV.'?()$#AU', $field, $matches)) continue;
             list(, $mHead, $mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
             //    [1] => * ^
             //    [2] => (title)

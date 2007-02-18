@@ -61,7 +61,7 @@ class TexyGenericBlockModule extends TexyModule
      */
     public function processSingleBlock($parser, $content)
     {
-        preg_match($this->texy->translatePattern('#^(.*)<MODIFIER_H>?(\n.*)?()$#sU'), $content, $matches);
+        preg_match('#^(.*)'.TEXY_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
         list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
         //    [1] => ...
         //    [2] => (title)
@@ -101,13 +101,9 @@ class TexyGenericBlockModule extends TexyModule
         else $el->tag = 'div';
 
         // add <br />
-        if ($el->tag && (strpos($el->getContent(), "\n") !== FALSE)) {
-            $elBr = new TexyTextualElement($this->texy);
-            $elBr->tag = 'br';
-            $key = $this->texy->hashKey($elBr, TexyDomElement::CONTENT_NONE); // !!!
-            $el->setContent(strtr($el->getContent(),
-                              array("\n" => $key)
-                           ), TRUE);
+        if ($el->tag && (strpos($el->content, "\n") !== FALSE)) {
+            $key = $this->texy->hash('<br />', TexyDomElement::CONTENT_INLINE);
+            $el->content = strtr($el->content, array("\n" => $key));
         }
 
         if ($this->handler)

@@ -55,14 +55,14 @@ class TexyQuoteModule extends TexyModule
             $this->texy->registerBlockPattern(
                 $this,
                 'processBlock',
-                '#^(?:<MODIFIER_H>\n)?\>(\ +|:)(\S.*)$#mU'
+                '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU'
             );
 
         if ($this->texy->allowed['Quote.line'])
             $this->texy->registerLinePattern(
                 $this,
                 'processLine',
-                '#(?<!\>)(\>\>)(?!\ |\>)(.+)<MODIFIER>?(?<!\ |\<)\<\<(?!\<)<LINK>??()#U'
+                '#(?<!\>)(\>\>)(?!\ |\>)(.+)'.TEXY_MODIFIER.'?(?<!\ |\<)\<\<(?!\<)'.TEXY_LINK.'??()#U'
             );
     }
 
@@ -82,19 +82,23 @@ class TexyQuoteModule extends TexyModule
         //    [6] => LINK
 
         $texy =  $this->texy;
-        $el = new TexyQuoteElement($texy);
-        $el->modifier->setProperties($mMod1, $mMod2, $mMod3);
 
-        if ($mLink)
-            $el->cite->set($mLink);
+        $el = NHtml::el('q');
+        $modifier = new TexyModifier($this->texy);
+        $modifier->setProperties($mMod1, $mMod2, $mMod3);
+        $modifier->decorate($el);
+
+        if ($mLink) {
+            $cite = new TexyUrl($texy);
+            $cite->set($mLink);
+            $el->cite = $cite->asURL();
+        }
 
         if ($this->handler)
             if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
-        $el->behaveAsOpening = TRUE;
-        $keyOpen  = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
-        $el->behaveAsOpening = FALSE;
-        $keyClose = $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+        $keyOpen  = $this->texy->hash($el->startTag(), TexyDomElement::CONTENT_NONE);
+        $keyClose = $this->texy->hash($el->endTag(), TexyDomElement::CONTENT_NONE);
         return $keyOpen . $mContent . $keyClose;
     }
 
@@ -132,7 +136,7 @@ class TexyQuoteModule extends TexyModule
             if ($mSpaces == ':') $linkTarget = trim($mContent);
             else {
                 if ($spaces === '') $spaces = max(1, strlen($mSpaces));
-                $content .= $mContent . TEXY_NEWLINE;
+                $content .= $mContent . "\n";
             }
 
             if (!$parser->receiveNext("#^>(?:|(\\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
@@ -191,28 +195,3 @@ class TexyBlockQuoteElement extends TexyBlockElement
 
 
 
-
-/**
- * HTML TAG QUOTE
- */
-class TexyQuoteElement extends TexyInlineTagElement
-{
-    public $tag = 'q';
-    public $cite;
-
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-        $this->cite = new TexyUrl($texy);
-    }
-
-
-    protected function generateTags(&$tags)
-    {
-        parent::generateTags($tags);
-        $tags[$this->tag]['cite'] = $this->cite->asURL();
-    }
-
-
-} // TexyBlockQuoteElement

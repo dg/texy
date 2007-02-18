@@ -56,8 +56,8 @@ class TexyDefinitionListModule extends TexyListModule
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^(?:<MODIFIER_H>\n)?'                          // .{color:red}
-          . '(\S.*)\:\ *<MODIFIER_H>?\n'                     // Term:
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                          // .{color:red}
+          . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'                     // Term:
           . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU'   //    - description
         );
     }
@@ -107,7 +107,7 @@ class TexyDefinitionListModule extends TexyListModule
 
         $parser->moveBackward(2);
 
-        $patternTerm = $texy->translatePattern('#^\n?(\S.*)\:\ *<MODIFIER_H>?()$#mUA');
+        $patternTerm = '#^\n?(\S.*)\:\ *'.TEXY_MODIFIER_H.'?()$#mUA';
         $bullet = preg_quote($mBullet);
 
         while (TRUE) {

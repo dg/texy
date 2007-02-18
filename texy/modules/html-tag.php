@@ -73,7 +73,7 @@ class TexyHtmlModule extends TexyModule
      */
     public function init()
     {
-        $this->texy->registerLinePattern($this, 'process', '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^":HASH:]*"|=\s*\'[^\':HASH:]*\'|=[^>:HASH:]*)*)(/?)>|<!--([^:HASH:]*?)-->#is');
+        $this->texy->registerLinePattern($this, 'process', '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_HASH.']*"|=\s*\'[^\''.TEXY_HASH.']*\'|=[^>'.TEXY_HASH.']*)*)(/?)>|<!--([^'.TEXY_HASH.']*?)-->#is');
     }
 
 
@@ -94,9 +94,7 @@ class TexyHtmlModule extends TexyModule
         if ($mTag == '') { // comment
             if (!$this->texy->allowed['HTML.comments']) return substr($matches[5], 0, 1) == '[' ? $match : '';
 
-            $el = new TexyTextualElement($this->texy);
-            $el->setContent($match, TRUE);
-            return $this->texy->hashKey($el, TexyDomElement::CONTENT_NONE);
+            return $this->texy->hash($match, TexyDomElement::CONTENT_NONE);
         }
 
         $allowedTags = & $this->texy->allowedTags;
@@ -114,8 +112,6 @@ class TexyHtmlModule extends TexyModule
         if (is_array($allowedTags) && !isset($allowedTags[$tag]))  // is element allowed?
             return $match;
 
-
-        $el = new TexyHtmlTagElement($this->texy);
 
         if ($isOpening) {  // process attributes
             $attrs = array();
@@ -166,19 +162,20 @@ class TexyHtmlModule extends TexyModule
             }
 
             if ($empty) $attrs[TexyHtml::EMPTYTAG] = TRUE;
-            $el->tags[$tag] = $attrs;
-            $el->isOpening  = TRUE;
 
         } else { // closing element
-            $el->tags[$tag] = FALSE;
-            $el->isOpening  = FALSE;
         }
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
+        //if ($this->handler)
+        //    if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
         $contentType = isset(TexyHtml::$inline[$tag]) ? TexyDomElement::CONTENT_NONE : TexyDomElement::CONTENT_BLOCK;
-        return $this->texy->hashKey($el, $contentType);
+
+	    $spec = array('br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,'applet'=>1,'isindex'=>1,);
+        if (isset($spec[$tag])) $contentType = TexyDomElement::CONTENT_INLINE;
+
+        $tag = $isOpening ? TexyHtml::openingTag($tag, $attrs) : TexyHtml::closingTag($tag);
+        return $this->texy->hash($tag, $contentType);
     }
 
 
@@ -203,29 +200,3 @@ class TexyHtmlModule extends TexyModule
 
 
 
-
-
-
-
-
-
-class TexyHtmlTagElement extends TexyDomElement
-{
-    public $tags;
-    public $isOpening;
-
-
-
-    // convert element to HTML string
-    public function __toString()
-    {
-        if ($this->isOpening)
-            return TexyHtml::openingTags($this->tags);
-        else
-            return TexyHtml::closingTags($this->tags);
-    }
-
-
-
-
-}  // TexyHtmlTagElement

@@ -83,9 +83,14 @@ abstract class TexyDomElement
         $tags = array();
         $this->generateTags($tags);
 
-        return TexyHtml::openingTags($tags)
-                     . $this->generateContent()
-                     . TexyHtml::closingTags($tags);
+        $open = $close = '';
+        foreach ($tags as $tag => $attr) {
+            $open .= TexyHtml::openingTag($tag, $attr);
+            $close = TexyHtml::closingTag($tag) . $close;
+        }
+        if ($open) $open = $this->texy->hash($open, TexyDomElement::CONTENT_BLOCK);
+        if ($close) $close = $this->texy->hash($close, TexyDomElement::CONTENT_BLOCK);
+        return $open . $this->generateContent() . $close;
     }
 
 
@@ -124,7 +129,7 @@ class TexyBlockElement extends TexyDomElement
     public function appendChild($child)
     {
         if (!($child instanceof TexyBlockElement) && !($child instanceof TexyTextualElement))
-            die('Only TexyInlineTagElement allowed.');
+            die('Only TexyBlockElement or TexyTextualElement allowed.');
 
         $this->children[] = $child;
     }
@@ -140,7 +145,7 @@ class TexyBlockElement extends TexyDomElement
     {
         $html = '';
         foreach ($this->children as $child)
-            $html .= $child->__toString();
+            $html .= $child->__toString() . "\n";
 
         return $html;
     }
@@ -173,49 +178,33 @@ class TexyBlockElement extends TexyDomElement
 
 /**
  * This element represent one line of text.
- * Text represents $content and $children is array of TexyInlineTagElement
+ * Text represents $content
  *
  */
 class TexyTextualElement extends TexyDomElement
 {
     public $content;                    // string
-    protected $htmlSafe = FALSE;        // is content HTML-safe?
 
 
-    public function setContent($text, $isHtmlSafe = FALSE)
-    {
-        $this->content = $text;
-        $this->htmlSafe = $isHtmlSafe;
-    }
-
-
-    public function getContent()
+    protected function generateContent()
     {
         return $this->content;
     }
 
 
-    public function safeContent($onlyReturn = FALSE)
-    {
-        $safeContent = $this->htmlSafe ? $this->content : TexyHtml::htmlChars($this->content);
 
-        if ($onlyReturn) return $safeContent;
-        else {
-            $this->htmlSafe = TRUE;
-            return $this->content = $safeContent;
+    public function toHtml()
+    {
+        $tags = array();
+        $this->generateTags($tags);
+
+        $open = $close = '';
+        foreach ($tags as $tag => $attr) {
+            $open .= TexyHtml::openingTag($tag, $attr);
+            $close = TexyHtml::closingTag($tag) . $close;
         }
+        return $open . htmlspecialChars($this->content) . $close;
     }
-
-
-
-
-    protected function generateContent()
-    {
-        $content = $this->safeContent(TRUE);
-        $content = $this->texy->hashReplace($content);
-        return $content;
-    }
-
 
 
     /**
@@ -242,35 +231,32 @@ class TexyTextualElement extends TexyDomElement
  * Used as children of TexyTextualElement
  *
  */
+
 class TexyInlineTagElement extends TexyDomElement
 {
-    private $closingTag;
-    public $behaveAsOpening;
 
-
-
-    // convert element to HTML string
-    public function __toString()
+    public function opening()
     {
-        if ($this->behaveAsOpening) {
-            $tags = array();
-            $this->generateTags($tags);
-            $this->closingTag = TexyHtml::closingTags($tags);
-            return TexyHtml::openingTags($tags);
+        $this->generateTags($tags);
+        $s = '';
+        if ($tags)
+            foreach ($tags as $tag => $attr)
+                $s .= TexyHtml::openingTag($tag, $attr);
+        return $s;
+    }
 
-        } else {
-            return $this->closingTag;
-        }
+    public function closing()
+    {
+        $this->generateTags($tags);
+        $s = '';
+        if ($tags)
+            foreach ($tags as $tag => $attr)
+                $s = TexyHtml::closingTag($tag) . $s;
+        return $s;
     }
 
 
-
-
-
 } // TexyInlineTagElement
-
-
-
 
 
 
@@ -345,6 +331,10 @@ class TexyDom extends TexyBlockElement
     {
         $html = parent::__toString();
 
+        $html = htmlspecialChars($html);
+
+        $html = $this->texy->hashReplace($html);
+
         $obj = new TexyHtmlWellForm();
         $html = $obj->process($html);
 
@@ -354,8 +344,6 @@ class TexyDom extends TexyBlockElement
 
             ///////////   UNFREEZE SPACES
         $html = Texy::unfreezeSpaces($html);
-
-        $html = TexyHtml::checkEntities($html);
 
             // THIS NOTICE SHOULD REMAIN!
         if (!defined('TEXY_NOTICE_SHOWED')) {
@@ -416,10 +404,11 @@ class TexyDomLine extends TexyTextualElement
     public function __toString()
     {
         $html = parent::__toString();
+        $html = $this->texy->hashReplace($html);
+
         $wf = new TexyHtmlWellForm();
         $html = $wf->process($html);
         $html = Texy::unfreezeSpaces($html);
-        $html = TexyHtml::checkEntities($html);
         return $html;
     }
 

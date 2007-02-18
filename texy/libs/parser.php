@@ -63,11 +63,13 @@ class TexyBlockParser extends TexyParser
     {
         $matches = NULL;
         $ok = preg_match(
-                   $pattern . 'Am', // anchored & multiline
-                   $this->text,
-                   $matches,
-                   PREG_OFFSET_CAPTURE,
-                   $this->offset);
+            $pattern . 'Am', // anchored & multiline
+            $this->text,
+            $matches,
+            PREG_OFFSET_CAPTURE,
+            $this->offset
+        );
+
         if ($ok) {
             $this->offset += strlen($matches[0][0]) + 1;  // 1 = "\n"
             foreach ($matches as $key => $value) $matches[$key] = $value[0];
@@ -80,7 +82,7 @@ class TexyBlockParser extends TexyParser
     public function moveBackward($linesCount = 1)
     {
         while (--$this->offset > 0)
-         if ($this->text{ $this->offset-1 } == TEXY_NEWLINE)
+         if ($this->text{ $this->offset-1 } === "\n")
              if (--$linesCount < 1) break;
 
         $this->offset = max($this->offset, 0);
@@ -197,10 +199,10 @@ class TexyLineParser extends TexyParser
                     $delta = ($arrPos[$key] == -2) ? 1 : 0;
 
                     if (preg_match($pl[$key]['pattern'],
-                                     $text,
-                                     $arrMatches[$key],
-                                     PREG_OFFSET_CAPTURE,
-                                     $offset+$delta)) {
+                            $text,
+                            $arrMatches[$key],
+                            PREG_OFFSET_CAPTURE,
+                            $offset+$delta)) {
 
                         $m = & $arrMatches[$key];
                         if (!strlen($m[0][0])) continue;
@@ -227,10 +229,10 @@ class TexyLineParser extends TexyParser
             $replacement = call_user_func_array($px['handler'], array($this, $arrMatches[$minKey], $px['user']));
             $len = strlen($arrMatches[$minKey][0]);
             $text = substr_replace(
-                        $text,
-                        $replacement,
-                        $offset,
-                        $len);
+                $text,
+                $replacement,
+                $offset,
+                $len);
 
             $delta = strlen($replacement) - $len;
             foreach ($keys as $key) {
@@ -243,59 +245,17 @@ class TexyLineParser extends TexyParser
         } while (1);
 
 
-
         $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
 
         foreach ($texy->getModules() as $module)
             $text = $module->linePostProcess($text);
 
         $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-        $text = htmlspecialchars($text);
-        //$text = TexyHtml::htmlChars($text, FALSE, TRUE);
 
-        $element->setContent($text, TRUE);
+        $element->content = $text;
     }
-
 } // TexyLineParser
 
 
 
 
-
-/**
- * INTERNAL HTML PARSING STRUCTURE
- * -------------------------------
- */
-class TexyHtmlParser extends TexyParser
-{
-
-    public function parse($text)
-    {
-            ///////////   INITIALIZATION
-        $element = $this->element;
-        $texy = $element->texy;
-
-        preg_match_all(
-            $texy->translatePattern('#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^":HASH:]*"|=\s*\'[^\':HASH:]*\'|=[^>:HASH:]*)*)(/?)>|<!--([^:HASH:]*?)-->#is'),
-            $text,
-            $matches,
-            PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
-
-        foreach(array_reverse($matches) as $m) {
-            $offset = $m[0][1];
-            foreach ($m as $key => $val) $m[$key] = $val[0];
-
-            $text = substr_replace(
-                        $text,
-                        $texy->htmlModule->process($this, $m),
-                        $offset,
-                        strlen($m[0])
-            );
-        }
-
-        $text = TexyHtml::htmlChars($text, FALSE, TRUE);
-
-        $element->setContent($text, TRUE);
-    }
-
-} // TexyHtmlParser
