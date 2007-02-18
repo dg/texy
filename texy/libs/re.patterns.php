@@ -21,7 +21,7 @@ if (!defined('TEXY')) die();
 
 
 
-// REGULAR EXPRESSIONS
+// REGULAR EXPRESSION PATTERNS
 
 //     international characters 'A-Za-z\x86-\xff'
 //     unicode                  'A-Za-z\x86-\x{ffff}'
@@ -64,47 +64,4 @@ define('TEXY_LINK_URL',        '(?:\[[^\]\n]+\]|(?!\[)[^\s'.TEXY_HASH.']*?[^:);,
 define('TEXY_LINK',            '(?::('.TEXY_LINK_URL.'))');    // any link
 define('TEXY_LINK_N',          '(?::('.TEXY_LINK_URL.'|:))');  // any link (also unstated)
 define('TEXY_EMAIL',           '[a-z0-9.+_-]+@[a-z0-9.+_-]{2,}\.[a-z]{2,}');    // name@exaple.com
-
-
-/** modifiers patterns generator:
-
-$TITLE =  '\([^\n\)]+\)';      // (...)
-$CLASS =  '\[[^\n\]]+\]';      // [...]
-$STYLE =  '\{[^\n\}]+\}';      // {...}
-$HALIGN = '(?:<>|>|=|<)';      //  <  >  =  <>
-$VALIGN = '(?:\^|\-|\_)';      //  ~ - _
-
-// .(title)[class]{style}
-define('TEXY_MODIFIER',
-         "(?:\\ *(?<= |^)\\.".
-         "($TITLE|$CLASS|$STYLE)".
-         "($TITLE|$CLASS|$STYLE)??".
-         "($TITLE|$CLASS|$STYLE)??)");
-
-
-// .(title)[class]{style}<>
-define('TEXY_MODIFIER_H',
-         "(?:\\ *(?<= |^)\\.".
-         "($TITLE|$CLASS|$STYLE|$HALIGN)".
-         "($TITLE|$CLASS|$STYLE|$HALIGN)??".
-         "($TITLE|$CLASS|$STYLE|$HALIGN)??".
-         "($TITLE|$CLASS|$STYLE|$HALIGN)??)");
-
-
-// .(title)[class]{style}<>^
-define('TEXY_MODIFIER_HV',
-         "(?:\\ *(?<= |^)\\.".
-         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)".
-         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".
-         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".
-         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??".
-         "($TITLE|$CLASS|$STYLE|$HALIGN|$VALIGN)??)");
-
-
-foreach (get_defined_constants() as $name => $value) {
-    $value = exportStr($value);
-    if (substr($name, 0, 5) === 'TEXY_')
-       echo "define('$name', '$value');\n";
-}
-*/
 

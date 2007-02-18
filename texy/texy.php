@@ -27,7 +27,7 @@ define('TEXY', 'Version 2.0beta for PHP5 $Revision$');
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
 require_once TEXY_DIR.'NHtml.php';
-require_once TEXY_DIR.'libs/constants.php';      // regular expressions & other constants
+require_once TEXY_DIR.'libs/re.patterns.php';    // regular expressions
 require_once TEXY_DIR.'libs/modifier.php';       // modifier processor
 require_once TEXY_DIR.'libs/url.php';            // object encapsulate of URL
 require_once TEXY_DIR.'libs/dom.php';            // Texy! DOM element's base class
@@ -37,16 +37,16 @@ require_once TEXY_DIR.'libs/html.php';
 require_once TEXY_DIR.'libs/html.wellform.php';
 require_once TEXY_DIR.'modules/block.php';
 require_once TEXY_DIR.'modules/formatter.php';
-require_once TEXY_DIR.'modules/generic-block.php';
+require_once TEXY_DIR.'modules/generic.block.php';
 require_once TEXY_DIR.'modules/heading.php';
-require_once TEXY_DIR.'modules/horiz-line.php';
-require_once TEXY_DIR.'modules/html-tag.php';
+require_once TEXY_DIR.'modules/horiz.line.php';
+require_once TEXY_DIR.'modules/html.tag.php';
 require_once TEXY_DIR.'modules/image.php';
-require_once TEXY_DIR.'modules/image-description.php';
+require_once TEXY_DIR.'modules/image.description.php';
 require_once TEXY_DIR.'modules/link.php';
 require_once TEXY_DIR.'modules/list.php';
-require_once TEXY_DIR.'modules/definition-list.php';
-require_once TEXY_DIR.'modules/long-words.php';
+require_once TEXY_DIR.'modules/definition.list.php';
+require_once TEXY_DIR.'modules/long.words.php';
 require_once TEXY_DIR.'modules/phrase.php';
 require_once TEXY_DIR.'modules/typography.php';
 require_once TEXY_DIR.'modules/quote.php';
