@@ -102,6 +102,9 @@ class TexyQuoteModule extends TexyModule
         } while (TRUE);
 
         if ($linkTarget) {
+                $link = new TexyUrl($this->texy);
+                $link->set($linkTarget);
+            	//$el->cite = $link->asURL();
             // TODO
             /*
             $elx = new TexyLinkElement($this->texy);

@@ -16,32 +16,54 @@
  */
 
 
+// security - include texy.php, not this file
+if (!defined('TEXY')) die();
+
+
 // static variable initialization
 TexyHtml::$valid = array_merge(TexyHtml::$block, TexyHtml::$inline);
 
 
 /**
- * HTML support for Texy!
+ * HTML helper
  *
  */
 class TexyHtml
 {
-    const EMPTYTAG = '/';
+    /** @var string element's name */
+    public $element;
+
+    /** @var bool is empty? NULL means autodetect */
+    public $forceEmpty;
+
+    /** @var bool use XHTML? */
+    static public $xhtml = TRUE;
+
+    /** @var array reserved properties */
+    static private $reserved = array('element'=>1, 'forceEmpty'=>1);
+
+    /* element's attributes are not explicitly declared */
+
 
     // notice: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
     static public $block = array(
         'address'=>1, 'blockquote'=>1, 'caption'=>1, 'col'=>1, 'colgroup'=>1, 'dd'=>1, 'div'=>1, 'dl'=>1, 'dt'=>1, 'fieldset'=>1, 'form'=>1,
         'h1'=>1, 'h2'=>1, 'h3'=>1, 'h4'=>1, 'h5'=>1, 'h6'=>1, 'hr'=>1, 'iframe'=>1, 'legend'=>1, 'li'=>1, 'object'=>1, 'ol'=>1, 'p'=>1,
         'param'=>1, 'pre'=>1, 'table'=>1, 'tbody'=>1, 'td'=>1, 'tfoot'=>1, 'th'=>1, 'thead'=>1, 'tr'=>1, 'ul'=>1,/*'embed'=>1,*/);
+    // todo: iframe, object, are block?
 
     static public $inline = array(
         'a'=>1, 'abbr'=>1, 'acronym'=>1, 'area'=>1, 'b'=>1, 'big'=>1, 'br'=>1, 'button'=>1, 'cite'=>1, 'code'=>1, 'del'=>1, 'dfn'=>1,
         'em'=>1, 'i'=>1, 'img'=>1, 'input'=>1, 'ins'=>1, 'kbd'=>1, 'label'=>1, 'map'=>1, 'noscript'=>1, 'optgroup'=>1, 'option'=>1, 'q'=>1,
         'samp'=>1, 'script'=>1, 'select'=>1, 'small'=>1, 'span'=>1, 'strong'=>1, 'sub'=>1, 'sup'=>1, 'textarea'=>1, 'tt'=>1, 'var'=>1,);
 
+    static public $inlineCont = array(
+        'br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,'applet'=>1,'isindex'=>1,);
+    // todo: use applet, isindex?
+
     static public $empty = array('img'=>1, 'hr'=>1, 'br'=>1, 'input'=>1, 'meta'=>1, 'area'=>1, 'base'=>1, 'col'=>1, 'link'=>1, 'param'=>1,);
 
-//  static public $meta = array('html'=>1, 'head'=>1, 'body'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'title'=>1,);
+    static public $meta = array('html'=>1, 'head'=>1, 'body'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'title'=>1,);
 
     static public $accepted_attrs = array(
         'abbr'=>1, 'accesskey'=>1, 'align'=>1, 'alt'=>1, 'archive'=>1, 'axis'=>1, 'bgcolor'=>1, 'cellpadding'=>1, 'cellspacing'=>1, 'char'=>1,
@@ -55,90 +77,135 @@ class TexyHtml
     static public $valid; /* array_merge(TexyHtml::$block, TexyHtml::$inline); */
 
 
-
     /**
-     * Like htmlSpecialChars, but can preserve entities
-     * @param  string  input string
-     * @param  bool    for using inside quotes?
-     * @param  bool    preserve entities?
-     * @return string
-     * @static
+     * TexyHtml element's factory
+     * @param string element name (or NULL)
+     * @param array  optional attributes list
+     * @return TexyHtml
      */
-    static public function htmlChars($s, $inQuotes = FALSE, $entity = FALSE)
+    static public function el($name=NULL, $attrs=NULL)
     {
-        $s = htmlSpecialChars($s, $inQuotes ? ENT_COMPAT : ENT_NOQUOTES);
-
-        if ($entity) // preserve numeric entities?
-            return preg_replace('~&amp;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', $s);
-        else
-            return $s;
+        return new self($name, $attrs);
     }
 
 
+    private function __construct($name, $attrs)
+    {
+        $this->element = $name;
+
+        if (is_array($attrs)) {
+           foreach ($attrs as $key => $value) $this->$key = $value;
+        }
+    }
 
 
     /**
-     * Build string which represents (X)HTML opening tag
-     * @param string   tag
-     * @param array    associative array of attributes and values ( / mean empty tag, arrays are imploded )
-     * @return string
-     * @static
+     * Overloaded setter for element's attribute
+     * @param string function name
+     * @param array function arguments
+     * @return TexyHtml self
      */
-    static public function openingTag($tag, $attrs)
+    public function __call($m, $args)
     {
-        if ($tag == NULL) return '';
+        /*if (!isset(self::$reserved[$m]))*/ $this->$m = $args[0];
+        return $this;
+    }
 
-        $empty = isset(self::$empty[$tag]) || isset($attrs[self::EMPTYTAG]);
 
-        $attrStr = '';
-        if (is_array($attrs)) {
-            unset($attrs[self::EMPTYTAG]);
+    /**
+     * Returns element's start tag
+     * @return string
+     */
+    public function startTag()
+    {
+        if (!$this->element) return '';
 
-            foreach (array_change_key_case($attrs, CASE_LOWER) as $name => $value) {
-                if (is_array($value)) {
-                    if ($name === 'style') {
-                        $style = array();
-                        foreach (array_change_key_case($value, CASE_LOWER) as $keyS => $valueS)
-                            if ($keyS && ($valueS !== '') && ($valueS !== NULL)) $style[] = $keyS.':'.$valueS;
-                        $value = implode(';', $style);
-                    } else $value = implode(' ', array_unique($value));
-                    if ($value == '') continue;
+        $s = '<' . $this->element;
+
+        // use array_change_key_case($this, CASE_LOWER) ?
+        // for each attribute...
+        foreach ($this as $key => $value)
+        {
+            // skip private properties
+            if (isset(self::$reserved[$key])) continue;
+
+            // skip NULLs and false boolean attributes
+            if ($value === NULL || $value === FALSE) continue;
+
+            // true boolean attribute
+            if ($value === TRUE) {
+                // in XHTML must use unminimized form
+                if (self::$xhtml) $s .= ' ' . $key . '="' . $key . '"';
+                // in HTML should use minimized form
+                else $s .= ' ' . $key;
+                continue;
+
+            } elseif (is_array($value)) {
+
+                // prepare into temporary array
+                $tmp = NULL;
+                // use array_change_key_case($value, CASE_LOWER) ?
+                foreach ($value as $k => $v) {
+                    // skip NULLs & empty string; composite 'style' vs. 'others'
+                    if ($v != NULL) $tmp[] = is_string($k) ? $k . ':' . $v : $v;
                 }
 
-                if ($value === NULL || $value === FALSE) continue;
-                $value = trim($value);
-                $attrStr .= ' '
-                          . self::htmlChars($name)
-                          . '="'
-                          . Texy::freezeSpaces(self::htmlChars($value, TRUE, TRUE))   // freezed spaces will be preserved during reformating
-                          . '"';
+                if (!$tmp) continue;
+                $value = implode($key === 'style' ? ';' : ' ', $tmp);
             }
+            // add new attribute
+            $s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value)) . '"';
         }
 
-        return '<' . $tag . $attrStr . ($empty ? ' /' : '') . '>';
+        // finish start tag
+        if (!self::$xhtml) return $s . '>';
+
+        $empty = $this->forceEmpty === NULL 
+            ? isset(self::$empty[$this->element])
+            : $this->forceEmpty;
+
+        return $empty ? $s . ' />' : $s . '>';
     }
 
 
-
     /**
-     * Build string which represents (X)HTML opening tag
+     * Returns element's end tag
      * @return string
-     * @static
      */
-    static public function closingTag($tag)
+    public function endTag()
     {
-        if ($tag == NULL || isset(self::$empty[$tag]) || isset($attrs[self::EMPTYTAG])) return '';
+        $empty = $this->forceEmpty === NULL 
+            ? isset(self::$empty[$this->element])
+            : $this->forceEmpty;
 
-        return '</'.$tag.'>';
+        return $this->element && !$empty 
+            ? '</' . $this->element . '>' 
+            : '';
     }
 
 
+    /**
+     * Is element empty?
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return $this->forceEmpty === NULL 
+            ? isset(self::$empty[$this->element]) 
+            : $this->forceEmpty;
+    }
+
 
     /**
-     * Undefined property usage prevention
+     * @return int
      */
-    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
-    function __set($nm, $val) { $this->__get($nm); }
-    private function __unset($nm) { $this->__get($nm); }
-    private function __isset($nm) { $this->__get($nm); }
+    public function getContentType()
+    {
+        if (isset(TexyHtml::$inlineCont[$this->element])) return Texy::CONTENT_INLINE;
+        if (isset(TexyHtml::$inline[$this->element])) return Texy::CONTENT_NONE;
+
+        return Texy::CONTENT_BLOCK;
+    }
+
+
 }

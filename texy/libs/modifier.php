@@ -162,10 +162,10 @@ class TexyModifier
     }
 
 
-    public function decorate(NHtml $el)
+    public function decorate(TexyHtml $el)
     {
         foreach ($this->getAttrs($el->element) as $attr => $val) $el->$attr = $val;
-        
+
         $el->id = $this->id;
         $el->title = $this->title;
         $el->class = $this->classes;

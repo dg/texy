@@ -259,8 +259,8 @@ class TexyTableFieldElement extends TexyTextualElement
     protected function generateTags(&$tags)
     {
         parent::generateTags($tags);
-        if ($this->colSpan <> 1) $tags[$this->tag]['colspan'] = (int) $this->colSpan;
-        if ($this->rowSpan <> 1) $tags[$this->tag]['rowspan'] = (int) $this->rowSpan;
+        if ($this->colSpan <> 1) $tags[$this->tag]->colspan = (int) $this->colSpan;
+        if ($this->rowSpan <> 1) $tags[$this->tag]->rowspan = (int) $this->rowSpan;
     }
 
 

@@ -194,8 +194,8 @@ class TexyLinkModule extends TexyModule
         $modifier = new TexyModifier($this->texy);
         $el = $this->factory($mLink, $mContent, $modifier);
 
-        $keyOpen  = $this->texy->hash($el->startTag(), TexyDomElement::CONTENT_NONE);
-        $keyClose = $this->texy->hash($el->endTag(), TexyDomElement::CONTENT_NONE);
+        $keyOpen  = $this->texy->hash($el->startTag(), Texy::CONTENT_NONE);
+        $keyClose = $this->texy->hash($el->endTag(), Texy::CONTENT_NONE);
         return $keyOpen . $mContent . $keyClose;
     }
 
@@ -253,7 +253,7 @@ class TexyLinkModule extends TexyModule
 
         $el = NHtml::el('a');
         $el->setContent($link->asTextual(), TRUE);
-        $el->contentType = TexyDomElement::CONTENT_TEXTUAL;
+        $el->contentType = Texy::CONTENT_TEXTUAL;
         $this->texy->summary['links'][] = $el->href = $link->asURL();
 
         // email on click
@@ -289,8 +289,8 @@ class TexyLinkModule extends TexyModule
         $link = new TexyUrl($this->texy);
         $link->set($mURL, $this->root);
 
-        $keyOpen  = $this->texy->hash($el->startTag(), TexyDomElement::CONTENT_NONE);
-        $keyClose = $this->texy->hash($el->endTag(), TexyDomElement::CONTENT_NONE);
+        $keyOpen  = $this->texy->hash($el->startTag(), Texy::CONTENT_NONE);
+        $keyClose = $this->texy->hash($el->endTag(), Texy::CONTENT_NONE);
         return $keyOpen . $link->asTextual() . $keyClose;
 
 /*
@@ -313,7 +313,7 @@ class TexyLinkModule extends TexyModule
 
 
         $this->texy->handle('Link.URL', $el);
-        return $this->texy->hash($el, TexyDomElement::CONTENT_TEXTUAL);
+        return $this->texy->hash($el, Texy::CONTENT_TEXTUAL);
 */
     }
 
@@ -328,7 +328,7 @@ class TexyLinkModule extends TexyModule
                 $elRef = $this->getReference( substr($loc, 1, -1) );
 
                 if ($elRef) {
-                    $modifier->copyFrom($elRef->modifier);
+                    $modifier = $elRef->modifier;
                     $loc = $elRef->URL . $elRef->query;
                     $loc = str_replace('%s', urlencode(Texy::wash($text)), $loc);
 
@@ -349,9 +349,9 @@ class TexyLinkModule extends TexyModule
             $link->set($loc, $this->root);
         } while (0);
 
-        if ($link->asURL() == '') return NHtml::el();  // dest URL is required
+        if ($link->asURL() == '') return TexyHtml::el();  // dest URL is required
 
-        $el = NHtml::el('a');
+        $el = TexyHtml::el('a');
 
         $attrs = $modifier->getAttrs('a'); /// !!
 
@@ -452,7 +452,7 @@ class TexyLinkElement extends TexyInlineTagElement
             $elRef = $this->texy->linkModule->getReference( substr($link, 1, -1) );
 
             if ($elRef) {
-                $this->modifier->copyFrom($elRef->modifier);
+                $this->modifier = clone $elRef->modifier;
                 $link = $elRef->URL . $elRef->query;
                 $link = str_replace('%s', urlencode(Texy::wash($text)), $link);
 
@@ -480,42 +480,20 @@ class TexyLinkElement extends TexyInlineTagElement
     {
         if ($this->link->asURL() == '') return;  // dest URL is required
 
-        $attrs = $this->modifier->getAttrs('a');
-        $this->texy->summary['links'][] = $attrs['href'] = $this->link->asURL();
+        $el = TexyHtml::el('a');
+        $tags['a'] = $el;
+
+        $this->modifier->decorate($el);
+        $this->texy->summary['links'][] = $el->href = $this->link->asURL();
 
         // rel="nofollow"
-        // rel="nofollow"
-        $nofollowClass = in_array('nofollow', $this->modifier->unfilteredClasses);
-        if ($this->link->isAbsolute() && ($this->texy->linkModule->forceNoFollow || $nofollowClass))
-            $attrs['rel'] = 'nofollow'; // TODO: append, not replace
-
-        $attrs['id']    = $this->modifier->id;
-        $attrs['title'] = $this->modifier->title;
-        $attrs['class'] = $this->modifier->classes;
-        $attrs['style'] = $this->modifier->styles;
-        if ($nofollowClass) {
-            if (($pos = array_search('nofollow', $attrs['class'])) !== FALSE)
-                 unset($attrs['class'][$pos]);
-        }
-
-        // popup on click
-        $popup = in_array('popup', $this->modifier->unfilteredClasses);
-        if ($popup) {
-            if (($pos = array_search('popup', $attrs['class'])) !== FALSE)
-                 unset($attrs['class'][$pos]);
-            $attrs['onclick'] = $this->texy->linkModule->popupOnClick;
-        }
-
+        if ($this->link->isAbsolute() && $this->texy->linkModule->forceNoFollow) $el->rel = 'nofollow'; // TODO: append, not replace
 
         // email on click
-        if ($this->link->isEmail())
-            $attrs['onclick'] = $this->texy->linkModule->emailOnClick;
+        if ($this->link->isEmail()) $el->onclick = $this->texy->linkModule->emailOnClick;
 
         // image on click
-        if ($this->link->isImage())
-            $attrs['onclick'] = $this->texy->linkModule->imageOnClick;
-
-        $tags['a'] = $attrs;
+        if ($this->link->isImage()) $el->onclick = $this->texy->linkModule->imageOnClick;
     }
 
 
@@ -562,8 +540,8 @@ class TexyLinkRefElement extends TexyTextualElement
             $this->content = $elLink->link->asTextual();
         }
 
-        $keyOpen  = $this->texy->hash($elLink->opening(), TexyDomElement::CONTENT_NONE);
-        $keyClose = $this->texy->hash($elLink->closing(), TexyDomElement::CONTENT_NONE);
+        $keyOpen  = $this->texy->hash($elLink->opening(), Texy::CONTENT_NONE);
+        $keyClose = $this->texy->hash($elLink->closing(), Texy::CONTENT_NONE);
         $this->content = $keyOpen . $this->content . $keyClose;
     }
 

@@ -60,6 +60,7 @@ class TexyPhraseModule extends TexyModule
         '()'  => 'acronym',
         '`'   => 'code',
         '``'  => '',
+        '>>'  => 'q',
     );
 
 
@@ -70,6 +71,14 @@ class TexyPhraseModule extends TexyModule
      */
     public function init()
     {
+/*
+        $this->texy->registerLinePattern(
+            $this,
+            'processPhrase2',
+            '#((?>[*+^_"~-]+?))(\S.*)'.TEXY_MODIFIER.'?(?<!\ )\\1'.TEXY_LINK.'??()#U'
+        );
+*/
+
         // strong & em speciality *** ... *** !!! its not good!
         if (@$this->allowed['***'] !== FALSE)
             $this->texy->registerLinePattern(
@@ -78,23 +87,6 @@ class TexyPhraseModule extends TexyModule
                 '#(?<!\*)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
                 $this->allowed['***']
             );
-
-        /*
-                '#((?>(?:[*+-^_"~`])+))(\S.+)'.TEXY_MODIFIER.'?(?<!\ )(?1)'.TEXY_LINK.'?#'
-                '#(?<!$ch)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
-                '#(?<!\*)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
-                '#(?<!\*)\*\*  (?!\ |\*)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\*)\*\*  (?!\*)'.TEXY_LINK.'??()#U',
-                '#(?<!\*)\*    (?!\ |\*)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\*)\*    (?!\*)'.TEXY_LINK.'??()#U',
-                '#(?<!\+)\+\+  (?!\ |\+)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\+)\+\+  (?!\+)()#U',
-                '#(?<!\-)\-\-  (?!\ |\-)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\-)\-\-  (?!\-)()#U',
-                '#(?<!\^)\^\^  (?!\ |\^)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\^)\^\^  (?!\^)()#U',
-                '#(?<!\_)\_\_  (?!\ |\_)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\_)\_\_  (?!\_)()#U',
-                '#(?<!\")\"    (?!\ )   ([^\"]+)'.TEXY_MODIFIER.'?(?<!\ )\"       (?!\")'.TEXY_LINK.'??()#U',
-                '#(?<!\~)\~    (?!\ )   ([^\~]+)'.TEXY_MODIFIER.'?(?<!\ )\~       (?!\~)'.TEXY_LINK.'??()#U',
-                '#(?<!\~)\~\~  (?!\ |\~)(.+)'.TEXY_MODIFIER.'?    (?<!\ |\~)\~\~  (?!\~)'.TEXY_LINK.'??()#U',
-                '#       \`\`           (\S[^'.TEXY_HASH.']*)     (?<!\ )\`\`                   ()#U',
-                '#       \`             (\S[^'.TEXY_HASH.']*)'.TEXY_MODIFIER.'?(?<!\ )\`               ()#U'
-        */
 
         // **strong**
         if (@$this->allowed['**'] !== FALSE)
@@ -178,6 +170,15 @@ class TexyPhraseModule extends TexyModule
                 $this->allowed['~~']
             );
 
+        // >>quote<<
+        if (@$this->allowed['>>'] !== FALSE)
+            $this->texy->registerLinePattern(
+                $this,
+                'processPhrase',
+                '#(?<!\>)\>\>(?!\ |\>)(.+)'.TEXY_MODIFIER.'?(?<!\ |\<)\<\<(?!\<)'.TEXY_LINK.'??()#U',
+                $this->allowed['>>']
+            );
+
         if (@$this->allowed['""()'] !== FALSE)
             // acronym/abbr "et al."((and others))
             $this->texy->registerLinePattern(
@@ -195,7 +196,6 @@ class TexyPhraseModule extends TexyModule
                 '#(?<!['.TEXY_CHAR.'])(['.TEXY_CHAR.']{2,})()()()\(\((.+)\)\)#Uu',
                 $this->allowed['()']
             );
-
 
         // ``protected`` (experimental, dont use)
         if (@$this->allowed['``'] !== FALSE)
@@ -236,13 +236,18 @@ class TexyPhraseModule extends TexyModule
             preg_match('#^(.)+(.+)'.TEXY_MODIFIER.'?\\1+()$#U', $match, $matches);
             list($match, , $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         }
-        //    [1] => ...
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
+        //    [1] => **
+        //    [2] => ...
+        //    [3] => (title)
+        //    [4] => [class]
+        //    [5] => {style}
+        //    [6] => LINK
 
-        if (($tags == 'span') && $mLink) $tags = ''; // eliminate wasted spans, use <a ..> instead
-        if (($tags == 'span') && !$mMod1 && !$mMod2 && !$mMod3) return $match; // don't use wasted spans...
+        //if (!isset($this->allowed[$mPhrase])) return $match;
+        //$tags = $this->allowed[$mPhrase];
+
+        if (($tags === 'span') && $mLink) $tags = ''; // eliminate wasted spans, use <a ..> instead
+        if (($tags === 'span') && !$mMod1 && !$mMod2 && !$mMod3) return $match; // don't use wasted spans...
         $tags = array_reverse(explode(' ', $tags));
         $el = NULL;
 
@@ -250,25 +255,32 @@ class TexyPhraseModule extends TexyModule
         $modifier->setProperties($mMod1, $mMod2, $mMod3);
 
         foreach ($tags as $tag) {
-            $el = NHtml::el($tag);
+            $el = TexyHtml::el($tag);
             if ($modifier) {
-                if ($tag == 'acronym' || $tag == 'abbr') { $modifier->title = $mLink; $mLink=''; }
+                if ($tag === 'acronym' || $tag === 'abbr') { $modifier->title = $mLink; $mLink=''; }
                 $modifier->decorate($el);
                 $modifier = NULL;
             }
-            $keyOpen  = $this->texy->hash($el->startTag(), TexyDomElement::CONTENT_NONE);
-            $keyClose = $this->texy->hash($el->endTag(), TexyDomElement::CONTENT_NONE);
+
+            if ($mLink && $tag === 'q') { // cite !!!
+                $link = new TexyUrl($this->texy);
+                $link->set($mLink);
+            	$el->cite = $link->asURL();
+            }
+
+            $keyOpen  = $this->texy->hash($el->startTag(), Texy::CONTENT_NONE);
+            $keyClose = $this->texy->hash($el->endTag(), Texy::CONTENT_NONE);
             $mContent = $keyOpen . $mContent . $keyClose;
         }
 
 
-        if ($mLink) {
+        if ($mLink && $tag !== 'q') {
             $modifier = new TexyModifier($this->texy);
             //$link = $this->texy->linkModule->factoryLink();
             $el = $this->texy->linkModule->factory($mLink, $mContent, $modifier);
 
-            $keyOpen  = $this->texy->hash($el->startTag(), TexyDomElement::CONTENT_NONE);
-            $keyClose = $this->texy->hash($el->endTag(), TexyDomElement::CONTENT_NONE);
+            $keyOpen  = $this->texy->hash($el->startTag(), Texy::CONTENT_NONE);
+            $keyClose = $this->texy->hash($el->endTag(), Texy::CONTENT_NONE);
             $mContent = $keyOpen . $mContent . $keyClose;
         }
 
@@ -289,7 +301,7 @@ class TexyPhraseModule extends TexyModule
         //    [1] => ...
 
         $this->allowed['`'] = strtolower($mTag);
-        if ($this->allowed['`'] == 'none') $this->allowed['`'] = '';
+        if ($this->allowed['`'] === 'none') $this->allowed['`'] = '';
     }
 
 
@@ -318,7 +330,7 @@ class TexyPhraseModule extends TexyModule
         if ($this->codeHandler)
             if (call_user_func_array($this->codeHandler, array($el, 'code')) === FALSE) return '';
 
-        return $this->texy->hash($el->toHtml(), TexyDomElement::CONTENT_TEXTUAL);
+        return $this->texy->hash($el->__toString(), Texy::CONTENT_TEXTUAL);
     }
 
 
@@ -339,7 +351,7 @@ class TexyPhraseModule extends TexyModule
         $el = new TexyTextualElement($this->texy);
         $el->content = Texy::freezeSpaces($mContent);
 
-        return $this->texy->hash($el->toHtml(), TexyDomElement::CONTENT_TEXTUAL);
+        return $this->texy->hash($el->__toString(), Texy::CONTENT_TEXTUAL);
     }
 
 

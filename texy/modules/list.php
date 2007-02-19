@@ -45,7 +45,7 @@ class TexyListModule extends TexyModule
     // private
     public $translate = array(    //  rexexp       class   list-style-type  tag
         '*'            => array('\*',          '',    '',              'ul'),
-        '-'            => array('\-',          '',    '',              'ul'),
+        '-'            => array('[\x{2013}-]', '',    '',              'ul'),
         '+'            => array('\+',          '',    '',              'ul'),
         '1.'           => array('\d+\.\ ',     '',    '',              'ol'),
         '1)'           => array('\d+\)',       '',    '',              'ol'),
@@ -69,7 +69,7 @@ class TexyListModule extends TexyModule
             $this,
             'processBlock',
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                         // .{color: red}
-          . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mU'  // item (unmatched)
+          . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mUu'  // item (unmatched)
         );
     }
 
@@ -102,7 +102,7 @@ class TexyListModule extends TexyModule
 
         $bullet = '';
         foreach ($this->translate as $type)
-            if (preg_match('#'.$type[0].'#A', $mBullet)) {
+            if (preg_match('#'.$type[0].'#Au', $mBullet)) {
                 $bullet = $type[0];
                 $el->tag = $type[3];
                 $el->modifier->styles['list-style-type'] = $type[2];
@@ -136,7 +136,7 @@ class TexyListModule extends TexyModule
     public function processItem($parser, $bullet, $indented = FALSE) {
         $texy =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
-        $patternItem = "#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAU";
+        $patternItem = "#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
 
         // first line (with bullet)
         if (!$parser->receiveNext($patternItem, $matches)) {

@@ -154,11 +154,13 @@ class TexyBlockModule extends TexyModule
                     strlen($m[0])
                 );
             }
+            /*
             $mContent = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8');
             $mContent = htmlspecialchars($mContent);
             $mContent = $this->texy->hashReplace($mContent);
-            $mContent = $this->texy->hash($mContent, TexyDomElement::CONTENT_BLOCK);
-            $el->content = $mContent;
+            $mContent = $this->texy->hash($mContent, Texy::CONTENT_BLOCK);
+            */
+            $el->content = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8');
 
             if ($this->htmlHandler)
                 if (call_user_func_array($this->htmlHandler, array($el, TRUE)) === FALSE) return;
@@ -169,8 +171,8 @@ class TexyBlockModule extends TexyModule
 
         case 'text':
             $el = new TexyTextualElement($this->texy);
-            $mContent = nl2br(TexyHtml::htmlChars($mContent));
-            $mContent = $this->texy->hash($mContent, TexyDomElement::CONTENT_BLOCK);
+            $mContent = nl2br( htmlSpecialChars($mContent) );
+            $mContent = $this->texy->hash($mContent, Texy::CONTENT_BLOCK);
             $el->content = $mContent;
 
             if ($this->htmlHandler)
@@ -192,7 +194,7 @@ class TexyBlockModule extends TexyModule
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
             $mContent = htmlSpecialChars($mContent);
-            $mContent = $this->texy->hash($mContent, TexyDomElement::CONTENT_BLOCK);
+            $mContent = $this->texy->hash($mContent, Texy::CONTENT_BLOCK);
             $el->content = $mContent;
 
             if ($this->codeHandler)
@@ -235,10 +237,10 @@ class TexyCodeBlockElement extends TexyTextualElement
         parent::generateTags($tags);
 
         if ($this->tag) {
-            $tags[$this->tag]['class'][] = $this->lang;
+            $tags[$this->tag]->class[] = $this->lang;
 
             if ($this->type)
-                $tags[$this->type] = array();
+                $tags[] = TexyHtml::el($this->type);
         }
     }
 

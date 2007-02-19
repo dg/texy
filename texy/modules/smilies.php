@@ -43,7 +43,7 @@ class TexySmiliesModule extends TexyModule
         ':-P'  =>  'razz.gif',
         ':-|'  =>  'neutral.gif',
     );
-    public $root      = 'images/smilies/';
+    public $root      = NULL;
     public $class     = '';
 
 
@@ -53,16 +53,17 @@ class TexySmiliesModule extends TexyModule
      */
     public function init()
     {
-        if (!empty($this->texy->allowed['Image.smilies'])) {
-            krsort($this->icons);
-            $pattern = array();
-            foreach ($this->icons as $key => $foo)
-                $pattern[] = preg_quote($key, '#') . '+';
+        if (empty($this->texy->allowed['Image.smilies'])) return;
 
-            $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
+        krsort($this->icons);
 
-            $this->texy->registerLinePattern($this, 'processLine', $crazyRE);
-        }
+        $pattern = array();
+        foreach ($this->icons as $key => $foo)
+            $pattern[] = preg_quote($key, '#') . '+';
+
+        $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
+
+        $this->texy->registerLinePattern($this, 'processLine', $crazyRE);
     }
 
 
@@ -92,14 +93,16 @@ class TexySmiliesModule extends TexyModule
          // find the closest match
         foreach ($this->icons as $key => $value)
             if (substr($match, 0, strlen($key)) === $key) {
-                $el->image->set($value, $this->root, TRUE);
+                $root = $this->root === NULL ? $this->texy->imageModule->root :  $this->root;
+        
+                $el->image->set($value, $root, TRUE); // different ROOT !!!
                 break;
             }
 
         if ($this->handler)
             if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
 
-        return $this->texy->hash($el->toHtml(), TexyDomElement::CONTENT_NONE); // !!!
+        return $this->texy->hash($el->__toString(), Texy::CONTENT_NONE); // !!!
     }
 
 

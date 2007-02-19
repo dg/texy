@@ -88,19 +88,19 @@ class TexyImageDescModule extends TexyModule
         $el->modifier->hAlign = $elImage->modifier->hAlign;
         $elImage->modifier->hAlign = NULL;
 
-        $content = $this->texy->hash($elImage->toHtml(), TexyDomElement::CONTENT_NONE); // !!!
+        $content = $this->texy->hash($elImage->__toString(), Texy::CONTENT_NONE); // !!!
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);
-            if ($mLink == ':') {
+            if ($mLink === ':') {
                 $elImage->requireLinkImage();
-                $elLink->link->copyFrom($elImage->linkImage);
+                if ($elImage->linkImage) $elLink->link->copyFrom($elImage->linkImage);
             } else {
                 $elLink->setLinkRaw($mLink);
             }
 
-            $keyOpen  = $this->texy->hash($elLink->opening(), TexyDomElement::CONTENT_NONE);
-            $keyClose = $this->texy->hash($elLink->closing(), TexyDomElement::CONTENT_NONE);
+            $keyOpen  = $this->texy->hash($elLink->opening(), Texy::CONTENT_NONE);
+            $keyClose = $this->texy->hash($elLink->closing(), Texy::CONTENT_NONE);
             $content = $keyOpen . $content . $keyClose;
         }
         $elImg = new TexyTextualElement($this->texy);
@@ -145,21 +145,24 @@ class TexyImageDescElement extends TexyBlockElement
 
     protected function generateTags(&$tags)
     {
-        $attrs = $this->modifier->getAttrs('div');
-        $attrs['class'] = $this->modifier->classes;
-        $attrs['style'] = $this->modifier->styles;
-        $attrs['id'] = $this->modifier->id;
+        $el = TexyHtml::el('div');
+        $tags['div'] = $el;
 
-        if ($this->modifier->hAlign == TexyModifier::HALIGN_LEFT) {
-            $attrs['class'][] = $this->texy->imageDescModule->leftClass;
+        foreach ($this->modifier->getAttrs('div') as $attr => $val) $el->$attr = $val;
 
-        } elseif ($this->modifier->hAlign == TexyModifier::HALIGN_RIGHT)  {
-            $attrs['class'][] = $this->texy->imageDescModule->rightClass;
+        $el->id = $this->modifier->id;
+        $el->class = $this->modifier->classes;
+        $el->style = $this->modifier->styles;
+
+        if ($this->modifier->hAlign === TexyModifier::HALIGN_LEFT) {
+            $el->class[] = $this->texy->imageDescModule->leftClass;
+
+        } elseif ($this->modifier->hAlign === TexyModifier::HALIGN_RIGHT)  {
+            $el->class[] = $this->texy->imageDescModule->rightClass;
 
         } elseif ($this->texy->imageDescModule->boxClass)
-            $attrs['class'][] = $this->texy->imageDescModule->boxClass;
+            $el->class[] = $this->texy->imageDescModule->boxClass;
 
-        $tags['div'] = $attrs;
     }
 
 

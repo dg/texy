@@ -37,9 +37,9 @@ class TexyDefinitionListModule extends TexyListModule
 
     // private
     public $translate = array(    //  rexexp  class
-        '*'            => array('\*',   ''),
-        '-'            => array('\-',   ''),
-        '+'            => array('\+',   ''),
+        '*'            => array('\*', ''),
+        '-'            => array('[\x{2013}-]', ''),
+        '+'            => array('\+', ''),
     );
 
 
@@ -56,9 +56,9 @@ class TexyDefinitionListModule extends TexyListModule
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                          // .{color:red}
-          . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'                     // Term:
-          . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mU'   //    - description
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color:red}
+          . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'               // Term:
+          . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mUu'   //    - description
         );
     }
 
@@ -99,7 +99,7 @@ class TexyDefinitionListModule extends TexyListModule
 
         $bullet = '';
         foreach ($this->translate as $type)
-            if (preg_match('#'.$type[0].'#A', $mBullet)) {
+            if (preg_match('#'.$type[0].'#Au', $mBullet)) {
                 $bullet = $type[0];
                 $el->modifier->classes[] = $type[1];
                 break;

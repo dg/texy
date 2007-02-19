@@ -153,7 +153,7 @@ class TexyImageModule extends TexyModule
         $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         //$elImage->setImagesRaw($mURLs);
 
-        $keyImage = $this->texy->hash($elImage->toHtml(), TexyDomElement::CONTENT_NONE); // !!!
+        $keyImage = $this->texy->hash($elImage->__toString(), Texy::CONTENT_NONE); // !!!
 
         if ($mLink) {
             $elLink = new TexyLinkElement($this->texy);
@@ -164,8 +164,8 @@ class TexyImageModule extends TexyModule
                 $elLink->setLinkRaw($mLink);
             }
 
-            $keyOpen  = $this->texy->hash($elLink->opening(), TexyDomElement::CONTENT_NONE);
-            $keyClose = $this->texy->hash($elLink->closing(), TexyDomElement::CONTENT_NONE);
+            $keyOpen  = $this->texy->hash($elLink->opening(), Texy::CONTENT_NONE);
+            $keyClose = $this->texy->hash($elLink->closing(), Texy::CONTENT_NONE);
             return $keyOpen . $keyImage . $keyClose;
         }
 
@@ -254,7 +254,7 @@ class TexyImageElement extends TexyTextualElement
         $elRef = $this->texy->imageModule->getReference(trim($URLs));
         if ($elRef) {
             $URLs = $elRef->URLs;
-            $this->modifier->copyFrom($elRef->modifier);
+            $this->modifier = clone $elRef->modifier;
         }
 
         $URLs = explode('|', $URLs . '||');
@@ -275,48 +275,48 @@ class TexyImageElement extends TexyTextualElement
     {
         if ($this->image->asURL() == '') return;  // image URL is required
 
-        // classes & styles
-        $attrs = $this->modifier->getAttrs('img');
-        $attrs['class'] = $this->modifier->classes;
-        $attrs['style'] = $this->modifier->styles;
-        $attrs['id'] = $this->modifier->id;
+        $el = TexyHtml::el('img');
+        $tags['img'] = $el;
 
-        if ($this->modifier->hAlign == TexyModifier::HALIGN_LEFT) {
+        foreach ($this->modifier->getAttrs('img') as $attr => $val) $el->$attr = $val;
+
+        $el->id = $this->modifier->id;
+        $el->class = $this->modifier->classes;
+        $el->style = $this->modifier->styles;
+
+        if ($this->modifier->hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->texy->imageModule->leftClass != '')
-                $attrs['class'][] = $this->texy->imageModule->leftClass;
+                $el->class[] = $this->texy->imageModule->leftClass;
             else
-                $attrs['style']['float'] = 'left';
+                $el->style['float'] = 'left';
 
-        } elseif ($this->modifier->hAlign == TexyModifier::HALIGN_RIGHT)  {
+        } elseif ($this->modifier->hAlign === TexyModifier::HALIGN_RIGHT)  {
 
             if ($this->texy->imageModule->rightClass != '')
-                $attrs['class'][] = $this->texy->imageModule->rightClass;
+                $el->class[] = $this->texy->imageModule->rightClass;
             else
-                $attrs['style']['float'] = 'right';
+                $el->style['float'] = 'right';
         }
 
         if ($this->modifier->vAlign)
-            $attrs['style']['vertical-align'] = $this->modifier->vAlign;
+            $el->style['vertical-align'] = $this->modifier->vAlign;
 
         // width x height generate
         $this->requireSize();
-        if ($this->width) $attrs['width'] = $this->width;
-        if ($this->height) $attrs['height'] = $this->height;
+        if ($this->width) $el->width = $this->width;
+        if ($this->height) $el->height = $this->height;
 
         // attribute generate
-        $this->texy->summary['images'][] = $attrs['src'] = $this->image->asURL();
+        $this->texy->summary['images'][] = $el->src = $this->image->asURL();
 
         // onmouseover actions generate
-        if ($this->overImage->asURL()) {
-            $attrs['onmouseover'] = 'this.src=\''.$this->overImage->asURL().'\'';
-            $attrs['onmouseout'] = 'this.src=\''.$this->image->asURL().'\'';
+        if ($this->overImage->asURL() != '') {
+            $el->onmouseover = 'this.src=\''.$this->overImage->asURL().'\'';
+            $el->onmouseout = 'this.src=\''.$this->image->asURL().'\'';
             $this->texy->summary['preload'][] = $this->overImage->asURL();
         }
 
-        // alternative text generate
-        $attrs['alt'] = $this->modifier->title != NULL ? $this->modifier->title : $this->texy->imageModule->defaultAlt;
-
-        $tags['img'] = $attrs;
+        $el->alt = $this->modifier->title != NULL ? (string) $this->modifier->title : (string) $this->texy->imageModule->defaultAlt;
     }
 
 

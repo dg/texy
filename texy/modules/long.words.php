@@ -45,9 +45,6 @@ class TexyLongWordsModule extends TexyModule
     {
         if (empty($this->texy->allowed['LongWord'])) return $text;
 
-        $charShy  = $this->texy->utf ? "\xC2\xAD" : "\xAD";
-        $charNbsp = $this->texy->utf ? "\xC2\xA0" : "\xA0";
-
         // convert nbsp + shy to single chars
         $text = strtr($text, array(
                             '&shy;'  => "\xC2\xAD",

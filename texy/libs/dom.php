@@ -29,11 +29,6 @@ if (!defined('TEXY')) die();
  */
 abstract class TexyDomElement
 {
-    const CONTENT_NONE =    1;
-    const CONTENT_INLINE =  2;
-    const CONTENT_TEXTUAL = 3;
-    const CONTENT_BLOCK =   4;
-
     public $texy; // parent Texy! object
     public $modifier;
     public $tag;
@@ -53,16 +48,9 @@ abstract class TexyDomElement
     protected function generateTags(&$tags)
     {
         if ($this->tag) {
-            $attrs = $this->modifier->getAttrs($this->tag);
-            $attrs['id']    = $this->modifier->id;
-            if ($this->modifier->title !== NULL)
-                $attrs['title'] = $this->modifier->title;
-            $attrs['class'] = $this->modifier->classes;
-            $attrs['style'] = $this->modifier->styles;
-            if ($this->modifier->hAlign) $attrs['style']['text-align'] = $this->modifier->hAlign;
-            if ($this->modifier->vAlign) $attrs['style']['vertical-align'] = $this->modifier->vAlign;
-
-            $tags[$this->tag] = $attrs;
+            $el = TexyHtml::el($this->tag);
+            $this->modifier->decorate($el);
+            $tags[$this->tag] = $el;
         }
     }
 
@@ -83,14 +71,13 @@ abstract class TexyDomElement
         $tags = array();
         $this->generateTags($tags);
 
-        $open = $close = '';
-        foreach ($tags as $tag => $attr) {
-            $open .= TexyHtml::openingTag($tag, $attr);
-            $close = TexyHtml::closingTag($tag) . $close;
+        $start = $end = '';
+
+        foreach ($tags as $el) {
+            $start .= $el->startTag();
+            $end = $el->endTag() . $end;
         }
-        if ($open) $open = $this->texy->hash($open, TexyDomElement::CONTENT_BLOCK);
-        if ($close) $close = $this->texy->hash($close, TexyDomElement::CONTENT_BLOCK);
-        return $open . $this->generateContent() . $close;
+        return $start . $this->generateContent() . $end;
     }
 
 
@@ -186,24 +173,10 @@ class TexyTextualElement extends TexyDomElement
     public $content;                    // string
 
 
+
     protected function generateContent()
     {
-        return $this->content;
-    }
-
-
-
-    public function toHtml()
-    {
-        $tags = array();
-        $this->generateTags($tags);
-
-        $open = $close = '';
-        foreach ($tags as $tag => $attr) {
-            $open .= TexyHtml::openingTag($tag, $attr);
-            $close = TexyHtml::closingTag($tag) . $close;
-        }
-        return $open . htmlspecialChars($this->content) . $close;
+        return htmlspecialChars($this->content);
     }
 
 
@@ -226,6 +199,9 @@ class TexyTextualElement extends TexyDomElement
 
 
 
+
+
+
 /**
  * Represent HTML tags (elements without content)
  * Used as children of TexyTextualElement
@@ -240,8 +216,8 @@ class TexyInlineTagElement extends TexyDomElement
         $this->generateTags($tags);
         $s = '';
         if ($tags)
-            foreach ($tags as $tag => $attr)
-                $s .= TexyHtml::openingTag($tag, $attr);
+            foreach ($tags as $el)
+                $s .= $el->startTag();
         return $s;
     }
 
@@ -250,168 +226,11 @@ class TexyInlineTagElement extends TexyDomElement
         $this->generateTags($tags);
         $s = '';
         if ($tags)
-            foreach ($tags as $tag => $attr)
-                $s = TexyHtml::closingTag($tag) . $s;
+            foreach ($tags as $el)
+                $s = $el->endTag() . $s;
         return $s;
     }
 
 
 } // TexyInlineTagElement
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
- * Texy! DOM
- * ---------
- */
-class TexyDom extends TexyBlockElement
-{
-    public $elements;
-    public $elementsById;
-    public $elementsByClass;
-
-
-    /**
-     * Convert Texy! document into DOM structure
-     * Before converting it normalize text and call all pre-processing modules
-     */
-    public function parse($text)
-    {
-            ///////////   REMOVE SPECIAL CHARS, NORMALIZE LINES
-        $text = Texy::wash($text);
-
-            ///////////   STANDARDIZE LINE ENDINGS TO UNIX-LIKE  (DOS, MAC)
-        $text = str_replace("\r\n", "\n", $text); // DOS
-        $text = strtr($text, "\r", "\n"); // Mac
-
-            ///////////   REPLACE TABS WITH SPACES
-        $tabWidth = $this->texy->tabWidth;
-        while (strpos($text, "\t") !== FALSE)
-            $text = preg_replace_callback('#^(.*)\t#mU',
-                       create_function('$matches', "return \$matches[1] . str_repeat(' ', $tabWidth - strlen(\$matches[1]) % $tabWidth);"),
-                       $text);
-
-            ///////////   REMOVE TEXY! COMMENTS
-        $commentChars = $this->texy->utf ? "\xC2\xA7" : "\xA7";
-        $text = preg_replace('#'.$commentChars.'{2,}(?!'.$commentChars.').*('.$commentChars.'{2,}|$)(?!'.$commentChars.')#mU', '', $text);
-
-            ///////////   RIGHT TRIM
-        $text = preg_replace("#[\t ]+$#m", '', $text); // right trim
-
-
-            ///////////   PRE-PROCESSING
-        foreach ($this->texy->getModules() as $module)
-            $text = $module->preProcess($text);
-
-            ///////////   PROCESS
-        parent::parse($text);
-    }
-
-
-
-
-
-    /**
-     * Convert DOM structure to (X)HTML code
-     * and call all post-processing modules
-     * @return string
-     */
-    public function __toString()
-    {
-        $html = parent::__toString();
-
-        $html = htmlspecialChars($html);
-
-        $html = $this->texy->hashReplace($html);
-
-        $obj = new TexyHtmlWellForm();
-        $html = $obj->process($html);
-
-            ///////////   POST-PROCESS
-        foreach ($this->texy->getModules() as $module)
-            $html = $module->postProcess($html);
-
-            ///////////   UNFREEZE SPACES
-        $html = Texy::unfreezeSpaces($html);
-
-            // THIS NOTICE SHOULD REMAIN!
-        if (!defined('TEXY_NOTICE_SHOWED')) {
-            $html .= "\n<!-- generated by Texy! -->";
-            define('TEXY_NOTICE_SHOWED', TRUE);
-        }
-
-        return $html;
-    }
-
-
-
-
-}  // TexyDom
-
-
-
-
-
-
-
-
-
-
-
-/**
- * Texy! DOM for single line
- * -------------------------
- */
-class TexyDomLine extends TexyTextualElement
-{
-    public  $elements;
-    public  $elementsById;
-    public  $elementsByClass;
-
-
-    /**
-     * Convert Texy! single line into DOM structure
-     */
-    public function parse($text)
-    {
-            ///////////   REMOVE SPECIAL CHARS AND LINE ENDINGS
-        $text = Texy::wash($text);
-        $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
-
-            ///////////   PROCESS
-        parent::parse($text);
-    }
-
-
-
-
-
-    /**
-     * Convert DOM structure to (X)HTML code
-     * @return string
-     */
-    public function __toString()
-    {
-        $html = parent::__toString();
-        $html = $this->texy->hashReplace($html);
-
-        $wf = new TexyHtmlWellForm();
-        $html = $wf->process($html);
-        $html = Texy::unfreezeSpaces($html);
-        return $html;
-    }
-
-
-
-} // TexyDomLine

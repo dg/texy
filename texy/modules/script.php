@@ -99,7 +99,8 @@ class TexyScriptModule extends TexyModule
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->content = $element->texy->hash('<texy:script content="'.TexyHtml::htmlChars($identifier, TRUE).'" />', TexyDomElement::CONTENT_TEXTUAL);
+        $element->content = $element->texy->hash('<texy:script content="'
+            . htmlSpecialChars($identifier) . '" />', Texy::CONTENT_TEXTUAL);
     }
 
 
