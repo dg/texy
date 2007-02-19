@@ -127,7 +127,7 @@ class TexyHeadingModule extends TexyModule
 
         $el = new TexyHeadingElement($this->texy);
         $el->level = $this->levels[$mLine];
-        if ($this->balancing == self::DYNAMIC)
+        if ($this->balancing === self::DYNAMIC)
             $el->deltaLevel = & $this->_deltaUnderline;
 
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
@@ -168,7 +168,7 @@ class TexyHeadingModule extends TexyModule
 
         $el = new TexyHeadingElement($this->texy);
         $el->level = 7 - min(7, max(2, strlen($mLine)));
-        if ($this->balancing == self::DYNAMIC)
+        if ($this->balancing === self::DYNAMIC)
             $el->deltaLevel = & $this->_deltaSurround;
 
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);

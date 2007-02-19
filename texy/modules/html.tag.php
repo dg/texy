@@ -92,7 +92,7 @@ class TexyHtmlModule extends TexyModule
         //    [5] => comment
 
         if ($mTag == '') { // comment
-            if (!$this->texy->allowed['HTML.comments']) return substr($matches[5], 0, 1) == '[' ? $match : '';
+            if (!$this->texy->allowed['HTML.comments']) return substr($matches[5], 0, 1) === '[' ? $match : '';
 
             return $this->texy->hash($match, TexyDomElement::CONTENT_NONE);
         }
@@ -103,8 +103,8 @@ class TexyHtmlModule extends TexyModule
         $tag = strtolower($mTag);
         if (!isset(TexyHtml::$valid[$tag])) $tag = $mTag;  // undo lowercase
 
-        $empty = ($mEmpty == '/') || isset(TexyHtml::$empty[$tag]);
-        $isOpening = $mClosing != '/';
+        $empty = ($mEmpty === '/') || isset(TexyHtml::$empty[$tag]);
+        $isOpening = $mClosing !== '/';
 
         if ($empty && !$isOpening)  // error - can't close empty element
             return $match;
@@ -122,7 +122,7 @@ class TexyHtmlModule extends TexyModule
                 if (is_array($allowedAttrs) && !in_array($key, $allowedAttrs)) continue;
                 $value = $matchAttr[2];
                 if ($value == NULL) $value = $key;
-                elseif ($value{0} == '\'' || $value{0} == '"') $value = substr($value, 1, -1);
+                elseif ($value{0} === '\'' || $value{0} === '"') $value = substr($value, 1, -1);
                 $attrs[$key] = $value;
             }
 

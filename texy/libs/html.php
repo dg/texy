@@ -96,7 +96,7 @@ class TexyHtml
 
             foreach (array_change_key_case($attrs, CASE_LOWER) as $name => $value) {
                 if (is_array($value)) {
-                    if ($name == 'style') {
+                    if ($name === 'style') {
                         $style = array();
                         foreach (array_change_key_case($value, CASE_LOWER) as $keyS => $valueS)
                             if ($keyS && ($valueS !== '') && ($valueS !== NULL)) $style[] = $keyS.':'.$valueS;

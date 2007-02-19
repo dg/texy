@@ -44,7 +44,7 @@ class TexyGenericBlockModule extends TexyModule
 
         foreach ($str_blocks as $str) {
             $str = trim($str);
-            if ($str == '') continue;
+            if ($str === '') continue;
             $this->processSingleBlock($parser, $str);
         }
     }
@@ -95,9 +95,9 @@ class TexyGenericBlockModule extends TexyModule
         }
 
         // specify tag
-        if ($contentType == TexyDomElement::CONTENT_TEXTUAL) $el->tag = 'p';
+        if ($contentType === TexyDomElement::CONTENT_TEXTUAL) $el->tag = 'p';
         elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $el->tag = 'div';
-        elseif ($contentType == TexyDomElement::CONTENT_BLOCK) $el->tag = '';
+        elseif ($contentType === TexyDomElement::CONTENT_BLOCK) $el->tag = '';
         else $el->tag = 'div';
 
         // add <br />

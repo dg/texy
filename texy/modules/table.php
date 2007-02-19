@@ -149,7 +149,7 @@ class TexyTableModule extends TexyModule
         $elRow = new TexyBlockElement($this->texy);
         $elRow->tag = 'tr';
         $elRow->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-        if ($this->row % 2 == 0) {
+        if ($this->row % 2 === 0) {
             if ($this->oddClass) $elRow->modifier->classes[] = $this->oddClass;
         } else {
             if ($this->evenClass) $elRow->modifier->classes[] = $this->evenClass;
@@ -166,7 +166,7 @@ class TexyTableModule extends TexyModule
             }
 
             $field = rtrim($field);
-            if ($field == '^') { // rowspan
+            if ($field === '^') { // rowspan
                 if (isset($this->last[$col])) {
                     $this->last[$col]->rowSpan++;
                     $col += $this->last[$col]->colSpan;
@@ -195,9 +195,9 @@ class TexyTableModule extends TexyModule
             }
 
             $elField = new TexyTableFieldElement($texy);
-            $elField->tag = ($this->isHead || ($mHead == '*')) ? 'th' : 'td';
+            $elField->tag = ($this->isHead || ($mHead === '*')) ? 'th' : 'td';
             if (isset($this->colModifier[$col]))
-                $elField->modifier->copyFrom($this->colModifier[$col]);
+                $elField->modifier = clone $this->colModifier[$col];
             $elField->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
             $elField->parse($mContent);
             $elRow->appendChild($elField);

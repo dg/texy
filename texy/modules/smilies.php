@@ -91,7 +91,7 @@ class TexySmiliesModule extends TexyModule
 
          // find the closest match
         foreach ($this->icons as $key => $value)
-            if (substr($match, 0, strlen($key)) == $key) {
+            if (substr($match, 0, strlen($key)) === $key) {
                 $el->image->set($value, $this->root, TRUE);
                 break;
             }

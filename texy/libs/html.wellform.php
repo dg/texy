@@ -95,7 +95,7 @@ class TexyHtmlWellForm
             $i = 1;
             while ($pair !== FALSE) {
                 $s .= '</'.$pair['tag'].'>';
-                if ($pair['tag'] == $mTag) break;
+                if ($pair['tag'] === $mTag) break;
                 $this->tagUsed[$pair['tag']]--;
                 $pair = prev($this->tagStack);
                 $i++;

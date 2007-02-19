@@ -65,35 +65,22 @@ class TexyModifier
     }
 
 
-
-
     public function setProperties()
     {
-        $classes = '';
-        $styles  = '';
-
         foreach (func_get_args() as $arg) {
             if ($arg == '') continue;
             $argX = trim(substr($arg, 1, -1));
             switch ($arg{0}) {
-                case '{':  $styles .= $argX . ';';  break;
+                case '{':  $this->parseStyles($argX); break;
                 case '(':  $this->title = html_entity_decode($argX); break;
-                case '[':  $classes .= ' ' . $argX; break;
+                case '[':  $this->parseClasses($argX); break;
                 case '^':  $this->vAlign = self::VALIGN_TOP; break;
                 case '-':  $this->vAlign = self::VALIGN_MIDDLE; break;
                 case '_':  $this->vAlign = self::VALIGN_BOTTOM; break;
                 case '=':  $this->hAlign = self::HALIGN_JUSTIFY; break;
                 case '>':  $this->hAlign = self::HALIGN_RIGHT; break;
-                case '<':  $this->hAlign = $arg == '<>' ? self::HALIGN_CENTER : self::HALIGN_LEFT; break;
+                case '<':  $this->hAlign = $arg === '<>' ? self::HALIGN_CENTER : self::HALIGN_LEFT; break;
             }
-        }
-
-        $this->parseStyles($styles);
-        $this->parseClasses($classes);
-
-        if (isset($this->classes['id'])) {
-            $this->id = $this->classes['id'];
-            unset($this->classes['id']);
         }
     }
 
@@ -116,40 +103,10 @@ class TexyModifier
 
                 return $attrs;
             }
-
         }
 
         return array();
     }
-
-
-    public function clear()
-    {
-        $this->id = NULL;
-        $this->classes = array();
-        $this->unfilteredClasses = array();
-        $this->styles = array();
-        $this->unfilteredStyles = array();
-        $this->unfilteredAttrs = array();
-        $this->hAlign = NULL;
-        $this->vAlign = NULL;
-        $this->title = NULL;
-    }
-
-
-    public function copyFrom($modifier)
-    {
-        $this->classes = $modifier->classes;
-        $this->unfilteredClasses = $modifier->unfilteredClasses;
-        $this->styles = $modifier->styles;
-        $this->unfilteredStyles = $modifier->unfilteredStyles;
-        $this->unfilteredAttrs = $modifier->unfilteredAttrs;
-        $this->id = $modifier->id;
-        $this->hAlign = $modifier->hAlign;
-        $this->vAlign = $modifier->vAlign;
-        $this->title = $modifier->title;
-    }
-
 
 
 
@@ -160,13 +117,14 @@ class TexyModifier
 
         $tmp = is_array($this->texy->allowedClasses) ? array_flip($this->texy->allowedClasses) : array(); // little speed-up trick
 
-        foreach (explode(' ', str_replace('#', ' #', $str)) as $value) {
+        $str = str_replace('#', ' #', $str);
+        foreach (explode(' ', $str) as $value) {
             if ($value === '') continue;
 
             if ($value{0} == '#') {
                 $this->unfilteredClasses['id'] = substr($value, 1);
                 if ($this->texy->allowedClasses === Texy::ALL || isset($tmp[$value]))
-                    $this->classes['id'] = substr($value, 1);
+                    $this->id = substr($value, 1);
 
             } else {
                 $this->unfilteredClasses[] = $value;
@@ -206,14 +164,31 @@ class TexyModifier
 
     public function decorate(NHtml $el)
     {
-        $attrs = $this->getAttrs($el->element);
-        // !!!
+        foreach ($this->getAttrs($el->element) as $attr => $val) $el->$attr = $val;
+        
         $el->id = $this->id;
         $el->title = $this->title;
         $el->class = $this->classes;
         $el->style = $this->styles;
         if ($this->hAlign) $el->style['text-align'] = $this->hAlign;
         if ($this->vAlign) $el->style['vertical-align'] = $this->vAlign;
+
+        if ($el->element === 'a') {
+            // rel="nofollow"
+            if (in_array('nofollow', $this->unfilteredClasses)) {
+                $el->rel = 'nofollow'; // TODO: append, not replace
+                if (($pos = array_search('nofollow', $el->class)) !== FALSE)
+                     unset($el->class[$pos]);
+            }
+
+            // popup on click
+            if (in_array('popup', $this->unfilteredClasses)) {
+                $el->onclick = $this->texy->linkModule->popupOnClick;
+                if (($pos = array_search('popup', $el->class)) !== FALSE)
+                     unset($el->class[$pos]);
+            }
+        }
+
     }
 
 

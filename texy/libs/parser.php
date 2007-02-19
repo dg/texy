@@ -114,7 +114,7 @@ class TexyBlockParser extends TexyParser
                 if ($arrPos[$key] === FALSE) continue;
 
                 if ($arrPos[$key] < $this->offset) {
-                    $delta = ($arrPos[$key] == -2) ? 1 : 0;
+                    $delta = ($arrPos[$key] === -2) ? 1 : 0;
                     if (preg_match(
                             $pb[$key]['pattern'],
                             $text,
@@ -136,7 +136,7 @@ class TexyBlockParser extends TexyParser
                 if ($arrPos[$key] < $minPos) { $minPos = $arrPos[$key]; $minKey = $key; }
             } // foreach
 
-            $next = ($minKey == -1) ? strlen($text) : $arrPos[$minKey];
+            $next = ($minKey === -1) ? strlen($text) : $arrPos[$minKey];
 
             if ($next > $this->offset) {
                 $str = substr($text, $this->offset, $next - $this->offset);
@@ -196,7 +196,7 @@ class TexyLineParser extends TexyParser
 
             foreach ($keys as $index => $key) {
                 if ($arrPos[$key] < $offset) {
-                    $delta = ($arrPos[$key] == -2) ? 1 : 0;
+                    $delta = ($arrPos[$key] === -2) ? 1 : 0;
 
                     if (preg_match($pl[$key]['pattern'],
                             $text,
@@ -216,13 +216,13 @@ class TexyLineParser extends TexyParser
                     }
                 } // if
 
-                if ($arrPos[$key] == $offset) { $minKey = $key; break; }
+                if ($arrPos[$key] === $offset) { $minKey = $key; break; }
 
                 if ($arrPos[$key] < $minPos) { $minPos = $arrPos[$key]; $minKey = $key; }
 
             } // foreach
 
-            if ($minKey == -1) break;
+            if ($minKey === -1) break;
 
             $px = $pl[$minKey];
             $offset = $arrPos[$minKey];

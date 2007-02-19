@@ -29,7 +29,7 @@ define('TEXY_DIR',  dirname(__FILE__).'/');
 require_once TEXY_DIR.'NHtml.php';
 require_once TEXY_DIR.'libs/re.patterns.php';    // regular expressions
 require_once TEXY_DIR.'libs/modifier.php';       // modifier processor
-require_once TEXY_DIR.'libs/url.php';            // object encapsulate of URL
+require_once TEXY_DIR.'libs/link.php';           // object encapsulate of URL
 require_once TEXY_DIR.'libs/dom.php';            // Texy! DOM element's base class
 require_once TEXY_DIR.'libs/module.php';         // Texy! module base class
 require_once TEXY_DIR.'libs/parser.php';         // Texy! parser
@@ -70,7 +70,6 @@ class Texy
     const NONE = FALSE;
 
     public $encoding = 'utf-8';
-    public $utf = TRUE;
 
     /** @var int  TAB width (for converting tabs to spaces) */
     public $tabWidth = 8;
@@ -293,6 +292,7 @@ class Texy
      */
     public function process($text, $singleLine = FALSE)
     {
+        // convert to UTF-8
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
             $text = iconv($this->encoding, 'utf-8', $text);
 
@@ -301,24 +301,58 @@ class Texy
         else
             $this->parse($text);
 
-
         $html = $this->DOM->__toString();
 
-        if (strcasecmp($this->encoding, 'utf-8') !== 0) {
-            $html = mb_convert_encoding($html, 'HTML-ENTITIES', "UTF-8");
 
-            /*
-            foreach ($i=128; $i<256; $i++) {
-                $s = iconv($this->encoding, 'UCS-2', chr($i));
+        // convert from UTF-8
+        if (strcasecmp($this->encoding, 'utf-8') !== 0)
+        {
+            // prepare UTF-8 -> charset table
+            $this->_chars = & self::$charTables[strtolower($this->encoding)];
+            if (!$this->_chars) {
+                for ($i=128; $i<256; $i++) {
+                    $ch = iconv($this->encoding, 'UTF-8//IGNORE', chr($i));
+                    if ($ch) $this->_chars[$ch] = chr($i);
+                }
             }
-            */
+
+            // convert
+            $html = preg_replace_callback('#[\x80-\x{FFFF}]#u', array($this, 'iconv'), $html);
         }
 
         return $html;
- }
+    }
 
 
 
+
+
+    static private $charTables;
+    private $_chars;
+
+    /**
+     * Converts from UTF-8 to HTML entity or character in dest encoding
+     */
+    private function iconv($m)
+    {
+        $m = $m[0];
+        if (isset($this->_chars[$m])) return $this->_chars[$m];
+
+        $ch1 = ord($m[0]);
+        $ch2 = ord($m[1]);
+        if (($ch2 >> 6) !== 2) return '';
+
+        if (($ch1 & 0xE0) === 0xC0)
+            return '&#' . ((($ch1 & 0x1F) << 6) + ($ch2 & 0x3F)) . ';';
+
+        if (($ch1 & 0xF0) === 0xE0) {
+            $ch3 = ord($m[2]);
+            if (($ch3 >> 6) !== 2) return '';
+            return '&#' . ((($ch1 & 0xF) << 12) + (($ch2 & 0x3F) << 06) + (($ch3 & 0x3F))) . ';';
+        }
+
+        return '';
+    }
 
 
 
@@ -386,7 +420,7 @@ class Texy
         ));
 
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
-            $text = iconv('utf-8', $this->encoding.'//TRANSLATE', $text);
+            $text = iconv('utf-8', $this->encoding.'//TRANSLIT', $text);
 
         return $text;
     }

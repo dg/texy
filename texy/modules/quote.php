@@ -57,49 +57,6 @@ class TexyQuoteModule extends TexyModule
                 'processBlock',
                 '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU'
             );
-
-        if ($this->texy->allowed['Quote.line'])
-            $this->texy->registerLinePattern(
-                $this,
-                'processLine',
-                '#(?<!\>)(\>\>)(?!\ |\>)(.+)'.TEXY_MODIFIER.'?(?<!\ |\<)\<\<(?!\<)'.TEXY_LINK.'??()#U'
-            );
-    }
-
-
-    /**
-     * Callback function: >>.... .(title)[class]{style}<<:LINK
-     * @return string
-     */
-    public function processLine($parser, $matches)
-    {
-        list(, , $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
-        //    [1] => **
-        //    [2] => ...
-        //    [3] => (title)
-        //    [4] => [class]
-        //    [5] => {style}
-        //    [6] => LINK
-
-        $texy =  $this->texy;
-
-        $el = NHtml::el('q');
-        $modifier = new TexyModifier($this->texy);
-        $modifier->setProperties($mMod1, $mMod2, $mMod3);
-        $modifier->decorate($el);
-
-        if ($mLink) {
-            $cite = new TexyUrl($texy);
-            $cite->set($mLink);
-            $el->cite = $cite->asURL();
-        }
-
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
-
-        $keyOpen  = $this->texy->hash($el->startTag(), TexyDomElement::CONTENT_NONE);
-        $keyClose = $this->texy->hash($el->endTag(), TexyDomElement::CONTENT_NONE);
-        return $keyOpen . $mContent . $keyClose;
     }
 
 
@@ -126,14 +83,15 @@ class TexyQuoteModule extends TexyModule
         //    [6] => ... / LINK
 
         $texy = $this->texy;
-        $el = new TexyBlockQuoteElement($texy);
+        $el = new TexyBlockElement($texy);
+    	$el->tag = 'blockquote';
         $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         $content = '';
         $linkTarget = '';
         $spaces = '';
         do {
-            if ($mSpaces == ':') $linkTarget = trim($mContent);
+            if ($mSpaces === ':') $linkTarget = trim($mContent);
             else {
                 if ($spaces === '') $spaces = max(1, strlen($mSpaces));
                 $content .= $mContent . "\n";
@@ -143,10 +101,13 @@ class TexyQuoteModule extends TexyModule
             list(, $mSpaces, $mContent) = $matches;
         } while (TRUE);
 
-        if ($linkTarget) {                                  // !!!!!
+        if ($linkTarget) {
+            // TODO
+            /*
             $elx = new TexyLinkElement($this->texy);
             $elx->setLinkRaw($linkTarget);
             $el->cite->set($elx->link->asURL());
+            */
         }
 
         $el->parse($content);
@@ -160,38 +121,6 @@ class TexyQuoteModule extends TexyModule
 
 
 } // TexyQuoteModule
-
-
-
-
-
-
-
-
-/**
- * HTML ELEMENT BLOCKQUOTE
- */
-class TexyBlockQuoteElement extends TexyBlockElement
-{
-    public $tag = 'blockquote';
-    public $cite;
-
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-        $this->cite = new TexyUrl($texy);
-    }
-
-
-    protected function generateTags(&$tags)
-    {
-        parent::generateTags($tags);
-        $tags[$this->tag]['cite'] = $this->cite->asURL();
-    }
-
-} // TexyBlockQuoteElement
-
 
 
 

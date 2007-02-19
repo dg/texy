@@ -89,9 +89,9 @@ class TexyBlockModule extends TexyModule
         $mContent = trim($mContent, "\n");
 
         if (!$mType) $mType = 'pre';                // default type
-        if ($mType == 'notexy') $mType = 'html'; // backward compatibility
-        if ($mType == 'html' && !$this->texy->allowed['Block.html']) $mType = 'text';
-        if ($mType == 'code' || $mType == 'samp')
+        if ($mType === 'notexy') $mType = 'html'; // backward compatibility
+        if ($mType === 'html' && !$this->texy->allowed['Block.html']) $mType = 'text';
+        if ($mType === 'code' || $mType === 'samp')
             $mType = $this->texy->allowed['Block.pre'] ? $mType : 'none';
         elseif (!$this->texy->allowed['Block.' . $mType]) $mType = 'none'; // transparent block
 

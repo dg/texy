@@ -141,7 +141,7 @@ class TexyLongWordsModule extends TexyModule
         while ($a < $len) {
             $hyphen = $DONT; // Do not hyphenate
             do {
-                if ($s[$a] == '.') { $hyphen = $HERE; break; }   // ???
+                if ($s[$a] === '.') { $hyphen = $HERE; break; }   // ???
 
                 if (isset($consonants[$s[$a]])) {  // souhlásky
 
@@ -150,20 +150,20 @@ class TexyLongWordsModule extends TexyModule
                         break;
                     }
 
-                    if (($s[$a] == 's') && ($s[$a-1] == 'n') && isset($consonants[$s[$a+1]])) { $hyphen = $AFTER; break; }
+                    if (($s[$a] === 's') && ($s[$a-1] === 'n') && isset($consonants[$s[$a+1]])) { $hyphen = $AFTER; break; }
 
                     if (isset($consonants[$s[$a+1]]) && isset($vowels[$s[$a-1]])) {
-                        if ($s[$a+1] == 'r') {
+                        if ($s[$a+1] === 'r') {
                             $hyphen = isset($before_r[$s[$a]]) ? $HERE : $AFTER;
                             break;
                         }
 
-                        if ($s[$a+1] == 'l') {
+                        if ($s[$a+1] === 'l') {
                             $hyphen = isset($before_l[$s[$a]]) ? $HERE : $AFTER;
                             break;
                         }
 
-                        if ($s[$a+1] == 'h') { // CH
+                        if ($s[$a+1] === 'h') { // CH
                             $hyphen = isset($before_h[$s[$a]]) ? $DONT : $AFTER;
                             break;
                         }
@@ -176,21 +176,21 @@ class TexyLongWordsModule extends TexyModule
                 }   // konec souhlasky
 
 
-                if (($s[$a] == 'u') && isset($doubleVowels[$s[$a-1]])) { $hyphen = $AFTER; break; }
+                if (($s[$a] === 'u') && isset($doubleVowels[$s[$a-1]])) { $hyphen = $AFTER; break; }
                 if (in_array($s[$a], $vowels) && isset($vowels[$s[$a-1]])) { $hyphen = $HERE; break; }
 
             } while(0);
 
-            if ($hyphen == $DONT && ($a - $last > $this->wordLimit*0.6)) $positions[] = $last = $a-1; // Hyphenate here
-            if ($hyphen == $HERE) $positions[] = $last = $a-1; // Hyphenate here
-            if ($hyphen == $AFTER) { $positions[] = $last = $a; $a++; } // Hyphenate after
+            if ($hyphen === $DONT && ($a - $last > $this->wordLimit*0.6)) $positions[] = $last = $a-1; // Hyphenate here
+            if ($hyphen === $HERE) $positions[] = $last = $a-1; // Hyphenate here
+            if ($hyphen === $AFTER) { $positions[] = $last = $a; $a++; } // Hyphenate after
 
             $a++;
         } // while
 
 
         $a = end($positions);
-        if (($a == $len-1) && isset($consonants[$s[$len]]))
+        if (($a === $len-1) && isset($consonants[$s[$len]]))
             array_pop($positions);
 
 
