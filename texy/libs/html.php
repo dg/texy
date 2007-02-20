@@ -31,16 +31,10 @@ TexyHtml::$valid = array_merge(TexyHtml::$block, TexyHtml::$inline);
 class TexyHtml
 {
     /** @var string element's name */
-    public $element;
+    public $_name;
 
-    /** @var bool is empty? NULL means autodetect */
-    public $forceEmpty;
-
-    /** @var bool use XHTML? */
-    static public $xhtml = TRUE;
-
-    /** @var array reserved properties */
-    static private $reserved = array('element'=>1, 'forceEmpty'=>1);
+    /** @var bool is element empty? */
+    public $_empty;
 
     /* element's attributes are not explicitly declared */
 
@@ -91,11 +85,25 @@ class TexyHtml
 
     private function __construct($name, $attrs)
     {
-        $this->element = $name;
+        $this->_name = $name;
+        $this->_empty = isset(self::$empty[$name]);
 
         if (is_array($attrs)) {
            foreach ($attrs as $key => $value) $this->$key = $value;
         }
+    }
+
+
+    /**
+     * Changes element's name
+     * @param string
+     * @return TexyHtml self
+     */
+    public function setElement($name)
+    {
+        $this->_name = $name;
+        $this->_empty = isset(self::$empty[$name]);
+        return $this;
     }
 
 
@@ -107,7 +115,7 @@ class TexyHtml
      */
     public function __call($m, $args)
     {
-        /*if (!isset(self::$reserved[$m]))*/ $this->$m = $args[0];
+        $this->$m = $args[0];
         return $this;
     }
 
@@ -118,16 +126,19 @@ class TexyHtml
      */
     public function startTag()
     {
-        if (!$this->element) return '';
+        if (!$this->_name) return '';
 
-        $s = '<' . $this->element;
+        $s = '<' . $this->_name;
+
+        // reserved properties 
+    	static $res = array('_name'=>1, '_empty'=>1,);
 
         // use array_change_key_case($this, CASE_LOWER) ?
         // for each attribute...
         foreach ($this as $key => $value)
         {
             // skip private properties
-            if (isset(self::$reserved[$key])) continue;
+            if (isset($res[$key])) continue;
 
             // skip NULLs and false boolean attributes
             if ($value === NULL || $value === FALSE) continue;
@@ -135,7 +146,7 @@ class TexyHtml
             // true boolean attribute
             if ($value === TRUE) {
                 // in XHTML must use unminimized form
-                if (self::$xhtml) $s .= ' ' . $key . '="' . $key . '"';
+                if (Texy::$xhtml) $s .= ' ' . $key . '="' . $key . '"';
                 // in HTML should use minimized form
                 else $s .= ' ' . $key;
                 continue;
@@ -158,13 +169,7 @@ class TexyHtml
         }
 
         // finish start tag
-        if (!self::$xhtml) return $s . '>';
-
-        $empty = $this->forceEmpty === NULL 
-            ? isset(self::$empty[$this->element])
-            : $this->forceEmpty;
-
-        return $empty ? $s . ' />' : $s . '>';
+        return Texy::$xhtml && $this->_empty ? $s . ' />' : $s . '>';
     }
 
 
@@ -174,25 +179,31 @@ class TexyHtml
      */
     public function endTag()
     {
-        $empty = $this->forceEmpty === NULL 
-            ? isset(self::$empty[$this->element])
-            : $this->forceEmpty;
-
-        return $this->element && !$empty 
-            ? '</' . $this->element . '>' 
+        return $this->_name && !$this->_empty
+            ? '</' . $this->_name . '>'
             : '';
     }
 
 
     /**
-     * Is element empty?
-     * @return bool
+     * Returns element's start tag as Texy mark
+     * @return string
      */
-    public function isEmpty()
+    public function startMark($texy)
     {
-        return $this->forceEmpty === NULL 
-            ? isset(self::$empty[$this->element]) 
-            : $this->forceEmpty;
+        $s = $this->startTag();
+        return $s === '' ? '' : $texy->mark($s, $this->getContentType());
+    }
+
+
+    /**
+     * Returns element's end tag as Texy mark
+     * @return string
+     */
+    public function endMark($texy)
+    {
+        $s = $this->endTag();
+        return $s === '' ? '' : $texy->mark($s, $this->getContentType());
     }
 
 
@@ -201,8 +212,8 @@ class TexyHtml
      */
     public function getContentType()
     {
-        if (isset(TexyHtml::$inlineCont[$this->element])) return Texy::CONTENT_INLINE;
-        if (isset(TexyHtml::$inline[$this->element])) return Texy::CONTENT_NONE;
+        if (isset(TexyHtml::$inlineCont[$this->_name])) return Texy::CONTENT_INLINE;
+        if (isset(TexyHtml::$inline[$this->_name])) return Texy::CONTENT_NONE;
 
         return Texy::CONTENT_BLOCK;
     }

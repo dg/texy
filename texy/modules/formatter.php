@@ -24,25 +24,20 @@ if (!defined('TEXY')) die();
 
 class TexyFormatterModule extends TexyModule
 {
+    protected $allow = array('Formatter');
     public $baseIndent  = 0;               // indent for top elements
     public $lineWrap    = 80;              // line width, doesn't include indent space
     public $indent      = TRUE;
 
     private $space;
-    private $hashTable = array();
+    private $marks = array();
 
 
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-        $this->texy->allowed['Formatter'] = TRUE;
-    }
 
 
     public function postProcess($text)
     {
-        if (!$this->texy->allowed['Formatter']) return $text;
+        if (empty($this->texy->allowed['Formatter'])) return $text;
 
         $this->space = $this->baseIndent;
 
@@ -84,7 +79,7 @@ class TexyFormatterModule extends TexyModule
             );
 
         // unfreeze pre, textarea, script and style elements
-        $text = strtr($text, $this->hashTable);
+        $text = strtr($text, $this->marks);
         return $text;
     }
 
@@ -93,14 +88,14 @@ class TexyFormatterModule extends TexyModule
 
 
     // create new unique key for string $matches[0]
-    // and saves pair (key => str) into table $this->hashTable
+    // and saves pair (key => str) into table $this->marks
     private function _freeze($matches)
     {
         static $counter = 0;
         $key = '<'.$matches[1].'>'
              . "\x1A" . strtr(base_convert(++$counter, 10, 4), '0123', "\x1B\x1C\x1D\x1E") . "\x1A"
              . '</'.$matches[1].'>';
-        $this->hashTable[$key] = $matches[0];
+        $this->marks[$key] = $matches[0];
         return $key;
     }
 

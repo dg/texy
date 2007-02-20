@@ -26,20 +26,19 @@ if (!defined('TEXY')) die();
  */
 class TexyDefinitionListModule extends TexyListModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('List.definition');
 
-    public $allowed = array(
-        '*'            => TRUE,
-        '-'            => TRUE,
-        '+'            => TRUE,
+    public $bullets = array(
+        '*' => TRUE,
+        '-' => TRUE,
+        '+' => TRUE,
     );
 
     // private
     public $translate = array(    //  rexexp  class
-        '*'            => array('\*', ''),
-        '-'            => array('[\x{2013}-]', ''),
-        '+'            => array('\+', ''),
+        '*' => array('\*'),
+        '-' => array('[\x{2013}-]'),
+        '+' => array('\+'),
     );
 
 
@@ -50,7 +49,7 @@ class TexyDefinitionListModule extends TexyListModule
     public function init()
     {
         $bullets = array();
-        foreach ($this->allowed as $bullet => $allowed)
+        foreach ($this->bullets as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
         $this->texy->registerBlockPattern(
@@ -58,7 +57,8 @@ class TexyDefinitionListModule extends TexyListModule
             'processBlock',
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color:red}
           . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'               // Term:
-          . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mUu'   //    - description
+          . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mUu',  //    - description
+            'List.definition'
         );
     }
 
@@ -94,16 +94,21 @@ class TexyDefinitionListModule extends TexyListModule
 
         $texy =  $this->texy;
         $el = new TexyBlockElement($texy);
-        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $el->tag = 'dl';
 
         $bullet = '';
         foreach ($this->translate as $type)
             if (preg_match('#'.$type[0].'#Au', $mBullet)) {
                 $bullet = $type[0];
-                $el->modifier->classes[] = $type[1];
                 break;
             }
+
+        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
+            $mod = new TexyModifier($this->texy);
+            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $el->tags[0] = $mod->generate('dl');
+        } else {
+            $el->tags[0] = TexyHtml::el('dl');
+        }
 
         $parser->moveBackward(2);
 
@@ -111,9 +116,8 @@ class TexyDefinitionListModule extends TexyListModule
         $bullet = preg_quote($mBullet);
 
         while (TRUE) {
-            if ($elItem = $this->processItem($parser, preg_quote($mBullet), TRUE)) {
-                $elItem->tag = 'dd';
-                $el->appendChild($elItem);
+            if ($elItem = $this->processItem($parser, preg_quote($mBullet), TRUE, 'dd')) {
+                $el->children[] = $elItem;
                 continue;
             }
 
@@ -125,20 +129,24 @@ class TexyDefinitionListModule extends TexyListModule
                 //    [4] => {style}
                 //    [5] => >
                 $elItem = new TexyTextualElement($texy);
-                $elItem->tag = 'dt';
-                $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+
+                if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
+                    $mod = new TexyModifier($this->texy);
+                    $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+                    $elItem->tags[0] = $mod->generate('dt');
+                } else {
+                    $elItem->tags[0] = TexyHtml::el('dt');
+                }
+
                 $elItem->parse($mContent);
-                $el->appendChild($elItem);
+                $el->children[] = $elItem;
                 continue;
             }
 
             break;
         }
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
-
-        $parser->element->appendChild($el);
+        $parser->element->children[] = $el;
     }
 
 } // TexyDefinitionListModule

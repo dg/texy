@@ -73,6 +73,8 @@ class Texy
     const CONTENT_TEXTUAL = 3;
     const CONTENT_BLOCK =   4;
 
+    /** @var bool use XHTML? */
+    static public $xhtml = TRUE;
 
     public $encoding = 'utf-8';
 
@@ -136,7 +138,7 @@ class Texy
      * Registered regexps and associated handlers for inline parsing
      * @var array Format: ('handler' => callback,
      *                     'pattern' => regular expression,
-     *                     'user'    => user arguments)
+     *                     'name'    => pattern's name)
      */
     private $linePatterns = array();
 
@@ -144,7 +146,7 @@ class Texy
      * Registered regexps and associated handlers for block parsing
      * @var array Format: ('handler' => callback,
      *                     'pattern' => regular expression,
-     *                     'user'    => user arguments)
+     *                     'name'    => pattern's name)
      */
     private $blockPatterns = array();
 
@@ -158,7 +160,7 @@ class Texy
      */
     private $references = array();
 
-    private $hashes = array();
+    private $marks = array();
 
 
 
@@ -232,24 +234,28 @@ class Texy
 
 
 
-    public function registerLinePattern($module, $method, $pattern, $user_args = NULL)
+    public function registerLinePattern($module, $method, $pattern, $name)
     {
+        if (empty($this->allowed[$name])) return;
+
         $this->linePatterns[] = array(
             'handler'     => array($module, $method),
             'pattern'     => $pattern,
-            'user'        => $user_args
+            'name'        => $name
         );
     }
 
 
-    public function registerBlockPattern($module, $method, $pattern, $user_args = NULL)
+    public function registerBlockPattern($module, $method, $pattern, $name)
     {
-//    if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
+        if (empty($this->allowed[$name])) return;
+
+        // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
 
         $this->blockPatterns[] = array(
             'handler'     => array($module, $method),
             'pattern'     => $pattern  . 'm',  // force multiline!
-            'user'        => $user_args
+            'name'        => $name
         );
     }
 
@@ -261,7 +267,7 @@ class Texy
      */
     protected function init()
     {
-        $this->hashes = array();
+        $this->marks = array();
         $this->linePatterns  = array();
         $this->blockPatterns = array();
 
@@ -364,8 +370,8 @@ class Texy
         // Convert DOM structure to (X)HTML code
         $html = $this->DOM->__toString();
 
-        // replace hashes
-        $html = strtr($html, $this->hashes);
+        // replace marks
+        $html = strtr($html, $this->marks);
 
         // wellform HTML
         $wf = new TexyHtmlWellForm();
@@ -420,8 +426,8 @@ class Texy
 
         $text = $this->DOM->__toString();
 
-        // replace hashes
-        $text = strtr($text, $this->hashes);
+        // replace marks
+        $text = strtr($text, $this->marks);
 
         // wellform HTML
         $wf = new TexyHtmlWellForm();
@@ -538,11 +544,11 @@ class Texy
 
 
     /**
-     * Generate unique HASH key - useful for freezing (folding) some substrings
+     * Generate unique MARK key - useful for freezing (folding) some substrings
      * @return string
      * @static
      */
-    public function hash($child, $contentType)
+    public function mark($child, $contentType)
     {
         static $borders = array(
             Texy::CONTENT_NONE => "\x14",
@@ -552,11 +558,11 @@ class Texy
         );
 
         $key = $borders[$contentType]
-            . strtr(base_convert(count($this->hashes), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
+            . strtr(base_convert(count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
             . $borders[$contentType];
 
-        if (is_object($child)) $this->hashes[$key] = $child->__toString();
-        else $this->hashes[$key] = $child;
+        if (is_object($child)) $this->marks[$key] = $child->__toString();
+        else $this->marks[$key] = $child;
 
         return $key;
     }

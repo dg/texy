@@ -20,9 +20,6 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
  * DOM element base class
  * @abstract
@@ -30,37 +27,19 @@ if (!defined('TEXY')) die();
 abstract class TexyDomElement
 {
     public $texy; // parent Texy! object
-    public $modifier;
-    public $tag;
+    public $tags = array();
 
 
     public function __construct($texy)
     {
         $this->texy = $texy;
-        $this->modifier = new TexyModifier($texy);
-    }
-
-
-
-    /**
-     * Generate HTML element tags
-     */
-    protected function generateTags(&$tags)
-    {
-        if ($this->tag) {
-            $el = TexyHtml::el($this->tag);
-            $this->modifier->decorate($el);
-            $tags[$this->tag] = $el;
-        }
     }
 
 
     /**
      * Generate HTML element content
-     * @abstract
      */
-    protected function generateContent() { }
-
+    abstract protected function generateContent();
 
 
     /**
@@ -68,19 +47,13 @@ abstract class TexyDomElement
      */
     public function __toString()
     {
-        $tags = array();
-        $this->generateTags($tags);
-
         $start = $end = '';
-
-        foreach ($tags as $el) {
+        foreach ($this->tags as $el) {
             $start .= $el->startTag();
             $end = $el->endTag() . $end;
         }
         return $start . $this->generateContent() . $end;
     }
-
-
 
 
     /**
@@ -102,47 +75,25 @@ abstract class TexyDomElement
 
 
 /**
- * This element represent array of other blocks (TexyDomElement)
- *
+ * This element represents array of TexyDomElement
  */
 class TexyBlockElement extends TexyDomElement
 {
-    protected $children = array();
+    public $children = array();
 
-
-
-
-    // $child must be TexyBlockElement or TexyTextualElement
-    public function appendChild($child)
-    {
-        if (!($child instanceof TexyBlockElement) && !($child instanceof TexyTextualElement))
-            die('Only TexyBlockElement or TexyTextualElement allowed.');
-
-        $this->children[] = $child;
-    }
-
-    public function getChild($key)
-    {
-        if (isset($this->children[$key]))
-           return $this->children[$key];
-        return NULL;
-    }
 
     protected function generateContent()
     {
         $html = '';
         foreach ($this->children as $child)
-            $html .= $child->__toString() . "\n";
+            $html .= $child->__toString();
 
         return $html;
     }
 
 
-
-
-
     /**
-     * Parse $text as BLOCK and create array children (array of Texy DOM elements)
+     * Parse $text as BLOCK and create array of children
      */
     public function parse($text)
     {
@@ -164,14 +115,11 @@ class TexyBlockElement extends TexyDomElement
 
 
 /**
- * This element represent one line of text.
- * Text represents $content
- *
+ * This element represents one paragraph of text.
  */
 class TexyTextualElement extends TexyDomElement
 {
-    public $content;                    // string
-
+    public $content = '';
 
 
     protected function generateContent()
@@ -181,15 +129,13 @@ class TexyTextualElement extends TexyDomElement
 
 
     /**
-     * Parse $text as SINGLE LINE and create string $content and array of Texy DOM elements ($children)
+     * Parse $text as single line and create $this->content
      */
     public function parse($text)
     {
         $parser = new TexyLineParser($this);
         $parser->parse($text);
     }
-
-
 
 }  // TexyTextualElement
 
@@ -200,37 +146,4 @@ class TexyTextualElement extends TexyDomElement
 
 
 
-
-
-/**
- * Represent HTML tags (elements without content)
- * Used as children of TexyTextualElement
- *
- */
-
-class TexyInlineTagElement extends TexyDomElement
-{
-
-    public function opening()
-    {
-        $this->generateTags($tags);
-        $s = '';
-        if ($tags)
-            foreach ($tags as $el)
-                $s .= $el->startTag();
-        return $s;
-    }
-
-    public function closing()
-    {
-        $this->generateTags($tags);
-        $s = '';
-        if ($tags)
-            foreach ($tags as $el)
-                $s = $el->endTag() . $s;
-        return $s;
-    }
-
-
-} // TexyInlineTagElement
 

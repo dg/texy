@@ -28,17 +28,12 @@ if (!defined('TEXY')) die();
  */
 class TexyLongWordsModule extends TexyModule
 {
+    protected $allow = array('LongWord');
+
     public $wordLimit = 20;
     public $shy       = '&#173;'; // eq &shy;
     public $nbsp      = '&#160;'; // eq &nbsp;
 
-
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-        $this->texy->allowed['LongWord'] = TRUE;
-    }
 
 
     public function linePostProcess($text)
@@ -55,7 +50,7 @@ class TexyLongWordsModule extends TexyModule
                      ));
 
         $text = preg_replace_callback(
-                            '#[^\ \n\t\-\xAD'.TEXY_HASH_SPACES.']{'.$this->wordLimit.',}#u',
+                            '#[^\ \n\t\-\xAD'.TEXY_MARK_SPACES.']{'.$this->wordLimit.',}#u',
                             array($this, '_replace'),
                             $text);
 
@@ -80,7 +75,7 @@ class TexyLongWordsModule extends TexyModule
 
         $chars = array();
         preg_match_all(
-                         '#&\\#?[a-z0-9]+;|['.TEXY_HASH.']+|.#u',
+                         '#&\\#?[a-z0-9]+;|['.TEXY_MARK.']+|.#u',
                          $mWord,
                          $chars
         );

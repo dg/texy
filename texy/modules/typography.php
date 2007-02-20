@@ -28,6 +28,8 @@ if (!defined('TEXY')) die();
  */
 class TexyTypographyModule extends TexyModule
 {
+    protected $allow = array('Typography');
+
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
     // Czech Republic
@@ -42,12 +44,6 @@ class TexyTypographyModule extends TexyModule
 
     private $pattern, $replace;
 
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-        $this->texy->allowed['Typography'] = TRUE;
-    }
 
 
     /**
@@ -82,10 +78,10 @@ class TexyTypographyModule extends TexyModule
           '#(\d{1,3}) (\d{3}) (\d{3})#'             => '$1&#160;$2&#160;$3',              // (phone) number 1 123 123
           '#(\d{1,3}) (\d{3})#'                     => '$1&#160;$2',                      // number 1 123
 
-          '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_HASH_N.']*) (['.TEXY_HASH_N.']*)(['.TEXY_CHAR.'])#mu'        // space between number and word
+          '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)(['.TEXY_CHAR.'])#mu'        // space between number and word
                                                     => '$1$2&#160;$3$4',
 
-          '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_HASH_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_HASH_N.']*) (['.TEXY_HASH_N.']*)([0-9'.TEXY_CHAR.'])#mu'
+          '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)([0-9'.TEXY_CHAR.'])#mu'
                                                     => '$1$2$3&#160;$4$5',                // space between preposition and word
         );
 
@@ -96,7 +92,8 @@ class TexyTypographyModule extends TexyModule
 
     public function linePostProcess($text)
     {
-        if (!$this->texy->allowed['Typography']) return $text;
+        if (empty($this->texy->allowed['Typography'])) return $text;
+
         return preg_replace($this->pattern, $this->replace, $text);
     }
 

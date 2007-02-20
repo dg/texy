@@ -28,22 +28,7 @@ if (!defined('TEXY')) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
-
-
-
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-
-        
-        $allowed = & $this->texy->allowed;
-        $allowed['Quote.line']  = TRUE;
-        $allowed['Quote.block'] = TRUE;
-    }
-
+    protected $allow = array('Blockquote');
 
 
     /**
@@ -51,12 +36,12 @@ class TexyQuoteModule extends TexyModule
      */
     public function init()
     {
-        if ($this->texy->allowed['Quote.block'])
-            $this->texy->registerBlockPattern(
-                $this,
-                'processBlock',
-                '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU'
-            );
+        $this->texy->registerBlockPattern(
+            $this,
+            'processBlock',
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU',
+            'Blockquote'
+        );
     }
 
 
@@ -82,10 +67,15 @@ class TexyQuoteModule extends TexyModule
         //    [5] => spaces |
         //    [6] => ... / LINK
 
-        $texy = $this->texy;
-        $el = new TexyBlockElement($texy);
-    	$el->tag = 'blockquote';
-        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el = new TexyBlockElement($this->texy);
+
+        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
+            $mod = new TexyModifier($this->texy);
+            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $el->tags[0] = $mod->generate('blockquote');
+        } else {
+            $el->tags[0] = TexyHtml::el('blockquote');
+        }
 
         $content = '';
         $linkTarget = '';
@@ -102,9 +92,7 @@ class TexyQuoteModule extends TexyModule
         } while (TRUE);
 
         if ($linkTarget) {
-                $link = new TexyUrl($this->texy);
-                $link->set($linkTarget);
-            	//$el->cite = $link->asURL();
+            $el->tags[0]->cite = $linkTarget;
             // TODO
             /*
             $elx = new TexyLinkElement($this->texy);
@@ -115,10 +103,7 @@ class TexyQuoteModule extends TexyModule
 
         $el->parse($content);
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
-
-        $parser->element->appendChild($el);
+        $parser->element->children[] = $el;
     }
 
 

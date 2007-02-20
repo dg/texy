@@ -27,32 +27,32 @@ if (!defined('TEXY')) die();
  */
 class TexyListModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('List.normal');
 
-    public $allowed = array(
-        '*'            => TRUE,
-        '-'            => TRUE,
-        '+'            => TRUE,
-        '1.'           => TRUE,
-        '1)'           => TRUE,
-        'I.'           => TRUE,
-        'I)'           => TRUE,
-        'a)'           => TRUE,
-        'A)'           => TRUE,
+    public $bullets = array(
+        '*'  => TRUE,
+        '-'  => TRUE,
+        '+'  => TRUE,
+        '1.' => TRUE,
+        '1)' => TRUE,
+        'I.' => TRUE,
+        'I)' => TRUE,
+        'a)' => TRUE,
+        'A)' => TRUE,
     );
 
     // private
-    public $translate = array(    //  rexexp       class   list-style-type  tag
-        '*'            => array('\*',          '',    '',              'ul'),
-        '-'            => array('[\x{2013}-]', '',    '',              'ul'),
-        '+'            => array('\+',          '',    '',              'ul'),
-        '1.'           => array('\d+\.\ ',     '',    '',              'ol'),
-        '1)'           => array('\d+\)',       '',    '',              'ol'),
-        'I.'           => array('[IVX]+\.\ ',  '',    'upper-roman',   'ol'),   // place romans before alpha
-        'I)'           => array('[IVX]+\)',    '',    'upper-roman',   'ol'),
-        'a)'           => array('[a-z]\)',     '',    'lower-alpha',   'ol'),
-        'A)'           => array('[A-Z]\)',     '',    'upper-alpha',   'ol'),
+    public $translate = array(    
+                  //  rexexp       list-style-type  tag
+        '*'  => array('\*',          '',              'ul'),
+        '-'  => array('[\x{2013}-]', '',              'ul'),
+        '+'  => array('\+',          '',              'ul'),
+        '1.' => array('\d+\.\ ',     '',              'ol'),
+        '1)' => array('\d+\)',       '',              'ol'),
+        'I.' => array('[IVX]+\.\ ',  'upper-roman',   'ol'),   // place romans before alpha
+        'I)' => array('[IVX]+\)',    'upper-roman',   'ol'),
+        'a)' => array('[a-z]\)',     'lower-alpha',   'ol'),
+        'A)' => array('[A-Z]\)',     'upper-alpha',   'ol'),
     );
 
 
@@ -62,14 +62,15 @@ class TexyListModule extends TexyModule
     public function init()
     {
         $bullets = array();
-        foreach ($this->allowed as $bullet => $allowed)
+        foreach ($this->bullets as $bullet => $allowed)
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                         // .{color: red}
-          . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mUu'  // item (unmatched)
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color: red}
+          . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
+            'List.normal'
         );
     }
 
@@ -98,32 +99,37 @@ class TexyListModule extends TexyModule
 
         $texy =  $this->texy;
         $el = new TexyBlockElement($texy);
-        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         $bullet = '';
         foreach ($this->translate as $type)
             if (preg_match('#'.$type[0].'#Au', $mBullet)) {
                 $bullet = $type[0];
-                $el->tag = $type[3];
-                $el->modifier->styles['list-style-type'] = $type[2];
-                $el->modifier->classes[] = $type[1];
+                $tag = $type[2];
+                $style = $type[1];
                 break;
             }
+
+        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
+            $mod = new TexyModifier($this->texy);
+            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $el->tags[0] = $mod->generate($tag);
+        } else {
+            $el->tags[0] = TexyHtml::el($tag);
+        }
+
+        $el->tags[0]->style['list-style-type'] = $style;
 
         $parser->moveBackward($mNewLine ? 2 : 1);
 
         $count = 0;
-        while ($elItem = $this->processItem($parser, $bullet)) {
-            $el->appendChild($elItem);
+        while ($elItem = $this->processItem($parser, $bullet, FALSE, 'li')) {
+            $el->children[] = $elItem;
             $count++;
         }
 
         if (!$count) return FALSE;
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
-
-        $parser->element->appendChild($el);
+        $parser->element->children[] = $el;
     }
 
 
@@ -133,7 +139,7 @@ class TexyListModule extends TexyModule
 
 
 
-    public function processItem($parser, $bullet, $indented = FALSE) {
+    public function processItem($parser, $bullet, $indented, $tag) {
         $texy =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
         $patternItem = "#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
@@ -153,8 +159,14 @@ class TexyListModule extends TexyModule
             //    [8] => >
 
         $elItem = new TexyBlockElement($texy);
-        $elItem->tag = 'li';
-        $elItem->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+
+        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
+            $mod = new TexyModifier($this->texy);
+            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $elItem->tags[0] = $mod->generate($tag);
+        } else {
+            $elItem->tags[0] = TexyHtml::el($tag);
+        }
 
         // next lines
         $spaces = $mNewLine ? strlen($mSpace) : '';
@@ -177,8 +189,8 @@ class TexyListModule extends TexyModule
         $elItem->parse($content);
         $mergeMode = $tmp;
 
-        if ($elItem->getChild(0) instanceof TexyGenericBlockElement)
-            $elItem->getChild(0)->tag = '';
+        if ($elItem->children && $elItem->children[0] instanceof TexyGenericBlockElement)
+            $elItem->children[0]->tags[0]->setElement(NULL);
 
         return $elItem;
     }

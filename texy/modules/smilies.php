@@ -28,10 +28,9 @@ if (!defined('TEXY')) die();
  */
 class TexySmiliesModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('Image.smilies');
 
-    public $icons     = array (
+    public $icons = array (
         ':-)'  =>  'smile.gif',
         ':-('  =>  'sad.gif',
         ';-)'  =>  'wink.gif',
@@ -43,8 +42,8 @@ class TexySmiliesModule extends TexyModule
         ':-P'  =>  'razz.gif',
         ':-|'  =>  'neutral.gif',
     );
-    public $root      = NULL;
-    public $class     = '';
+    public $root = NULL;
+    public $class = '';
 
 
 
@@ -63,7 +62,7 @@ class TexySmiliesModule extends TexyModule
 
         $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
 
-        $this->texy->registerLinePattern($this, 'processLine', $crazyRE);
+        $this->texy->registerLinePattern($this, 'processLine', $crazyRE, 'Image.smilies');
     }
 
 
@@ -94,15 +93,11 @@ class TexySmiliesModule extends TexyModule
         foreach ($this->icons as $key => $value)
             if (substr($match, 0, strlen($key)) === $key) {
                 $root = $this->root === NULL ? $this->texy->imageModule->root :  $this->root;
-        
-                $el->image->set($value, $root, TRUE); // different ROOT !!!
+                //$el->image->set($value, $root, TRUE); // different ROOT !!!
                 break;
             }
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
-
-        return $this->texy->hash($el->__toString(), Texy::CONTENT_NONE); // !!!
+        return $this->texy->mark($el->__toString(), Texy::CONTENT_NONE); // !!!
     }
 
 

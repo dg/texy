@@ -27,10 +27,8 @@ if (!defined('TEXY')) die();
  */
 class TexyLinkModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('Link.reference', 'Link.email', 'Link.URL', 'Link.quickLink', 'Link.definition');
 
-    // options
     public $root            = '';                          // root of relative links
     public $emailOnClick    = NULL;                        // 'this.href="mailto:"+this.href.match(/./g).reverse().slice(0,-7).join("")';
     public $imageOnClick    = 'return !popupImage(this.href)';  // image popup event
@@ -40,55 +38,40 @@ class TexyLinkModule extends TexyModule
 
 
 
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-
-        $allowed = & $this->texy->allowed;
-        $allowed['Link.reference']      = TRUE;   // [reference]
-        $allowed['Link.email']     = TRUE;   // emails replacement
-        $allowed['Link.URL']       = TRUE;   // direct url replacement
-        $allowed['Link.quickLink'] = TRUE;   // quick link xxx:[url] or [reference]
-        $allowed['Link.definition'] = TRUE;  // [ref]: URL  reference definitions
-    }
-
-
-
-
-
     /**
      * Module initialization.
      */
     public function init()
     {
-        if ($this->texy->allowed['Link.quickLink'])
-            $this->texy->registerLinePattern(
-                $this,
-                'processLineQuick',
-                '#(['.TEXY_CHAR.'0-9@\#$%&.,_-]+)(?=:\[)'.TEXY_LINK.'()#Uu'
-            );
+        $this->texy->registerLinePattern(
+            $this,
+            'processLineQuick',
+            '#(['.TEXY_CHAR.'0-9@\#$%&.,_-]+)(?=:\[)'.TEXY_LINK.'()#Uu',
+            'Link.quickLink'
+        );
 
         // [reference]
         $this->texy->registerLinePattern(
             $this,
             'processLineReference',
-            '#('.TEXY_LINK_REF.')#U'
+            '#('.TEXY_LINK_REF.')#U',
+            'Link.reference'
         );
 
         // direct url and email
-        if ($this->texy->allowed['Link.URL'])
-            $this->texy->registerLinePattern(
-                $this,
-                'processLineURL',
-                '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu'
-            );
+        $this->texy->registerLinePattern(
+            $this,
+            'processLineURL',
+            '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
+            'Link.URL'
+        );
 
-        if ($this->texy->allowed['Link.email'])
-            $this->texy->registerLinePattern(
-                $this,
-                'processLineURL',
-                '#(?<=\s|^|\(|\[|\<|:)'.TEXY_EMAIL.'#i'
-            );
+        $this->texy->registerLinePattern(
+            $this,
+            'processLineURL',
+            '#(?<=\s|^|\(|\[|\<|:)'.TEXY_EMAIL.'#i',
+            'Link.email'
+        );
     }
 
 
@@ -189,19 +172,35 @@ class TexyLinkModule extends TexyModule
         //    [1] => ...
         //    [2] => [ref]
 
-        if (!$this->texy->allowed['Link.quickLink']) return $mContent;
+        $mLink = substr($mLink, 1, -1);
+        $elRef = $this->getReference($mLink);
+        if ($elRef) {
+            $loc = $elRef->URL . $elRef->query;
+            $loc = str_replace('%s', urlencode(Texy::wash($mContent)), $loc);
+            $link = new TexyLink($this->texy, $loc, TexyLink::REFERENCE);
+            $el = $elRef->modifier->generate('a');
+        } else {
+            $el = TexyHtml::el('a');
+            $link = new TexyLink($this->texy, $mLink, TexyLink::REFERENCE);
+        }
 
-        $modifier = new TexyModifier($this->texy);
-        $el = $this->factory($mLink, $mContent, $modifier);
+        $this->texy->summary['links'][] = $el->href = $link->asURL();
 
-        $keyOpen  = $this->texy->hash($el->startTag(), Texy::CONTENT_NONE);
-        $keyClose = $this->texy->hash($el->endTag(), Texy::CONTENT_NONE);
+        // rel="nofollow"
+        if ($link->isAbsolute() && $this->forceNoFollow) $el->rel = 'nofollow'; // TODO: append, not replace
+
+        // email on click
+        if ($link->isEmail()) $el->onclick = $this->emailOnClick;
+
+        $keyOpen  = $el->startMark($this->texy);
+        $keyClose = $el->endMark($this->texy);
         return $keyOpen . $mContent . $keyClose;
     }
 
 
 
 
+    static private $callstack;
 
     /**
      * Callback function: [ref]
@@ -212,63 +211,42 @@ class TexyLinkModule extends TexyModule
         list($match, $mRef) = $matches;
         //    [1] => [ref]
 
-        if (!$this->texy->allowed['Link.reference']) return $match;
-
-
-        $elLink = new TexyLinkRefElement($this->texy);
-        if ($elLink->setLink($mRef) === FALSE) return $match;
-
-        return $elLink->__toString();
-
-
-/*
-
         $mRef = substr($mRef, 1, -1);
-        $lowName = strtolower($mRef); // pozor na UTF8 !
+
         // prevent cycling
-        //if (isset(self::$callstack[$lowName])) return FALSE;
+        $lowName = strtolower($mRef); // pozor na UTF8 !
+        if (isset(self::$callstack[$lowName])) return $match;
 
-        $elRef =  $this->getReference($mRef);
-        if (!$elRef) return FALSE;
+        $elRef = $this->getReference($mRef);
+        if (!$elRef) return $match;
 
-        $elLink = new TexyLinkElement($this->texy);
-        $elLink->setLinkRaw($refRaw);
+        $link = new TexyLink($this->texy, $elRef->URL . $elRef->query, TexyLink::REFERENCE);
 
-        if ($elRef->label) {
-            //self::$callstack[$lowName] = TRUE;
-            $this->parse($elRef->label);
-            //$el->setContent...
-            //unset(self::$callstack[$lowName]);
-        }
-
-        $this->content = $this->appendChild($elLink, $this->content);
-
-
-
-
-        $link = new TexyUrl($this->texy);
-        $link->set($mURL, $this->root);
-
-        if ($link->asURL() == '') return;  // dest URL is required
-
-        $el = NHtml::el('a');
-        $el->setContent($link->asTextual(), TRUE);
-        $el->contentType = Texy::CONTENT_TEXTUAL;
+        $modifier = $elRef->modifier;
+        $el = $modifier->generate('a');
         $this->texy->summary['links'][] = $el->href = $link->asURL();
 
+        // rel="nofollow"
+        if ($link->isAbsolute() && $this->forceNoFollow) $el->rel = 'nofollow'; // TODO: append, not replace
+
         // email on click
-        if ($link->isEmail())
-            $el->onclick = $this->emailOnClick;
-
-        // image on click
-        elseif ($link->isImage())
-            $el->onclick = $this->imageOnClick;
+        if ($link->isEmail()) $el->onclick = $this->emailOnClick;
 
 
-        $this->texy->handle('Link.URL', $el);
-        return $parser->element->appendChild($el);
-*/
+        if ($elRef->label) {
+            self::$callstack[$lowName] = TRUE;
+            $label = new TexyTextualElement($this->texy);
+            $label->parse($elRef->label);
+            $content = $label->content;
+            unset(self::$callstack[$lowName]);
 
+        } else {
+            $content = $link->asTextual();
+        }
+
+        $keyOpen  = $el->startMark($this->texy);
+        $keyClose = $el->endMark($this->texy);
+        return $keyOpen . $content . $keyClose;
     }
 
 
@@ -283,48 +261,29 @@ class TexyLinkModule extends TexyModule
         list($mURL) = $matches;
         //    [0] => URL
 
-        $modifier = new TexyModifier($this->texy);
-        $el = $this->factory($mURL, NULL, $modifier);
-
-        $link = new TexyUrl($this->texy);
-        $link->set($mURL, $this->root);
-
-        $keyOpen  = $this->texy->hash($el->startTag(), Texy::CONTENT_NONE);
-        $keyClose = $this->texy->hash($el->endTag(), Texy::CONTENT_NONE);
-        return $keyOpen . $link->asTextual() . $keyClose;
-
-/*
-        $link = new TexyUrl($this->texy);
-        $link->set($mURL, $this->root);
-
-        if ($link->asURL() == '') return;  // dest URL is required
-
-        $el = NHtml::el('a');
-        $el->setContent($link->asTextual(), TRUE);
+        $link = new TexyLink($this->texy, $mURL, TexyLink::DIRECT);
+        $el = TexyHtml::el('a');
         $this->texy->summary['links'][] = $el->href = $link->asURL();
 
+        // rel="nofollow"
+        if ($link->isAbsolute() && $this->forceNoFollow) $el->rel = 'nofollow'; // TODO: append, not replace
+
         // email on click
-        if ($link->isEmail())
-            $el->onclick = $this->emailOnClick;
+        if ($link->isEmail()) $el->onclick = $this->emailOnClick;
 
-        // image on click
-        elseif ($link->isImage())
-            $el->onclick = $this->imageOnClick;
-
-
-        $this->texy->handle('Link.URL', $el);
-        return $this->texy->hash($el, Texy::CONTENT_TEXTUAL);
-*/
+        $keyOpen  = $el->startMark($this->texy);
+        $keyClose = $el->endMark($this->texy);
+        return $keyOpen . $link->asTextual() . $keyClose;
     }
 
 
-
+/*
     public function factory($loc, $text='', $modifier)
     {
-        $link = new TexyUrl($this->texy);
+        $link = new TexyLink($this->texy);
 
         do {
-            if (strlen($loc)>1 && $loc{0} == '[' && $loc{1} != '*') {
+            if (strlen($loc)>1 && $loc{0} === '[' && $loc{1} !== '*') {
                 $elRef = $this->getReference( substr($loc, 1, -1) );
 
                 if ($elRef) {
@@ -338,7 +297,7 @@ class TexyLinkModule extends TexyModule
                 }
             }
 
-            if (strlen($loc)>1 && $loc{0} == '[' && $loc{1} == '*') {
+            if (strlen($loc)>1 && $loc{0} === '[' && $loc{1} === '*') {
                 $elImage = new TexyImageElement($this->texy);
                 $elImage->setImagesRaw(substr($loc, 2, -2));
                 $elImage->requireLinkImage();
@@ -352,45 +311,21 @@ class TexyLinkModule extends TexyModule
         if ($link->asURL() == '') return TexyHtml::el();  // dest URL is required
 
         $el = TexyHtml::el('a');
-
-        $attrs = $modifier->getAttrs('a'); /// !!
-
+        $modifier->decorate($el);
         $this->texy->summary['links'][] = $el->href = $link->asURL();
 
         // rel="nofollow"
-        $nofollowClass = in_array('nofollow', $modifier->unfilteredClasses);
-        if ($link->isAbsolute() && ($this->forceNoFollow || $nofollowClass))
-            $el->rel = 'nofollow'; // TODO: append, not replace
-
-        $el->id    = $modifier->id;
-        $el->title = $modifier->title;
-        $el->class = $modifier->classes;
-        $el->style = $modifier->styles;
-        if ($nofollowClass) {
-            if (($pos = array_search('nofollow', $el->class)) !== FALSE)
-                 unset($el->class[$pos]);
-        }
-
-        // popup on click
-        $popup = in_array('popup', $modifier->unfilteredClasses);
-        if ($popup) {
-            if (($pos = array_search('popup', $el->class)) !== FALSE)
-                 unset($el->class[$pos]);
-            $el->onclick = $this->popupOnClick;
-        }
-
+        if ($link->isAbsolute() && $this->forceNoFollow) $el->rel = 'nofollow'; // TODO: append, not replace
 
         // email on click
-        if ($link->isEmail())
-            $el->onclick = $this->emailOnClick;
+        if ($link->isEmail()) $el->onclick = $this->emailOnClick;
 
         // image on click
-        if ($link->isImage())
-            $el->onclick = $this->imageOnClick;
+        if ($link->isImage()) $el->onclick = $this->imageOnClick;
 
         return $el;
     }
-
+*/
 } // TexyLinkModule
 
 
@@ -410,7 +345,7 @@ class TexyLinkReference {
     {
         $this->modifier = new TexyModifier($texy);
 
-        if (strlen($URL) > 1)  if ($URL{0} == '\'' || $URL{0} == '"') $URL = substr($URL, 1, -1);
+        if (strlen($URL) > 1)  if ($URL{0} === '\'' || $URL{0} === '"') $URL = substr($URL, 1, -1);
         $this->URL = trim($URL);
         $this->label = trim($label);
     }
@@ -422,33 +357,13 @@ class TexyLinkReference {
 
 
 
-
-/**
- * HTML TAG ANCHOR
- */
-class TexyLinkElement extends TexyInlineTagElement
-{
-    public $link;
-
-
-    // constructor
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-
-        $this->link = new TexyUrl($texy);
-    }
-
-
-    public function setLink($URL)
-    {
-        $this->link->set($URL, $this->texy->linkModule->root);
-    }
+/*
+ // TexyLinkElement
 
 
     public function setLinkRaw($link, $text='')
     {
-        if (strlen($link)>1 && $link{0} == '[' && $link{1} != '*') {
+        if (strlen($link)>1 && $link{0} === '[' && $link{1} !== '*') {
             $elRef = $this->texy->linkModule->getReference( substr($link, 1, -1) );
 
             if ($elRef) {
@@ -462,11 +377,11 @@ class TexyLinkElement extends TexyInlineTagElement
             }
         }
 
-        if (strlen($link)>1 && $link{0} == '[' && $link{1} == '*') {
+        if (strlen($link)>1 && $link{0} === '[' && $link{1} === '*') {
             $elImage = new TexyImageElement($this->texy);
             $elImage->setImagesRaw(substr($link, 2, -2));
             $elImage->requireLinkImage();
-            $this->link->copyFrom($elImage->linkImage);
+            if ($elImage->linkImage) $this->link->copyFrom($elImage->linkImage);
             return;
         }
 
@@ -486,7 +401,7 @@ class TexyLinkElement extends TexyInlineTagElement
         $this->modifier->decorate($el);
         $this->texy->summary['links'][] = $el->href = $this->link->asURL();
 
-        // rel="nofollow"
+         // rel="nofollow"
         if ($this->link->isAbsolute() && $this->texy->linkModule->forceNoFollow) $el->rel = 'nofollow'; // TODO: append, not replace
 
         // email on click
@@ -494,11 +409,9 @@ class TexyLinkElement extends TexyInlineTagElement
 
         // image on click
         if ($this->link->isImage()) $el->onclick = $this->texy->linkModule->imageOnClick;
+
     }
-
-
-} // TexyLinkElement
-
+*/
 
 
 
@@ -507,45 +420,3 @@ class TexyLinkElement extends TexyInlineTagElement
 
 
 
-/**
- * HTML ELEMENT ANCHOR (with content)
- */
-class TexyLinkRefElement extends TexyTextualElement
-{
-    public $refName;
-
-
-    static private $callstack;
-
-
-    public function setLink($refRaw)
-    {
-        $this->refName = substr($refRaw, 1, -1);
-        $lowName = strtolower($this->refName); // pozor na UTF8 !
-        // prevent cycling
-        if (isset(self::$callstack[$lowName])) return FALSE;
-
-        $elRef =  $this->texy->linkModule->getReference($this->refName);
-        if (!$elRef) return FALSE;
-
-        $elLink = new TexyLinkElement($this->texy);
-        $elLink->setLinkRaw($refRaw);
-
-        if ($elRef->label) {
-            self::$callstack[$lowName] = TRUE;
-            $this->parse($elRef->label);
-            unset(self::$callstack[$lowName]);
-
-        } else {
-            $this->content = $elLink->link->asTextual();
-        }
-
-        $keyOpen  = $this->texy->hash($elLink->opening(), Texy::CONTENT_NONE);
-        $keyClose = $this->texy->hash($elLink->closing(), Texy::CONTENT_NONE);
-        $this->content = $keyOpen . $this->content . $keyClose;
-    }
-
-
-
-
-} // TexyLinkRefElement

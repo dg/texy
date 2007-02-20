@@ -28,15 +28,19 @@ if (!defined('TEXY')) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('Horizline');
 
     /**
      * Module initialization.
      */
     public function init()
     {
-        $this->texy->registerBlockPattern($this, 'processBlock', '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU');
+        $this->texy->registerBlockPattern(
+            $this, 
+            'processBlock', 
+            '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU', 
+            'Horizline'
+        );
     }
 
 
@@ -63,13 +67,16 @@ class TexyHorizLineModule extends TexyModule
         //    [5] => >
 
         $el = new TexyBlockElement($this->texy);
-        $el->tag = 'hr';
-        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
+        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
+            $mod = new TexyModifier($this->texy);
+            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $el->tags[0] = $mod->generate('hr');
+        } else {
+            $el->tags[0] = TexyHtml::el('hr');
+        }
 
-        $parser->element->appendChild($el);
+        $parser->element->children[] = $el;
     }
 
 

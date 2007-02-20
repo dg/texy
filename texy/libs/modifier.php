@@ -49,14 +49,11 @@ class TexyModifier
     protected $texy; // parent Texy! object
     public $id;
     public $classes = array();
-    public $unfilteredClasses = array();
     public $styles = array();
-    public $unfilteredStyles = array();
-    public $unfilteredAttrs = array();
+    public $attrs = array();
     public $hAlign;
     public $vAlign;
     public $title;
-
 
 
     public function __construct($texy)
@@ -67,129 +64,132 @@ class TexyModifier
 
     public function setProperties()
     {
-        foreach (func_get_args() as $arg) {
+        $acc = TexyHtml::$accepted_attrs;
+
+        foreach (func_get_args() as $arg)
+        {
             if ($arg == '') continue;
+
             $argX = trim(substr($arg, 1, -1));
             switch ($arg{0}) {
-                case '{':  $this->parseStyles($argX); break;
-                case '(':  $this->title = html_entity_decode($argX); break;
-                case '[':  $this->parseClasses($argX); break;
-                case '^':  $this->vAlign = self::VALIGN_TOP; break;
-                case '-':  $this->vAlign = self::VALIGN_MIDDLE; break;
-                case '_':  $this->vAlign = self::VALIGN_BOTTOM; break;
-                case '=':  $this->hAlign = self::HALIGN_JUSTIFY; break;
-                case '>':  $this->hAlign = self::HALIGN_RIGHT; break;
-                case '<':  $this->hAlign = $arg === '<>' ? self::HALIGN_CENTER : self::HALIGN_LEFT; break;
+            case '(':
+                $this->title = html_entity_decode($argX);
+                break;
+
+            case '{':
+                foreach (explode(';', $argX) as $value) {
+                    $pair = explode(':', $value.':');
+                    $prop = strtolower(trim($pair[0]));
+                    $value = trim($pair[1]);
+                    if ($prop === '') continue;
+
+                    if (isset($acc[$prop])) // attribute
+                        $this->attrs[$prop] = $value;
+                    else  // style
+                        $this->styles[$prop] = $value;
+                }
+                break;
+
+            case '[':
+                $argX = str_replace('#', ' #', $argX);
+                foreach (explode(' ', $argX) as $value) {
+                    if ($value === '') continue;
+
+                    if ($value{0} == '#')
+                        $this->id = substr($value, 1);
+                    else
+                        $this->classes[] = $value;
+                }
+                break;
+
+            case '^':  $this->vAlign = self::VALIGN_TOP; break;
+            case '-':  $this->vAlign = self::VALIGN_MIDDLE; break;
+            case '_':  $this->vAlign = self::VALIGN_BOTTOM; break;
+            case '=':  $this->hAlign = self::HALIGN_JUSTIFY; break;
+            case '>':  $this->hAlign = self::HALIGN_RIGHT; break;
+            case '<':  $this->hAlign = $arg === '<>' ? self::HALIGN_CENTER : self::HALIGN_LEFT; break;
             }
         }
     }
 
 
-    public function getAttrs($tag)
+
+
+    /**
+     * Generates TexyHtml element
+     * @param string
+     * @return TexyHtml
+     */
+    public function generate($tag)
     {
-        if ($this->texy->allowedTags === Texy::ALL)
-            return $this->unfilteredAttrs;
+        // tag & attibutes
+        if ($this->texy->allowedTags === Texy::ALL) {
+            $el = TexyHtml::el($tag, $this->attrs);
 
-        if (is_array($this->texy->allowedTags) && isset($this->texy->allowedTags[$tag])) {
-            $allowedAttrs = $this->texy->allowedTags[$tag];
+        } elseif (is_array($this->texy->allowedTags) && isset($this->texy->allowedTags[$tag])) {
+            $allowed = $this->texy->allowedTags[$tag];
 
-            if ($allowedAttrs === Texy::ALL)
-                return $this->unfilteredAttrs;
-
-            if (is_array($allowedAttrs) && count($allowedAttrs)) {
-                $attrs = $this->unfilteredAttrs;
-                foreach ($attrs as $key => $foo)
-                    if (!in_array($key, $allowedAttrs)) unset($attrs[$key]);
-
-                return $attrs;
-            }
-        }
-
-        return array();
-    }
-
-
-
-
-    public function parseClasses($str)
-    {
-        if ($str == NULL) return;
-
-        $tmp = is_array($this->texy->allowedClasses) ? array_flip($this->texy->allowedClasses) : array(); // little speed-up trick
-
-        $str = str_replace('#', ' #', $str);
-        foreach (explode(' ', $str) as $value) {
-            if ($value === '') continue;
-
-            if ($value{0} == '#') {
-                $this->unfilteredClasses['id'] = substr($value, 1);
-                if ($this->texy->allowedClasses === Texy::ALL || isset($tmp[$value]))
-                    $this->id = substr($value, 1);
+            if ($allowed === Texy::ALL) {
+                $el = TexyHtml::el($tag, $this->attrs);
 
             } else {
-                $this->unfilteredClasses[] = $value;
-                if ($this->texy->allowedClasses === Texy::ALL || isset($tmp[$value]))
-                    $this->classes[] = $value;
+                $el = TexyHtml::el($tag);
+                unset($allowed['_name'], $allowed['_empty']);
+
+                if (is_array($allowed) && count($allowed))
+                    foreach ($this->attrs as $key => $val)
+                        if (in_array($key, $allowed)) $el->$key = $val;
             }
+        } else {
+            $el = TexyHtml::el($tag);
         }
-    }
 
 
-
-
-
-    public function parseStyles($str)
-    {
-        if ($str == NULL) return;
-
-        $tmp = is_array($this->texy->allowedStyles) ? array_flip($this->texy->allowedStyles) : array(); // little speed-up trick
-
-        foreach (explode(';', $str) as $value) {
-            $pair = explode(':', $value.':');
-            $property = strtolower(trim($pair[0]));
-            $value = trim($pair[1]);
-            if ($property == '') continue;
-
-            if (isset(TexyHtml::$accepted_attrs[$property])) { // attribute
-                $this->unfilteredAttrs[$property] = $value;
-
-            } else { // style
-                $this->unfilteredStyles[$property] = $value;
-                if ($this->texy->allowedStyles === Texy::ALL || isset($tmp[$property]))
-                    $this->styles[$property] = $value;
-            }
-        }
-    }
-
-
-    public function decorate(TexyHtml $el)
-    {
-        foreach ($this->getAttrs($el->element) as $attr => $val) $el->$attr = $val;
-
-        $el->id = $this->id;
+        // title
         $el->title = $this->title;
-        $el->class = $this->classes;
-        $el->style = $this->styles;
+
+        // classes
+        $tmp = is_array($this->texy->allowedClasses) ? array_flip($this->texy->allowedClasses) : array();
+        foreach ($this->classes as $val) {
+            if ($this->texy->allowedClasses === Texy::ALL || isset($tmp[$val]))
+                $el->class[] = $val;
+        }
+
+        // id
+        if ($this->texy->allowedClasses === Texy::ALL || isset($tmp['#' . $this->id]))
+            $el->id = $this->id;
+
+        // styles
+        $tmp = is_array($this->texy->allowedStyles) ? array_flip($this->texy->allowedStyles) : array();
+        foreach ($this->styles as $prop => $val) {
+            if ($this->texy->allowedStyles === Texy::ALL || isset($tmp[$prop]))
+                $el->style[$prop] = $val;
+        }
+
+        // align
         if ($this->hAlign) $el->style['text-align'] = $this->hAlign;
         if ($this->vAlign) $el->style['vertical-align'] = $this->vAlign;
 
-        if ($el->element === 'a') {
+        // special cases
+        if ($tag === 'a') {
             // rel="nofollow"
-            if (in_array('nofollow', $this->unfilteredClasses)) {
+            if (in_array('nofollow', $this->classes)) {
                 $el->rel = 'nofollow'; // TODO: append, not replace
                 if (($pos = array_search('nofollow', $el->class)) !== FALSE)
                      unset($el->class[$pos]);
             }
 
             // popup on click
-            if (in_array('popup', $this->unfilteredClasses)) {
+            if (in_array('popup', $this->classes)) {
                 $el->onclick = $this->texy->linkModule->popupOnClick;
                 if (($pos = array_search('popup', $el->class)) !== FALSE)
                      unset($el->class[$pos]);
             }
         }
 
+        return $el;
     }
+
 
 
     /**

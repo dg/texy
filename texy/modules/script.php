@@ -28,8 +28,10 @@ if (!defined('TEXY')) die();
  */
 class TexyScriptModule extends TexyModule
 {
+    protected $allow = array('Script');
+
     /** @var callback    Callback that will be called with newly created element */
-    public $handler;             // function myUserFunc($element, string $identifier, array/NULL $args)
+    public $handler;    // function myUserFunc($element, string $identifier, array/NULL $args)
 
 
     /**
@@ -37,7 +39,12 @@ class TexyScriptModule extends TexyModule
      */
     public function init()
     {
-        $this->texy->registerLinePattern($this, 'processLine', '#\{\{([^'.TEXY_HASH.']+)\}\}()#U');
+        $this->texy->registerLinePattern(
+            $this, 
+            'processLine', 
+            '#\{\{([^'.TEXY_MARK.']+)\}\}()#U',
+            'Script'
+        );
     }
 
 
@@ -89,7 +96,7 @@ class TexyScriptModule extends TexyModule
         } while(0);
 
         return ''; // !!!
-        return $this->texy->hash($el, $el->contentType);
+        return $this->texy->mark($el, $el->contentType);
     }
 
 
@@ -99,7 +106,7 @@ class TexyScriptModule extends TexyModule
         if ($args)
             $identifier .= '('.implode(',', $args).')';
 
-        $element->content = $element->texy->hash('<texy:script content="'
+        $element->content = $element->texy->mark('<texy:script content="'
             . htmlSpecialChars($identifier) . '" />', Texy::CONTENT_TEXTUAL);
     }
 

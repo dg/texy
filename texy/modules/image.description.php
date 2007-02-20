@@ -26,19 +26,11 @@ if (!defined('TEXY')) die();
  */
 class TexyImageDescModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('Image.desc');
 
     public $boxClass   = 'image';        // non-floated box class
     public $leftClass  = 'image left';   // left-floated box class
     public $rightClass = 'image right';  // right-floated box class
-
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-        $this->texy->allowed['Image.desc'] = TRUE;
-    }
 
 
     /**
@@ -46,12 +38,12 @@ class TexyImageDescModule extends TexyModule
      */
     public function init()
     {
-        if ($this->texy->allowed['Image.desc'])
-            $this->texy->registerBlockPattern(
-                $this,
-                'processBlock',
-                '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU'
-            );
+        $this->texy->registerBlockPattern(
+            $this,
+            'processBlock',
+            '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU',
+            'Image.desc'
+        );
     }
 
 
@@ -77,20 +69,35 @@ class TexyImageDescModule extends TexyModule
         //    [10] => {style}
         //    [11] => >
 
-        $el = new TexyImageDescElement($this->texy);
-        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el = new TexyBlockElement($this->texy);
 
         $elImage = new TexyImageElement($this->texy);
         $elImage->setImagesRaw($mURLs);
         $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
         //$elImage->setImagesRaw($mURLs);
 
-        $el->modifier->hAlign = $elImage->modifier->hAlign;
-        $elImage->modifier->hAlign = NULL;
 
-        $content = $this->texy->hash($elImage->__toString(), Texy::CONTENT_NONE); // !!!
+        $mod = new TexyModifier($this->texy);
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $hAlign = $elImage->modifier->hAlign;
+        $mod->hAlign = $elImage->modifier->hAlign = NULL;
+
+        $el->tags[0] = $mod->generate('div');
+
+        if ($hAlign === TexyModifier::HALIGN_LEFT) {
+            $el->tags[0]->class[] = $this->leftClass;
+
+        } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
+            $el->tags[0]->class[] = $this->rightClass;
+
+        } elseif ($this->texy->imageDescModule->boxClass)
+            $el->tags[0]->class[] = $this->boxClass;
+
+
+        $content = $this->texy->mark($elImage->__toString(), Texy::CONTENT_NONE); // !!!
 
         if ($mLink) {
+/*
             $elLink = new TexyLinkElement($this->texy);
             if ($mLink === ':') {
                 $elImage->requireLinkImage();
@@ -99,22 +106,20 @@ class TexyImageDescModule extends TexyModule
                 $elLink->setLinkRaw($mLink);
             }
 
-            $keyOpen  = $this->texy->hash($elLink->opening(), Texy::CONTENT_NONE);
-            $keyClose = $this->texy->hash($elLink->closing(), Texy::CONTENT_NONE);
+            $keyOpen  = $this->texy->mark($elLink->opening(), Texy::CONTENT_NONE);
+            $keyClose = $this->texy->mark($elLink->closing(), Texy::CONTENT_NONE);
             $content = $keyOpen . $content . $keyClose;
+*/
         }
         $elImg = new TexyTextualElement($this->texy);
         $elImg->content = $content;
-        $el->appendChild($elImg);
+        $el->children[] = $elImg;
 
         $elDesc = new TexyGenericBlockElement($this->texy);
         $elDesc->parse(ltrim($mContent));
-        $el->appendChild($elDesc);
+        $el->children[] = $elDesc;
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($el)) === FALSE) return;
-
-        $parser->element->appendChild($el);
+        $parser->element->children[] = $el;
     }
 
 
@@ -124,47 +129,3 @@ class TexyImageDescModule extends TexyModule
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-/**
- * HTML ELEMENT IMAGE (WITH DESCRIPTION)
- */
-class TexyImageDescElement extends TexyBlockElement
-{
-
-
-
-    protected function generateTags(&$tags)
-    {
-        $el = TexyHtml::el('div');
-        $tags['div'] = $el;
-
-        foreach ($this->modifier->getAttrs('div') as $attr => $val) $el->$attr = $val;
-
-        $el->id = $this->modifier->id;
-        $el->class = $this->modifier->classes;
-        $el->style = $this->modifier->styles;
-
-        if ($this->modifier->hAlign === TexyModifier::HALIGN_LEFT) {
-            $el->class[] = $this->texy->imageDescModule->leftClass;
-
-        } elseif ($this->modifier->hAlign === TexyModifier::HALIGN_RIGHT)  {
-            $el->class[] = $this->texy->imageDescModule->rightClass;
-
-        } elseif ($this->texy->imageDescModule->boxClass)
-            $el->class[] = $this->texy->imageDescModule->boxClass;
-
-    }
-
-
-
-}  // TexyImageDescElement

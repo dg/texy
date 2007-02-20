@@ -28,8 +28,7 @@ if (!defined('TEXY')) die();
  */
 class TexyHtmlModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('Html', 'Html.tag', 'Html.comment');
 
     public $safeTags = array(
         'a'         => array('href', 'rel', 'title', 'lang'),
@@ -55,25 +54,17 @@ class TexyHtmlModule extends TexyModule
 
 
 
-
-
-    public function __construct($texy)
-    {
-        parent::__construct($texy);
-        $this->texy->allowed['HTML.comments'] = TRUE;
-    }
-    
-
-
-
-
-
     /**
      * Module initialization.
      */
     public function init()
     {
-        $this->texy->registerLinePattern($this, 'process', '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_HASH.']*"|=\s*\'[^\''.TEXY_HASH.']*\'|=[^>'.TEXY_HASH.']*)*)(/?)>|<!--([^'.TEXY_HASH.']*?)-->#is');
+        $this->texy->registerLinePattern(
+            $this, 
+            'process', 
+            '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
+            'Html'
+        );
     }
 
 
@@ -92,10 +83,13 @@ class TexyHtmlModule extends TexyModule
         //    [5] => comment
 
         if ($mTag == '') { // comment
-            if (!$this->texy->allowed['HTML.comments']) return substr($matches[5], 0, 1) === '[' ? $match : '';
+            if (empty($this->texy->allowed['Html.comment']))
+                return substr($matches[5], 0, 1) === '[' ? $match : '';
 
-            return $this->texy->hash($match, Texy::CONTENT_NONE);
+            return $this->texy->mark($match, Texy::CONTENT_NONE);
         }
+
+        if (empty($this->texy->allowed['Html.tag'])) return $match;
 
         $allowedTags = & $this->texy->allowedTags;
         if (!$allowedTags) return $match;   // disabled
@@ -108,10 +102,10 @@ class TexyHtmlModule extends TexyModule
 
         $el = TexyHtml::el($tag);
 
-        if ($mEmpty === '/') $el->forceEmpty = TRUE; // or use TexyHtml autodetect 
+        if ($mEmpty === '/') $el->_empty = TRUE; // or use TexyHtml autodetect
         $isOpening = $mClosing !== '/';
 
-        if ($el->isEmpty() && !$isOpening)  // error - can't close empty element
+        if ($el->_empty && !$isOpening)  // error - can't close empty element
             return $match;
 
 
@@ -132,13 +126,13 @@ class TexyHtmlModule extends TexyModule
             $modifier = new TexyModifier($this->texy);
 
             if (isset($el->class)) {
-                $modifier->parseClasses($el->class);
-                $el->class = $modifier->classes;
+                //$modifier->parseClasses($el->class);
+                //$el->class = $modifier->classes;
             }
 
             if (isset($el->style)) {
-                $modifier->parseStyles($el->style);
-                $el->style = $modifier->styles;
+                //$modifier->parseStyles($el->style);
+                //$el->style = $modifier->styles;
             }
 
             if (isset($el->id)) {
@@ -162,10 +156,7 @@ class TexyHtmlModule extends TexyModule
 
         }
 
-        //if ($this->handler)
-        //    if (call_user_func_array($this->handler, array($el)) === FALSE) return '';
-
-        return $this->texy->hash($isOpening ? $el->startTag() : $el->endTag(), $el->getContentType());
+        return $isOpening ? $el->startMark($this->texy) : $el->endMark($this->texy);
     }
 
 

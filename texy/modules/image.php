@@ -27,10 +27,8 @@ if (!defined('TEXY')) die();
  */
 class TexyImageModule extends TexyModule
 {
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;
+    protected $allow = array('Image.normal');
 
-    // options
     public $root       = 'images/';     // root of relative images (http)
     public $linkedRoot = 'images/';     // root of linked images (http)
     public $rootPrefix = '';            // physical location on server
@@ -45,10 +43,9 @@ class TexyImageModule extends TexyModule
     public function __construct($texy)
     {
         parent::__construct($texy);
-        $this->texy->allowed['Image.normal'] = TRUE;
 
         if (isset($_SERVER['SCRIPT_NAME'])) {
-            $this->rootPrefix = dirname($_SERVER['SCRIPT_NAME']).'/'; // physical location on server
+            $this->rootPrefix = dirname($_SERVER['SCRIPT_NAME']) . '/'; // physical location on server
         }
     }
 
@@ -59,7 +56,12 @@ class TexyImageModule extends TexyModule
     public function init()
     {
         // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
-        $this->texy->registerLinePattern($this, 'processLine',     '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U');
+        $this->texy->registerLinePattern(
+            $this, 
+            'processLine', 
+            '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U', 
+            'Image.normal'
+        );
     }
 
 
@@ -135,8 +137,6 @@ class TexyImageModule extends TexyModule
      */
     public function processLine($parser, $matches)
     {
-        if (!$this->texy->allowed['Image.normal']) return '';
-
         list(, $mURLs, $mMod1, $mMod2, $mMod3, $mMod4, $mLink) = $matches;
         //    [1] => URLs
         //    [2] => (title)
@@ -145,32 +145,44 @@ class TexyImageModule extends TexyModule
         //    [5] => >
         //    [6] => url | [ref] | [*image*]
 
-        //foreach ($this->handlers as $handler)
-        //    if (call_user_func_array($this->handler, array($elImage)) === FALSE) return '';
-
         $elImage = new TexyImageElement($this->texy);
-        $elImage->setImagesRaw($mURLs);
-        $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        //$elImage->setImagesRaw($mURLs);
 
-        $keyImage = $this->texy->hash($elImage->__toString(), Texy::CONTENT_NONE); // !!!
-
-        if ($mLink) {
-            $elLink = new TexyLinkElement($this->texy);
-            if ($mLink == ':') {
-                $elImage->requireLinkImage();
-                $elLink->link->copyFrom($elImage->linkImage);
-            } else {
-                $elLink->setLinkRaw($mLink);
-            }
-
-            $keyOpen  = $this->texy->hash($elLink->opening(), Texy::CONTENT_NONE);
-            $keyClose = $this->texy->hash($elLink->closing(), Texy::CONTENT_NONE);
-            return $keyOpen . $keyImage . $keyClose;
+        $elRef = $this->getReference(trim($mURLs));
+        if ($elRef) {
+            $mURLs = $elRef->URLs;
+            $elImage->modifier = clone $elRef->modifier;
         }
 
-        if ($this->handler)
-            if (call_user_func_array($this->handler, array($elImage)) === FALSE) return '';
+        $URLs = explode('|', $mURLs);
+
+        // dimensions
+        if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $URLs[0], $matches)) {
+            $URLs[0] = $matches[1];
+            $elImage->setSize($matches[2], $matches[3]);
+        }
+
+        $elImage->image = new TexyLink($this->texy, $URLs[0], TexyLink::IMAGE);
+        if (isset($URLs[1])) $elImage->overImage = new TexyLink($this->texy, $URLs[1], TexyLink::IMAGE);
+        if (isset($URLs[2])) $elImage->linkImage = new TexyLink($this->texy, $URLs[2], TexyLink::LINKED_IMAGE);
+
+        $elImage->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+
+        $keyImage = $this->texy->mark($elImage->__toString(), Texy::CONTENT_NONE); // !!!
+
+        if ($mLink) {
+            /*
+            if ($mLink === ':') {
+                $elImage->requireLinkImage();
+                if ($elImage->linkImage) $link = $elImage->linkImage;
+            } else {
+                $link = new TexyLink($this->texy, $mLink, TexyLink::DIRECT);
+            }
+
+            $keyOpen  = $this->texy->mark($elLink->opening(), Texy::CONTENT_NONE);
+            $keyClose = $this->texy->mark($elLink->closing(), Texy::CONTENT_NONE);
+            return $keyOpen . $keyImage . $keyClose;
+            */
+        }
 
         return $keyImage;
     }
@@ -220,23 +232,21 @@ class TexyImageElement extends TexyTextualElement
 
     public $width, $height;
 
+    public $modifier;
 
-    // constructor
+
     public function __construct($texy)
     {
-        parent::__construct($texy);
-        $this->image = new TexyUrl($texy);
-        $this->overImage = new TexyUrl($texy);
-        $this->linkImage = new TexyUrl($texy);
+        $this->texy = $texy;
+        $this->modifier = new TexyModifier($texy);
     }
-
 
 
     public function setImages($URL = NULL, $URL_over = NULL, $URL_link = NULL)
     {
-        $this->image->set($URL, $this->texy->imageModule->root, TRUE);
-        $this->overImage->set($URL_over, $this->texy->imageModule->root, TRUE);
-        $this->linkImage->set($URL_link, $this->texy->imageModule->linkedRoot, TRUE);
+        if ($URL != NULL) $this->image = new TexyLink($this->texy, $URL, TexyLink::IMAGE);
+        if ($URL_over != NULL) $this->overImage = new TexyLink($this->texy, $URL_over, TexyLink::IMAGE);
+        if ($URL_link != NULL) $this->linkImage = new TexyLink($this->texy, $URL_link, TexyLink::LINKED_IMAGE);
     }
 
 
@@ -270,36 +280,32 @@ class TexyImageElement extends TexyTextualElement
 
 
 
-
-    protected function generateTags(&$tags)
+    public function __toString()
     {
-        if ($this->image->asURL() == '') return;  // image URL is required
+        if (!$this->image) return;  // image URL is required
 
-        $el = TexyHtml::el('img');
-        $tags['img'] = $el;
+        $alt = $this->modifier->title !== NULL ? $this->modifier->title : $this->texy->imageModule->defaultAlt;
+        $this->modifier->title = NULL;
 
-        foreach ($this->modifier->getAttrs('img') as $attr => $val) $el->$attr = $val;
+        $hAlign = $this->modifier->hAlign;
+        $this->modifier->hAlign = NULL;
 
-        $el->id = $this->modifier->id;
-        $el->class = $this->modifier->classes;
-        $el->style = $this->modifier->styles;
+        $el = $this->modifier->generate('img');
+        $this->tags[0] = $el;
 
-        if ($this->modifier->hAlign === TexyModifier::HALIGN_LEFT) {
+        if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->texy->imageModule->leftClass != '')
                 $el->class[] = $this->texy->imageModule->leftClass;
             else
                 $el->style['float'] = 'left';
 
-        } elseif ($this->modifier->hAlign === TexyModifier::HALIGN_RIGHT)  {
+        } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
 
             if ($this->texy->imageModule->rightClass != '')
                 $el->class[] = $this->texy->imageModule->rightClass;
             else
                 $el->style['float'] = 'right';
         }
-
-        if ($this->modifier->vAlign)
-            $el->style['vertical-align'] = $this->modifier->vAlign;
 
         // width x height generate
         $this->requireSize();
@@ -310,13 +316,15 @@ class TexyImageElement extends TexyTextualElement
         $this->texy->summary['images'][] = $el->src = $this->image->asURL();
 
         // onmouseover actions generate
-        if ($this->overImage->asURL() != '') {
+        if ($this->overImage) {
             $el->onmouseover = 'this.src=\''.$this->overImage->asURL().'\'';
             $el->onmouseout = 'this.src=\''.$this->image->asURL().'\'';
             $this->texy->summary['preload'][] = $this->overImage->asURL();
         }
 
-        $el->alt = $this->modifier->title != NULL ? (string) $this->modifier->title : (string) $this->texy->imageModule->defaultAlt;
+        $el->alt = (string) $alt;
+        
+        return parent::__toString();
     }
 
 
@@ -338,9 +346,9 @@ class TexyImageElement extends TexyTextualElement
 
     public function requireLinkImage()
     {
-        if ($this->linkImage->asURL() == '')
-            $this->linkImage->set($this->image->value, $this->texy->imageModule->linkedRoot, TRUE);
-
+        if (!$this->linkImage && $this->image) {
+            $this->linkImage = new TexyLink($this->texy, $this->image->value, TexyLink::LINKED_IMAGE);
+        }
     }
 
 

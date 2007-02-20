@@ -29,13 +29,17 @@ if (!defined('TEXY')) die();
  */
 abstract class TexyModule
 {
-    protected $texy;             // parent Texy! object
+    protected $texy;  // parent Texy! object
+    protected $allow = array(); // list of syntax to allow
 
 
     public function __construct($texy)
     {
-        $this->texy =  $texy;
+        $this->texy = $texy;
         $texy->registerModule($this);
+
+        foreach ($this->allow as $item)
+            $texy->allowed[$item] = TRUE;
     }
 
 

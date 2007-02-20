@@ -148,7 +148,7 @@ class TexyBlockParser extends TexyParser
             $px = $pb[$minKey];
             $matches = $arrMatches[$minKey];
             $this->offset = $arrPos[$minKey] + strlen($matches[0]) + 1;   // 1 = \n
-            $ok = call_user_func_array($px['handler'], array($this, $matches, $px['user']));
+            $ok = call_user_func_array($px['handler'], array($this, $matches, $px['name']));
             if ($ok === FALSE || ( $this->offset <= $arrPos[$minKey] )) { // module rejects text
                 $this->offset = $arrPos[$minKey]; // turn offset back
                 $arrPos[$minKey] = -2;
@@ -226,7 +226,7 @@ class TexyLineParser extends TexyParser
 
             $px = $pl[$minKey];
             $offset = $arrPos[$minKey];
-            $replacement = call_user_func_array($px['handler'], array($this, $arrMatches[$minKey], $px['user']));
+            $replacement = call_user_func_array($px['handler'], array($this, $arrMatches[$minKey], $px['name']));
             $len = strlen($arrMatches[$minKey][0]);
             $text = substr_replace(
                 $text,
