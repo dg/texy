@@ -20,11 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * HTML TAGS MODULE CLASS
+ * Html tags module
  */
 class TexyHtmlModule extends TexyModule
 {
@@ -54,14 +51,11 @@ class TexyHtmlModule extends TexyModule
 
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $this->texy->registerLinePattern(
-            $this, 
-            'process', 
+            $this,
+            'process',
             '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
             'Html'
         );

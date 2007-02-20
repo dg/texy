@@ -69,18 +69,23 @@ class Texy
     const ALL = TRUE;
     const NONE = FALSE;
 
+    // types of marks
     const CONTENT_NONE =    1;
     const CONTENT_INLINE =  2;
     const CONTENT_TEXTUAL = 3;
     const CONTENT_BLOCK =   4;
+
 
     /** @var bool use XHTML? */
     static public $xhtml = TRUE;
 
     public $encoding = 'utf-8';
 
-    /** @var int  TAB width (for converting tabs to spaces) */
-    public $tabWidth = 8;
+    /** @var array  Allowed Texy! syntax */
+    public $allowed = array();
+
+    /** @var TRUE|FALSE|array  Allowed HTML tags */
+    public $allowedTags;
 
     /** @var TRUE|FALSE|array  Allowed classes */
     public $allowedClasses = Texy::ALL;
@@ -88,16 +93,11 @@ class Texy
     /** @var TRUE|FALSE|array  Allowed inline CSS style */
     public $allowedStyles = Texy::ALL;
 
-    /** @var TRUE|FALSE|array  Allowed HTML tags */
-    public $allowedTags;
-
-    public $allowed = array();
+    /** @var int  TAB width (for converting tabs to spaces) */
+    public $tabWidth = 8;
 
     /** @var boolean  Do obfuscate e-mail addresses? */
     public $obfuscateEmail = TRUE;
-
-    /** @var TexyDomElement  DOM structure for parsed text */
-    private $DOM;
 
     /** @var array  Parsing summary */
     public $summary;
@@ -107,7 +107,6 @@ class Texy
 
     /** @var bool  Merge lines mode */
     public $mergeLines = TRUE;
-
 
     public $referenceHandler;
 
@@ -136,29 +135,27 @@ class Texy
         $wellForm;
 
 
-    /** @var bool    ... */
-    public $_mergeMode = TRUE;
-
-
-
     /**
      * Registered regexps and associated handlers for inline parsing
-     * @var array Format: ('handler' => callback,
-     *                     'pattern' => regular expression,
-     *                     'name'    => pattern's name)
+     * @var array of ('handler' => callback
+     *                'pattern' => regular expression
+     *                'name'    => pattern's name)
      */
     private $linePatterns = array();
 
     /**
      * Registered regexps and associated handlers for block parsing
-     * @var array Format: ('handler' => callback,
-     *                     'pattern' => regular expression,
-     *                     'name'    => pattern's name)
+     * @var array of ('handler' => callback
+     *                'pattern' => regular expression
+     *                'name'    => pattern's name)
      */
     private $blockPatterns = array();
 
 
-    /** @var TexyModule[]  List of all used modules */
+    /** @var TexyDomElement  DOM structure for parsed text */
+    private $DOM;
+
+    /** @var TexyModule[]  List of all modules */
     private $modules;
 
     /**
@@ -167,7 +164,12 @@ class Texy
      */
     private $references = array();
 
+    /** @var array */
     private $marks = array();
+
+    /** @var bool */
+    public $_mergeMode;
+
 
 
 
@@ -183,6 +185,7 @@ class Texy
         // load all modules
         $this->loadModules();
 
+        // load routines
         $this->formatter = new TexyHtmlFormatter();
         $this->wellForm = new TexyHtmlWellForm();
         $this->genericBlock = new TexyGenericBlock($this);
@@ -209,11 +212,10 @@ class Texy
     /**
      * Create array of all used modules ($this->modules)
      * This array can be changed by overriding this method (by subclasses)
-     * or directly in main code
      */
     protected function loadModules()
     {
-        // Line parsing - order is not much important
+        // Line parsing - order is not important
         $this->scriptModule = new TexyScriptModule($this);
         $this->htmlModule = new TexyHtmlModule($this);
         $this->imageModule = new TexyImageModule($this);
@@ -221,7 +223,7 @@ class Texy
         $this->phraseModule = new TexyPhraseModule($this);
         $this->smiliesModule = new TexySmiliesModule($this);
 
-        // block parsing - order is not much important
+        // block parsing - order is not important
         $this->blockModule = new TexyBlockModule($this);
         $this->headingModule = new TexyHeadingModule($this);
         $this->horizLineModule = new TexyHorizLineModule($this);
@@ -231,7 +233,7 @@ class Texy
         $this->tableModule = new TexyTableModule($this);
         $this->imageDescModule = new TexyImageDescModule($this);
 
-        // post process
+        // post process - order is not important
         $this->typographyModule = new TexyTypographyModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
     }
@@ -273,19 +275,16 @@ class Texy
 
 
     /**
-     * Initialization
-     * It is called between constructor and first use (method parse)
+     * Initialization - called before every use
      */
     protected function init()
     {
         $this->_mergeMode = TRUE;
         $this->marks = array();
-        $this->linePatterns  = array();
-        $this->blockPatterns = array();
-
-        if (!$this->modules) die('Texy: No modules installed');
 
         // init modules
+        $this->linePatterns  = array();
+        $this->blockPatterns = array();
         foreach ($this->modules as $module) $module->init();
     }
 
@@ -293,8 +292,11 @@ class Texy
 
     /**
      * Convert Texy! document in (X)HTML code
-     * This is shortcut for parse() & DOM->toHtml()
-     * @return string
+     * This is shortcut for parse() & toHtml()
+     *
+     * @param string   input text
+     * @param bool     is block or single line?
+     * @return string  output html code
      */
     public function process($text, $singleLine = FALSE)
     {
@@ -309,8 +311,11 @@ class Texy
 
 
     /**
-     * Convert Texy! document into internal DOM structure ($this->DOM)
+     * Converts Texy! document into internal DOM structure ($this->DOM)
      * Before converting it normalize text and call all pre-processing modules
+     *
+     * @param string
+     * @return void
      */
     public function parse($text)
     {
@@ -353,7 +358,9 @@ class Texy
 
 
     /**
-     * Convert Texy! single line text into internal DOM structure ($this->DOM)
+     * Converts Texy! single line text into internal DOM structure ($this->DOM)
+     * @param string
+     * @return void
      */
     public function parseLine($text)
     {
@@ -368,13 +375,17 @@ class Texy
         $text = Texy::wash($text);
         $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
 
-            ///////////   PROCESS
+        // parse
         $this->DOM = new TexyTextualElement($this);
         $this->DOM->parse($text);
     }
 
 
 
+    /**
+     * Converts internal DOM structure to final HTML code
+     * @return string
+     */
     public function toHtml()
     {
         if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
@@ -411,7 +422,7 @@ class Texy
             }
 
             // convert
-            $html = preg_replace_callback('#[\x80-\x{FFFF}]#u', array($this, 'iconv'), $html);
+            $html = preg_replace_callback('#[\x80-\x{FFFF}]#u', array($this, 'utfconv'), $html);
         }
 
         return $html;
@@ -421,7 +432,7 @@ class Texy
 
 
     /**
-     * Convert internal DOM structure ($this->DOM) to pure Text
+     * Converts internal DOM structure to pure Text
      * @return string
      */
     public function toText()
@@ -472,8 +483,8 @@ class Texy
 
 
     /**
-     * Switch Texy and default modules to safe mode
-     * Suitable for 'comments' and other usages, where input text may insert attacker
+     * Switch Texy! configuration to the safe mode
+     * Suitable for web comments and other usages, where input text may insert attacker
      */
     public function safeMode()
     {
@@ -490,7 +501,7 @@ class Texy
 
 
     /**
-     * Switch Texy and default modules to (default) trust mode
+     * Switch Texy! configuration to the (default) trust mode
      */
     public function trustMode()
     {
@@ -506,14 +517,11 @@ class Texy
 
 
 
-
-
-
     /**
      * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04
-     * which are ignored by some formatting functions
+     * which are ignored by TexyHtmlFormatter routine
+     * @param string
      * @return string
-     * @static
      */
     static public function freezeSpaces($s)
     {
@@ -522,9 +530,9 @@ class Texy
 
 
     /**
-     * Revert meta-spaces back to normal spaces
+     * Reverts meta-spaces back to normal spaces
+     * @param string
      * @return string
-     * @static
      */
     static public function unfreezeSpaces($s)
     {
@@ -534,9 +542,9 @@ class Texy
 
 
     /**
-     * remove special controls chars used by Texy!
+     * Removes special controls characters used by Texy!
+     * @param string
      * @return string
-     * @static
      */
     static public function wash($text)
     {
@@ -547,9 +555,10 @@ class Texy
 
 
     /**
-     * Generate unique MARK key - useful for freezing (folding) some substrings
+     * Generate unique mark - useful for freezing (folding) some substrings
+     * @param string
+     * @param int
      * @return string
-     * @static
      */
     public function mark($child, $contentType)
     {
@@ -564,7 +573,10 @@ class Texy
             . strtr(base_convert(count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
             . $borders[$contentType];
 
-        if (is_object($child)) $this->marks[$key] = $child->__toString();
+        if (is_object($child)) {
+            debugbreak();
+            $this->marks[$key] = $child->__toString();
+        }
         else $this->marks[$key] = $child;
 
         return $key;
@@ -633,13 +645,16 @@ class Texy
 
 
 
+    /** @var array */
     static private $charTables;
+
+    /** @var array */
     private $_chars;
 
     /**
-     * Converts from UTF-8 to HTML entity or character in dest encoding
+     * Converts UTF-8 to a) HTML entity or b) character in dest encoding
      */
-    private function iconv($m)
+    private function utfconv($m)
     {
         $m = $m[0];
         if (isset($this->_chars[$m])) return $this->_chars[$m];
@@ -659,6 +674,7 @@ class Texy
 
         return '';
     }
+
 
 
     /**

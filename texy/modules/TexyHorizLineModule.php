@@ -20,25 +20,20 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * HORIZONTAL LINE MODULE CLASS
+ * Horizontal line module
  */
 class TexyHorizLineModule extends TexyModule
 {
     protected $allow = array('Horizline');
 
-    /**
-     * Module initialization.
-     */
+
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this, 
-            'processBlock', 
-            '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU', 
+            $this,
+            'processBlock',
+            '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU',
             'Horizline'
         );
     }

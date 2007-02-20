@@ -20,9 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
 /**
- * DEFINITION LIST MODULE CLASS
+ * Definition list module
  */
 class TexyDefinitionListModule extends TexyListModule
 {
@@ -34,8 +33,7 @@ class TexyDefinitionListModule extends TexyListModule
         '+' => TRUE,
     );
 
-    // private
-    public $translate = array(    //  rexexp  class
+    private $translate = array(    //  rexexp  class
         '*' => array('\*'),
         '-' => array('[\x{2013}-]'),
         '+' => array('\+'),
@@ -43,9 +41,6 @@ class TexyDefinitionListModule extends TexyListModule
 
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $bullets = array();

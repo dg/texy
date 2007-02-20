@@ -20,11 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * TABLE MODULE CLASS
+ * Table module
  */
 class TexyTableModule extends TexyModule
 {
@@ -40,9 +37,6 @@ class TexyTableModule extends TexyModule
 
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $this->texy->registerBlockPattern(

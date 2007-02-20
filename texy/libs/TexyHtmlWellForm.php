@@ -15,11 +15,10 @@
  * @version    $Revision$ $Date$
  */
 
+// security - include texy.php, not this file
+if (!defined('TEXY')) die();
 
-/**
- * HTML support for Texy!
- *
- */
+
 
 class TexyHtmlWellForm
 {
@@ -33,7 +32,6 @@ class TexyHtmlWellForm
     );
 */
 
-    // internal
     private $tagUsed;
     private $tagStack;
     private $autoClose = array(
@@ -53,10 +51,9 @@ class TexyHtmlWellForm
 
 
 
-
     /**
-     * Convert <strong><em> ... </strong> ... </em>
-     *    into <strong><em> ... </em></strong><em> ... </em>
+     * Converts <strong><em> ... </strong> ... </em>
+     * into <strong><em> ... </em></strong><em> ... </em>
      */
     public function process($text)
     {
@@ -72,7 +69,6 @@ class TexyHtmlWellForm
         }
         return $text;
     }
-
 
 
     /**
@@ -154,4 +150,5 @@ class TexyHtmlWellForm
     function __set($nm, $val) { $this->__get($nm); }
     private function __unset($nm) { $this->__get($nm); }
     private function __isset($nm) { $this->__get($nm); }
+
 }

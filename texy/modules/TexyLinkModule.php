@@ -20,10 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
 /**
- * LINKS MODULE CLASS
+ * Links module
  */
 class TexyLinkModule extends TexyModule
 {
@@ -38,9 +36,6 @@ class TexyLinkModule extends TexyModule
 
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $this->texy->registerLinePattern(

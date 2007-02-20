@@ -20,11 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * AUTOMATIC REPLACEMENTS MODULE CLASS
+ * Typography replacements module
  */
 class TexyTypographyModule extends TexyModule
 {
@@ -45,10 +42,6 @@ class TexyTypographyModule extends TexyModule
     private $pattern, $replace;
 
 
-
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $pairs = array(

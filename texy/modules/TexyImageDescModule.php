@@ -20,9 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
 /**
- * IMAGE WITH DESCRIPTION MODULE CLASS
+ * Image with description module
  */
 class TexyImageDescModule extends TexyModule
 {
@@ -33,9 +32,7 @@ class TexyImageDescModule extends TexyModule
     public $rightClass = 'image right';  // right-floated box class
 
 
-    /**
-     * Module initialization.
-     */
+
     public function init()
     {
         $this->texy->registerBlockPattern(

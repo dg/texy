@@ -20,21 +20,16 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * MODIFIER PROCESSOR
- * ------------------
+ * Modifier processor
  *
- * Modifier is text like .(title)[class1 class2 #id]{color: red}>^
+ * Modifiers are texts like .(title)[class1 class2 #id]{color: red}>^
  *   .         starts with dot
  *   (...)     title or alt modifier
  *   [...]     classes or ID modifier
  *   {...}     inner style modifier
  *   < > <> =  horizontal align modifier
  *   ^ - _     vertical align modifier
- *
  */
 class TexyModifier
 {
@@ -46,7 +41,9 @@ class TexyModifier
     const VALIGN_MIDDLE =    'middle';
     const VALIGN_BOTTOM =    'bottom';
 
-    protected $texy; // parent Texy! object
+    /** @var Texy */
+    protected $texy;
+
     public $id;
     public $classes = array();
     public $styles = array();

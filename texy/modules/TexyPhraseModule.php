@@ -20,9 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
 /**
- * PHRASES MODULE CLASS
+ * Phrases module
  */
 class TexyPhraseModule extends TexyModule
 {
@@ -63,9 +62,7 @@ class TexyPhraseModule extends TexyModule
     );
 
 
-    /**
-     * Module initialization.
-     */
+
     public function init()
     {
 /*

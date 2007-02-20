@@ -20,20 +20,14 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * QUOTE & BLOCKQUOTE MODULE CLASS
+ * Blockquote module
  */
 class TexyQuoteModule extends TexyModule
 {
     protected $allow = array('Blockquote');
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $this->texy->registerBlockPattern(

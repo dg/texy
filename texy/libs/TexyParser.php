@@ -19,17 +19,28 @@
 if (!defined('TEXY')) die();
 
 
+
+/**
+ * Texy! parser base class
+ */
 abstract class TexyParser
 {
+    /** @var TexyDomElement */
     public $element;
 
 
+    /**
+     * @param TexyDomElement
+     */
     public function __construct($element)
     {
         $this->element = $element;
     }
 
 
+    /**
+     * @param string
+     */
     abstract public function parse($text);
 
 
@@ -45,10 +56,8 @@ abstract class TexyParser
 
 
 
-
 /**
- * INTERNAL PARSING BLOCK STRUCTURE
- * --------------------------------
+ * Parser for block structures
  */
 class TexyBlockParser extends TexyParser
 {
@@ -92,7 +101,7 @@ class TexyBlockParser extends TexyParser
 
     public function parse($text)
     {
-            ///////////   INITIALIZATION
+        // initialization
         $texy = $this->element->texy;
         $this->text = $text;
         $this->offset = 0;
@@ -103,7 +112,7 @@ class TexyBlockParser extends TexyParser
         foreach ($keys as $key) $arrPos[$key] = -1;
 
 
-            ///////////   PARSING
+        // parse loop
         do {
             $minKey = -1;
             $minPos = strlen($text);
@@ -159,9 +168,6 @@ class TexyBlockParser extends TexyParser
         } while (1);
     }
 
-
-
-
 } // TexyBlockParser
 
 
@@ -172,15 +178,14 @@ class TexyBlockParser extends TexyParser
 
 
 /**
- * INTERNAL PARSING LINE STRUCTURE
- * -------------------------------
+ * Parser for single line structures
  */
 class TexyLineParser extends TexyParser
 {
 
     public function parse($text)
     {
-            ///////////   INITIALIZATION
+        // initialization
         $element = $this->element;
         $texy = $element->texy;
 
@@ -191,7 +196,7 @@ class TexyLineParser extends TexyParser
         foreach ($keys as $key) $arrPos[$key] = -1;
 
 
-            ///////////   PARSING
+        // parse loop
         do {
             $minKey = -1;
             $minPos = strlen($text);
@@ -256,6 +261,7 @@ class TexyLineParser extends TexyParser
 
         $element->content = $text;
     }
+
 } // TexyLineParser
 
 

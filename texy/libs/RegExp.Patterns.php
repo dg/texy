@@ -21,14 +21,14 @@ if (!defined('TEXY')) die();
 
 
 
-// REGULAR EXPRESSION PATTERNS
+// Regular expression patterns
 
-//     international characters 'A-Za-z\x86-\xff'
-//     unicode                  'A-Za-z\x86-\x{ffff}'
-//     numbers                  0-9
-//     spaces                   \n\r\t\x32
-//     control                  \x00 - \x31  (without spaces)
-//     others                   !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+// international characters 'A-Za-z\x86-\xff'
+// unicode                  'A-Za-z\x86-\x{ffff}'
+// numbers                  0-9
+// spaces                   \n\r\t\x32
+// control                  \x00 - \x31  (without spaces)
+// others                   !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
 
 
 // character classes
@@ -38,7 +38,7 @@ define('TEXY_CHAR',            'A-Za-z\x86-\x{ffff}');
 define('TEXY_MARK',            "\x01-\x04\x14-\x1F");       // ANY MARK CHAR
 define('TEXY_MARK_SPACES',     "\x01-\x04");       // MARKED SPACE
 define('TEXY_MARK_N',          "\x14\x18-\x1F");    // marked CONTENT_NONE
-define('TEXY_MARK_I',          "\x15\x18-\x1F");    // marked CONTENT_INLINE 
+define('TEXY_MARK_I',          "\x15\x18-\x1F");    // marked CONTENT_INLINE
 define('TEXY_MARK_T',          "\x16\x18-\x1F");    // marked CONTENT_TEXTUAL
 define('TEXY_MARK_B',          "\x17\x18-\x1F");    // marked CONTENT_BLOCK
 
@@ -48,7 +48,7 @@ define('TEXY_MODIFIER',        '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\
 
 // modifier .(title)[class]{style}<>
 define('TEXY_MODIFIER_H',      '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<))??)');
-                               
+
 // modifier .(title)[class]{style}<>^
 define('TEXY_MODIFIER_HV',     '(?:\ *(?<= |^)\.(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??(\([^\n\)]+\)|\[[^\n\]]+\]|\{[^\n\}]+\}|(?:<>|>|=|<)|(?:\^|\-|\_))??)');
 

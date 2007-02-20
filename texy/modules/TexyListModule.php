@@ -20,10 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
 /**
- * ORDERED / UNORDERED NESTED LIST MODULE CLASS
+ * Ordered / unordered nested list module
  */
 class TexyListModule extends TexyModule
 {
@@ -41,9 +39,8 @@ class TexyListModule extends TexyModule
         'A)' => TRUE,
     );
 
-    // private
-    public $translate = array(    
-                  //  rexexp       list-style-type  tag
+    private $translate = array(
+                    //  rexexp       list-style-type  tag
         '*'  => array('\*',          '',              'ul'),
         '-'  => array('[\x{2013}-]', '',              'ul'),
         '+'  => array('\+',          '',              'ul'),
@@ -56,9 +53,7 @@ class TexyListModule extends TexyModule
     );
 
 
-    /**
-     * Module initialization.
-     */
+
     public function init()
     {
         $bullets = array();

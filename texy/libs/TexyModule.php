@@ -20,17 +20,16 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * Texy! MODULES BASE CLASS
- * ------------------------
+ * Texy! modules base class
  */
 abstract class TexyModule
 {
-    protected $texy;  // parent Texy! object
-    protected $allow = array(); // list of syntax to allow
+    /** @var Texy */
+    protected $texy;
+
+    /** @var array  list of syntax to allow */
+    protected $allow = array();
 
 
     public function __construct($texy)
@@ -43,28 +42,34 @@ abstract class TexyModule
     }
 
 
-
-
-    // register all line & block patterns a routines
+    /**
+     * Registers all line & block patterns
+     */
     public function init()
     {
     }
 
 
-    // block's pre-process
+    /**
+     * Full text pre-processing
+     * @param string
+     * @return string
+     */
     public function preProcess($text)
     {
         return $text;
     }
 
 
-    // single line post-process
+    /**
+     * Single line post-processing
+     * @param string
+     * @return string
+     */
     public function linePostProcess($line)
     {
         return $line;
     }
-
-
 
 
     /**
@@ -74,4 +79,5 @@ abstract class TexyModule
     function __set($nm, $val) { $this->__get($nm); }
     private function __unset($nm) { $this->__get($nm); }
     private function __isset($nm) { $this->__get($nm); }
+
 } // TexyModule

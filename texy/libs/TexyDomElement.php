@@ -21,12 +21,14 @@ if (!defined('TEXY')) die();
 
 
 /**
- * DOM element base class
- * @abstract
+ * Texy DOM element base class
  */
 abstract class TexyDomElement
 {
-    public $texy; // parent Texy! object
+    /** @var Texy */
+    public $texy;
+
+    /** @var array of TexyHtml */
     public $tags = array();
 
 
@@ -37,13 +39,15 @@ abstract class TexyDomElement
 
 
     /**
-     * Generate HTML element content
+     * Returns element's content
+     * @return string
      */
     abstract protected function generateContent();
 
 
     /**
-     * Convert element to HTML string
+     * Converts to "HTML" string
+     * @return string
      */
     public function __toString()
     {
@@ -79,21 +83,24 @@ abstract class TexyDomElement
  */
 class TexyBlockElement extends TexyDomElement
 {
+    /** @var array of TexyDomElement */
     public $children = array();
 
 
     protected function generateContent()
     {
-        $html = '';
+        $s = '';
         foreach ($this->children as $child)
-            $html .= $child->__toString();
+            $s .= $child->__toString();
 
-        return $html;
+        return $s;
     }
 
 
     /**
-     * Parse text as BLOCK and create array of children
+     * Parses text as block
+     * @param string
+     * @return void
      */
     public function parse($text)
     {
@@ -101,9 +108,7 @@ class TexyBlockElement extends TexyDomElement
         $parser->parse($text);
     }
 
-
-
-}  // TexyBlockElement
+}
 
 
 
@@ -115,10 +120,11 @@ class TexyBlockElement extends TexyDomElement
 
 
 /**
- * This element represents one paragraph of text.
+ * This element represents one paragraph of text
  */
 class TexyTextualElement extends TexyDomElement
 {
+    /** @var string */
     public $content = '';
 
 
@@ -129,7 +135,9 @@ class TexyTextualElement extends TexyDomElement
 
 
     /**
-     * Parse $text as single line and create $this->content
+     * Parses text as single line
+     * @param string
+     * @return void
      */
     public function parse($text)
     {
@@ -137,15 +145,14 @@ class TexyTextualElement extends TexyDomElement
         $parser->parse($text);
     }
 
-}  // TexyTextualElement
-
+}
 
 
 
 
 
 /**
- * Generic paragraph / div / transparent
+ * Generic paragraph / div / transparent created by TexyGenericBlock
  */
 class TexyParagraphElement extends TexyTextualElement
 {

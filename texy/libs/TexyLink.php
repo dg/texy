@@ -20,7 +20,6 @@ if (!defined('TEXY')) die();
 
 
 
-
 /**
  * URL storage
  *
@@ -28,7 +27,8 @@ if (!defined('TEXY')) die();
  */
 class TexyLink
 {
-    protected $texy;  // root Texy object association
+    /** @var Texy */
+    protected $texy;
 
     public $value;
     protected $source;

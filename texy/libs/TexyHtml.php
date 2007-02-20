@@ -26,7 +26,6 @@ TexyHtml::$valid = array_merge(TexyHtml::$block, TexyHtml::$inline);
 
 /**
  * HTML helper
- *
  */
 class TexyHtml
 {
@@ -130,7 +129,7 @@ class TexyHtml
 
         $s = '<' . $this->_name;
 
-        // reserved properties 
+        // reserved properties
     	static $res = array('_name'=>1, '_empty'=>1,);
 
         // use array_change_key_case($this, CASE_LOWER) ?

@@ -20,26 +20,18 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
-
-
 /**
- * BLOCK MODULE CLASS
+ * Special blocks module
  */
 class TexyBlockModule extends TexyModule
 {
     protected $allow = array('Block', 'Block.pre', 'Block.text', 'Block.html', 'Block.div', 'Block.source', 'Block.comment');
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this, 
+            $this,
             'processBlock',
             '#^/--+ *(?:(code|samp|text|html|div|notexy|source|comment)( .*)?|) *'.TEXY_MODIFIER_H.'?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi',
             'Block'
@@ -130,7 +122,6 @@ class TexyBlockModule extends TexyModule
 
 
         case 'html':
-            ///////////   INITIALIZATION
             $el = new TexyTextualElement($this->texy);
 
             preg_match_all(

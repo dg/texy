@@ -20,11 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * AUTOMATIC REPLACEMENTS MODULE CLASS
+ * Smilies Module
  */
 class TexySmiliesModule extends TexyModule
 {
@@ -47,9 +44,6 @@ class TexySmiliesModule extends TexyModule
 
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         if (empty($this->texy->allowed['Image.smilies'])) return;

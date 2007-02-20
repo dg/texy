@@ -20,10 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
 /**
- * IMAGES MODULE CLASS
+ * Images module
  */
 class TexyImageModule extends TexyModule
 {
@@ -50,16 +48,14 @@ class TexyImageModule extends TexyModule
     }
 
 
-    /**
-     * Module initialization.
-     */
+
     public function init()
     {
         // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
         $this->texy->registerLinePattern(
-            $this, 
-            'processLine', 
-            '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U', 
+            $this,
+            'processLine',
+            '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U',
             'Image.normal'
         );
     }
@@ -323,7 +319,7 @@ class TexyImageElement extends TexyTextualElement
         }
 
         $el->alt = (string) $alt;
-        
+
         return parent::__toString();
     }
 

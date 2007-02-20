@@ -20,9 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
 /**
- * HEADING MODULE CLASS
+ * Heading module
  */
 class TexyHeadingModule extends TexyModule
 {
@@ -49,9 +48,6 @@ class TexyHeadingModule extends TexyModule
     private $_deltaSurround;
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $this->texy->registerBlockPattern(

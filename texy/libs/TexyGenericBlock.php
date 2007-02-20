@@ -20,14 +20,12 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * PARAGRAPH / GENERIC MODULE CLASS
+ * Generic block module
  */
 class TexyGenericBlock
 {
+    /** @var Texy */
     public $texy;
 
 
@@ -38,7 +36,7 @@ class TexyGenericBlock
 
 
     /**
-     * Callback function (for blocks)
+     * Callback function for blocks
      *
      *            ....  .(title)[class]{style}>
      *             ...

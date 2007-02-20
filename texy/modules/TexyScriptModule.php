@@ -20,11 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * SCRIPTS MODULE CLASS
+ * Scripts module
  */
 class TexyScriptModule extends TexyModule
 {
@@ -34,14 +31,11 @@ class TexyScriptModule extends TexyModule
     public $handler;    // function myUserFunc($element, string $identifier, array/NULL $args)
 
 
-    /**
-     * Module initialization.
-     */
     public function init()
     {
         $this->texy->registerLinePattern(
-            $this, 
-            'processLine', 
+            $this,
+            'processLine',
             '#\{\{([^'.TEXY_MARK.']+)\}\}()#U',
             'Script'
         );

@@ -20,8 +20,6 @@ if (!defined('TEXY')) die();
 
 
 
-
-
 class TexyHtmlFormatter
 {
     public $baseIndent  = 0;     // indent for top elements
@@ -30,7 +28,6 @@ class TexyHtmlFormatter
 
     private $space;
     private $marks;
-
 
 
 

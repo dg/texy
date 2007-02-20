@@ -20,11 +20,8 @@ if (!defined('TEXY')) die();
 
 
 
-
-
-
 /**
- * LONG WORDS WRAP MODULE CLASS
+ * Long words wrap module
  */
 class TexyLongWordsModule extends TexyModule
 {
