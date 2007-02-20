@@ -115,7 +115,7 @@ class TexyImageDescModule extends TexyModule
         $elImg->content = $content;
         $el->children[] = $elImg;
 
-        $elDesc = new TexyGenericBlockElement($this->texy);
+        $elDesc = new TexyBlockElement($this->texy);
         $elDesc->parse(ltrim($mContent));
         $el->children[] = $elDesc;
 

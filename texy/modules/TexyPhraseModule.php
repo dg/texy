@@ -21,42 +21,27 @@ if (!defined('TEXY')) die();
 
 
 
-
-
 /**
  * PHRASES MODULE CLASS
- *
- *   **strong**
- *   *emphasis*
- *   ***strong+emphasis***
- *   ^^superscript^^
- *   __subscript__
- *   ++inserted++
- *   --deleted--
- *   ~~cite~~
- *   "span"
- *   ~span~
- *   `....`
- *   ``....``
  */
 class TexyPhraseModule extends TexyModule
 {
     protected $allow = array(
-        'Phrase.strongEm', // ***
-        'Phrase.strong',   // **
-        'Phrase.em',       // *
-        'Phrase.ins',      // ++
-        'Phrase.del',      // --
-        'Phrase.sup',      // ^^
-        'Phrase.sub',      // __
-        'Phrase.span',     // "
-        'Phrase.span',     // ~
-        'Phrase.cite',     // ~~
-        'Phrase.acronym',  // ".. .."()
-        'Phrase.acronymAlt', // ...()
-        'Phrase.code',     // `
-        'Phrase.notexy',   // ``
-        'Phrase.quote',    // >>...<<
+        'Phrase.strongEm',   // ***strong+emphasis***
+        'Phrase.strong',     // **strong**
+        'Phrase.em',         // *emphasis*
+        'Phrase.ins',        // ++inserted++
+        'Phrase.del',        // --deleted--
+        'Phrase.sup',        // ^^superscript^^
+        'Phrase.sub',        // __subscript__
+        'Phrase.span',       // "span"
+        'Phrase.span',       // ~span~
+        'Phrase.cite',       // ~~cite~~
+        'Phrase.acronym',    // "acro nym"()
+        'Phrase.acronymAlt', // acronym()
+        'Phrase.code',       // `code`
+        'Phrase.notexy',     // ``....``
+        'Phrase.quote',      // >>quote<<
         'Phrase.codeSwitch', // `=...
     );
 

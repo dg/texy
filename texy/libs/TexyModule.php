@@ -58,14 +58,6 @@ abstract class TexyModule
     }
 
 
-
-    // block's post-process
-    public function postProcess($text)
-    {
-        return $text;
-    }
-
-
     // single line post-process
     public function linePostProcess($line)
     {

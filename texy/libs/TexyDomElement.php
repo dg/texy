@@ -93,7 +93,7 @@ class TexyBlockElement extends TexyDomElement
 
 
     /**
-     * Parse $text as BLOCK and create array of children
+     * Parse text as BLOCK and create array of children
      */
     public function parse($text)
     {
@@ -144,6 +144,12 @@ class TexyTextualElement extends TexyDomElement
 
 
 
+/**
+ * Generic paragraph / div / transparent
+ */
+class TexyParagraphElement extends TexyTextualElement
+{
+}
 
 
 

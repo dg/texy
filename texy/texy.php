@@ -26,32 +26,33 @@ define('TEXY', 'Version 2.0beta for PHP5 $Revision$');
  */
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
-require_once TEXY_DIR.'libs/re.patterns.php';    // regular expressions
-require_once TEXY_DIR.'libs/modifier.php';       // modifier processor
-require_once TEXY_DIR.'libs/url.php';           // object encapsulate of URL
-require_once TEXY_DIR.'libs/dom.php';            // Texy! DOM element's base class
-require_once TEXY_DIR.'libs/module.php';         // Texy! module base class
-require_once TEXY_DIR.'libs/parser.php';         // Texy! parser
-require_once TEXY_DIR.'libs/html.php';
-require_once TEXY_DIR.'libs/html.wellform.php';
-require_once TEXY_DIR.'modules/block.php';
-require_once TEXY_DIR.'modules/formatter.php';
-require_once TEXY_DIR.'modules/generic.block.php';
-require_once TEXY_DIR.'modules/heading.php';
-require_once TEXY_DIR.'modules/horiz.line.php';
-require_once TEXY_DIR.'modules/html.tag.php';
-require_once TEXY_DIR.'modules/image.php';
-require_once TEXY_DIR.'modules/image.description.php';
-require_once TEXY_DIR.'modules/link.php';
-require_once TEXY_DIR.'modules/list.php';
-require_once TEXY_DIR.'modules/definition.list.php';
-require_once TEXY_DIR.'modules/long.words.php';
-require_once TEXY_DIR.'modules/phrase.php';
-require_once TEXY_DIR.'modules/typography.php';
-require_once TEXY_DIR.'modules/quote.php';
-require_once TEXY_DIR.'modules/script.php';
-require_once TEXY_DIR.'modules/table.php';
-require_once TEXY_DIR.'modules/smilies.php';
+require_once TEXY_DIR.'libs/RegExp.Patterns.php';
+require_once TEXY_DIR.'libs/TexyDomElement.php';
+require_once TEXY_DIR.'libs/TexyGenericBlock.php';
+require_once TEXY_DIR.'libs/TexyHtml.php';
+require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
+require_once TEXY_DIR.'libs/TexyHtmlWellForm.php';
+require_once TEXY_DIR.'libs/TexyLink.php';
+require_once TEXY_DIR.'libs/TexyModifier.php';
+require_once TEXY_DIR.'libs/TexyModule.php';
+require_once TEXY_DIR.'libs/TexyParser.php';
+
+require_once TEXY_DIR.'modules/TexyBlockModule.php';
+require_once TEXY_DIR.'modules/TexyHeadingModule.php';
+require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
+require_once TEXY_DIR.'modules/TexyHtmlModule.php';
+require_once TEXY_DIR.'modules/TexyImageDescModule.php';
+require_once TEXY_DIR.'modules/TexyImageModule.php';
+require_once TEXY_DIR.'modules/TexyLinkModule.php';
+require_once TEXY_DIR.'modules/TexyListModule.php';
+require_once TEXY_DIR.'modules/TexyDefinitionListModule.php';
+require_once TEXY_DIR.'modules/TexyLongWordsModule.php';
+require_once TEXY_DIR.'modules/TexyPhraseModule.php';
+require_once TEXY_DIR.'modules/TexyQuoteModule.php';
+require_once TEXY_DIR.'modules/TexyScriptModule.php';
+require_once TEXY_DIR.'modules/TexySmiliesModule.php';
+require_once TEXY_DIR.'modules/TexyTableModule.php';
+require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
 
 /**
@@ -126,11 +127,17 @@ class Texy
         $definitionListModule,
         $tableModule,
         $imageDescModule,
-        $genericBlockModule,
         $typographyModule,
         $longWordsModule,
-        $formatterModule;
 
+        $genericBlock,
+        $formatter,
+        $formatterModule, // back compatibility
+        $wellForm;
+
+
+    /** @var bool    ... */
+    public $_mergeMode = TRUE;
 
 
 
@@ -176,6 +183,12 @@ class Texy
         // load all modules
         $this->loadModules();
 
+        $this->formatter = new TexyHtmlFormatter();
+        $this->wellForm = new TexyHtmlWellForm();
+        $this->genericBlock = new TexyGenericBlock($this);
+
+        $this->formatterModule = $this->formatter; // back compatibility
+
         // example of link reference ;-)
         /*
         $elRef = new TexyLinkReference($this, 'http://texy.info/', 'Texy!');
@@ -217,12 +230,10 @@ class Texy
         $this->definitionListModule = new TexyDefinitionListModule($this);
         $this->tableModule = new TexyTableModule($this);
         $this->imageDescModule = new TexyImageDescModule($this);
-        $this->genericBlockModule = new TexyGenericBlockModule($this);
 
         // post process
         $this->typographyModule = new TexyTypographyModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
-        $this->formatterModule = new TexyFormatterModule($this);
     }
 
 
@@ -267,6 +278,7 @@ class Texy
      */
     protected function init()
     {
+        $this->_mergeMode = TRUE;
         $this->marks = array();
         $this->linePatterns  = array();
         $this->blockPatterns = array();
@@ -373,13 +385,9 @@ class Texy
         // replace marks
         $html = strtr($html, $this->marks);
 
-        // wellform HTML
-        $wf = new TexyHtmlWellForm();
-        $html = $wf->process($html);
-
-        // post-process
-        foreach ($this->modules as $module)
-            $html = $module->postProcess($html);  // existuje pouze formatovani
+        // wellform and reformat HTML
+        $html = $this->wellForm->process($html);
+        $html = $this->formatter->process($html);
 
         // this notice should remain!
         if (!defined('TEXY_NOTICE_SHOWED')) {
@@ -420,44 +428,39 @@ class Texy
     {
         if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
 
-        // generate output
-        $saveLineWrap = $this->formatterModule->lineWrap;
-        $this->formatterModule->lineWrap = FALSE;
-
-        $text = $this->DOM->__toString();
+        $html = $this->DOM->__toString();
 
         // replace marks
-        $text = strtr($text, $this->marks);
+        $html = strtr($html, $this->marks);
 
-        // wellform HTML
-        $wf = new TexyHtmlWellForm();
-        $text = $wf->process($text);
-
-        // post-process
-        foreach ($this->modules as $module) $text = $module->postProcess($text);  // existuje pouze formatovani
-        $this->formatterModule->lineWrap = $saveLineWrap;
+        // wellform and reformat HTML
+        $html = $this->wellForm->process($html);
+        $saveLineWrap = $this->formatter->lineWrap;
+        $this->formatter->lineWrap = FALSE;
+        $html = $this->formatter->process($html);
+        $this->formatter->lineWrap = $saveLineWrap;
 
         // unfreeze spaces
-        $text = Texy::unfreezeSpaces($text);
+        $html = Texy::unfreezeSpaces($html);
 
         // remove tags
-        $text = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $text);
-        $text = strip_tags($text);
-        $text = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $text);
+        $html = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $html);
+        $html = strip_tags($html);
+        $html = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $html);
 
         // entities -> chars
-        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $html = html_entity_decode($html, ENT_QUOTES, 'UTF-8');
 
         // convert nbsp to normal space and remove shy
-        $text = strtr($text, array(
+        $html = strtr($html, array(
             "\xC2\xAD" => '',  // shy
             "\xC2\xA0" => ' ', // nbsp
         ));
 
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
-            $text = iconv('utf-8', $this->encoding.'//TRANSLIT', $text);
+            $html = iconv('utf-8', $this->encoding.'//TRANSLIT', $html);
 
-        return $text;
+        return $html;
     }
 
 

@@ -22,24 +22,22 @@ if (!defined('TEXY')) die();
 
 
 
-class TexyFormatterModule extends TexyModule
+class TexyHtmlFormatter
 {
-    protected $allow = array('Formatter');
-    public $baseIndent  = 0;               // indent for top elements
-    public $lineWrap    = 80;              // line width, doesn't include indent space
+    public $baseIndent  = 0;     // indent for top elements
+    public $lineWrap    = 80;    // line width, doesn't include indent space
     public $indent      = TRUE;
 
     private $space;
-    private $marks = array();
+    private $marks;
 
 
 
 
-    public function postProcess($text)
+    public function process($text)
     {
-        if (empty($this->texy->allowed['Formatter'])) return $text;
-
         $this->space = $this->baseIndent;
+        $this->marks = array();
 
         // freeze all pre, textarea, script and style elements
         $text = preg_replace_callback(
@@ -159,4 +157,4 @@ class TexyFormatterModule extends TexyModule
 
 
 
-} // TexyFormatterModule
+} // TexyHtmlFormatter

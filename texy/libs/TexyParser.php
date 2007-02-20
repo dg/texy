@@ -56,7 +56,6 @@ class TexyBlockParser extends TexyParser
     private $offset;
 
 
-
     // match current line against RE.
     // if succesfull, increments current position and returns TRUE
     public function receiveNext($pattern, &$matches)
@@ -141,7 +140,7 @@ class TexyBlockParser extends TexyParser
             if ($next > $this->offset) {
                 $str = substr($text, $this->offset, $next - $this->offset);
                 $this->offset = $next;
-                call_user_func_array(array($texy->genericBlockModule, 'processBlock'), array($this, $str));
+                $texy->genericBlock->process($this, $str);
                 continue;
             }
 
@@ -159,6 +158,9 @@ class TexyBlockParser extends TexyParser
 
         } while (1);
     }
+
+
+
 
 } // TexyBlockParser
 

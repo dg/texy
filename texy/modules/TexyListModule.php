@@ -182,14 +182,12 @@ class TexyListModule extends TexyModule
         }
 
         // parse content
-        $mergeMode = & $texy->genericBlockModule->mergeMode;
-        $tmp = $mergeMode;
-        $mergeMode = FALSE;
-
+        $tmp = $texy->_mergeMode;
+        $texy->_mergeMode = FALSE;
         $elItem->parse($content);
-        $mergeMode = $tmp;
+        $texy->_mergeMode = $tmp;
 
-        if ($elItem->children && $elItem->children[0] instanceof TexyGenericBlockElement)
+        if ($elItem->children && $elItem->children[0] instanceof TexyParagraphElement)
             $elItem->children[0]->tags[0]->setElement(NULL);
 
         return $elItem;

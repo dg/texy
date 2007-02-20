@@ -26,62 +26,75 @@ if (!defined('TEXY')) die();
  *
  * Analyse type of URL and convert it to valid URL or textual representation
  */
-class TexyUrl
+class TexyLink
 {
     protected $texy;  // root Texy object association
 
     public $value;
-    protected $flags;
+    protected $source;
+    protected $type;
     protected $root;
     protected $URL;
 
+    // types
     const ABSOLUTE = 1;
     const RELATIVE = 2;
-    const EMAIL = 4;
-    const IMAGE = 8;
+    const EMAIL = 3;
+
+    // sources
+    const DIRECT = 1;  // -> absolute, relative, email
+    const REFERENCE = 2; // -> resolve: absolute, relative, email
+    const IMAGE = 3; // -> (resolve): absolute, relative
+    const LINKED_IMAGE = 4; // -> (resolve): absolute, relative
 
 
 
 
     /**
-     * Creates a new TexyUrl object
+     * Creates a new TexyLink object
      *
      * @param object  association with root Texy object
-     */
-    public function __construct($texy)
-    {
-        $this->texy =  $texy;
-    }
-
-
-
-
-
-    /**
-     * Sets URL properties
-     *
      * @param string  text written in document
-     * @param string  root, for relative URL's
-     * @param bool    image indicator (user usage)
-     * @return void
+     * @param int     direct/reference/image/linked_image indicator
      */
-    public function set($value, $root = '', $isImage = FALSE)
+    public function __construct($texy, $value, $source)
     {
+        $this->texy = $texy;
+        $this->source = $source;
         $this->value = trim($value);
-        if ($root <> NULL) $root = rtrim($root, '/\\') . '/';
-        $this->root = $root;
 
+        if ($source === self::DIRECT) $root = $texy->linkModule->root;
+        elseif ($source === self::REFERENCE) $root = $texy->linkModule->root;
+        elseif ($source === self::IMAGE) $root = $texy->imageModule->root;
+        elseif ($source === self::LINKED_IMAGE) $root = $texy->imageModule->linkedRoot;
+        else $root = NULL;
 
-        // will be completed on demand
-        $this->URL = NULL;
+        if ($root <> NULL) $this->root = rtrim($root, '/\\') . '/';
+        /*
+        if ($source === self::REFERENCE) {
+            $elRef = $texy->linkModule->getReference($value);
+            if ($elRef) {
+                $modifier->copyFrom($elRef->modifier);
+                $loc = $elRef->URL . $elRef->query;
+                $loc = str_replace('%s', urlencode(Texy::wash($text)), $loc);
+            }
+        }
+
+        if ($source === self::IMAGE || $source === self::LINKED_IMAGE) {
+            $elImage = new TexyImageElement($this->texy);
+            $elImage->setImagesRaw(substr($loc, 2, -2));
+            $elImage->requireLinkImage();
+            $link->copyFrom($elImage->linkImage);
+        }
+        */
 
         // detect URL type
         if (preg_match('#^'.TEXY_EMAIL.'$#i', $this->value)) // email
-            $this->flags = self::EMAIL;
+            $this->type = self::EMAIL;
         elseif (preg_match('#^(https?://|ftp://|www\.|ftp\.|/)#i', $this->value))  // absolute URL
-            $this->flags = self::ABSOLUTE | ($isImage ? self::IMAGE : 0);
+            $this->type = self::ABSOLUTE;
         else  // relative
-            $this->flags = self::RELATIVE | ($isImage ? self::IMAGE : 0);
+            $this->type = self::RELATIVE;
     }
 
 
@@ -92,7 +105,7 @@ class TexyUrl
      */
     public function isAbsolute()
     {
-        return (bool) ($this->flags & self::ABSOLUTE);
+        return $this->type === self::ABSOLUTE;
     }
 
 
@@ -103,7 +116,7 @@ class TexyUrl
      */
     public function isEmail()
     {
-        return (bool) ($this->flags & self::EMAIL);
+        return $this->type === self::EMAIL;
     }
 
 
@@ -114,19 +127,9 @@ class TexyUrl
      */
     public function isImage()
     {
-        return (bool) ($this->flags & self::IMAGE);
+        return $this->source === self::IMAGE || $this->source === self::LINKED_IMAGE;
     }
 
-
-
-
-    public function copyFrom($obj)
-    {
-        $this->value = $obj->value;
-        $this->flags = $obj->flags;
-        $this->URL  = $obj->URL;
-        $this->root = $obj->root;
-    }
 
 
 
@@ -144,7 +147,7 @@ class TexyUrl
             return $this->URL = $this->value;
 
         // email URL
-        if ($this->flags & self::EMAIL) {
+        if ($this->type === self::EMAIL) {
             // obfuscating against spam robots
             if ($this->texy->obfuscateEmail) {
                 $this->URL = 'mai';
@@ -159,20 +162,20 @@ class TexyUrl
         }
 
         // absolute URL
-        if ($this->flags & self::ABSOLUTE) {
+        if ($this->type === self::ABSOLUTE) {
             $lower = strtolower($this->value);
 
             // must begins with 'http://' or 'ftp://'
-            if (substr($lower, 0, 4) == 'www.') {
+            if (substr($lower, 0, 4) === 'www.') {
                 return $this->URL = 'http://'.$this->value;
-            } elseif (substr($lower, 0, 4) == 'ftp.') {
+            } elseif (substr($lower, 0, 4) === 'ftp.') {
                 return $this->URL = 'ftp://'.$this->value;
             }
             return $this->URL = $this->value;
         }
 
         // relative URL
-        if ($this->flags & self::RELATIVE) {
+        if ($this->type === self::RELATIVE) {
             return $this->URL = $this->root . $this->value;
         }
         return NULL;
@@ -186,17 +189,17 @@ class TexyUrl
      */
     public function asTextual()
     {
-        if ($this->flags & self::EMAIL) {
+        if ($this->type === self::EMAIL) {
             return $this->texy->obfuscateEmail
                    ? strtr($this->value, array('@' => "&#160;(at)&#160;"))
                    : $this->value;
         }
 
-        if ($this->flags & self::ABSOLUTE) {
+        if ($this->type === self::ABSOLUTE) {
             $URL = $this->value;
             $lower = strtolower($URL);
-            if (substr($lower, 0, 4) == 'www.') $URL = 'none://'.$URL;
-            elseif (substr($lower, 0, 4) == 'ftp.') $URL = 'none://'.$URL;
+            if (substr($lower, 0, 4) === 'www.') $URL = 'none://'.$URL;
+            elseif (substr($lower, 0, 4) === 'ftp.') $URL = 'none://'.$URL;
 
             $parts = @parse_url($URL);
             if ($parts === FALSE) return $this->value;
@@ -231,4 +234,5 @@ class TexyUrl
     function __set($nm, $val) { $this->__get($nm); }
     private function __unset($nm) { $this->__get($nm); }
     private function __isset($nm) { $this->__get($nm); }
-} // TexyUrl
+
+} // TexyLink
