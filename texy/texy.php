@@ -170,6 +170,8 @@ class Texy
     /** @var bool */
     public $_mergeMode;
 
+    /** @var array */
+    public $_classes, $_styles;
 
 
 
@@ -281,6 +283,13 @@ class Texy
     {
         $this->_mergeMode = TRUE;
         $this->marks = array();
+
+        // speed-up
+        if (is_array($this->allowedClasses)) $this->_classes = array_flip($this->allowedClasses);
+        else $this->_classes = $this->allowedClasses;
+
+        if (is_array($this->allowedStyles)) $this->_styles = array_flip($this->allowedStyles);
+        else $this->_styles = $this->allowedStyles;
 
         // init modules
         $this->linePatterns  = array();
@@ -573,11 +582,7 @@ class Texy
             . strtr(base_convert(count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
             . $borders[$contentType];
 
-        if (is_object($child)) {
-            debugbreak();
-            $this->marks[$key] = $child->__toString();
-        }
-        else $this->marks[$key] = $child;
+        $this->marks[$key] = $child;
 
         return $key;
     }

@@ -145,22 +145,25 @@ class TexyModifier
         // title
         $el->title = $this->title;
 
-        // classes
-        $tmp = is_array($this->texy->allowedClasses) ? array_flip($this->texy->allowedClasses) : array();
-        foreach ($this->classes as $val) {
-            if ($this->texy->allowedClasses === Texy::ALL || isset($tmp[$val]))
-                $el->class[] = $val;
+        // classes & ID
+        $tmp = $this->texy->_classes;
+        if ($tmp === Texy::ALL) {
+            foreach ($this->classes as $val) $el->class[] = $val;
+            $el->id = $this->id;
+        } elseif (is_array($tmp)) {
+            foreach ($this->classes as $val)
+                if (isset($tmp[$val])) $el->class[] = $val;
+
+            if (isset($tmp['#' . $this->id])) $el->id = $this->id;
         }
 
-        // id
-        if ($this->texy->allowedClasses === Texy::ALL || isset($tmp['#' . $this->id]))
-            $el->id = $this->id;
-
         // styles
-        $tmp = is_array($this->texy->allowedStyles) ? array_flip($this->texy->allowedStyles) : array();
-        foreach ($this->styles as $prop => $val) {
-            if ($this->texy->allowedStyles === Texy::ALL || isset($tmp[$prop]))
-                $el->style[$prop] = $val;
+        $tmp = $this->texy->_styles;
+        if ($tmp === Texy::ALL) {
+            foreach ($this->styles as $prop => $val) $el->style[$prop] = $val;
+        } elseif (is_array($tmp)) {
+            foreach ($this->styles as $prop => $val)
+                if (isset($tmp[$prop])) $el->style[$prop] = $val;
         }
 
         // align

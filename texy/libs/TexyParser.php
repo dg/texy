@@ -51,7 +51,8 @@ abstract class TexyParser
     function __set($nm, $val) { $this->__get($nm); }
     private function __unset($nm) { $this->__get($nm); }
     private function __isset($nm) { $this->__get($nm); }
-} // TexyBlockParser
+
+} // TexyParser
 
 
 
@@ -256,8 +257,6 @@ class TexyLineParser extends TexyParser
 
         foreach ($texy->getModules() as $module)
             $text = $module->linePostProcess($text);
-
-        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
 
         $element->content = $text;
     }

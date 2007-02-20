@@ -30,13 +30,13 @@ class TexyTypographyModule extends TexyModule
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
     // Czech Republic
-    public $doubleQuotes = array('&#8222;', '&#8220;');  // left & right double quote
-    public $singleQuotes = array('&#8218;', '&#8216;');  // left & right single quote
+    public $doubleQuotes = array("\xe2\x80\x9e", "\xe2\x80\x9c");  // left & right double quote
+    public $singleQuotes = array("\xe2\x80\x9a", "\xe2\x80\x98");  // left & right single quote
 
 /*
     // UK
-    public $doubleQuotes = array('&#8220;', '&#8221;');  // left & right double quote
-    public $singleQuotes = array('&#8216;', '&#8217;');  // left & right single quote
+    public $doubleQuotes = array("\xe2\x80\x9c", "\xe2\x80\x9d");  // left & right double quote
+    public $singleQuotes = array("\xe2\x80\x98", "\xe2\x80\x99");  // left & right single quote
 */
 
     private $pattern, $replace;
@@ -51,31 +51,31 @@ class TexyTypographyModule extends TexyModule
           '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'  // single ''
                                                     => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
 
-          '#(\S|^) ?\.{3}#m'                        => '$1&#8230;',                       // ellipsis  ...
-          '#(\d| )-(\d| )#'                         => "\$1&#8211;\$2",               	  // en dash    -
-          '#,-#'                                    => ",&#8211;",                    	  // en dash    ,-
-          '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => '$1&#160;$2&#160;$3',              // date 23. 1. 1978
-          '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => '$1&#160;$2',                      // date 23. 1.
-          '# --- #'                                 => " &#8212; ",                       // em dash    ---
-          '# -- #'                                  => " &#8211; ",                       // en dash    --
-          '# -&gt; #'                               => ' &#8594; ',                       // right arrow ->
-          '# &lt;- #'                               => ' &#8592; ',                       // left arrow ->
-          '# &lt;-&gt; #'                           => ' &#8596; ',                       // left right arrow <->
-          '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => '$1&#215;$3&#215;$4',              // dimension sign x
-          '#(\d+)( ?)x\\2(\d+)#'                    => '$1&#215;$3',                      // dimension sign x
-          '#(?<=\d)x(?= |,|.|$)#m'                  => '&#215;',                          // 10x
-          '#(\S ?)\(TM\)#i'                         => '$1&#8482;',                       // trademark  (TM)
-          '#(\S ?)\(R\)#i'                          => '$1&#174;',                        // registered (R)
-          '#\(C\)( ?\S)#i'                          => '&#169;$1',                        // copyright  (C)
-          '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => '$1&#160;$2&#160;$3&#160;$4',      // (phone) number 1 123 123 123
-          '#(\d{1,3}) (\d{3}) (\d{3})#'             => '$1&#160;$2&#160;$3',              // (phone) number 1 123 123
-          '#(\d{1,3}) (\d{3})#'                     => '$1&#160;$2',                      // number 1 123
+          '#(\S|^) ?\.{3}#m'                        => "\$1\xe2\x80\xa6",                // ellipsis  ...
+          '#(\d| )-(\d| )#'                         => "\$1\xe2\x80\x93\$2",             // en dash    -
+          '#,-#'                                    => ",\xe2\x80\x93",                  // en dash    ,-
+          '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
+          '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
+          '# --- #'                                 => " \xe2\x80\x94 ",                 // em dash    ---
+          '# -- #'                                  => " \xe2\x80\x93 ",                 // en dash    --
+          '# -> #'                                  => " \xe2\x86\x92 ",                 // right arrow ->
+          '# <- #'                                  => " \xe2\x86\x90 ",                 // left arrow ->
+          '# <-> #'                                 => " \xe2\x86\x94 ",                 // left right arrow <->
+          '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign x
+          '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign x
+          '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // 10x
+          '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark  (TM)
+          '#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
+          '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright  (C)
+          '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
+          '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
+          '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
 
           '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)(['.TEXY_CHAR.'])#mu'        // space between number and word
-                                                    => '$1$2&#160;$3$4',
+                                                    => "\$1\$2\xc2\xa0\$3\$4",
 
           '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)([0-9'.TEXY_CHAR.'])#mu'
-                                                    => '$1$2$3&#160;$4$5',                // space between preposition and word
+                                                    => "\$1\$2\$3\xc2\xa0\$4\$5",                // space between preposition and word
         );
 
         $this->pattern = array_keys($pairs);

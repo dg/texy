@@ -150,7 +150,7 @@ class TexyBlockModule extends TexyModule
 
         case 'text':
             $el = new TexyTextualElement($this->texy);
-            $mContent = nl2br( htmlSpecialChars($mContent) );
+            $mContent = nl2br( htmlSpecialChars($mContent, ENT_NOQUOTES) );
             $mContent = $this->texy->mark($mContent, Texy::CONTENT_BLOCK);
             $el->content = $mContent;
 
@@ -164,13 +164,13 @@ class TexyBlockModule extends TexyModule
             $el->tags[0] = $mod->generate('pre');
 
             $el->tags[0]->class[] = $mSecond; // lang
-            if ($mType) $el->tags[1] = TexyHtml::el($mType); // type
+            if ($mType && $mType !== 'pre') $el->tags[1] = TexyHtml::el($mType); // type
 
             // outdent
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-            $mContent = htmlSpecialChars($mContent);
+            $mContent = htmlSpecialChars($mContent, ENT_NOQUOTES);
             $mContent = $this->texy->mark($mContent, Texy::CONTENT_BLOCK);
             $el->content = $mContent;
 

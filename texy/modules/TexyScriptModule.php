@@ -101,7 +101,7 @@ class TexyScriptModule extends TexyModule
             $identifier .= '('.implode(',', $args).')';
 
         $element->content = $element->texy->mark('<texy:script content="'
-            . htmlSpecialChars($identifier) . '" />', Texy::CONTENT_TEXTUAL);
+            . htmlSpecialChars($identifier, ENT_COMPAT) . '" />', Texy::CONTENT_TEXTUAL);
     }
 
 

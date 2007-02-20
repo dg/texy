@@ -36,6 +36,7 @@ class TexyHtmlFormatter
         $this->space = $this->baseIndent;
         $this->marks = array();
 
+        // PROBLEM: <pre><pre> ... </pre></pre>
         // freeze all pre, textarea, script and style elements
         $text = preg_replace_callback(
             '#<(pre|textarea|script|style)(.*)</\\1>#Uis',
@@ -88,8 +89,9 @@ class TexyHtmlFormatter
     {
         static $counter = 0;
         $key = '<'.$matches[1].'>'
-             . "\x1A" . strtr(base_convert(++$counter, 10, 4), '0123', "\x1B\x1C\x1D\x1E") . "\x1A"
+             . strtr(base_convert(++$counter, 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
              . '</'.$matches[1].'>';
+
         $this->marks[$key] = $matches[0];
         return $key;
     }

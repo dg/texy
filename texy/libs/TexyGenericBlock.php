@@ -45,11 +45,12 @@ class TexyGenericBlock
      */
     public function process($parser, $content)
     {
-        $str_blocks = $this->texy->_mergeMode
-                      ? preg_split('#(\n{2,})#', $content)
-                      : preg_split('#(\n(?! )|\n{2,})#', $content);
+        if ($this->texy->_mergeMode)
+            $parts = preg_split('#(\n{2,})#', $content);
+        else
+            $parts = preg_split('#(\n(?! )|\n{2,})#', $content);
 
-        foreach ($str_blocks as $content) {
+        foreach ($parts as $content) {
             $content = trim($content);
             if ($content === '') continue;
 

@@ -157,18 +157,22 @@ class TexyHtml
                 // use array_change_key_case($value, CASE_LOWER) ?
                 foreach ($value as $k => $v) {
                     // skip NULLs & empty string; composite 'style' vs. 'others'
-                    if ($v != NULL) $tmp[] = is_string($k) ? $k . ':' . $v : $v;
+                    if ($v == NULL) continue;
+
+                    if (is_string($k)) $tmp[] = $k . ':' . $v;
+                    else $tmp[] = $v;
                 }
 
                 if (!$tmp) continue;
                 $value = implode($key === 'style' ? ';' : ' ', $tmp);
             }
             // add new attribute
-            $s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value)) . '"';
+            $s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value, ENT_COMPAT)) . '"';
         }
 
         // finish start tag
-        return Texy::$xhtml && $this->_empty ? $s . ' />' : $s . '>';
+        if (Texy::$xhtml && $this->_empty) return $s . ' />';
+        return $s . '>';
     }
 
 
@@ -178,9 +182,8 @@ class TexyHtml
      */
     public function endTag()
     {
-        return $this->_name && !$this->_empty
-            ? '</' . $this->_name . '>'
-            : '';
+        if ($this->_name && !$this->_empty) return '</' . $this->_name . '>';
+        return '';
     }
 
 
@@ -191,7 +194,8 @@ class TexyHtml
     public function startMark($texy)
     {
         $s = $this->startTag();
-        return $s === '' ? '' : $texy->mark($s, $this->getContentType());
+        if ($s === '') return '';
+        return $texy->mark($s, $this->getContentType());
     }
 
 
@@ -202,7 +206,8 @@ class TexyHtml
     public function endMark($texy)
     {
         $s = $this->endTag();
-        return $s === '' ? '' : $texy->mark($s, $this->getContentType());
+        if ($s === '') return '';
+        return $texy->mark($s, $this->getContentType());
     }
 
 

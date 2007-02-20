@@ -317,7 +317,7 @@ class TexyPhraseModule extends TexyModule
         }
 
         return $this->texy->mark(
-            $el->startTag() . htmlSpecialChars($mContent) . $el->endTag(),
+            $el->startTag() . htmlSpecialChars($mContent, ENT_NOQUOTES) . $el->endTag(),
             Texy::CONTENT_TEXTUAL
         );
     }
@@ -336,7 +336,7 @@ class TexyPhraseModule extends TexyModule
     public function processProtect($parser, $matches)
     {
         list(, $mContent) = $matches;
-        return $this->texy->mark(htmlSpecialChars($mContent), Texy::CONTENT_TEXTUAL);
+        return $this->texy->mark(htmlSpecialChars($mContent, ENT_NOQUOTES), Texy::CONTENT_TEXTUAL);
     }
 
 

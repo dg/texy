@@ -170,7 +170,6 @@ class TexyTableModule extends TexyModule
         foreach (explode('|', $mContent) as $field) {
             if (($field == '') && $elField) { // colspan
                 $elField->colSpan++;
-                if ($elField->colSpan > 1) $elField->tags[0]->colspan = $elField->colSpan;
                 unset($this->last[$col]);
                 $col++;
                 continue;
@@ -180,7 +179,6 @@ class TexyTableModule extends TexyModule
             if ($field === '^') { // rowspan
                 if (isset($this->last[$col])) {
                     $this->last[$col]->rowSpan++;
-                    if ($this->last[$col]->rowSpan > 1) $this->last[$col]->tags[0]->rowspan = $this->last[$col]->rowSpan;
                     $col += $this->last[$col]->colSpan;
                     continue;
                 }
@@ -206,7 +204,7 @@ class TexyTableModule extends TexyModule
                 $this->colModifier[$col]->setProperties($mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5);
             }
 
-            $elField = new TexyTextualElement($texy);
+            $elField = new TexyTableFieldElement($texy);
 
             if (isset($this->colModifier[$col]))
                 $mod = clone $this->colModifier[$col];
@@ -233,3 +231,21 @@ class TexyTableModule extends TexyModule
 
 
 
+
+/**
+ * Table field TD / TH
+ */
+class TexyTableFieldElement extends TexyTextualElement
+{
+    public $colSpan = 1;
+    public $rowSpan = 1;
+
+    public function __toString()
+    {
+        if ($this->colSpan <> 1) $this->tags[0]->colspan = $this->colSpan;
+        if ($this->rowSpan <> 1) $this->tags[0]->rowspan = $this->rowSpan;
+        return parent::__toString();
+    }
+
+
+} // TexyTableFieldElement

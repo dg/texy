@@ -130,7 +130,7 @@ class TexyTextualElement extends TexyDomElement
 
     protected function generateContent()
     {
-        return htmlspecialChars($this->content);
+        return htmlspecialChars($this->content, ENT_NOQUOTES);
     }
 
 
