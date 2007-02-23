@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyDefinitionListModule extends TexyListModule
 {
-    protected $allow = array('List.definition');
+    protected $allow = array('ListDefinition');
 
     public $bullets = array(
         '*' => TRUE,
@@ -53,7 +53,7 @@ class TexyDefinitionListModule extends TexyListModule
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color:red}
           . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'               // Term:
           . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mUu',  //    - description
-            'List.definition'
+            'ListDefinition'
         );
     }
 
@@ -62,10 +62,10 @@ class TexyDefinitionListModule extends TexyListModule
     /**
      * Callback function (for blocks)
      *
-     *            Term: .(title)[class]{style}>
-     *              - description 1
-     *              - description 2
-     *              - description 3
+     *  Term: .(title)[class]{style}>
+     *    - description 1
+     *    - description 2
+     *    - description 3
      *
      */
     public function processBlock($parser, $matches)
@@ -87,8 +87,8 @@ class TexyDefinitionListModule extends TexyListModule
         //   [10] => space
         //   [11] => - * +
 
-        $texy =  $this->texy;
-        $el = new TexyBlockElement($texy);
+        $tx = $this->texy;
+        $el = new TexyBlockElement($tx);
 
         $bullet = '';
         foreach ($this->translate as $type)
@@ -98,11 +98,11 @@ class TexyDefinitionListModule extends TexyListModule
             }
 
         if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($this->texy);
+            $mod = new TexyModifier($tx);
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('dl');
         } else {
-            $el->tags[0] = TexyHtml::el('dl');
+            $el->tags[0] = TexyHtmlEl::el('dl');
         }
 
         $parser->moveBackward(2);
@@ -123,14 +123,14 @@ class TexyDefinitionListModule extends TexyListModule
                 //    [3] => [class]
                 //    [4] => {style}
                 //    [5] => >
-                $elItem = new TexyTextualElement($texy);
+                $elItem = new TexyTextualElement($tx);
 
                 if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-                    $mod = new TexyModifier($this->texy);
+                    $mod = new TexyModifier($tx);
                     $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                     $elItem->tags[0] = $mod->generate('dt');
                 } else {
-                    $elItem->tags[0] = TexyHtml::el('dt');
+                    $elItem->tags[0] = TexyHtmlEl::el('dt');
                 }
 
                 $elItem->parse($mContent);

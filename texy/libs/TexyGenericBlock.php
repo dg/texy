@@ -38,9 +38,9 @@ class TexyGenericBlock
     /**
      * Callback function for blocks
      *
-     *            ....  .(title)[class]{style}>
-     *             ...
-     *             ...
+     *  ....  .(title)[class]{style}>
+     *   ...
+     *   ...
      *
      */
     public function process($parser, $content)
@@ -103,17 +103,11 @@ class TexyGenericBlock
                 $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                 $el->tags[0] = $mod->generate($tag);
             } else {
-                $el->tags[0] = TexyHtml::el($tag);
+                $el->tags[0] = TexyHtmlEl::el($tag);
             }
 
             $parser->element->children[] = $el;
         }
     }
 
-
 } // TexyGenericBlock
-
-
-
-
-

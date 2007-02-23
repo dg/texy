@@ -23,9 +23,9 @@ if (!defined('TEXY')) die();
 /**
  * Long words wrap module
  */
-class TexyLongWordsModule extends TexyModule
+class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 {
-    protected $allow = array('LongWord');
+    protected $allow = array('LongWords');
 
     public $wordLimit = 20;
 
@@ -80,13 +80,14 @@ class TexyLongWordsModule extends TexyModule
 
     public function linePostProcess($text)
     {
-        if (empty($this->texy->allowed['LongWord'])) return $text;
+        if (empty($this->texy->allowed['LongWords'])) return $text;
 
         return preg_replace_callback(
-            '#[^\ \n\t\-\xAD'.TEXY_MARK_SPACES.']{'.$this->wordLimit.',}#u',
+            '#[^\ \n\t\-\x{2013}\x{a0}\x{ad}\x15\x16\x17'.TEXY_MARK_SPACES.']{'.$this->wordLimit.',}#u',
             array($this, '_replace'),
             $text);
     }
+
 
 
     /**
@@ -101,7 +102,7 @@ class TexyLongWordsModule extends TexyModule
 
         $chars = array();
         preg_match_all(
-            '#&\\#?[a-z0-9]+;|['.TEXY_MARK.']+|.#u',
+            '#['.TEXY_MARK.']+|.#u',
             $mWord,
             $chars
         );
@@ -169,9 +170,8 @@ class TexyLongWordsModule extends TexyModule
                     break;
                 }   // konec souhlasky
 
-
                 if (($s[$a] === 'u') && isset($doubleVowels[$s[$a-1]])) { $hyphen = self::AFTER; break; }
-                if (in_array($s[$a], $vowels) && isset($vowels[$s[$a-1]])) { $hyphen = self::HERE; break; }
+                if (isset($vowels[$s[$a]]) && isset($vowels[$s[$a-1]])) { $hyphen = self::HERE; break; }
 
             } while(0);
 
@@ -198,14 +198,7 @@ class TexyLongWordsModule extends TexyModule
         }
         $syllables[] = implode('', $chars);
 
-
-        $text = implode("\xC2\xAD", $syllables); // shy
-        $text = strtr($text, array("\xC2\xAD\xC2\xA0" => ' ', "\xC2\xA0\xC2\xAD" => ' '));
-
-        return $text;
+        return implode("\xC2\xAD", $syllables); // insert shy
     }
-
-
-
 
 } // TexyLongWordsModule

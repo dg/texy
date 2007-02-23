@@ -32,6 +32,7 @@ abstract class TexyModule
     protected $allow = array();
 
 
+
     public function __construct($texy)
     {
         $this->texy = $texy;
@@ -62,17 +63,6 @@ abstract class TexyModule
 
 
     /**
-     * Single line post-processing
-     * @param string
-     * @return string
-     */
-    public function linePostProcess($line)
-    {
-        return $line;
-    }
-
-
-    /**
      * Undefined property usage prevention
      */
     function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
@@ -81,3 +71,18 @@ abstract class TexyModule
     private function __isset($nm) { $this->__get($nm); }
 
 } // TexyModule
+
+
+
+
+interface ITexyLineModule
+{
+
+    /**
+     * Single line post-processing
+     * @param string
+     * @return string
+     */
+    public function linePostProcess($line);
+
+}

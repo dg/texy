@@ -17,9 +17,10 @@
 
 
 if (version_compare(PHP_VERSION , '5.0.0', '<'))
-    die('Texy!: too old version of PHP!');
+    die('Texy! needs PHP version 5');
 
-define('TEXY', 'Version 2.0beta for PHP5 $Revision$');
+define('TEXY', 'Version 2.0beta $Revision$');
+
 
 /**
  * Absolute filesystem path to the Texy package
@@ -36,7 +37,6 @@ require_once TEXY_DIR.'libs/TexyLink.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
-
 require_once TEXY_DIR.'modules/TexyBlockModule.php';
 require_once TEXY_DIR.'modules/TexyHeadingModule.php';
 require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
@@ -75,13 +75,16 @@ class Texy
     const CONTENT_TEXTUAL = 3;
     const CONTENT_BLOCK =   4;
 
-
-    /** @var bool use XHTML? */
+    /** @var bool  use XHTML? */
     static public $xhtml = TRUE;
 
+    /** @var boolean  Do obfuscate e-mail addresses? */
+    static public $obfuscateEmail = TRUE;
+
+    /** @var string  input & output text encoding */
     public $encoding = 'utf-8';
 
-    /** @var array  Allowed Texy! syntax */
+    /** @var array  Texy! syntax configuration */
     public $allowed = array();
 
     /** @var TRUE|FALSE|array  Allowed HTML tags */
@@ -96,21 +99,23 @@ class Texy
     /** @var int  TAB width (for converting tabs to spaces) */
     public $tabWidth = 8;
 
-    /** @var boolean  Do obfuscate e-mail addresses? */
-    public $obfuscateEmail = TRUE;
-
     /** @var array  Parsing summary */
-    public $summary;
+    public $summary = array(
+        'images' => array(),
+        'links' => array(),
+        'preload' => array(),
+    );
 
     /** @var string  Generated stylesheet */
     public $styleSheet = '';
 
-    /** @var bool  Merge lines mode */
+    /** @var bool  Paragraph merging mode */
     public $mergeLines = TRUE;
 
-    public $referenceHandler;
+    /** @var object  User handler object */
+    public $handler;
 
-    /** @var TexyModule Default modules */
+    /** @var TexyModule[]  default modules */
     public
         $scriptModule,
         $htmlModule,
@@ -127,8 +132,9 @@ class Texy
         $tableModule,
         $imageDescModule,
         $typographyModule,
-        $longWordsModule,
+        $longWordsModule;
 
+    public
         $genericBlock,
         $formatter,
         $formatterModule, // back compatibility
@@ -156,33 +162,25 @@ class Texy
     private $DOM;
 
     /** @var TexyModule[]  List of all modules */
-    private $modules;
+    private $modules, $lineModules;
 
-    /**
-     * Reference stack
-     * @var array Format: ('home' => TexyLinkReference, ...)
-     */
-    private $references = array();
-
-    /** @var array */
+    /** @var array  Texy internal markup */
     private $marks = array();
 
-    /** @var bool */
+    /** @var bool  for internal usage */
     public $_mergeMode;
 
-    /** @var array */
+    /** @var array  for internal usage */
     public $_classes, $_styles;
+
+
 
 
 
     public function __construct()
     {
-        // init some other variables
-        $this->summary['images']  = array();
-        $this->summary['links']   = array();
-        $this->summary['preload'] = array();
-
-        $this->allowedTags = TexyHtml::$valid; // full support for HTML tags
+        // full support for valid HTML tags by default
+        $this->allowedTags = TexyHtml::$valid;
 
         // load all modules
         $this->loadModules();
@@ -194,20 +192,13 @@ class Texy
 
         $this->formatterModule = $this->formatter; // back compatibility
 
-        // example of link reference ;-)
-        /*
-        $elRef = new TexyLinkReference($this, 'http://texy.info/', 'Texy!');
-        $elRef->modifier->title = 'Text to HTML converter and formatter';
-        $this->addReference('Texy', $elRef);
-
-        $elRef = new TexyLinkReference($this, 'http://www.google.com/search?q=%s');
-        $this->addReference('google', $elRef);
-
-        $elRef = new TexyLinkReference($this, 'http://en.wikipedia.org/wiki/Special:Search?search=%s');
-        $this->addReference('wikipedia', $elRef);
-        */
+        // examples of link reference ;-)
+        $mod = new TexyModifier($this);
+        $mod->title = 'The best text -> HTML converter and formatter';
+        $this->linkModule->addReference('texy', 'http://texy.info/', 'Texy!', $mod);
+        $this->linkModule->addReference('google', 'http://www.google.com/search?q=%s');
+        $this->linkModule->addReference('wikipedia', 'http://en.wikipedia.org/wiki/Special:Search?search=%s');
     }
-
 
 
 
@@ -245,6 +236,9 @@ class Texy
     public function registerModule($module)
     {
         $this->modules[] = $module;
+
+        if ($module instanceof ITexyLineModule)
+            $this->lineModules[] = $module;
     }
 
 
@@ -259,6 +253,7 @@ class Texy
             'name'        => $name
         );
     }
+
 
 
     public function registerBlockPattern($module, $method, $pattern, $name)
@@ -281,6 +276,9 @@ class Texy
      */
     protected function init()
     {
+        if ($this->handler && !is_object($this->handler))
+            throw new Exception('$texy->handler must be object. See documentation.');
+
         $this->_mergeMode = TRUE;
         $this->marks = array();
 
@@ -365,7 +363,6 @@ class Texy
 
 
 
-
     /**
      * Converts Texy! single line text into internal DOM structure ($this->DOM)
      * @param string
@@ -405,6 +402,9 @@ class Texy
         // replace marks
         $html = strtr($html, $this->marks);
 
+        // BACK COMPATIBILITY HACK !!!
+        //$html = strtr($html, array("\xc2\xa0"=>'&#160;',"\xc2\xad"=>'&#173;',"\xe2\x80\x9e"=>'&#8222;',"\xe2\x80\x9c"=>'&#8220;',"\xe2\x80\x9a"=>'&#8218;',"\xe2\x80\x98"=>'&#8216;',"\xe2\x80\xa6"=>'&#8230;',"\xe2\x80\x93"=>'&#8211;'));
+
         // wellform and reformat HTML
         $html = $this->wellForm->process($html);
         $html = $this->formatter->process($html);
@@ -436,7 +436,6 @@ class Texy
 
         return $html;
     }
-
 
 
 
@@ -485,12 +484,6 @@ class Texy
 
 
 
-    public function handle($class, $el)
-    {
-    }
-
-
-
     /**
      * Switch Texy! configuration to the safe mode
      * Suitable for web comments and other usages, where input text may insert attacker
@@ -500,12 +493,11 @@ class Texy
         $this->allowedClasses = Texy::NONE;                 // no class or ID are allowed
         $this->allowedStyles  = Texy::NONE;                 // style modifiers are disabled
         $this->htmlModule->safeMode();                      // only HTML tags and attributes specified in $safeTags array are allowed
-        $this->allowed['Image.normal'] = FALSE;             // disable images
-        $this->allowed['Link.definition'] = FALSE;          // disable [ref]: URL  reference definitions
+        $this->allowed['Image'] = FALSE;                    // disable images
+        $this->allowed['LinkDefinition'] = FALSE;           // disable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
         $this->mergeLines = FALSE;                          // enter means <BR>
     }
-
 
 
 
@@ -517,12 +509,11 @@ class Texy
         $this->allowedClasses = Texy::ALL;                  // classes and id are allowed
         $this->allowedStyles  = Texy::ALL;                  // inline styles are allowed
         $this->htmlModule->trustMode();                     // full support for HTML tags
-        $this->allowed['Image.normal'] = TRUE;              // enable images
-        $this->allowed['Link.definition'] = TRUE;           // enable [ref]: URL  reference definitions
+        $this->allowed['Image'] = TRUE;                     // enable images
+        $this->allowed['LinkDefinition'] = TRUE;            // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
         $this->mergeLines = TRUE;                           // enter doesn't means <BR>
     }
-
 
 
 
@@ -536,6 +527,7 @@ class Texy
     {
         return strtr($s, " \t\r\n", "\x01\x02\x03\x04");
     }
+
 
 
     /**
@@ -559,7 +551,6 @@ class Texy
     {
         return preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $text);
     }
-
 
 
 
@@ -589,45 +580,11 @@ class Texy
 
 
 
-
-
-
-    /**
-     * Add new named reference
-     */
-    public function addReference($name, $obj)
-    {
-        $name = strtolower($name); // pozor na UTF8 !
-        $this->references[$name] = $obj;
-    }
-
-
-
-
-    /**
-     * Receive new named link. If not exists, try
-     * call user function to create one.
-     */
-    function getReference($name)
-    {
-        $lowName = strtolower($name); // pozor na UTF8 !
-
-        if (isset($this->references[$lowName]))
-            return $this->references[$lowName];
-
-
-        if ($this->referenceHandler)
-            return call_user_func_array($this->referenceHandler, array($name, $this));
-
-        return FALSE;
-    }
-
-
-
     public function getLinePatterns()
     {
         return $this->linePatterns;
     }
+
 
 
     public function getBlockPatterns()
@@ -636,17 +593,18 @@ class Texy
     }
 
 
+
     public function getDOM()
     {
         return $this->DOM;
     }
 
 
-    public function getModules()
-    {
-        return $this->modules;
-    }
 
+    public function getLineModules()
+    {
+        return $this->lineModules;
+    }
 
 
 
@@ -690,6 +648,7 @@ class Texy
         foreach (array_keys(get_object_vars($this)) as $key)
             $this->$key = NULL;
     }
+
 
 
     /**

@@ -29,6 +29,7 @@ abstract class TexyParser
     public $element;
 
 
+
     /**
      * @param TexyDomElement
      */
@@ -38,10 +39,12 @@ abstract class TexyParser
     }
 
 
+
     /**
      * @param string
      */
     abstract public function parse($text);
+
 
 
     /**
@@ -52,7 +55,10 @@ abstract class TexyParser
     private function __unset($nm) { $this->__get($nm); }
     private function __isset($nm) { $this->__get($nm); }
 
-} // TexyParser
+}
+
+
+
 
 
 
@@ -64,6 +70,7 @@ class TexyBlockParser extends TexyParser
 {
     private $text;        // text splited in array of lines
     private $offset;
+
 
 
     // match current line against RE.
@@ -96,7 +103,6 @@ class TexyBlockParser extends TexyParser
 
         $this->offset = max($this->offset, 0);
     }
-
 
 
 
@@ -210,7 +216,7 @@ class TexyLineParser extends TexyParser
                             $text,
                             $arrMatches[$key],
                             PREG_OFFSET_CAPTURE,
-                            $offset+$delta)) {
+                            $offset + $delta)) {
 
                         $m = & $arrMatches[$key];
                         if (!strlen($m[0][0])) continue;
@@ -252,17 +258,13 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
+        if (strpos($text, '&') !== FALSE) // speed-up
+            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
 
-        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-
-        foreach ($texy->getModules() as $module)
+        foreach ($texy->getLineModules() as $module)
             $text = $module->linePostProcess($text);
 
         $element->content = $text;
     }
 
 } // TexyLineParser
-
-
-
-

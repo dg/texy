@@ -27,14 +27,11 @@ if (!defined('TEXY')) die();
  */
 class TexyLink
 {
-    /** @var Texy */
-    protected $texy;
-
-    public $value;
-    protected $source;
+    protected $value;
     protected $type;
+    protected $source;
     protected $root;
-    protected $URL;
+    protected $url;
 
     // types
     const ABSOLUTE = 1;
@@ -42,59 +39,72 @@ class TexyLink
     const EMAIL = 3;
 
     // sources
-    const DIRECT = 1;  // -> absolute, relative, email
-    const REFERENCE = 2; // -> resolve: absolute, relative, email
-    const IMAGE = 3; // -> (resolve): absolute, relative
-    const LINKED_IMAGE = 4; // -> (resolve): absolute, relative
-
+    const DIRECT = 1;
+    const REFERENCE = 2;
+    const IMAGE = 3;
 
 
 
     /**
      * Creates a new TexyLink object
      *
-     * @param object  association with root Texy object
      * @param string  text written in document
-     * @param int     direct/reference/image/linked_image indicator
+     * @param string  root, for relative URL's
+     * @param int     source (DIRECT, IMAGE, REFERENCE)
+     * @return void
      */
-    public function __construct($texy, $value, $source)
+    public function __construct($value, $root, $source, $label=NULL)
     {
-        $this->texy = $texy;
+        $value = trim($value);
+
         $this->source = $source;
-        $this->value = trim($value);
-
-        if ($source === self::DIRECT) $root = $texy->linkModule->root;
-        elseif ($source === self::REFERENCE) $root = $texy->linkModule->root;
-        elseif ($source === self::IMAGE) $root = $texy->imageModule->root;
-        elseif ($source === self::LINKED_IMAGE) $root = $texy->imageModule->linkedRoot;
-        else $root = NULL;
-
-        if ($root <> NULL) $this->root = rtrim($root, '/\\') . '/';
-        /*
-        if ($source === self::REFERENCE) {
-            $elRef = $texy->linkModule->getReference($value);
-            if ($elRef) {
-                $modifier->copyFrom($elRef->modifier);
-                $loc = $elRef->URL . $elRef->query;
-                $loc = str_replace('%s', urlencode(Texy::wash($text)), $loc);
-            }
-        }
-
-        if ($source === self::IMAGE || $source === self::LINKED_IMAGE) {
-            $elImage = new TexyImageElement($this->texy);
-            $elImage->setImagesRaw(substr($loc, 2, -2));
-            $elImage->requireLinkImage();
-            $link->copyFrom($elImage->linkImage);
-        }
-        */
+        $this->value = $value;
 
         // detect URL type
-        if (preg_match('#^'.TEXY_EMAIL.'$#i', $this->value)) // email
+        if ($source !== self::IMAGE && preg_match('#^'.TEXY_EMAIL.'$#i', $value)) { // email
             $this->type = self::EMAIL;
-        elseif (preg_match('#^(https?://|ftp://|www\.|ftp\.|/)#i', $this->value))  // absolute URL
+            // obfuscating against spam robots
+            if (Texy::$obfuscateEmail) {
+                $s = 'mai';
+                $s2 = 'lto:' . $value;
+                for ($i=0; $i<strlen($s2); $i++)
+                    $s .= '&#' . ord($s2{$i}) . ';';
+
+                $this->url = $s;
+            } else {
+                $this->url = 'mailto:' . $value;
+            }
+
+        } elseif (preg_match('#^(https?://|ftp://|www\.|ftp\.|/)#i', $value)) {
+            // absolute URL
             $this->type = self::ABSOLUTE;
-        else  // relative
+            $value = str_replace('%s', urlencode(Texy::wash($label)), $value);
+
+            // must begins with 'http://' or 'ftp://'
+            $lower = strtolower($value);
+            if (substr($lower, 0, 4) === 'www.') {
+                $this->url = 'http://' . $value;
+            } elseif (substr($lower, 0, 4) === 'ftp.') {
+                $this->url = 'ftp://' . $value;
+            } else {
+                $this->url = $value;
+            }
+
+        } else {
+            // relative
             $this->type = self::RELATIVE;
+            $value = str_replace('%s', urlencode(Texy::wash($label)), $value);
+            if ($root == NULL) $this->url = $value;
+            else $this->url = rtrim($root, '/\\') . '/' . $value;
+        }
+    }
+
+
+
+    static public function adjustURL($value, $root, $isImage)
+    {
+        $link = new self($value, $root, $isImage);
+        return $link->url;
     }
 
 
@@ -127,9 +137,8 @@ class TexyLink
      */
     public function isImage()
     {
-        return $this->source === self::IMAGE || $this->source === self::LINKED_IMAGE;
+        return $this->source === self::IMAGE;
     }
-
 
 
 
@@ -139,46 +148,7 @@ class TexyLink
      */
     public function asURL()
     {
-        // output is cached
-        if ($this->URL !== NULL)
-            return $this->URL;
-
-        if ($this->value == '')
-            return $this->URL = $this->value;
-
-        // email URL
-        if ($this->type === self::EMAIL) {
-            // obfuscating against spam robots
-            if ($this->texy->obfuscateEmail) {
-                $this->URL = 'mai';
-                $s = 'lto:'.$this->value;
-                for ($i=0; $i<strlen($s); $i++)
-                    $this->URL .= '&#' . ord($s{$i}) . ';';
-
-            } else {
-                $this->URL = 'mailto:'.$this->value;
-            }
-            return $this->URL;
-        }
-
-        // absolute URL
-        if ($this->type === self::ABSOLUTE) {
-            $lower = strtolower($this->value);
-
-            // must begins with 'http://' or 'ftp://'
-            if (substr($lower, 0, 4) === 'www.') {
-                return $this->URL = 'http://'.$this->value;
-            } elseif (substr($lower, 0, 4) === 'ftp.') {
-                return $this->URL = 'ftp://'.$this->value;
-            }
-            return $this->URL = $this->value;
-        }
-
-        // relative URL
-        if ($this->type === self::RELATIVE) {
-            return $this->URL = $this->root . $this->value;
-        }
-        return NULL;
+        return $this->url;
     }
 
 
@@ -190,7 +160,7 @@ class TexyLink
     public function asTextual()
     {
         if ($this->type === self::EMAIL) {
-            return $this->texy->obfuscateEmail
+            return Texy::$obfuscateEmail
                    ? strtr($this->value, array('@' => "&#160;(at)&#160;"))
                    : $this->value;
         }

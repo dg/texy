@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyBlockModule extends TexyModule
 {
-    protected $allow = array('Block', 'Block.pre', 'Block.text', 'Block.html', 'Block.div', 'Block.source', 'Block.comment');
+    protected $allow = array('Blocks', 'BlockPre', 'BlockText', 'BlockHtml', 'BlockDiv', 'BlockSource', 'BlockComment');
 
 
     public function init()
@@ -34,7 +34,7 @@ class TexyBlockModule extends TexyModule
             $this,
             'processBlock',
             '#^/--+ *(?:(code|samp|text|html|div|notexy|source|comment)( .*)?|) *'.TEXY_MODIFIER_H.'?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi',
-            'Block'
+            'Blocks'
         );
     }
 
@@ -44,10 +44,10 @@ class TexyBlockModule extends TexyModule
      * Callback function (for blocks)
      * @return object
      *
-     *            /-----code html .(title)[class]{style}
-     *              ....
-     *              ....
-     *            \----
+     *   /-----code html .(title)[class]{style}
+     *     ....
+     *     ....
+     *   \----
      *
      */
     public function processBlock($parser, $matches)
@@ -61,24 +61,25 @@ class TexyBlockModule extends TexyModule
         //    [6] => >
         //    [7] => .... content
 
+        $tx = $this->texy;
         $mType = trim(strtolower($mType));
         $mSecond = trim(strtolower($mSecond));
         $mContent = trim($mContent, "\n");
 
         if (!$mType) $mType = 'pre';                // default type
         if ($mType === 'notexy') $mType = 'html'; // backward compatibility
-        if ($mType === 'html' && !$this->texy->allowed['Block.html']) $mType = 'text';
+        if ($mType === 'html' && !$tx->allowed['BlockHtml']) $mType = 'text';
         if ($mType === 'code' || $mType === 'samp')
-            $mType = $this->texy->allowed['Block.pre'] ? $mType : 'none';
-        elseif (empty($this->texy->allowed['Block.' . $mType])) $mType = 'none'; // transparent block
+            $mType = $tx->allowed['BlockPre'] ? $mType : 'none';
+        elseif (empty($tx->allowed['Block' . ucfirst($mType)])) $mType = 'none'; // transparent block
 
-        $mod = new TexyModifier($this->texy);
+        $mod = new TexyModifier($tx);
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         switch ($mType) {
         case 'none':
         case 'div':
-            $el = new TexyBlockElement($this->texy);
+            $el = new TexyBlockElement($tx);
             $el->tags[0] = $mod->generate('div');
 
             // outdent
@@ -93,7 +94,7 @@ class TexyBlockModule extends TexyModule
 
 
         case 'source':
-            $el = new TexyBlockElement($this->texy);
+            $el = new TexyBlockElement($tx);
             $el->tags[0] = $mod->generate('pre');
 
             // outdent
@@ -106,10 +107,10 @@ class TexyBlockModule extends TexyModule
             // TODO !!!
             /*
         $html = parent::generateContent();
-        if ($this->texy->formatterModule)
-            $html = $this->texy->formatterModule->postProcess($html);
+        if ($tx->formatterModule)
+            $html = $tx->formatterModule->postProcess($html);
 
-        $el = new TexyCodeBlockElement($this->texy);
+        $el = new TexyCodeBlockElement($tx);
         $el->lang = 'html';
         $el->type = 'code';
         $el->content = $html;
@@ -122,7 +123,7 @@ class TexyBlockModule extends TexyModule
 
 
         case 'html':
-            $el = new TexyTextualElement($this->texy);
+            $el = new TexyTextualElement($tx);
 
             preg_match_all(
                 '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
@@ -137,7 +138,7 @@ class TexyBlockModule extends TexyModule
 
                 $mContent = substr_replace(
                     $mContent,
-                    $this->texy->htmlModule->process($this, $m),
+                    $tx->htmlModule->process($this, $m),
                     $offset,
                     strlen($m[0])
                 );
@@ -149,9 +150,9 @@ class TexyBlockModule extends TexyModule
 
 
         case 'text':
-            $el = new TexyTextualElement($this->texy);
+            $el = new TexyTextualElement($tx);
             $mContent = nl2br( htmlSpecialChars($mContent, ENT_NOQUOTES) );
-            $mContent = $this->texy->mark($mContent, Texy::CONTENT_BLOCK);
+            $mContent = $tx->mark($mContent, Texy::CONTENT_BLOCK);
             $el->content = $mContent;
 
             $parser->element->children[] = $el;
@@ -160,18 +161,18 @@ class TexyBlockModule extends TexyModule
 
 
         default: // pre | code | samp
-            $el = new TexyTextualElement($this->texy);
+            $el = new TexyTextualElement($tx);
             $el->tags[0] = $mod->generate('pre');
 
             $el->tags[0]->class[] = $mSecond; // lang
-            if ($mType && $mType !== 'pre') $el->tags[1] = TexyHtml::el($mType); // type
+            if ($mType && $mType !== 'pre') $el->tags[1] = TexyHtmlEl::el($mType); // type
 
             // outdent
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
             $mContent = htmlSpecialChars($mContent, ENT_NOQUOTES);
-            $mContent = $this->texy->mark($mContent, Texy::CONTENT_BLOCK);
+            $mContent = $tx->mark($mContent, Texy::CONTENT_BLOCK);
             $el->content = $mContent;
 
             $parser->element->children[] = $el;
@@ -180,12 +181,4 @@ class TexyBlockModule extends TexyModule
 
     } // function processBlock
 
-
-
-
-} // TexyBlockModule
-
-
-
-
-            
+} // TexyBlockModule            

@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyHtmlModule extends TexyModule
 {
-    protected $allow = array('Html', 'Html.tag', 'Html.comment');
+    protected $allow = array('Html', 'HtmlTag', 'HtmlComment');
 
     public $safeTags = array(
         'a'         => array('href', 'rel', 'title', 'lang'),
@@ -56,7 +56,7 @@ class TexyHtmlModule extends TexyModule
         $this->texy->registerLinePattern(
             $this,
             'process',
-            '#<(/?)([a-z][a-z0-9_:-]*)(|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
+            '#<(/?)([a-z][a-z0-9_:-]*)(/?|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)>|<!--([^'.TEXY_MARK.']*?)-->#is',
             'Html'
         );
     }
@@ -69,88 +69,118 @@ class TexyHtmlModule extends TexyModule
      */
     public function process($parser, $matches)
     {
-        list($match, $mClosing, $mTag, $mAttr, $mEmpty/*, $mComment*/) = $matches;
+        $matches[] = NULL;
+        list($match, $mClosing, $mTag, $mAttr, $mComment) = $matches;
         //    [1] => /
         //    [2] => tag
         //    [3] => attributes
         //    [4] => /
         //    [5] => comment
 
-        if ($mTag == '') { // comment
-            if (empty($this->texy->allowed['Html.comment']))
+        $tx = $this->texy;
+
+        if ($mTag == '') { // html comment
+            if (empty($tx->allowed['HtmlComment']))
                 return substr($matches[5], 0, 1) === '[' ? $match : '';
 
-            return $this->texy->mark($match, Texy::CONTENT_NONE);
+            return $tx->mark($match, Texy::CONTENT_NONE);
         }
 
-        if (empty($this->texy->allowed['Html.tag'])) return $match;
-
-        $allowedTags = & $this->texy->allowedTags;
-        if (!$allowedTags) return $match;   // disabled
+        if (empty($tx->allowed['HtmlTag'])) return $match;
 
         $tag = strtolower($mTag);
         if (!isset(TexyHtml::$valid[$tag])) $tag = $mTag;  // undo lowercase
 
-        if (is_array($allowedTags) && !isset($allowedTags[$tag]))  // is element allowed?
-            return $match;
-
-        $el = TexyHtml::el($tag);
-
-        if ($mEmpty === '/') $el->_empty = TRUE; // or use TexyHtml autodetect
-        $isOpening = $mClosing !== '/';
-
-        if ($el->_empty && !$isOpening)  // error - can't close empty element
-            return $match;
-
-
-        if ($isOpening) {  // process attributes
-            $allowedAttrs = is_array($allowedTags) ? $allowedTags[$tag] : NULL;
-            preg_match_all('#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is', $mAttr, $matchesAttr, PREG_SET_ORDER);
-            foreach ($matchesAttr as $matchAttr) {
-                $key = strtolower($matchAttr[1]);
-                if (is_array($allowedAttrs) && !in_array($key, $allowedAttrs)) continue;
-                $value = $matchAttr[2];
-                if ($value == NULL) $value = $key;
-                elseif ($value{0} === '\'' || $value{0} === '"') $value = substr($value, 1, -1);
-                $el->$key = $value;
-            }
-
-
-            // apply allowedClasses & allowedStyles
-            $modifier = new TexyModifier($this->texy);
-
-            if (isset($el->class)) {
-                //$modifier->parseClasses($el->class);
-                //$el->class = $modifier->classes;
-            }
-
-            if (isset($el->style)) {
-                //$modifier->parseStyles($el->style);
-                //$el->style = $modifier->styles;
-            }
-
-            if (isset($el->id)) {
-                if (!$this->texy->allowedClasses)
-                    unset($el->id);
-                elseif (is_array($this->texy->allowedClasses) && !in_array('#'.$el->id, $this->texy->allowedClasses))
-                    unset($el->id);
-            }
-
-
-            if ($tag === 'img') {
-                if (!isset($el->src)) return $match;
-                $this->texy->summary['images'][] = $el->src;
-
-            } elseif ($tag === 'a') {
-                if (!isset($el->href) && !isset($el->name) && !isset($el->id)) return $match;
-                if (isset($el->href)) {
-                    $this->texy->summary['links'][] = $el->href;
-                }
-            }
-
+        // tag & attibutes
+        $aTags = $tx->allowedTags; // speed-up
+        if (!$aTags) return $match;  // all tags are disabled
+        if (is_array($aTags)) {
+            if (!isset($aTags[$tag])) return $match; // this element not allowed
+            $aAttrs = $aTags[$tag]; // allowed attrs
+        } else {
+            $aAttrs = NULL; // all attrs are allowed
         }
 
-        return $isOpening ? $el->startMark($this->texy) : $el->endMark($this->texy);
+        $isEmpty = substr($mAttr, -1) === '/';
+        $isOpening = $mClosing !== '/';
+
+        if ($isEmpty && !$isOpening)  // error - can't close empty element
+            return $match;
+
+        $el = TexyHtmlEl::el($tag);
+        if ($aTags === Texy::ALL && $isEmpty) $el->_empty = TRUE; // force empty
+
+        if (!$isOpening) // closing tag? we are finished
+            return $el->endMark($tx);
+
+        // process attributes
+        if ($isEmpty) $mAttr = substr($mAttr, 0, -1);
+        if (is_array($aAttrs)) $aAttrs = array_flip($aAttrs);
+        else $aAttrs = NULL;
+
+        preg_match_all(
+            '#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is',
+            $mAttr,
+            $matches2,
+            PREG_SET_ORDER
+        );
+
+        foreach ($matches2 as $m) {
+            $key = strtolower($m[1]);
+            if ($aAttrs !== NULL && !isset($aAttrs[$key])) continue;
+
+            $val = $m[2];
+            if ($val == NULL) $el->$key = TRUE;
+            elseif ($val{0} === '\'' || $val{0} === '"') $el->$key = substr($val, 1, -1);
+            else $el->$key = $val;
+        }
+
+
+        // apply allowedClasses & allowedStyles
+        $modifier = new TexyModifier($tx);
+
+        if (isset($el->class)) {
+            $tmp = $tx->_classes; // speed-up
+            if (is_array($tmp)) {
+                $el->class = explode(' ', $el->class);
+                foreach ($el->class as $key => $val)
+                    if (!isset($tmp[$val])) unset($el->class[$key]);
+
+                if (!isset($tmp['#' . $el->id])) $el->id = NULL;
+            } elseif ($tmp !== Texy::ALL) {
+                $el->class = $el->id = NULL;
+            }
+        }
+
+        if (isset($el->style)) {
+            $tmp = $tx->_styles;  // speed-up
+            if (is_array($tmp)) {
+                $styles = explode(';', $el->style);
+                $el->style = NULL;
+                foreach ($styles as $value) {
+                    $pair = explode(':', $value, 2); $pair[] = '';
+                    $prop = strtolower(trim($pair[0]));
+                    $value = trim($pair[1]);
+                    if ($value !== '' && isset($tmp[$prop]))
+                        $el->style[$prop] = $value;
+                }
+            } elseif ($tmp !== Texy::ALL) {
+                $el->style = NULL;
+            }
+        }
+
+        if ($tag === 'img') {
+            if (!isset($el->src)) return $match;
+            $tx->summary['images'][] = $el->src;
+
+        } elseif ($tag === 'a') {
+            if (!isset($el->href) && !isset($el->name) && !isset($el->id)) return $match;
+            if (isset($el->href)) {
+                $tx->summary['links'][] = $el->href;
+            }
+        }
+
+        return $el->startMark($tx);
     }
 
 
@@ -167,11 +197,4 @@ class TexyHtmlModule extends TexyModule
         $this->texy->allowedTags = $allowSafeTags ? $this->safeTags : Texy::NONE;
     }
 
-
-
 } // TexyHtmlModule
-
-
-
-
-

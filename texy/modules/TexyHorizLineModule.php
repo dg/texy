@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    protected $allow = array('Horizline');
+    protected $allow = array('HorizLine');
 
 
     public function init()
@@ -34,22 +34,22 @@ class TexyHorizLineModule extends TexyModule
             $this,
             'processBlock',
             '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU',
-            'Horizline'
+            'HorizLine'
         );
     }
 
 
 
     /**
-     * Callback function (for blocks)
+     * Callback function
      *
-     *            ---------------------------
+     *   ---------------------------
      *
-     *            - - - - - - - - - - - - - -
+     *   - - - - - - - - - - - - - -
      *
-     *            ***************************
+     *   ***************************
      *
-     *            * * * * * * * * * * * * * *
+     *   * * * * * * * * * * * * * *
      *
      */
     public function processBlock($parser, $matches)
@@ -68,13 +68,10 @@ class TexyHorizLineModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('hr');
         } else {
-            $el->tags[0] = TexyHtml::el('hr');
+            $el->tags[0] = TexyHtmlEl::el('hr');
         }
 
         $parser->element->children[] = $el;
     }
-
-
-
 
 } // TexyHorizlineModule

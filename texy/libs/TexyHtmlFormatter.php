@@ -75,11 +75,12 @@ class TexyHtmlFormatter
             );
 
         // unfreeze pre, textarea, script and style elements
-        $text = strtr($text, $this->marks);
+        if ($this->marks) {
+            $text = str_replace(array_keys($this->marks), array_values($this->marks), $text);
+        }
+
         return $text;
     }
-
-
 
 
 
@@ -95,7 +96,6 @@ class TexyHtmlFormatter
         $this->marks[$key] = $matches[0];
         return $key;
     }
-
 
 
 
@@ -138,7 +138,6 @@ class TexyHtmlFormatter
 
 
 
-
     /**
      * Callback function: wrap lines
      * @return string
@@ -153,7 +152,5 @@ class TexyHtmlFormatter
                       wordwrap($mContent, $this->lineWrap)
                  );
     }
-
-
 
 } // TexyHtmlFormatter

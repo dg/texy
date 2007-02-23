@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyListModule extends TexyModule
 {
-    protected $allow = array('List.normal');
+    protected $allow = array('List');
 
     public $bullets = array(
         '*'  => TRUE,
@@ -65,11 +65,9 @@ class TexyListModule extends TexyModule
             'processBlock',
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color: red}
           . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
-            'List.normal'
+            'List'
         );
     }
-
-
 
 
 
@@ -92,8 +90,8 @@ class TexyListModule extends TexyModule
         //    [4] => >
         //    [5] => bullet * + - 1) a) A) IV)
 
-        $texy =  $this->texy;
-        $el = new TexyBlockElement($texy);
+        $tx = $this->texy;
+        $el = new TexyBlockElement($tx);
 
         $bullet = '';
         foreach ($this->translate as $type)
@@ -105,11 +103,11 @@ class TexyListModule extends TexyModule
             }
 
         if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($this->texy);
+            $mod = new TexyModifier($tx);
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate($tag);
         } else {
-            $el->tags[0] = TexyHtml::el($tag);
+            $el->tags[0] = TexyHtmlEl::el($tag);
         }
 
         $el->tags[0]->style['list-style-type'] = $style;
@@ -129,13 +127,9 @@ class TexyListModule extends TexyModule
 
 
 
-
-
-
-
-
-    public function processItem($parser, $bullet, $indented, $tag) {
-        $texy =  $this->texy;
+    public function processItem($parser, $bullet, $indented, $tag)
+    {
+        $tx =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
         $patternItem = "#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
 
@@ -153,14 +147,14 @@ class TexyListModule extends TexyModule
             //    [7] => {style}
             //    [8] => >
 
-        $elItem = new TexyBlockElement($texy);
+        $elItem = new TexyBlockElement($tx);
 
         if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($this->texy);
+            $mod = new TexyModifier($tx);
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $elItem->tags[0] = $mod->generate($tag);
         } else {
-            $elItem->tags[0] = TexyHtml::el($tag);
+            $elItem->tags[0] = TexyHtmlEl::el($tag);
         }
 
         // next lines
@@ -177,10 +171,10 @@ class TexyListModule extends TexyModule
         }
 
         // parse content
-        $tmp = $texy->_mergeMode;
-        $texy->_mergeMode = FALSE;
+        $tmp = $tx->_mergeMode;
+        $tx->_mergeMode = FALSE;
         $elItem->parse($content);
-        $texy->_mergeMode = $tmp;
+        $tx->_mergeMode = $tmp;
 
         if ($elItem->children && $elItem->children[0] instanceof TexyParagraphElement)
             $elItem->children[0]->tags[0]->setElement(NULL);
@@ -188,10 +182,4 @@ class TexyListModule extends TexyModule
         return $elItem;
     }
 
-
-
-
-
 } // TexyListModule
-
-

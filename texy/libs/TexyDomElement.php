@@ -28,8 +28,9 @@ abstract class TexyDomElement
     /** @var Texy */
     public $texy;
 
-    /** @var array of TexyHtml */
+    /** @var array of TexyHtmlEl */
     public $tags = array();
+
 
 
     public function __construct($texy)
@@ -38,11 +39,13 @@ abstract class TexyDomElement
     }
 
 
+
     /**
      * Returns element's content
      * @return string
      */
     abstract protected function generateContent();
+
 
 
     /**
@@ -60,6 +63,7 @@ abstract class TexyDomElement
     }
 
 
+
     /**
      * Undefined property usage prevention
      */
@@ -68,7 +72,7 @@ abstract class TexyDomElement
     private function __unset($nm) { $this->__get($nm); }
     private function __isset($nm) { $this->__get($nm); }
 
-}  // TexyDomElement
+}
 
 
 
@@ -87,6 +91,7 @@ class TexyBlockElement extends TexyDomElement
     public $children = array();
 
 
+
     protected function generateContent()
     {
         $s = '';
@@ -95,6 +100,7 @@ class TexyBlockElement extends TexyDomElement
 
         return $s;
     }
+
 
 
     /**
@@ -128,10 +134,12 @@ class TexyTextualElement extends TexyDomElement
     public $content = '';
 
 
+
     protected function generateContent()
     {
         return htmlspecialChars($this->content, ENT_NOQUOTES);
     }
+
 
 
     /**
@@ -157,6 +165,3 @@ class TexyTextualElement extends TexyDomElement
 class TexyParagraphElement extends TexyTextualElement
 {
 }
-
-
-

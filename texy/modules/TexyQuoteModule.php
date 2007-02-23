@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    protected $allow = array('Blockquote');
+    protected $allow = array('BlockQuote');
 
 
     public function init()
@@ -34,21 +34,20 @@ class TexyQuoteModule extends TexyModule
             $this,
             'processBlock',
             '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU',
-            'Blockquote'
+            'BlockQuote'
         );
     }
-
 
 
 
     /**
      * Callback function (for blocks)
      *
-     *            > They went in single file, running like hounds on a strong scent,
-     *            and an eager light was in their eyes. Nearly due west the broad
-     *            swath of the marching Orcs tramped its ugly slot; the sweet grass
-     *            of Rohan had been bruised and blackened as they passed.
-     *            >:http://www.mycom.com/tolkien/twotowers.html
+     *   > They went in single file, running like hounds on a strong scent,
+     *   and an eager light was in their eyes. Nearly due west the broad
+     *   swath of the marching Orcs tramped its ugly slot; the sweet grass
+     *   of Rohan had been bruised and blackened as they passed.
+     *   >:http://www.mycom.com/tolkien/twotowers.html
      *
      */
     public function processBlock($parser, $matches)
@@ -61,22 +60,25 @@ class TexyQuoteModule extends TexyModule
         //    [5] => spaces |
         //    [6] => ... / LINK
 
-        $el = new TexyBlockElement($this->texy);
+        $tx = $this->texy;
+        $el = new TexyBlockElement($tx);
 
         if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($this->texy);
+            $mod = new TexyModifier($tx);
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('blockquote');
         } else {
-            $el->tags[0] = TexyHtml::el('blockquote');
+            $el->tags[0] = TexyHtmlEl::el('blockquote');
         }
 
         $content = '';
         $linkTarget = '';
         $spaces = '';
         do {
-            if ($mSpaces === ':') $linkTarget = trim($mContent);
-            else {
+            if ($mSpaces === ':') {
+                $el->tags[0]->cite = $tx->quoteModule->citeLink($mContent)->asURL();
+                $content .= "\n";
+            } else {
                 if ($spaces === '') $spaces = max(1, strlen($mSpaces));
                 $content .= $mContent . "\n";
             }
@@ -85,16 +87,6 @@ class TexyQuoteModule extends TexyModule
             list(, $mSpaces, $mContent) = $matches;
         } while (TRUE);
 
-        if ($linkTarget) {
-            $el->tags[0]->cite = $linkTarget;
-            // TODO
-            /*
-            $elx = new TexyLinkElement($this->texy);
-            $elx->setLinkRaw($linkTarget);
-            $el->cite->set($elx->link->asURL());
-            */
-        }
-
         $el->parse($content);
 
         $parser->element->children[] = $el;
@@ -102,7 +94,32 @@ class TexyQuoteModule extends TexyModule
 
 
 
+    /**
+     * Converts cite destination to TexyLink
+     * @param string
+     * @return TexyLink
+     */
+    public function citeLink($dest)
+    {
+        $tx = $this->texy;
+        // [ref]
+        if ($dest{0} === '[') {
+            $dest = substr($dest, 1, -1);
+            $ref = $this->getReference($dest);
+            if ($ref)
+                $link = new TexyLink($ref['URL'], $tx->linkModule->root, TexyLink::DIRECT);
+            else
+                $link = new TexyLink($dest, $tx->linkModule->root, TexyLink::REFERENCE);
+
+        } else { // direct URL
+            $link = new TexyLink($dest, $tx->linkModule->root, TexyLink::DIRECT);
+        }
+
+        // handler
+        if (is_callable(array($tx->handler, 'Cite'))) $tx->handler->Cite($link);
+
+        return $link;
+    }
+
+
 } // TexyQuoteModule
-
-
-

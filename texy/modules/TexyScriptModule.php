@@ -27,8 +27,11 @@ class TexyScriptModule extends TexyModule
 {
     protected $allow = array('Script');
 
-    /** @var callback    Callback that will be called with newly created element */
-    public $handler;    // function myUserFunc($element, string $identifier, array/NULL $args)
+    /**
+     * @var callback  handle script elements
+     * function myUserFunc($element, string $identifier, array/NULL $args)
+     */
+    public $handler;
 
 
     public function init()
@@ -84,13 +87,13 @@ class TexyScriptModule extends TexyModule
                 break;
             }
 
-            if (is_callable( $this->handler) )
+            if (is_callable($this->handler))
                 call_user_func_array($this->handler, array($el, $identifier, $args));
 
         } while(0);
 
         return ''; // !!!
-        return $this->texy->mark($el, $el->contentType);
+        return $this->texy->mark($el, Texy::CONTENT_TEXTUAL);
     }
 
 
@@ -104,7 +107,4 @@ class TexyScriptModule extends TexyModule
             . htmlSpecialChars($identifier, ENT_COMPAT) . '" />', Texy::CONTENT_TEXTUAL);
     }
 
-
 } // TexyScriptModule
-
-

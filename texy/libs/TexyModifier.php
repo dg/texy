@@ -33,13 +33,13 @@ if (!defined('TEXY')) die();
  */
 class TexyModifier
 {
-    const HALIGN_LEFT =      'left';
-    const HALIGN_RIGHT =     'right';
-    const HALIGN_CENTER =    'center';
-    const HALIGN_JUSTIFY =   'justify';
-    const VALIGN_TOP =       'top';
-    const VALIGN_MIDDLE =    'middle';
-    const VALIGN_BOTTOM =    'bottom';
+    const HALIGN_LEFT =    'left';
+    const HALIGN_RIGHT =   'right';
+    const HALIGN_CENTER =  'center';
+    const HALIGN_JUSTIFY = 'justify';
+    const VALIGN_TOP =     'top';
+    const VALIGN_MIDDLE =  'middle';
+    const VALIGN_BOTTOM =  'bottom';
 
     /** @var Texy */
     protected $texy;
@@ -53,36 +53,40 @@ class TexyModifier
     public $title;
 
 
+
     public function __construct($texy)
     {
         $this->texy =  $texy;
     }
 
 
+
     public function setProperties()
     {
-        $acc = TexyHtml::$accepted_attrs;
+        $acc = TexyHtml::$attrs;
 
         foreach (func_get_args() as $arg)
         {
-            if ($arg == '') continue;
+            if ($arg == NULL) continue;
 
             $argX = trim(substr($arg, 1, -1));
             switch ($arg{0}) {
             case '(':
-                $this->title = html_entity_decode($argX);
+                if (strpos($argX, '&') !== FALSE) // speed-up
+                    $argX = html_entity_decode($argX);
+                $this->title = $argX;
                 break;
 
             case '{':
                 foreach (explode(';', $argX) as $value) {
-                    $pair = explode(':', $value.':');
+                    $pair = explode(':', $value, 2); $pair[] = '';
                     $prop = strtolower(trim($pair[0]));
                     $value = trim($pair[1]);
                     if ($prop === '') continue;
 
                     if (isset($acc[$prop])) // attribute
                         $this->attrs[$prop] = $value;
-                    else  // style
+                    elseif ($value !== '')  // style
                         $this->styles[$prop] = $value;
                 }
                 break;
@@ -92,7 +96,7 @@ class TexyModifier
                 foreach (explode(' ', $argX) as $value) {
                     if ($value === '') continue;
 
-                    if ($value{0} == '#')
+                    if ($value{0} === '#')
                         $this->id = substr($value, 1);
                     else
                         $this->classes[] = $value;
@@ -111,42 +115,46 @@ class TexyModifier
 
 
 
-
     /**
-     * Generates TexyHtml element
+     * Generates TexyHtmlEl element
      * @param string
-     * @return TexyHtml
+     * @return TexyHtmlEl
      */
     public function generate($tag)
     {
         // tag & attibutes
-        if ($this->texy->allowedTags === Texy::ALL) {
-            $el = TexyHtml::el($tag, $this->attrs);
+        $tmp = $this->texy->allowedTags; // speed-up
+        if ($tmp === Texy::ALL) {
+            $el = TexyHtmlEl::el($tag, $this->attrs);
 
-        } elseif (is_array($this->texy->allowedTags) && isset($this->texy->allowedTags[$tag])) {
-            $allowed = $this->texy->allowedTags[$tag];
+        } elseif (is_array($tmp) && isset($tmp[$tag])) {
+            $tmp = $tmp[$tag];
 
-            if ($allowed === Texy::ALL) {
-                $el = TexyHtml::el($tag, $this->attrs);
+            if ($tmp === Texy::ALL) {
+                $el = TexyHtmlEl::el($tag, $this->attrs);
 
             } else {
-                $el = TexyHtml::el($tag);
-                unset($allowed['_name'], $allowed['_empty']);
+                $el = TexyHtmlEl::el($tag);
 
-                if (is_array($allowed) && count($allowed))
+                if (is_array($tmp) && count($tmp)) {
+                    $tmp = array_flip($tmp);
                     foreach ($this->attrs as $key => $val)
-                        if (in_array($key, $allowed)) $el->$key = $val;
+                        if (isset($tmp[$key])) $el->$key = $val;
+                }
             }
         } else {
-            $el = TexyHtml::el($tag);
+            $el = TexyHtmlEl::el($tag);
         }
+
+        // HACK (move to front)
+        $el->href = NULL; // $el->src = NULL;
 
 
         // title
         $el->title = $this->title;
 
         // classes & ID
-        $tmp = $this->texy->_classes;
+        $tmp = $this->texy->_classes; // speed-up
         if ($tmp === Texy::ALL) {
             foreach ($this->classes as $val) $el->class[] = $val;
             $el->id = $this->id;
@@ -158,7 +166,7 @@ class TexyModifier
         }
 
         // styles
-        $tmp = $this->texy->_styles;
+        $tmp = $this->texy->_styles;  // speed-up
         if ($tmp === Texy::ALL) {
             foreach ($this->styles as $prop => $val) $el->style[$prop] = $val;
         } elseif (is_array($tmp)) {
@@ -169,23 +177,6 @@ class TexyModifier
         // align
         if ($this->hAlign) $el->style['text-align'] = $this->hAlign;
         if ($this->vAlign) $el->style['vertical-align'] = $this->vAlign;
-
-        // special cases
-        if ($tag === 'a') {
-            // rel="nofollow"
-            if (in_array('nofollow', $this->classes)) {
-                $el->rel = 'nofollow'; // TODO: append, not replace
-                if (($pos = array_search('nofollow', $el->class)) !== FALSE)
-                     unset($el->class[$pos]);
-            }
-
-            // popup on click
-            if (in_array('popup', $this->classes)) {
-                $el->onclick = $this->texy->linkModule->popupOnClick;
-                if (($pos = array_search('popup', $el->class)) !== FALSE)
-                     unset($el->class[$pos]);
-            }
-        }
 
         return $el;
     }

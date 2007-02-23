@@ -25,11 +25,16 @@ if (!defined('TEXY')) die();
  */
 class TexyImageDescModule extends TexyModule
 {
-    protected $allow = array('Image.desc');
+    protected $allow = array('ImageDesc');
 
-    public $boxClass   = 'image';        // non-floated box class
-    public $leftClass  = 'image left';   // left-floated box class
-    public $rightClass = 'image right';  // right-floated box class
+    /** @var string  non-floated box CSS class */
+    public $boxClass = 'image';
+
+    /** @var string  left-floated box CSS class */
+    public $leftClass = 'image left';
+
+    /** @var string  right-floated box CSS class */
+    public $rightClass = 'image right';
 
 
 
@@ -39,7 +44,7 @@ class TexyImageDescModule extends TexyModule
             $this,
             'processBlock',
             '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU',
-            'Image.desc'
+            'ImageDesc'
         );
     }
 
@@ -48,7 +53,7 @@ class TexyImageDescModule extends TexyModule
     /**
      * Callback function (for blocks)
      *
-     *            [*image*]:link *** .... .(title)[class]{style}>
+     *   [*image*]:link *** .... .(title)[class]{style}>
      *
      */
     public function processBlock($parser, $matches)
@@ -66,18 +71,17 @@ class TexyImageDescModule extends TexyModule
         //    [10] => {style}
         //    [11] => >
 
-        $el = new TexyBlockElement($this->texy);
+        $tx = $this->texy;
+        $el = new TexyBlockElement($tx);
 
-        $elImage = new TexyImageElement($this->texy);
-        $elImage->setImagesRaw($mURLs);
-        $elImage->modifier->setProperties($mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
-        //$elImage->setImagesRaw($mURLs);
+        list($URL, $overURL, $width, $height, $imgMod) = $tx->imageModule->factory1($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
-
-        $mod = new TexyModifier($this->texy);
+        $mod = new TexyModifier($tx);
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $hAlign = $elImage->modifier->hAlign;
-        $mod->hAlign = $elImage->modifier->hAlign = NULL;
+        $hAlign = $imgMod->hAlign;
+        $mod->hAlign = $imgMod->hAlign = NULL;
+
+        $elImage = $tx->imageModule->factoryEl($URL, $overURL, $width, $height, $imgMod, $mLink);
 
         $el->tags[0] = $mod->generate('div');
 
@@ -87,42 +91,31 @@ class TexyImageDescModule extends TexyModule
         } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
             $el->tags[0]->class[] = $this->rightClass;
 
-        } elseif ($this->texy->imageDescModule->boxClass)
+        } elseif ($tx->imageDescModule->boxClass)
             $el->tags[0]->class[] = $this->boxClass;
 
 
-        $content = $this->texy->mark($elImage->__toString(), Texy::CONTENT_NONE); // !!!
-
-        if ($mLink) {
-/*
-            $elLink = new TexyLinkElement($this->texy);
-            if ($mLink === ':') {
-                $elImage->requireLinkImage();
-                if ($elImage->linkImage) $elLink->link->copyFrom($elImage->linkImage);
-            } else {
-                $elLink->setLinkRaw($mLink);
-            }
-
-            $keyOpen  = $this->texy->mark($elLink->opening(), Texy::CONTENT_NONE);
-            $keyClose = $this->texy->mark($elLink->closing(), Texy::CONTENT_NONE);
-            $content = $keyOpen . $content . $keyClose;
-*/
-        }
-        $elImg = new TexyTextualElement($this->texy);
-        $elImg->content = $content;
+        $elImg = new TexyTextualElement($tx);
+        $elImg->content = $elImage->startMark($tx);
         $el->children[] = $elImg;
 
-        $elDesc = new TexyBlockElement($this->texy);
+        $elDesc = new TexyBlockElement($tx);
         $elDesc->parse(ltrim($mContent));
         $el->children[] = $elDesc;
+
+        if ($mLink) {
+            if ($mLink === ':') {
+                $elLink = $tx->linkModule->factoryEl(
+                    new TexyLink($URL, $tx->imageModule->linkedRoot, TRUE),
+                    new TexyModifier($tx)
+                );
+            } else {
+                $elLink = $tx->linkModule->factory($mLink, NULL, NULL, NULL, NULL);
+            }
+            $elImg->content = $elLink->startMark($tx) . $elImg->content . $elLink->endMark($tx);
+        }
 
         $parser->element->children[] = $el;
     }
 
-
-
-
 } // TexyImageModule
-
-
-

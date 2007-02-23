@@ -25,8 +25,9 @@ if (!defined('TEXY')) die();
  */
 class TexySmiliesModule extends TexyModule
 {
-    protected $allow = array('Image.smilies');
+    protected $allow = array('ImageSmilies');
 
+    /** @var array  supported smilies and image files */
     public $icons = array (
         ':-)'  =>  'smile.gif',
         ':-('  =>  'sad.gif',
@@ -39,28 +40,29 @@ class TexySmiliesModule extends TexyModule
         ':-P'  =>  'razz.gif',
         ':-|'  =>  'neutral.gif',
     );
-    public $root = NULL;
-    public $class = '';
+
+    /** @var string  CSS class for smilies */
+    public $class;
+
+    /** @var string  images location= $texy->imageModule->webRoot (or fileRoot) + $iconPrefix + $icons[...] */
+    public $iconPrefix;
 
 
 
     public function init()
     {
-        if (empty($this->texy->allowed['Image.smilies'])) return;
+        if (empty($this->texy->allowed['ImageSmilies'])) return;
 
         krsort($this->icons);
 
         $pattern = array();
         foreach ($this->icons as $key => $foo)
-            $pattern[] = preg_quote($key, '#') . '+';
+            $pattern[] = preg_quote($key, '#') . '+'; // last char can be repeated
 
-        $crazyRE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
+        $RE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
 
-        $this->texy->registerLinePattern($this, 'processLine', $crazyRE, 'Image.smilies');
+        $this->texy->registerLinePattern($this, 'processLine', $RE, 'Image.smilies');
     }
-
-
-
 
 
 
@@ -78,22 +80,20 @@ class TexySmiliesModule extends TexyModule
         //    [5] => {style}
         //    [6] => LINK
 
-        $texy =  $this->texy;
-        $el = new TexyImageElement($texy);
-        $el->modifier->title = $match;
-        $el->modifier->classes[] = $this->class;
+        $tx = $this->texy;
 
-         // find the closest match
+        // find the closest match
         foreach ($this->icons as $key => $value)
-            if (substr($match, 0, strlen($key)) === $key) {
-                $root = $this->root === NULL ? $this->texy->imageModule->root :  $this->root;
-                //$el->image->set($value, $root, TRUE); // different ROOT !!!
-                break;
+        {
+            if (substr($match, 0, strlen($key)) === $key)
+            {
+                $mod = new TexyModifier($tx);
+                $mod->title = $match;
+                $mod->classes[] = $this->class;
+                $el = $tx->imageModule->factory2($this->iconPrefix . $value, NULL, NULL, $mod, NULL);
+                return $el->startMark($tx);
             }
-
-        return $this->texy->mark($el->__toString(), Texy::CONTENT_NONE); // !!!
+        }
     }
-
-
 
 } // TexySmiliesModule

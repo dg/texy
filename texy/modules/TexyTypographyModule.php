@@ -23,7 +23,7 @@ if (!defined('TEXY')) die();
 /**
  * Typography replacements module
  */
-class TexyTypographyModule extends TexyModule
+class TexyTypographyModule extends TexyModule implements ITexyLineModule
 {
     protected $allow = array('Typography');
 
@@ -40,6 +40,7 @@ class TexyTypographyModule extends TexyModule
 */
 
     private $pattern, $replace;
+
 
 
     public function init()
@@ -83,13 +84,12 @@ class TexyTypographyModule extends TexyModule
     }
 
 
+
     public function linePostProcess($text)
     {
         if (empty($this->texy->allowed['Typography'])) return $text;
 
         return preg_replace($this->pattern, $this->replace, $text);
     }
-
-
 
 } // TexyTypographyModule

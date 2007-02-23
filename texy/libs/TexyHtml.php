@@ -20,23 +20,12 @@
 if (!defined('TEXY')) die();
 
 
-// static variable initialization
-TexyHtml::$valid = array_merge(TexyHtml::$block, TexyHtml::$inline);
-
 
 /**
- * HTML helper
+ * HTML tags definitions
  */
 class TexyHtml
 {
-    /** @var string element's name */
-    public $_name;
-
-    /** @var bool is element empty? */
-    public $_empty;
-
-    /* element's attributes are not explicitly declared */
-
 
     // notice: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
     static public $block = array(
@@ -58,7 +47,7 @@ class TexyHtml
 
     static public $meta = array('html'=>1, 'head'=>1, 'body'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'title'=>1,);
 
-    static public $accepted_attrs = array(
+    static public $attrs = array(
         'abbr'=>1, 'accesskey'=>1, 'align'=>1, 'alt'=>1, 'archive'=>1, 'axis'=>1, 'bgcolor'=>1, 'cellpadding'=>1, 'cellspacing'=>1, 'char'=>1,
         'charoff'=>1, 'charset'=>1, 'cite'=>1, 'classid'=>1, 'codebase'=>1, 'codetype'=>1, 'colspan'=>1, 'compact'=>1, 'coords'=>1, 'data'=>1,
         'datetime'=>1, 'declare'=>1, 'dir'=>1, 'face'=>1, 'frame'=>1, 'headers'=>1, 'href'=>1, 'hreflang'=>1, 'hspace'=>1, 'ismap'=>1,
@@ -69,12 +58,33 @@ class TexyHtml
 
     static public $valid; /* array_merge(TexyHtml::$block, TexyHtml::$inline); */
 
+}
+
+// static variable initialization
+TexyHtml::$valid = array_merge(TexyHtml::$block, TexyHtml::$inline);
+
+
+
+
+/**
+ * HTML helper
+ */
+class TexyHtmlEl
+{
+    /** @var string element's name */
+    public $_name;
+
+    /** @var bool is element empty? */
+    public $_empty;
+
+    /* element's attributes are not explicitly declared */
+
 
     /**
-     * TexyHtml element's factory
+     * TexyHtmlEl element's factory
      * @param string element name (or NULL)
      * @param array  optional attributes list
-     * @return TexyHtml
+     * @return TexyHtmlEl
      */
     static public function el($name=NULL, $attrs=NULL)
     {
@@ -84,24 +94,24 @@ class TexyHtml
 
     private function __construct($name, $attrs)
     {
-        $this->_name = $name;
-        $this->_empty = isset(self::$empty[$name]);
-
         if (is_array($attrs)) {
            foreach ($attrs as $key => $value) $this->$key = $value;
         }
+
+        $this->_name = $name;
+        $this->_empty = isset(TexyHtml::$empty[$name]);
     }
 
 
     /**
      * Changes element's name
      * @param string
-     * @return TexyHtml self
+     * @return TexyHtmlEl self
      */
     public function setElement($name)
     {
         $this->_name = $name;
-        $this->_empty = isset(self::$empty[$name]);
+        $this->_empty = isset(TexyHtml::$empty[$name]);
         return $this;
     }
 
@@ -110,7 +120,7 @@ class TexyHtml
      * Overloaded setter for element's attribute
      * @param string function name
      * @param array function arguments
-     * @return TexyHtml self
+     * @return TexyHtmlEl self
      */
     public function __call($m, $args)
     {
@@ -167,7 +177,10 @@ class TexyHtml
                 $value = implode($key === 'style' ? ';' : ' ', $tmp);
             }
             // add new attribute
-            $s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value, ENT_COMPAT)) . '"';
+            //$s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value, ENT_COMPAT)) . '"';
+            // BACK-COMPATIBILITY-HACK !!!
+            $s .= ' ' . $key . '="' . Texy::freezeSpaces(
+                preg_replace('~&amp;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', htmlSpecialChars($value, ENT_COMPAT))) . '"';
         }
 
         // finish start tag

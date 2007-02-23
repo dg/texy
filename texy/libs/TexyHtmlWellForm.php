@@ -51,6 +51,7 @@ class TexyHtmlWellForm
 
 
 
+
     /**
      * Converts <strong><em> ... </strong> ... </em>
      * into <strong><em> ... </em></strong><em> ... </em>
@@ -69,6 +70,7 @@ class TexyHtmlWellForm
         }
         return $text;
     }
+
 
 
     /**
@@ -141,6 +143,7 @@ class TexyHtmlWellForm
             return $s;
         }
     }
+
 
 
     /**
