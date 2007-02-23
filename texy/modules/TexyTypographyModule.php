@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyTypographyModule extends TexyModule implements ITexyLineModule
 {
-    protected $allow = array('Typography');
+    protected $allow = array('typography');
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
@@ -87,7 +87,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
     public function linePostProcess($text)
     {
-        if (empty($this->texy->allowed['Typography'])) return $text;
+        if (empty($this->texy->allowed['typography'])) return $text;
 
         return preg_replace($this->pattern, $this->replace, $text);
     }

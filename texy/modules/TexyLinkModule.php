@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyLinkModule extends TexyModule
 {
-    protected $allow = array('LinkReference', 'LinkEmail', 'LinkURL', 'LinkQuick', 'LinkDefinition');
+    protected $allow = array('linkReference', 'linkEmail', 'linkURL', 'linkQuick', 'linkDefinition');
 
     /** @var string  root of relative links */
     public $root = '';
@@ -46,20 +46,20 @@ class TexyLinkModule extends TexyModule
     protected $references = array();
 
     /** @var array */
-    static private $callstack;
+    static private $deadlock;
 
 
 
     public function init()
     {
-        self::$callstack = array();
+        self::$deadlock = array();
 
         $tx = $this->texy;
         $tx->registerLinePattern(
             $this,
             'processLineQuick',
             '#(['.TEXY_CHAR.'0-9@\#$%&.,_-]+)(?=:\[)'.TEXY_LINK.'()#Uu',
-            'LinkQuick'
+            'linkQuick'
         );
 
         // [reference]
@@ -67,7 +67,7 @@ class TexyLinkModule extends TexyModule
             $this,
             'processLineReference',
             '#('.TEXY_LINK_REF.')#U',
-            'LinkReference'
+            'linkReference'
         );
 
         // direct url and email
@@ -75,14 +75,14 @@ class TexyLinkModule extends TexyModule
             $this,
             'processLineURL',
             '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
-            'LinkURL'
+            'linkURL'
         );
 
         $tx->registerLinePattern(
             $this,
             'processLineURL',
             '#(?<=\s|^|\(|\[|\<|:)'.TEXY_EMAIL.'#i',
-            'LinkEmail'
+            'linkEmail'
         );
     }
 
@@ -156,7 +156,7 @@ class TexyLinkModule extends TexyModule
     public function preProcess($text)
     {
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-        if ($this->texy->allowed['LinkDefinition'])
+        if ($this->texy->allowed['linkDefinition'])
             return preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?()$#mU',
                 array($this, 'processReferenceDefinition'),
@@ -200,7 +200,8 @@ class TexyLinkModule extends TexyModule
         //    [2] => [ref]
 
         $el = $this->factory($mLink, NULL, NULL, NULL, $mContent);
-        return $el->startMark($this->texy) . $mContent . $el->endMark($this->texy);
+	    $el->addChild($mContent);
+        return $el->toTexy($this->texy); // must be text
     }
 
 
@@ -220,22 +221,23 @@ class TexyLinkModule extends TexyModule
 
         if (!$ref) {
             // try handler
-            if (is_callable(array($tx->handler, 'Reference')))
-                return $tx->handler->Reference($tx, $name);
+            if (is_callable(array($tx->handler, 'reference')))
+                return $tx->handler->reference($tx, $name);
 
             // no change
-            return $match;
+            return FALSE;
         }
 
         if ($ref['label']) {
-            // prevent cycling
-            if (isset(self::$callstack[$mRef['name']])) $content = $ref['label'];
-            else {
+            // prevent deadlock
+            if (isset(self::$deadlock[$mRef['name']])) {
+                $content = $ref['label'];
+            } else {
                 $label = new TexyTextualElement($tx);
-                self::$callstack[$mRef['name']] = TRUE;
+                self::$deadlock[$mRef['name']] = TRUE;
                 $label->parse($ref['label']);
                 $content = $label->content;
-                unset(self::$callstack[$mRef['name']]);
+                unset(self::$deadlock[$mRef['name']]);
             }
         } else {
             $link = new TexyUrl($ref['URL'], $this->root, TexyUrl::DIRECT);
@@ -243,7 +245,8 @@ class TexyLinkModule extends TexyModule
         }
 
         $el = $this->factory($mRef, NULL, NULL, NULL, NULL);
-        return $el->startMark($tx) . $content . $el->endMark($tx);
+        $el->addChild($content);
+        return $el; // must be object!
     }
 
 
@@ -262,7 +265,8 @@ class TexyLinkModule extends TexyModule
             $link,
             new TexyModifier($this->texy)
         );
-        return $el->startMark($this->texy) . $link->asTextual() . $el->endMark($this->texy);
+        $el->addChild($link->asTextual());
+        return $el; // must be object
     }
 
 
@@ -306,8 +310,8 @@ class TexyLinkModule extends TexyModule
 
         $link = new TexyUrl($dest, $root, $src, $label);
 
-        if (is_callable(array($tx->handler, 'Link')))
-            $tx->handler->Link($link, $modifier);
+        //if (is_callable(array($tx->handler, 'link')))
+        //    $tx->handler->link($tx, $link, $modifier);
 
         return $this->factoryEl($link, $modifier);
     }

@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    protected $allow = array('HorizLine');
+    protected $allow = array('horizLine');
 
 
     public function init()
@@ -34,7 +34,7 @@ class TexyHorizLineModule extends TexyModule
             $this,
             'processBlock',
             '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU',
-            'HorizLine'
+            'horizLine'
         );
     }
 

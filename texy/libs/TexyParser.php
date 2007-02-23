@@ -109,11 +109,11 @@ class TexyBlockParser extends TexyParser
     public function parse($text)
     {
         // initialization
-        $texy = $this->element->texy;
+        $tx = $this->element->texy;
         $this->text = $text;
         $this->offset = 0;
 
-        $pb = $texy->getBlockPatterns();
+        $pb = $tx->getBlockPatterns();
         $keys = array_keys($pb);
         $arrMatches = $arrPos = array();
         foreach ($keys as $key) $arrPos[$key] = -1;
@@ -156,7 +156,7 @@ class TexyBlockParser extends TexyParser
             if ($next > $this->offset) {
                 $str = substr($text, $this->offset, $next - $this->offset);
                 $this->offset = $next;
-                $texy->genericBlock->process($this, $str);
+                $tx->genericBlock->process($this, $str);
                 continue;
             }
 
@@ -194,10 +194,10 @@ class TexyLineParser extends TexyParser
     {
         // initialization
         $element = $this->element;
-        $texy = $element->texy;
+        $tx = $element->texy;
 
         $offset = 0;
-        $pl = $texy->getLinePatterns();
+        $pl = $tx->getLinePatterns();
         $keys = array_keys($pl);
         $arrMatches = $arrPos = array();
         foreach ($keys as $key) $arrPos[$key] = -1;
@@ -239,20 +239,38 @@ class TexyLineParser extends TexyParser
             if ($minKey === -1) break;
 
             $px = $pl[$minKey];
-            $offset = $arrPos[$minKey];
-            $replacement = call_user_func_array($px['handler'], array($this, $arrMatches[$minKey], $px['name']));
-            if ($replacement instanceof TexyTextualElement) $replacement = $replacement->content;
+            $offset = $start = $arrPos[$minKey];
+
+            $replacement = call_user_func_array(
+                $px['handler'],
+                array($this, $arrMatches[$minKey],
+                $px['name'])
+            );
+
+            if ($replacement instanceof TexyTextualElement) {
+                $replacement = $replacement->content;
+                $offset += strlen($replacement);
+            } elseif ($replacement instanceof TexyHtml) {
+                $replacement = $replacement->toTexy($tx);
+                $offset += strlen($replacement); // !
+            } elseif ($replacement === FALSE) {
+                $arrPos[$minKey] = -2;
+                continue;
+            } elseif (!is_string($replacement)) {
+                $replacement = (string) $replacement;
+            }
+
             $len = strlen($arrMatches[$minKey][0]);
             $text = substr_replace(
                 $text,
                 $replacement,
-                $offset,
-                $len);
+                $start,
+                $len
+            );
 
             $delta = strlen($replacement) - $len;
             foreach ($keys as $key) {
-                if ($arrPos[$key] === -1);
-                elseif ($arrPos[$key] < $offset + $len) $arrPos[$key] = -1;
+                if ($arrPos[$key] < $start + $len) $arrPos[$key] = -1;
                 else $arrPos[$key] += $delta;
             }
 
@@ -263,7 +281,7 @@ class TexyLineParser extends TexyParser
         if (strpos($text, '&') !== FALSE) // speed-up
             $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
 
-        foreach ($texy->getLineModules() as $module)
+        foreach ($tx->getLineModules() as $module)
             $text = $module->linePostProcess($text);
 
         $element->content = $text;

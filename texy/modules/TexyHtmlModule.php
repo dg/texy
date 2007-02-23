@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyHtmlModule extends TexyModule
 {
-    protected $allow = array('Html', 'HtmlTag', 'HtmlComment');
+    protected $allow = array('html', 'htmlTag', 'htmlComment');
 
     public $safeTags = array(
         'a'         => array('href', 'rel', 'title', 'lang'),
@@ -56,8 +56,10 @@ class TexyHtmlModule extends TexyModule
         $this->texy->registerLinePattern(
             $this,
             'process',
-            '#<(/?)([a-z][a-z0-9_:-]*)(/?|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)>|<!--([^'.TEXY_MARK.']*?)-->#is',
-            'Html'
+            '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
+
+//            '#<(/?)([a-z][a-z0-9_:-]*)(/?|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)>|<!--([^'.TEXY_MARK.']*?)-->#is',
+            'html'
         );
     }
 
@@ -70,7 +72,7 @@ class TexyHtmlModule extends TexyModule
     public function process($parser, $matches)
     {
         $matches[] = NULL;
-        list($match, $mClosing, $mTag, $mAttr, $mComment) = $matches;
+        list($match, $mClosing, $mTag, $mAttr, $mEmpty, $mComment) = $matches;
         //    [1] => /
         //    [2] => tag
         //    [3] => attributes
@@ -80,41 +82,44 @@ class TexyHtmlModule extends TexyModule
         $tx = $this->texy;
 
         if ($mTag == '') { // html comment
-            if (empty($tx->allowed['HtmlComment']))
+            if (empty($tx->allowed['htmlComment']))
                 return substr($matches[5], 0, 1) === '[' ? $match : '';
 
             return $tx->mark($match, Texy::CONTENT_NONE);
         }
 
-        if (empty($tx->allowed['HtmlTag'])) return $match;
+        if (empty($tx->allowed['htmlTag'])) return FALSE;
 
         $tag = strtolower($mTag);
         if (!isset(Texy::$validTags[$tag])) $tag = $mTag;  // undo lowercase
 
         // tag & attibutes
         $aTags = $tx->allowedTags; // speed-up
-        if (!$aTags) return $match;  // all tags are disabled
+        if (!$aTags) return FALSE;  // all tags are disabled
         if (is_array($aTags)) {
-            if (!isset($aTags[$tag])) return $match; // this element not allowed
+            if (!isset($aTags[$tag])) return FALSE; // this element not allowed
             $aAttrs = $aTags[$tag]; // allowed attrs
         } else {
             $aAttrs = NULL; // all attrs are allowed
         }
 
-        $isEmpty = substr($mAttr, -1) === '/';
+        $isEmpty = $mEmpty === '/';
+        if (!$isEmpty && substr($mAttr, -1) === '/') {
+            $mAttr = substr($mAttr, 0, -1);
+            $isEmpty = TRUE;
+        }
         $isOpening = $mClosing !== '/';
 
         if ($isEmpty && !$isOpening)  // error - can't close empty element
-            return $match;
+            return FALSE;
 
         $el = TexyHtml::el($tag);
         if ($aTags === Texy::ALL && $isEmpty) $el->_empty = TRUE; // force empty
 
         if (!$isOpening) // closing tag? we are finished
-            return $el->endMark($tx);
+            return $tx->mark($el->endTag(), $el->getContentType());
 
         // process attributes
-        if ($isEmpty) $mAttr = substr($mAttr, 0, -1);
         if (is_array($aAttrs)) $aAttrs = array_flip($aAttrs);
         else $aAttrs = NULL;
 
@@ -170,17 +175,17 @@ class TexyHtmlModule extends TexyModule
         }
 
         if ($tag === 'img') {
-            if (!isset($el->src)) return $match;
+            if (!isset($el->src)) return FALSE;
             $tx->summary['images'][] = $el->src;
 
         } elseif ($tag === 'a') {
-            if (!isset($el->href) && !isset($el->name) && !isset($el->id)) return $match;
+            if (!isset($el->href) && !isset($el->name) && !isset($el->id)) return FALSE;
             if (isset($el->href)) {
                 $tx->summary['links'][] = $el->href;
             }
         }
 
-        return $el->startMark($tx);
+        return $tx->mark($el->startTag(), $el->getContentType());
     }
 
 

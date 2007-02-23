@@ -21,19 +21,17 @@
 
 
 // include Texy!
-$texyPath = '../../texy/';
-require_once ($texyPath . 'texy.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
 $texy = new Texy();
-$texy->formatterModule->baseIndent  = 1;
+$texy->formatter->baseIndent  = 1;
 
 
 
-function doIt() {
-    global $texy;
-
+function doIt($texy)
+{
     // processing
     $text = file_get_contents('sample.texy');
     $html = $texy->process($text);  // that's all folks!
@@ -49,23 +47,23 @@ function doIt() {
 }
 
 
-
+header('Content-type: text/html; charset=utf-8');
 
 echo '<h2>trustMode() - enable all valid tags</h2>';
 $texy->htmlModule->trustMode();
-doIt();
+doIt($texy);
 
 echo '<h2>trustMode(FALSE) - enable all tags</h2>';
 $texy->htmlModule->trustMode(FALSE);
-doIt();
+doIt($texy);
 
 echo '<h2>safeMode() - enable only "safe" tags</h2>';
 $texy->htmlModule->safeMode();
-doIt();
+doIt($texy);
 
 echo '<h2>safeMode(FALSE) - disable all tags</h2>';
 $texy->htmlModule->safeMode(FALSE);
-doIt();
+doIt($texy);
 
 echo '<h2>custom</h2>';
 $texy->allowedTags =
@@ -73,6 +71,4 @@ $texy->allowedTags =
          'myExtraTag' => array('attr1'),
          'strong'     => array(),
      );
-doIt();
-
-?>
+doIt($texy);

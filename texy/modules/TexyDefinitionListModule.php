@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyDefinitionListModule extends TexyListModule
 {
-    protected $allow = array('ListDefinition');
+    protected $allow = array('listDefinition');
 
     public $bullets = array(
         '*' => TRUE,
@@ -53,7 +53,7 @@ class TexyDefinitionListModule extends TexyListModule
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color:red}
           . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'               // Term:
           . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mUu',  //    - description
-            'ListDefinition'
+            'listDefinition'
         );
     }
 

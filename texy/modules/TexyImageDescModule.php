@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyImageDescModule extends TexyModule
 {
-    protected $allow = array('ImageDesc');
+    protected $allow = array('imageDesc');
 
     /** @var string  non-floated box CSS class */
     public $boxClass = 'image';
@@ -44,7 +44,7 @@ class TexyImageDescModule extends TexyModule
             $this,
             'processBlock',
             '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU',
-            'ImageDesc'
+            'imageDesc'
         );
     }
 
@@ -96,7 +96,6 @@ class TexyImageDescModule extends TexyModule
 
 
         $elImg = new TexyTextualElement($tx);
-        $elImg->content = $elImage->startMark($tx);
         $el->children[] = $elImg;
 
         $elDesc = new TexyBlockElement($tx);
@@ -112,7 +111,10 @@ class TexyImageDescModule extends TexyModule
             } else {
                 $elLink = $tx->linkModule->factory($mLink, NULL, NULL, NULL, NULL);
             }
-            $elImg->content = $elLink->startMark($tx) . $elImg->content . $elLink->endMark($tx);
+            $elLink->addChild($elImage);
+            $elImg->content = $elLink->toTexy($tx);
+        } else {
+            $elImg->content = $elImage->toTexy($tx);
         }
 
         $parser->element->children[] = $el;

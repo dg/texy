@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyImageModule extends TexyModule
 {
-    protected $allow = array('Image');
+    protected $allow = array('image');
 
     /** @var string  root of relative images (http) */
     public $webRoot = 'images/';
@@ -76,7 +76,7 @@ class TexyImageModule extends TexyModule
             $this,
             'processLine',
             '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U',
-            'Image'
+            'image'
         );
     }
 
@@ -133,6 +133,7 @@ class TexyImageModule extends TexyModule
     }
 
 
+
     /**
      * Parses image's syntax
      * @param string  input: small.jpg 80x13 | small-over.jpg
@@ -161,6 +162,7 @@ class TexyImageModule extends TexyModule
         }
         return array($URL, $overURL, $width, $height);
     }
+
 
 
     /**
@@ -217,7 +219,9 @@ class TexyImageModule extends TexyModule
 
         list($URL, $overURL, $width, $height, $mod) = $this->factory1($mURLs, $mMod1, $mMod2, $mMod3, $mMod4);
         $el = $this->factoryEl($URL, $overURL, $width, $height, $mod, $mLink);
-        $mark = $el->startMark($this->texy);
+
+        if (is_callable(array($tx->handler, 'image')))
+            $tx->handler->image($tx, $el, $mod);
 
         if ($mLink) {
             if ($mLink === ':') {
@@ -228,10 +232,11 @@ class TexyImageModule extends TexyModule
             } else {
                 $elLink = $tx->linkModule->factory($mLink, NULL, NULL, NULL, NULL);
             }
-            $mark = $elLink->startMark($tx) . $mark . $elLink->endMark($tx);
+            $elLink->addChild($el);
+            return $elLink;
         }
 
-        return $mark;
+        return $el;
     }
 
 

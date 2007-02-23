@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyTableModule extends TexyModule
 {
-    protected $allow = array('Table');
+    protected $allow = array('table');
 
     /** @var string  CSS class for odd rows */
 
@@ -47,7 +47,7 @@ class TexyTableModule extends TexyModule
             'processBlock',
             '#^(?:'.TEXY_MODIFIER_HV.'\n)?'   // .{color: red}
           . '\|.*()$#mU',                     // | ....
-            'Table'
+            'table'
         );
     }
 
@@ -238,11 +238,11 @@ class TexyTableFieldElement extends TexyTextualElement
     public $rowSpan = 1;
 
 
-    public function __toString()
+    public function toHtml()
     {
         if ($this->colSpan <> 1) $this->tags[0]->colspan = $this->colSpan;
         if ($this->rowSpan <> 1) $this->tags[0]->rowspan = $this->rowSpan;
-        return parent::__toString();
+        return parent::toHtml();
     }
 
 } // TexyTableFieldElement

@@ -17,34 +17,45 @@
 require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
-class MyTexy extends Texy
-{
 
-    protected function init()
-    {
-        // disable *** and ** and * phrases
-        $this->phraseModule->allowed['***'] = false;
-        $this->phraseModule->allowed['**'] = false;
-        $this->phraseModule->allowed['*'] = false;
+$texy = new Texy();
 
-        parent::init();
+// disable *** and ** and * phrases
+$texy->allowed['phraseStrongEm'] = FALSE;
+$texy->allowed['phraseStrong'] = FALSE;
+$texy->allowed['phraseEm'] = FALSE;
 
-        // add new syntax: *bold* _italic_
-        $this->registerLinePattern($this->phraseModule, 'processPhrase', '#(?<!\*)\*(?!\ )([^\*]+)<MODIFIER>?(?<!\ )\*(?!\*)()#U', 'b');
-        $this->registerLinePattern($this->phraseModule, 'processPhrase', '#(?<!\_)\_(?!\ )([^\_]+)<MODIFIER>?(?<!\ )\_(?!\_)()#U', 'i');
-    }
-
-}
+$texy->allowed['mySyntax1'] = TRUE;
+$texy->allowed['mySyntax2'] = TRUE;
 
 
+die('NOT WORKING YET.');
 
-$texy = new MyTexy();
+// add new syntax: *bold* _italic_
+$texy->registerLinePattern(
+    $texy->phraseModule,
+    'processPhrase',
+    '#(?<!\*)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
+//    '#(?<!\*)\*(?!\ )([^\*]+)<MODIFIER>?(?<!\ )\*(?!\*)()#U',
+    'mySyntax1'
+);
+
+$texy->registerLinePattern(
+    $texy->phraseModule,
+    'processPhrase',
+    '#(?<!\*)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
+//    '#(?<!\_)\_(?!\ )([^\_]+)<MODIFIER>?(?<!\ )\_(?!\_)()#U',
+    'mySyntax2'
+);
+
+
 
 // processing
 $text = file_get_contents('syntax.texy');
 $html = $texy->process($text);  // that's all folks!
 
 // echo formated output
+header('Content-type: text/html; charset=utf-8');
 echo $html;
 
 // and echo generated HTML code

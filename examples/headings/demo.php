@@ -31,6 +31,7 @@ $texy->headingModule->balancing = TexyHeadingModule::DYNAMIC; // this is default
 $html = $texy->process($text);  // that's all folks!
 
 // echo topmost heading (text is html safe!)
+header('Content-type: text/html; charset=utf-8');
 echo '<title>' . $texy->headingModule->title . '</title>';
 
 // and echo generated HTML code

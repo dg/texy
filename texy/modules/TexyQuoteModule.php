@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    protected $allow = array('BlockQuote');
+    protected $allow = array('blockQuote');
 
 
     public function init()
@@ -34,7 +34,7 @@ class TexyQuoteModule extends TexyModule
             $this,
             'processBlock',
             '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU',
-            'BlockQuote'
+            'blockQuote'
         );
     }
 
@@ -116,7 +116,7 @@ class TexyQuoteModule extends TexyModule
         }
 
         // handler
-        if (is_callable(array($tx->handler, 'Cite'))) $tx->handler->Cite($link);
+        if (is_callable(array($tx->handler, 'cite'))) $tx->handler->cite($tx, $link);
 
         return $link;
     }

@@ -27,7 +27,7 @@ $html = $texy->process($text);
 
 
 // echo formated output
-header("Content-type: text/html; charset=windows-1250");
+header('Content-type: text/html; charset=utf-8');
 echo '<title>' . $texy->headingModule->title . '</title>';
 
 // echo $texy->time

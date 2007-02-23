@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexySmiliesModule extends TexyModule
 {
-    protected $allow = array('ImageSmilies');
+    //protected $allow = array('smilies');
 
     /** @var array  supported smilies and image files */
     public $icons = array (
@@ -51,7 +51,7 @@ class TexySmiliesModule extends TexyModule
 
     public function init()
     {
-        if (empty($this->texy->allowed['ImageSmilies'])) return;
+        if (empty($this->texy->allowed['smilies'])) return;
 
         krsort($this->icons);
 
@@ -61,7 +61,7 @@ class TexySmiliesModule extends TexyModule
 
         $RE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
 
-        $this->texy->registerLinePattern($this, 'processLine', $RE, 'Image.smilies');
+        $this->texy->registerLinePattern($this, 'processLine', $RE, 'smilies');
     }
 
 
@@ -90,8 +90,8 @@ class TexySmiliesModule extends TexyModule
                 $mod = new TexyModifier($tx);
                 $mod->title = $match;
                 $mod->classes[] = $this->class;
-                $el = $tx->imageModule->factory2($this->iconPrefix . $value, NULL, NULL, $mod, NULL);
-                return $el->startMark($tx);
+                $el = $tx->imageModule->factoryEl($this->iconPrefix . $value, NULL, NULL, NULL, $mod, NULL);
+                return $el; // should be object
             }
         }
     }

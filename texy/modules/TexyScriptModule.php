@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyScriptModule extends TexyModule
 {
-    protected $allow = array('Script');
+    protected $allow = array('script');
 
     /**
      * @var callback  handle script elements
@@ -40,7 +40,7 @@ class TexyScriptModule extends TexyModule
             $this,
             'processLine',
             '#\{\{([^'.TEXY_MARK.']+)\}\}()#U',
-            'Script'
+            'script'
         );
     }
 
@@ -56,7 +56,7 @@ class TexyScriptModule extends TexyModule
         //    [1] => ...
 
         $identifier = trim($mContent);
-        if ($identifier === '') return;
+        if ($identifier === '' || $this->handler === NULL) return FALSE;
 
         $args = NULL;
         if (preg_match('#^([a-z_][a-z0-9_]*)\s*\(([^()]*)\)$#i', $identifier, $matches)) {
@@ -65,46 +65,27 @@ class TexyScriptModule extends TexyModule
             array_walk($args, 'trim');
         }
 
-        $el = new TexyTextualElement($this->texy);
+        if (is_callable(array($this->handler, $identifier))) {
+            array_unshift($args, $this->texy);
+            return call_user_func_array(array($this->handler, $identifier), $args);
+        }
 
-        do {
-            if ($this->handler === NULL) break;
+        if (is_callable($this->handler))
+            return call_user_func_array($this->handler, array($this->texy, $identifier, $args));
 
-            if (is_object($this->handler)) {
-
-                if ($args === NULL && isset($this->handler->$identifier)) {
-                    $el->content = $this->handler->$identifier;
-                    break;
-                }
-
-                if (is_array($args) && is_callable( array($this->handler, $identifier) ))  {
-                    array_unshift($args, NULL);
-                    $args[0] = $el;
-                    call_user_func_array( array($this->handler, $identifier), $args);
-                    break;
-                }
-
-                break;
-            }
-
-            if (is_callable($this->handler))
-                call_user_func_array($this->handler, array($el, $identifier, $args));
-
-        } while(0);
-
-        return ''; // !!!
-        return $this->texy->mark($el, Texy::CONTENT_TEXTUAL);
+        return FALSE;
     }
 
 
 
-    public function defaultHandler($element, $identifier, $args)
+    public function defaultHandler($texy, $identifier, $args)
     {
-        if ($args)
-            $identifier .= '('.implode(',', $args).')';
+        if ($args) $identifier .= '('.implode(',', $args).')';
 
-        $element->content = $element->texy->mark('<texy:script content="'
-            . htmlSpecialChars($identifier, ENT_COMPAT) . '" />', Texy::CONTENT_TEXTUAL);
+        $el = TexyHtml::el('texy:script');
+        $el->_empty = TRUE;
+        $el->content = $identifier;
+        return $el;
     }
 
 } // TexyScriptModule

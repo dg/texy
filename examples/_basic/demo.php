@@ -21,7 +21,7 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 $texy = new Texy();
 
 // other OPTIONAL configuration
-$texy->utf = FALSE;                    // disable UTF-8
+$texy->encoding = 'windows-1250';      // disable UTF-8
 $texy->imageModule->root = 'images/';  // specify image folder
 
 
@@ -31,7 +31,7 @@ $html = $texy->process($text);  // that's all folks!
 
 
 // echo formated output
-header('Content-type: text/html; charset=windows-1250');
+header('Content-type: text/html; charset=' . $texy->encoding);
 echo '<link rel="stylesheet" type="text/css" media="all" href="style.css" />';
 echo '<title>' . $texy->headingModule->title . '</title>';
 echo $html;

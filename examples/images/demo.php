@@ -20,32 +20,22 @@
 
 
 // include Texy!
-$texyPath = '../../texy/';
-require_once ($texyPath . 'texy.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
-// this is user callback function for processing 'image references' [*xxxx*]
-// returns FALSE or TexyImageReference
+class myHandler {
 
-function myUserFunc($refName, $texy) {
-    if ($refName != '*user*') { // accept only [* user *]
-        $FALSE = FALSE; // php4_sucks
-        return $FALSE;
+    function image($texy, $refName)
+    {
+        // TODO!
     }
 
-    $elRef = new TexyImageReference($texy);
-    $elRef->URLs = 'image.gif | '        // image URL
-                 . 'image-over.gif | '   // onmouseover image
-                 . 'big.gif';          // linked image
-    $elRef->modifier->title = 'Texy! logo';
-    return $elRef;
 }
 
 
-
 $texy = new Texy();
-$texy->referenceHandler        = 'myUserFunc';       // callback
+$texy->handler = new myHandler;
 $texy->imageModule->root       = 'imagesdir/';       // "in-line" images root
 $texy->imageModule->linkedRoot = 'imagesdir/big/';   // "linked" images root
 $texy->imageModule->leftClass  = 'my-left-class';    // left-floated image modifier
@@ -59,6 +49,7 @@ $html = $texy->process($text);  // that's all folks!
 
 
 // echo formated output
+header('Content-type: text/html; charset=utf-8');
 echo $html;
 
 
@@ -91,6 +82,3 @@ foreach ($texy->summary['preload'] as $key => $image)
 echo '<pre>';
 echo $script;
 echo '</pre>';
-
-
-?>

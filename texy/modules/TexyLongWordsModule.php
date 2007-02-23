@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 {
-    protected $allow = array('LongWords');
+    protected $allow = array('longWords');
 
     public $wordLimit = 20;
 
@@ -80,7 +80,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 
     public function linePostProcess($text)
     {
-        if (empty($this->texy->allowed['LongWords'])) return $text;
+        if (empty($this->texy->allowed['longWords'])) return $text;
 
         return preg_replace_callback(
             '#[^\ \n\t\-\x{2013}\x{a0}\x{ad}\x15\x16\x17'.TEXY_MARK_SPACES.']{'.$this->wordLimit.',}#u',

@@ -20,35 +20,35 @@
 
 
 // include Texy!
-$texyPath = '../../texy/';
-require_once ($texyPath . 'texy.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
 
 
-// this is user callback function for processing 'link references' [xxxx]
-// returns FALSE or TexyLinkReference
+// this is user callback object for processing Texy events
+class myHandler
+{
 
-function myUserFunc($refName, $texy) {
-    $names = array('Me', 'Punkrats', 'Serwhats', 'Bonnyfats');
+    // reference handler
+    function reference($texy, $refName)
+    {
+        $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 
-    if (!isset($names[$refName]))
-        return FALSE;              // it's not my job
+        if (!isset($names[$refName])) return FALSE; // it's not my job
 
-    $name  = $names[$refName];  // some range checing
+        $name = $names[$refName];  // some range checing
 
-      // this function must return TexyLinkReference object (or FALSE, of course)
-    $elRef = new TexyLinkReference($texy);
+        $el = TexyHtml::el('a');
+        $el->href = '#comm-' . $refName; // set link destination
+        $el->class[] = 'comment';        // set class name
+        $el->rel = 'nofollow';           // enable rel="nofollow"
+        $el->setContent("[$refName] $name:");  // set link label (with Texy formatting)
+        return $el;
+    }
 
-    $elRef->URL = '#comm-' . $refName; // set link destination
-    $elRef->label = '[' . $refName . '] **' . $name . '**';   // set link label (with Texy formatting)
-    $elRef->modifier->classes[] = 'comment';  // set modifier, e.g. class name
-
-    // to enable rel="nofollow", set this:   $elRef->modifier->classes[] = 'nofollow';
-
-    return $elRef;
 }
+
 
 
 
@@ -58,8 +58,8 @@ function myUserFunc($refName, $texy) {
 $texy = new Texy();
 
 // configuration
-$texy->referenceHandler = 'myUserFunc';   // references link [1] [2] will be processed through user function
-$texy->safeMode();                        // safe mode prevets attacker to inject some HTML code and disable images
+$texy->handler = new myHandler;  // references link [1] [2] will be processed through user function
+$texy->safeMode();               // safe mode prevets attacker to inject some HTML code and disable images
 
 // how generally disable links or enable images? here is a way:
 //      $texy->imageModule->allowed = TRUE;
@@ -72,6 +72,7 @@ $html = $texy->process($text);  // that's all folks!
 
 
 // echo formated output
+header('Content-type: text/html; charset=utf-8');
 echo $html;
 
 
@@ -96,5 +97,3 @@ echo '<hr />';
 echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
-
-?>

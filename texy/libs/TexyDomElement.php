@@ -29,7 +29,7 @@ abstract class TexyDomElement
     public $texy;
 
     /** @var array of TexyHtml */
-    public $tags = array();
+    public $tags;
 
 
 
@@ -44,7 +44,7 @@ abstract class TexyDomElement
      * Returns element's content
      * @return string
      */
-    abstract protected function generateContent();
+    abstract protected function getContent();
 
 
 
@@ -52,14 +52,15 @@ abstract class TexyDomElement
      * Converts to "HTML" string
      * @return string
      */
-    public function __toString()
+    public function toHtml()
     {
         $start = $end = '';
-        foreach ($this->tags as $el) {
-            $start .= $el->startTag();
-            $end = $el->endTag() . $end;
-        }
-        return $start . $this->generateContent() . $end;
+        if ($this->tags)
+            foreach ($this->tags as $el) {
+                $start .= $el->startTag();
+                $end = $el->endTag() . $end;
+            }
+        return $start . $this->getContent() . $end;
     }
 
 
@@ -92,11 +93,11 @@ class TexyBlockElement extends TexyDomElement
 
 
 
-    protected function generateContent()
+    protected function getContent()
     {
         $s = '';
         foreach ($this->children as $child)
-            $s .= $child->__toString();
+            $s .= $child->toHtml();
 
         return $s;
     }
@@ -133,11 +134,24 @@ class TexyTextualElement extends TexyDomElement
     /** @var string */
     public $content = '';
 
+    /** @var bool  is content still HTML encoded? */
+    public $protect = FALSE;
 
 
-    protected function generateContent()
+    protected function getContent()
     {
-        return htmlspecialChars($this->content, ENT_NOQUOTES);
+        if ($this->protect)
+            // check entites
+            return preg_replace_callback('#&\#?[a-zA-Z0-9]+;#', array(__CLASS__, 'entCb'), $this->content);
+        else
+            return htmlspecialChars($this->content, ENT_NOQUOTES);
+    }
+
+
+
+    static private function entCb($m)
+    {
+        return htmlSpecialChars(html_entity_decode($m[0], ENT_QUOTES, 'UTF-8'), ENT_QUOTES);
     }
 
 

@@ -1,1 +1,1 @@
-Texy! Version 2.0beta for PHP5 (released 2007/?)
+Texy! Version 2.0beta for PHP5 (released 2007/02/-)

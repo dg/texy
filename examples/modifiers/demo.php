@@ -18,19 +18,17 @@
 
 
 // include Texy!
-$texyPath = '../../texy/';
-require_once ($texyPath . 'texy.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
 $texy = new Texy();
-$texy->formatterModule->baseIndent  = 1;
+$texy->formatter->baseIndent  = 1;
 
 
 
-function doIt() {
-    global $texy;
-
+function doIt($texy)
+{
     // processing
     $text = file_get_contents('sample.texy');
     $html = $texy->process($text);  // that's all folks!
@@ -48,19 +46,21 @@ function doIt() {
 
 
 
+header('Content-type: text/html; charset=utf-8');
+
 echo '<h2>mode: Styles and Classes allowed (default)</h2>';
 $texy->allowedClasses = TRUE;
 $texy->allowedStyles  = TRUE;
-doIt();
+doIt($texy);
 
 echo '<h2>mode: Styles and Classes disabled</h2>';
 $texy->allowedClasses = FALSE;
 $texy->allowedStyles  = FALSE;
-doIt();
+doIt($texy);
 
 echo '<h2>mode: Custom</h2>';
 $texy->allowedClasses = array('one', '#id');
 $texy->allowedStyles  = array('color');
-doIt();
+doIt($texy);
 
 ?>

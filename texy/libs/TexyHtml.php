@@ -32,6 +32,9 @@ class TexyHtml
     /** @var bool is element empty? */
     public $_empty;
 
+    /** @var array element's content */
+    public $_childNodes;
+
     /* element's attributes are not explicitly declared */
 
 
@@ -55,6 +58,7 @@ class TexyHtml
 
         $this->_name = $name;
         $this->_empty = isset(Texy::$emptyTags[$name]);
+        $this->_childNodes = array();
     }
 
 
@@ -67,6 +71,30 @@ class TexyHtml
     {
         $this->_name = $name;
         $this->_empty = isset(Texy::$emptyTags[$name]);
+        return $this;
+    }
+
+
+    /**
+     * Sets element's content
+     * @param string|TexyHtml object
+     * @return TexyHtml self
+     */
+    public function setContent($content)
+    {
+        $this->_childNodes = array( $content );
+        return $this;
+    }
+
+
+    /**
+     * Adds new child of element's content
+     * @param string|TexyHtml object
+     * @return TexyHtml self
+     */
+    public function addChild($content)
+    {
+        $this->_childNodes[] = $content;
         return $this;
     }
 
@@ -85,6 +113,29 @@ class TexyHtml
 
 
     /**
+     * Renders element's start tag, content and end tag
+     * @return string
+     */
+    public function toTexy($texy)
+    {
+        $ct = $this->getContentType();
+        $s = $texy->mark($this->startTag(), $ct);
+
+        // empty elements are finished now
+        if ($this->_empty) return $s;
+
+        // add content
+        foreach ($this->_childNodes as $val)
+            if ($val instanceof self) $s .= $val->toTexy($texy);
+            else $s .= $val;
+
+        $s .= $texy->mark($this->endTag(), $ct);
+
+        return $s;
+    }
+
+
+    /**
      * Returns element's start tag
      * @return string
      */
@@ -95,7 +146,7 @@ class TexyHtml
         $s = '<' . $this->_name;
 
         // reserved properties
-    	static $res = array('_name'=>1, '_empty'=>1,);
+    	static $res = array('_name'=>1, '_childNodes'=>1, '_empty'=>1,);
 
         // use array_change_key_case($this, CASE_LOWER) ?
         // for each attribute...
@@ -154,29 +205,6 @@ class TexyHtml
         return '';
     }
 
-
-    /**
-     * Returns element's start tag as Texy mark
-     * @return string
-     */
-    public function startMark($texy)
-    {
-        $s = $this->startTag();
-        if ($s === '') return '';
-        return $texy->mark($s, $this->getContentType());
-    }
-
-
-    /**
-     * Returns element's end tag as Texy mark
-     * @return string
-     */
-    public function endMark($texy)
-    {
-        $s = $this->endTag();
-        if ($s === '') return '';
-        return $texy->mark($s, $this->getContentType());
-    }
 
 
     /**

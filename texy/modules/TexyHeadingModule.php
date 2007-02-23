@@ -29,7 +29,7 @@ class TexyHeadingModule extends TexyModule
         DYNAMIC = 1,  // auto-leveling
         FIXED =   2;  // fixed-leveling
 
-    protected $allow = array('HeadingSurrounded', 'HeadingUnderlined');
+    protected $allow = array('headingSurrounded', 'headingUnderlined');
 
     /** @var int  level of top heading, 1..6 */
     public $top = 1;
@@ -62,14 +62,14 @@ class TexyHeadingModule extends TexyModule
             'processBlockUnderline',
             '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
           . '(\#|\*|\=|\-){3,}$#mU',
-            'HeadingUnderlined'
+            'headingUnderlined'
         );
 
         $this->texy->registerBlockPattern(
             $this,
             'processBlockSurround',
             '#^((\#|\=){2,})(?!\\2)(.+)\\2*'.TEXY_MODIFIER_H.'?()$#mU',
-            'HeadingSurrounded'
+            'headingSurrounded'
         );
     }
 
@@ -170,7 +170,7 @@ class TexyHeadingModule extends TexyModule
         $parser->element->children[] = $el;
 
         // document title
-        if ($this->title === NULL) $this->title = strip_tags($el->__toString());
+        if ($this->title === NULL) $this->title = Texy::wash($el->content);
 
         // dynamic headings balancing
         $this->_rangeSurround[0] = min($this->_rangeSurround[0], $el->level);
@@ -196,11 +196,11 @@ class TexyHeadingElement extends TexyTextualElement
     public $deltaLevel = 0;
 
 
-    public function __toString()
+    public function toHtml()
     {
         $level = min(6, max(1, $this->level + $this->deltaLevel + $this->texy->headingModule->top));
         $this->tags[0]->setElement('h' . $level);
-        return parent::__toString();
+        return parent::toHtml();
     }
 
 } // TexyHeadingElement

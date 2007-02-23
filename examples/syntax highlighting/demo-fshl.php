@@ -15,61 +15,57 @@
  * @license    GNU GENERAL PUBLIC LICENSE v2
  */
 
-$texyPath = dirname(__FILE__).'/../../texy/';
-$fshlPath = dirname(__FILE__).'/fshl/';
-
 
 // include libs
-require_once ($texyPath . 'texy.php');
-include_once ($fshlPath . 'fshl.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
+
+
+$fshlPath = dirname(__FILE__).'/fshl/';
+include_once $fshlPath . 'fshl.php';
+
+
+if (!class_exists('fshlParser'))
+    die('DOWNLOAD <a href="http://hvge.sk/scripts/fshl/">FSHL</a> AND UNPACK TO FSHL FOLDER FIRST!');
 
 
 
+// this is user callback object for processing Texy events
+class myHandler
+{
 
+    // callback function for processing blocks
+    function blockCode($texy, $element, $lang, $modifier)
+    {
+        $lang = strtoupper($lang);
+        if ($lang == 'JAVASCRIPT') $lang = 'JS';
+        if (!in_array(
+                $lang,
+                array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
+           ) return;
 
-// this is user callback function for processing blocks
-//
-//    /---code lang
-//      ......
-//      ......
-//    \---
-//
-// $element is TexyCodeBlockElement object
-//     $element->content   -  content of element
-//     $element->htmlSafe  -  is content HTML safe?
-//     $element->tag       -  parent HTML tag, default value is 'pre'
-//     $element->type      -  type of content: code | samp | kbd | var | dfn  (or empty value)
-//     $element->lang      -  language (optional)
-//
-//  Syntax highlighter changes $element->content and sets $element->htmlSafe to TRUE
-//
-function myUserFunc($element) {
-    $lang = strtoupper($element->lang);
-    if ($lang == 'JAVASCRIPT') $lang = 'JS';
-    if (!in_array(
-            $lang,
-            array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
-       ) return;
+        $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
+        $element->content = $parser->highlightString($lang, $element->content);
 
-    $parser = new fshlParser($element->texy->utf ? 'HTML_UTF8' : 'HTML', P_TAB_INDENT);
-    $element->setContent($parser->highlightString($lang, $element->getContent()), TRUE);
+        // output is in HTML
+        $element->protect = TRUE;
+
+        // remove tags
+        //$element->tags = NULL;
+    }
+
 }
 
 
 
-
-
-
 $texy = new Texy();
-
-// set user callback function for /-- code blocks
-$texy->blockModule->codeHandler = 'myUserFunc';
+$texy->handler = new myHandler;
 
 // processing
 $text = file_get_contents('sample.texy');
 $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
+header('Content-type: text/html; charset=utf-8');
 echo '<style type="text/css">'. file_get_contents($fshlPath.'styles/COHEN_style.css') . '</style>';
 echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
@@ -80,5 +76,3 @@ echo '<hr />';
 echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
-
-?>

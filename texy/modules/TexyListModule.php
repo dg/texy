@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyListModule extends TexyModule
 {
-    protected $allow = array('List');
+    protected $allow = array('list');
 
     public $bullets = array(
         '*'  => TRUE,
@@ -65,7 +65,7 @@ class TexyListModule extends TexyModule
             'processBlock',
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color: red}
           . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
-            'List'
+            'list'
         );
     }
 

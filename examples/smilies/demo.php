@@ -16,8 +16,7 @@
 
 
 // include Texy!
-$texyPath = '../../texy/';
-require_once ($texyPath . 'texy.php');
+require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
@@ -25,9 +24,9 @@ $texy = new Texy();
 
 
 // SMILIES ARE DISABLED BY DEFAULT!
-$texy->smiliesModule->allowed = TRUE;
+$texy->allowed['smilies'] = TRUE;
 // configure it
-$texy->smiliesModule->root  = 'images/';
+$texy->smiliesModule->iconPrefix  = '';
 $texy->smiliesModule->class  = 'smilie';
 $texy->smiliesModule->icons[':oops:'] = 'redface.gif';  // user-defined smilie
 
@@ -38,6 +37,7 @@ $text = file_get_contents('sample.texy');
 $html = $texy->process($text);  // that's all folks!
 
 // CSS style
+header('Content-type: text/html; charset=utf-8');
 echo '<style type="text/css"> .smiley { vertical-align: middle; } </style>';
 
 // echo formated output
