@@ -85,7 +85,7 @@ class TexyHtmlWellForm
         //    [3] => ... (attributes)
         //    [4] => /   (empty)
 
-        if (isset(TexyHtml::$empty[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.'/>';
+        if (isset(Texy::$emptyTags[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.'/>';
 
         if ($mClosing) {  // closing
             $pair = end($this->tagStack);
@@ -100,7 +100,7 @@ class TexyHtmlWellForm
             }
             if ($pair === FALSE) return '';
 
-            if (isset(TexyHtml::$block[$mTag])) {
+            if (isset(Texy::$blockTags[$mTag])) {
                 array_splice($this->tagStack, -$i);
                 return $s;
             }

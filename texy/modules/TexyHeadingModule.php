@@ -113,7 +113,7 @@ class TexyHeadingModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('hx');
         } else {
-            $el->tags[0] = TexyHtmlEl::el('hx');
+            $el->tags[0] = TexyHtml::el('hx');
         }
 
         $el->level = $this->levels[$mLine];
@@ -158,7 +158,7 @@ class TexyHeadingModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('hx');
         } else {
-            $el->tags[0] = TexyHtmlEl::el('hx');
+            $el->tags[0] = TexyHtml::el('hx');
         }
 
         $el->level = 7 - min(7, max(2, strlen($mLine)));

@@ -68,7 +68,7 @@ class TexyQuoteModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('blockquote');
         } else {
-            $el->tags[0] = TexyHtmlEl::el('blockquote');
+            $el->tags[0] = TexyHtml::el('blockquote');
         }
 
         $content = '';

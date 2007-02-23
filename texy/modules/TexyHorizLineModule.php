@@ -68,7 +68,7 @@ class TexyHorizLineModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('hr');
         } else {
-            $el->tags[0] = TexyHtmlEl::el('hr');
+            $el->tags[0] = TexyHtml::el('hr');
         }
 
         $parser->element->children[] = $el;

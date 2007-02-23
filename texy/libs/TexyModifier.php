@@ -63,7 +63,7 @@ class TexyModifier
 
     public function setProperties()
     {
-        $acc = TexyHtml::$attrs;
+        $acc = Texy::$tagAttrs;
 
         foreach (func_get_args() as $arg)
         {
@@ -116,25 +116,25 @@ class TexyModifier
 
 
     /**
-     * Generates TexyHtmlEl element
+     * Generates TexyHtml element
      * @param string
-     * @return TexyHtmlEl
+     * @return TexyHtml
      */
     public function generate($tag)
     {
         // tag & attibutes
         $tmp = $this->texy->allowedTags; // speed-up
         if ($tmp === Texy::ALL) {
-            $el = TexyHtmlEl::el($tag, $this->attrs);
+            $el = TexyHtml::el($tag, $this->attrs);
 
         } elseif (is_array($tmp) && isset($tmp[$tag])) {
             $tmp = $tmp[$tag];
 
             if ($tmp === Texy::ALL) {
-                $el = TexyHtmlEl::el($tag, $this->attrs);
+                $el = TexyHtml::el($tag, $this->attrs);
 
             } else {
-                $el = TexyHtmlEl::el($tag);
+                $el = TexyHtml::el($tag);
 
                 if (is_array($tmp) && count($tmp)) {
                     $tmp = array_flip($tmp);
@@ -143,7 +143,7 @@ class TexyModifier
                 }
             }
         } else {
-            $el = TexyHtmlEl::el($tag);
+            $el = TexyHtml::el($tag);
         }
 
         // HACK (move to front)

@@ -198,6 +198,7 @@ class TexyPhraseModule extends TexyModule
     {
         list($match, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         if ($mContent == NULL) {
+            // ???
             preg_match('#^(.)+(.+)'.TEXY_MODIFIER.'?\\1+()$#U', $match, $matches);
             list($match, , $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
         }
@@ -246,7 +247,7 @@ class TexyPhraseModule extends TexyModule
                 $el = $modifier->generate($tag);
                 $modifier = NULL;
             } else {
-                $el = TexyHtmlEl::el($tag);
+                $el = TexyHtml::el($tag);
             }
 
             if ($mLink && $tag === 'q') { // cite
@@ -297,7 +298,7 @@ class TexyPhraseModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3);
             $el = $mod->generate( $this->codeTag );
         } else {
-            $el = TexyHtmlEl::el( $this->codeTag );
+            $el = TexyHtml::el( $this->codeTag );
         }
 
         return $this->texy->mark(

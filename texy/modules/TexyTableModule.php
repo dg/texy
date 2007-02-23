@@ -79,7 +79,7 @@ class TexyTableModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
             $el->tags[0] = $mod->generate('table');
         } else {
-            $el->tags[0] = TexyHtmlEl::el('table');
+            $el->tags[0] = TexyHtml::el('table');
         }
 
 //        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
@@ -101,7 +101,7 @@ class TexyTableModule extends TexyModule
                 $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                 $caption->tags[0] = $mod->generate('caption');
             } else {
-                $caption->tags[0] = TexyHtmlEl::el('caption');
+                $caption->tags[0] = TexyHtml::el('caption');
             }
             $caption->parse($mContent);
             $el->children[] = $caption;
@@ -154,7 +154,7 @@ class TexyTableModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
             $elRow->tags[0] = $mod->generate('tr');
         } else {
-            $elRow->tags[0] = TexyHtmlEl::el('tr');
+            $elRow->tags[0] = TexyHtml::el('tr');
         }
 
         if ($this->row % 2 === 0) {

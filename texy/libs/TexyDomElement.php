@@ -28,7 +28,7 @@ abstract class TexyDomElement
     /** @var Texy */
     public $texy;
 
-    /** @var array of TexyHtmlEl */
+    /** @var array of TexyHtml */
     public $tags = array();
 
 

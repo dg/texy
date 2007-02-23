@@ -107,7 +107,7 @@ class TexyListModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate($tag);
         } else {
-            $el->tags[0] = TexyHtmlEl::el($tag);
+            $el->tags[0] = TexyHtml::el($tag);
         }
 
         $el->tags[0]->style['list-style-type'] = $style;
@@ -154,7 +154,7 @@ class TexyListModule extends TexyModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $elItem->tags[0] = $mod->generate($tag);
         } else {
-            $elItem->tags[0] = TexyHtmlEl::el($tag);
+            $elItem->tags[0] = TexyHtml::el($tag);
         }
 
         // next lines

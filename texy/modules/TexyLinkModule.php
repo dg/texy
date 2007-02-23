@@ -107,7 +107,6 @@ class TexyLinkModule extends TexyModule
 
         if (!$modifier) $modifier = new TexyModifier($this->texy);
 
-        // if (strlen($URL) > 1)  if ($URL{0} === '\'' || $URL{0} === '"') $URL = substr($URL, 1, -1);
         $this->references[$name] = array(
             'URL' => $URL,
             'label' => $label,
@@ -215,14 +214,24 @@ class TexyLinkModule extends TexyModule
         list($match, $mRef) = $matches;
         //    [1] => [ref]
 
-        $ref = $this->getReference(substr($mRef, 1, -1));
-        if (!$ref) return $match;
+        $tx = $this->texy;
+        $name = substr($mRef, 1, -1);
+        $ref = $this->getReference($name);
+
+        if (!$ref) {
+            // try handler
+            if (is_callable(array($tx->handler, 'Reference')))
+                return $tx->handler->Reference($tx, $name);
+
+            // no change
+            return $match;
+        }
 
         if ($ref['label']) {
             // prevent cycling
             if (isset(self::$callstack[$mRef['name']])) $content = $ref['label'];
             else {
-                $label = new TexyTextualElement($this->texy);
+                $label = new TexyTextualElement($tx);
                 self::$callstack[$mRef['name']] = TRUE;
                 $label->parse($ref['label']);
                 $content = $label->content;
@@ -234,7 +243,7 @@ class TexyLinkModule extends TexyModule
         }
 
         $el = $this->factory($mRef, NULL, NULL, NULL, NULL);
-        return $el->startMark($this->texy) . $content . $el->endMark($this->texy);
+        return $el->startMark($tx) . $content . $el->endMark($tx);
     }
 
 

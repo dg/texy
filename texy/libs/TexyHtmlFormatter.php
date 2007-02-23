@@ -52,7 +52,7 @@ class TexyHtmlFormatter
 
         // indent all block elements + br
         $text = preg_replace_callback(
-            '# *<(/?)(' . implode(array_keys(TexyHtml::$block), '|') . '|br)(>| [^>]*>) *#i',
+            '# *<(/?)(' . implode(array_keys(Texy::$blockTags), '|') . '|br)(>| [^>]*>) *#i',
             array($this, 'indent'),
             $text
         );
@@ -117,7 +117,7 @@ class TexyHtmlFormatter
                    . str_repeat("\t", max(0, $this->space - 1))
                    . $match;
 
-        if (isset(TexyHtml::$empty[$mTag]))
+        if (isset(Texy::$emptyTags[$mTag]))
             return "\r"
                    . str_repeat("\t", $this->space)
                    . $match

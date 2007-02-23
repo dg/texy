@@ -165,7 +165,7 @@ class TexyBlockModule extends TexyModule
             $el->tags[0] = $mod->generate('pre');
 
             $el->tags[0]->class[] = $mSecond; // lang
-            if ($mType && $mType !== 'pre') $el->tags[1] = TexyHtmlEl::el($mType); // type
+            if ($mType && $mType !== 'pre') $el->tags[1] = TexyHtml::el($mType); // type
 
             // outdent
             if ($spaces = strspn($mContent, ' '))

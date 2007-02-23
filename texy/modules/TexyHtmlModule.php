@@ -89,7 +89,7 @@ class TexyHtmlModule extends TexyModule
         if (empty($tx->allowed['HtmlTag'])) return $match;
 
         $tag = strtolower($mTag);
-        if (!isset(TexyHtml::$valid[$tag])) $tag = $mTag;  // undo lowercase
+        if (!isset(Texy::$validTags[$tag])) $tag = $mTag;  // undo lowercase
 
         // tag & attibutes
         $aTags = $tx->allowedTags; // speed-up
@@ -107,7 +107,7 @@ class TexyHtmlModule extends TexyModule
         if ($isEmpty && !$isOpening)  // error - can't close empty element
             return $match;
 
-        $el = TexyHtmlEl::el($tag);
+        $el = TexyHtml::el($tag);
         if ($aTags === Texy::ALL && $isEmpty) $el->_empty = TRUE; // force empty
 
         if (!$isOpening) // closing tag? we are finished
@@ -187,7 +187,7 @@ class TexyHtmlModule extends TexyModule
 
     public function trustMode($onlyValidTags = TRUE)
     {
-        $this->texy->allowedTags = $onlyValidTags ? TexyHtml::$valid : Texy::ALL;
+        $this->texy->allowedTags = $onlyValidTags ? Texy::$validTags : Texy::ALL;
     }
 
 

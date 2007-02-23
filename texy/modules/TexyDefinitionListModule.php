@@ -102,7 +102,7 @@ class TexyDefinitionListModule extends TexyListModule
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
             $el->tags[0] = $mod->generate('dl');
         } else {
-            $el->tags[0] = TexyHtmlEl::el('dl');
+            $el->tags[0] = TexyHtml::el('dl');
         }
 
         $parser->moveBackward(2);
@@ -130,7 +130,7 @@ class TexyDefinitionListModule extends TexyListModule
                     $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
                     $elItem->tags[0] = $mod->generate('dt');
                 } else {
-                    $elItem->tags[0] = TexyHtmlEl::el('dt');
+                    $elItem->tags[0] = TexyHtml::el('dt');
                 }
 
                 $elItem->parse($mContent);
