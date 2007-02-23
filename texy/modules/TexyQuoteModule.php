@@ -95,9 +95,9 @@ class TexyQuoteModule extends TexyModule
 
 
     /**
-     * Converts cite destination to TexyLink
+     * Converts cite destination to TexyUrl
      * @param string
-     * @return TexyLink
+     * @return TexyUrl
      */
     public function citeLink($dest)
     {
@@ -107,12 +107,12 @@ class TexyQuoteModule extends TexyModule
             $dest = substr($dest, 1, -1);
             $ref = $this->getReference($dest);
             if ($ref)
-                $link = new TexyLink($ref['URL'], $tx->linkModule->root, TexyLink::DIRECT);
+                $link = new TexyUrl($ref['URL'], $tx->linkModule->root, TexyUrl::DIRECT);
             else
-                $link = new TexyLink($dest, $tx->linkModule->root, TexyLink::REFERENCE);
+                $link = new TexyUrl($dest, $tx->linkModule->root, TexyUrl::REFERENCE);
 
         } else { // direct URL
-            $link = new TexyLink($dest, $tx->linkModule->root, TexyLink::DIRECT);
+            $link = new TexyUrl($dest, $tx->linkModule->root, TexyUrl::DIRECT);
         }
 
         // handler

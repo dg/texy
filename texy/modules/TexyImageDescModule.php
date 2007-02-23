@@ -106,7 +106,7 @@ class TexyImageDescModule extends TexyModule
         if ($mLink) {
             if ($mLink === ':') {
                 $elLink = $tx->linkModule->factoryEl(
-                    new TexyLink($URL, $tx->imageModule->linkedRoot, TRUE),
+                    new TexyUrl($URL, $tx->imageModule->linkedRoot, TexyUrl::IMAGE),
                     new TexyModifier($tx)
                 );
             } else {

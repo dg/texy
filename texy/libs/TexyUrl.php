@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  *
  * Analyse type of URL and convert it to valid URL or textual representation
  */
-class TexyLink
+class TexyUrl
 {
     protected $value;
     protected $type;
@@ -46,7 +46,7 @@ class TexyLink
 
 
     /**
-     * Creates a new TexyLink object
+     * Creates a new TexyUrl object
      *
      * @param string  text written in document
      * @param string  root, for relative URL's
@@ -97,14 +97,6 @@ class TexyLink
             if ($root == NULL) $this->url = $value;
             else $this->url = rtrim($root, '/\\') . '/' . $value;
         }
-    }
-
-
-
-    static public function adjustURL($value, $root, $isImage)
-    {
-        $link = new self($value, $root, $isImage);
-        return $link->url;
     }
 
 
@@ -205,4 +197,4 @@ class TexyLink
     private function __unset($nm) { $this->__get($nm); }
     private function __isset($nm) { $this->__get($nm); }
 
-} // TexyLink
+} // TexyUrl

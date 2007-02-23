@@ -229,7 +229,7 @@ class TexyLinkModule extends TexyModule
                 unset(self::$callstack[$mRef['name']]);
             }
         } else {
-            $link = new TexyLink($ref['URL'], $this->root, TexyLink::DIRECT);
+            $link = new TexyUrl($ref['URL'], $this->root, TexyUrl::DIRECT);
             $content = $link->asTextual();
         }
 
@@ -248,7 +248,7 @@ class TexyLinkModule extends TexyModule
         list($mURL) = $matches;
         //    [0] => URL
 
-        $link = new TexyLink($mURL, NULL, FALSE);
+        $link = new TexyUrl($mURL, NULL, TexyUrl::DIRECT);
         $el = $this->factoryEl(
             $link,
             new TexyModifier($this->texy)
@@ -260,7 +260,7 @@ class TexyLinkModule extends TexyModule
 
     public function factory($dest, $mMod1, $mMod2, $mMod3, $label)
     {
-        $src = TexyLink::DIRECT;
+        $src = TexyUrl::DIRECT;
         $root = $this->root;
         $tx = $this->texy;
 
@@ -272,13 +272,13 @@ class TexyLinkModule extends TexyModule
                 $dest = $ref['URL'];
                 $modifier = clone $ref['modifier'];
             } else {
-                $src = TexyLink::REFERENCE;
+                $src = TexyUrl::REFERENCE;
                 $modifier = new TexyModifier($tx);
             }
 
         // [* image *]
         } elseif (strlen($dest)>1 && $dest{0} === '[' && $dest{1} === '*') {
-            $src = TexyLink::IMAGE;
+            $src = TexyUrl::IMAGE;
             $root = $tx->imageModule->linkedRoot;
             $dest = trim(substr($dest, 2, -2));
             $ref = $tx->imageModule->getReference($dest);
@@ -295,7 +295,7 @@ class TexyLinkModule extends TexyModule
 
         $modifier->setProperties($mMod1, $mMod2, $mMod3);
 
-        $link = new TexyLink($dest, $root, $src, $label);
+        $link = new TexyUrl($dest, $root, $src, $label);
 
         if (is_callable(array($tx->handler, 'Link')))
             $tx->handler->Link($link, $modifier);

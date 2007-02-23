@@ -222,7 +222,7 @@ class TexyImageModule extends TexyModule
         if ($mLink) {
             if ($mLink === ':') {
                 $elLink = $tx->linkModule->factoryEl(
-                    new TexyLink($URL, $this->linkedRoot, TexyLink::IMAGE),
+                    new TexyUrl($URL, $this->linkedRoot, TexyUrl::IMAGE),
                     new TexyModifier($tx)
                 );
             } else {
@@ -261,7 +261,8 @@ class TexyImageModule extends TexyModule
     public function factoryEl($URL, $overURL, $width, $height, $modifier, $link)
     {
         $tx = $this->texy;
-        $src = TexyLink::adjustURL($URL, $this->webRoot, TRUE);
+        $src = new TexyUrl($URL, $this->webRoot, TexyUrl::IMAGE);
+        $src = $src->asURL();
         $tx->summary['images'][] = $src;
 
         $alt = $modifier->title !== NULL ? $modifier->title : $this->defaultAlt;
@@ -303,7 +304,8 @@ class TexyImageModule extends TexyModule
 
         // onmouseover actions generate
         if ($overURL !== NULL) {
-            $overSrc = TexyLink::adjustURL($overURL, $this->webRoot, TRUE);
+            $overSrc = new TexyUrl($overURL, $this->webRoot, TexyUrl::IMAGE);
+            $overSrc = $overSrc->asURL();
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
             $el->onmouseout = 'this.src=\'' . addSlashes($src) . '\'';
             $tx->summary['preload'][] = $overSrc;

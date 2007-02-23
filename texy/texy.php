@@ -33,7 +33,7 @@ require_once TEXY_DIR.'libs/TexyGenericBlock.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
 require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
 require_once TEXY_DIR.'libs/TexyHtmlWellForm.php';
-require_once TEXY_DIR.'libs/TexyLink.php';
+require_once TEXY_DIR.'libs/TexyUrl.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
