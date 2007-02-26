@@ -284,13 +284,6 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        
-        if (strpos($text, '&') !== FALSE) // speed-up
-            $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-
-        foreach ($tx->getLineModules() as $module)
-            $text = $module->linePostProcess($text);
-        
         $element->content = $text;
     }
 

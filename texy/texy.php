@@ -28,7 +28,7 @@ define('TEXY', 'Version 2.0beta $Revision$');
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
-require_once TEXY_DIR.'libs/TexyDomElement.php';
+require_once TEXY_DIR.'libs/TexyDom.php';
 require_once TEXY_DIR.'libs/TexyGenericBlock.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
 require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
@@ -69,16 +69,13 @@ class Texy
     const NONE = FALSE;
 
     // types of marks
-    const CONTENT_NONE =    1;
-    const CONTENT_INLINE =  2;
-    const CONTENT_TEXTUAL = 3;
-    const CONTENT_BLOCK =   4;
+    const CONTENT_NONE =    "\x14";
+    const CONTENT_INLINE =  "\x15";
+    const CONTENT_TEXTUAL = "\x16";
+    const CONTENT_BLOCK =   "\x17";
 
     /** @var bool  use XHTML? */
     static public $xhtml = TRUE;
-
-    /** @var boolean  Do obfuscate e-mail addresses? */
-    static public $obfuscateEmail = TRUE;
 
     /** @var string  input & output text encoding */
     public $encoding = 'utf-8';
@@ -90,10 +87,13 @@ class Texy
     public $allowedTags;
 
     /** @var TRUE|FALSE|array  Allowed classes */
-    public $allowedClasses = Texy::ALL;
+    public $allowedClasses;
 
     /** @var TRUE|FALSE|array  Allowed inline CSS style */
-    public $allowedStyles = Texy::ALL;
+    public $allowedStyles;
+
+    /** @var boolean  Do obfuscate e-mail addresses? */
+    public $obfuscateEmail = TRUE;
 
     /** @var int  TAB width (for converting tabs to spaces) */
     public $tabWidth = 8;
@@ -145,39 +145,27 @@ class Texy
      * notice: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
      */
     static public $blockTags = array(
-        'address'=>1, 'blockquote'=>1, 'caption'=>1, 'col'=>1, 'colgroup'=>1, 'dd'=>1, 'div'=>1, 'dl'=>1, 'dt'=>1,
-        'fieldset'=>1, 'form'=>1, 'h1'=>1, 'h2'=>1, 'h3'=>1, 'h4'=>1, 'h5'=>1, 'h6'=>1, 'hr'=>1, 'iframe'=>1, 'legend'=>1,
-        'li'=>1, 'object'=>1, 'ol'=>1, 'p'=>1, 'param'=>1, 'pre'=>1, 'table'=>1, 'tbody'=>1, 'td'=>1, 'tfoot'=>1,
-        'th'=>1, 'thead'=>1, 'tr'=>1, 'ul'=>1,/*'embed'=>1,*/);
+        'address'=>1,'blockquote'=>1,'caption'=>1,'col'=>1,'colgroup'=>1,'dd'=>1,'div'=>1,'dl'=>1,'dt'=>1,
+        'fieldset'=>1,'form'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,'h5'=>1,'h6'=>1,'hr'=>1,'iframe'=>1,'legend'=>1,
+        'li'=>1,'object'=>1,'ol'=>1,'p'=>1,'param'=>1,'pre'=>1,'table'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,
+        'th'=>1,'thead'=>1,'tr'=>1,'ul'=>1,/*'embed'=>1,*/);
     // todo: iframe, object, are block?
 
     static public $inlineTags = array(
-        'a'=>1, 'abbr'=>1, 'acronym'=>1, 'area'=>1, 'b'=>1, 'big'=>1, 'br'=>1, 'button'=>1, 'cite'=>1, 'code'=>1,
-        'del'=>1, 'dfn'=>1, 'em'=>1, 'i'=>1, 'img'=>1, 'input'=>1, 'ins'=>1, 'kbd'=>1, 'label'=>1, 'map'=>1, 'noscript'=>1,
-        'optgroup'=>1, 'option'=>1, 'q'=>1, 'samp'=>1, 'script'=>1, 'select'=>1, 'small'=>1, 'span'=>1, 'strong'=>1,
-        'sub'=>1, 'sup'=>1, 'textarea'=>1, 'tt'=>1, 'var'=>1,);
+        'a'=>1,'abbr'=>1,'acronym'=>1,'area'=>1,'b'=>1,'big'=>1,'br'=>1,'button'=>1,'cite'=>1,'code'=>1,
+        'del'=>1,'dfn'=>1,'em'=>1,'i'=>1,'img'=>1,'input'=>1,'ins'=>1,'kbd'=>1,'label'=>1,'map'=>1,'noscript'=>1,
+        'optgroup'=>1,'option'=>1,'q'=>1,'samp'=>1,'script'=>1,'select'=>1,'small'=>1,'span'=>1,'strong'=>1,
+        'sub'=>1,'sup'=>1,'textarea'=>1,'tt'=>1,'var'=>1,);
 
     static public $inlineCont = array(
         'br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,
         'applet'=>1,'isindex'=>1,);
     // todo: use applet, isindex?
 
-    static public $emptyTags = array('img'=>1, 'hr'=>1, 'br'=>1, 'input'=>1, 'meta'=>1, 'area'=>1, 'base'=>1, 'col'=>1,
-        'link'=>1, 'param'=>1,);
+    static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,'base'=>1,'col'=>1,
+        'link'=>1,'param'=>1,);
 
-    //static public $metaTag = array('html'=>1, 'head'=>1, 'body'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'title'=>1,);
-
-    static public $tagAttrs = array(
-        'abbr'=>1, 'accesskey'=>1, 'align'=>1, 'alt'=>1, 'archive'=>1, 'axis'=>1, 'bgcolor'=>1, 'cellpadding'=>1,
-        'cellspacing'=>1, 'char'=>1, 'charoff'=>1, 'charset'=>1, 'cite'=>1, 'classid'=>1, 'codebase'=>1, 'codetype'=>1,
-        'colspan'=>1, 'compact'=>1, 'coords'=>1, 'data'=>1, 'datetime'=>1, 'declare'=>1, 'dir'=>1, 'face'=>1, 'frame'=>1,
-        'headers'=>1, 'href'=>1, 'hreflang'=>1, 'hspace'=>1, 'ismap'=>1, 'lang'=>1, 'longdesc'=>1, 'name'=>1, 'noshade'=>1,
-        'nowrap'=>1, 'onblur'=>1, 'onclick'=>1, 'ondblclick'=>1, 'onkeydown'=>1, 'onkeypress'=>1, 'onkeyup'=>1,
-        'onmousedown'=>1, 'onmousemove'=>1, 'onmouseout'=>1, 'onmouseover'=>1, 'onmouseup'=>1, 'rel'=>1, 'rev'=>1, 'rowspan'=>1,
-        'rules'=>1, 'scope'=>1, 'shape'=>1, 'size'=>1, 'span'=>1, 'src'=>1, 'standby'=>1, 'start'=>1, 'summary'=>1,
-        'tabindex'=>1, 'target'=>1, 'title'=>1, 'type'=>1, 'usemap'=>1, 'valign'=>1, 'value'=>1, 'vspace'=>1,);
-
-    static public $validTags; /* array_merge(Texy::$blockTags, Texy::$inlineTags); */
+    //static public $metaTag = array('html'=>1,'head'=>1,'body'=>1,'base'=>1,'meta'=>1,'link'=>1,'title'=>1,);
 
 
     /**
@@ -218,12 +206,6 @@ class Texy
 
     public function __construct()
     {
-        // static variable initialization
-        self::$validTags = array_merge(self::$blockTags, self::$inlineTags);
-
-        // full support for valid HTML tags by default
-        $this->allowedTags = self::$validTags;
-
         // load all modules
         $this->loadModules();
 
@@ -233,6 +215,9 @@ class Texy
         $this->genericBlock = new TexyGenericBlock($this);
 
         $this->formatterModule = $this->formatter; // back compatibility
+
+        // default configuration
+        $this->trustMode();
 
         // examples of link reference ;-)
         $mod = new TexyModifier($this);
@@ -537,7 +522,18 @@ class Texy
     {
         $this->allowedClasses = self::NONE;                 // no class or ID are allowed
         $this->allowedStyles  = self::NONE;                 // style modifiers are disabled
-        $this->htmlModule->safeMode();                      // only HTML tags and attributes specified in $safeTags array are allowed
+        $this->allowedTags = array(                         // only some "safe" HTML tags and attributes are allowed
+            'a'         => array('href'),
+            'acronym'   => array('title'),
+            'b'         => array(),
+            'br'        => array(),
+            'code'      => array(),
+            'em'        => array(),
+            'i'         => array(),
+            'strong'    => array(),
+            'sub'       => array(),
+            'sup'       => array(),
+        );
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['linkDefinition'] = FALSE;           // disable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
@@ -553,7 +549,7 @@ class Texy
     {
         $this->allowedClasses = self::ALL;                  // classes and id are allowed
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
-        $this->htmlModule->trustMode();                     // full support for HTML tags
+        $this->allowedTags = array_merge(self::$blockTags, self::$inlineTags); // full support for valid HTML tags
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['linkDefinition'] = TRUE;            // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
@@ -601,24 +597,17 @@ class Texy
 
     /**
      * Generate unique mark - useful for freezing (folding) some substrings
-     * @param string
-     * @param int
-     * @return string
+     * @param string   any string to froze
+     * @param int      Texy::CONTENT_* constant
+     * @return string  internal mark
      */
     public function mark($child, $contentType)
     {
         if ($child==='') return '';
 
-        static $borders = array(
-            self::CONTENT_NONE => "\x14",
-            self::CONTENT_INLINE => "\x15",
-            self::CONTENT_TEXTUAL => "\x16",
-            self::CONTENT_BLOCK => "\x17",
-        );
-
-        $key = $borders[$contentType]
+        $key = $contentType
             . strtr(base_convert(count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
-            . $borders[$contentType];
+            . $contentType;
 
         $this->marks[$key] = $child;
 

@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyBlockModule extends TexyModule
 {
-    protected $allow = array('blocks', 'blockPre', 'blockCode', 'blockHtml', 'blockText', 'blockSource', 'blockComment');
+    protected $allow = array('blocks', 'blockPre', 'blockCode', 'blockHtml', 'blockText', 'blockTexysource', 'blockComment');
 
 
     public function init()
@@ -33,7 +33,7 @@ class TexyBlockModule extends TexyModule
         $this->texy->registerBlockPattern(
             $this,
             'processBlock',
-            '#^/--+ *(?:(code|text|html|div|notexy|source|comment)( .*)?|) *'.TEXY_MODIFIER_H.'?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi',
+            '#^/--+ *(?:(code|text|html|div|texysource|comment)( .*)?|) *'.TEXY_MODIFIER_H.'?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi',
             'blocks'
         );
     }
@@ -67,11 +67,10 @@ class TexyBlockModule extends TexyModule
         $mContent = trim($mContent, "\n");
 
         if (!$mType) $mType = 'pre';                // default type
-        if ($mType === 'notexy') $mType = 'html'; // backward compatibility
-        if ($mType === 'html' && !$tx->allowed['blockHtml']) $mType = 'text';
-        if ($mType === 'source' && !$tx->allowed['blockSource']) $mType = 'pre';
-        if ($mType === 'code' && !$tx->allowed['blockCode']) $mType = 'pre';
-        if ($mType === 'pre' && !$tx->allowed['blockPre']) $mType = 'div';
+        if ($mType === 'html' && empty($tx->allowed['blockHtml'])) $mType = 'text';
+        if ($mType === 'texysource' && empty($tx->allowed['blockTexysource'])) $mType = 'pre';
+        if ($mType === 'code' && empty($tx->allowed['blockCode'])) $mType = 'pre';
+        if ($mType === 'pre' && empty($tx->allowed['blockPre'])) $mType = 'div';
 
         $type = 'block' . ucfirst($mType);
         if (empty($tx->allowed[$type])) {
@@ -96,7 +95,7 @@ class TexyBlockModule extends TexyModule
             break;
 
 
-        case 'source':
+        case 'texysource':
             // outdent
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
@@ -108,11 +107,13 @@ class TexyBlockModule extends TexyModule
             $html = $tx->unMarks($html);
             $html = $tx->wellForm->process($html);
             $html = $tx->formatter->process($html);
+            $html = str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $html);
 
             $el = new TexyTextualElement($tx);
             $el->tags[0] = $mod->generate('pre');
             $el->tags[1] = TexyHtml::el('code')->class('html');
             $el->content = $html;
+            $el->protect = TRUE;
             $parser->element->children[] = $el;
             break;
 
@@ -142,15 +143,28 @@ class TexyBlockModule extends TexyModule
             }
 
             $el = new TexyTextualElement($tx);
-            $el->content = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8');
+
+            // protect entites & < > "
+            // $mContent = strtr($mContent, "\x05\x06\x07<>\"", "   \x05\x06\x07");
+            // decode quotes
+            // $mContent = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8'); // ENT_NOQUOTES converts &#x22;
+            // htmlSpecialChars
+            // $mContent = str_replace(array('&', '<', '>', '"'), array('&amp;', '&lt;', '&gt;', '&quot;'), $mContent);
+            // pass back protected entities
+            // $mContent = strtr($mContent, "\x05\x06\x07", '<>"');
+
+            if (strpos($mContent, '&') !== FALSE) // speed-up
+                $mContent = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8');
+            $el->content = str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent);
+            $el->protect = TRUE;
             $parser->element->children[] = $el;
             break;
 
 
         case 'text':
             $el = new TexyTextualElement($tx);
-            $mContent = nl2br( htmlSpecialChars($mContent, ENT_NOQUOTES) );
-            $el->content = $tx->mark($mContent, Texy::CONTENT_BLOCK);
+            $el->content = nl2br( str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent) );
+            $el->protect = TRUE;
             $parser->element->children[] = $el;
             break;
 
@@ -169,10 +183,11 @@ class TexyBlockModule extends TexyModule
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-            $el->content = $mContent;
+            $el->content = str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent);
+            $el->protect = TRUE;
 
             if (is_callable(array($tx->handler, $type)))
-                $tx->handler->$type($tx, $el, $mSecond, $mod);
+                $tx->handler->$type($tx, $mContent, $el, $mSecond, $mod);
 
             $parser->element->children[] = $el;
 

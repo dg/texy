@@ -140,27 +140,20 @@ class TexyTextualElement extends TexyDomElement
 
     protected function contentToHtml()
     {
-        if ($this->protect)
-            // check entites
-            return preg_replace_callback('#&\#?[a-zA-Z0-9]+;#', array(__CLASS__, 'entCb'), $this->content);
-        else {
+        if ($this->protect) {
+            return $this->content;
+        } else {
             $s = $this->content;
-            /*
+
             if (strpos($s, '&') !== FALSE) // speed-up
                 $s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 
             foreach ($this->texy->getLineModules() as $module)
                 $s = $module->linePostProcess($s);
-            */
-            return htmlspecialChars($s, ENT_NOQUOTES);
+
+            // htmlspecialChars($s, ENT_NOQUOTES); - speed up
+            return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
         }
-    }
-
-
-
-    static private function entCb($m)
-    {
-        return htmlSpecialChars(html_entity_decode($m[0], ENT_QUOTES, 'UTF-8'), ENT_QUOTES);
     }
 
 

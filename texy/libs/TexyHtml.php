@@ -46,19 +46,16 @@ class TexyHtml
      */
     static public function el($name=NULL, $attrs=NULL)
     {
-        return new self($name, $attrs);
-    }
-
-
-    private function __construct($name, $attrs)
-    {
+        $el = new self();
         if (is_array($attrs)) {
-           foreach ($attrs as $key => $value) $this->$key = $value;
+           foreach ($attrs as $key => $value) $el->$key = $value;
         }
 
-        $this->_name = $name;
-        $this->_empty = isset(Texy::$emptyTags[$name]);
-        $this->_childNodes = array();
+        $el->_name = $name;
+        $el->_empty = isset(Texy::$emptyTags[$name]);
+        $el->_childNodes = array();
+
+        return $el;
     }
 
 
@@ -133,16 +130,12 @@ class TexyHtml
 
         $s = '<' . $this->_name;
 
-        // reserved properties
-    	static $res = array('_name'=>1, '_childNodes'=>1, '_empty'=>1,);
-
-        // use array_change_key_case($this, CASE_LOWER) ?
         // for each attribute...
-        foreach ($this as $key => $value)
-        {
-            // skip private properties
-            if (isset($res[$key])) continue;
+        $attrs = (array) $this; // use array_change_key_case($this, CASE_LOWER) ???
+        unset($attrs['_name'], $attrs['_childNodes'], $attrs['_empty']);
 
+        foreach ($attrs as $key => $value)
+        {
             // skip NULLs and false boolean attributes
             if ($value === NULL || $value === FALSE) continue;
 
@@ -158,7 +151,7 @@ class TexyHtml
 
                 // prepare into temporary array
                 $tmp = NULL;
-                // use array_change_key_case($value, CASE_LOWER) ?
+                // use array_change_key_case($value, CASE_LOWER) ???
                 foreach ($value as $k => $v) {
                     // skip NULLs & empty string; composite 'style' vs. 'others'
                     if ($v == NULL) continue;
@@ -171,7 +164,8 @@ class TexyHtml
                 $value = implode($key === 'style' ? ';' : ' ', $tmp);
             }
             // add new attribute
-            $s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value, ENT_COMPAT)) . '"';
+            $value = str_replace(array('&', '"', '<', '>', '@'), array('&amp;', '&quot;', '&lt;', '&gt;', '&#64;'), $value);
+            $s .= ' ' . $key . '="' . Texy::freezeSpaces($value) . '"';
         }
 
         // finish start tag

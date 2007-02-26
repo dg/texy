@@ -27,29 +27,6 @@ class TexyHtmlModule extends TexyModule
 {
     protected $allow = array('html', 'htmlTag', 'htmlComment');
 
-    public $safeTags = array(
-        'a'         => array('href', 'rel', 'title', 'lang'),
-        'abbr'      => array('title', 'lang'),
-        'acronym'   => array('title', 'lang'),
-        'b'         => array('title', 'lang'),
-        'br'        => array(),
-        'cite'      => array('title', 'lang'),
-        'code'      => array('title', 'lang'),
-        'dfn'       => array('title', 'lang'),
-        'em'        => array('title', 'lang'),
-        'i'         => array('title', 'lang'),
-        'kbd'       => array('title', 'lang'),
-        'q'         => array('cite', 'title', 'lang'),
-        'samp'      => array('title', 'lang'),
-        'small'     => array('title', 'lang'),
-        'span'      => array('title', 'lang'),
-        'strong'    => array('title', 'lang'),
-        'sub'       => array('title', 'lang'),
-        'sup'       => array('title', 'lang'),
-        'var'       => array('title', 'lang'),
-    );
-
-
 
     public function init()
     {
@@ -57,8 +34,6 @@ class TexyHtmlModule extends TexyModule
             $this,
             'process',
             '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
-
-//            '#<(/?)([a-z][a-z0-9_:-]*)(/?|\s(?:[\sa-z0-9:-]|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^>'.TEXY_MARK.']*)*)>|<!--([^'.TEXY_MARK.']*?)-->#is',
             'html'
         );
     }
@@ -91,7 +66,8 @@ class TexyHtmlModule extends TexyModule
         if (empty($tx->allowed['htmlTag'])) return FALSE;
 
         $tag = strtolower($mTag);
-        if (!isset(Texy::$validTags[$tag])) $tag = $mTag;  // undo lowercase
+        // test for validity - not good!!
+        if (!isset(Texy::$blockTags[$tag]) && !isset(Texy::$inlineTags[$tag])) $tag = $mTag;  // undo lowercase
 
         // tag & attibutes
         $aTags = $tx->allowedTags; // speed-up
@@ -186,20 +162,6 @@ class TexyHtmlModule extends TexyModule
         }
 
         return $tx->mark($el->startTag(), $el->getContentType());
-    }
-
-
-
-    public function trustMode($onlyValidTags = TRUE)
-    {
-        $this->texy->allowedTags = $onlyValidTags ? Texy::$validTags : Texy::ALL;
-    }
-
-
-
-    public function safeMode($allowSafeTags = TRUE)
-    {
-        $this->texy->allowedTags = $allowSafeTags ? $this->safeTags : Texy::NONE;
     }
 
 } // TexyHtmlModule

@@ -340,30 +340,21 @@ class TexyLinkModule extends TexyModule
 
         if (empty($image)) {
 
-            if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) { // email
-
-                if (Texy::$obfuscateEmail) { // obfuscating against spam robots
-                    $s = 'mai';
-                    $s2 = 'lto:' . $URL;
-                    for ($i=0; $i<strlen($s2); $i++)
-                        $s .= '&#' . ord($s2{$i}) . ';';
-
-                    $el->href = $s;
-                } else {
-                    $el->href = 'mailto:' . $URL;
-                }
-
+            if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) {
+                // email
+                $el->href = 'mailto:' . $URL;
                 $el->onclick = $this->emailOnClick;
 
-            } else { // classic URL
-
+            } else {
+                // classic URL
                 $el->href = Texy::webRoot($URL, $this->root, $isAbsolute);
 
                 // rel="nofollow"
                 if ($nofollow || ($this->forceNoFollow && $isAbsolute)) $el->rel[] = 'nofollow';
             }
 
-        } else { // image
+        } else {
+            // image
             $el->href = Texy::webRoot($URL, $tx->imageModule->linkedRoot);
             $el->onclick = $this->imageOnClick;
         }
@@ -383,7 +374,7 @@ class TexyLinkModule extends TexyModule
     public function textualURL($URL)
     {
         if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) { // email
-            return Texy::$obfuscateEmail
+            return $this->texy->obfuscateEmail
                    ? strtr($URL, array('@' => "&#160;(at)&#160;"))
                    : $URL;
         }
