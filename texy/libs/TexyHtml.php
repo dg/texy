@@ -76,18 +76,6 @@ class TexyHtml
 
 
     /**
-     * Sets element's content
-     * @param string|TexyHtml object
-     * @return TexyHtml self
-     */
-    public function setContent($content)
-    {
-        $this->_childNodes = array( $content );
-        return $this;
-    }
-
-
-    /**
      * Adds new child of element's content
      * @param string|TexyHtml object
      * @return TexyHtml self
@@ -116,7 +104,7 @@ class TexyHtml
      * Renders element's start tag, content and end tag
      * @return string
      */
-    public function toTexy($texy)
+    public function toText($texy)
     {
         $ct = $this->getContentType();
         $s = $texy->mark($this->startTag(), $ct);
@@ -126,7 +114,7 @@ class TexyHtml
 
         // add content
         foreach ($this->_childNodes as $val)
-            if ($val instanceof self) $s .= $val->toTexy($texy);
+            if ($val instanceof self) $s .= $val->toText($texy);
             else $s .= $val;
 
         $s .= $texy->mark($this->endTag(), $ct);
@@ -183,10 +171,7 @@ class TexyHtml
                 $value = implode($key === 'style' ? ';' : ' ', $tmp);
             }
             // add new attribute
-            //$s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value, ENT_COMPAT)) . '"';
-            // BACK-COMPATIBILITY-HACK !!!
-            $s .= ' ' . $key . '="' . Texy::freezeSpaces(
-                preg_replace('~&amp;([a-zA-Z0-9]+|#x[0-9a-fA-F]+|#[0-9]+);~', '&$1;', htmlSpecialChars($value, ENT_COMPAT))) . '"';
+            $s .= ' ' . $key . '="' . Texy::freezeSpaces(htmlSpecialChars($value, ENT_COMPAT)) . '"';
         }
 
         // finish start tag

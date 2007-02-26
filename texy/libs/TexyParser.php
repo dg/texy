@@ -189,6 +189,7 @@ class TexyBlockParser extends TexyParser
  */
 class TexyLineParser extends TexyParser
 {
+    public $continue;
 
     public function parse($text)
     {
@@ -241,6 +242,7 @@ class TexyLineParser extends TexyParser
             $px = $pl[$minKey];
             $offset = $start = $arrPos[$minKey];
 
+            $this->continue = FALSE;
             $replacement = call_user_func_array(
                 $px['handler'],
                 array($this, $arrMatches[$minKey],
@@ -251,8 +253,7 @@ class TexyLineParser extends TexyParser
                 $replacement = $replacement->content;
                 $offset += strlen($replacement);
             } elseif ($replacement instanceof TexyHtml) {
-                $replacement = $replacement->toTexy($tx);
-                $offset += strlen($replacement); // !
+                $replacement = $replacement->toText($tx);
             } elseif ($replacement === FALSE) {
                 $arrPos[$minKey] = -2;
                 continue;
@@ -274,16 +275,22 @@ class TexyLineParser extends TexyParser
                 else $arrPos[$key] += $delta;
             }
 
-            $arrPos[$minKey] = -2;
+            if ($this->continue) {
+                $arrPos[$minKey] = -2;
+            } else {
+                $arrPos[$minKey] = -1;
+                $offset += strlen($replacement);
+            }
 
         } while (1);
 
+        
         if (strpos($text, '&') !== FALSE) // speed-up
             $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
 
         foreach ($tx->getLineModules() as $module)
             $text = $module->linePostProcess($text);
-
+        
         $element->content = $text;
     }
 

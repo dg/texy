@@ -62,8 +62,9 @@ $texy->handler = new myHandler;  // references link [1] [2] will be processed th
 $texy->safeMode();               // safe mode prevets attacker to inject some HTML code and disable images
 
 // how generally disable links or enable images? here is a way:
-//      $texy->imageModule->allowed = TRUE;
-//      $texy->linkModule->allowed = FALSE;
+//    $disallow = array('image', 'figure', 'linkReference', 'linkEmail', 'linkURL', 'linkQuick');
+//    foreach ($diallow as $item)
+//        $texy->allowed[$item] = FALSE; 
 
 
 // processing

@@ -72,11 +72,10 @@ class TexyQuoteModule extends TexyModule
         }
 
         $content = '';
-        $linkTarget = '';
         $spaces = '';
         do {
             if ($mSpaces === ':') {
-                $el->tags[0]->cite = $tx->quoteModule->citeLink($mContent)->asURL();
+                $el->tags[0]->cite = $tx->quoteModule->citeLink($mContent);
                 $content .= "\n";
             } else {
                 if ($spaces === '') $spaces = max(1, strlen($mSpaces));
@@ -95,30 +94,33 @@ class TexyQuoteModule extends TexyModule
 
 
     /**
-     * Converts cite destination to TexyUrl
+     * Converts cite source to URL
      * @param string
-     * @return TexyUrl
+     * @return string
      */
-    public function citeLink($dest)
+    public function citeLink($link)
     {
         $tx = $this->texy;
+        $asReference = FALSE;
         // [ref]
-        if ($dest{0} === '[') {
-            $dest = substr($dest, 1, -1);
-            $ref = $this->getReference($dest);
-            if ($ref)
-                $link = new TexyUrl($ref['URL'], $tx->linkModule->root, TexyUrl::DIRECT);
-            else
-                $link = new TexyUrl($dest, $tx->linkModule->root, TexyUrl::REFERENCE);
-
+        if ($link{0} === '[') {
+            $link = substr($link, 1, -1);
+            $ref = $this->getReference($link);
+            if ($ref) {
+                $res = Texy::webRoot($ref['URL'], $tx->linkModule->root);
+            } else {
+                $res = Texy::webRoot($link, $tx->linkModule->root);
+                $asReference = TRUE;
+            }
         } else { // direct URL
-            $link = new TexyUrl($dest, $tx->linkModule->root, TexyUrl::DIRECT);
+            $res = Texy::webRoot($link, $tx->linkModule->root);
         }
 
         // handler
-        if (is_callable(array($tx->handler, 'cite'))) $tx->handler->cite($tx, $link);
+        if (is_callable(array($tx->handler, 'citeSource')))
+            $tx->handler->citeSource($tx, $link, $asReference, $res);
 
-        return $link;
+        return $res;
     }
 
 

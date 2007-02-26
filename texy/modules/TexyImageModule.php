@@ -28,7 +28,7 @@ class TexyImageModule extends TexyModule
     protected $allow = array('image');
 
     /** @var string  root of relative images (http) */
-    public $webRoot = 'images/';
+    public $root = 'images/';
 
     /** @var string  root of linked images (http) */
     public $linkedRoot = 'images/';
@@ -45,10 +45,9 @@ class TexyImageModule extends TexyModule
     /** @var string  default alternative text */
     public $defaultAlt = '';
 
-    protected $references = array();
+    private $references = array();
 
     // back compatiblity
-    public $root;
     public $rootPrefix = '';
 
 
@@ -59,7 +58,6 @@ class TexyImageModule extends TexyModule
         parent::__construct($texy);
 
         // back compatiblity
-        $this->root = & $this->webRoot;
         $this->rootPrefix = & $this->fileRoot;
 
         if (isset($_SERVER['SCRIPT_NAME'])) {
@@ -98,16 +96,10 @@ class TexyImageModule extends TexyModule
             $name = strtolower($name);
         }
 
-        if (!$modifier) $modifier = new TexyModifier($this->texy);
-        list($URL, $overURL, $width, $height) = self::parseContent($URLs);
-        $this->references[$name] = array(
-            'URL' => $URL,
-            'overURL' => $overURL,
-            'modifier' => $modifier,
-            'width' => $width,
-            'height' => $height,
-            'name' => $name,
-        );
+        $ref = $this->parseContent($URLs);
+        $ref['modifier'] = $modifier;
+        $ref['name'] = $name;
+        $this->references[$name] = $ref;
     }
 
 
@@ -126,8 +118,13 @@ class TexyImageModule extends TexyModule
             $name = strtolower($name);
         }
 
-        if (isset($this->references[$name]))
-            return $this->references[$name];
+        if (isset($this->references[$name])) {
+            $ref = $this->references[$name];
+            $ref['modifier'] = empty($ref['modifier'])
+                ? new TexyModifier($this->texy)
+                : clone $ref['modifier'];
+            return $ref;
+        }
 
         return FALSE;
     }
@@ -136,33 +133,53 @@ class TexyImageModule extends TexyModule
 
     /**
      * Parses image's syntax
-     * @param string  input: small.jpg 80x13 | small-over.jpg
-     * @return array  output: ('small.jpg', 'small-over.jpg', 80, 13)
+     * @param string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
+     * @return array  output
      */
-    static private function parseContent($content)
+    private function parseContent($content)
     {
         $content = explode('|', $content);
+        $req = array();
 
         // dimensions
         if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $content[0], $matches)) {
-            $URL = trim($matches[1]);
-            $width = (int) $matches[2];
-            $height = (int) $matches[3];
+            $req['imageURL'] = trim($matches[1]);
+            $req['width'] = (int) $matches[2];
+            $req['height'] = (int) $matches[3];
 
         } else {
-            $URL = trim($content[0]);
-            $width = $height = NULL;
+            $req['imageURL'] = trim($content[0]);
+            $req['width'] = $req['height'] = NULL;
         }
 
-        // onmouseover actions generate
-        $overURL = NULL;
+        // onmouseover image
+        $req['overURL'] = NULL;
         if (isset($content[1])) {
-            $content[1] = trim($content[1]);
-            if ($content[1] !== '') $overURL = $content[1];
+            $tmp = trim($content[1]);
+            if ($tmp !== '') $req['overURL'] = $tmp;
         }
-        return array($URL, $overURL, $width, $height);
+
+        // linked image
+        $req['linkedURL'] = NULL;
+        if (isset($content[2])) {
+            $tmp = trim($content[1]);
+            if ($tmp !== '') $req['linkedURL'] = $tmp;
+        }
+
+        return $req;
     }
 
+
+    public function parse($mURLs, $mMod1, $mMod2, $mMod3, $mMod4)
+    {
+        $req = $this->getReference(trim($mURLs));
+        if (!$req) {
+            $req = $this->parseContent($mURLs);
+            $req['modifier'] = new TexyModifier($this->texy);
+        }
+        $req['modifier']->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        return $req;
+    }
 
 
     /**
@@ -217,58 +234,64 @@ class TexyImageModule extends TexyModule
 
         $tx = $this->texy;
 
-        list($URL, $overURL, $width, $height, $mod) = $this->factory1($mURLs, $mMod1, $mMod2, $mMod3, $mMod4);
-        $el = $this->factoryEl($URL, $overURL, $width, $height, $mod, $mLink);
+        $req = $this->parse($mURLs, $mMod1, $mMod2, $mMod3, $mMod4);
+        $el = $this->factory($req);
 
         if (is_callable(array($tx->handler, 'image')))
-            $tx->handler->image($tx, $el, $mod);
+            $tx->handler->image($tx, $req, $el);
+
+        $tx->summary['images'][] = $el->src;
 
         if ($mLink) {
             if ($mLink === ':') {
-                $elLink = $tx->linkModule->factoryEl(
-                    new TexyUrl($URL, $this->linkedRoot, TexyUrl::IMAGE),
-                    new TexyModifier($tx)
+                $reqL = array(
+                    'URL' => empty($req['linkedURL']) ? $req['imageURL'] : $req['linkedURL'],
+                    'image' => TRUE,
+                    'modifier' => new TexyModifier($tx),
                 );
             } else {
-                $elLink = $tx->linkModule->factory($mLink, NULL, NULL, NULL, NULL);
+                $reqL = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
             }
+
+            $elLink = $tx->linkModule->factory($reqL);
+            $tx->summary['links'][] = $elLink->href;
+
             $elLink->addChild($el);
-            return $elLink;
+            return $elLink->toText($tx);
         }
 
-        return $el;
+        return $el->toText($tx);
     }
 
 
 
-    public function factory1($mContent, $mMod1, $mMod2, $mMod3, $mMod4)
+    public function factory($req)
     {
-        $mContent = trim($mContent);
+        extract($req);
 
-        $ref = $this->getReference($mContent);
-        if ($ref) {
-            $URL = $ref['URL'];
-            $overURL = $ref['overURL'];
-            $width = $ref['width'];
-            $height = $ref['height'];
-            $modifier = clone $ref['modifier'];
-        } else {
-            list($URL, $overURL, $width, $height) = self::parseContent($mContent);
-            $modifier = new TexyModifier($this->texy);
-        }
-
-        $modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        return array($URL, $overURL, $width, $height, $modifier);
-    }
-
-
-
-    public function factoryEl($URL, $overURL, $width, $height, $modifier, $link)
-    {
         $tx = $this->texy;
-        $src = new TexyUrl($URL, $this->webRoot, TexyUrl::IMAGE);
-        $src = $src->asURL();
-        $tx->summary['images'][] = $src;
+        $src = Texy::webRoot($imageURL, $this->root);
+        $file = Texy::fileRoot($imageURL, $this->fileRoot);
+
+        if (substr($src, -4) === '.swf') {
+/*
+    <!--[if !IE]> -->
+    <object type="application/x-shockwave-flash" data="movie.swf" width="300" height="135">
+    <!-- <![endif]-->
+
+    <!--[if IE]>
+    <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="300" height="135"
+        codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0">
+        <param name="movie" value="movie.swf" />
+    <!--><!--dgx-->
+        <param name="loop" value="true" />
+        <param name="menu" value="false" />
+
+        <p><?=$modifier->title !== NULL ? $modifier->title : $this->defaultAlt;?></p>
+    </object>
+    <!-- <![endif]-->
+*/
+        }
 
         $alt = $modifier->title !== NULL ? $modifier->title : $this->defaultAlt;
         $modifier->title = NULL;
@@ -296,8 +319,8 @@ class TexyImageModule extends TexyModule
             $el->width = $width;
             $el->height = $height;
 
-        } elseif (is_file($this->fileRoot . '/' . $URL)) {
-            $size = getImageSize($this->fileRoot . '/' . $URL);
+        } elseif (is_file($file)) {
+            $size = getImageSize($file);
             if (is_array($size)) {
                 $el->width = $size[0];
                 $el->height = $size[1];
@@ -307,16 +330,17 @@ class TexyImageModule extends TexyModule
         $el->src = $src;
         $el->alt = (string) $alt;  // needed
 
+
         // onmouseover actions generate
         if ($overURL !== NULL) {
-            $overSrc = new TexyUrl($overURL, $this->webRoot, TexyUrl::IMAGE);
-            $overSrc = $overSrc->asURL();
+            $overSrc = Texy::webRoot($overURL, $this->root);
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
             $el->onmouseout = 'this.src=\'' . addSlashes($src) . '\'';
+            static $counter; $counter++;
+            $attrs['onload'] = "preload_$counter=new Image();preload_$counter.src='" . addSlashes($overSrc) . "';this.onload=''";
             $tx->summary['preload'][] = $overSrc;
         }
 
-        $tmp = $el->alt; unset($el->alt); $el->alt = $tmp;
         return $el;
     }
 

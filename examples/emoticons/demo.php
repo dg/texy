@@ -1,10 +1,10 @@
 <?php
 
 /**
- * TEXY! SMILIES DEMO
+ * TEXY! EMOTICONS DEMO
  * --------------------------------------
  *
- * This demo shows how enable smilies in Texy!
+ * This demo shows how enable emoticons in Texy!
  *
  * This source file is subject to the GNU GPL license.
  *
@@ -23,12 +23,11 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 $texy = new Texy();
 
 
-// SMILIES ARE DISABLED BY DEFAULT!
-$texy->allowed['smilies'] = TRUE;
+// EMOTICONS ARE DISABLED BY DEFAULT!
+$texy->allowed['emoticon'] = TRUE;
 // configure it
-$texy->smiliesModule->iconPrefix  = '';
-$texy->smiliesModule->class  = 'smilie';
-$texy->smiliesModule->icons[':oops:'] = 'redface.gif';  // user-defined smilie
+$texy->emoticonModule->class = 'smilie';
+$texy->emoticonModule->icons[':oops:'] = 'redface.gif';  // user-defined emoticon
 
 
 

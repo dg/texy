@@ -60,7 +60,7 @@ class TexyHtmlWellForm
     {
         $this->tagStack = array();
         $this->tagUsed  = array();
-        $text = preg_replace_callback('#<(/?)([a-z_:][a-z0-9._:-]*)(|\s.*)(/?)>()#Uis', array($this, 'cb'), $text);
+        $text = preg_replace_callback('#<(/?)([a-z][a-z0-9._:-]*)(|\s.*)(/?)>()#Uis', array($this, 'cb'), $text);
         if ($this->tagStack) {
             $pair = end($this->tagStack);
             while ($pair !== FALSE) {
@@ -85,16 +85,18 @@ class TexyHtmlWellForm
         //    [3] => ... (attributes)
         //    [4] => /   (empty)
 
-        if (isset(Texy::$emptyTags[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.'/>';
+        if (isset(Texy::$emptyTags[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.$mEmpty.'>';
 
         if ($mClosing) {  // closing
             $pair = end($this->tagStack);
             $s = '';
             $i = 1;
             while ($pair !== FALSE) {
-                $s .= '</'.$pair['tag'].'>';
-                if ($pair['tag'] === $mTag) break;
-                $this->tagUsed[$pair['tag']]--;
+                $tag = $pair['tag'];
+                //if (Texy::$xhtml || !isset(self::$optional[$tag]))
+                $s .= '</'.$tag.'>';
+                if ($tag === $mTag) break;
+                $this->tagUsed[$tag]--;
                 $pair = prev($this->tagStack);
                 $i++;
             }
@@ -124,8 +126,10 @@ class TexyHtmlWellForm
                     isset($this->autoClose[$pair['tag']]) &&
                     isset($this->autoClose[$pair['tag']][$mTag]) ) {
 
-                $s .= '</'.$pair['tag'].'>';
-                $this->tagUsed[$pair['tag']]--;
+                $tag = $pair['tag'];
+                //if (Texy::$xhtml || !isset(self::$optional[$tag]))
+                $s .= '</'.$tag.'>';
+                $this->tagUsed[$tag]--;
                 unset($this->tagStack[key($this->tagStack)]);
 
                 $pair = end($this->tagStack);

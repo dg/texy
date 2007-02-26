@@ -21,13 +21,13 @@ if (!defined('TEXY')) die();
 
 
 /**
- * Smilies Module
+ * Emoticon module
  */
-class TexySmiliesModule extends TexyModule
+class TexyEmoticonModule extends TexyModule
 {
-    //protected $allow = array('smilies');
+    //protected $allow = array('emoticon');
 
-    /** @var array  supported smilies and image files */
+    /** @var array  supported emoticons and image files */
     public $icons = array (
         ':-)'  =>  'smile.gif',
         ':-('  =>  'sad.gif',
@@ -41,17 +41,20 @@ class TexySmiliesModule extends TexyModule
         ':-|'  =>  'neutral.gif',
     );
 
-    /** @var string  CSS class for smilies */
+    /** @var string  CSS class for emoticons */
     public $class;
 
-    /** @var string  images location= $texy->imageModule->webRoot (or fileRoot) + $iconPrefix + $icons[...] */
-    public $iconPrefix;
+    /** @var string  root of relative images (default value is $texy->imageModule->root) */
+    public $root;
+
+    /** @var string  physical location of images on server (default value is $texy->imageModule->fileRoot) */
+    public $fileRoot;
 
 
 
     public function init()
     {
-        if (empty($this->texy->allowed['smilies'])) return;
+        if (empty($this->texy->allowed['emoticon'])) return;
 
         krsort($this->icons);
 
@@ -61,7 +64,7 @@ class TexySmiliesModule extends TexyModule
 
         $RE = '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#';
 
-        $this->texy->registerLinePattern($this, 'processLine', $RE, 'smilies');
+        $this->texy->registerLinePattern($this, 'processLine', $RE, 'emoticon');
     }
 
 
@@ -83,17 +86,31 @@ class TexySmiliesModule extends TexyModule
         $tx = $this->texy;
 
         // find the closest match
-        foreach ($this->icons as $key => $value)
+        foreach ($this->icons as $emoticon => $file)
         {
-            if (substr($match, 0, strlen($key)) === $key)
+            if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
-                $mod = new TexyModifier($tx);
-                $mod->title = $match;
-                $mod->classes[] = $this->class;
-                $el = $tx->imageModule->factoryEl($this->iconPrefix . $value, NULL, NULL, NULL, $mod, NULL);
-                return $el; // should be object
+                $el = TexyHtml::el('img');
+                $el->src = Texy::webRoot($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+                $el->alt = $match;
+                $el->class[] = $this->class;
+
+                $file = Texy::fileRoot($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
+                if (is_file($file)) {
+                    $size = getImageSize($file);
+                    if (is_array($size)) {
+                        $el->width = $size[0];
+                        $el->height = $size[1];
+                    }
+                }
+
+                if (is_callable(array($tx->handler, 'emoticon')))
+                    $tx->handler->emoticon($tx, $match, $el);
+
+                $tx->summary['images'][] = $el->src;
+                return $el;
             }
         }
     }
 
-} // TexySmiliesModule
+}

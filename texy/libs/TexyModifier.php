@@ -147,7 +147,7 @@ class TexyModifier
         }
 
         // HACK (move to front)
-        $el->href = NULL; // $el->src = NULL;
+        $el->href = $el->src = NULL;
 
 
         // title

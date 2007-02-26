@@ -234,7 +234,7 @@ class TexyPhraseModule extends TexyModule
 
         $content = $mContent;
         if ($name === 'phraseStrongEm') {
-            $content = TexyHtml::el('em')->addChild($content)->toTexy($tx);
+            $content = TexyHtml::el('em')->addChild($content)->toText($tx);
         }
 
         $modifier = new TexyModifier($tx);
@@ -246,20 +246,21 @@ class TexyPhraseModule extends TexyModule
         $el = $modifier->generate($tag);
 
         if ($mLink && $tag === 'q') { // cite
-            $el->cite = $tx->quoteModule->citeLink($mLink)->asURL();
+            $el->cite = $tx->quoteModule->citeLink($mLink);
             $mLink = NULL;
         }
 
         $el->addChild($content);
-        $content = $el->toTexy($tx);
+        $content = $el->toText($tx);
 
         if ($mLink) {
-            $el = $tx->linkModule->factory($mLink, $mMod1, $mMod2, $mMod3, $mContent);
-            $el->addChild($content);
-            $content = $el->toTexy($tx);
+            $req = $tx->linkModule->parse($mLink, $mMod1, $mMod2, $mMod3, $mContent);
+            $el = $tx->linkModule->factory($req)->addChild($content);
+            $content = $el->toText($tx);
         }
 
-        return $content; // must be text
+        $parser->continue = TRUE;
+        return $content;
     }
 
 

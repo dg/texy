@@ -33,7 +33,6 @@ require_once TEXY_DIR.'libs/TexyGenericBlock.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
 require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
 require_once TEXY_DIR.'libs/TexyHtmlWellForm.php';
-require_once TEXY_DIR.'libs/TexyUrl.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
@@ -41,7 +40,7 @@ require_once TEXY_DIR.'modules/TexyBlockModule.php';
 require_once TEXY_DIR.'modules/TexyHeadingModule.php';
 require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
 require_once TEXY_DIR.'modules/TexyHtmlModule.php';
-require_once TEXY_DIR.'modules/TexyImageDescModule.php';
+require_once TEXY_DIR.'modules/TexyFigureModule.php';
 require_once TEXY_DIR.'modules/TexyImageModule.php';
 require_once TEXY_DIR.'modules/TexyLinkModule.php';
 require_once TEXY_DIR.'modules/TexyListModule.php';
@@ -50,7 +49,7 @@ require_once TEXY_DIR.'modules/TexyLongWordsModule.php';
 require_once TEXY_DIR.'modules/TexyPhraseModule.php';
 require_once TEXY_DIR.'modules/TexyQuoteModule.php';
 require_once TEXY_DIR.'modules/TexyScriptModule.php';
-require_once TEXY_DIR.'modules/TexySmiliesModule.php';
+require_once TEXY_DIR.'modules/TexyEmoticonModule.php';
 require_once TEXY_DIR.'modules/TexyTableModule.php';
 require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
@@ -122,7 +121,7 @@ class Texy
         $imageModule,
         $linkModule,
         $phraseModule,
-        $smiliesModule,
+        $emoticonModule,
         $blockModule,
         $headingModule,
         $horizLineModule,
@@ -130,7 +129,7 @@ class Texy
         $listModule,
         $definitionListModule,
         $tableModule,
-        $imageDescModule,
+        $figureModule,
         $typographyModule,
         $longWordsModule;
 
@@ -220,7 +219,7 @@ class Texy
     public function __construct()
     {
         // static variable initialization
-        self::$validTags = array_merge(Texy::$blockTags, Texy::$inlineTags);
+        self::$validTags = array_merge(self::$blockTags, self::$inlineTags);
 
         // full support for valid HTML tags by default
         $this->allowedTags = self::$validTags;
@@ -257,7 +256,7 @@ class Texy
         $this->imageModule = new TexyImageModule($this);
         $this->linkModule = new TexyLinkModule($this);
         $this->phraseModule = new TexyPhraseModule($this);
-        $this->smiliesModule = new TexySmiliesModule($this);
+        $this->emoticonModule = new TexyEmoticonModule($this);
 
         // block parsing - order is not important
         $this->blockModule = new TexyBlockModule($this);
@@ -267,7 +266,7 @@ class Texy
         $this->listModule = new TexyListModule($this);
         $this->definitionListModule = new TexyDefinitionListModule($this);
         $this->tableModule = new TexyTableModule($this);
-        $this->imageDescModule = new TexyImageDescModule($this);
+        $this->figureModule = new TexyFigureModule($this);
 
         // post process - order is not important
         $this->typographyModule = new TexyTypographyModule($this);
@@ -377,7 +376,7 @@ class Texy
             $text = iconv($this->encoding, 'utf-8', $text);
 
         // remove special chars, normalize lines
-        $text = Texy::wash($text);
+        $text = self::wash($text);
 
         // standardize line endings to unix-like  (dos, mac)
         $text = str_replace("\r\n", "\n", $text); // DOS
@@ -421,7 +420,7 @@ class Texy
             $text = iconv($this->encoding, 'utf-8', $text);
 
         // remove special chars and line endings
-        $text = Texy::wash($text);
+        $text = self::wash($text);
         $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
 
         // parse
@@ -452,6 +451,9 @@ class Texy
         $html = $this->wellForm->process($html);
         $html = $this->formatter->process($html);
 
+        if (!self::$xhtml) // remove HTML 4.01 optional tags
+            $html = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#', '', $html);
+
         // this notice should remain!
         if (!defined('TEXY_NOTICE_SHOWED')) {
             $html .= "\n<!-- by Texy2! -->";
@@ -459,7 +461,7 @@ class Texy
         }
 
         // unfreeze spaces
-        $html = Texy::unfreezeSpaces($html);
+        $html = self::unfreezeSpaces($html);
 
         // convert from UTF-8
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
@@ -503,7 +505,7 @@ class Texy
         $this->formatter->lineWrap = $saveLineWrap;
 
         // unfreeze spaces
-        $html = Texy::unfreezeSpaces($html);
+        $html = self::unfreezeSpaces($html);
 
         // remove tags
         $html = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $html);
@@ -533,8 +535,8 @@ class Texy
      */
     public function safeMode()
     {
-        $this->allowedClasses = Texy::NONE;                 // no class or ID are allowed
-        $this->allowedStyles  = Texy::NONE;                 // style modifiers are disabled
+        $this->allowedClasses = self::NONE;                 // no class or ID are allowed
+        $this->allowedStyles  = self::NONE;                 // style modifiers are disabled
         $this->htmlModule->safeMode();                      // only HTML tags and attributes specified in $safeTags array are allowed
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['linkDefinition'] = FALSE;           // disable [ref]: URL  reference definitions
@@ -549,8 +551,8 @@ class Texy
      */
     public function trustMode()
     {
-        $this->allowedClasses = Texy::ALL;                  // classes and id are allowed
-        $this->allowedStyles  = Texy::ALL;                  // inline styles are allowed
+        $this->allowedClasses = self::ALL;                  // classes and id are allowed
+        $this->allowedStyles  = self::ALL;                  // inline styles are allowed
         $this->htmlModule->trustMode();                     // full support for HTML tags
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['linkDefinition'] = TRUE;            // enable [ref]: URL  reference definitions
@@ -608,10 +610,10 @@ class Texy
         if ($child==='') return '';
 
         static $borders = array(
-            Texy::CONTENT_NONE => "\x14",
-            Texy::CONTENT_INLINE => "\x15",
-            Texy::CONTENT_TEXTUAL => "\x16",
-            Texy::CONTENT_BLOCK => "\x17",
+            self::CONTENT_NONE => "\x14",
+            self::CONTENT_INLINE => "\x15",
+            self::CONTENT_TEXTUAL => "\x16",
+            self::CONTENT_BLOCK => "\x17",
         );
 
         $key = $borders[$contentType]
@@ -628,6 +630,41 @@ class Texy
     public function unMarks($html)
     {
         return strtr($html, $this->marks);
+    }
+
+
+
+    static public function webRoot($URL, $root, &$isAbsolute=NULL)
+    {
+        if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $URL)) {
+            $isAbsolute = TRUE;
+            // absolute URL
+            // must begins with 'http://' or 'ftp://'
+            $lower = strtolower($URL);
+            if (substr($lower, 0, 4) === 'www.') {
+                return 'http://' . $URL;
+            } elseif (substr($lower, 0, 4) === 'ftp.') {
+                return 'ftp://' . $URL;
+            }
+
+            return $URL;
+        }
+
+        // relative
+        $isAbsolute = FALSE;
+        return rtrim($root, '/\\') . '/' . $URL;
+    }
+
+
+
+    static public function fileRoot($path, $root)
+    {
+        if (substr($path, 0, 1) === '/') {
+            return $path;
+        }
+
+        // relative
+        return $path;
     }
 
 

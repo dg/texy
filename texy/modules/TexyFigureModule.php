@@ -21,20 +21,20 @@ if (!defined('TEXY')) die();
 
 
 /**
- * Image with description module
+ * The captioned figures
  */
-class TexyImageDescModule extends TexyModule
+class TexyFigureModule extends TexyModule
 {
-    protected $allow = array('imageDesc');
+    protected $allow = array('figure');
 
     /** @var string  non-floated box CSS class */
-    public $boxClass = 'image';
+    public $class = 'figure';
 
     /** @var string  left-floated box CSS class */
-    public $leftClass = 'image left';
+    public $leftClass = 'figure-left';
 
     /** @var string  right-floated box CSS class */
-    public $rightClass = 'image right';
+    public $rightClass = 'figure-right';
 
 
 
@@ -44,7 +44,7 @@ class TexyImageDescModule extends TexyModule
             $this,
             'processBlock',
             '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU',
-            'imageDesc'
+            'figure'
         );
     }
 
@@ -74,50 +74,50 @@ class TexyImageDescModule extends TexyModule
         $tx = $this->texy;
         $el = new TexyBlockElement($tx);
 
-        list($URL, $overURL, $width, $height, $imgMod) = $tx->imageModule->factory1($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
+        $req = $tx->imageModule->parse($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
         $mod = new TexyModifier($tx);
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $hAlign = $imgMod->hAlign;
-        $mod->hAlign = $imgMod->hAlign = NULL;
+        $hAlign = $req['modifier']->hAlign;
+        $mod->hAlign = $req['modifier']->hAlign = NULL;
 
-        $elImage = $tx->imageModule->factoryEl($URL, $overURL, $width, $height, $imgMod, $mLink);
+        $elImg = $tx->imageModule->factory($req, $mLink);
+        if ($mLink) {
+            if ($mLink === ':') {
+                $reqL = array(
+                    'URL' => empty($req['linkedURL']) ? $req['imageURL'] : $req['linkedURL'],
+                    'image' => TRUE,
+                    'modifier' => new TexyModifier($tx),
+                );
+            } else {
+                $reqL = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
+            }
+
+            $elLink = $tx->linkModule->factory($reqL);
+            $tx->summary['links'][] = $elLink->href;
+
+            $elLink->addChild($elImg);
+            $elImg = $elLink;
+        }
 
         $el->tags[0] = $mod->generate('div');
+        $el->children[0] = new TexyTextualElement($tx);
+        $el->children[0]->content = $elImg->toText($tx);
+
+        $el->children[1] = new TexyBlockElement($tx);
+        $el->children[1]->parse(ltrim($mContent));
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             $el->tags[0]->class[] = $this->leftClass;
-
         } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
             $el->tags[0]->class[] = $this->rightClass;
+        } elseif ($this->class)
+            $el->tags[0]->class[] = $this->class;
 
-        } elseif ($tx->imageDescModule->boxClass)
-            $el->tags[0]->class[] = $this->boxClass;
-
-
-        $elImg = new TexyTextualElement($tx);
-        $el->children[] = $elImg;
-
-        $elDesc = new TexyBlockElement($tx);
-        $elDesc->parse(ltrim($mContent));
-        $el->children[] = $elDesc;
-
-        if ($mLink) {
-            if ($mLink === ':') {
-                $elLink = $tx->linkModule->factoryEl(
-                    new TexyUrl($URL, $tx->imageModule->linkedRoot, TexyUrl::IMAGE),
-                    new TexyModifier($tx)
-                );
-            } else {
-                $elLink = $tx->linkModule->factory($mLink, NULL, NULL, NULL, NULL);
-            }
-            $elLink->addChild($elImage);
-            $elImg->content = $elLink->toTexy($tx);
-        } else {
-            $elImg->content = $elImage->toTexy($tx);
-        }
+        if (is_callable(array($tx->handler, 'figure')))
+            $tx->handler->figure($tx, $req, $el);
 
         $parser->element->children[] = $el;
     }
 
-} // TexyImageModule
+}

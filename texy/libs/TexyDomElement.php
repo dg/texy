@@ -44,7 +44,7 @@ abstract class TexyDomElement
      * Returns element's content
      * @return string
      */
-    abstract protected function getContent();
+    abstract protected function contentToHtml();
 
 
 
@@ -60,7 +60,7 @@ abstract class TexyDomElement
                 $start .= $el->startTag();
                 $end = $el->endTag() . $end;
             }
-        return $start . $this->getContent() . $end;
+        return $start . $this->contentToHtml() . $end;
     }
 
 
@@ -93,7 +93,7 @@ class TexyBlockElement extends TexyDomElement
 
 
 
-    protected function getContent()
+    protected function contentToHtml()
     {
         $s = '';
         foreach ($this->children as $child)
@@ -138,13 +138,22 @@ class TexyTextualElement extends TexyDomElement
     public $protect = FALSE;
 
 
-    protected function getContent()
+    protected function contentToHtml()
     {
         if ($this->protect)
             // check entites
             return preg_replace_callback('#&\#?[a-zA-Z0-9]+;#', array(__CLASS__, 'entCb'), $this->content);
-        else
-            return htmlspecialChars($this->content, ENT_NOQUOTES);
+        else {
+            $s = $this->content;
+            /*
+            if (strpos($s, '&') !== FALSE) // speed-up
+                $s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+
+            foreach ($this->texy->getLineModules() as $module)
+                $s = $module->linePostProcess($s);
+            */
+            return htmlspecialChars($s, ENT_NOQUOTES);
+        }
     }
 
 
