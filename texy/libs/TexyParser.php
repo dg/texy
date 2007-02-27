@@ -20,57 +20,23 @@ if (!defined('TEXY')) die();
 
 
 
-/**
- * Texy! parser base class
- */
-abstract class TexyParser
-{
-    /** @var TexyDomElement */
-    public $element;
-
-
-
-    /**
-     * @param TexyDomElement
-     */
-    public function __construct($element)
-    {
-        $this->element = $element;
-    }
-
-
-
-    /**
-     * @param string
-     */
-    abstract public function parse($text);
-
-
-
-    /**
-     * Undefined property usage prevention
-     */
-    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
-    function __set($nm, $val) { $this->__get($nm); }
-    private function __unset($nm) { $this->__get($nm); }
-    private function __isset($nm) { $this->__get($nm); }
-
-}
-
-
-
-
-
-
 
 /**
  * Parser for block structures
  */
-class TexyBlockParser extends TexyParser
+class TexyBlockParser
 {
     private $text;        // text splited in array of lines
     private $offset;
+    private $texy;
+    public $children = array();
 
+
+
+    public function __construct($texy)
+    {
+    	$this->texy = $texy;
+    }
 
 
     // match current line against RE.
@@ -109,11 +75,13 @@ class TexyBlockParser extends TexyParser
     public function parse($text)
     {
         // initialization
-        $tx = $this->element->texy;
+        $tx = $this->texy;
         $this->text = $text;
         $this->offset = 0;
 
         $pb = $tx->getBlockPatterns();
+        if (!$pb) return array(); // nothing to do
+
         $keys = array_keys($pb);
         $arrMatches = $arrPos = array();
         foreach ($keys as $key) $arrPos[$key] = -1;
@@ -121,7 +89,7 @@ class TexyBlockParser extends TexyParser
 
         // parse loop
         do {
-            $minKey = -1;
+            $minKey = NULL;
             $minPos = strlen($text);
             if ($this->offset >= $minPos) break;
 
@@ -151,7 +119,7 @@ class TexyBlockParser extends TexyParser
                 if ($arrPos[$key] < $minPos) { $minPos = $arrPos[$key]; $minKey = $key; }
             } // foreach
 
-            $next = ($minKey === -1) ? strlen($text) : $arrPos[$minKey];
+            $next = ($minKey === NULL) ? strlen($text) : $arrPos[$minKey];
 
             if ($next > $this->offset) {
                 $str = substr($text, $this->offset, $next - $this->offset);
@@ -163,7 +131,7 @@ class TexyBlockParser extends TexyParser
             $px = $pb[$minKey];
             $matches = $arrMatches[$minKey];
             $this->offset = $arrPos[$minKey] + strlen($matches[0]) + 1;   // 1 = \n
-            $ok = call_user_func_array($px['handler'], array($this, $matches, $px['name']));
+            $ok = call_user_func_array($px['handler'], array($this, $matches, $minKey));
             if ($ok === FALSE || ( $this->offset <= $arrPos[$minKey] )) { // module rejects text
                 $this->offset = $arrPos[$minKey]; // turn offset back
                 $arrPos[$minKey] = -2;
@@ -173,7 +141,15 @@ class TexyBlockParser extends TexyParser
             $arrPos[$minKey] = -1;
 
         } while (1);
+
+        return $this->children;
     }
+
+    /**
+     * Undefined property usage prevention
+     */
+    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
+    function __set($nm, $val) { $this->__get($nm); }
 
 } // TexyBlockParser
 
@@ -187,18 +163,32 @@ class TexyBlockParser extends TexyParser
 /**
  * Parser for single line structures
  */
-class TexyLineParser extends TexyParser
+class TexyLineParser
 {
-    public $continue;
+    public $again;
+    private $texy;
 
-    public function parse($text)
+
+    public function __construct($texy)
     {
+        $this->texy = $texy;
+    }
+
+
+    public function parse($text, $select=NULL)
+    {
+        $tx = $this->texy;
+
         // initialization
-        $element = $this->element;
-        $tx = $element->texy;
+        $pl = $tx->getLinePatterns();
+        if ($select) {
+            foreach ($select as $name) if (isset($pl[$name])) $plX[$name] = $pl[$name];
+            $pl = $plX;
+            unset($plX);
+        }
+        if (!$pl) return $text; // nothing to do
 
         $offset = 0;
-        $pl = $tx->getLinePatterns();
         $keys = array_keys($pl);
         $arrMatches = $arrPos = array();
         foreach ($keys as $key) $arrPos[$key] = -1;
@@ -206,7 +196,7 @@ class TexyLineParser extends TexyParser
 
         // parse loop
         do {
-            $minKey = -1;
+            $minKey = NULL;
             $minPos = strlen($text);
 
             foreach ($keys as $index => $key)
@@ -237,16 +227,16 @@ class TexyLineParser extends TexyParser
                 }
             } // foreach
 
-            if ($minKey === -1) break;
+            if ($minKey === NULL) break;
 
             $px = $pl[$minKey];
             $offset = $start = $arrPos[$minKey];
 
-            $this->continue = FALSE;
+            $this->again = FALSE;
             $replacement = call_user_func_array(
                 $px['handler'],
                 array($this, $arrMatches[$minKey],
-                $px['name'])
+                $minKey)
             );
 
             if ($replacement instanceof TexyTextualElement) {
@@ -275,7 +265,7 @@ class TexyLineParser extends TexyParser
                 else $arrPos[$key] += $delta;
             }
 
-            if ($this->continue) {
+            if ($this->again) {
                 $arrPos[$minKey] = -2;
             } else {
                 $arrPos[$minKey] = -1;
@@ -284,7 +274,14 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        $element->content = $text;
+        return $text;
     }
+
+
+    /**
+     * Undefined property usage prevention
+     */
+    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
+    function __set($nm, $val) { $this->__get($nm); }
 
 } // TexyLineParser

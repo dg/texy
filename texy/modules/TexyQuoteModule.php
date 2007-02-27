@@ -88,7 +88,7 @@ class TexyQuoteModule extends TexyModule
 
         $el->parse($content);
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
     }
 
 
@@ -107,13 +107,13 @@ class TexyQuoteModule extends TexyModule
             $link = substr($link, 1, -1);
             $ref = $this->getReference($link);
             if ($ref) {
-                $res = Texy::webRoot($ref['URL'], $tx->linkModule->root);
+                $res = Texy::completeURL($ref['URL'], $tx->linkModule->root);
             } else {
-                $res = Texy::webRoot($link, $tx->linkModule->root);
+                $res = Texy::completeURL($link, $tx->linkModule->root);
                 $asReference = TRUE;
             }
         } else { // direct URL
-            $res = Texy::webRoot($link, $tx->linkModule->root);
+            $res = Texy::completeURL($link, $tx->linkModule->root);
         }
 
         // handler

@@ -91,7 +91,7 @@ class TexyBlockModule extends TexyModule
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
             $el->parse($mContent);
-            $parser->element->children[] = $el;
+            $parser->children[] = $el;
             break;
 
 
@@ -114,7 +114,7 @@ class TexyBlockModule extends TexyModule
             $el->tags[1] = TexyHtml::el('code')->class('html');
             $el->content = $html;
             $el->protect = TRUE;
-            $parser->element->children[] = $el;
+            $parser->children[] = $el;
             break;
 
 
@@ -123,41 +123,14 @@ class TexyBlockModule extends TexyModule
 
 
         case 'html':
-            preg_match_all(
-                '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
-                $mContent,
-                $matches,
-                PREG_OFFSET_CAPTURE | PREG_SET_ORDER
-            );
-
-            foreach (array_reverse($matches) as $m) {
-                $offset = $m[0][1];
-                foreach ($m as $key => $val) $m[$key] = $val[0];
-
-                $mContent = substr_replace(
-                    $mContent,
-                    $tx->htmlModule->process($this, $m),
-                    $offset,
-                    strlen($m[0])
-                );
-            }
-
             $el = new TexyTextualElement($tx);
-
-            // protect entites & < > "
-            // $mContent = strtr($mContent, "\x05\x06\x07<>\"", "   \x05\x06\x07");
-            // decode quotes
-            // $mContent = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8'); // ENT_NOQUOTES converts &#x22;
-            // htmlSpecialChars
-            // $mContent = str_replace(array('&', '<', '>', '"'), array('&amp;', '&lt;', '&gt;', '&quot;'), $mContent);
-            // pass back protected entities
-            // $mContent = strtr($mContent, "\x05\x06\x07", '<>"');
-
+            $lineParser = new TexyLineParser($this->texy);
+            $mContent = $lineParser->parse($mContent, array('html'));
             if (strpos($mContent, '&') !== FALSE) // speed-up
                 $mContent = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8');
             $el->content = str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent);
             $el->protect = TRUE;
-            $parser->element->children[] = $el;
+            $parser->children[] = $el;
             break;
 
 
@@ -165,7 +138,7 @@ class TexyBlockModule extends TexyModule
             $el = new TexyTextualElement($tx);
             $el->content = nl2br( str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent) );
             $el->protect = TRUE;
-            $parser->element->children[] = $el;
+            $parser->children[] = $el;
             break;
 
 
@@ -189,7 +162,7 @@ class TexyBlockModule extends TexyModule
             if (is_callable(array($tx->handler, $type)))
                 $tx->handler->$type($tx, $mContent, $el, $mSecond, $mod);
 
-            $parser->element->children[] = $el;
+            $parser->children[] = $el;
 
         } // switch
 

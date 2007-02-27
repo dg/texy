@@ -91,11 +91,11 @@ class TexyEmoticonModule extends TexyModule
             if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
                 $el = TexyHtml::el('img');
-                $el->src = Texy::webRoot($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+                $el->src = Texy::completeURL($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
                 $el->alt = $match;
                 $el->class[] = $this->class;
 
-                $file = Texy::fileRoot($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
+                $file = Texy::completePath($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
                 if (is_file($file)) {
                     $size = getImageSize($file);
                     if (is_array($size)) {

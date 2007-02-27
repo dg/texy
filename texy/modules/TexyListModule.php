@@ -122,7 +122,7 @@ class TexyListModule extends TexyModule
 
         if (!$count) return FALSE;
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
     }
 
 

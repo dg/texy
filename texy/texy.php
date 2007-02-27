@@ -274,10 +274,9 @@ class Texy
     {
         if (empty($this->allowed[$name])) return;
 
-        $this->linePatterns[] = array(
+        $this->linePatterns[$name] = array(
             'handler'     => array($module, $method),
             'pattern'     => $pattern,
-            'name'        => $name
         );
     }
 
@@ -289,10 +288,9 @@ class Texy
 
         // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
 
-        $this->blockPatterns[] = array(
+        $this->blockPatterns[$name] = array(
             'handler'     => array($module, $method),
             'pattern'     => $pattern  . 'm',  // force multiline!
-            'name'        => $name
         );
     }
 
@@ -623,7 +621,7 @@ class Texy
 
 
 
-    static public function webRoot($URL, $root, &$isAbsolute=NULL)
+    static public function completeURL($URL, $root, &$isAbsolute=NULL)
     {
         if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $URL)) {
             $isAbsolute = TRUE;
@@ -635,7 +633,6 @@ class Texy
             } elseif (substr($lower, 0, 4) === 'ftp.') {
                 return 'ftp://' . $URL;
             }
-
             return $URL;
         }
 
@@ -646,14 +643,11 @@ class Texy
 
 
 
-    static public function fileRoot($path, $root)
+    static public function completePath($path, $root)
     {
-        if (substr($path, 0, 1) === '/') {
-            return $path;
-        }
-
-        // relative
-        return $path;
+        if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $path)) return FALSE;
+        if (strpos($path, '..')) return FALSE;
+        return rtrim($root, '/\\') . '/' . $path;
     }
 
 
@@ -734,7 +728,5 @@ class Texy
      */
     function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
     function __set($nm, $val) { $this->__get($nm); }
-    private function __unset($nm) { $this->__get($nm); }
-    private function __isset($nm) { $this->__get($nm); }
 
 } // Texy

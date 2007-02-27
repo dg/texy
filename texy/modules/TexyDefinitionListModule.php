@@ -141,7 +141,7 @@ class TexyDefinitionListModule extends TexyListModule
             break;
         }
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
     }
 
 } // TexyDefinitionListModule

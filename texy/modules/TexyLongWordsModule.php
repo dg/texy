@@ -50,16 +50,15 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 
     private $before_r = array(
         'b','B','c','C','d','D','f','F','g','G','k','K','p','P','r','R','t','T','v','V',
-        "\xe8","\xc8","\xef","\xcf","\xf8","\xd8","\x9d","\x8d",  //czech utf-8
-        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4");
+        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4"); //czech utf-8
 
     private $before_l = array(
         'b','B','c','C','d','D','f','F','g','G','k','K','l','L','p','P','t','T','v','V',
         "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\xa5","\xc5\xa4"); //czech utf-8
 
-    private $before_h = array('c', 'C', 's', 'S');
+    private $before_h = array('c','C','s','S');
 
-    private $doubleVowels = array('a', 'A','o', 'O');
+    private $doubleVowels = array('a','A','o','O');
 
 
 

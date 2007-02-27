@@ -117,7 +117,7 @@ class TexyFigureModule extends TexyModule
         if (is_callable(array($tx->handler, 'figure')))
             $tx->handler->figure($tx, $req, $el);
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
     }
 
 }

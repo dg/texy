@@ -259,7 +259,7 @@ class TexyPhraseModule extends TexyModule
             $content = $el->toText($tx);
         }
 
-        $parser->continue = TRUE;
+        $parser->again = TRUE;
         return $content;
     }
 

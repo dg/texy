@@ -106,7 +106,7 @@ class TexyGenericBlock
                 $el->tags[0] = TexyHtml::el($tag);
             }
 
-            $parser->element->children[] = $el;
+            $parser->children[] = $el;
         }
     }
 

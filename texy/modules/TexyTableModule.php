@@ -127,7 +127,7 @@ class TexyTableModule extends TexyModule
             break;
         }
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
     }
 
 

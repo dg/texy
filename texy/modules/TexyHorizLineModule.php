@@ -71,7 +71,7 @@ class TexyHorizLineModule extends TexyModule
             $el->tags[0] = TexyHtml::el('hr');
         }
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
     }
 
 } // TexyHorizlineModule

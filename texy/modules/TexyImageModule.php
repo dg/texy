@@ -270,8 +270,8 @@ class TexyImageModule extends TexyModule
         extract($req);
 
         $tx = $this->texy;
-        $src = Texy::webRoot($imageURL, $this->root);
-        $file = Texy::fileRoot($imageURL, $this->fileRoot);
+        $src = Texy::completeURL($imageURL, $this->root);
+        $file = Texy::completePath($imageURL, $this->fileRoot);
 
         if (substr($src, -4) === '.swf') {
 /*
@@ -333,7 +333,7 @@ class TexyImageModule extends TexyModule
 
         // onmouseover actions generate
         if ($overURL !== NULL) {
-            $overSrc = Texy::webRoot($overURL, $this->root);
+            $overSrc = Texy::completeURL($overURL, $this->root);
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
             $el->onmouseout = 'this.src=\'' . addSlashes($src) . '\'';
             static $counter; $counter++;

@@ -122,7 +122,7 @@ class TexyHeadingModule extends TexyModule
 
         $el->parse(trim($mContent));
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
 
         // document title
         if ($this->title === NULL) $this->title = Texy::wash($el->content);
@@ -167,7 +167,7 @@ class TexyHeadingModule extends TexyModule
 
         $el->parse(trim($mContent));
 
-        $parser->element->children[] = $el;
+        $parser->children[] = $el;
 
         // document title
         if ($this->title === NULL) $this->title = Texy::wash($el->content);

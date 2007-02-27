@@ -70,8 +70,6 @@ abstract class TexyDomElement
      */
     function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
     function __set($nm, $val) { $this->__get($nm); }
-    private function __unset($nm) { $this->__get($nm); }
-    private function __isset($nm) { $this->__get($nm); }
 
 }
 
@@ -111,8 +109,8 @@ class TexyBlockElement extends TexyDomElement
      */
     public function parse($text)
     {
-        $parser = new TexyBlockParser($this);
-        $parser->parse($text);
+        $parser = new TexyBlockParser($this->texy);
+        $this->children = $parser->parse($text);
     }
 
 }
@@ -165,8 +163,8 @@ class TexyTextualElement extends TexyDomElement
      */
     public function parse($text)
     {
-        $parser = new TexyLineParser($this);
-        $parser->parse($text);
+        $parser = new TexyLineParser($this->texy);
+        $this->content = $parser->parse($text);
     }
 
 }

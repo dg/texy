@@ -347,7 +347,7 @@ class TexyLinkModule extends TexyModule
 
             } else {
                 // classic URL
-                $el->href = Texy::webRoot($URL, $this->root, $isAbsolute);
+                $el->href = Texy::completeURL($URL, $this->root, $isAbsolute);
 
                 // rel="nofollow"
                 if ($nofollow || ($this->forceNoFollow && $isAbsolute)) $el->rel[] = 'nofollow';
@@ -355,7 +355,7 @@ class TexyLinkModule extends TexyModule
 
         } else {
             // image
-            $el->href = Texy::webRoot($URL, $tx->imageModule->linkedRoot);
+            $el->href = Texy::completeURL($URL, $tx->imageModule->linkedRoot);
             $el->onclick = $this->imageOnClick;
         }
 
