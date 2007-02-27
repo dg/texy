@@ -191,11 +191,11 @@ class Texy
     /** @var TexyModule[]  List of all modules */
     private $modules, $lineModules;
 
-    /** @var array  Texy internal markup */
+    /** @var array  Texy internal markup table */
     private $marks = array();
 
-    /** @var bool  for internal usage */
-    public $_mergeMode;
+    /** @var bool  how split paragraphs (internal usage) */
+    public $_paragraphMode;
 
     /** @var array  for internal usage */
     public $_classes, $_styles;
@@ -304,7 +304,7 @@ class Texy
         if ($this->handler && !is_object($this->handler))
             throw new Exception('$texy->handler must be object. See documentation.');
 
-        $this->_mergeMode = TRUE;
+        $this->_paragraphMode = TRUE;
         $this->marks = array();
 
         // speed-up
@@ -551,7 +551,7 @@ class Texy
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['linkDefinition'] = TRUE;            // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
-        $this->mergeLines = TRUE;                           // enter doesn't means <BR>
+        //$this->mergeLines = TRUE;                           // enter doesn't means <BR>
     }
 
 

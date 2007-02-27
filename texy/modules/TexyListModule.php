@@ -162,10 +162,10 @@ class TexyListModule extends TexyModule
         }
 
         // parse content
-        $tmp = $tx->_mergeMode;
-        $tx->_mergeMode = FALSE;
+        $tmp = $tx->_paragraphMode;
+        $tx->_paragraphMode = FALSE;
         $elItem->parse($content);
-        $tx->_mergeMode = $tmp;
+        $tx->_paragraphMode = $tmp;
 
         if ($elItem->children && $elItem->children[0] instanceof TexyParagraphElement)
             $elItem->children[0]->tags[0]->setElement(NULL);

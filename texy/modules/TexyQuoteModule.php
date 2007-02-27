@@ -100,7 +100,7 @@ class TexyQuoteModule extends TexyModule
         // [ref]
         if ($link{0} === '[') {
             $link = substr($link, 1, -1);
-            $ref = $this->getReference($link);
+            $ref = $tx->linkModule->getReference($link);
             if ($ref) {
                 $res = Texy::completeURL($ref['URL'], $tx->linkModule->root);
             } else {

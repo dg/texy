@@ -32,7 +32,7 @@ if (!defined('TEXY')) die();
 
 
 // character classes
-define('TEXY_CHAR',        'A-Za-z\x{c0}-\x{1eff}');
+define('TEXY_CHAR',        'A-Za-z\x{c0}-\x{02af}\x{0370}-\x{1eff}');
 
 // marking meta-charakters
 define('TEXY_MARK',        "\x01-\x04\x14-\x1F"); // any mark char

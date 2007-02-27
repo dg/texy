@@ -385,11 +385,11 @@ class TexyLinkModule extends TexyModule
         }
 
         if (preg_match('#^(https?://|ftp://|www\.|ftp\.|/)#i', $URL)) {
-            $lower = strtolower($URL);
-            if (substr($lower, 0, 4) === 'www.') $URL = 'none://'.$URL;
-            elseif (substr($lower, 0, 4) === 'ftp.') $URL = 'none://'.$URL;
 
-            $parts = @parse_url($URL);
+            if (strncasecmp($URL, 'www.', 4) === 0) $parts = @parse_url('none://'.$URL);
+            elseif (strncasecmp($URL, 'ftp.', 4) === 0) $parts = @parse_url('none://'.$URL);
+            else $parts = @parse_url($URL);
+
             if ($parts === FALSE) return $URL;
 
             $res = '';

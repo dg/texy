@@ -132,7 +132,7 @@ class TexyTextualElement extends TexyDomElement
     /** @var string */
     public $content = '';
 
-    /** @var bool  is content still HTML encoded? */
+    /** @var bool  is content already HTML encoded? */
     public $protect = FALSE;
 
 
@@ -146,7 +146,6 @@ class TexyTextualElement extends TexyDomElement
             foreach ($this->texy->getLineModules() as $module)
                 $s = $module->linePostProcess($s);
 
-            // htmlspecialChars($s, ENT_NOQUOTES); - speed up
             return Texy::encode($s);
         }
     }

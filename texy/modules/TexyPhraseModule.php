@@ -44,12 +44,31 @@ class TexyPhraseModule extends TexyModule
         'phraseCodeSwitch', // `=...
     );
 
-    public $codeTag = 'code';
+    public $tags = array(
+        'phraseStrong' => 'strong', // or 'b'
+        'phraseEm' => 'em', // or 'i'
+        'phraseIns' => 'ins',
+        'phraseDel' => 'del',
+        'phraseSup' => 'sup',
+        'phraseSub' => 'sub',
+        'phraseSpan' => 'span',
+        'phraseSpanAlt' => 'span',
+        'phraseCite' => 'cite',
+        'phraseAcronym' => 'acronym',
+        'phraseAcronymAlt' => 'acronym',
+        'phraseCode'  => 'code',
+        'phraseQuote' => 'q',
+    );
+
+    private $codeTag;
+
 
 
     public function init()
     {
         $tx = $this->texy;
+        $this->codeTag = $this->tags['phraseCode'];
+
 /*
         $tx->registerLinePattern(
             array($this, 'processPhrase2'),
@@ -194,24 +213,8 @@ class TexyPhraseModule extends TexyModule
 
         $tx = $this->texy;
 
-        static $_tags = array(
-            'phraseStrongEm' => 'strong', // & em
-            'phraseStrong' => 'strong',
-            'phraseEm' => 'em',
-            'phraseIns' => 'ins',
-            'phraseDel' => 'del',
-            'phraseSup' => 'sup',
-            'phraseSub' => 'sub',
-            'phraseSpan' => 'span',
-            'phraseSpanAlt' => 'span',
-            'phraseCite' => 'cite',
-            'phraseAcronym' => 'acronym',
-            'phraseAcronymAlt' => 'acronym',
-            'phraseQuote' => 'q',
-            'phraseCode'  => 'code',
-        );
-
-        $tag = $_tags[$name];
+        if ($name === 'phraseStrongEm') $tag = $this->tags['phraseStrong'];
+        else $tag = $this->tags[$name];
         if (($tag === 'span') && $mLink) $tag = NULL; // eliminate wasted spans, use <a ..> instead
         elseif (($tag === 'span') && !$mMod1 && !$mMod2 && !$mMod3) return FALSE; // don't use wasted spans...
 

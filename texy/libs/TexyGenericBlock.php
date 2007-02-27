@@ -46,7 +46,7 @@ class TexyGenericBlock
     public function process($parser, $content)
     {
         $tx = $this->texy;
-        if ($tx->_mergeMode)
+        if ($tx->_paragraphMode)
             $parts = preg_split('#(\n{2,})#', $content);
         else
             $parts = preg_split('#(\n(?! )|\n{2,})#', $content);

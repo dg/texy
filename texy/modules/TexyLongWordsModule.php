@@ -82,7 +82,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
         if (empty($this->texy->allowed['longWords'])) return $text;
 
         return preg_replace_callback(
-            '#[^\ \n\t\-\x{2013}\x{ad}\x15\x16\x17'.TEXY_MARK_SPACES.']{'.$this->wordLimit.',}#u',
+            '#[^\ \n\t\x{2013}\x{2014}\x{ad}\x15\x16\x17'.TEXY_MARK_SPACES.'-]{'.$this->wordLimit.',}#u',
             array($this, '_replace'),
             $text);
     }
@@ -130,12 +130,14 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
         $len = count($s) - 2;
 
         $positions = array();
-        $a = 1; $last = 1;
+        $a = 0; $last = 1;
 
-        while ($a < $len) {
+        while (++$a < $len) {
             $hyphen = self::DONT; // Do not hyphenate
             do {
-                if ($s[$a] === '.') { $hyphen = self::HERE; break; } // ???
+                if ($s[$a] === "\xC2\xA0") { $a++; continue 2; } // here and after never
+
+                if ($s[$a] === '.') { $hyphen = self::HERE; break; } 
 
                 if (isset($consonants[$s[$a]])) {  // souhlásky
 
@@ -178,7 +180,6 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
             if ($hyphen === self::HERE) $positions[] = $last = $a-1; // Hyphenate here
             if ($hyphen === self::AFTER) { $positions[] = $last = $a; $a++; } // Hyphenate after
 
-            $a++;
         } // while
 
 
@@ -197,7 +198,10 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
         }
         $syllables[] = implode('', $chars);
 
-        return implode("\xC2\xAD", $syllables); // insert shy
+        //$s = implode("\xC2\xAD", $syllables); // insert shy
+        //$s = str_replace(array("\xC2\xAD\xC2\xA0", "\xC2\xA0\xC2\xAD"), array(' ', ' '), $s); // shy+nbsp = normal space
+
+        return implode("\xC2\xAD", $syllables);;
     }
 
 } // TexyLongWordsModule

@@ -46,38 +46,41 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
     public function init()
     {
         $pairs = array(
-          '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
-                                                    => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
+            '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
+                                                      => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
+            
+            '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'  // single ''
+                                                      => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
 
-          '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'  // single ''
-                                                    => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
+            '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
+            '#(?<=[\d ])-(?=[\d ])#'                  => "\xe2\x80\x93",                   // en dash  -
+            '#,-#'                                    => ",\xe2\x80\x93",                  // en dash ,-
+            '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
+            '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
+            '#([\x{2013}\x{2014}]) #u'                => "\$1\xc2\xa0",                    // dash &nbsp;
+            '# --- #'                                 => " \xe2\x80\x94\xc2\xa0",          // em dash ---
+            '# -- #'                                  => " \xe2\x80\x93\xc2\xa0",          // en dash --
+            '# -> #'                                  => " \xe2\x86\x92 ",                 // right arrow ->
+            '# <- #'                                  => " \xe2\x86\x90 ",                 // left arrow ->
+            '# <-> #'                                 => " \xe2\x86\x94 ",                 // left right arrow <->
+            '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign x
+            '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign x
+            '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // 10x
+            '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark  (TM)
+            '#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
+            '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright  (C)
+            '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
+            '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
+            '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
+            '#(\S{100,}) (\S+)$#'                     => "\$1\xc2\xa0\$2",                 // space before last word
 
-          '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
-          '#(\d| )-(\d| )#'                         => "\$1\xe2\x80\x93\$2",             // en dash    -
-          '#,-#'                                    => ",\xe2\x80\x93",                  // en dash    ,-
-          '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
-          '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
-          '# --- #'                                 => " \xe2\x80\x94 ",                 // em dash    ---
-          '# -- #'                                  => " \xe2\x80\x93 ",                 // en dash    --
-          '# -> #'                                  => " \xe2\x86\x92 ",                 // right arrow ->
-          '# <- #'                                  => " \xe2\x86\x90 ",                 // left arrow ->
-          '# <-> #'                                 => " \xe2\x86\x94 ",                 // left right arrow <->
-          '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign x
-          '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign x
-          '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // 10x
-          '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark  (TM)
-          '#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
-          '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright  (C)
-          '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
-          '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
-          '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
-          '#(\S{100,}) (\S+)$#'                     => "\$1\xc2\xa0\$2",                 // space before last word
+            // nbsp space between number and word, symbol, punctation, currency symbol
+            '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)(['.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+                                                      => "\$1\$2\xc2\xa0\$3\$4",
 
-          '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)(['.TEXY_CHAR.'\x{b0}])#mu' // space between number and word
-                                                    => "\$1\$2\xc2\xa0\$3\$4",
-
-          '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)([0-9'.TEXY_CHAR.'])#mu'
-                                                    => "\$1\$2\$3\xc2\xa0\$4\$5",                // space between preposition and word
+            // space between preposition and word
+            '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)([0-9'.TEXY_CHAR.'])#mu'
+                                                    => "\$1\$2\$3\xc2\xa0\$4\$5",                
         );
 
         $this->pattern = array_keys($pairs);
