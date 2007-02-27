@@ -61,8 +61,7 @@ class TexyListModule extends TexyModule
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlock',
+            array($this, 'processBlock'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color: red}
           . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
             'list'
@@ -102,13 +101,9 @@ class TexyListModule extends TexyModule
                 break;
             }
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($tx);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $el->tags[0] = $mod->generate($tag);
-        } else {
-            $el->tags[0] = TexyHtml::el($tag);
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el->tags[0] = $mod->generate($tx, $tag);
 
         $el->tags[0]->style['list-style-type'] = $style;
 
@@ -149,13 +144,9 @@ class TexyListModule extends TexyModule
 
         $elItem = new TexyBlockElement($tx);
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($tx);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $elItem->tags[0] = $mod->generate($tag);
-        } else {
-            $elItem->tags[0] = TexyHtml::el($tag);
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $elItem->tags[0] = $mod->generate($tx, $tag);
 
         // next lines
         $spaces = $mNewLine ? strlen($mSpace) : '';

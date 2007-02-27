@@ -41,8 +41,7 @@ class TexyFigureModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlock',
+            array($this, 'processBlock'),
             '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU',
             'figure'
         );
@@ -76,7 +75,7 @@ class TexyFigureModule extends TexyModule
 
         $req = $tx->imageModule->parse($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
-        $mod = new TexyModifier($tx);
+        $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $hAlign = $req['modifier']->hAlign;
         $mod->hAlign = $req['modifier']->hAlign = NULL;
@@ -87,7 +86,7 @@ class TexyFigureModule extends TexyModule
                 $reqL = array(
                     'URL' => empty($req['linkedURL']) ? $req['imageURL'] : $req['linkedURL'],
                     'image' => TRUE,
-                    'modifier' => new TexyModifier($tx),
+                    'modifier' => new TexyModifier,
                 );
             } else {
                 $reqL = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
@@ -100,7 +99,7 @@ class TexyFigureModule extends TexyModule
             $elImg = $elLink;
         }
 
-        $el->tags[0] = $mod->generate('div');
+        $el->tags[0] = $mod->generate($tx, 'div');
         $el->children[0] = new TexyTextualElement($tx);
         $el->children[0]->content = $elImg->toText($tx);
 

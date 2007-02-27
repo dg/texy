@@ -56,31 +56,27 @@ class TexyLinkModule extends TexyModule
 
         $tx = $this->texy;
         $tx->registerLinePattern(
-            $this,
-            'processLineQuick',
+            array($this, 'processLineQuick'),
             '#(['.TEXY_CHAR.'0-9@\#$%&.,_-]+)(?=:\[)'.TEXY_LINK.'()#Uu',
             'linkQuick'
         );
 
         // [reference]
         $tx->registerLinePattern(
-            $this,
-            'processLineReference',
+            array($this, 'processLineReference'),
             '#('.TEXY_LINK_REF.')#U',
             'linkReference'
         );
 
         // direct url and email
         $tx->registerLinePattern(
-            $this,
-            'processLineURL',
+            array($this, 'processLineURL'),
             '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
             'linkURL'
         );
 
         $tx->registerLinePattern(
-            $this,
-            'processLineURL',
+            array($this, 'processLineURL'),
             '#(?<=\s|^|\(|\[|\<|:)'.TEXY_EMAIL.'#i',
             'linkEmail'
         );
@@ -147,7 +143,7 @@ class TexyLinkModule extends TexyModule
         if (empty($ref)) return FALSE;
 
         $ref['modifier'] = empty($ref['modifier'])
-            ? new TexyModifier($this->texy)
+            ? new TexyModifier
             : clone $ref['modifier'];
 
         return $ref;
@@ -186,7 +182,7 @@ class TexyLinkModule extends TexyModule
         //    [5] => [class]
         //    [6] => {style}
 
-        $mod = new TexyModifier($this->texy);
+        $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3);
         $this->addReference($mRef, $mLink, trim($mLabel), $mod);
         return '';
@@ -204,11 +200,16 @@ class TexyLinkModule extends TexyModule
         //    [1] => ...
         //    [2] => [ref]
 
+        $tx = $this->texy;
         $req = $this->parse($mLink, NULL, NULL, NULL, $mContent);
         $el = $this->factory($req);
         $el->addChild($mContent);
-        $this->texy->summary['links'][] = $el->href;
-        return $el->toText($this->texy, $mContent);
+
+        if (is_callable(array($tx->handler, 'link')))
+            $tx->handler->link($tx, $req, $el);
+
+        $tx->summary['links'][] = $el->href;
+        return $el;
     }
 
 
@@ -252,8 +253,12 @@ class TexyLinkModule extends TexyModule
 
         $el = $this->factory($ref);
         $el->addChild($content);
+
+        if (is_callable(array($tx->handler, 'reference2')))
+            $tx->handler->reference2($tx, $ref, $el);
+
         $tx->summary['links'][] = $el->href;
-        return $el->toText($tx);
+        return $el;
     }
 
 
@@ -278,7 +283,7 @@ class TexyLinkModule extends TexyModule
             $tx->handler->$name($tx, $mURL, $el);
 
         $tx->summary['links'][] = $el->href;
-        return $el->toText($tx);
+        return $el;
     }
 
 
@@ -308,7 +313,7 @@ class TexyLinkModule extends TexyModule
             $req = array(
                 'URL' => trim($dest),
                 'label' => $label,
-                'modifier' => new TexyModifier($tx),
+                'modifier' => new TexyModifier,
             );
         }
 
@@ -334,7 +339,7 @@ class TexyLinkModule extends TexyModule
             $popup = isset($classes['popup']);
             unset($classes['nofollow'], $classes['popup']);
             $modifier->classes = array_flip($classes);
-            $el = $modifier->generate('a');
+            $el = $modifier->generate($tx, 'a');
         }
 
 

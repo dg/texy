@@ -31,8 +31,7 @@ class TexyBlockModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlock',
+            array($this, 'processBlock'),
             '#^/--+ *(?:(code|text|html|div|texysource|comment)( .*)?|) *'.TEXY_MODIFIER_H.'?\n(.*\n)?(?:\\\\--+ *\\1?|\z)()$#mUsi',
             'blocks'
         );
@@ -52,7 +51,7 @@ class TexyBlockModule extends TexyModule
      */
     public function processBlock($parser, $matches, $name)
     {
-        list(, $mType, $mSecond, $mMod1, $mMod2, $mMod3, $mMod4, $mContent) = $matches;
+        list(, $mType, $mLang, $mMod1, $mMod2, $mMod3, $mMod4, $mContent) = $matches;
         //    [1] => code
         //    [2] => lang ?
         //    [3] => (title)
@@ -63,7 +62,7 @@ class TexyBlockModule extends TexyModule
 
         $tx = $this->texy;
         $mType = trim(strtolower($mType));
-        $mSecond = trim(strtolower($mSecond));
+        $mLang = trim(strtolower($mLang));
         $mContent = trim($mContent, "\n");
 
         if (!$mType) $mType = 'pre';                // default type
@@ -78,13 +77,13 @@ class TexyBlockModule extends TexyModule
             $type = 'blockDiv';
         }
 
-        $mod = new TexyModifier($tx);
+        $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
 
         switch ($mType) {
         case 'div':
             $el = new TexyBlockElement($tx);
-            $el->tags[0] = $mod->generate('div');
+            $el->tags[0] = $mod->generate($tx, 'div');
 
             // outdent
             if ($spaces = strspn($mContent, ' '))
@@ -107,10 +106,10 @@ class TexyBlockModule extends TexyModule
             $html = $tx->unMarks($html);
             $html = $tx->wellForm->process($html);
             $html = $tx->formatter->process($html);
-            $html = str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $html);
+            $html = Texy::encode($html);
 
             $el = new TexyTextualElement($tx);
-            $el->tags[0] = $mod->generate('pre');
+            $el->tags[0] = $mod->generate($tx, 'pre');
             $el->tags[1] = TexyHtml::el('code')->class('html');
             $el->content = $html;
             $el->protect = TRUE;
@@ -126,9 +125,8 @@ class TexyBlockModule extends TexyModule
             $el = new TexyTextualElement($tx);
             $lineParser = new TexyLineParser($this->texy);
             $mContent = $lineParser->parse($mContent, array('html'));
-            if (strpos($mContent, '&') !== FALSE) // speed-up
-                $mContent = html_entity_decode($mContent, ENT_QUOTES, 'UTF-8');
-            $el->content = str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent);
+            $mContent = Texy::decode($mContent);
+            $el->content = Texy::encode($mContent);
             $el->protect = TRUE;
             $parser->children[] = $el;
             break;
@@ -136,31 +134,31 @@ class TexyBlockModule extends TexyModule
 
         case 'text':
             $el = new TexyTextualElement($tx);
-            $el->content = nl2br( str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent) );
+            $el->content = nl2br( Texy::encode($mContent) );
             $el->protect = TRUE;
             $parser->children[] = $el;
             break;
 
 
-
-        default: // pre | code | samp
+        case 'pre':
+        case 'code':
             $el = new TexyTextualElement($tx);
-            $el->tags[0] = $mod->generate('pre');
-            $el->tags[0]->class[] = $mSecond; // lang
+            $el->tags[0] = $mod->generate($tx, 'pre');
+            $el->tags[0]->class[] = $mLang; // lang
 
-            if ($mType !== 'pre') {
-                $el->tags[1] = TexyHtml::el($mType); // code | samp
+            if ($mType === 'code') {
+                $el->tags[1] = TexyHtml::el('code');
             }
 
             // outdent
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-            $el->content = str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $mContent);
+            $el->content = Texy::encode($mContent);
             $el->protect = TRUE;
 
             if (is_callable(array($tx->handler, $type)))
-                $tx->handler->$type($tx, $mContent, $el, $mSecond, $mod);
+                $tx->handler->$type($tx, $mLang, $mod, $mContent, $el);
 
             $parser->children[] = $el;
 

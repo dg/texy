@@ -58,16 +58,14 @@ class TexyHeadingModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlockUnderline',
+            array($this, 'processBlockUnderline'),
             '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
           . '(\#|\*|\=|\-){3,}$#mU',
             'headingUnderlined'
         );
 
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlockSurround',
+            array($this, 'processBlockSurround'),
             '#^((\#|\=){2,})(?!\\2)(.+)\\2*'.TEXY_MODIFIER_H.'?()$#mU',
             'headingSurrounded'
         );
@@ -108,13 +106,9 @@ class TexyHeadingModule extends TexyModule
 
         $el = new TexyHeadingElement($this->texy);
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($this->texy);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $el->tags[0] = $mod->generate('hx');
-        } else {
-            $el->tags[0] = TexyHtml::el('hx');
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el->tags[0] = $mod->generate($this->texy, 'hx');
 
         $el->level = $this->levels[$mLine];
         if ($this->balancing === self::DYNAMIC)
@@ -153,13 +147,9 @@ class TexyHeadingModule extends TexyModule
 
         $el = new TexyHeadingElement($this->texy);
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($this->texy);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $el->tags[0] = $mod->generate('hx');
-        } else {
-            $el->tags[0] = TexyHtml::el('hx');
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el->tags[0] = $mod->generate($this->texy, 'hx');
 
         $el->level = 7 - min(7, max(2, strlen($mLine)));
         if ($this->balancing === self::DYNAMIC)

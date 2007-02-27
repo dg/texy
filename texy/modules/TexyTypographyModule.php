@@ -52,7 +52,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
           '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'  // single ''
                                                     => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
 
-          '#(\S|^) ?\.{3,4}#m'                      => "\$1\xe2\x80\xa6",                // ellipsis  ...
+          '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
           '#(\d| )-(\d| )#'                         => "\$1\xe2\x80\x93\$2",             // en dash    -
           '#,-#'                                    => ",\xe2\x80\x93",                  // en dash    ,-
           '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
@@ -73,7 +73,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
           '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
           '#(\S{100,}) (\S+)$#'                     => "\$1\xc2\xa0\$2",                 // space before last word
 
-          '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)(['.TEXY_CHAR.'])#mu'        // space between number and word
+          '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)(['.TEXY_CHAR.'\x{b0}])#mu' // space between number and word
                                                     => "\$1\$2\xc2\xa0\$3\$4",
 
           '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)([0-9'.TEXY_CHAR.'])#mu'

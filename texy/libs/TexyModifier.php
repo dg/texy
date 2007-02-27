@@ -41,9 +41,6 @@ class TexyModifier
     const VALIGN_MIDDLE =  'middle';
     const VALIGN_BOTTOM =  'bottom';
 
-    /** @var Texy */
-    protected $texy;
-
     public $id;
     public $classes = array();
     public $styles = array();
@@ -67,46 +64,37 @@ class TexyModifier
 
 
 
-    public function __construct($texy)
-    {
-        $this->texy =  $texy;
-    }
-
-
-
     public function setProperties()
     {
-        $ea = self::$elAttrs;
-
         foreach (func_get_args() as $arg)
         {
             if ($arg == NULL) continue;
 
-            $argX = trim(substr($arg, 1, -1));
-            switch ($arg{0}) {
-            case '(':
-                if (strpos($argX, '&') !== FALSE) // speed-up
-                    $argX = html_entity_decode($argX);
-                $this->title = $argX;
-                break;
+            $arg0 = $arg[0];
 
-            case '{':
-                foreach (explode(';', $argX) as $value) {
+            if ($arg0 === '(') { // title
+
+                $this->title = Texy::decode(trim(substr($arg, 1, -1)));
+
+            } elseif ($arg0 === '{') { // style & attributes
+
+                $arg = substr($arg, 1, -1);
+                foreach (explode(';', $arg) as $value) {
                     $pair = explode(':', $value, 2); $pair[] = '';
                     $prop = strtolower(trim($pair[0]));
                     $value = trim($pair[1]);
                     if ($prop === '') continue;
 
-                    if (isset($ea[$prop])) // attribute
+                    if (isset(self::$elAttrs[$prop])) // attribute
                         $this->attrs[$prop] = $value;
                     elseif ($value !== '')  // style
                         $this->styles[$prop] = $value;
                 }
-                break;
 
-            case '[':
-                $argX = str_replace('#', ' #', $argX);
-                foreach (explode(' ', $argX) as $value) {
+            } elseif ($arg0 === '[') { // classes & ID
+
+                $arg = str_replace('#', ' #', substr($arg, 1, -1));
+                foreach (explode(' ', $arg) as $value) {
                     if ($value === '') continue;
 
                     if ($value{0} === '#')
@@ -114,15 +102,15 @@ class TexyModifier
                     else
                         $this->classes[] = $value;
                 }
-                break;
-
-            case '^':  $this->vAlign = self::VALIGN_TOP; break;
-            case '-':  $this->vAlign = self::VALIGN_MIDDLE; break;
-            case '_':  $this->vAlign = self::VALIGN_BOTTOM; break;
-            case '=':  $this->hAlign = self::HALIGN_JUSTIFY; break;
-            case '>':  $this->hAlign = self::HALIGN_RIGHT; break;
-            case '<':  $this->hAlign = $arg === '<>' ? self::HALIGN_CENTER : self::HALIGN_LEFT; break;
             }
+            // alignment
+            elseif ($arg === '^') $this->vAlign = self::VALIGN_TOP;
+            elseif ($arg === '-') $this->vAlign = self::VALIGN_MIDDLE;
+            elseif ($arg === '_') $this->vAlign = self::VALIGN_BOTTOM;
+            elseif ($arg === '=') $this->hAlign = self::HALIGN_JUSTIFY;
+            elseif ($arg === '>') $this->hAlign = self::HALIGN_RIGHT;
+            elseif ($arg === '<') $this->hAlign = self::HALIGN_LEFT;
+            elseif ($arg === '<>') $this->hAlign = self::HALIGN_CENTER;
         }
     }
 
@@ -130,14 +118,18 @@ class TexyModifier
 
     /**
      * Generates TexyHtml element
-     * @param string
+     * @param Texy   base Texy object
+     * @param string HTML tag name
      * @return TexyHtml
      */
-    public function generate($tag)
+    public function generate($texy, $tag)
     {
         // tag & attibutes
-        $tmp = $this->texy->allowedTags; // speed-up
-        if ($tmp === Texy::ALL) {
+        $tmp = $texy->allowedTags; // speed-up
+        if (!$this->attrs) {
+            $el = TexyHtml::el($tag);
+
+        } elseif ($tmp === Texy::ALL) {
             $el = TexyHtml::el($tag, $this->attrs);
 
         } elseif (is_array($tmp) && isset($tmp[$tag])) {
@@ -167,24 +159,28 @@ class TexyModifier
         $el->title = $this->title;
 
         // classes & ID
-        $tmp = $this->texy->_classes; // speed-up
-        if ($tmp === Texy::ALL) {
-            foreach ($this->classes as $val) $el->class[] = $val;
-            $el->id = $this->id;
-        } elseif (is_array($tmp)) {
-            foreach ($this->classes as $val)
-                if (isset($tmp[$val])) $el->class[] = $val;
+        if ($this->classes || $this->id !== NULL) {
+            $tmp = $texy->_classes; // speed-up
+            if ($tmp === Texy::ALL) {
+                foreach ($this->classes as $val) $el->class[] = $val;
+                $el->id = $this->id;
+            } elseif (is_array($tmp)) {
+                foreach ($this->classes as $val)
+                    if (isset($tmp[$val])) $el->class[] = $val;
 
-            if (isset($tmp['#' . $this->id])) $el->id = $this->id;
+                if (isset($tmp['#' . $this->id])) $el->id = $this->id;
+            }
         }
 
         // styles
-        $tmp = $this->texy->_styles;  // speed-up
-        if ($tmp === Texy::ALL) {
-            foreach ($this->styles as $prop => $val) $el->style[$prop] = $val;
-        } elseif (is_array($tmp)) {
-            foreach ($this->styles as $prop => $val)
-                if (isset($tmp[$prop])) $el->style[$prop] = $val;
+        if ($this->styles) {
+            $tmp = $texy->_styles;  // speed-up
+            if ($tmp === Texy::ALL) {
+                foreach ($this->styles as $prop => $val) $el->style[$prop] = $val;
+            } elseif (is_array($tmp)) {
+                foreach ($this->styles as $prop => $val)
+                    if (isset($tmp[$prop])) $el->style[$prop] = $val;
+            }
         }
 
         // align

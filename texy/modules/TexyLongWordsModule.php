@@ -82,7 +82,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
         if (empty($this->texy->allowed['longWords'])) return $text;
 
         return preg_replace_callback(
-            '#[^\ \n\t\-\x{2013}\x{a0}\x{ad}\x15\x16\x17'.TEXY_MARK_SPACES.']{'.$this->wordLimit.',}#u',
+            '#[^\ \n\t\-\x{2013}\x{ad}\x15\x16\x17'.TEXY_MARK_SPACES.']{'.$this->wordLimit.',}#u',
             array($this, '_replace'),
             $text);
     }
@@ -135,7 +135,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
         while ($a < $len) {
             $hyphen = self::DONT; // Do not hyphenate
             do {
-                if ($s[$a] === '.') { $hyphen = self::HERE; break; }   // ???
+                if ($s[$a] === '.') { $hyphen = self::HERE; break; } // ???
 
                 if (isset($consonants[$s[$a]])) {  // souhlásky
 

@@ -43,8 +43,7 @@ class TexyTableModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlock',
+            array($this, 'processBlock'),
             '#^(?:'.TEXY_MODIFIER_HV.'\n)?'   // .{color: red}
           . '\|.*()$#mU',                     // | ....
             'table'
@@ -74,13 +73,9 @@ class TexyTableModule extends TexyModule
         $tx = $this->texy;
         $el = new TexyBlockElement($tx);
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4 || $mMod5) {
-            $mod = new TexyModifier($tx);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-            $el->tags[0] = $mod->generate('table');
-        } else {
-            $el->tags[0] = TexyHtml::el('table');
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+        $el->tags[0] = $mod->generate($tx, 'table');
 
 //        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
 
@@ -96,13 +91,9 @@ class TexyTableModule extends TexyModule
             //    [6] => >
 
             $caption = new TexyTextualElement($tx);
-            if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-                $mod = new TexyModifier($tx);
-                $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-                $caption->tags[0] = $mod->generate('caption');
-            } else {
-                $caption->tags[0] = TexyHtml::el('caption');
-            }
+            $mod = new TexyModifier;
+            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $caption->tags[0] = $mod->generate($tx, 'caption');
             $caption->parse($mContent);
             $el->children[] = $caption;
         }
@@ -149,13 +140,9 @@ class TexyTableModule extends TexyModule
 
         $elRow = new TexyBlockElement($tx);
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4 || $mMod5) {
-            $mod = new TexyModifier($tx);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-            $elRow->tags[0] = $mod->generate('tr');
-        } else {
-            $elRow->tags[0] = TexyHtml::el('tr');
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+        $elRow->tags[0] = $mod->generate($tx, 'tr');
 
         if ($this->row % 2 === 0) {
             if ($this->oddClass) $elRow->tags[0]->class[] = $this->oddClass;
@@ -198,7 +185,7 @@ class TexyTableModule extends TexyModule
             //    [12] => ^
 
             if ($mModCol1 || $mModCol2 || $mModCol3 || $mModCol4 || $mModCol5) {
-                $this->colModifier[$col] = new TexyModifier($tx);
+                $this->colModifier[$col] = new TexyModifier;
                 $this->colModifier[$col]->setProperties($mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5);
             }
 
@@ -207,11 +194,11 @@ class TexyTableModule extends TexyModule
             if (isset($this->colModifier[$col]))
                 $mod = clone $this->colModifier[$col];
             else
-                $mod = new TexyModifier($tx);
+                $mod = new TexyModifier;
 
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
 
-            $elField->tags[0] = $mod->generate( ($this->isHead || ($mHead === '*')) ? 'th' : 'td' );
+            $elField->tags[0] = $mod->generate($tx,  ($this->isHead || ($mHead === '*')) ? 'th' : 'td' );
 
             $elField->parse($mContent);
             if ($elField->content == '') $elField->content = "\xC2\xA0"; // &nbsp;

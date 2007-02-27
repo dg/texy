@@ -31,8 +31,7 @@ class TexyHtmlModule extends TexyModule
     public function init()
     {
         $this->texy->registerLinePattern(
-            $this,
-            'process',
+            array($this, 'process'),
             '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
             'html'
         );
@@ -112,13 +111,13 @@ class TexyHtmlModule extends TexyModule
 
             $val = $m[2];
             if ($val == NULL) $el->$key = TRUE;
-            elseif ($val{0} === '\'' || $val{0} === '"') $el->$key = substr($val, 1, -1);
-            else $el->$key = $val;
+            elseif ($val{0} === '\'' || $val{0} === '"') $el->$key = Texy::decode(substr($val, 1, -1));
+            else $el->$key = Texy::decode($val);
         }
 
 
         // apply allowedClasses & allowedStyles
-        $modifier = new TexyModifier($tx);
+        $modifier = new TexyModifier;
 
         if (isset($el->class)) {
             $tmp = $tx->_classes; // speed-up

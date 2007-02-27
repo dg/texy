@@ -48,8 +48,7 @@ class TexyDefinitionListModule extends TexyListModule
             if ($allowed) $bullets[] = $this->translate[$bullet][0];
 
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlock',
+            array($this, 'processBlock'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color:red}
           . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'               // Term:
           . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mUu',  //    - description
@@ -97,14 +96,9 @@ class TexyDefinitionListModule extends TexyListModule
                 break;
             }
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($tx);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $el->tags[0] = $mod->generate('dl');
-        } else {
-            $el->tags[0] = TexyHtml::el('dl');
-        }
-
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el->tags[0] = $mod->generate($tx, 'dl');
         $parser->moveBackward(2);
 
         $patternTerm = '#^\n?(\S.*)\:\ *'.TEXY_MODIFIER_H.'?()$#mUA';
@@ -125,13 +119,9 @@ class TexyDefinitionListModule extends TexyListModule
                 //    [5] => >
                 $elItem = new TexyTextualElement($tx);
 
-                if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-                    $mod = new TexyModifier($tx);
-                    $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-                    $elItem->tags[0] = $mod->generate('dt');
-                } else {
-                    $elItem->tags[0] = TexyHtml::el('dt');
-                }
+                $mod = new TexyModifier;
+                $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+                $elItem->tags[0] = $mod->generate($tx, 'dt');
 
                 $elItem->parse($mContent);
                 $el->children[] = $elItem;

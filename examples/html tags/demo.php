@@ -49,23 +49,23 @@ function doIt($texy)
 
 header('Content-type: text/html; charset=utf-8');
 
-echo '<h2>trustMode() - enable all valid tags</h2>';
-$texy->htmlModule->trustMode();
+echo '<h2>Enable nearly all valid tags</h2>';
+$texy->allowedTags = array_merge(Texy::$blockTags, Texy::$inlineTags);
 doIt($texy);
 
-echo '<h2>trustMode(FALSE) - enable all tags</h2>';
-$texy->htmlModule->trustMode(FALSE);
+echo '<h2>Texy::ALL - enables all tags</h2>';
+$texy->allowedTags = Texy::ALL;
 doIt($texy);
 
-echo '<h2>safeMode() - enable only "safe" tags</h2>';
-$texy->htmlModule->safeMode();
+echo '<h2>safeMode() - enables only some "safe" tags</h2>';
+$texy->safeMode();
 doIt($texy);
 
-echo '<h2>safeMode(FALSE) - disable all tags</h2>';
-$texy->htmlModule->safeMode(FALSE);
+echo '<h2>Texy::NONE - disables all tags</h2>';
+$texy->allowedTags = Texy::NONE;
 doIt($texy);
 
-echo '<h2>custom</h2>';
+echo '<h2>Enable custom tags</h2>';
 $texy->allowedTags =
      array(            // enable only tags <myExtraTag> with attribute & <strong>
          'myExtraTag' => array('attr1'),

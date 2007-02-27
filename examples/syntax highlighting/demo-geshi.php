@@ -36,12 +36,12 @@ class myHandler
 {
 
     // callback function for processing blocks
-    function blockCode($texy, $element, $lang, $modifier)
+    function blockCode($texy, $lang, $modifier, $content, $element)
     {
         global $geshiPath;
 
         if ($lang == 'html') $lang = 'html4strict';
-        $geshi = new GeSHi($element->content, $lang, $geshiPath.'geshi/');
+        $geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
         if ($geshi->error) return;  // GeSHi could not find the language
 

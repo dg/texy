@@ -71,8 +71,7 @@ class TexyImageModule extends TexyModule
     {
         // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
         $this->texy->registerLinePattern(
-            $this,
-            'processLine',
+            array($this, 'processLine'),
             '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U',
             'image'
         );
@@ -121,7 +120,7 @@ class TexyImageModule extends TexyModule
         if (isset($this->references[$name])) {
             $ref = $this->references[$name];
             $ref['modifier'] = empty($ref['modifier'])
-                ? new TexyModifier($this->texy)
+                ? new TexyModifier
                 : clone $ref['modifier'];
             return $ref;
         }
@@ -162,7 +161,7 @@ class TexyImageModule extends TexyModule
         // linked image
         $req['linkedURL'] = NULL;
         if (isset($content[2])) {
-            $tmp = trim($content[1]);
+            $tmp = trim($content[2]);
             if ($tmp !== '') $req['linkedURL'] = $tmp;
         }
 
@@ -175,7 +174,7 @@ class TexyImageModule extends TexyModule
         $req = $this->getReference(trim($mURLs));
         if (!$req) {
             $req = $this->parseContent($mURLs);
-            $req['modifier'] = new TexyModifier($this->texy);
+            $req['modifier'] = new TexyModifier;
         }
         $req['modifier']->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         return $req;
@@ -210,7 +209,7 @@ class TexyImageModule extends TexyModule
         //    [4] => [class]
         //    [5] => {style}
 
-        $mod = new TexyModifier($this->texy);
+        $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3);
         $this->addReference($mRef, $mURLs, $mod);
         return '';
@@ -219,7 +218,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Callback function: [* small.jpg 80x13 | small-over.jpg .(alternative text)[class]{style}>]:LINK
+     * Callback function: [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
      * @return string
      */
     public function processLine($parser, $matches)
@@ -247,7 +246,7 @@ class TexyImageModule extends TexyModule
                 $reqL = array(
                     'URL' => empty($req['linkedURL']) ? $req['imageURL'] : $req['linkedURL'],
                     'image' => TRUE,
-                    'modifier' => new TexyModifier($tx),
+                    'modifier' => new TexyModifier,
                 );
             } else {
                 $reqL = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
@@ -257,10 +256,10 @@ class TexyImageModule extends TexyModule
             $tx->summary['links'][] = $elLink->href;
 
             $elLink->addChild($el);
-            return $elLink->toText($tx);
+            return $elLink;
         }
 
-        return $el->toText($tx);
+        return $el;
     }
 
 
@@ -299,7 +298,7 @@ class TexyImageModule extends TexyModule
         $hAlign = $modifier->hAlign;
         $modifier->hAlign = NULL;
 
-        $el = $modifier->generate('img');
+        $el = $modifier->generate($tx, 'img');
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->leftClass != '')

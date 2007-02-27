@@ -220,7 +220,7 @@ class Texy
         $this->trustMode();
 
         // examples of link reference ;-)
-        $mod = new TexyModifier($this);
+        $mod = new TexyModifier;
         $mod->title = 'The best text -> HTML converter and formatter';
         $this->linkModule->addReference('texy', 'http://texy.info/', 'Texy!', $mod);
         $this->linkModule->addReference('google', 'http://www.google.com/search?q=%s');
@@ -270,26 +270,26 @@ class Texy
 
 
 
-    public function registerLinePattern($module, $method, $pattern, $name)
+    public function registerLinePattern($handler, $pattern, $name)
     {
         if (empty($this->allowed[$name])) return;
 
         $this->linePatterns[$name] = array(
-            'handler'     => array($module, $method),
+            'handler'     => $handler,
             'pattern'     => $pattern,
         );
     }
 
 
 
-    public function registerBlockPattern($module, $method, $pattern, $name)
+    public function registerBlockPattern($handler, $pattern, $name)
     {
         if (empty($this->allowed[$name])) return;
 
         // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
 
         $this->blockPatterns[$name] = array(
-            'handler'     => array($module, $method),
+            'handler'     => $handler,
             'pattern'     => $pattern  . 'm',  // force multiline!
         );
     }
@@ -427,9 +427,6 @@ class Texy
         // replace marks
         $html = $this->unMarks($html);
 
-        // BACK COMPATIBILITY HACK !!!
-        //$html = strtr($html, array("\xc2\xa0"=>'&#160;',"\xc2\xad"=>'&#173;',"\xe2\x80\x9e"=>'&#8222;',"\xe2\x80\x9c"=>'&#8220;',"\xe2\x80\x9a"=>'&#8218;',"\xe2\x80\x98"=>'&#8216;',"\xe2\x80\xa6"=>'&#8230;',"\xe2\x80\x93"=>'&#8211;'));
-
         // wellform and reformat HTML
         $html = $this->wellForm->process($html);
         $html = $this->formatter->process($html);
@@ -496,7 +493,7 @@ class Texy
         $html = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $html);
 
         // entities -> chars
-        $html = html_entity_decode($html, ENT_QUOTES, 'UTF-8');
+        $html = Texy::decode($html);
 
         // convert nbsp to normal space and remove shy
         $html = strtr($html, array(
@@ -525,12 +522,15 @@ class Texy
             'acronym'   => array('title'),
             'b'         => array(),
             'br'        => array(),
+            'cite'      => array(),
             'code'      => array(),
             'em'        => array(),
             'i'         => array(),
             'strong'    => array(),
             'sub'       => array(),
             'sup'       => array(),
+            'q'         => array(),
+            'small'     => array(),
         );
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['linkDefinition'] = FALSE;           // disable [ref]: URL  reference definitions
@@ -586,11 +586,34 @@ class Texy
      * @param string
      * @return string
      */
-    static public function wash($text)
+    static public function wash($s)
     {
-        return preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $text);
+        return preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
     }
 
+
+
+    /**
+     * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!)
+     * @param string
+     * @return string
+     */
+    static public function encode($s)
+    {
+        return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
+    }
+
+
+    /**
+     * Texy! version of html_entity_decode (always UTF-8, much faster than original!)
+     * @param string
+     * @return string
+     */
+    static public function decode($s)
+    {
+        if (strpos($s, '&') === FALSE) return $s;
+        return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+    }
 
 
     /**
@@ -625,8 +648,8 @@ class Texy
     {
         if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $URL)) {
             $isAbsolute = TRUE;
+            $URL = str_replace('&amp;', '&', $URL); // replace unwanted &amp;
             // absolute URL
-            // must begins with 'http://' or 'ftp://'
             $lower = strtolower($URL);
             if (substr($lower, 0, 4) === 'www.') {
                 return 'http://' . $URL;
@@ -638,6 +661,7 @@ class Texy
 
         // relative
         $isAbsolute = FALSE;
+        if ($root == NULL) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;
     }
 
@@ -647,6 +671,7 @@ class Texy
     {
         if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $path)) return FALSE;
         if (strpos($path, '..')) return FALSE;
+        if ($root == NULL) return $path;
         return rtrim($root, '/\\') . '/' . $path;
     }
 

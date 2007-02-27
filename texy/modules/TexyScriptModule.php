@@ -37,8 +37,7 @@ class TexyScriptModule extends TexyModule
     public function init()
     {
         $this->texy->registerLinePattern(
-            $this,
-            'processLine',
+            array($this, 'processLine'),
             '#\{\{([^'.TEXY_MARK.']+)\}\}()#U',
             'script'
         );

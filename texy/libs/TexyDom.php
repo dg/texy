@@ -141,16 +141,13 @@ class TexyTextualElement extends TexyDomElement
         if ($this->protect) {
             return $this->content;
         } else {
-            $s = $this->content;
-
-            if (strpos($s, '&') !== FALSE) // speed-up
-                $s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+            $s = Texy::decode($this->content);
 
             foreach ($this->texy->getLineModules() as $module)
                 $s = $module->linePostProcess($s);
 
             // htmlspecialChars($s, ENT_NOQUOTES); - speed up
-            return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
+            return Texy::encode($s);
         }
     }
 

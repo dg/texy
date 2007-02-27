@@ -34,7 +34,7 @@ class myHandler
 {
 
     // callback function for processing blocks
-    function blockCode($texy, $element, $lang, $modifier)
+    function blockCode($texy, $lang, $modifier, $content, $element)
     {
         $lang = strtoupper($lang);
         if ($lang == 'JAVASCRIPT') $lang = 'JS';
@@ -44,13 +44,10 @@ class myHandler
            ) return;
 
         $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
-        $element->content = $parser->highlightString($lang, $element->content);
+        $element->content = $parser->highlightString($lang, $content);
 
         // output is in HTML
         $element->protect = TRUE;
-
-        // remove tags
-        //$element->tags = NULL;
     }
 
 }

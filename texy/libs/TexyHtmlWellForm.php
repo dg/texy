@@ -96,8 +96,8 @@ class TexyHtmlWellForm
                 $tag = $pair['tag'];
                 //if (Texy::$xhtml || !isset(self::$optional[$tag]))
                 $s .= '</'.$tag.'>';
-                if ($tag === $mTag) break;
                 $this->tagUsed[$tag]--;
+                if ($tag === $mTag) break;
                 $pair = prev($this->tagStack);
                 $i++;
             }

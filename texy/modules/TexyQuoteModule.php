@@ -31,8 +31,7 @@ class TexyQuoteModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlock',
+            array($this, 'processBlock'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU',
             'blockQuote'
         );
@@ -63,13 +62,9 @@ class TexyQuoteModule extends TexyModule
         $tx = $this->texy;
         $el = new TexyBlockElement($tx);
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($tx);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $el->tags[0] = $mod->generate('blockquote');
-        } else {
-            $el->tags[0] = TexyHtml::el('blockquote');
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el->tags[0] = $mod->generate($tx, 'blockquote');
 
         $content = '';
         $spaces = '';

@@ -239,10 +239,7 @@ class TexyLineParser
                 $minKey)
             );
 
-            if ($replacement instanceof TexyTextualElement) {
-                $replacement = $replacement->content;
-                $offset += strlen($replacement);
-            } elseif ($replacement instanceof TexyHtml) {
+            if ($replacement instanceof TexyHtml) {
                 $replacement = $replacement->toText($tx);
             } elseif ($replacement === FALSE) {
                 $arrPos[$minKey] = -2;

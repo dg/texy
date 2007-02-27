@@ -31,8 +31,7 @@ class TexyHorizLineModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            $this,
-            'processBlock',
+            array($this, 'processBlock'),
             '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU',
             'horizLine'
         );
@@ -63,13 +62,9 @@ class TexyHorizLineModule extends TexyModule
 
         $el = new TexyBlockElement($this->texy);
 
-        if ($mMod1 || $mMod2 || $mMod3 || $mMod4) {
-            $mod = new TexyModifier($this->texy);
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $el->tags[0] = $mod->generate('hr');
-        } else {
-            $el->tags[0] = TexyHtml::el('hr');
-        }
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $el->tags[0] = $mod->generate($this->texy, 'hr');
 
         $parser->children[] = $el;
     }

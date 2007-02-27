@@ -43,7 +43,7 @@ class myHandler
         $el->href = '#comm-' . $refName; // set link destination
         $el->class[] = 'comment';        // set class name
         $el->rel = 'nofollow';           // enable rel="nofollow"
-        $el->setContent("[$refName] $name:");  // set link label (with Texy formatting)
+        $el->addChild("[$refName] $name:");  // set link label (with Texy formatting)
         return $el;
     }
 
@@ -64,7 +64,7 @@ $texy->safeMode();               // safe mode prevets attacker to inject some HT
 // how generally disable links or enable images? here is a way:
 //    $disallow = array('image', 'figure', 'linkReference', 'linkEmail', 'linkURL', 'linkQuick');
 //    foreach ($diallow as $item)
-//        $texy->allowed[$item] = FALSE; 
+//        $texy->allowed[$item] = FALSE;
 
 
 // processing
