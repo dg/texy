@@ -25,7 +25,11 @@ if (!defined('TEXY')) die();
  */
 class TexyHtmlModule extends TexyModule
 {
-    protected $allow = array('html', 'htmlTag', 'htmlComment');
+    protected $default = array(
+        'html' => TRUE,
+        'htmlTag' => TRUE,
+        'htmlComment' => FALSE,
+    );
 
 
     public function init()
@@ -124,7 +128,7 @@ class TexyHtmlModule extends TexyModule
             if (is_array($tmp)) {
                 $el->class = explode(' ', $el->class);
                 foreach ($el->class as $key => $val)
-                    if (!isset($tmp[$val])) unset($el->class[$key]);
+                    if (!isset($tmp[$val])) unset($el->class[$key]); // id & class are case-sensitive in XHTML
 
                 if (!isset($tmp['#' . $el->id])) $el->id = NULL;
             } elseif ($tmp !== Texy::ALL) {
@@ -138,11 +142,10 @@ class TexyHtmlModule extends TexyModule
                 $styles = explode(';', $el->style);
                 $el->style = NULL;
                 foreach ($styles as $value) {
-                    $pair = explode(':', $value, 2); $pair[] = '';
-                    $prop = strtolower(trim($pair[0]));
-                    $value = trim($pair[1]);
-                    if ($value !== '' && isset($tmp[$prop]))
-                        $el->style[$prop] = $value;
+                    $pair = explode(':', $value, 2);
+                    $prop = trim($pair[0]);
+                    if (isset($pair[1]) && isset($tmp[strtolower($prop)])) // CSS is case-insensitive
+                        $el->style[$prop] = $pair[1];
                 }
             } elseif ($tmp !== Texy::ALL) {
                 $el->style = NULL;

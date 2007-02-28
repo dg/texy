@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    protected $allow = array('horizLine');
+    protected $default = array('horizLine' => TRUE);
 
 
     public function init()

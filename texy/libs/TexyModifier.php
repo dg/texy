@@ -80,10 +80,10 @@ class TexyModifier
 
                 $arg = substr($arg, 1, -1);
                 foreach (explode(';', $arg) as $value) {
-                    $pair = explode(':', $value, 2); $pair[] = '';
+                    $pair = explode(':', $value, 2);
                     $prop = strtolower(trim($pair[0]));
+                    if ($prop === '' || !isset($pair[1])) continue;
                     $value = trim($pair[1]);
-                    if ($prop === '') continue;
 
                     if (isset(self::$elAttrs[$prop])) // attribute
                         $this->attrs[$prop] = $value;

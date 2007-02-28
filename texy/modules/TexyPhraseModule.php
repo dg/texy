@@ -25,23 +25,24 @@ if (!defined('TEXY')) die();
  */
 class TexyPhraseModule extends TexyModule
 {
-    protected $allow = array(
-        'phraseStrongEm',   // ***strong+emphasis***
-        'phraseStrong',     // **strong**
-        'phraseEm',         // *emphasis*
-        'phraseIns',        // ++inserted++
-        'phraseDel',        // --deleted--
-        'phraseSup',        // ^^superscript^^
-        'phraseSub',        // __subscript__
-        'phraseSpan',       // "span"
-        'phraseSpanAlt',    // ~span~
-        'phraseCite',       // ~~cite~~
-        'phraseAcronym',    // "acro nym"()
-        'phraseAcronymAlt', // acronym()
-        'phraseCode',       // `code`
-        'phraseNoTexy',     // ``....``
-        'phraseQuote',      // >>quote<<
-        'phraseCodeSwitch', // `=...
+    protected $default = array(
+        'phraseStrongEm' => TRUE,   // ***strong+emphasis***
+        'phraseStrong' => TRUE,     // **strong**
+        'phraseEm' => TRUE,         // *emphasis*
+        'phraseSpan' => TRUE,       // "span"
+        'phraseSpanAlt' => TRUE,    // ~span~
+        'phraseAcronym' => TRUE,    // "acro nym"((...))
+        'phraseAcronymAlt' => TRUE, // acronym((...))
+        'phraseCode' => TRUE,       // `code`
+        'phraseNoTexy' => TRUE,     // ``....``
+        'phraseQuote' => TRUE,      // >>quote<<
+        'phraseCodeSwitch' => TRUE, // `=...
+
+        'phraseIns' => FALSE,       // ++inserted++
+        'phraseDel' => FALSE,       // --deleted--
+        'phraseSup' => FALSE,       // ^^superscript^^
+        'phraseSub' => FALSE,       // __subscript__
+        'phraseCite' => FALSE,      // ~~cite~~
     );
 
     public $tags = array(

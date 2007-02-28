@@ -25,7 +25,15 @@ if (!defined('TEXY')) die();
  */
 class TexyBlockModule extends TexyModule
 {
-    protected $allow = array('blocks', 'blockPre', 'blockCode', 'blockHtml', 'blockText', 'blockTexysource', 'blockComment');
+    protected $default = array(
+        'blocks' => TRUE,
+        'blockPre' => TRUE,
+        'blockCode' => TRUE,
+        'blockHtml' => TRUE,
+        'blockText' => TRUE,
+        'blockTexysource' => TRUE,
+        'blockComment' => TRUE,
+    );
 
 
     public function init()

@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    protected $allow = array('blockQuote');
+    protected $default = array('blockQuote' => TRUE);
 
 
     public function init()

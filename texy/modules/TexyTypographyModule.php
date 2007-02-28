@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyTypographyModule extends TexyModule implements ITexyLineModule
 {
-    protected $allow = array('typography');
+    protected $default = array('typography' => TRUE);
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
@@ -48,7 +48,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
         $pairs = array(
             '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
                                                       => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
-            
+
             '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'  // single ''
                                                       => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
 
@@ -80,7 +80,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
             // space between preposition and word
             '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)([0-9'.TEXY_CHAR.'])#mu'
-                                                    => "\$1\$2\$3\xc2\xa0\$4\$5",                
+                                                    => "\$1\$2\$3\xc2\xa0\$4\$5",
         );
 
         $this->pattern = array_keys($pairs);

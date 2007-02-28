@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyScriptModule extends TexyModule
 {
-    protected $allow = array('script');
+    protected $default = array('script' => FALSE);
 
     /**
      * @var callback  handle script elements

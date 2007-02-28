@@ -25,7 +25,13 @@ if (!defined('TEXY')) die();
  */
 class TexyLinkModule extends TexyModule
 {
-    protected $allow = array('linkReference', 'linkEmail', 'linkURL', 'linkQuick', 'linkDefinition');
+    protected $default = array(
+        'linkReference' => TRUE,
+        'linkEmail' => TRUE,
+        'linkURL' => TRUE,
+        'linkQuick' => TRUE,
+        'linkDefinition' => TRUE,
+    );
 
     /** @var string  root of relative links */
     public $root = '';

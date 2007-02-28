@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyTableModule extends TexyModule
 {
-    protected $allow = array('table');
+    protected $default = array('table' => TRUE);
 
     /** @var string  CSS class for odd rows */
 

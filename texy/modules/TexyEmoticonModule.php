@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyEmoticonModule extends TexyModule
 {
-    //protected $allow = array('emoticon');
+    protected $default = array('emoticon' => FALSE);
 
     /** @var array  supported emoticons and image files */
     public $icons = array (

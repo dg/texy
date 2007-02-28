@@ -647,15 +647,11 @@ class Texy
     static public function completeURL($URL, $root, &$isAbsolute=NULL)
     {
         if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $URL)) {
+            // absolute URL
             $isAbsolute = TRUE;
             $URL = str_replace('&amp;', '&', $URL); // replace unwanted &amp;
-            // absolute URL
-            $lower = strtolower($URL);
-            if (substr($lower, 0, 4) === 'www.') {
-                return 'http://' . $URL;
-            } elseif (substr($lower, 0, 4) === 'ftp.') {
-                return 'ftp://' . $URL;
-            }
+            if (strncasecmp($URL, 'www.', 4) === 0) return 'http://' . $URL;
+            elseif (strncasecmp($URL, 'ftp.', 4) === 0) return 'ftp://' . $URL;
             return $URL;
         }
 

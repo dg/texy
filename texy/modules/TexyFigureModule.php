@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyFigureModule extends TexyModule
 {
-    protected $allow = array('figure');
+    protected $default = array('figure' => TRUE);
 
     /** @var string  non-floated box CSS class */
     public $class = 'figure';

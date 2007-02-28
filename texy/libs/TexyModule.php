@@ -29,7 +29,7 @@ abstract class TexyModule
     protected $texy;
 
     /** @var array  list of syntax to allow */
-    protected $allow = array();
+    protected $default = array();
 
 
 
@@ -37,9 +37,7 @@ abstract class TexyModule
     {
         $this->texy = $texy;
         $texy->registerModule($this);
-
-        foreach ($this->allow as $item)
-            $texy->allowed[$item] = TRUE;
+        $texy->allowed = array_merge($texy->allowed, $this->default);
     }
 
 

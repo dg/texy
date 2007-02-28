@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyListModule extends TexyModule
 {
-    protected $allow = array('list');
+    protected $default = array('list' => TRUE);
 
     public $bullets = array(
         '*'  => TRUE,

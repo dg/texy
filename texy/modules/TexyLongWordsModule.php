@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 {
-    protected $allow = array('longWords');
+    protected $default = array('longWords' => TRUE);
 
     public $wordLimit = 20;
 
@@ -82,7 +82,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
         if (empty($this->texy->allowed['longWords'])) return $text;
 
         return preg_replace_callback(
-            '#[^\ \n\t\x{2013}\x{2014}\x{ad}\x15\x16\x17'.TEXY_MARK_SPACES.'-]{'.$this->wordLimit.',}#u',
+            '#[^\ \n\t\x15\x16\x17'.TEXY_MARK_SPACES.'\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
             array($this, '_replace'),
             $text);
     }
@@ -137,7 +137,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
             do {
                 if ($s[$a] === "\xC2\xA0") { $a++; continue 2; } // here and after never
 
-                if ($s[$a] === '.') { $hyphen = self::HERE; break; } 
+                if ($s[$a] === '.') { $hyphen = self::HERE; break; }
 
                 if (isset($consonants[$s[$a]])) {  // souhlásky
 

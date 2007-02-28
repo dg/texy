@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyImageModule extends TexyModule
 {
-    protected $allow = array('image');
+    protected $default = array('image' => TRUE);
 
     /** @var string  root of relative images (http) */
     public $root = 'images/';

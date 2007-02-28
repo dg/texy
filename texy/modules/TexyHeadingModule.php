@@ -29,7 +29,7 @@ class TexyHeadingModule extends TexyModule
         DYNAMIC = 1,  // auto-leveling
         FIXED =   2;  // fixed-leveling
 
-    protected $allow = array('headingSurrounded', 'headingUnderlined');
+    protected $default = array('headingSurrounded' => TRUE, 'headingUnderlined' => TRUE);
 
     /** @var int  level of top heading, 1..6 */
     public $top = 1;
