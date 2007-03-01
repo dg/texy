@@ -91,17 +91,19 @@ class TexyListModule extends TexyModule
 
         $tx = $this->texy;
 
+        $el = TexyHtml::el();
+
         $bullet = '';
-        foreach ($this->translate as $type)
-            if (preg_match('#'.$type[0].'#Au', $mBullet)) {
-                $bullet = $type[0];
-                $tag = $type[2];
-                $style = $type[1];
+        foreach ($this->translate as $type => $desc)
+            if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
+                $bullet = $desc[0];
+                $el->elName = $desc[2];
+                $el->style['list-style-type'] = $desc[1];
+		if ($el->elName === 'ol' && $type[0] === '1') {
+                    $el->start = (int) $mBullet > 1 ? (int) $mBullet : NULL;            
+                }
                 break;
             }
-
-        $el = TexyHtml::el($tag);
-        $el->style['list-style-type'] = $style;
 
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);

@@ -37,6 +37,7 @@ class TexyPhraseModule extends TexyModule
         'phraseNoTexy' => TRUE,     // ``....``
         'phraseQuote' => TRUE,      // >>quote<<
         'phraseCodeSwitch' => TRUE, // `=...
+        'phraseLink' => TRUE,       // ....:link
 
         'phraseIns' => FALSE,       // ++inserted++
         'phraseDel' => FALSE,       // --deleted--
@@ -245,7 +246,7 @@ class TexyPhraseModule extends TexyModule
 
         $content = $el->export($tx);
 
-        if ($mLink) {
+        if ($mLink && $tx->allowed['phraseLink']) {
             $req = $tx->linkModule->parse($mLink, $mMod1, $mMod2, $mMod3, $mContent);
             $el = $tx->linkModule->factory($req)->setContent($content);
 

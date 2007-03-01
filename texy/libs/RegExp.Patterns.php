@@ -62,4 +62,4 @@ define('TEXY_LINK_REF',    '\[[^\[\]\*\n'.TEXY_MARK.']+\]');  // reference  [ref
 define('TEXY_LINK_URL',    '(?:\[[^\]\n]+\]|(?!\[)[^\s'.TEXY_MARK.']*?[^:);,.!?\s'.TEXY_MARK.'])'); // any url (nekonèí :).,!?
 define('TEXY_LINK',        '(?::('.TEXY_LINK_URL.'))');       // any link
 define('TEXY_LINK_N',      '(?::('.TEXY_LINK_URL.'|:))');     // any link (also unstated)
-define('TEXY_EMAIL',       '[a-z0-9.+_-]+@[a-z0-9.+_-]{2,}\.[a-z]{2,}');    // name@exaple.com
+define('TEXY_EMAIL',       '[a-z0-9.+_-]+@[a-z0-9.+_-]+\.[a-z]{2,}');    // name@exaple.com

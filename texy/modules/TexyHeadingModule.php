@@ -37,6 +37,15 @@ class TexyHeadingModule extends TexyModule
     /** @var string  textual content of first heading */
     public $title;
 
+    /** @var array  generated Table of Contents */
+    public $TOC;
+
+    /** @var bool  autogenerate ID */
+    public $generateID = FALSE;
+
+    /** @var array  used ID's */
+    private $usedID;
+
     /** @var int  balancing mode */
     public $balancing = TexyHeadingModule::DYNAMIC;
 
@@ -69,19 +78,14 @@ class TexyHeadingModule extends TexyModule
             '#^((\#|\=){2,})(?!\\2)(.+)\\2*'.TEXY_MODIFIER_H.'?()$#mU',
             'headingSurrounded'
         );
-    }
 
-
-
-    public function preProcess($text)
-    {
         $this->_rangeUnderline = array(10, 0);
         $this->_rangeSurround = array(10, 0);
         $this->title = NULL;
+        $this->TOC = $this->usedID = array();
 
         $foo = NULL; $this->_deltaUnderline = & $foo;
         $bar = NULL; $this->_deltaSurround = & $bar;
-        return $text;
     }
 
 
@@ -104,24 +108,12 @@ class TexyHeadingModule extends TexyModule
         //
         //    [6] => ...
 
-        $el = new TexyHeadingElement;
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $mod->decorate($this->texy, $el);
-
         $level = $this->levels[$mLine];
-        $el->eXtra['level'] = $level;
-        $el->eXtra['top'] = $this->top;
-        $el->eXtra['deltaLevel'] = 0;
-        if ($this->balancing === self::DYNAMIC)
-            $el->eXtra['deltaLevel'] = & $this->_deltaUnderline;
-
-        $el->parseLine($this->texy, trim($mContent));
-
+        $el = $this->factory($level, $mContent, $mMod1, $mMod2, $mMod3, $mMod4);
         $parser->children[] = $el;
 
-        // document title
-        if ($this->title === NULL) $this->title = Texy::wash($el->getContent());
+        if ($this->balancing === self::DYNAMIC)
+            $el->eXtra['deltaLevel'] = & $this->_deltaUnderline;
 
         // dynamic headings balancing
         $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $level);
@@ -148,24 +140,12 @@ class TexyHeadingModule extends TexyModule
         //    [5] => {style}
         //    [6] => >
 
-        $el = new TexyHeadingElement;
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $mod->decorate($this->texy, $el);
-
         $level = 7 - min(7, max(2, strlen($mLine)));
-        $el->eXtra['level'] = $level;
-        $el->eXtra['top'] = $this->top;
-        $el->eXtra['deltaLevel'] = 0;
-        if ($this->balancing === self::DYNAMIC)
-            $el->eXtra['deltaLevel'] = & $this->_deltaSurround;
-
-        $el->parseLine($this->texy, trim($mContent));
-
+        $el = $this->factory($level, $mContent, $mMod1, $mMod2, $mMod3, $mMod4);
         $parser->children[] = $el;
 
-        // document title
-        if ($this->title === NULL) $this->title = Texy::wash($el->getContent());
+        if ($this->balancing === self::DYNAMIC)
+            $el->eXtra['deltaLevel'] = & $this->_deltaSurround;
 
         // dynamic headings balancing
         $this->_rangeSurround[0] = min($this->_rangeSurround[0], $level);
@@ -173,6 +153,50 @@ class TexyHeadingModule extends TexyModule
         $this->_deltaSurround  = -$this->_rangeSurround[0] +
             ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
+    }
+
+
+
+    public function factory($level, $mContent, $mMod1, $mMod2, $mMod3, $mMod4)
+    {
+        $el = new TexyHeadingElement;
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod->decorate($this->texy, $el);
+
+        $el->eXtra['level'] = $level;
+        $el->eXtra['top'] = $this->top;
+        $el->eXtra['deltaLevel'] = 0;
+
+        $el->parseLine($this->texy, trim($mContent));
+
+        // document title
+        $title = Texy::wash($el->getContent());
+        if ($this->title === NULL) $this->title = $title;
+
+        // Table of Contents
+        if ($this->generateID && empty($el->id)) {
+            $el->id = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $title));
+            $el->id = str_replace(' ', '-', $el->id);
+            $el->id = preg_replace('#[^a-z0-9_-]#i', '', $el->id);
+            $counter = '';
+            if (isset($this->usedID[$el->id . $counter])) {
+                $counter = 2;
+                while (isset($this->usedID[$el->id . '-' . $counter])) $counter++;
+                $el->id .= '-' . $counter;
+            }
+            $this->usedID[$el->id] = TRUE;
+        }
+
+        $TOC = array(
+            'id' => isset($el->id) ? $el->id : NULL,
+            'title' => $title,
+            'level' => 0,
+        );
+        $this->TOC[] = & $TOC;
+        $el->eXtra['TOC'] = & $TOC;
+
+        return $el;
     }
 
 } // TexyHeadingModule
@@ -193,6 +217,7 @@ class TexyHeadingElement extends TexyHtml
     {
         $level = $this->eXtra['level'] + $this->eXtra['deltaLevel'] + $this->eXtra['top'];
         $this->elName = 'h' . min(6, max(1, $level));
+        $this->eXtra['TOC']['level'] = $level;
         return parent::startTag();
     }
 
