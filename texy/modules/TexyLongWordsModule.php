@@ -82,7 +82,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
         if (empty($this->texy->allowed['longWords'])) return $text;
 
         return preg_replace_callback(
-            '#[^\ \n\t\x15\x16\x17'.TEXY_MARK_SPACES.'\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
+            '#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
             array($this, '_replace'),
             $text);
     }

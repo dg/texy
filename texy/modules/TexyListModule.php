@@ -28,42 +28,30 @@ class TexyListModule extends TexyModule
     protected $default = array('list' => TRUE);
 
     public $bullets = array(
-        '*'  => TRUE,
-        '-'  => TRUE,
-        '+'  => TRUE,
-        '1.' => TRUE,
-        '1)' => TRUE,
-        'I.' => TRUE,
-        'I)' => TRUE,
-        'a)' => TRUE,
-        'A)' => TRUE,
-    );
-
-    private $translate = array(
-                    //  rexexp       list-style-type  tag
-        '*'  => array('\*',          '',              'ul'),
-        '-'  => array('[\x{2013}-]', '',              'ul'),
-        '+'  => array('\+',          '',              'ul'),
-        '1.' => array('\d+\.\ ',     '',              'ol'),
-        '1)' => array('\d+\)',       '',              'ol'),
-        'I.' => array('[IVX]+\.\ ',  'upper-roman',   'ol'),   // place romans before alpha
-        'I)' => array('[IVX]+\)',    'upper-roman',   'ol'),
-        'a)' => array('[a-z]\)',     'lower-alpha',   'ol'),
-        'A)' => array('[A-Z]\)',     'upper-alpha',   'ol'),
+                    //  rexexp           list-style-type  tag
+        '*'  => array('\*',              '',              'ul'),
+        '-'  => array('[\x{2013}-]',     '',              'ul'),
+        '+'  => array('\+',              '',              'ul'),
+        '1.' => array('\d{1,3}\.\ ',     '',              'ol'),
+        '1)' => array('\d{1,3}\)',       '',              'ol'),
+        'I.' => array('[IVX]{1,4}\.\ ',  'upper-roman',   'ol'),
+        'I)' => array('[IVX]+\)',        'upper-roman',   'ol'), // before A) !
+        'a)' => array('[a-z]\)',         'lower-alpha',   'ol'),
+        'A)' => array('[A-Z]\)',         'upper-alpha',   'ol'),
     );
 
 
 
     public function init()
     {
-        $bullets = array();
-        foreach ($this->bullets as $bullet => $allowed)
-            if ($allowed) $bullets[] = $this->translate[$bullet][0];
+        $RE = array();
+        foreach ($this->bullets as $desc)
+            if (is_array($desc)) $RE[] = $desc[0];
 
         $this->texy->registerBlockPattern(
             array($this, 'processBlock'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color: red}
-          . '('.implode('|', $bullets).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
+          . '('.implode('|', $RE).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
             'list'
         );
     }
@@ -94,13 +82,18 @@ class TexyListModule extends TexyModule
         $el = TexyHtml::el();
 
         $bullet = '';
-        foreach ($this->translate as $type => $desc)
+        foreach ($this->bullets as $type => $desc)
             if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
                 $bullet = $desc[0];
                 $el->elName = $desc[2];
                 $el->style['list-style-type'] = $desc[1];
-		if ($el->elName === 'ol' && $type[0] === '1') {
-                    $el->start = (int) $mBullet > 1 ? (int) $mBullet : NULL;            
+		        if ($el->elName === 'ol') {
+                    if ($type[0] === '1' && (int) $mBullet > 1)
+                        $el->start = (int) $mBullet;
+                    elseif ($type[0] === 'a' && $mBullet[0] > 'a')
+                        $el->start = ord($mBullet[0]) - 96;
+                    elseif ($type[0] === 'A' && $mBullet[0] > 'A')
+                        $el->start = ord($mBullet[0]) - 64;
                 }
                 break;
             }

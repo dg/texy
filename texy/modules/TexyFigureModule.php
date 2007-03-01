@@ -36,6 +36,8 @@ class TexyFigureModule extends TexyModule
     /** @var string  right-floated box CSS class */
     public $rightClass = 'figure-right';
 
+    /** @var int  how calculate div's width */
+    public $widthDelta = 10;
 
 
     public function init()
@@ -102,6 +104,8 @@ class TexyFigureModule extends TexyModule
         }
 
         $el = TexyHtml::el('div');
+        if (!empty($elImg->width)) $el->style['width'] = ($elImg->width + $this->widthDelta) . 'px';
+
         $mod->decorate($tx, $el);
         $el->childNodes['img'] = TexyHtml::el('');
         $el->childNodes['img']->childNodes[] = $elImg->export($tx);

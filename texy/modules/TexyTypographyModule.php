@@ -45,6 +45,11 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
     public function init()
     {
+        // CONTENT_NONE mark:    \x17-\x1F
+        // CONTENT_INLINE mark:  \x16
+        // CONTENT_TEXTUAL mark: \x17
+        // CONTENT_BLOCK: not used in linePostProcess
+
         $pairs = array(
             '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
                                                       => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
@@ -72,14 +77,14 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
             '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
             '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
             '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
-            '#(\S{100,}) (\S+)$#'                     => "\$1\xc2\xa0\$2",                 // space before last word
+            '#(?<=.{70}) +(?=[\x17-\x1F]*\S{1,5}[\x17-\x1F]*$)#' => "\xc2\xa0",            // space before last short word
 
             // nbsp space between number and word, symbol, punctation, currency symbol
-            '#(?<=^| |\.|,|-|\+|\x15)(['.TEXY_MARK_N.']*\d+['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*['.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+[\x17-\x1F]*) ([\x17-\x1F]*['.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
                                                       => "\$1\xc2\xa0\$2",
 
             // space between preposition and word
-            '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*[ksvzouiKSVZOUIA]['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*[0-9'.TEXY_CHAR.'])#mu'
+            '#(?<=^|[^0-9'.TEXY_CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*) ([\x17-\x1F]*[0-9'.TEXY_CHAR.'])#mu'
                                                       => "\$1\xc2\xa0\$2",
         );
 

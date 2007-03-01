@@ -68,10 +68,10 @@ class Texy
     const NONE = FALSE;
 
     // types of protection marks
-    const CONTENT_NONE =    "\x14";
-    const CONTENT_INLINE =  "\x15";
-    const CONTENT_TEXTUAL = "\x16";
-    const CONTENT_BLOCK =   "\x17";
+    const CONTENT_NONE =    "\x17";
+    const CONTENT_INLINE =  "\x16";
+    const CONTENT_TEXTUAL = "\x15";
+    const CONTENT_BLOCK =   "\x14";
 
     /** @var bool  use XHTML? */
     static public $xhtml = TRUE;

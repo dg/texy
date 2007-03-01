@@ -28,12 +28,6 @@ class TexyDefinitionListModule extends TexyListModule
     protected $default = array('listDefinition' => TRUE);
 
     public $bullets = array(
-        '*' => TRUE,
-        '-' => TRUE,
-        '+' => TRUE,
-    );
-
-    private $translate = array(    //  rexexp  class
         '*' => array('\*'),
         '-' => array('[\x{2013}-]'),
         '+' => array('\+'),
@@ -43,15 +37,15 @@ class TexyDefinitionListModule extends TexyListModule
 
     public function init()
     {
-        $bullets = array();
-        foreach ($this->bullets as $bullet => $allowed)
-            if ($allowed) $bullets[] = $this->translate[$bullet][0];
+        $RE = array();
+        foreach ($this->bullets as $desc)
+            if (is_array($desc)) $RE[] = $desc[0];
 
         $this->texy->registerBlockPattern(
             array($this, 'processBlock'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color:red}
           . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'               // Term:
-          . '(\ +)('.implode('|', $bullets).')\ +\S.*$#mUu',  //    - description
+          . '(\ +)('.implode('|', $RE).')\ +\S.*$#mUu',  //    - description
             'listDefinition'
         );
     }
@@ -89,9 +83,9 @@ class TexyDefinitionListModule extends TexyListModule
         $tx = $this->texy;
 
         $bullet = '';
-        foreach ($this->translate as $type)
-            if (preg_match('#'.$type[0].'#Au', $mBullet)) {
-                $bullet = $type[0];
+        foreach ($this->bullets as $desc)
+            if (is_array($desc) && preg_match('#'.$desc[0].'#Au', $mBullet)) {
+                $bullet = $desc[0];
                 break;
             }
 

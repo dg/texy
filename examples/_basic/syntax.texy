@@ -277,9 +277,9 @@ a)  Bird
 b)  McHale
 c)  Parish
 
-I)  Bird
-II)  McHale
-III)  Parish
+I.  Bird
+II.  McHale
+III.  Parish
 
 A)  Bird
 B)  McHale
@@ -292,12 +292,12 @@ nested
 
 
 a)  Bird
-  I)  Bird
+  I.  Bird
     +   Red
     +   Green
     +   Blue
-  II)  McHale
-  III)  Parish
+  II.  McHale
+  III.  Parish
 b)  McHale
 c)  Parish
       1)  Bird

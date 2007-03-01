@@ -23,24 +23,16 @@ if (!defined('TEXY')) die();
 
 // Regular expression patterns
 
-// international characters 'A-Za-z\x86-\xff'
-// unicode                  'A-Za-z\x86-\x{ffff}'
-// numbers                  0-9
-// spaces                   \n\r\t\x32
-// control                  \x00 - \x31  (without spaces)
-// others                   !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
-
-
-// character classes
+// Unicode character classes
 define('TEXY_CHAR',        'A-Za-z\x{c0}-\x{02af}\x{0370}-\x{1eff}');
 
-// marking meta-charakters
-define('TEXY_MARK',        "\x01-\x04\x14-\x1F"); // any mark char
-define('TEXY_MARK_SPACES', "\x01-\x04");        // marked space
-define('TEXY_MARK_N',      "\x14\x18-\x1F");    // marked CONTENT_NONE
-define('TEXY_MARK_I',      "\x15\x18-\x1F");    // marked CONTENT_INLINE
-define('TEXY_MARK_T',      "\x16\x18-\x1F");    // marked CONTENT_TEXTUAL
-define('TEXY_MARK_B',      "\x17\x18-\x1F");    // marked CONTENT_BLOCK
+// marking meta-characters
+// any mark:               \x14-\x1F
+// CONTENT_NONE mark:      \x17-\x1F
+// CONTENT_INLINE mark:    \x16-\x1F
+// CONTENT_TEXTUAL mark:   \x17-\x1F
+// CONTENT_BLOCK:          \x18-\x1F
+define('TEXY_MARK',        "\x14-\x1F");
 
 
 // modifier .(title)[class]{style}
