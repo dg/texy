@@ -43,7 +43,7 @@ class myHandler
         $el->href = '#comm-' . $refName; // set link destination
         $el->class[] = 'comment';        // set class name
         $el->rel = 'nofollow';           // enable rel="nofollow"
-        $el->addChild("[$refName] $name:");  // set link label (with Texy formatting)
+        $el->childNodes[] = "[$refName] $name:";  // set link label (with Texy formatting)
         return $el;
     }
 

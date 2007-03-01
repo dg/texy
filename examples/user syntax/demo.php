@@ -29,25 +29,44 @@ $texy->allowed['mySyntax1'] = TRUE;
 $texy->allowed['mySyntax2'] = TRUE;
 
 
-die('NOT WORKING YET.');
-
-// add new syntax: *bold* _italic_
+// add new syntax: *bold*
 $texy->registerLinePattern(
-    $texy->phraseModule,
-    'processPhrase',
-    '#(?<!\*)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
-//    '#(?<!\*)\*(?!\ )([^\*]+)<MODIFIER>?(?<!\ )\*(?!\*)()#U',
+    'userHandler',
+    '#(?<!\*)\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U',
     'mySyntax1'
 );
 
+// add new syntax: _italic_
 $texy->registerLinePattern(
-    $texy->phraseModule,
-    'processPhrase',
-    '#(?<!\*)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
-//    '#(?<!\_)\_(?!\ )([^\_]+)<MODIFIER>?(?<!\ )\_(?!\_)()#U',
+    'userHandler',
+    '#(?<!_)_(?!\ |_)(.+)'.TEXY_MODIFIER.'?(?<!\ |_)_(?!_)()#U',
     'mySyntax2'
 );
 
+
+function userHandler($parser, $matches, $name)
+{
+    list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
+
+    global $texy;
+
+    // create element
+    $tag = $name === 'mySyntax1' ? 'b' : 'i';
+    $el = TexyHtml::el($tag);
+
+    // apply modifier
+    $mod = new TexyModifier;
+    $mod->setProperties($mMod1, $mMod2, $mMod3);
+    $mod->decorate($texy, $el);
+
+    $el->class = 'myclass';
+    $el->setContent($mContent);
+
+    // parse inner content of this element
+    $parser->again = TRUE;
+
+    return $el;
+}
 
 
 // processing

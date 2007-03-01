@@ -234,6 +234,10 @@ class TexyImageModule extends TexyModule
         $tx = $this->texy;
 
         $req = $this->parse($mURLs, $mMod1, $mMod2, $mMod3, $mMod4);
+
+        if (is_callable(array($tx->handler, 'preImage')))
+            $tx->handler->preImage($tx, $req, $mLink);
+
         $el = $this->factory($req);
 
         if (is_callable(array($tx->handler, 'image')))

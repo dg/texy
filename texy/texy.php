@@ -311,8 +311,6 @@ class Texy
         else $this->_styles = $this->allowedStyles;
 
         // init modules
-        $this->linePatterns  = array();
-        $this->blockPatterns = array();
         foreach ($this->modules as $module) $module->init();
     }
 
@@ -380,6 +378,9 @@ class Texy
         // process
         $this->DOM = TexyHtml::el();
         $this->DOM->parseBlock($this, $text);
+
+        // clean-up
+        $this->linePatterns = $this->blockPatterns = array();
     }
 
 
@@ -405,6 +406,9 @@ class Texy
         // parse
         $this->DOM = TexyHtml::el();
         $this->DOM->parseLine($this, $text);
+
+        // clean-up
+        $this->linePatterns = $this->blockPatterns = array();
     }
 
 

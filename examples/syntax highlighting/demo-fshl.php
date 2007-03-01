@@ -19,7 +19,6 @@
 // include libs
 require_once dirname(__FILE__).'/../../texy/texy.php';
 
-
 $fshlPath = dirname(__FILE__).'/fshl/';
 include_once $fshlPath . 'fshl.php';
 
@@ -44,10 +43,14 @@ class myHandler
            ) return;
 
         $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
-        $element->content = $parser->highlightString($lang, $content);
+        $content = $parser->highlightString($lang, $content);
 
-        // output is in HTML
-        $element->protect = TRUE;
+        $content = $texy->protect($content);
+
+        if (isset($element->childNodes[0]))
+            $element->childNodes[0]->setContent($content);
+        else
+            $element->setContent($content);
     }
 
 }

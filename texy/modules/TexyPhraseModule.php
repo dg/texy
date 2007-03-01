@@ -279,7 +279,7 @@ class TexyPhraseModule extends TexyModule
      * Callback function: `.... .(title)[class]{style}`
      * @return string
      */
-    public function processCode($parser, $matches)
+    public function processCode($parser, $matches, $name)
     {
         list(, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
         //    [1] => ...
@@ -287,15 +287,17 @@ class TexyPhraseModule extends TexyModule
         //    [3] => [class]
         //    [4] => {style}
 
+        $tx = $this->texy;
         $el = TexyHtml::el($this->codeTag);
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3);
-        $mod->decorate($this->texy, $el);
+        $mod->decorate($tx, $el);
+        $el->setContent( $tx->protect(Texy::encode($mContent), Texy::CONTENT_TEXTUAL) );
 
-        return $this->texy->protect(
-            $el->startTag() . htmlSpecialChars($mContent, ENT_NOQUOTES) . $el->endTag(),
-            Texy::CONTENT_TEXTUAL
-        );
+        if (is_callable(array($tx->handler, $name)))
+            $tx->handler->$name($tx, $mContent, $mod, $el);
+
+        return $el;
     }
 
 
@@ -307,7 +309,7 @@ class TexyPhraseModule extends TexyModule
     public function processProtect($parser, $matches)
     {
         list(, $mContent) = $matches;
-        return $this->texy->protect(htmlSpecialChars($mContent, ENT_NOQUOTES), Texy::CONTENT_TEXTUAL);
+        return $this->texy->protect(Texy::encode($mContent), Texy::CONTENT_TEXTUAL);
     }
 
 } // TexyPhraseModule

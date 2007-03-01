@@ -58,16 +58,18 @@ class myHandler
         // save generated stylesheet
         $texy->styleSheet .= $geshi->get_stylesheet();
 
-        $element->content = $geshi->parse_code();
+        $content = $geshi->parse_code();
 
         // check buggy GESHI, it sometimes produce not UTF-8 valid code :-((
-        $element->content = iconv('UTF-8', 'UTF-8//IGNORE', $element->content);
+        $content = iconv('UTF-8', 'UTF-8//IGNORE', $content);
 
-        // output is in HTML
-        $element->protect = TRUE;
+        // protect output is in HTML
+        $content = $texy->protect($content);
+
+        $element->setContent($content);
 
         // remove tags
-        $element->tags = NULL;
+        $element->elName = NULL;
     }
 
 }

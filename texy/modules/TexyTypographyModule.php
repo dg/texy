@@ -75,12 +75,12 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
             '#(\S{100,}) (\S+)$#'                     => "\$1\xc2\xa0\$2",                 // space before last word
 
             // nbsp space between number and word, symbol, punctation, currency symbol
-            '#(?<=^| |\.|,|-|\+)(\d+)(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)(['.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
-                                                      => "\$1\$2\xc2\xa0\$3\$4",
+            '#(?<=^| |\.|,|-|\+|\x15)(['.TEXY_MARK_N.']*\d+['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*['.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+                                                      => "\$1\xc2\xa0\$2",
 
             // space between preposition and word
-            '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*)([ksvzouiKSVZOUIA])(['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*)([0-9'.TEXY_CHAR.'])#mu'
-                                                    => "\$1\$2\$3\xc2\xa0\$4\$5",
+            '#(?<=^|[^0-9'.TEXY_CHAR.'])(['.TEXY_MARK_N.']*[ksvzouiKSVZOUIA]['.TEXY_MARK_N.']*) (['.TEXY_MARK_N.']*[0-9'.TEXY_CHAR.'])#mu'
+                                                      => "\$1\xc2\xa0\$2",
         );
 
         $this->pattern = array_keys($pairs);

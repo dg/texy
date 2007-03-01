@@ -71,8 +71,6 @@ class TexyFigureModule extends TexyModule
         //    [11] => >
 
         $tx = $this->texy;
-        //$el = new TexyBlockElement($tx);
-
 
         $req = $tx->imageModule->parse($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
@@ -80,6 +78,9 @@ class TexyFigureModule extends TexyModule
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
         $hAlign = $req['modifier']->hAlign;
         $mod->hAlign = $req['modifier']->hAlign = NULL;
+
+        if (is_callable(array($tx->handler, 'preFigure')))
+            $tx->handler->preFigure($tx, $req, $mod, $mLink, $mContent);
 
         $elImg = $tx->imageModule->factory($req, $mLink);
         if ($mLink) {
@@ -116,7 +117,7 @@ class TexyFigureModule extends TexyModule
             $el->class[] = $this->class;
 
         if (is_callable(array($tx->handler, 'figure')))
-            $tx->handler->figure($tx, $req, $el);
+            $tx->handler->figure($tx, $req, $mod, $el);
 
         $parser->children[] = $el;
     }
