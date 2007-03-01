@@ -60,11 +60,10 @@ class TexyHorizLineModule extends TexyModule
         //    [4] => {style}
         //    [5] => >
 
-        $el = new TexyBlockElement($this->texy);
-
+        $el = TexyHtml::el('hr');
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $el->tags[0] = $mod->generate($this->texy, 'hr');
+        $mod->decorate($this->texy, $el);
 
         $parser->children[] = $el;
     }

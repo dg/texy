@@ -209,7 +209,7 @@ class TexyLinkModule extends TexyModule
         $tx = $this->texy;
         $req = $this->parse($mLink, NULL, NULL, NULL, $mContent);
         $el = $this->factory($req);
-        $el->addChild($mContent);
+        $el->setContent($mContent);
 
         if (is_callable(array($tx->handler, 'link')))
             $tx->handler->link($tx, $req, $el);
@@ -247,10 +247,9 @@ class TexyLinkModule extends TexyModule
             if (isset(self::$deadlock[$mRef['name']])) {
                 $content = $ref['label'];
             } else {
-                $label = new TexyTextualElement($tx);
                 self::$deadlock[$mRef['name']] = TRUE;
-                $label->parse($ref['label']);
-                $content = $label->content;
+                $lineParser = new TexyLineParser($tx);
+                $content = $lineParser->parse($ref['label']);
                 unset(self::$deadlock[$mRef['name']]);
             }
         } else {
@@ -258,7 +257,7 @@ class TexyLinkModule extends TexyModule
         }
 
         $el = $this->factory($ref);
-        $el->addChild($content);
+        $el->setContent($content);
 
         if (is_callable(array($tx->handler, 'reference2')))
             $tx->handler->reference2($tx, $ref, $el);
@@ -283,7 +282,7 @@ class TexyLinkModule extends TexyModule
             'URL' => $mURL,
         );
         $el = $this->factory($req);
-        $el->addChild($this->textualURL($mURL));
+        $el->setContent($this->textualURL($mURL));
 
         if (is_callable(array($tx->handler, $name)))
             $tx->handler->$name($tx, $mURL, $el);
@@ -336,8 +335,9 @@ class TexyLinkModule extends TexyModule
         extract($req);
         $tx = $this->texy;
 
+        $el = TexyHtml::el('a');
+
         if (empty($modifier)) {
-            $el = TexyHtml::el('a');
             $nofollow = $popup = FALSE;
         } else {
             $classes = array_flip($modifier->classes);
@@ -345,7 +345,7 @@ class TexyLinkModule extends TexyModule
             $popup = isset($classes['popup']);
             unset($classes['nofollow'], $classes['popup']);
             $modifier->classes = array_flip($classes);
-            $el = $modifier->generate($tx, 'a');
+            $modifier->decorate($tx, $el);
         }
 
 

@@ -26,14 +26,14 @@ if (!defined('TEXY')) die();
  */
 class TexyHtml
 {
-    /** @var string element's name */
-    public $_name;
+    /** @var string  element's name */
+    public $elName;
 
-    /** @var bool is element empty? */
-    public $_empty;
+    /** @var array|FALSE  element's content, FALSE means empty element */
+    public $childNodes = array();
 
-    /** @var array element's content */
-    public $_childNodes;
+    /** @var mixed  user data */
+    public $eXtra;
 
     /* element's attributes are not explicitly declared */
 
@@ -41,20 +41,13 @@ class TexyHtml
     /**
      * TexyHtml element's factory
      * @param string element name (or NULL)
-     * @param array  optional attributes list
      * @return TexyHtml
      */
-    static public function el($name=NULL, $attrs=NULL)
+    static public function el($name=NULL)
     {
         $el = new self();
-        if (is_array($attrs)) {
-           foreach ($attrs as $key => $value) $el->$key = $value;
-        }
-
-        $el->_name = $name;
-        $el->_empty = isset(Texy::$emptyTags[$name]);
-        $el->_childNodes = array();
-
+        $el->elName = $name;
+        if (isset(Texy::$emptyTags[$name])) $el->childNodes = FALSE;
         return $el;
     }
 
@@ -62,25 +55,48 @@ class TexyHtml
     /**
      * Changes element's name
      * @param string
-     * @return TexyHtml self
+     * @return TexyHtml  itself
      */
     public function setElement($name)
     {
-        $this->_name = $name;
-        $this->_empty = isset(Texy::$emptyTags[$name]);
+        $this->elName = $name;
+        if (isset(Texy::$emptyTags[$name])) $el->childNodes = FALSE;
         return $this;
     }
 
 
     /**
-     * Adds new child of element's content
-     * @param string|TexyHtml object
-     * @return TexyHtml self
+     * Sets element's attributes
+     * @param array
+     * @return TexyHtml  itself
      */
-    public function addChild($content)
+    public function setAttrs($attrs)
     {
-        $this->_childNodes[] = $content;
+        foreach ($attrs as $key => $value) $el->$key = $value;
         return $this;
+    }
+
+
+    /**
+     * Sets element's content
+     * @param string|TexyHtml object
+     * @return TexyHtml  itself
+     */
+    public function setContent($content)
+    {
+        $this->childNodes = array( $content );
+        return $this;
+    }
+
+
+    /**
+     * Gets element's content
+     * @return string
+     */
+    public function getContent()
+    {
+        if (isset($this->childNodes[0])) return $this->childNodes[0];
+        return NULL;
     }
 
 
@@ -88,7 +104,7 @@ class TexyHtml
      * Overloaded setter for element's attribute
      * @param string function name
      * @param array function arguments
-     * @return TexyHtml self
+     * @return TexyHtml  itself
      */
     public function __call($m, $args)
     {
@@ -101,20 +117,25 @@ class TexyHtml
      * Renders element's start tag, content and end tag
      * @return string
      */
-    public function toText($texy)
+    public function export($texy)
     {
         $ct = $this->getContentType();
-        $s = $texy->mark($this->startTag(), $ct);
+        $s = $texy->protect($this->startTag(), $ct);
 
         // empty elements are finished now
-        if ($this->_empty) return $s;
+        if ($this->childNodes === FALSE) return $s;
 
         // add content
-        foreach ($this->_childNodes as $val)
-            if ($val instanceof self) $s .= $val->toText($texy);
+        if (!is_array($this->childNodes)) {
+            debugbreak();
+            throw new Exception('TexyHtml::childNodes bad usage.');
+        }
+
+        foreach ($this->childNodes as $val)
+            if ($val instanceof self) $s .= $val->export($texy);
             else $s .= $val;
 
-        $s .= $texy->mark($this->endTag(), $ct);
+        $s .= $texy->protect($this->endTag(), $ct);
 
         return $s;
     }
@@ -126,13 +147,13 @@ class TexyHtml
      */
     public function startTag()
     {
-        if (!$this->_name) return '';
+        if (!$this->elName) return '';
 
-        $s = '<' . $this->_name;
+        $s = '<' . $this->elName;
 
         // for each attribute...
-        $attrs = (array) $this; // use array_change_key_case($this, CASE_LOWER) ???
-        unset($attrs['_name'], $attrs['_childNodes'], $attrs['_empty']);
+        $attrs = (array) $this;
+        unset($attrs['elName'], $attrs['childNodes'], $attrs['eXtra']);
 
         foreach ($attrs as $key => $value)
         {
@@ -151,7 +172,6 @@ class TexyHtml
 
                 // prepare into temporary array
                 $tmp = NULL;
-                // use array_change_key_case($value, CASE_LOWER) ???
                 foreach ($value as $k => $v) {
                     // skip NULLs & empty string; composite 'style' vs. 'others'
                     if ($v == NULL) continue;
@@ -169,7 +189,7 @@ class TexyHtml
         }
 
         // finish start tag
-        if (Texy::$xhtml && $this->_empty) return $s . ' />';
+        if (Texy::$xhtml  && $this->childNodes === FALSE) return $s . ' />';
         return $s . '>';
     }
 
@@ -180,7 +200,8 @@ class TexyHtml
      */
     public function endTag()
     {
-        if ($this->_name && !$this->_empty) return '</' . $this->_name . '>';
+        if ($this->elName && $this->childNodes !== FALSE)
+            return '</' . $this->elName . '>';
         return '';
     }
 
@@ -191,11 +212,37 @@ class TexyHtml
      */
     public function getContentType()
     {
-        if (isset(Texy::$inlineCont[$this->_name])) return Texy::CONTENT_INLINE;
-        if (isset(Texy::$inlineTags[$this->_name])) return Texy::CONTENT_NONE;
+        if (isset(Texy::$inlineCont[$this->elName])) return Texy::CONTENT_INLINE;
+        if (isset(Texy::$inlineTags[$this->elName])) return Texy::CONTENT_NONE;
 
         return Texy::CONTENT_BLOCK;
     }
 
 
+
+    /**
+     * Parses text as block
+     * @param Texy
+     * @param string
+     * @return void
+     */
+    public function parseLine($texy, $s)
+    {
+        $parser = new TexyLineParser($texy);
+        $this->childNodes[] = $parser->parse($s);
+    }
+
+
+
+    /**
+     * Parses text as single line
+     * @param Texy
+     * @param string
+     * @return void
+     */
+    public function parseBlock($texy, $s)
+    {
+        $parser = new TexyBlockParser($texy);
+        $this->childNodes = $parser->parse($s);
+    }
 }

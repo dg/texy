@@ -81,7 +81,7 @@ class TexyModifier
                 $arg = substr($arg, 1, -1);
                 foreach (explode(';', $arg) as $value) {
                     $pair = explode(':', $value, 2);
-                    $prop = strtolower(trim($pair[0]));
+                    $prop = strtolower(trim($pair[0])); // strtolower protects TexyHtml's elName, eXtra, childNodes
                     if ($prop === '' || !isset($pair[1])) continue;
                     $value = trim($pair[1]);
 
@@ -117,38 +117,33 @@ class TexyModifier
 
 
     /**
-     * Generates TexyHtml element
+     * Decorates TexyHtml element
      * @param Texy   base Texy object
-     * @param string HTML tag name
-     * @return TexyHtml
+     * @param TexyHtml  element to decorate
+     * @return void
      */
-    public function generate($texy, $tag)
+    public function decorate($texy, $el)
     {
         // tag & attibutes
         $tmp = $texy->allowedTags; // speed-up
         if (!$this->attrs) {
-            $el = TexyHtml::el($tag);
 
         } elseif ($tmp === Texy::ALL) {
-            $el = TexyHtml::el($tag, $this->attrs);
+            $el->setAttrs($this->attrs);
 
-        } elseif (is_array($tmp) && isset($tmp[$tag])) {
-            $tmp = $tmp[$tag];
+        } elseif (is_array($tmp) && isset($tmp[$el->elName])) {
+            $tmp = $tmp[$el->elName];
 
             if ($tmp === Texy::ALL) {
-                $el = TexyHtml::el($tag, $this->attrs);
+                $el->setAttrs($this->attrs);
 
             } else {
-                $el = TexyHtml::el($tag);
-
                 if (is_array($tmp) && count($tmp)) {
                     $tmp = array_flip($tmp);
                     foreach ($this->attrs as $key => $val)
                         if (isset($tmp[$key])) $el->$key = $val;
                 }
             }
-        } else {
-            $el = TexyHtml::el($tag);
         }
 
         // HACK (move to front)

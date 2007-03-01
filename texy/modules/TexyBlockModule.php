@@ -90,14 +90,14 @@ class TexyBlockModule extends TexyModule
 
         switch ($mType) {
         case 'div':
-            $el = new TexyBlockElement($tx);
-            $el->tags[0] = $mod->generate($tx, 'div');
+            $el = TexyHtml::el('div');
+            $mod->decorate($tx, $el);
 
             // outdent
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-            $el->parse($mContent);
+            $el->parseBlock($tx, $mContent);
             $parser->children[] = $el;
             break;
 
@@ -107,20 +107,17 @@ class TexyBlockModule extends TexyModule
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-            $el = new TexyBlockElement($tx);
-            $el->parse($mContent);
+            $el = TexyHtml::el();
+            $el->parseBlock($tx, $mContent);
 
-            $html = $el->toHtml();
-            $html = $tx->unMarks($html);
-            $html = $tx->wellForm->process($html);
-            $html = $tx->formatter->process($html);
+            $html = $tx->export($el);
             $html = Texy::encode($html);
 
-            $el = new TexyTextualElement($tx);
-            $el->tags[0] = $mod->generate($tx, 'pre');
-            $el->tags[1] = TexyHtml::el('code')->class('html');
-            $el->content = $html;
-            $el->protect = TRUE;
+            $el = TexyHtml::el('pre');
+            $mod->decorate($tx, $el);
+            $el2 = TexyHtml::el('code')->class('html');
+            $el->childNodes[] = $el2;
+            $el2->childNodes[] = $tx->protect($html);
             $parser->children[] = $el;
             break;
 
@@ -130,40 +127,41 @@ class TexyBlockModule extends TexyModule
 
 
         case 'html':
-            $el = new TexyTextualElement($tx);
-            $lineParser = new TexyLineParser($this->texy);
-            $mContent = $lineParser->parse($mContent, array('html'));
+            $lineParser = new TexyLineParser($tx);
+            $lineParser->select = array('html');
+            $mContent = $lineParser->parse($mContent);
             $mContent = Texy::decode($mContent);
-            $el->content = Texy::encode($mContent);
-            $el->protect = TRUE;
+            $mContent = Texy::encode($mContent);
+            $mContent = $tx->unprotect($mContent);
+            $el = TexyHtml::el();
+            $el->setContent( $tx->protect($mContent) );
             $parser->children[] = $el;
             break;
 
 
         case 'text':
-            $el = new TexyTextualElement($tx);
-            $el->content = nl2br( Texy::encode($mContent) );
-            $el->protect = TRUE;
+            $el = TexyHtml::el('');
+            $el->childNodes[] = $tx->protect( nl2br( Texy::encode($mContent) ) );
             $parser->children[] = $el;
             break;
 
 
         case 'pre':
         case 'code':
-            $el = new TexyTextualElement($tx);
-            $el->tags[0] = $mod->generate($tx, 'pre');
-            $el->tags[0]->class[] = $mLang; // lang
-
-            if ($mType === 'code') {
-                $el->tags[1] = TexyHtml::el('code');
-            }
-
             // outdent
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
-            $el->content = Texy::encode($mContent);
-            $el->protect = TRUE;
+            $el = TexyHtml::el('pre');
+            $mod->decorate($tx, $el);
+            $el->class[] = $mLang; // lang
+
+            if ($mType === 'code') {
+                $el->childNodes[0] = TexyHtml::el('code');
+                $el->childNodes[0]->setContent( $tx->protect( Texy::encode($mContent) ) );
+            } else {
+                $el->setContent( $tx->protect( Texy::encode($mContent) ) );
+            }
 
             if (is_callable(array($tx->handler, $type)))
                 $tx->handler->$type($tx, $mLang, $mod, $mContent, $el);

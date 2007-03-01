@@ -90,7 +90,6 @@ class TexyListModule extends TexyModule
         //    [5] => bullet * + - 1) a) A) IV)
 
         $tx = $this->texy;
-        $el = new TexyBlockElement($tx);
 
         $bullet = '';
         foreach ($this->translate as $type)
@@ -101,17 +100,18 @@ class TexyListModule extends TexyModule
                 break;
             }
 
+        $el = TexyHtml::el($tag);
+        $el->style['list-style-type'] = $style;
+
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $el->tags[0] = $mod->generate($tx, $tag);
-
-        $el->tags[0]->style['list-style-type'] = $style;
+        $mod->decorate($tx, $el);
 
         $parser->moveBackward($mNewLine ? 2 : 1);
 
         $count = 0;
         while ($elItem = $this->processItem($parser, $bullet, FALSE, 'li')) {
-            $el->children[] = $elItem;
+            $el->childNodes[] = $elItem;
             $count++;
         }
 
@@ -142,11 +142,10 @@ class TexyListModule extends TexyModule
             //    [7] => {style}
             //    [8] => >
 
-        $elItem = new TexyBlockElement($tx);
-
+        $elItem = TexyHtml::el($tag);
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $elItem->tags[0] = $mod->generate($tx, $tag);
+        $mod->decorate($tx, $elItem);
 
         // next lines
         $spaces = $mNewLine ? strlen($mSpace) : '';
@@ -164,11 +163,12 @@ class TexyListModule extends TexyModule
         // parse content
         $tmp = $tx->_paragraphMode;
         $tx->_paragraphMode = FALSE;
-        $elItem->parse($content);
+        $elItem->parseBlock($tx, $content);
         $tx->_paragraphMode = $tmp;
 
-        if ($elItem->children && $elItem->children[0] instanceof TexyParagraphElement)
-            $elItem->children[0]->tags[0]->setElement(NULL);
+        if ($elItem->childNodes[0] instanceof TexyHtml) {
+            $elItem->childNodes[0]->elName = '';
+        }
 
         return $elItem;
     }

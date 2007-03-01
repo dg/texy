@@ -255,7 +255,7 @@ class TexyImageModule extends TexyModule
             $elLink = $tx->linkModule->factory($reqL);
             $tx->summary['links'][] = $elLink->href;
 
-            $elLink->addChild($el);
+            $elLink->childNodes[] = $el;
             return $elLink;
         }
 
@@ -298,7 +298,8 @@ class TexyImageModule extends TexyModule
         $hAlign = $modifier->hAlign;
         $modifier->hAlign = NULL;
 
-        $el = $modifier->generate($tx, 'img');
+        $el = TexyHtml::el('img');
+        $modifier->decorate($tx, $el);
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->leftClass != '')

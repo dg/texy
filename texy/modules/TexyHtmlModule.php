@@ -63,7 +63,7 @@ class TexyHtmlModule extends TexyModule
             if (empty($tx->allowed['htmlComment']))
                 return substr($matches[5], 0, 1) === '[' ? $match : '';
 
-            return $tx->mark($match, Texy::CONTENT_NONE);
+            return $tx->protect($match, Texy::CONTENT_NONE);
         }
 
         if (empty($tx->allowed['htmlTag'])) return FALSE;
@@ -96,7 +96,7 @@ class TexyHtmlModule extends TexyModule
         if ($aTags === Texy::ALL && $isEmpty) $el->_empty = TRUE; // force empty
 
         if (!$isOpening) // closing tag? we are finished
-            return $tx->mark($el->endTag(), $el->getContentType());
+            return $tx->protect($el->endTag(), $el->getContentType());
 
         // process attributes
         if (is_array($aAttrs)) $aAttrs = array_flip($aAttrs);
@@ -110,7 +110,9 @@ class TexyHtmlModule extends TexyModule
         );
 
         foreach ($matches2 as $m) {
-            $key = strtolower($m[1]);
+            $key = strtolower($m[1]); // strtolower protects TexyHtml's elName, eXtra, childNodes
+
+            // skip disabled
             if ($aAttrs !== NULL && !isset($aAttrs[$key])) continue;
 
             $val = $m[2];
@@ -121,8 +123,6 @@ class TexyHtmlModule extends TexyModule
 
 
         // apply allowedClasses & allowedStyles
-        $modifier = new TexyModifier;
-
         if (isset($el->class)) {
             $tmp = $tx->_classes; // speed-up
             if (is_array($tmp)) {
@@ -163,7 +163,7 @@ class TexyHtmlModule extends TexyModule
             }
         }
 
-        return $tx->mark($el->startTag(), $el->getContentType());
+        return $tx->protect($el->startTag(), $el->getContentType());
     }
 
 } // TexyHtmlModule

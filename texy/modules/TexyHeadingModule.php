@@ -104,28 +104,31 @@ class TexyHeadingModule extends TexyModule
         //
         //    [6] => ...
 
-        $el = new TexyHeadingElement($this->texy);
-
+        $el = new TexyHeadingElement;
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $el->tags[0] = $mod->generate($this->texy, 'hx');
+        $mod->decorate($this->texy, $el);
 
-        $el->level = $this->levels[$mLine];
+        $level = $this->levels[$mLine];
+        $el->eXtra['level'] = $level;
+        $el->eXtra['top'] = $this->top;
+        $el->eXtra['deltaLevel'] = 0;
         if ($this->balancing === self::DYNAMIC)
-            $el->deltaLevel = & $this->_deltaUnderline;
+            $el->eXtra['deltaLevel'] = & $this->_deltaUnderline;
 
-        $el->parse(trim($mContent));
+        $el->parseLine($this->texy, trim($mContent));
 
         $parser->children[] = $el;
 
         // document title
-        if ($this->title === NULL) $this->title = Texy::wash($el->content);
+        if ($this->title === NULL) $this->title = Texy::wash($el->getContent());
 
         // dynamic headings balancing
-        $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $el->level);
-        $this->_rangeUnderline[1] = max($this->_rangeUnderline[1], $el->level);
-        $this->_deltaUnderline    = -$this->_rangeUnderline[0];
-        $this->_deltaSurround     = -$this->_rangeSurround[0] + ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
+        $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $level);
+        $this->_rangeUnderline[1] = max($this->_rangeUnderline[1], $level);
+        $this->_deltaUnderline = -$this->_rangeUnderline[0];
+        $this->_deltaSurround = -$this->_rangeSurround[0] +
+            ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
     }
 
 
@@ -145,27 +148,30 @@ class TexyHeadingModule extends TexyModule
         //    [5] => {style}
         //    [6] => >
 
-        $el = new TexyHeadingElement($this->texy);
-
+        $el = new TexyHeadingElement;
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $el->tags[0] = $mod->generate($this->texy, 'hx');
+        $mod->decorate($this->texy, $el);
 
-        $el->level = 7 - min(7, max(2, strlen($mLine)));
+        $level = 7 - min(7, max(2, strlen($mLine)));
+        $el->eXtra['level'] = $level;
+        $el->eXtra['top'] = $this->top;
+        $el->eXtra['deltaLevel'] = 0;
         if ($this->balancing === self::DYNAMIC)
-            $el->deltaLevel = & $this->_deltaSurround;
+            $el->eXtra['deltaLevel'] = & $this->_deltaSurround;
 
-        $el->parse(trim($mContent));
+        $el->parseLine($this->texy, trim($mContent));
 
         $parser->children[] = $el;
 
         // document title
-        if ($this->title === NULL) $this->title = Texy::wash($el->content);
+        if ($this->title === NULL) $this->title = Texy::wash($el->getContent());
 
         // dynamic headings balancing
-        $this->_rangeSurround[0] = min($this->_rangeSurround[0], $el->level);
-        $this->_rangeSurround[1] = max($this->_rangeSurround[1], $el->level);
-        $this->_deltaSurround    = -$this->_rangeSurround[0] + ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
+        $this->_rangeSurround[0] = min($this->_rangeSurround[0], $level);
+        $this->_rangeSurround[1] = max($this->_rangeSurround[1], $level);
+        $this->_deltaSurround  = -$this->_rangeSurround[0] +
+            ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
     }
 
@@ -180,17 +186,14 @@ class TexyHeadingModule extends TexyModule
 /**
  * HTML ELEMENT H1-6
  */
-class TexyHeadingElement extends TexyTextualElement
+class TexyHeadingElement extends TexyHtml
 {
-    public $level = 0;  // 0 .. ?
-    public $deltaLevel = 0;
 
-
-    public function toHtml()
+    public function startTag()
     {
-        $level = min(6, max(1, $this->level + $this->deltaLevel + $this->texy->headingModule->top));
-        $this->tags[0]->setElement('h' . $level);
-        return parent::toHtml();
+        $level = $this->eXtra['level'] + $this->eXtra['deltaLevel'] + $this->eXtra['top'];
+        $this->elName = 'h' . min(6, max(1, $level));
+        return parent::startTag();
     }
 
 } // TexyHeadingElement

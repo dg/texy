@@ -72,18 +72,18 @@ class TexyGenericBlock
                $mContent = strtr($mContent, "\n\r", " \n");
             }
 
-            $el = new TexyParagraphElement($tx);
-            $el->parse($mContent);
+            $lineParser = new TexyLineParser($tx);
+            $content = $lineParser->parse($mContent);
 
             // check content type
             $contentType = Texy::CONTENT_NONE;
-            if (strpos($el->content, "\x17") !== FALSE) {
+            if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
                 $contentType = Texy::CONTENT_BLOCK;
-            } elseif (strpos($el->content, "\x16") !== FALSE) {
+            } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
                 $contentType = Texy::CONTENT_TEXTUAL;
             } else {
-                if (strpos($el->content, "\x15") !== FALSE) $contentType = Texy::CONTENT_INLINE;
-                $s = trim( preg_replace('#['.TEXY_MARK.']+#', '', $el->content) );
+                if (strpos($content, Texy::CONTENT_INLINE) !== FALSE) $contentType = Texy::CONTENT_INLINE;
+                $s = trim( preg_replace('#['.TEXY_MARK.']+#', '', $content) );
                 if (strlen($s)) $contentType = Texy::CONTENT_TEXTUAL;
             }
 
@@ -94,14 +94,19 @@ class TexyGenericBlock
             else $tag = 'div';
 
             // add <br />
-            if ($tag && (strpos($el->content, "\n") !== FALSE)) {
-                $key = $tx->mark('<br />', Texy::CONTENT_INLINE);
-                $el->content = strtr($el->content, array("\n" => $key));
+            if ($tag && (strpos($content, "\n") !== FALSE)) {
+                $key = $tx->protect('<br />', Texy::CONTENT_INLINE);
+                $content = strtr($content, array("\n" => $key));
+            } else {
+                $content = strtr($content, array("\n" => ' '));
             }
 
             $mod = new TexyModifier;
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $el->tags[0] = $mod->generate($tx, $tag);
+            $el = TexyHtml::el($tag);
+            $mod->decorate($tx, $el);
+            $el->childNodes[] = $content;
+
 
             $parser->children[] = $el;
         }

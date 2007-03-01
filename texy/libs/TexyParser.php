@@ -166,6 +166,7 @@ class TexyBlockParser
 class TexyLineParser
 {
     public $again;
+    public $select;
     private $texy;
 
 
@@ -175,14 +176,14 @@ class TexyLineParser
     }
 
 
-    public function parse($text, $select=NULL)
+    public function parse($text)
     {
         $tx = $this->texy;
 
         // initialization
         $pl = $tx->getLinePatterns();
-        if ($select) {
-            foreach ($select as $name) if (isset($pl[$name])) $plX[$name] = $pl[$name];
+        if ($this->select) {
+            foreach ($this->select as $name) if (isset($pl[$name])) $plX[$name] = $pl[$name];
             $pl = $plX;
             unset($plX);
         }
@@ -240,7 +241,7 @@ class TexyLineParser
             );
 
             if ($replacement instanceof TexyHtml) {
-                $replacement = $replacement->toText($tx);
+                $replacement = $replacement->export($tx);
             } elseif ($replacement === FALSE) {
                 $arrPos[$minKey] = -2;
                 continue;

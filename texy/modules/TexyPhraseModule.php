@@ -221,37 +221,38 @@ class TexyPhraseModule extends TexyModule
 
         $content = $mContent;
         if ($name === 'phraseStrongEm') {
-            $content = TexyHtml::el('em')->addChild($content)->toText($tx);
+            $content = TexyHtml::el('em')->setContent($content)->export($tx);
         }
 
-        $modifier = new TexyModifier;
-        $modifier->setProperties($mMod1, $mMod2, $mMod3);
+        $mod = new TexyModifier;
+        $mod->setProperties($mMod1, $mMod2, $mMod3);
         if ($tag === 'acronym' || $tag === 'abbr') {
-            $modifier->title = trim(Texy::decode($mLink));
+            $mod->title = trim(Texy::decode($mLink));
             $mLink = NULL;
         }
-        $el = $modifier->generate($tx, $tag);
+        $el = TexyHtml::el($tag);
+        $mod->decorate($tx, $el);
 
         if ($mLink && $tag === 'q') { // cite
             $el->cite = $tx->quoteModule->citeLink($mLink);
             $mLink = NULL;
         }
 
-        $el->addChild($content);
+        $el->setContent($content);
 
         if (is_callable(array($tx->handler, 'phrase')))
-            $tx->handler->phrase($tx, $name, $modifier, $mLink, $el);
+            $tx->handler->phrase($tx, $name, $mod, $mLink, $el);
 
-        $content = $el->toText($tx);
+        $content = $el->export($tx);
 
         if ($mLink) {
             $req = $tx->linkModule->parse($mLink, $mMod1, $mMod2, $mMod3, $mContent);
-            $el = $tx->linkModule->factory($req)->addChild($content);
+            $el = $tx->linkModule->factory($req)->setContent($content);
 
             if (is_callable(array($tx->handler, 'link')))
                 $tx->handler->link($tx, $req, $el);
 
-            $content = $el->toText($tx);
+            $content = $el->export($tx);
         }
 
         $parser->again = TRUE;
@@ -286,11 +287,12 @@ class TexyPhraseModule extends TexyModule
         //    [3] => [class]
         //    [4] => {style}
 
+        $el = TexyHtml::el($this->codeTag);
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3);
-        $el = $mod->generate($this->texy,  $this->codeTag );
+        $mod->decorate($this->texy, $el);
 
-        return $this->texy->mark(
+        return $this->texy->protect(
             $el->startTag() . htmlSpecialChars($mContent, ENT_NOQUOTES) . $el->endTag(),
             Texy::CONTENT_TEXTUAL
         );
@@ -305,7 +307,7 @@ class TexyPhraseModule extends TexyModule
     public function processProtect($parser, $matches)
     {
         list(, $mContent) = $matches;
-        return $this->texy->mark(htmlSpecialChars($mContent, ENT_NOQUOTES), Texy::CONTENT_TEXTUAL);
+        return $this->texy->protect(htmlSpecialChars($mContent, ENT_NOQUOTES), Texy::CONTENT_TEXTUAL);
     }
 
 } // TexyPhraseModule

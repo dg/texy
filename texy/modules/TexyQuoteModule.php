@@ -60,17 +60,17 @@ class TexyQuoteModule extends TexyModule
         //    [6] => ... / LINK
 
         $tx = $this->texy;
-        $el = new TexyBlockElement($tx);
 
+        $el = TexyHtml::el('blockquote');
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $el->tags[0] = $mod->generate($tx, 'blockquote');
+        $mod->decorate($tx, $el);
 
         $content = '';
         $spaces = '';
         do {
             if ($mSpaces === ':') {
-                $el->tags[0]->cite = $tx->quoteModule->citeLink($mContent);
+                $el->cite = $tx->quoteModule->citeLink($mContent);
                 $content .= "\n";
             } else {
                 if ($spaces === '') $spaces = max(1, strlen($mSpaces));
@@ -81,7 +81,7 @@ class TexyQuoteModule extends TexyModule
             list(, $mSpaces, $mContent) = $matches;
         } while (TRUE);
 
-        $el->parse($content);
+        $el->parseBlock($tx, $content);
 
         $parser->children[] = $el;
     }

@@ -71,7 +71,8 @@ class TexyFigureModule extends TexyModule
         //    [11] => >
 
         $tx = $this->texy;
-        $el = new TexyBlockElement($tx);
+        //$el = new TexyBlockElement($tx);
+
 
         $req = $tx->imageModule->parse($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
@@ -95,23 +96,24 @@ class TexyFigureModule extends TexyModule
             $elLink = $tx->linkModule->factory($reqL);
             $tx->summary['links'][] = $elLink->href;
 
-            $elLink->addChild($elImg);
+            $elLink->childNodes[] = $elImg;
             $elImg = $elLink;
         }
 
-        $el->tags[0] = $mod->generate($tx, 'div');
-        $el->children[0] = new TexyTextualElement($tx);
-        $el->children[0]->content = $elImg->toText($tx);
+        $el = TexyHtml::el('div');
+        $mod->decorate($tx, $el);
+        $el->childNodes['img'] = TexyHtml::el('');
+        $el->childNodes['img']->childNodes[] = $elImg->export($tx);
 
-        $el->children[1] = new TexyBlockElement($tx);
-        $el->children[1]->parse(ltrim($mContent));
+        $el->childNodes['caption'] = TexyHtml::el('');
+        $el->childNodes['caption']->parseBlock($tx, ltrim($mContent));
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
-            $el->tags[0]->class[] = $this->leftClass;
+            $el->class[] = $this->leftClass;
         } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
-            $el->tags[0]->class[] = $this->rightClass;
+            $el->class[] = $this->rightClass;
         } elseif ($this->class)
-            $el->tags[0]->class[] = $this->class;
+            $el->class[] = $this->class;
 
         if (is_callable(array($tx->handler, 'figure')))
             $tx->handler->figure($tx, $req, $el);

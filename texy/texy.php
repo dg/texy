@@ -28,7 +28,6 @@ define('TEXY', 'Version 2.0beta $Revision$');
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
-require_once TEXY_DIR.'libs/TexyDom.php';
 require_once TEXY_DIR.'libs/TexyGenericBlock.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
 require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
@@ -68,7 +67,7 @@ class Texy
     const ALL = TRUE;
     const NONE = FALSE;
 
-    // types of marks
+    // types of protection marks
     const CONTENT_NONE =    "\x14";
     const CONTENT_INLINE =  "\x15";
     const CONTENT_TEXTUAL = "\x16";
@@ -189,9 +188,9 @@ class Texy
     private $DOM;
 
     /** @var TexyModule[]  List of all modules */
-    private $modules, $lineModules;
+    private $modules;
 
-    /** @var array  Texy internal markup table */
+    /** @var array  Texy protect markup table */
     private $marks = array();
 
     /** @var bool  how split paragraphs (internal usage) */
@@ -263,9 +262,6 @@ class Texy
     public function registerModule($module)
     {
         $this->modules[] = $module;
-
-        if ($module instanceof ITexyLineModule)
-            $this->lineModules[] = $module;
     }
 
 
@@ -382,8 +378,8 @@ class Texy
             $text = $module->preProcess($text);
 
         // process
-        $this->DOM = new TexyBlockElement($this);
-        $this->DOM->parse($text);
+        $this->DOM = TexyHtml::el();
+        $this->DOM->parseBlock($this, $text);
     }
 
 
@@ -407,8 +403,8 @@ class Texy
         $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
 
         // parse
-        $this->DOM = new TexyTextualElement($this);
-        $this->DOM->parse($text);
+        $this->DOM = TexyHtml::el();
+        $this->DOM->parseLine($this, $text);
     }
 
 
@@ -419,29 +415,15 @@ class Texy
      */
     public function toHtml()
     {
-        if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
-
         // Convert DOM structure to (X)HTML code
-        $html = $this->DOM->toHtml();
-
-        // replace marks
-        $html = $this->unMarks($html);
-
-        // wellform and reformat HTML
-        $html = $this->wellForm->process($html);
-        $html = $this->formatter->process($html);
-
-        if (!self::$xhtml) // remove HTML 4.01 optional tags
-            $html = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#', '', $html);
+        if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
+        $html = $this->export($this->DOM);
 
         // this notice should remain!
         if (!defined('TEXY_NOTICE_SHOWED')) {
             $html .= "\n<!-- by Texy2! -->";
             define('TEXY_NOTICE_SHOWED', TRUE);
         }
-
-        // unfreeze spaces
-        $html = self::unfreezeSpaces($html);
 
         // convert from UTF-8
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
@@ -470,22 +452,12 @@ class Texy
      */
     public function toText()
     {
+        // Convert DOM structure to (X)HTML code
         if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
-
-        $html = $this->DOM->toHtml();
-
-        // replace marks
-        $html = $this->unMarks($html);
-
-        // wellform and reformat HTML
-        $html = $this->wellForm->process($html);
-        $saveLineWrap = $this->formatter->lineWrap;
+        $save = $this->formatter->lineWrap;
         $this->formatter->lineWrap = FALSE;
-        $html = $this->formatter->process($html);
-        $this->formatter->lineWrap = $saveLineWrap;
-
-        // unfreeze spaces
-        $html = self::unfreezeSpaces($html);
+        $html = $this->export($this->DOM);
+        $this->formatter->lineWrap = $save;
 
         // remove tags
         $html = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $html);
@@ -505,6 +477,51 @@ class Texy
             $html = iconv('utf-8', $this->encoding.'//TRANSLIT', $html);
 
         return $html;
+    }
+
+
+
+    /**
+     * Converts internal DOM structure to final HTML code in UTF-8
+     * @return string
+     */
+    public function export($el)
+    {
+        $s = $el->export($this);
+
+        // decode HTML entities to UTF-8
+        $s = self::decode($s);
+
+        // postprocessing
+        $blocks = explode(self::CONTENT_BLOCK, $s);
+        foreach ($this->modules as $module) {
+            if ($module instanceof ITexyLineModule) {
+                foreach ($blocks as $n => $s) {
+                    if ($n % 2 === 0 && $s !== '')
+                        $blocks[$n] = $module->linePostProcess($s);
+                }
+            }
+        }
+        $s = implode(self::CONTENT_BLOCK, $blocks);
+
+        // encode < > &
+        $s = self::encode($s);
+
+        // replace protected marks
+        $s = $this->unProtect($s);
+
+        // wellform and reformat HTML
+        $s = $this->wellForm->process($s);
+        $s = $this->formatter->process($s);
+
+        // remove HTML 4.01 optional tags
+        if (!self::$xhtml)
+            $html = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#', '', $html);
+
+        // unfreeze spaces
+        $s = self::unfreezeSpaces($s);
+
+        return $s;
     }
 
 
@@ -622,7 +639,7 @@ class Texy
      * @param int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
-    public function mark($child, $contentType)
+    public function protect($child, $contentType=self::CONTENT_BLOCK)
     {
         if ($child==='') return '';
 
@@ -637,7 +654,7 @@ class Texy
 
 
 
-    public function unMarks($html)
+    public function unProtect($html)
     {
         return strtr($html, $this->marks);
     }
@@ -690,13 +707,6 @@ class Texy
     public function getDOM()
     {
         return $this->DOM;
-    }
-
-
-
-    public function getLineModules()
-    {
-        return $this->lineModules;
     }
 
 

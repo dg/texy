@@ -71,13 +71,11 @@ class TexyTableModule extends TexyModule
         //    [5] => _
 
         $tx = $this->texy;
-        $el = new TexyBlockElement($tx);
 
+        $el = TexyHtml::el('table');
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-        $el->tags[0] = $mod->generate($tx, 'table');
-
-//        $el->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+        $mod->decorate($tx, $el);
 
         $parser->moveBackward();
 
@@ -90,12 +88,12 @@ class TexyTableModule extends TexyModule
             //    [5] => {style}
             //    [6] => >
 
-            $caption = new TexyTextualElement($tx);
+            $caption = TexyHtml::el('caption');
             $mod = new TexyModifier;
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-            $caption->tags[0] = $mod->generate($tx, 'caption');
-            $caption->parse($mContent);
-            $el->children[] = $caption;
+            $mod->decorate($tx, $caption);
+            $caption->parseLine($tx, $mContent);
+            $el->childNodes[] = $caption;
         }
 
         $this->isHead = FALSE;
@@ -110,7 +108,7 @@ class TexyTableModule extends TexyModule
             }
 
             if ($elRow = $this->processRow($parser)) {
-                $el->children[] = $elRow;
+                $el->childNodes[] = $elRow;
                 $this->row++;
                 continue;
             }
@@ -138,23 +136,22 @@ class TexyTableModule extends TexyModule
         //    [5] => >
         //    [6] => _
 
-        $elRow = new TexyBlockElement($tx);
-
+        $elRow = TexyHtml::el('tr');
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
-        $elRow->tags[0] = $mod->generate($tx, 'tr');
+        $mod->decorate($tx, $elRow);
 
         if ($this->row % 2 === 0) {
-            if ($this->oddClass) $elRow->tags[0]->class[] = $this->oddClass;
+            if ($this->oddClass) $elRow->class[] = $this->oddClass;
         } else {
-            if ($this->evenClass) $elRow->tags[0]->class[] = $this->evenClass;
+            if ($this->evenClass) $elRow->class[] = $this->evenClass;
         }
 
         $col = 0;
         $elField = NULL;
         foreach (explode('|', $mContent) as $field) {
             if (($field == '') && $elField) { // colspan
-                $elField->colSpan++;
+                $elField->colspan++;
                 unset($this->last[$col]);
                 $col++;
                 continue;
@@ -163,8 +160,8 @@ class TexyTableModule extends TexyModule
             $field = rtrim($field);
             if ($field === '^') { // rowspan
                 if (isset($this->last[$col])) {
-                    $this->last[$col]->rowSpan++;
-                    $col += $this->last[$col]->colSpan;
+                    $this->last[$col]->rowspan++;
+                    $col += $this->last[$col]->colspan;
                     continue;
                 }
             }
@@ -189,8 +186,6 @@ class TexyTableModule extends TexyModule
                 $this->colModifier[$col]->setProperties($mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5);
             }
 
-            $elField = new TexyTableFieldElement($tx);
-
             if (isset($this->colModifier[$col]))
                 $mod = clone $this->colModifier[$col];
             else
@@ -198,12 +193,14 @@ class TexyTableModule extends TexyModule
 
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
 
-            $elField->tags[0] = $mod->generate($tx,  ($this->isHead || ($mHead === '*')) ? 'th' : 'td' );
+            $elField = new TexyTableFieldElement;
+            $elField->elName = $this->isHead || ($mHead === '*') ? 'th' : 'td';
+            $mod->decorate($tx, $elField);
 
-            $elField->parse($mContent);
-            if ($elField->content == '') $elField->content = "\xC2\xA0"; // &nbsp;
+            $elField->parseLine($tx, $mContent);
+            if ($elField->childNodes[0] === '') $elField->childNodes[0]  = "\xC2\xA0"; // &nbsp;
 
-            $elRow->children[] = $elField;
+            $elRow->childNodes[] = $elField;
             $this->last[$col] = $elField;
             $col++;
         }
@@ -219,17 +216,17 @@ class TexyTableModule extends TexyModule
 /**
  * Table field TD / TH
  */
-class TexyTableFieldElement extends TexyTextualElement
+class TexyTableFieldElement extends TexyHtml
 {
-    public $colSpan = 1;
-    public $rowSpan = 1;
+    public $colspan = 1;
+    public $rowspan = 1;
 
 
-    public function toHtml()
+    public function startTag()
     {
-        if ($this->colSpan <> 1) $this->tags[0]->colspan = $this->colSpan;
-        if ($this->rowSpan <> 1) $this->tags[0]->rowspan = $this->rowSpan;
-        return parent::toHtml();
+        if ($this->colspan == 1) $this->colspan = NULL;
+        if ($this->rowspan == 1) $this->rowspan = NULL;
+        return parent::startTag();
     }
 
 } // TexyTableFieldElement

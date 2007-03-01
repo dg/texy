@@ -87,7 +87,6 @@ class TexyDefinitionListModule extends TexyListModule
         //   [11] => - * +
 
         $tx = $this->texy;
-        $el = new TexyBlockElement($tx);
 
         $bullet = '';
         foreach ($this->translate as $type)
@@ -96,9 +95,10 @@ class TexyDefinitionListModule extends TexyListModule
                 break;
             }
 
+        $el = TexyHtml::el('dl');
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $el->tags[0] = $mod->generate($tx, 'dl');
+        $mod->decorate($tx, $el);
         $parser->moveBackward(2);
 
         $patternTerm = '#^\n?(\S.*)\:\ *'.TEXY_MODIFIER_H.'?()$#mUA';
@@ -106,7 +106,7 @@ class TexyDefinitionListModule extends TexyListModule
 
         while (TRUE) {
             if ($elItem = $this->processItem($parser, preg_quote($mBullet), TRUE, 'dd')) {
-                $el->children[] = $elItem;
+                $el->childNodes[] = $elItem;
                 continue;
             }
 
@@ -117,14 +117,14 @@ class TexyDefinitionListModule extends TexyListModule
                 //    [3] => [class]
                 //    [4] => {style}
                 //    [5] => >
-                $elItem = new TexyTextualElement($tx);
 
+                $elItem = TexyHtml::el('dt');
                 $mod = new TexyModifier;
                 $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-                $elItem->tags[0] = $mod->generate($tx, 'dt');
+                $mod->decorate($tx, $elItem);
 
-                $elItem->parse($mContent);
-                $el->children[] = $elItem;
+                $elItem->parseLine($tx, $mContent);
+                $el->childNodes[] = $elItem;
                 continue;
             }
 
