@@ -29,15 +29,34 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
-    // Czech Republic
-    public $doubleQuotes = array("\xe2\x80\x9e", "\xe2\x80\x9c");  // left & right double quote
-    public $singleQuotes = array("\xe2\x80\x9a", "\xe2\x80\x98");  // left & right single quote
+    static public $locales = array(
+        'cs' => array(
+            'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
+            'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
+        ),
 
-/*
-    // UK
-    public $doubleQuotes = array("\xe2\x80\x9c", "\xe2\x80\x9d");  // left & right double quote
-    public $singleQuotes = array("\xe2\x80\x98", "\xe2\x80\x99");  // left & right single quote
-*/
+        'en' => array(
+            'singleQuotes' => array("\xe2\x80\x98", "\xe2\x80\x99"), // U+2018, U+2019
+            'doubleQuotes' => array("\xe2\x80\x9c", "\xe2\x80\x9d"), // U+201C, U+201D
+        ),
+
+        'fr' => array(
+            'singleQuotes' => array("\xe2\x80\xb9", "\xe2\x80\xba"), // U+2039, U+203A
+            'doubleQuotes' => array("\xc2\xab", "\xc2\xbb"),         // U+00AB, U+00BB
+        ),
+
+        'de' => array(
+            'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
+            'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
+        ),
+
+        'pl' => array(
+            'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x99"), // U+201A, U+2019
+            'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9d"), // U+201E, U+201D
+        ),
+    );
+
+    public $locale = 'cs';
 
     private $pattern, $replace;
 
@@ -51,12 +70,6 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
         // CONTENT_BLOCK: not used in linePostProcess
 
         $pairs = array(
-            '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'      // double ""
-                                                      => $this->doubleQuotes[0].'$1'.$this->doubleQuotes[1],
-
-            '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'  // single ''
-                                                      => $this->singleQuotes[0].'$1'.$this->singleQuotes[1],
-
             '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
             '#(?<=[\d ])-(?=[\d ])#'                  => "\xe2\x80\x93",                   // en dash  -
             '#,-#'                                    => ",\xe2\x80\x93",                  // en dash ,-
@@ -74,10 +87,11 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
             '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark  (TM)
             '#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
             '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright  (C)
+            '#\(EUR\)#'                               => "\xe2\x82\xac",                    // Euro  (EUR)
             '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
             '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
             '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
-            '#(?<=.{70}) +(?=[\x17-\x1F]*\S{1,5}[\x17-\x1F]*$)#' => "\xc2\xa0",            // space before last short word
+            '#(?<=.{50}) +(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#u' => "\xc2\xa0",           // space before last short word
 
             // nbsp space between number and word, symbol, punctation, currency symbol
             '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+[\x17-\x1F]*) ([\x17-\x1F]*['.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
@@ -87,6 +101,18 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
             '#(?<=^|[^0-9'.TEXY_CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*) ([\x17-\x1F]*[0-9'.TEXY_CHAR.'])#mu'
                                                       => "\$1\xc2\xa0\$2",
         );
+
+        if (isset(self::$locales[$this->locale]))
+        {
+            $info = self::$locales[$this->locale];
+
+            // double ""
+            $pairs['#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'] = $info['doubleQuotes'][0].'$1'.$info['doubleQuotes'][1];
+
+            // single ''
+            $pairs['#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'] = $info['singleQuotes'][0].'$1'.$info['singleQuotes'][1];
+        }
+
 
         $this->pattern = array_keys($pairs);
 	    $this->replace = array_values($pairs);
@@ -100,5 +126,6 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
         return preg_replace($this->pattern, $this->replace, $text);
     }
+
 
 } // TexyTypographyModule
