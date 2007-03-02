@@ -86,12 +86,16 @@ class TexyEmoticonModule extends TexyModule
         //    [6] => LINK
 
         $tx = $this->texy;
+        $user = NULL;
 
         // find the closest match
         foreach ($this->icons as $emoticon => $file)
         {
             if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
+                if (is_callable(array($tx->handler, 'emoticon')))
+                    $tx->handler->emoticon($tx, $match, $file, $user);
+
                 $el = TexyHtml::el('img');
                 $el->src = Texy::completeURL($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
                 $el->alt = $match;
@@ -106,8 +110,8 @@ class TexyEmoticonModule extends TexyModule
                     }
                 }
 
-                if (is_callable(array($tx->handler, 'emoticon')))
-                    $tx->handler->emoticon($tx, $match, $el);
+                if (is_callable(array($tx->handler, 'emoticon2')))
+                    $tx->handler->emoticon2($tx, $el, $user);
 
                 $tx->summary['images'][] = $el->src;
                 return $el;

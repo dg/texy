@@ -33,7 +33,7 @@ class myHandler
 {
 
     // callback function for processing blocks
-    function blockCode($texy, $lang, $modifier, $content, $element)
+    function blockCode($texy, $lang, $content, $modifier)
     {
         $lang = strtoupper($lang);
         if ($lang == 'JAVASCRIPT') $lang = 'JS';
@@ -47,10 +47,10 @@ class myHandler
 
         $content = $texy->protect($content);
 
-        if (isset($element->childNodes[0]))
-            $element->childNodes[0]->setContent($content);
-        else
-            $element->setContent($content);
+        $el = TexyHtml::el('code')->setContent( $content );
+        $elPre = TexyHtml::el('pre')->class(strtolower($lang))->setContent($el);
+        $modifier->decorate($texy, $elPre);
+        return $elPre;
     }
 
 }

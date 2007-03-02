@@ -48,6 +48,7 @@ class TexyModifier
     public $hAlign;
     public $vAlign;
     public $title;
+    public $cite;
 
     /** @var array  list of properties which are regarded as HTML element attributes */
     static public $elAttrs = array(

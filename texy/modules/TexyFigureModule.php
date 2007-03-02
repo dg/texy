@@ -73,43 +73,45 @@ class TexyFigureModule extends TexyModule
         //    [11] => >
 
         $tx = $this->texy;
+        $user = $link = NULL;
 
-        $req = $tx->imageModule->parse($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
+        $image = $tx->imageModule->parse($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
 
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $hAlign = $req['modifier']->hAlign;
-        $mod->hAlign = $req['modifier']->hAlign = NULL;
 
-        if (is_callable(array($tx->handler, 'preFigure')))
-            $tx->handler->preFigure($tx, $req, $mod, $mLink, $mContent);
-
-        $elImg = $tx->imageModule->factory($req, $mLink);
         if ($mLink) {
             if ($mLink === ':') {
-                $reqL = array(
-                    'URL' => empty($req['linkedURL']) ? $req['imageURL'] : $req['linkedURL'],
-                    'image' => TRUE,
-                    'modifier' => new TexyModifier,
-                );
+                $link = new TexyLink;
+                $link->URL = $image->linkedURL === NULL ? $image->imageURL : $image->linkedURL;
+                $link->type = TexyLink::AUTOIMAGE;
+                $link->modifier = new TexyModifier;
             } else {
-                $reqL = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
+                $link = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
             }
-
-            $elLink = $tx->linkModule->factory($reqL);
-            $tx->summary['links'][] = $elLink->href;
-
-            $elLink->childNodes[] = $elImg;
-            $elImg = $elLink;
         }
+
+        if (is_callable(array($tx->handler, 'figure'))) {
+            $el = $tx->handler->figure($tx, $image, $link, $mContent, $mod, $user);
+            if ($el) return $el;
+        }
+
+        $hAlign = $image->modifier->hAlign;
+        $mod->hAlign = $image->modifier->hAlign = NULL;
+
+        $elImg = $tx->imageModule->factory($image);
+        $tx->summary['images'][] = $elImg->src;
 
         $el = TexyHtml::el('div');
         if (!empty($elImg->width)) $el->style['width'] = ($elImg->width + $this->widthDelta) . 'px';
-
         $mod->decorate($tx, $el);
-        $el->childNodes['img'] = TexyHtml::el('');
-        $el->childNodes['img']->childNodes[] = $elImg->export($tx);
 
+        if ($link) {
+            $elImg = $tx->linkModule->factory($link)->setContent($elImg);
+            $tx->summary['links'][] = $elImg->href;
+        }
+
+        $el->childNodes['img'] = $elImg;
         $el->childNodes['caption'] = TexyHtml::el('');
         $el->childNodes['caption']->parseBlock($tx, ltrim($mContent));
 
@@ -120,8 +122,8 @@ class TexyFigureModule extends TexyModule
         } elseif ($this->class)
             $el->class[] = $this->class;
 
-        if (is_callable(array($tx->handler, 'figure')))
-            $tx->handler->figure($tx, $req, $mod, $el);
+        if (is_callable(array($tx->handler, 'figure2')))
+            $tx->handler->figure2($tx, $el, $user);
 
         $parser->children[] = $el;
     }

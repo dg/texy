@@ -31,7 +31,7 @@ class myHandler
 {
 
     // reference handler
-    function reference($texy, $refName)
+    function referenceNew($texy, $refName)
     {
         $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 

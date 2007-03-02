@@ -70,7 +70,7 @@ class TexyQuoteModule extends TexyModule
         $spaces = '';
         do {
             if ($mSpaces === ':') {
-                $el->cite = $tx->quoteModule->citeLink($mContent);
+                $mod->cite = $tx->quoteModule->citeLink($mContent);
                 $content .= "\n";
             } else {
                 if ($spaces === '') $spaces = max(1, strlen($mSpaces));
@@ -81,6 +81,7 @@ class TexyQuoteModule extends TexyModule
             list(, $mSpaces, $mContent) = $matches;
         } while (TRUE);
 
+        $el->cite = $mod->cite;
         $el->parseBlock($tx, $content);
 
         $parser->children[] = $el;
@@ -96,26 +97,20 @@ class TexyQuoteModule extends TexyModule
     public function citeLink($link)
     {
         $tx = $this->texy;
-        $asReference = FALSE;
-        // [ref]
-        if ($link{0} === '[') {
+
+        if ($link == NULL) return NULL;
+
+        if ($link{0} === '[') { // [ref]
             $link = substr($link, 1, -1);
             $ref = $tx->linkModule->getReference($link);
             if ($ref) {
-                $res = Texy::completeURL($ref['URL'], $tx->linkModule->root);
+                return Texy::completeURL($ref['URL'], $tx->linkModule->root);
             } else {
-                $res = Texy::completeURL($link, $tx->linkModule->root);
-                $asReference = TRUE;
+                return Texy::completeURL($link, $tx->linkModule->root);
             }
         } else { // direct URL
-            $res = Texy::completeURL($link, $tx->linkModule->root);
+            return Texy::completeURL($link, $tx->linkModule->root);
         }
-
-        // handler
-        if (is_callable(array($tx->handler, 'citeSource')))
-            $tx->handler->citeSource($tx, $link, $asReference, $res);
-
-        return $res;
     }
 
 

@@ -26,17 +26,16 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 class myHandler {
 
-    function image($texy, $req, &$element)
+    function image($texy, &$image, &$link)
     {
-        if ($req['imageURL'] != 'user')  // accept only [* user *]
+        if ($image->imageURL != 'user')  // accept only [* user *]
           return FALSE;
 
-        $req['imageURL'] = 'image.gif'; // image URL
-        $req['overURL'] = 'image-over.gif'; // onmouseover image
-        $req['linkedURL'] = 'image-big.gif'; // linked image
-        $req['modifier']->title = 'Texy! logo';
+        $image->imageURL = 'image.gif'; // image URL
+        $image->overURL = 'image-over.gif'; // onmouseover image
+        $image->modifier->title = 'Texy! logo';
 
-        $element = $texy->imageModule->factory($req); // refactoring
+        if ($link) $link->URL = 'image-big.gif'; // linked image
     }
 
 }

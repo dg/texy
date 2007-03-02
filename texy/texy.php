@@ -238,8 +238,8 @@ class Texy
         $this->scriptModule = new TexyScriptModule($this);
         $this->htmlModule = new TexyHtmlModule($this);
         $this->imageModule = new TexyImageModule($this);
-        $this->linkModule = new TexyLinkModule($this);
         $this->phraseModule = new TexyPhraseModule($this);
+        $this->linkModule = new TexyLinkModule($this);
         $this->emoticonModule = new TexyEmoticonModule($this);
 
         // block parsing - order is not important

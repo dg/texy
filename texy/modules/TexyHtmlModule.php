@@ -95,8 +95,12 @@ class TexyHtmlModule extends TexyModule
         $el = TexyHtml::el($tag);
         if ($aTags === Texy::ALL && $isEmpty) $el->_empty = TRUE; // force empty
 
-        if (!$isOpening) // closing tag? we are finished
+        if (!$isOpening) { // closing tag? we are finished
+            if (is_callable(array($tx->handler, 'htmlTag')))
+                $tx->handler->htmlTag($tx, $el, FALSE);
+
             return $tx->protect($el->endTag(), $el->getContentType());
+        }
 
         // process attributes
         if (is_array($aAttrs)) $aAttrs = array_flip($aAttrs);
@@ -162,6 +166,9 @@ class TexyHtmlModule extends TexyModule
                 $tx->summary['links'][] = $el->href;
             }
         }
+
+        if (is_callable(array($tx->handler, 'htmlTag')))
+            $tx->handler->htmlTag($tx, $el, TRUE);
 
         return $tx->protect($el->startTag(), $el->getContentType());
     }

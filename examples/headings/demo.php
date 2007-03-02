@@ -28,6 +28,10 @@ $text = file_get_contents('sample.texy');
 $texy->headingModule->top       = 2;   // set headings top limit
 $texy->headingModule->balancing = TexyHeadingModule::DYNAMIC; // this is default
 
+// generate ID
+$texy->headingModule->generateID = TRUE;
+
+
 $html = $texy->process($text);  // that's all folks!
 
 // echo topmost heading (text is html safe!)
@@ -77,5 +81,12 @@ echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
 echo '<hr />';
+
+
+// and echo TOC
+echo '<h2>Table of contents</h2>';
+echo '<pre>';
+print_r($texy->headingModule->TOC);
+echo '</pre>';
 
 ?>

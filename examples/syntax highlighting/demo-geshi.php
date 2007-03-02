@@ -36,7 +36,7 @@ class myHandler
 {
 
     // callback function for processing blocks
-    function blockCode($texy, $lang, $modifier, $content, $element)
+    function blockCode($texy, $lang, $content, $modifier)
     {
         global $geshiPath;
 
@@ -66,10 +66,7 @@ class myHandler
         // protect output is in HTML
         $content = $texy->protect($content);
 
-        $element->setContent($content);
-
-        // remove tags
-        $element->elName = NULL;
+        return TexyHtml::el()->setContent($content);
     }
 
 }

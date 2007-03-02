@@ -69,6 +69,7 @@ class TexyBlockModule extends TexyModule
         //    [7] => .... content
 
         $tx = $this->texy;
+        $user = NULL;
         $mType = trim(strtolower($mType));
         $mLang = trim(strtolower($mLang));
         $mContent = trim($mContent, "\n");
@@ -113,9 +114,9 @@ class TexyBlockModule extends TexyModule
             $html = $tx->export($el);
             $html = Texy::encode($html);
 
-            $el = TexyHtml::el('pre');
+            $el = TexyHtml::el('pre')->class('html');
             $mod->decorate($tx, $el);
-            $el2 = TexyHtml::el('code')->class('html');
+            $el2 = TexyHtml::el('code');
             $el->childNodes[] = $el2;
             $el2->childNodes[] = $tx->protect($html);
             $parser->children[] = $el;
@@ -152,6 +153,14 @@ class TexyBlockModule extends TexyModule
             if ($spaces = strspn($mContent, ' '))
                 $mContent = preg_replace("#^ {1,$spaces}#m", '', $mContent);
 
+            if (is_callable(array($tx->handler, $type))) {
+                $el = $tx->handler->$type($tx, $mLang, $mContent, $mod, $user);
+                if ($el) {
+                    $parser->children[] = $el;
+                    return;
+                }
+            }
+
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
             $el->class[] = $mLang; // lang
@@ -163,8 +172,9 @@ class TexyBlockModule extends TexyModule
                 $el->setContent( $tx->protect( Texy::encode($mContent) ) );
             }
 
+            $type .= '2';
             if (is_callable(array($tx->handler, $type)))
-                $tx->handler->$type($tx, $mLang, $mod, $mContent, $el);
+                $tx->handler->$type($tx, $el, $user);
 
             $parser->children[] = $el;
 

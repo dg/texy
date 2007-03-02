@@ -163,16 +163,20 @@ class TexyHeadingModule extends TexyModule
 
     public function factory($level, $mContent, $mMod1, $mMod2, $mMod3, $mMod4)
     {
-        $el = new TexyHeadingElement;
+        $tx = $this->texy;
         $mod = new TexyModifier;
         $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
-        $mod->decorate($this->texy, $el);
+        $user = NULL;
 
+        if (is_callable(array($tx->handler, 'heading')))
+            $el = $tx->handler->heading($tx, $level, $mContent, $mod, $user);
+
+        $el = new TexyHeadingElement;
+        $mod->decorate($tx, $el);
         $el->eXtra['level'] = $level;
         $el->eXtra['top'] = $this->top;
         $el->eXtra['deltaLevel'] = 0;
-
-        $el->parseLine($this->texy, trim($mContent));
+        $el->parseLine($tx, trim($mContent));
 
         // document title
         $title = Texy::wash($el->getContent());
@@ -199,6 +203,9 @@ class TexyHeadingModule extends TexyModule
         );
         $this->TOC[] = & $TOC;
         $el->eXtra['TOC'] = & $TOC;
+
+        if (is_callable(array($tx->handler, 'heading2')))
+            $tx->handler->heading2($tx, $el, $user);
 
         return $el;
     }
