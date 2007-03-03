@@ -166,14 +166,14 @@ class TexyImageModule extends TexyModule
     /**
      * @return TexyImage
      */
-    public function parse($mURLs, $mMod1, $mMod2, $mMod3, $mMod4)
+    public function parse($mURLs, $mMod)
     {
         $image = $this->getReference(trim($mURLs));
         if (!$image) {
             $image = $this->parseContent($mURLs);
             $image->modifier = new TexyModifier;
         }
-        $image->modifier->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $image->modifier->setProperties($mMod);
         return $image;
     }
 
@@ -199,15 +199,12 @@ class TexyImageModule extends TexyModule
      */
     public function processReferenceDefinition($matches)
     {
-        list(, $mRef, $mURLs, $mMod1, $mMod2, $mMod3) = $matches;
+        list(, $mRef, $mURLs, $mMod) = $matches;
         //    [1] => [* (reference) *]
         //    [2] => urls
-        //    [3] => (title)
-        //    [4] => [class]
-        //    [5] => {style}
+        //    [3] => .(title)[class]{style}<>
 
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3);
+        $mod = new TexyModifier($mMod);
         $this->addReference($mRef, $mURLs, $mod);
         return '';
     }
@@ -220,18 +217,16 @@ class TexyImageModule extends TexyModule
      */
     public function processLine($parser, $matches)
     {
-        list(, $mURLs, $mMod1, $mMod2, $mMod3, $mMod4, $mLink) = $matches;
+        list(, $mURLs, $mMod, $mAlign, $mLink) = $matches;
         //    [1] => URLs
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
-        //    [5] => >
-        //    [6] => url | [ref] | [*image*]
+        //    [2] => .(title)[class]{style}<>
+        //    [3] => * < >
+        //    [4] => url | [ref] | [*image*]
 
         $tx = $this->texy;
         $user = $link = NULL;
 
-        $image = $this->parse($mURLs, $mMod1, $mMod2, $mMod3, $mMod4);
+        $image = $this->parse($mURLs, $mMod.$mAlign);
 
         if ($mLink) {
             if ($mLink === ':') {

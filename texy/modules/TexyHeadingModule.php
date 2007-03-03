@@ -102,18 +102,14 @@ class TexyHeadingModule extends TexyModule
      */
     public function processBlockUnderline($parser, $matches)
     {
-        list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mLine) = $matches;
+        list(, $mContent, $mMod, $mLine) = $matches;
         //  $matches:
         //    [1] => ...
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
-        //    [5] => >
-        //
-        //    [6] => ...
+        //    [2] => .(title)[class]{style}<>
+        //    [3] => ...
 
         $level = $this->levels[$mLine];
-        $el = $this->factory($level, $mContent, $mMod1, $mMod2, $mMod3, $mMod4);
+        $el = $this->factory($level, $mContent, $mMod);
         $parser->children[] = $el;
 
         if ($this->balancing === self::DYNAMIC)
@@ -136,16 +132,13 @@ class TexyHeadingModule extends TexyModule
      */
     public function processBlockSurround($parser, $matches)
     {
-        list(, $mLine, , $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, $mLine, , $mContent, $mMod) = $matches;
         //    [1] => ###
         //    [2] => ...
-        //    [3] => (title)
-        //    [4] => [class]
-        //    [5] => {style}
-        //    [6] => >
+        //    [3] => .(title)[class]{style}<>
 
         $level = 7 - min(7, max(2, strlen($mLine)));
-        $el = $this->factory($level, $mContent, $mMod1, $mMod2, $mMod3, $mMod4);
+        $el = $this->factory($level, $mContent, $mMod);
         $parser->children[] = $el;
 
         if ($this->balancing === self::DYNAMIC)
@@ -161,11 +154,10 @@ class TexyHeadingModule extends TexyModule
 
 
 
-    public function factory($level, $mContent, $mMod1, $mMod2, $mMod3, $mMod4)
+    public function factory($level, $mContent, $mMod)
     {
         $tx = $this->texy;
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
         $user = NULL;
 
         if (is_callable(array($tx->handler, 'heading')))

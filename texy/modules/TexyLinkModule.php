@@ -170,16 +170,13 @@ class TexyLinkModule extends TexyModule
      */
     public function processReferenceDefinition($matches)
     {
-        list(, $mRef, $mLink, $mLabel, $mMod1, $mMod2, $mMod3) = $matches;
+        list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
         //    [1] => [ (reference) ]
         //    [2] => link
         //    [3] => ...
-        //    [4] => (title)
-        //    [5] => [class]
-        //    [6] => {style}
+        //    [4] => .(title)[class]{style}
 
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3);
+        $mod = new TexyModifier($mMod);
         $this->addReference($mRef, $mLink, trim($mLabel), $mod);
         return '';
     }
@@ -268,7 +265,7 @@ class TexyLinkModule extends TexyModule
     /**
      * @return TexyLink
      */
-    public function parse($dest, $mMod1, $mMod2, $mMod3, $label)
+    public function parse($dest, $mMod, $label)
     {
         $tx = $this->texy;
         $type = TexyLink::NORMAL;
@@ -298,7 +295,7 @@ class TexyLinkModule extends TexyModule
         }
 
         $link->URL = str_replace('%s', urlencode(Texy::wash($label)), $link->URL);
-        $link->modifier->setProperties($mMod1, $mMod2, $mMod3);
+        $link->modifier->setProperties($mMod);
         $link->type = $type;
         return $link;
     }

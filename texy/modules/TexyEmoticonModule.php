@@ -78,12 +78,6 @@ class TexyEmoticonModule extends TexyModule
     public function processLine($parser, $matches)
     {
         $match = $matches[0];
-        //    [1] => **
-        //    [2] => ...
-        //    [3] => (title)
-        //    [4] => [class]
-        //    [5] => {style}
-        //    [6] => LINK
 
         $tx = $this->texy;
         $user = NULL;

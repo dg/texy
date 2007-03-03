@@ -56,12 +56,7 @@ class TexyGenericBlock
             if ($content === '') continue;
 
             preg_match('#^(.*)'.TEXY_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
-            list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mContent2) = $matches;
-            //    [1] => ...
-            //    [2] => (title)
-            //    [3] => [class]
-            //    [4] => {style}
-            //    [5] => >
+            list(, $mContent, $mMod, $mContent2) = $matches;
 
 
             // ....
@@ -90,7 +85,7 @@ class TexyGenericBlock
 
             // specify tag
             if ($contentType === Texy::CONTENT_TEXTUAL) $tag = 'p';
-            elseif ($mMod1 || $mMod2 || $mMod3 || $mMod4) $tag = 'div';
+            elseif ($mMod) $tag = 'div';
             elseif ($contentType === Texy::CONTENT_BLOCK) $tag = '';
             else $tag = 'div';
 
@@ -101,8 +96,7 @@ class TexyGenericBlock
             };
             $content = strtr($content, "\r\n", '  ');
 
-            $mod = new TexyModifier;
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $mod = new TexyModifier($mMod);
             $el = TexyHtml::el($tag);
             $mod->decorate($tx, $el);
             $el->childNodes[] = $content;

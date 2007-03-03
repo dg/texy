@@ -59,26 +59,20 @@ class TexyFigureModule extends TexyModule
      */
     public function processBlock($parser, $matches)
     {
-        list(, $mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4, $mLink, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod) = $matches;
         //    [1] => URLs
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
-        //    [5] => >
-        //    [6] => url | [ref] | [*image*]
-        //    [7] => ...
-        //    [8] => (title)
-        //    [9] => [class]
-        //    [10] => {style}
-        //    [11] => >
+        //    [2] => .(title)[class]{style}<>
+        //    [3] => * < >
+        //    [4] => url | [ref] | [*image*]
+        //    [5] => ...
+        //    [6] => .(title)[class]{style}<>
 
         $tx = $this->texy;
         $user = $link = NULL;
 
-        $image = $tx->imageModule->parse($mURLs, $mImgMod1, $mImgMod2, $mImgMod3, $mImgMod4);
+        $image = $tx->imageModule->parse($mURLs, $mImgMod.$mAlign);
 
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
 
         if ($mLink) {
             if ($mLink === ':') {

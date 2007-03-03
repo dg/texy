@@ -170,7 +170,7 @@ class TexyPhraseModule extends TexyModule
         // acronym/abbr NATO((North Atlantic Treaty Organisation))
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!['.TEXY_CHAR.'])(['.TEXY_CHAR.']{2,})()()()\(\((.+)\)\)#Uu',
+            '#(?<!['.TEXY_CHAR.'])(['.TEXY_CHAR.']{2,})()\(\((.+)\)\)#Uu',
             'phraseAcronymAlt'
         );
 
@@ -192,7 +192,7 @@ class TexyPhraseModule extends TexyModule
         // ....:LINK
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(['.TEXY_CHAR.'0-9@\#$%&.,_-]+)()()()(?=:\[)'.TEXY_LINK.'()#Uu',
+            '#(['.TEXY_CHAR.'0-9@\#$%&.,_-]+)()(?=:\[)'.TEXY_LINK.'()#Uu',
             'phraseQuickLink'
         );
 
@@ -219,31 +219,28 @@ class TexyPhraseModule extends TexyModule
      */
     public function processPhrase($parser, $matches, $phrase)
     {
-        list($match, $mContent, $mMod1, $mMod2, $mMod3, $mLink) = $matches;
+        list($match, $mContent, $mMod, $mLink) = $matches;
         //    [1] => **
         //    [2] => ...
-        //    [3] => (title)
-        //    [4] => [class]
-        //    [5] => {style}
-        //    [6] => LINK
+        //    [3] => .(title)[class]{style}
+        //    [4] => LINK
 
         $tx = $this->texy;
         $parser->again = $phrase !== 'phraseCode' && $phrase !== 'phraseQuickLink';
 
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3);
+        $mod = new TexyModifier($mMod);
         $link = $user = NULL;
 
         $tag = isset($this->tags[$phrase]) ? $this->tags[$phrase] : NULL;
 
         if ($tag === 'a') {
             if ($mLink == NULL) {
-                if (!$mMod1 && !$mMod2 && !$mMod3) return FALSE; // means "..."
+                if (!$mMod) return FALSE; // means "..."
                 $tag = 'span';
             } elseif (empty($tx->allowed['phraseHasLink'])) {
                 return $mContent;
             } else {
-                $link = $tx->linkModule->parse($mLink, $mMod1, $mMod2, $mMod3, $mContent);
+                $link = $tx->linkModule->parse($mLink, $mMod, $mContent);
                 $tag = NULL;
             }
 

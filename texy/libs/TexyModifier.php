@@ -64,24 +64,32 @@ class TexyModifier
     );
 
 
-
-    public function setProperties()
+    public function __construct($mod=NULL)
     {
-        foreach (func_get_args() as $arg)
+        $this->setProperties($mod);
+    }
+
+
+    public function setProperties($mod)
+    {
+        if (!$mod) return;
+        $mod = strtr($mod, "\n", ' ');
+
+        $p = 0;
+        $len = strlen($mod);
+
+        while ($p < $len)
         {
-            if ($arg == NULL) continue;
+            $ch = $mod[$p];
 
-            $arg0 = $arg[0];
+            if ($ch === '(') { // title
+                $a = strpos($mod, ')', $p) + 1;
+                $this->title = Texy::decode(trim(substr($mod, $p + 1, $a - $p - 2)));
+                $p = $a;
 
-            if ($arg0 === '(') { // title
-
-                $arg = strtr(substr($arg, 1, -1), "\n", ' ');
-                $this->title = Texy::decode(trim($arg));
-
-            } elseif ($arg0 === '{') { // style & attributes
-
-                $arg = strtr(substr($arg, 1, -1), "\n", ' ');
-                foreach (explode(';', $arg) as $value) {
+            } elseif ($ch === '{') { // style & attributes
+                $a = strpos($mod, '}', $p) + 1;
+                foreach (explode(';', substr($mod, $p + 1, $a - $p - 2)) as $value) {
                     $pair = explode(':', $value, 2);
                     $prop = strtolower(trim($pair[0])); // strtolower protects TexyHtml's elName, eXtra, childNodes
                     if ($prop === '' || !isset($pair[1])) continue;
@@ -92,12 +100,12 @@ class TexyModifier
                     elseif ($value !== '')  // style
                         $this->styles[$prop] = $value;
                 }
+                $p = $a;
 
-            } elseif ($arg0 === '[') { // classes & ID
-
-                $arg = strtr(substr($arg, 1, -1), "\n", ' ');
-                $arg = str_replace('#', ' #', $arg);
-                foreach (explode(' ', $arg) as $value) {
+            } elseif ($ch === '[') { // classes & ID
+                $a = strpos($mod, ']', $p) + 1;
+                $s = str_replace('#', ' #', substr($mod, $p + 1, $a - $p - 2));
+                foreach (explode(' ', $s) as $value) {
                     if ($value === '') continue;
 
                     if ($value{0} === '#')
@@ -105,15 +113,17 @@ class TexyModifier
                     else
                         $this->classes[] = $value;
                 }
+                $p = $a;
             }
             // alignment
-            elseif ($arg === '^') $this->vAlign = self::VALIGN_TOP;
-            elseif ($arg === '-') $this->vAlign = self::VALIGN_MIDDLE;
-            elseif ($arg === '_') $this->vAlign = self::VALIGN_BOTTOM;
-            elseif ($arg === '=') $this->hAlign = self::HALIGN_JUSTIFY;
-            elseif ($arg === '>') $this->hAlign = self::HALIGN_RIGHT;
-            elseif ($arg === '<') $this->hAlign = self::HALIGN_LEFT;
-            elseif ($arg === '<>') $this->hAlign = self::HALIGN_CENTER;
+            elseif ($ch === '^') { $this->vAlign = self::VALIGN_TOP; $p++; }
+            elseif ($ch === '-') { $this->vAlign = self::VALIGN_MIDDLE; $p++; }
+            elseif ($ch === '_') { $this->vAlign = self::VALIGN_BOTTOM; $p++; }
+            elseif ($ch === '=') { $this->hAlign = self::HALIGN_JUSTIFY; $p++; }
+            elseif ($ch === '>') { $this->hAlign = self::HALIGN_RIGHT; $p++; }
+            elseif (substr($mod, $p, 2) === '<>') { $this->hAlign = self::HALIGN_CENTER; $p+=2; }
+            elseif ($ch === '<') { $this->hAlign = self::HALIGN_LEFT; $p++; }
+            else { break; }
         }
     }
 

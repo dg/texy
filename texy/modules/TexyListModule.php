@@ -70,12 +70,10 @@ class TexyListModule extends TexyModule
      */
     public function processBlock($parser, $matches)
     {
-        list(, $mMod1, $mMod2, $mMod3, $mMod4, $mBullet, $mNewLine) = $matches;
-        //    [1] => (title)
-        //    [2] => [class]
-        //    [3] => {style}
-        //    [4] => >
-        //    [5] => bullet * + - 1) a) A) IV)
+        list(, $mMod, $mBullet, $mNewLine) = $matches;
+        //    [1] => .(title)[class]{style}<>
+        //    [2] => bullet * + - 1) a) A) IV)
+        //    [3] => \n
 
         $tx = $this->texy;
 
@@ -98,8 +96,7 @@ class TexyListModule extends TexyModule
                 break;
             }
 
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $el);
 
         $parser->moveBackward($mNewLine ? 2 : 1);
@@ -127,19 +124,15 @@ class TexyListModule extends TexyModule
         if (!$parser->receiveNext($patternItem, $matches)) {
             return FALSE;
         }
-        list(, $mIndent, $mNewLine, $mSpace, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, $mIndent, $mNewLine, $mSpace, $mContent, $mMod) = $matches;
             //    [1] => indent
             //    [2] => \n
             //    [3] => space
             //    [4] => ...
-            //    [5] => (title)
-            //    [6] => [class]
-            //    [7] => {style}
-            //    [8] => >
+            //    [5] => .(title)[class]{style}<>
 
         $elItem = TexyHtml::el($tag);
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $elItem);
 
         // next lines

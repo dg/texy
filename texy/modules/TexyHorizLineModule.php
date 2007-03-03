@@ -53,7 +53,7 @@ class TexyHorizLineModule extends TexyModule
      */
     public function processBlock($parser, $matches)
     {
-        list(, , $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+        list(, , $mMod) = $matches;
         //    [1] => ---
         //    [2] => (title)
         //    [3] => [class]
@@ -61,8 +61,7 @@ class TexyHorizLineModule extends TexyModule
         //    [5] => >
 
         $el = TexyHtml::el('hr');
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
         $mod->decorate($this->texy, $el);
 
         $parser->children[] = $el;

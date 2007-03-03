@@ -59,14 +59,11 @@ class TexyBlockModule extends TexyModule
      */
     public function processBlock($parser, $matches, $name)
     {
-        list(, $mType, $mLang, $mMod1, $mMod2, $mMod3, $mMod4, $mContent) = $matches;
-        //    [1] => code
+        list(, $mType, $mLang, $mMod, $mContent) = $matches;
+        //    [1] => code | text
         //    [2] => lang ?
-        //    [3] => (title)
-        //    [4] => [class]
-        //    [5] => {style}
-        //    [6] => >
-        //    [7] => .... content
+        //    [3] => .(title)[class]{style}<>
+        //    [4] => .... content
 
         $tx = $this->texy;
         $user = NULL;
@@ -86,8 +83,7 @@ class TexyBlockModule extends TexyModule
             $type = 'blockDiv';
         }
 
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
 
         switch ($mType) {
         case 'div':

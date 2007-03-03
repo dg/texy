@@ -63,22 +63,12 @@ class TexyDefinitionListModule extends TexyListModule
      */
     public function processBlock($parser, $matches)
     {
-        list(, $mMod1, $mMod2, $mMod3, $mMod4,
-                                 $mContentTerm, $mModTerm1, $mModTerm2, $mModTerm3, $mModTerm4,
-                                 $mSpaces, $mBullet) = $matches;
-        //    [1] => (title)
-        //    [2] => [class]
-        //    [3] => {style}
-        //    [4] => >
-
-        //    [5] => ...
-        //    [6] => (title)
-        //    [7] => [class]
-        //    [8] => {style}
-        //    [9] => >
-
-        //   [10] => space
-        //   [11] => - * +
+        list(, $mMod, $mContentTerm, $mMod, $mSpaces, $mBullet) = $matches;
+        //   [1] => .(title)[class]{style}<>
+        //   [2] => ...
+        //   [3] => .(title)[class]{style}<>
+        //   [4] => space
+        //   [5] => - * +
 
         $tx = $this->texy;
 
@@ -90,8 +80,7 @@ class TexyDefinitionListModule extends TexyListModule
             }
 
         $el = TexyHtml::el('dl');
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $el);
         $parser->moveBackward(2);
 
@@ -105,16 +94,12 @@ class TexyDefinitionListModule extends TexyListModule
             }
 
             if ($parser->receiveNext($patternTerm, $matches)) {
-                list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+                list(, $mContent, $mMod) = $matches;
                 //    [1] => ...
-                //    [2] => (title)
-                //    [3] => [class]
-                //    [4] => {style}
-                //    [5] => >
+                //    [2] => .(title)[class]{style}<>
 
                 $elItem = TexyHtml::el('dt');
-                $mod = new TexyModifier;
-                $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+                $mod = new TexyModifier($mMod);
                 $mod->decorate($tx, $elItem);
 
                 $elItem->parseLine($tx, $mContent);

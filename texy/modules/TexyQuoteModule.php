@@ -51,19 +51,15 @@ class TexyQuoteModule extends TexyModule
      */
     public function processBlock($parser, $matches)
     {
-        list(, $mMod1, $mMod2, $mMod3, $mMod4, $mSpaces, $mContent) = $matches;
-        //    [1] => (title)
-        //    [2] => [class]
-        //    [3] => {style}
-        //    [4] => <>
-        //    [5] => spaces |
-        //    [6] => ... / LINK
+        list(, $mMod, $mSpaces, $mContent) = $matches;
+        //    [1] => .(title)[class]{style}<>
+        //    [2] => spaces |
+        //    [3] => ... / LINK
 
         $tx = $this->texy;
 
         $el = TexyHtml::el('blockquote');
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+        $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $el);
 
         $content = '';

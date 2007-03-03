@@ -63,34 +63,25 @@ class TexyTableModule extends TexyModule
      */
     public function processBlock($parser, $matches)
     {
-        list(, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
-        //    [1] => (title)
-        //    [2] => [class]
-        //    [3] => {style}
-        //    [4] => >
-        //    [5] => _
+        list(, $mMod) = $matches;
+        //    [1] => .(title)[class]{style}<>_
 
         $tx = $this->texy;
 
         $el = TexyHtml::el('table');
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+        $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $el);
 
         $parser->moveBackward();
 
         if ($parser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
-            list(, , $mContent, $mMod1, $mMod2, $mMod3, $mMod4) = $matches;
+            list(, , $mContent, $mMod) = $matches;
             //    [1] => # / =
             //    [2] => ....
-            //    [3] => (title)
-            //    [4] => [class]
-            //    [5] => {style}
-            //    [6] => >
+            //    [3] => .(title)[class]{style}<>
 
             $caption = TexyHtml::el('caption');
-            $mod = new TexyModifier;
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);
+            $mod = new TexyModifier($mMod);
             $mod->decorate($tx, $caption);
             $caption->parseLine($tx, $mContent);
             $el->childNodes[] = $caption;
@@ -128,17 +119,12 @@ class TexyTableModule extends TexyModule
         if (!$parser->receiveNext('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
             return FALSE;
         }
-        list(, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+        list(, $mContent, $mMod) = $matches;
         //    [1] => ....
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
-        //    [5] => >
-        //    [6] => _
+        //    [2] => .(title)[class]{style}<>_
 
         $elRow = TexyHtml::el('tr');
-        $mod = new TexyModifier;
-        $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+        $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $elRow);
 
         if ($this->row % 2 === 0) {
@@ -167,23 +153,14 @@ class TexyTableModule extends TexyModule
             }
 
             if (!preg_match('#(\*??)\ *'.TEXY_MODIFIER_HV.'??(.*)'.TEXY_MODIFIER_HV.'?()$#AU', $field, $matches)) continue;
-            list(, $mHead, $mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5, $mContent, $mMod1, $mMod2, $mMod3, $mMod4, $mMod5) = $matches;
+            list(, $mHead, $mModCol, $mContent, $mMod) = $matches;
             //    [1] => * ^
-            //    [2] => (title)
-            //    [3] => [class]
-            //    [4] => {style}
-            //    [5] => <
-            //    [6] => ^
-            //    [7] => ....
-            //    [8] => (title)
-            //    [9] => [class]
-            //    [10] => {style}
-            //    [11] => <>
-            //    [12] => ^
+            //    [2] => .(title)[class]{style}<>_
+            //    [3] => ....
+            //    [4] => .(title)[class]{style}<>_
 
-            if ($mModCol1 || $mModCol2 || $mModCol3 || $mModCol4 || $mModCol5) {
-                $this->colModifier[$col] = new TexyModifier;
-                $this->colModifier[$col]->setProperties($mModCol1, $mModCol2, $mModCol3, $mModCol4, $mModCol5);
+            if ($mModCol) {
+                $this->colModifier[$col] = new TexyModifier($mModCol);
             }
 
             if (isset($this->colModifier[$col]))
@@ -191,7 +168,7 @@ class TexyTableModule extends TexyModule
             else
                 $mod = new TexyModifier;
 
-            $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4, $mMod5);
+            $mod->setProperties($mMod);
 
             $elField = new TexyTableFieldElement;
             $elField->elName = $this->isHead || ($mHead === '*') ? 'th' : 'td';
