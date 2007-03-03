@@ -36,7 +36,7 @@ class myHandler
 {
 
     // callback function for processing blocks
-    function blockCode($texy, $lang, $content, $modifier)
+    function documentCode($texy, $lang, $content, $modifier)
     {
         global $geshiPath;
 

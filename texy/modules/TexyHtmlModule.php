@@ -26,7 +26,6 @@ if (!defined('TEXY')) die();
 class TexyHtmlModule extends TexyModule
 {
     protected $default = array(
-        'html' => TRUE,
         'htmlTag' => TRUE,
         'htmlComment' => FALSE,
     );
@@ -35,38 +34,44 @@ class TexyHtmlModule extends TexyModule
     public function init()
     {
         $this->texy->registerLinePattern(
-            array($this, 'process'),
-            '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>|<!--([^'.TEXY_MARK.']*?)-->#is',
-            'html'
+            array($this, 'processTag'),
+            '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>#is',
+            'htmlTag'
+        );
+
+        $this->texy->registerLinePattern(
+            array($this, 'processComment'),
+            '#<!--([^'.TEXY_MARK.']*?)-->#is',
+            'htmlComment'
         );
     }
 
 
 
     /**
-     * Callback function: <tag attr="..">  | <!-- comment -->
+     * Callback function: <!-- comment -->
      * @return string
      */
-    public function process($parser, $matches)
+    public function processComment($parser, $matches)
     {
-        $matches[] = NULL;
-        list($match, $mClosing, $mTag, $mAttr, $mEmpty, $mComment) = $matches;
+        list($match) = $matches;
+        return $this->texy->protect($match, Texy::CONTENT_NONE);
+    }
+
+
+    /**
+     * Callback function: <tag attr="..">
+     * @return string
+     */
+    public function processTag($parser, $matches)
+    {
+        list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
         //    [2] => tag
         //    [3] => attributes
         //    [4] => /
-        //    [5] => comment
 
         $tx = $this->texy;
-
-        if ($mTag == '') { // html comment
-            if (empty($tx->allowed['htmlComment']))
-                return substr($matches[5], 0, 1) === '[' ? $match : '';
-
-            return $tx->protect($match, Texy::CONTENT_NONE);
-        }
-
-        if (empty($tx->allowed['htmlTag'])) return FALSE;
 
         $tag = strtolower($mTag);
         // test for validity - not good!!

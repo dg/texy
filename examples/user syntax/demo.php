@@ -46,7 +46,7 @@ $texy->registerLinePattern(
 
 function userHandler($parser, $matches, $name)
 {
-    list($match, $mContent, $mMod1, $mMod2, $mMod3) = $matches;
+    list($match, $mContent, $mMod) = $matches;
 
     global $texy;
 
@@ -55,8 +55,7 @@ function userHandler($parser, $matches, $name)
     $el = TexyHtml::el($tag);
 
     // apply modifier
-    $mod = new TexyModifier;
-    $mod->setProperties($mMod1, $mMod2, $mMod3);
+    $mod = new TexyModifier($mMod);
     $mod->decorate($texy, $el);
 
     $el->class = 'myclass';

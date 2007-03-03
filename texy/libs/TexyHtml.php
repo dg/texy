@@ -126,10 +126,8 @@ class TexyHtml
         if ($this->childNodes === FALSE) return $s;
 
         // add content
-        if (!is_array($this->childNodes)) {
-            debugbreak();
+        if (!is_array($this->childNodes))
             throw new Exception('TexyHtml::childNodes bad usage.');
-        }
 
         foreach ($this->childNodes as $val)
             if ($val instanceof self) $s .= $val->export($texy);

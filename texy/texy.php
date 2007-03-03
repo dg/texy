@@ -28,14 +28,13 @@ define('TEXY', 'Version 2.0beta $Revision$');
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
-require_once TEXY_DIR.'libs/TexyGenericBlock.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
 require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
 require_once TEXY_DIR.'libs/TexyHtmlWellForm.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
-require_once TEXY_DIR.'modules/TexyBlockModule.php';
+require_once TEXY_DIR.'modules/TexyDocumentModule.php';
 require_once TEXY_DIR.'modules/TexyHeadingModule.php';
 require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
 require_once TEXY_DIR.'modules/TexyHtmlModule.php';
@@ -113,6 +112,9 @@ class Texy
     /** @var object  User handler object */
     public $handler;
 
+    /** @var string */
+    public $defaultDocument = 'document/texy';
+
     /** @var TexyModule[]  default modules */
     public
         $scriptModule,
@@ -121,7 +123,7 @@ class Texy
         $linkModule,
         $phraseModule,
         $emoticonModule,
-        $blockModule,
+        $documentModule,
         $headingModule,
         $horizLineModule,
         $quoteModule,
@@ -133,7 +135,6 @@ class Texy
         $longWordsModule;
 
     public
-        $genericBlock,
         $formatter,
         $formatterModule, // back compatibility
         $wellForm;
@@ -183,6 +184,8 @@ class Texy
      */
     private $blockPatterns = array();
 
+    /** @var array */
+    private $docTypes = array();
 
     /** @var TexyDomElement  DOM structure for parsed text */
     private $DOM;
@@ -211,7 +214,6 @@ class Texy
         // load routines
         $this->formatter = new TexyHtmlFormatter();
         $this->wellForm = new TexyHtmlWellForm();
-        $this->genericBlock = new TexyGenericBlock($this);
 
         $this->formatterModule = $this->formatter; // back compatibility
 
@@ -243,7 +245,7 @@ class Texy
         $this->emoticonModule = new TexyEmoticonModule($this);
 
         // block parsing - order is not important
-        $this->blockModule = new TexyBlockModule($this);
+        $this->documentModule = new TexyDocumentModule($this);
         $this->headingModule = new TexyHeadingModule($this);
         $this->horizLineModule = new TexyHorizLineModule($this);
         $this->quoteModule = new TexyQuoteModule($this);
@@ -269,7 +271,6 @@ class Texy
     public function registerLinePattern($handler, $pattern, $name)
     {
         if (empty($this->allowed[$name])) return;
-
         $this->linePatterns[$name] = array(
             'handler'     => $handler,
             'pattern'     => $pattern,
@@ -280,16 +281,21 @@ class Texy
 
     public function registerBlockPattern($handler, $pattern, $name)
     {
-        if (empty($this->allowed[$name])) return;
-
         // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
-
+        if (empty($this->allowed[$name])) return;
         $this->blockPatterns[$name] = array(
             'handler'     => $handler,
-            'pattern'     => $pattern  . 'm',  // force multiline!
+            'pattern'     => $pattern  . 'm',  // force multiline
         );
     }
 
+
+
+    public function registerDocType($handler, $name)
+    {
+        if (empty($this->allowed[$name])) return;
+        $this->docTypes[$name] = $handler;
+    }
 
 
     /**
@@ -377,7 +383,11 @@ class Texy
 
         // process
         $this->DOM = TexyHtml::el();
-        $this->DOM->parseBlock($this, $text);
+        $parser = new TexyDocumentParser($this);
+        $this->DOM->childNodes = $parser->parse($text);
+
+        //$this->DOM = TexyHtml::el();
+        //$this->DOM->parseBlock($this, $text);
 
         // clean-up
         $this->linePatterns = $this->blockPatterns = array();
@@ -716,6 +726,11 @@ class Texy
         return $this->DOM;
     }
 
+
+    public function getDocTypes()
+    {
+        return $this->docTypes;
+    }
 
 
     /** @var array */
