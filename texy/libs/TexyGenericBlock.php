@@ -65,7 +65,6 @@ class TexyGenericBlock
             if ($tx->mergeLines) {
                 // \r means break line
                 $mContent = preg_replace('#\n (?=\S)#', "\r", $mContent);
-//               $mContent = strtr($mContent, "\n\r", " \n");
             }
 
             $lineParser = new TexyLineParser($tx);

@@ -40,25 +40,13 @@ class TexyHorizLineModule extends TexyModule
 
 
     /**
-     * Callback function
-     *
-     *   ---------------------------
-     *
-     *   - - - - - - - - - - - - - -
-     *
-     *   ***************************
-     *
-     *   * * * * * * * * * * * * * *
-     *
+     * Callback function for -------
      */
     public function processBlock($parser, $matches)
     {
         list(, , $mMod) = $matches;
         //    [1] => ---
-        //    [2] => (title)
-        //    [3] => [class]
-        //    [4] => {style}
-        //    [5] => >
+        //    [2] => .(title)[class]{style}<>
 
         $el = TexyHtml::el('hr');
         $mod = new TexyModifier($mMod);

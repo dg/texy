@@ -135,6 +135,10 @@ class TexyTableModule extends TexyModule
 
         $col = 0;
         $elField = NULL;
+
+        // special escape sequence \|
+        $mContent = str_replace('\\|', '&#x7C;', $mContent);
+
         foreach (explode('|', $mContent) as $field) {
             if (($field == '') && $elField) { // colspan
                 $elField->colspan++;

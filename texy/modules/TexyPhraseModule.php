@@ -75,6 +75,14 @@ class TexyPhraseModule extends TexyModule
     public function init()
     {
         $tx = $this->texy;
+/*
+        // UNIVERSAL
+        $tx->registerLinePattern(
+            array($this, 'processPhrase'),
+            '#((?>([*+/^_"~`-])+?))(?!\s)(.*(?!\\2).)'.TEXY_MODIFIER.'?(?<!\s)\\1(?!\\2)'.TEXY_LINK.'??()#Us',
+            'phraseStrong'
+        );
+*/
 
         // strong & em speciality
         $tx->registerLinePattern(
@@ -203,12 +211,6 @@ class TexyPhraseModule extends TexyModule
             'phraseCodeSwitch'
         );
 
-/*
-        $tx->registerLinePattern(
-            array($this, 'processPhrase2'),
-            '#((?>[*+^_"~-]+?))(\S.*)'.TEXY_MODIFIER.'?(?<!\s)\\1'.TEXY_LINK.'??()#U'
-        );
-*/
     }
 
 

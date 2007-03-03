@@ -32,7 +32,7 @@ class TexyQuoteModule extends TexyModule
     {
         $this->texy->registerBlockPattern(
             array($this, 'processBlock'),
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU',
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:|(\>+?|\ +|:)(.*))()$#mU',
             'blockQuote'
         );
     }
@@ -65,20 +65,27 @@ class TexyQuoteModule extends TexyModule
         $content = '';
         $spaces = '';
         do {
-            if ($mSpaces === ':') {
+            if ($mSpaces === '') {
+                $spaces = max(1, strlen($mSpaces));
+                $content .= $mContent . "\n";
+            } elseif ($mSpaces{0} === '>') {
+                $content .= $mSpaces . $mContent . "\n";
+            } elseif ($mSpaces === ':') {
                 $mod->cite = $tx->quoteModule->citeLink($mContent);
                 $content .= "\n";
             } else {
-                if ($spaces === '') $spaces = max(1, strlen($mSpaces));
                 $content .= $mContent . "\n";
             }
 
-            if (!$parser->receiveNext("#^>(?:|(\\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
+            if (!$parser->receiveNext("#^\>(?:|(\>+|\\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
             list(, $mSpaces, $mContent) = $matches;
         } while (TRUE);
 
         $el->cite = $mod->cite;
         $el->parseBlock($tx, $content);
+
+        // no content?
+        if (!$el->childNodes) return;
 
         $parser->children[] = $el;
     }

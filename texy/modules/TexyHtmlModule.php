@@ -44,7 +44,7 @@ class TexyHtmlModule extends TexyModule
 
 
     /**
-     * Callback function: <tag ...>  | <!-- comment -->
+     * Callback function: <tag attr="..">  | <!-- comment -->
      * @return string
      */
     public function process($parser, $matches)
@@ -128,7 +128,7 @@ class TexyHtmlModule extends TexyModule
         }
 
 
-        // apply allowedClasses & allowedStyles
+        // apply allowedClasses
         if (isset($el->class)) {
             $tmp = $tx->_classes; // speed-up
             if (is_array($tmp)) {
@@ -142,6 +142,7 @@ class TexyHtmlModule extends TexyModule
             }
         }
 
+        // apply allowedStyles
         if (isset($el->style)) {
             $tmp = $tx->_styles;  // speed-up
             if (is_array($tmp)) {
