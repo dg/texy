@@ -106,6 +106,8 @@ class TexyHtmlModule extends TexyModule
         if (is_array($aAttrs)) $aAttrs = array_flip($aAttrs);
         else $aAttrs = NULL;
 
+        $mAttr = strtr($mAttr, "\n", ' ');
+
         preg_match_all(
             '#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is',
             $mAttr,

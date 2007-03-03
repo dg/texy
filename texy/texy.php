@@ -352,7 +352,7 @@ class Texy
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
             $text = iconv($this->encoding, 'utf-8', $text);
 
-        // remove special chars, normalize lines
+        // remove special chars
         $text = self::wash($text);
 
         // standardize line endings to unix-like  (dos, mac)
@@ -399,9 +399,12 @@ class Texy
         if (strcasecmp($this->encoding, 'utf-8') !== 0)
             $text = iconv($this->encoding, 'utf-8', $text);
 
-        // remove special chars and line endings
+        // remove special chars
         $text = self::wash($text);
-        $text = rtrim(strtr($text, array("\n" => ' ', "\r" => '')));
+
+        // standardize line endings to unix-like  (dos, mac)
+        $text = str_replace("\r\n", "\n", $text); // DOS
+        $text = strtr($text, "\r", "\n"); // Mac
 
         // parse
         $this->DOM = TexyHtml::el();

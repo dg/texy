@@ -129,7 +129,7 @@ class TexyBlockModule extends TexyModule
 
         case 'html':
             $lineParser = new TexyLineParser($tx);
-            $lineParser->select = array('html');
+            $lineParser->onlyHtml = TRUE;
             $mContent = $lineParser->parse($mContent);
             $mContent = Texy::decode($mContent);
             $mContent = Texy::encode($mContent);

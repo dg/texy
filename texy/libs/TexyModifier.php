@@ -75,11 +75,12 @@ class TexyModifier
 
             if ($arg0 === '(') { // title
 
-                $this->title = Texy::decode(trim(substr($arg, 1, -1)));
+                $arg = strtr(substr($arg, 1, -1), "\n", ' ');
+                $this->title = Texy::decode(trim($arg));
 
             } elseif ($arg0 === '{') { // style & attributes
 
-                $arg = substr($arg, 1, -1);
+                $arg = strtr(substr($arg, 1, -1), "\n", ' ');
                 foreach (explode(';', $arg) as $value) {
                     $pair = explode(':', $value, 2);
                     $prop = strtolower(trim($pair[0])); // strtolower protects TexyHtml's elName, eXtra, childNodes
@@ -94,7 +95,8 @@ class TexyModifier
 
             } elseif ($arg0 === '[') { // classes & ID
 
-                $arg = str_replace('#', ' #', substr($arg, 1, -1));
+                $arg = strtr(substr($arg, 1, -1), "\n", ' ');
+                $arg = str_replace('#', ' #', $arg);
                 foreach (explode(' ', $arg) as $value) {
                     if ($value === '') continue;
 

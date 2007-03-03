@@ -26,9 +26,16 @@ if (!defined('TEXY')) die();
  */
 class TexyBlockParser
 {
-    private $text;        // text splited in array of lines
+    /** @var string */
+    private $text;
+
+    /** @var int */
     private $offset;
+
+    /** @var Texy */
     private $texy;
+
+    /** @var array */
     public $children = array();
 
 
@@ -165,8 +172,13 @@ class TexyBlockParser
  */
 class TexyLineParser
 {
+    /** @var bool */
     public $again;
-    public $select;
+
+    /** @var bool */
+    public $onlyHtml;
+
+    /** @var Texy */
     private $texy;
 
 
@@ -181,11 +193,16 @@ class TexyLineParser
         $tx = $this->texy;
 
         // initialization
-        $pl = $tx->getLinePatterns();
-        if ($this->select) {
-            foreach ($this->select as $name) if (isset($pl[$name])) $plX[$name] = $pl[$name];
-            $pl = $plX;
-            unset($plX);
+        if ($this->onlyHtml) {
+            // special mode - parse only html tags
+            $tmp = $tx->getLinePatterns();
+            $pl['html'] = $tmp['html'];
+            unset($tmp);
+        } else {
+            // normal mode
+            $pl = $tx->getLinePatterns();
+            // special escape sequences
+            $text = str_replace(array('\)', '\*'), array('&#x29;', '&#x2A;'), $text);
         }
         if (!$pl) return $text; // nothing to do
 

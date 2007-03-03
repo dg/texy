@@ -68,8 +68,9 @@ class TexyGenericBlock
             //  ...  => \n
             $mContent = trim($mContent . $mContent2);
             if ($tx->mergeLines) {
-               $mContent = preg_replace('#\n (\S)#', " \r\\1", $mContent);
-               $mContent = strtr($mContent, "\n\r", " \n");
+                // \r means break line
+                $mContent = preg_replace('#\n (?=\S)#', "\r", $mContent);
+//               $mContent = strtr($mContent, "\n\r", " \n");
             }
 
             $lineParser = new TexyLineParser($tx);
@@ -94,12 +95,11 @@ class TexyGenericBlock
             else $tag = 'div';
 
             // add <br />
-            if ($tag && (strpos($content, "\n") !== FALSE)) {
+            if ($tag && (strpos($content, "\r") !== FALSE)) {
                 $key = $tx->protect('<br />', Texy::CONTENT_INLINE);
-                $content = strtr($content, array("\n" => $key));
-            } else {
-                $content = strtr($content, array("\n" => ' '));
-            }
+                $content = str_replace("\r", $key, $content);
+            };
+            $content = strtr($content, "\r\n", '  ');
 
             $mod = new TexyModifier;
             $mod->setProperties($mMod1, $mMod2, $mMod3, $mMod4);

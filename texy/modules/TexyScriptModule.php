@@ -28,7 +28,7 @@ class TexyScriptModule extends TexyModule
     protected $default = array('script' => FALSE);
 
     /**
-     * @var callback  handle script elements
+     * @var callback|object  script elements handler
      * function myUserFunc($element, string $identifier, array/NULL $args)
      */
     public $handler;
@@ -54,37 +54,35 @@ class TexyScriptModule extends TexyModule
         list(, $mContent) = $matches;
         //    [1] => ...
 
-        $identifier = trim($mContent);
-        if ($identifier === '' || $this->handler === NULL) return FALSE;
+        $func = trim($mContent);
+        if ($func === '') return FALSE;
 
         $args = NULL;
-        if (preg_match('#^([a-z_][a-z0-9_]*)\s*\(([^()]*)\)$#i', $identifier, $matches)) {
-            $identifier = $matches[1];
+        if (preg_match('#^([a-z_][a-z0-9_]*)\s*\(([^()]*)\)$#i', $func, $matches)) {
+            $func = $matches[1];
             $args = explode(',', $matches[2]);
             array_walk($args, 'trim');
         }
 
-        if (is_callable(array($this->handler, $identifier))) {
+        if ($func==='texy')
+            return $this->texyHandler($args);
+
+        if (is_callable(array($this->handler, $func))) {
             array_unshift($args, $this->texy);
-            return call_user_func_array(array($this->handler, $identifier), $args);
+            return call_user_func_array(array($this->handler, $func), $args);
         }
 
         if (is_callable($this->handler))
-            return call_user_func_array($this->handler, array($this->texy, $identifier, $args));
+            return call_user_func_array($this->handler, array($this->texy, $func, $args));
 
         return FALSE;
     }
 
 
 
-    public function defaultHandler($texy, $identifier, $args)
+    public function texyHandler($args)
     {
-        if ($args) $identifier .= '('.implode(',', $args).')';
-
-        $el = TexyHtml::el('texy:script');
-        $el->_empty = TRUE;
-        $el->content = $identifier;
-        return $el;
+        return '';
     }
 
 } // TexyScriptModule

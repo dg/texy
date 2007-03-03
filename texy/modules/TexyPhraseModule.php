@@ -79,91 +79,91 @@ class TexyPhraseModule extends TexyModule
         // strong & em speciality
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\*)\*\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#U',
+            '#(?<!\*)\*\*\*(?!\s|\*)(.+)'.TEXY_MODIFIER.'?(?<!\s|\*)\*\*\*(?!\*)()'.TEXY_LINK.'??()#Us',
             'phraseStrongEm'
         );
 
         // **strong**
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\*)\*\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*\*(?!\*)'.TEXY_LINK.'??()#U',
+            '#(?<!\*)\*\*(?!\s|\*)(.+)'.TEXY_MODIFIER.'?(?<!\s|\*)\*\*(?!\*)'.TEXY_LINK.'??()#Us',
             'phraseStrong'
         );
 
         // //emphasis//
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<![/:])\/\/(?!\ |\/)(.+)'.TEXY_MODIFIER.'?(?<!\ |\/)\/\/(?!\/)'.TEXY_LINK.'??()#U',
+            '#(?<![/:])\/\/(?!\s|\/)(.+)'.TEXY_MODIFIER.'?(?<!\s|\/)\/\/(?!\/)'.TEXY_LINK.'??()#Us',
             'phraseEm'
         );
 
         // *emphasisAlt*
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\*)\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*(?!\*)'.TEXY_LINK.'??()#U',
+            '#(?<!\*)\*(?!\s|\*)(.+)'.TEXY_MODIFIER.'?(?<!\s|\*)\*(?!\*)'.TEXY_LINK.'??()#Us',
             'phraseEmAlt'
         );
 
         // ++inserted++
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\+)\+\+(?!\ |\+)(.+)'.TEXY_MODIFIER.'?(?<!\ |\+)\+\+(?!\+)()#U',
+            '#(?<!\+)\+\+(?!\s|\+)([^\r\n]+)'.TEXY_MODIFIER.'?(?<!\s|\+)\+\+(?!\+)()#U',
             'phraseIns'
         );
 
         // --deleted--
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\-)\-\-(?!\ |\-)(.+)'.TEXY_MODIFIER.'?(?<!\ |\-)\-\-(?!\-)()#U',
+            '#(?<!\-)\-\-(?!\s|\-)([^\r\n]+)'.TEXY_MODIFIER.'?(?<!\s|\-)\-\-(?!\-)()#U',
             'phraseDel'
         );
 
         // ^^superscript^^
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\^)\^\^(?!\ |\^)(.+)'.TEXY_MODIFIER.'?(?<!\ |\^)\^\^(?!\^)()#U',
+            '#(?<!\^)\^\^(?!\s|\^)([^\r\n]+)'.TEXY_MODIFIER.'?(?<!\s|\^)\^\^(?!\^)()#U',
             'phraseSup'
         );
 
         // __subscript__
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\_)\_\_(?!\ |\_)(.+)'.TEXY_MODIFIER.'?(?<!\ |\_)\_\_(?!\_)()#U',
+            '#(?<!\_)\_\_(?!\s|\_)([^\r\n]+)'.TEXY_MODIFIER.'?(?<!\s|\_)\_\_(?!\_)()#U',
             'phraseSub'
         );
 
         // "span"
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\")\"(?!\ )([^\"]+)'.TEXY_MODIFIER.'?(?<!\ )\"(?!\")'.TEXY_LINK.'??()#U',
+            '#(?<!\")\"(?!\s)([^\"\r]+)'.TEXY_MODIFIER.'?(?<!\s)\"(?!\")'.TEXY_LINK.'??()#U',
             'phraseSpan'
         );
 
         // ~alternative span~
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\~)\~(?!\ )([^\~]+)'.TEXY_MODIFIER.'?(?<!\ )\~(?!\~)'.TEXY_LINK.'??()#U',
+            '#(?<!\~)\~(?!\s)([^\~\r]+)'.TEXY_MODIFIER.'?(?<!\s)\~(?!\~)'.TEXY_LINK.'??()#U',
             'phraseSpanAlt'
         );
 
         // ~~cite~~
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\~)\~\~(?!\ |\~)(.+)'.TEXY_MODIFIER.'?(?<!\ |\~)\~\~(?!\~)'.TEXY_LINK.'??()#U',
+            '#(?<!\~)\~\~(?!\s|\~)([^\r\n]+)'.TEXY_MODIFIER.'?(?<!\s|\~)\~\~(?!\~)'.TEXY_LINK.'??()#U',
             'phraseCite'
         );
 
         // >>quote<<
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\>)\>\>(?!\ |\>)(.+)'.TEXY_MODIFIER.'?(?<!\ |\<)\<\<(?!\<)'.TEXY_LINK.'??()#U',
+            '#(?<!\>)\>\>(?!\s|\>)([^\r\n]+)'.TEXY_MODIFIER.'?(?<!\s|\<)\<\<(?!\<)'.TEXY_LINK.'??()#U',
             'phraseQuote'
         );
 
         // acronym/abbr "et al."((and others))
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#(?<!\")\"(?!\ )([^\"]+)'.TEXY_MODIFIER.'?(?<!\ )\"(?!\")\(\((.+)\)\)()#U',
+            '#(?<!\")\"(?!\s)([^\"\r\n]+)'.TEXY_MODIFIER.'?(?<!\s)\"(?!\")\(\((.+)\)\)()#U',
             'phraseAcronym'
         );
 
@@ -177,14 +177,14 @@ class TexyPhraseModule extends TexyModule
         // ''notexy''
         $tx->registerLinePattern(
             array($this, 'processNoTexy'),
-            '#(?<!\')\'\'(?!\ |\')([^'.TEXY_MARK.']*)(?<!\ |\')\'\'(?!\')()#U',
+            '#(?<!\')\'\'(?!\s|\')([^'.TEXY_MARK.'\r\n]*)(?<!\s|\')\'\'(?!\')()#U',
             'phraseNoTexy'
         );
 
         // `code`
         $tx->registerLinePattern(
             array($this, 'processPhrase'),
-            '#\`(\S[^'.TEXY_MARK.']*)'.TEXY_MODIFIER.'?(?<!\ )\`()#U',
+            '#\`(\S[^'.TEXY_MARK.'\r\n]*)'.TEXY_MODIFIER.'?(?<!\s)\`()#U',
             'phraseCode'
         );
 
@@ -206,7 +206,7 @@ class TexyPhraseModule extends TexyModule
 /*
         $tx->registerLinePattern(
             array($this, 'processPhrase2'),
-            '#((?>[*+^_"~-]+?))(\S.*)'.TEXY_MODIFIER.'?(?<!\ )\\1'.TEXY_LINK.'??()#U'
+            '#((?>[*+^_"~-]+?))(\S.*)'.TEXY_MODIFIER.'?(?<!\s)\\1'.TEXY_LINK.'??()#U'
         );
 */
     }
