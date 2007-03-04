@@ -49,7 +49,7 @@ class TexyListModule extends TexyModule
             if (is_array($desc)) $RE[] = $desc[0];
 
         $this->texy->registerBlockPattern(
-            array($this, 'processBlock'),
+            array($this, 'patternList'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color: red}
           . '('.implode('|', $RE).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
             'list'
@@ -59,7 +59,7 @@ class TexyListModule extends TexyModule
 
 
     /**
-     * Callback function (for blocks)
+     * Callback for:
      *
      *            1) .... .(title)[class]{style}>
      *            2) ....
@@ -67,8 +67,12 @@ class TexyListModule extends TexyModule
      *                + ...
      *            3) ....
      *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml  or FALSE when not accepted
      */
-    public function processBlock($parser, $matches)
+    public function patternList($parser, $matches)
     {
         list(, $mMod, $mBullet, $mNewLine) = $matches;
         //    [1] => .(title)[class]{style}<>
@@ -102,19 +106,28 @@ class TexyListModule extends TexyModule
         $parser->moveBackward($mNewLine ? 2 : 1);
 
         $count = 0;
-        while ($elItem = $this->processItem($parser, $bullet, FALSE, 'li')) {
+        while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li')) {
             $el->childNodes[] = $elItem;
             $count++;
         }
 
         if (!$count) return FALSE;
 
-        $parser->children[] = $el;
+        return $el;
     }
 
 
 
-    public function processItem($parser, $bullet, $indented, $tag)
+    /**
+     * Callback for single list item
+     *
+     * @param TexyBlockParser
+     * @param string  bullet type
+     * @param string  left space
+     * @param string  html tag
+     * @return TexyHtml|FALSE
+     */
+    public function patternItem($parser, $bullet, $indented, $tag)
     {
         $tx =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';

@@ -35,15 +35,26 @@ if (!class_exists('Geshi'))
 class myHandler
 {
 
-    // callback function for processing blocks
-    function documentCode($texy, $lang, $content, $modifier)
+    /**
+     * User handler
+     *
+     * @param Texy    base Texy object
+     * @param string  text to highlight
+     * @param string  Texy doctype 'document/code'
+     * @param string  language
+     * @param TexyModifier modifier
+     * @return TexyHtml
+     */
+    function wrapCodeDocument($texy, $content, $doctype, $lang, $modifier)
     {
         global $geshiPath;
 
         if ($lang == 'html') $lang = 'html4strict';
+        $content = $texy->documentModule->outdent($content);
         $geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
-        if ($geshi->error) return;  // GeSHi could not find the language
+        // GeSHi could not find the language
+        if ($geshi->error) return NULL;
 
         // do syntax-highlighting
         $geshi->set_encoding('UTF-8');

@@ -26,44 +26,59 @@ if (!defined('TEXY')) die();
 class TexyHtmlModule extends TexyModule
 {
     protected $default = array(
-        'htmlTag' => TRUE,
-        'htmlComment' => FALSE,
+        'html/tag' => TRUE,
+        'html/comment' => FALSE,
     );
 
 
     public function init()
     {
         $this->texy->registerLinePattern(
-            array($this, 'processTag'),
+            array($this, 'patternTag'),
             '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>#is',
-            'htmlTag'
+            'html/tag'
         );
 
         $this->texy->registerLinePattern(
-            array($this, 'processComment'),
+            array($this, 'patternComment'),
             '#<!--([^'.TEXY_MARK.']*?)-->#is',
-            'htmlComment'
+            'html/comment'
         );
     }
 
 
 
     /**
-     * Callback function: <!-- comment -->
-     * @return string
+     * Callback for: <!-- comment -->
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string  or FALSE when not accepted
      */
-    public function processComment($parser, $matches)
+    public function patternComment($parser, $matches)
     {
         list($match) = $matches;
-        return $this->texy->protect($match, Texy::CONTENT_NONE);
+
+        $tx = $this->texy;
+
+        // !! TODO
+        if (is_callable(array($tx->handler, 'htmlComment')))
+            $tx->handler->htmlComment($tx, $match);
+
+        return $tx->protect($match, Texy::CONTENT_NONE);
     }
 
 
     /**
-     * Callback function: <tag attr="..">
-     * @return string
+     * Callback for: <tag attr="..">
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string  or FALSE when not accepted
      */
-    public function processTag($parser, $matches)
+    public function patternTag($parser, $matches)
     {
         list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /

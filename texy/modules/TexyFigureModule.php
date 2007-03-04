@@ -43,7 +43,7 @@ class TexyFigureModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            array($this, 'processBlock'),
+            array($this, 'pattern'),
             '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mU',
             'figure'
         );
@@ -52,12 +52,14 @@ class TexyFigureModule extends TexyModule
 
 
     /**
-     * Callback function (for blocks)
+     * Callback for [*image*]:link *** .... .(title)[class]{style}>
      *
-     *   [*image*]:link *** .... .(title)[class]{style}>
-     *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml  or FALSE when not accepted
      */
-    public function processBlock($parser, $matches)
+    public function pattern($parser, $matches)
     {
         list(, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod) = $matches;
         //    [1] => URLs
@@ -68,11 +70,9 @@ class TexyFigureModule extends TexyModule
         //    [6] => .(title)[class]{style}<>
 
         $tx = $this->texy;
-        $user = $link = NULL;
-
-        $image = $tx->imageModule->parse($mURLs, $mImgMod.$mAlign);
-
+        $image = $tx->imageModule->parse($mURLs, $mImgMod.$mAlign, TRUE);
         $mod = new TexyModifier($mMod);
+        $mContent = ltrim($mContent);
 
         if ($mLink) {
             if ($mLink === ':') {
@@ -81,33 +81,46 @@ class TexyFigureModule extends TexyModule
                 $link->type = TexyLink::AUTOIMAGE;
                 $link->modifier = new TexyModifier;
             } else {
-                $link = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
+                $link = $tx->linkModule->parse($mLink, NULL, NULL);
             }
+        } else $link = NULL;
+
+        // event wrapper
+        if (is_callable(array($tx->handler, 'wrapFigure'))) {
+            $res = $tx->handler->wrapFigure($tx, $image, $link, $mContent, $mod);
+            if ($res !== NULL) return $res;
         }
 
-        if (is_callable(array($tx->handler, 'figure'))) {
-            $el = $tx->handler->figure($tx, $image, $link, $mContent, $mod, $user);
-            if ($el) return $el;
-        }
+        return $this->proceed($image, $link, $mContent, $mod);
+    }
+
+
+
+    /**
+     * Finish invocation
+     *
+     * @param TexyImage
+     * @param TexyLink
+     * @param string
+     * @param TexyModifier
+     * @return TexyHtml|string
+     */
+    public function proceed(TexyImage $image, $link, $content, $mod)
+    {
+        $tx = $this->texy;
 
         $hAlign = $image->modifier->hAlign;
         $mod->hAlign = $image->modifier->hAlign = NULL;
 
-        $elImg = $tx->imageModule->factory($image);
-        $tx->summary['images'][] = $elImg->src;
+        $elImg = $tx->imageModule->proceed($image, $link);
 
         $el = TexyHtml::el('div');
-        if (!empty($elImg->width)) $el->style['width'] = ($elImg->width + $this->widthDelta) . 'px';
+        if (!empty($image->width)) $el->style['width'] = ($image->width + $this->widthDelta) . 'px';
         $mod->decorate($tx, $el);
-
-        if ($link) {
-            $elImg = $tx->linkModule->factory($link)->setContent($elImg);
-            $tx->summary['links'][] = $elImg->href;
-        }
 
         $el->childNodes['img'] = $elImg;
         $el->childNodes['caption'] = TexyHtml::el('');
-        $el->childNodes['caption']->parseBlock($tx, ltrim($mContent));
+        $el->childNodes['caption']->parseBlock($tx, ltrim($content));
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             $el->class[] = $this->leftClass;
@@ -116,10 +129,7 @@ class TexyFigureModule extends TexyModule
         } elseif ($this->class)
             $el->class[] = $this->class;
 
-        if (is_callable(array($tx->handler, 'figure2')))
-            $tx->handler->figure2($tx, $el, $user);
-
-        $parser->children[] = $el;
+        return $el;
     }
 
 }

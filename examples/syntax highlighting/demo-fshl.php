@@ -32,24 +32,39 @@ if (!class_exists('fshlParser'))
 class myHandler
 {
 
-    // callback function for processing blocks
-    function documentCode($texy, $lang, $content, $modifier)
+    /**
+     * User handler
+     *
+     * @param Texy    base Texy object
+     * @param string  text to highlight
+     * @param string  Texy doctype 'document/code'
+     * @param string  language
+     * @param TexyModifier modifier
+     * @return TexyHtml
+     */
+    function wrapCodeDocument($texy, $content, $doctype, $lang, $modifier)
     {
         $lang = strtoupper($lang);
         if ($lang == 'JAVASCRIPT') $lang = 'JS';
         if (!in_array(
                 $lang,
                 array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
-           ) return;
+           ) return NULL;
 
         $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
-        $content = $parser->highlightString($lang, $content);
 
+        $content = $texy->documentModule->outdent($content);
+        $content = $parser->highlightString($lang, $content);
         $content = $texy->protect($content);
 
-        $el = TexyHtml::el('code')->setContent( $content );
-        $elPre = TexyHtml::el('pre')->class(strtolower($lang))->setContent($el);
-        $modifier->decorate($texy, $elPre);
+        $el = TexyHtml::el('code');
+        $el->setContent( $content );
+
+        $elPre = TexyHtml::el('pre');
+        if ($modifier) $modifier->decorate($texy, $elPre);
+        $elPre->class = strtolower($lang);
+        $elPre->setContent($el);
+
         return $elPre;
     }
 

@@ -25,7 +25,9 @@ if (!defined('TEXY')) die();
  */
 class TexyImageModule extends TexyModule
 {
-    protected $default = array('image' => TRUE);
+    protected $default = array(
+        'image' => TRUE,
+    );
 
     /** @var string  root of relative images (http) */
     public $root = 'images/';
@@ -69,9 +71,9 @@ class TexyImageModule extends TexyModule
 
     public function init()
     {
-        // [*image*]:LINK    where LINK is:   url | [ref] | [*image*]
+        // [*image*]:LINK
         $this->texy->registerLinePattern(
-            array($this, 'processLine'),
+            array($this, 'patternImage'),
             '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U',
             'image'
         );
@@ -97,7 +99,7 @@ class TexyImageModule extends TexyModule
 
         if (!$modifier) $modifier = new TexyModifier;
 
-        $image = $this->parseContent($URLs);
+        $image = $this->parse($URLs, NULL, FALSE);
         $image->modifier = $modifier;
         $image->name = $name;
         $this->references[$name] = $image;
@@ -126,54 +128,46 @@ class TexyImageModule extends TexyModule
     }
 
 
-
     /**
      * Parses image's syntax
      * @param string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
+     * @param string
+     * @param bool
      * @return TexyImage  output
      */
-    private function parseContent($content)
+    public function parse($content, $mod, $tryRef)
     {
-        $content = explode('|', $content);
-        $image = new TexyImage;
+        $image = $tryRef ? $this->getReference(trim($content)) : FALSE;
 
-        // dimensions
-        if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $content[0], $matches)) {
-            $image->imageURL = trim($matches[1]);
-            $image->width = (int) $matches[2];
-            $image->height = (int) $matches[3];
-        } else {
-            $image->imageURL = trim($content[0]);
-        }
-
-        // onmouseover image
-        if (isset($content[1])) {
-            $tmp = trim($content[1]);
-            if ($tmp !== '') $image->overURL = $tmp;
-        }
-
-        // linked image
-        if (isset($content[2])) {
-            $tmp = trim($content[2]);
-            if ($tmp !== '') $image->linkedURL = $tmp;
-        }
-
-        return $image;
-    }
-
-
-
-    /**
-     * @return TexyImage
-     */
-    public function parse($mURLs, $mMod)
-    {
-        $image = $this->getReference(trim($mURLs));
         if (!$image) {
-            $image = $this->parseContent($mURLs);
+            $content = explode('|', $content);
+            $image = new TexyImage;
+
+            // dimensions
+            if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $content[0], $matches)) {
+                $image->imageURL = trim($matches[1]);
+                $image->width = (int) $matches[2];
+                $image->height = (int) $matches[3];
+            } else {
+                $image->imageURL = trim($content[0]);
+            }
+
+            // onmouseover image
+            if (isset($content[1])) {
+                $tmp = trim($content[1]);
+                if ($tmp !== '') $image->overURL = $tmp;
+            }
+
+            // linked image
+            if (isset($content[2])) {
+                $tmp = trim($content[2]);
+                if ($tmp !== '') $image->linkedURL = $tmp;
+            }
+
             $image->modifier = new TexyModifier;
         }
-        $image->modifier->setProperties($mMod);
+
+        $image->modifier->setProperties($mod);
         return $image;
     }
 
@@ -186,7 +180,7 @@ class TexyImageModule extends TexyModule
         // [*image*]: urls .(title)[class]{style}
         return preg_replace_callback(
             '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?()$#mU',
-            array($this, 'processReferenceDefinition'),
+            array($this, 'patternReferenceDef'),
             $text
         );
     }
@@ -194,10 +188,12 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Callback function: [*image*]: urls .(title)[class]{style}
+     * Callback for: [*image*]: urls .(title)[class]{style}
+     *
+     * @param array      regexp matches
      * @return string
      */
-    public function processReferenceDefinition($matches)
+    public function patternReferenceDef($matches)
     {
         list(, $mRef, $mURLs, $mMod) = $matches;
         //    [1] => [* (reference) *]
@@ -212,10 +208,14 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Callback function: [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
-     * @return string
+     * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string  or FALSE when not accepted
      */
-    public function processLine($parser, $matches)
+    public function patternImage($parser, $matches)
     {
         list(, $mURLs, $mMod, $mAlign, $mLink) = $matches;
         //    [1] => URLs
@@ -224,9 +224,8 @@ class TexyImageModule extends TexyModule
         //    [4] => url | [ref] | [*image*]
 
         $tx = $this->texy;
-        $user = $link = NULL;
 
-        $image = $this->parse($mURLs, $mMod.$mAlign);
+        $image = $this->parse($mURLs, $mMod.$mAlign, TRUE);
 
         if ($mLink) {
             if ($mLink === ':') {
@@ -235,37 +234,29 @@ class TexyImageModule extends TexyModule
                 $link->type = TexyLink::AUTOIMAGE;
                 $link->modifier = new TexyModifier;
             } else {
-                $link = $tx->linkModule->parse($mLink, NULL, NULL, NULL, NULL);
+                $link = $tx->linkModule->parse($mLink, NULL, NULL);
             }
+        } else $link = NULL;
+
+        // event wrapper
+        if (is_callable(array($tx->handler, 'wrapImage'))) {
+            $res = $tx->handler->wrapImage($tx, $image, $link);
+            if ($res !== NULL) return $res;
         }
 
-        if (is_callable(array($tx->handler, 'image'))) {
-            $el = $tx->handler->image($tx, $image, $link, $user);
-            if ($el) return $el;
-        }
-
-        $el = $this->factory($image);
-
-        $tx->summary['images'][] = $el->src;
-
-        if ($link) {
-            $el = $tx->linkModule->factory($link)->setContent($el);
-            $tx->summary['links'][] = $el->href;
-        }
-
-        if (is_callable(array($tx->handler, 'image2')))
-            $tx->handler->image2($tx, $el, $user);
-
-        return $el;
+        return $this->proceed($image, $link);
     }
 
 
 
     /**
+     * Finish invocation
+     *
      * @param TexyImage
-     * @return TexyHtml
+     * @param TexyLink
+     * @return TexyHtml|string
      */
-    public function factory($image)
+    public function proceed(TexyImage $image, $link)
     {
         $tx = $this->texy;
         $src = Texy::completeURL($image->imageURL, $this->root);
@@ -322,8 +313,8 @@ class TexyImageModule extends TexyModule
         } elseif (is_file($file)) {
             $size = getImageSize($file);
             if (is_array($size)) {
-                $el->width = $size[0];
-                $el->height = $size[1];
+                $image->width = $el->width = $size[0];
+                $image->height = $el->height = $size[1];
             }
         }
 
@@ -341,10 +332,16 @@ class TexyImageModule extends TexyModule
             $tx->summary['preload'][] = $overSrc;
         }
 
+        $tx->summary['images'][] = $el->src;
+
+        if ($link) return $tx->linkModule->proceed($link, $el);
+
         return $el;
     }
 
+
 } // TexyImageModule
+
 
 
 

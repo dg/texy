@@ -43,7 +43,7 @@ class TexyTableModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            array($this, 'processBlock'),
+            array($this, 'patternTable'),
             '#^(?:'.TEXY_MODIFIER_HV.'\n)?'   // .{color: red}
           . '\|.*()$#mU',                     // | ....
             'table'
@@ -53,15 +53,20 @@ class TexyTableModule extends TexyModule
 
 
     /**
-     * Callback function (for blocks)
+     * Callback for:
      *
      *  .(title)[class]{style}>
      *  |------------------
      *  | xxx | xxx | xxx | .(..){..}[..]
      *  |------------------
      *  | aa  | bb  | cc  |
+     *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml  or FALSE when not accepted
      */
-    public function processBlock($parser, $matches)
+    public function patternTable($parser, $matches)
     {
         list(, $mMod) = $matches;
         //    [1] => .(title)[class]{style}<>_
@@ -98,7 +103,7 @@ class TexyTableModule extends TexyModule
                 continue;
             }
 
-            if ($elRow = $this->processRow($parser)) {
+            if ($elRow = $this->patternRow($parser)) {
                 $el->childNodes[] = $elRow;
                 $this->row++;
                 continue;
@@ -107,12 +112,17 @@ class TexyTableModule extends TexyModule
             break;
         }
 
-        $parser->children[] = $el;
+        return $el;
     }
 
 
 
-    protected function processRow($parser)
+    /**
+     * Handles single row: | xxx | xxx | xxx | .(..){..}[..]
+     * @param TexyBlockParser
+     * @return TexyHtml
+     */
+    protected function patternRow($parser)
     {
         $tx = $this->texy;
 

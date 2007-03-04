@@ -37,7 +37,7 @@ class TexyScriptModule extends TexyModule
     public function init()
     {
         $this->texy->registerLinePattern(
-            array($this, 'processLine'),
+            array($this, 'pattern'),
             '#\{\{([^'.TEXY_MARK.']+)\}\}()#U',
             'script'
         );
@@ -46,10 +46,14 @@ class TexyScriptModule extends TexyModule
 
 
     /**
-     * Callback function: {{...}}
-     * @return string
+     * Callback for: {{...}}
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string  or FALSE when not accepted
      */
-    public function processLine($parser, $matches)
+    public function pattern($parser, $matches)
     {
         list(, $mContent) = $matches;
         //    [1] => ...

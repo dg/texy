@@ -25,24 +25,29 @@ if (!defined('TEXY')) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    protected $default = array('horizLine' => TRUE);
+    protected $default = array('horizline' => TRUE);
 
 
     public function init()
     {
         $this->texy->registerBlockPattern(
-            array($this, 'processBlock'),
+            array($this, 'pattern'),
             '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU',
-            'horizLine'
+            'horizline'
         );
     }
 
 
 
     /**
-     * Callback function for -------
+     * Callback for: -------
+     *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml  or FALSE when not accepted
      */
-    public function processBlock($parser, $matches)
+    public function pattern($parser, $matches)
     {
         list(, , $mMod) = $matches;
         //    [1] => ---
@@ -51,8 +56,7 @@ class TexyHorizLineModule extends TexyModule
         $el = TexyHtml::el('hr');
         $mod = new TexyModifier($mMod);
         $mod->decorate($this->texy, $el);
-
-        $parser->children[] = $el;
+        return $el;
     }
 
 } // TexyHorizlineModule

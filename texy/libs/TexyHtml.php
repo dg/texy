@@ -219,7 +219,7 @@ class TexyHtml
 
 
     /**
-     * Parses text as block
+     * Parses text as single line
      * @param Texy
      * @param string
      * @return void
@@ -233,7 +233,7 @@ class TexyHtml
 
 
     /**
-     * Parses text as single line
+     * Parses text as block
      * @param Texy
      * @param string
      * @return void
@@ -243,4 +243,19 @@ class TexyHtml
         $parser = new TexyBlockParser($texy);
         $this->childNodes = $parser->parse($s);
     }
+
+
+
+    /**
+     * Parses text as new document
+     * @param Texy
+     * @param string
+     * @return void
+     */
+    public function parseDocument($texy, $s)
+    {
+        $parser = new TexyDocumentParser($texy);
+        $this->childNodes = $parser->parse($s);
+    }
+
 }

@@ -63,7 +63,7 @@ class TexyEmoticonModule extends TexyModule
             $pattern[] = preg_quote($key, '#') . '+'; // last char can be repeated
 
         $this->texy->registerLinePattern(
-            array($this, 'processLine'),
+            array($this, 'pattern'),
             '#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#',
             'emoticon'
         );
@@ -72,45 +72,63 @@ class TexyEmoticonModule extends TexyModule
 
 
     /**
-     * Callback function: :-)
-     * @return string
+     * Callback for: :-)))
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string  or FALSE when not accepted
      */
-    public function processLine($parser, $matches)
+    public function pattern($parser, $matches)
     {
         $match = $matches[0];
 
         $tx = $this->texy;
-        $user = NULL;
 
         // find the closest match
         foreach ($this->icons as $emoticon => $file)
         {
             if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
-                if (is_callable(array($tx->handler, 'emoticon')))
-                    $tx->handler->emoticon($tx, $match, $file, $user);
-
-                $el = TexyHtml::el('img');
-                $el->src = Texy::completeURL($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
-                $el->alt = $match;
-                $el->class[] = $this->class;
-
-                $file = Texy::completePath($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
-                if (is_file($file)) {
-                    $size = getImageSize($file);
-                    if (is_array($size)) {
-                        $el->width = $size[0];
-                        $el->height = $size[1];
-                    }
+                // event wrapper
+                if (is_callable(array($tx->handler, 'wrapEmoticon'))) {
+                    $res = $tx->handler->wrapEmoticon($tx, $emoticon, $match, $file);
+                    if ($res !== NULL) return $res;
                 }
 
-                if (is_callable(array($tx->handler, 'emoticon2')))
-                    $tx->handler->emoticon2($tx, $el, $user);
-
-                $tx->summary['images'][] = $el->src;
-                return $el;
+                return $this->proceed($emoticon, $match, $file);
             }
         }
+    }
+
+
+
+    /**
+     * Finish invocation
+     *
+     * @param string
+     * @param string
+     * @param string
+     * @return TexyHtml|string
+     */
+    public function proceed($emoticon, $raw, $file)
+    {
+        $tx = $this->texy;
+        $el = TexyHtml::el('img');
+        $el->src = Texy::completeURL($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+        $el->alt = $raw;
+        $el->class[] = $this->class;
+
+        $file = Texy::completePath($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
+        if (is_file($file)) {
+            $size = getImageSize($file);
+            if (is_array($size)) {
+                $el->width = $size[0];
+                $el->height = $size[1];
+            }
+        }
+        $tx->summary['images'][] = $el->src;
+        return $el;
     }
 
 }

@@ -29,7 +29,7 @@ class TexyHeadingModule extends TexyModule
         DYNAMIC = 1,  // auto-leveling
         FIXED =   2;  // fixed-leveling
 
-    protected $default = array('headingSurrounded' => TRUE, 'headingUnderlined' => TRUE);
+    protected $default = array('heading/surrounded' => TRUE, 'heading/underlined' => TRUE);
 
     /** @var string  textual content of first heading */
     public $title;
@@ -71,16 +71,16 @@ class TexyHeadingModule extends TexyModule
     public function init()
     {
         $this->texy->registerBlockPattern(
-            array($this, 'processBlockUnderline'),
+            array($this, 'patternUnderline'),
             '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
           . '(\#|\*|\=|\-){3,}$#mU',
-            'headingUnderlined'
+            'heading/underlined'
         );
 
         $this->texy->registerBlockPattern(
-            array($this, 'processBlockSurround'),
+            array($this, 'patternSurround'),
             '#^((\#|\=){2,})(?!\\2)(.+)\\2*'.TEXY_MODIFIER_H.'?()$#mU',
-            'headingSurrounded'
+            'heading/surrounded'
         );
 
         $this->_rangeUnderline = array(10, 0);
@@ -95,12 +95,17 @@ class TexyHeadingModule extends TexyModule
 
 
     /**
-     * Callback function (for blocks)
+     * Callback for:
      *
      *  Heading .(title)[class]{style}>
      *  -------------------------------
+     *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml  or FALSE when not accepted
      */
-    public function processBlockUnderline($parser, $matches)
+    public function patternUnderline($parser, $matches)
     {
         list(, $mContent, $mMod, $mLine) = $matches;
         //  $matches:
@@ -108,12 +113,8 @@ class TexyHeadingModule extends TexyModule
         //    [2] => .(title)[class]{style}<>
         //    [3] => ...
 
+        $mod = new TexyModifier($mMod);
         $level = $this->levels[$mLine];
-        $el = $this->factory($level, $mContent, $mMod);
-        $parser->children[] = $el;
-
-        if ($this->balancing === self::DYNAMIC)
-            $el->eXtra['deltaLevel'] = & $this->_deltaUnderline;
 
         // dynamic headings balancing
         $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $level);
@@ -121,28 +122,37 @@ class TexyHeadingModule extends TexyModule
         $this->_deltaUnderline = -$this->_rangeUnderline[0];
         $this->_deltaSurround = -$this->_rangeSurround[0] +
             ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
+
+        // event wrapper
+        if (is_callable(array($this->texy->handler, 'wrapHeading'))) {
+            $res = $this->texy->handler->wrapHeading($this->texy, $level, $mContent, $mod, FALSE);
+            if ($res !== NULL) return $res;
+        }
+
+        return $this->proceed($level, $mContent, $mod, FALSE);
     }
 
 
 
     /**
-     * Callback function (for blocks)
+     * Callback for:
      *
      *   ### Heading .(title)[class]{style}>
+     *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml  or FALSE when not accepted
      */
-    public function processBlockSurround($parser, $matches)
+    public function patternSurround($parser, $matches)
     {
         list(, $mLine, , $mContent, $mMod) = $matches;
         //    [1] => ###
         //    [2] => ...
         //    [3] => .(title)[class]{style}<>
 
+        $mod = new TexyModifier($mMod);
         $level = 7 - min(7, max(2, strlen($mLine)));
-        $el = $this->factory($level, $mContent, $mMod);
-        $parser->children[] = $el;
-
-        if ($this->balancing === self::DYNAMIC)
-            $el->eXtra['deltaLevel'] = & $this->_deltaSurround;
 
         // dynamic headings balancing
         $this->_rangeSurround[0] = min($this->_rangeSurround[0], $level);
@@ -150,25 +160,42 @@ class TexyHeadingModule extends TexyModule
         $this->_deltaSurround  = -$this->_rangeSurround[0] +
             ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
+        // event wrapper
+        if (is_callable(array($this->texy->handler, 'wrapHeading'))) {
+            $res = $this->texy->handler->wrapHeading($this->texy, $level, $mContent, $mod, TRUE);
+            if ($res !== NULL) return $res;
+        }
+
+        return $this->proceed($level, $mContent, $mod, TRUE);
     }
 
 
 
-    public function factory($level, $mContent, $mMod)
+    /**
+     * Finish invocation
+     *
+     * @param int
+     * @param string
+     * @param TexyModifier
+     * @param bool
+     * @return TexyHtml
+     */
+    public function proceed($level, $content, $mod, $surround)
     {
         $tx = $this->texy;
-        $mod = new TexyModifier($mMod);
-        $user = NULL;
-
-        if (is_callable(array($tx->handler, 'heading')))
-            $el = $tx->handler->heading($tx, $level, $mContent, $mod, $user);
-
         $el = new TexyHeadingElement;
         $mod->decorate($tx, $el);
         $el->eXtra['level'] = $level;
         $el->eXtra['top'] = $this->top;
-        $el->eXtra['deltaLevel'] = 0;
-        $el->parseLine($tx, trim($mContent));
+        if ($this->balancing === self::DYNAMIC) {
+            if ($surround)
+                $el->eXtra['deltaLevel'] = & $this->_deltaSurround;
+            else
+                $el->eXtra['deltaLevel'] = & $this->_deltaUnderline;
+        } else {
+            $el->eXtra['deltaLevel'] = 0;
+        }
+        $el->parseLine($tx, trim($content));
 
         // document title
         $title = Texy::wash($el->getContent());
@@ -196,11 +223,9 @@ class TexyHeadingModule extends TexyModule
         $this->TOC[] = & $TOC;
         $el->eXtra['TOC'] = & $TOC;
 
-        if (is_callable(array($tx->handler, 'heading2')))
-            $tx->handler->heading2($tx, $el, $user);
-
         return $el;
     }
+
 
 } // TexyHeadingModule
 

@@ -25,23 +25,23 @@ if (!defined('TEXY')) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    protected $default = array('blockQuote' => TRUE);
+    protected $default = array('blockquote' => TRUE);
 
 
     public function init()
     {
         $this->texy->registerBlockPattern(
-            array($this, 'processBlock'),
+            array($this, 'pattern'),
 //            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU',  // >>>>
             '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))?()$#mU',       // only >
-            'blockQuote'
+            'blockquote'
         );
     }
 
 
 
     /**
-     * Callback function (for blocks)
+     * Callback for:
      *
      *   > They went in single file, running like hounds on a strong scent,
      *   and an eager light was in their eyes. Nearly due west the broad
@@ -49,8 +49,12 @@ class TexyQuoteModule extends TexyModule
      *   of Rohan had been bruised and blackened as they passed.
      *   >:http://www.mycom.com/tolkien/twotowers.html
      *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml  or FALSE when not accepted
      */
-    public function processBlock($parser, $matches)
+    public function pattern($parser, $matches)
     {
         list(, $mMod, $mPrefix, $mContent) = $matches;
         //    [1] => .(title)[class]{style}<>
@@ -86,7 +90,7 @@ class TexyQuoteModule extends TexyModule
         // no content?
         if (!$el->childNodes) return;
 
-        $parser->children[] = $el;
+        return $el;
     }
 
 

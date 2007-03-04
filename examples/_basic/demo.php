@@ -23,13 +23,13 @@ $texy = new Texy();
 // other OPTIONAL configuration
 $texy->encoding = 'windows-1250';      // disable UTF-8
 $texy->imageModule->root = 'images/';  // specify image folder
-$texy->allowed['phraseIns'] = TRUE;
-$texy->allowed['phraseDel'] = TRUE;
-$texy->allowed['phraseSup'] = TRUE;
-$texy->allowed['phraseSub'] = TRUE;
-$texy->allowed['phraseCite'] = TRUE;
+$texy->allowed['phrase/ins'] = TRUE;
+$texy->allowed['phrase/del'] = TRUE;
+$texy->allowed['phrase/sup'] = TRUE;
+$texy->allowed['phrase/sub'] = TRUE;
+$texy->allowed['phrase/cite'] = TRUE;
+$texy->allowed['html/comment'] = TRUE;
 $texy->allowed['script'] = TRUE;
-$texy->allowed['htmlComment'] = TRUE;
 
 
 // processing

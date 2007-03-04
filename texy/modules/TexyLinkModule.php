@@ -26,10 +26,10 @@ if (!defined('TEXY')) die();
 class TexyLinkModule extends TexyModule
 {
     protected $default = array(
-        'linkReference' => TRUE,
-        'linkEmail' => TRUE,
-        'linkURL' => TRUE,
-        'linkDefinition' => TRUE,
+        'link/reference' => TRUE,
+        'link/email' => TRUE,
+        'link/url' => TRUE,
+        'link/definition' => TRUE,
     );
 
     /** @var string  root of relative links */
@@ -62,24 +62,147 @@ class TexyLinkModule extends TexyModule
         $tx = $this->texy;
         // [reference]
         $tx->registerLinePattern(
-            array($this, 'processLineReference'),
+            array($this, 'patternReference'),
             '#('.TEXY_LINK_REF.')#U',
-            'linkReference'
+            'link/reference'
         );
 
         // direct url and email
         $tx->registerLinePattern(
-            array($this, 'processLineURL'),
+            array($this, 'patternUrlEmail'),
             '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
-            'linkURL'
+            'link/url'
         );
 
         $tx->registerLinePattern(
-            array($this, 'processLineURL'),
+            array($this, 'patternUrlEmail'),
             '#(?<=\s|^|\(|\[|\<|:)'.TEXY_EMAIL.'#i',
-            'linkEmail'
+            'link/email'
         );
     }
+
+
+
+    /**
+     * Text preprocessing
+     */
+    public function preProcess($text)
+    {
+        // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
+        if ($this->texy->allowed['link/definition'])
+            return preg_replace_callback(
+                '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?()$#mU',
+                array($this, 'patternReferenceDef'),
+                $text
+            );
+        return $text;
+    }
+
+
+
+    /**
+     * Callback for: [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
+     *
+     * @param array      regexp matches
+     * @return string
+     */
+    private function patternReferenceDef($matches)
+    {
+        list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
+        //    [1] => [ (reference) ]
+        //    [2] => link
+        //    [3] => ...
+        //    [4] => .(title)[class]{style}
+
+        $mod = new TexyModifier($mMod);
+        $this->addReference($mRef, $mLink, trim($mLabel), $mod);
+        return '';
+    }
+
+
+
+
+    /**
+     * Callback for: [ref]
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string  or FALSE when not accepted
+     */
+    public function patternReference($parser, $matches)
+    {
+        list($match, $mRef) = $matches;
+        //    [1] => [ref]
+
+        $tx = $this->texy;
+        $name = substr($mRef, 1, -1);
+        $link = $this->getReference($name);
+
+        if (!$link) {
+            // try handler
+            if (is_callable(array($tx->handler, 'reference')))
+                return $tx->handler->reference($tx, $name);
+
+            // no change
+            return FALSE;
+        }
+
+        $link->type = TexyLink::REF;
+
+        if ($link->label != '') {  // NULL or ''
+            // prevent deadlock
+            if (isset(self::$deadlock[$link->name])) {
+                $content = $link->label;
+            } else {
+                self::$deadlock[$link->name] = TRUE;
+                $lineParser = new TexyLineParser($tx);
+                $content = $lineParser->parse($link->label);
+                unset(self::$deadlock[$link->name]);
+            }
+        } else {
+            $content = $this->textualURL($link->URL);
+        }
+
+        // event wrapper
+        if (is_callable(array($tx->handler, 'wrapReference'))) {
+            $res = $tx->handler->wrapReference($tx, $link, $content);
+            if ($res !== NULL) return $res;
+        }
+
+        return $this->proceed($link, $content);
+    }
+
+
+
+    /**
+     * Callback for: http://www.dgx.cz   dave@dgx.cz
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string  or FALSE when not accepted
+     */
+    public function patternUrlEmail($parser, $matches, $name)
+    {
+        list($mURL) = $matches;
+        //    [0] => URL
+
+        $link = new TexyLink;
+        $link->URL = $mURL;
+        $content = $this->textualURL($mURL);
+
+        // event wrapper
+        $method = $name === 'link/email' ? 'wrapEmail' : 'wrapURL';
+        if (is_callable(array($this->texy->handler, $method))) {
+            $res = $this->texy->handler->$method($this->texy, $link, $content);
+            if ($res !== NULL) return $res;
+        }
+
+        return $this->proceed($link, $content);
+    }
+
+
 
 
 
@@ -147,122 +270,11 @@ class TexyLinkModule extends TexyModule
 
 
 
-    /**
-     * Text preprocessing
-     */
-    public function preProcess($text)
-    {
-        // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-        if ($this->texy->allowed['linkDefinition'])
-            return preg_replace_callback(
-                '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?()$#mU',
-                array($this, 'processReferenceDefinition'),
-                $text
-            );
-        return $text;
-    }
-
-
 
     /**
-     * Callback function: [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-     * @return string
-     */
-    public function processReferenceDefinition($matches)
-    {
-        list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
-        //    [1] => [ (reference) ]
-        //    [2] => link
-        //    [3] => ...
-        //    [4] => .(title)[class]{style}
-
-        $mod = new TexyModifier($mMod);
-        $this->addReference($mRef, $mLink, trim($mLabel), $mod);
-        return '';
-    }
-
-
-
-
-    /**
-     * Callback function: [ref]
-     * @return string
-     */
-    public function processLineReference($parser, $matches)
-    {
-        list($match, $mRef) = $matches;
-        //    [1] => [ref]
-
-        $tx = $this->texy;
-        $name = substr($mRef, 1, -1);
-        $link = $this->getReference($name);
-
-        if (!$link) {
-            // try handler
-            if (is_callable(array($tx->handler, 'referenceNew')))
-                return $tx->handler->referenceNew($tx, $name);
-
-            // no change
-            return FALSE;
-        }
-
-        $link->type = TexyLink::REF;
-        $user = NULL;
-
-        if (is_callable(array($tx->handler, 'reference'))) {
-            $el = $tx->handler->reference($tx, $link, $user);
-            if ($el) return $el;
-        }
-
-        $el = $this->factory($link);
-
-        if ($link->label != '') {  // NULL or ''
-            // prevent deadlock
-            if (isset(self::$deadlock[$link->name])) {
-                $el->setContent($link->label);
-            } else {
-                self::$deadlock[$link->name] = TRUE;
-                $el->parseLine($tx, $link->label);
-                unset(self::$deadlock[$link->name]);
-            }
-        } else {
-            $el->setContent($this->textualURL($link->URL));
-        }
-
-        if (is_callable(array($tx->handler, 'reference2')))
-            $tx->handler->reference2($tx, $el, $user);
-
-        $tx->summary['links'][] = $el->href;
-        return $el;
-    }
-
-
-
-    /**
-     * Callback function: http://www.dgx.cz   dave@dgx.cz
-     * @return string
-     */
-    public function processLineURL($parser, $matches, $name)
-    {
-        list($mURL) = $matches;
-        //    [0] => URL
-
-        $tx = $this->texy;
-        $link = new TexyLink;
-        $link->URL = $mURL;
-        $el = $this->factory($link);
-        $el->setContent($this->textualURL($mURL));
-
-        if (is_callable(array($tx->handler, $name)))
-            $tx->handler->$name($tx, $el, $mURL);
-
-        $tx->summary['links'][] = $el->href;
-        return $el;
-    }
-
-
-
-    /**
+     * @param string
+     * @param string
+     * @param string
      * @return TexyLink
      */
     public function parse($dest, $mMod, $label)
@@ -303,10 +315,13 @@ class TexyLinkModule extends TexyModule
 
 
     /**
+     * Finish invocation
+     *
      * @param TexyLink
-     * @return TexyHtml
+     * @param TexyHtml|string
+     * @return TexyHtml|string
      */
-    public function factory(TexyLink $link)
+    public function proceed($link, $content=NULL)
     {
         $tx = $this->texy;
 
@@ -347,16 +362,20 @@ class TexyLinkModule extends TexyModule
         // popup on click
         if ($popup) $el->onclick = $this->popupOnClick;
 
+        if ($content !== NULL) $el->setContent($content);
+
+        $tx->summary['links'][] = $el->href;
+
         return $el;
     }
 
 
-
     /**
      * Returns textual representation of URL
+     * @param string
      * @return string
      */
-    public function textualURL($URL)
+    private function textualURL($URL)
     {
         if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) { // email
             return $this->texy->obfuscateEmail
@@ -392,6 +411,8 @@ class TexyLinkModule extends TexyModule
 
         return $URL;
     }
+
+
 
 } // TexyLinkModule
 

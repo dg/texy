@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 {
-    protected $default = array('longWords' => TRUE);
+    protected $default = array('longwords' => TRUE);
 
     public $wordLimit = 20;
 
@@ -79,22 +79,23 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 
     public function linePostProcess($text)
     {
-        if (empty($this->texy->allowed['longWords'])) return $text;
+        if (empty($this->texy->allowed['longwords'])) return $text;
 
         return preg_replace_callback(
             '#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
-            array($this, '_replace'),
+            array($this, 'pattern'),
             $text);
     }
 
 
 
     /**
-     * Callback function: rozdìlí dlouhá slova na slabiky - EXPERIMENTÁLNÍ
+     * Callback for long words
      * (c) David Grudl
+     * @param array
      * @return string
      */
-    private function _replace($matches)
+    private function pattern($matches)
     {
         list($mWord) = $matches;
         //    [0] => lllloooonnnnggggwwwoorrdddd

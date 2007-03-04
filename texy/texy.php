@@ -219,6 +219,7 @@ class Texy
 
         // default configuration
         $this->trustMode();
+        $this->allowed['document/texy'] = TRUE;
 
         // examples of link reference ;-)
         $mod = new TexyModifier;
@@ -383,14 +384,14 @@ class Texy
 
         // process
         $this->DOM = TexyHtml::el();
-        $parser = new TexyDocumentParser($this);
-        $this->DOM->childNodes = $parser->parse($text);
+        $this->DOM->parseDocument($this, $text);
 
-        //$this->DOM = TexyHtml::el();
-        //$this->DOM->parseBlock($this, $text);
+        // user handler
+        if (is_callable(array($this->handler, 'afterParse')))
+            $this->handler->afterParse($this, $this->DOM, FALSE);
 
         // clean-up
-        $this->linePatterns = $this->blockPatterns = array();
+        $this->docTypes = $this->linePatterns = $this->blockPatterns = array();
     }
 
 
@@ -420,8 +421,12 @@ class Texy
         $this->DOM = TexyHtml::el();
         $this->DOM->parseLine($this, $text);
 
+        // user handler
+        if (is_callable(array($this->handler, 'afterParse')))
+            $this->handler->afterParse($this, $this->DOM, TRUE);
+
         // clean-up
-        $this->linePatterns = $this->blockPatterns = array();
+        $this->docTypes = $this->linePatterns = $this->blockPatterns = array();
     }
 
 
@@ -567,7 +572,7 @@ class Texy
             'small'     => array(),
         );
         $this->allowed['image'] = FALSE;                    // disable images
-        $this->allowed['linkDefinition'] = FALSE;           // disable [ref]: URL  reference definitions
+        $this->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
         //$this->mergeLines = FALSE;                          // enter means <BR>
     }
@@ -583,7 +588,7 @@ class Texy
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
         $this->allowedTags = array_merge(self::$blockTags, self::$inlineTags); // full support for valid HTML tags
         $this->allowed['image'] = TRUE;                     // enable images
-        $this->allowed['linkDefinition'] = TRUE;            // enable [ref]: URL  reference definitions
+        $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
         //$this->mergeLines = TRUE;                           // enter doesn't means <BR>
     }

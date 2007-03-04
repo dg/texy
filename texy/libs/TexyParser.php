@@ -48,8 +48,8 @@ class TexyParser
  */
 class TexyDocumentParser extends TexyParser
 {
-    /** @var array */
-    public $children = array();
+    /** @var string */
+    public $defaultType = 'pre';
 
 
     public function parse($text)
@@ -58,7 +58,7 @@ class TexyDocumentParser extends TexyParser
         $dt = $tx->getDocTypes();
 
         preg_match_all(
-            '#^(?>([/\\\\])--+? *?)((?>\S*?)) *(\S*)'.TEXY_MODIFIER_H.'?$#mU',
+            '#^(?>([/\\\\])--+? *?)(.*)'.TEXY_MODIFIER_H.'?$#mU',
             $text,
             $matches,
             PREG_OFFSET_CAPTURE | PREG_SET_ORDER
@@ -66,24 +66,28 @@ class TexyDocumentParser extends TexyParser
 
         // initialization
         $i = 0;
-        $docType = $tx->defaultDocument;
+        $docType = NULL;
         $docStack = array();
+        $children = array();
         $desc = NULL;
         $mod = new TexyModifier;
         $offset = 0;
         do {
+            if (!$docType) $docType = $tx->defaultDocument;
+
             $end = isset($matches[$i]) ? $matches[$i][0][1] - 1 : strlen($text);
 
             if ($end > $offset) {
                 $s = substr($text, $offset, $end - $offset);
 
                 if (isset($dt[$docType])) {
-                    call_user_func_array($dt[$docType], array($this, $s, $docType, $desc, $mod));
+                    $res = call_user_func_array($dt[$docType], array($this, $s, $docType, $desc, $mod));
+                    if ($res) $children[] = $res;
 
                 } else { // handle as 'texy'
                     $el = TexyHtml::el();
                     $el->parseBlock($tx, $s);
-                    $this->children[] = $el;
+                    $children[] = $el;
                 }
             }
 
@@ -96,19 +100,28 @@ class TexyDocumentParser extends TexyParser
 
             if ($match[1][0] === '/') { // is opening
                 $docStack[] = $docType;
-                $docType = 'document/' . $match[2][0];
-                $desc = isset($match[3]) ? $match[3][0] : NULL;
-                $mod = isset($match[4]) ? new TexyModifier($match[4][0]) : new TexyModifier;
+                $words = preg_split('# +#', $match[2][0], 2, PREG_SPLIT_NO_EMPTY);
+                if (!isset($words[0])) $words[0] = $this->defaultType;
+                $docType = 'document/' . $words[0];
+                $desc = isset($words[1]) ? $words[1] : NULL;
+                $mod = isset($match[3]) ? new TexyModifier($match[3][0]) : new TexyModifier;
 
             } else { // closing
                 $desc = NULL;
                 $mod = new TexyModifier;
-                $docType = $docStack ? array_pop($docStack) : $tx->defaultDocument;
+                if ($match[2][0] != NULL) {
+                    $words = preg_split('# +#', $match[2][0], 1, PREG_SPLIT_NO_EMPTY);
+                    $toClose = 'document/' . $words[0];
+                    while ($docType && $toClose !== $docType) {
+                        $docType = array_pop($docStack);
+                    }
+                }
+                $docType = array_pop($docStack);
             }
 
         } while (1);
 
-        return $this->children;
+        return $children;
     }
 
 } // TexyDocumentParser
@@ -134,9 +147,6 @@ class TexyBlockParser extends TexyParser
 
     /** @var int */
     private $offset;
-
-    /** @var array */
-    public $children = array();
 
 
 
@@ -176,61 +186,51 @@ class TexyBlockParser extends TexyParser
     private function genericBlock($content)
     {
         $tx = $this->texy;
-        if ($tx->_paragraphMode)
-            $parts = preg_split('#(\n{2,})#', $content);
-        else
-            $parts = preg_split('#(\n(?! )|\n{2,})#', $content);
 
-        foreach ($parts as $content) {
-            $content = trim($content);
-            if ($content === '') continue;
+        preg_match('#^(.*)'.TEXY_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
+        list(, $mContent, $mMod, $mContent2) = $matches;
 
-            preg_match('#^(.*)'.TEXY_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
-            list(, $mContent, $mMod, $mContent2) = $matches;
-
-            // ....
-            //  ...  => \n
-            $mContent = trim($mContent . $mContent2);
-            if ($tx->mergeLines) {
-                // \r means break line
-                $mContent = preg_replace('#\n (?=\S)#', "\r", $mContent);
-            }
-
-            $lineParser = new TexyLineParser($tx);
-            $content = $lineParser->parse($mContent);
-
-            // check content type
-            $contentType = Texy::CONTENT_NONE;
-            if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
-                $contentType = Texy::CONTENT_BLOCK;
-            } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
-                $contentType = Texy::CONTENT_TEXTUAL;
-            } else {
-                if (strpos($content, Texy::CONTENT_INLINE) !== FALSE) $contentType = Texy::CONTENT_INLINE;
-                $s = trim( preg_replace('#['.TEXY_MARK.']+#', '', $content) );
-                if (strlen($s)) $contentType = Texy::CONTENT_TEXTUAL;
-            }
-
-            // specify tag
-            if ($contentType === Texy::CONTENT_TEXTUAL) $tag = 'p';
-            elseif ($mMod) $tag = 'div';
-            elseif ($contentType === Texy::CONTENT_BLOCK) $tag = '';
-            else $tag = 'div';
-
-            // add <br />
-            if ($tag && (strpos($content, "\r") !== FALSE)) {
-                $key = $tx->protect('<br />', Texy::CONTENT_INLINE);
-                $content = str_replace("\r", $key, $content);
-            };
-            $content = strtr($content, "\r\n", '  ');
-
-            $mod = new TexyModifier($mMod);
-            $el = TexyHtml::el($tag);
-            $mod->decorate($tx, $el);
-            $el->childNodes[] = $content;
-
-            $this->children[] = $el;
+        // ....
+        //  ...  => \n
+        $mContent = trim($mContent . $mContent2);
+        if ($tx->mergeLines) {
+            // \r means break line
+            $mContent = preg_replace('#\n (?=\S)#', "\r", $mContent);
         }
+
+        $lineParser = new TexyLineParser($tx);
+        $content = $lineParser->parse($mContent);
+
+        // check content type
+        $contentType = Texy::CONTENT_NONE;
+        if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
+            $contentType = Texy::CONTENT_BLOCK;
+        } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
+            $contentType = Texy::CONTENT_TEXTUAL;
+        } else {
+            if (strpos($content, Texy::CONTENT_INLINE) !== FALSE) $contentType = Texy::CONTENT_INLINE;
+            $s = trim( preg_replace('#['.TEXY_MARK.']+#', '', $content) );
+            if (strlen($s)) $contentType = Texy::CONTENT_TEXTUAL;
+        }
+
+        // specify tag
+        if ($contentType === Texy::CONTENT_TEXTUAL) $tag = 'p';
+        elseif ($mMod) $tag = 'div';
+        elseif ($contentType === Texy::CONTENT_BLOCK) $tag = '';
+        else $tag = 'div';
+
+        // add <br />
+        if ($tag && (strpos($content, "\r") !== FALSE)) {
+            $key = $tx->protect('<br />', Texy::CONTENT_INLINE);
+            $content = str_replace("\r", $key, $content);
+        };
+        $content = strtr($content, "\r\n", '  ');
+
+        $mod = new TexyModifier($mMod);
+        $el = TexyHtml::el($tag);
+        $mod->decorate($tx, $el);
+        $el->childNodes[] = $content;
+        return $el;
     }
 
 
@@ -241,6 +241,7 @@ class TexyBlockParser extends TexyParser
         $tx = $this->texy;
         $this->text = $text;
         $this->offset = 0;
+        $children = array();
 
         $pb = $tx->getBlockPatterns();
         if (!$pb) return array(); // nothing to do
@@ -287,15 +288,33 @@ class TexyBlockParser extends TexyParser
             if ($next > $this->offset) {
                 $str = substr($text, $this->offset, $next - $this->offset);
                 $this->offset = $next;
-                $this->genericBlock($str);
+
+                if ($tx->_paragraphMode)
+                    $parts = preg_split('#(\n{2,})#', $str);
+                else
+                    $parts = preg_split('#(\n(?! )|\n{2,})#', $str);
+
+                foreach ($parts as $str) {
+                    $str = trim($str);
+                    if ($str === '') continue;
+                    $children[] = $this->genericBlock($str);
+                }
                 continue;
             }
 
             $px = $pb[$minKey];
             $matches = $arrMatches[$minKey];
-            $this->offset = $arrPos[$minKey] + strlen($matches[0]) + 1;   // 1 = \n
-            $ok = call_user_func_array($px['handler'], array($this, $matches, $minKey));
-            if ($ok === FALSE || ( $this->offset <= $arrPos[$minKey] )) { // module rejects text
+            $this->offset = $arrPos[$minKey] + strlen($arrMatches[$minKey][0]) + 1;   // 1 = \n
+
+            $res = call_user_func_array(
+                $px['handler'],
+                array($this, $arrMatches[$minKey], $minKey)
+            );
+
+            if ($res instanceof TexyHtml) {
+                $children[] = $res;
+
+            } elseif ($res === FALSE || $this->offset <= $arrPos[$minKey]) { // module rejects text
                 $this->offset = $arrPos[$minKey]; // turn offset back
                 $arrPos[$minKey] = -2;
                 continue;
@@ -305,7 +324,7 @@ class TexyBlockParser extends TexyParser
 
         } while (1);
 
-        return $this->children;
+        return $children;
     }
 
 } // TexyBlockParser
@@ -340,8 +359,8 @@ class TexyLineParser extends TexyParser
         if ($this->onlyHtml) {
             // special mode - parse only html tags
             $tmp = $tx->getLinePatterns();
-            $pl['htmlTag'] = $tmp['htmlTag'];
-            $pl['htmlComment'] = $tmp['htmlComment'];
+            $pl['html/tag'] = $tmp['html/tag'];
+            $pl['html/comment'] = $tmp['html/comment'];
             unset($tmp);
         } else {
             // normal mode
@@ -398,8 +417,7 @@ class TexyLineParser extends TexyParser
             $this->again = FALSE;
             $res = call_user_func_array(
                 $px['handler'],
-                array($this, $arrMatches[$minKey],
-                $minKey)
+                array($this, $arrMatches[$minKey], $minKey)
             );
 
             if ($res instanceof TexyHtml) {
