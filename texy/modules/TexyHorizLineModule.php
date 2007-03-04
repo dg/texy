@@ -32,7 +32,7 @@ class TexyHorizLineModule extends TexyModule
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
-            '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU',
+            '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER.'?()$#mU',
             'horizline'
         );
     }

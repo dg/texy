@@ -292,10 +292,13 @@ class Texy
 
 
 
-    public function registerDocType($handler, $name)
+    public function registerDocType($handler, $name, $nested)
     {
         if (empty($this->allowed[$name])) return;
-        $this->docTypes[$name] = $handler;
+        $this->docTypes[$name] = array(
+            'handler'     => $handler,
+            'nested'      => $nested,
+        );
     }
 
 

@@ -39,44 +39,14 @@ class TexyDocumentModule extends TexyModule
     public function init()
     {
         $tx = $this->texy;
-        $tx->registerDocType(array($this, 'pattern'), 'document/pre');
-        $tx->registerDocType(array($this, 'pattern'), 'document/code');
-        $tx->registerDocType(array($this, 'pattern'), 'document/html');
-        $tx->registerDocType(array($this, 'pattern'), 'document/text');
-        $tx->registerDocType(array($this, 'pattern'), 'document/texysource');
-        $tx->registerDocType(array($this, 'pattern'), 'document/comment');
-        $tx->registerDocType(array($this, 'patternDiv'), 'document/div');
+        $tx->registerDocType(array($this, 'pattern'), 'document/pre', FALSE);
+        $tx->registerDocType(array($this, 'pattern'), 'document/code', FALSE);
+        $tx->registerDocType(array($this, 'pattern'), 'document/html', FALSE);
+        $tx->registerDocType(array($this, 'pattern'), 'document/text', FALSE);
+        $tx->registerDocType(array($this, 'pattern'), 'document/texysource', FALSE);
+        $tx->registerDocType(array($this, 'pattern'), 'document/comment', FALSE);
+        $tx->registerDocType(array($this, 'pattern'), 'document/div', TRUE);
     }
-
-
-    /**
-     * Callback for: /--- div
-     *
-     * @param TexyDocumentParser
-     * @param string   content
-     * @param string   doctype - document/div
-     * @param string   --
-     * @param TexyModifier
-     * @param string   two character flag
-     * @return TexyHtml|string|FALSE
-     */
-    public function patternDiv($parser, $s, $doctype, $param, $mod, $flag)
-    {
-        $tx = $this->texy;
-        $el = TexyHtml::el();
-        $s = $this->outdent($s);
-        $el->parseDocument($tx, $s);
-        if ($flag[0] === '<') {
-            $elX = TexyHtml::el('div');
-            $mod->decorate($tx, $elX);
-            array_unshift($el->childNodes, $tx->protect($elX->startTag()));
-        }
-        if ($flag[1] === '>') {
-            $el->childNodes[] = $tx->protect('</div>');
-        }
-        return $el;
-    }
-
 
     /**
      * Callback for: /--- ???
@@ -88,7 +58,7 @@ class TexyDocumentModule extends TexyModule
      * @param TexyModifier
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $s, $doctype, $param, $mod, $flag)
+    public function pattern($parser, $s, $doctype, $param, $mod)
     {
         // event wrapper
         $method = str_replace('/', '', $doctype);
@@ -174,6 +144,14 @@ class TexyDocumentModule extends TexyModule
 
         if ($doctype === 'document/comment') {
             return "\n";
+        }
+
+        if ($doctype === 'document/div') {
+            $el = TexyHtml::el('div');
+            $mod->decorate($tx, $el);
+            $s = $this->outdent($s);
+            $el->parseDocument($tx, $s);
+            return $el;
         }
     }
 

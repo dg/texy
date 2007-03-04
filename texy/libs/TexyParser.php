@@ -55,42 +55,51 @@ class TexyDocumentParser extends TexyParser
     public function parse($text)
     {
         $tx = $this->texy;
-        $dt = $tx->getDocTypes();
 
         preg_match_all(
-            '#^(?>([/\\\\])--+?)([^.({[<>]*)'.TEXY_MODIFIER_H.'?$#mU',
+            '#^(?>([/\\\\])--+?)(.*)'.TEXY_MODIFIER_H.'?$#mU',
             $text,
             $matches,
             PREG_OFFSET_CAPTURE | PREG_SET_ORDER
         );
 
+        // add cap
+        $count = count($matches);
+        $matches[] = array(0 => array(1 => strlen($text) + 1));
+
         // initialization
-        $i = 0;
+        $dt = $tx->getDocTypes();
         $docType = NULL;
         $docStack = array();
         $nodes = array();
         $param = NULL;
         $mod = new TexyModifier;
         $offset = 0;
+        $i = -1;
         do {
-            if (!$docType) {
-                $docType = $tx->defaultDocument;
-                $flag = '[';
+            if (!$docType) $docType = $tx->defaultDocument;
+
+            // find end of next block
+            if (isset($dt[$docType]) && $dt[$docType]['nested']) { // is nested?
+                $level = 1;
+                do {
+                    $i++;
+                    $level += $matches[$i][1][0] === '/' ? +1 : -1;
+                } while ($i < $count && $level !== 0);
+            } else {
+                $i++;
             }
 
-            if (isset($matches[$i])) {
-                $end = $matches[$i][0][1] - 1;
-                $flag .= $matches[$i][1][0] === '/' ? '-' : '>';
-            } else {
-                $end = strlen($text);
-                $flag .= ']';
-            }
+            $end = $matches[$i][0][1] - 1;
 
             if ($end > $offset) {
                 $s = substr($text, $offset, $end - $offset);
 
                 if (isset($dt[$docType])) {
-                    $res = call_user_func_array($dt[$docType], array($this, $s, $docType, $param, $mod, $flag));
+                    $res = call_user_func_array(
+                        $dt[$docType]['handler'],
+                        array($this, $s, $docType, $param, $mod)
+                    );
                     if ($res != NULL) $nodes[] = $res;
 
                 } else { // handle as document/texy
@@ -100,11 +109,10 @@ class TexyDocumentParser extends TexyParser
                 }
             }
 
-            // get next document block
-            if ($i == count($matches)) break;
-            $match = $matches[$i];
-            $i++;
+            if ($i === $count) break;
 
+            // get next document block
+            $match = $matches[$i];
             $offset = $match[0][1] + strlen($match[0][0])+1;
 
             if ($match[1][0] === '/') { // is opening
@@ -114,21 +122,11 @@ class TexyDocumentParser extends TexyParser
                 $docType = 'document/' . $words[0];
                 $param = isset($words[1]) ? $words[1] : NULL;
                 $mod = isset($match[3]) ? new TexyModifier($match[3][0]) : new TexyModifier;
-                $flag = '<';
 
             } else { // closing
                 $param = NULL;
                 $mod = new TexyModifier;
-                if ($match[2][0] != NULL) {
-                    $words = preg_split('# +#', $match[2][0], 1, PREG_SPLIT_NO_EMPTY);
-                    $toClose = 'document/' . $words[0];
-                    while ($docType && $toClose !== $docType) {
-                        $docType = array_pop($docStack);
-                    }
-                }
-
                 $docType = array_pop($docStack);
-                $flag = '-';
             }
 
         } while (1);

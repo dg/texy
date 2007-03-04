@@ -139,11 +139,11 @@ TexyDocumentParser
 extends
 TexyParser{public$defaultType='pre';public
 function
-parse($text){$tx=$this->texy;$dt=$tx->getDocTypes();preg_match_all('#^(?>([/\\\\])--+?)([^.({[<>]*)'.TEXY_MODIFIER_H.'?$#mU',$text,$matches,PREG_OFFSET_CAPTURE|PREG_SET_ORDER);$i=0;$docType=NULL;$docStack=array();$nodes=array();$param=NULL;$mod=new
-TexyModifier;$offset=0;do{if(!$docType){$docType=$tx->defaultDocument;$flag='[';}if(isset($matches[$i])){$end=$matches[$i][0][1]-1;$flag.=$matches[$i][1][0]==='/'?'-':'>';}else{$end=strlen($text);$flag.=']';}if($end>$offset){$s=substr($text,$offset,$end-$offset);if(isset($dt[$docType])){$res=call_user_func_array($dt[$docType],array($this,$s,$docType,$param,$mod,$flag));if($res!=NULL)$nodes[]=$res;}else{$el=TexyHtml::el();$el->parseBlock($tx,$s);$nodes[]=$el;}}if($i==count($matches))break;$match=$matches[$i];$i++;$offset=$match[0][1]+strlen($match[0][0])+1;if($match[1][0]==='/'){$docStack[]=$docType;$words=preg_split('# +#',$match[2][0],2,PREG_SPLIT_NO_EMPTY);if(!isset($words[0]))$words[0]=$this->defaultType;$docType='document/'.$words[0];$param=isset($words[1])?$words[1]:NULL;$mod=isset($match[3])?new
+parse($text){$tx=$this->texy;preg_match_all('#^(?>([/\\\\])--+?)(.*)'.TEXY_MODIFIER_H.'?$#mU',$text,$matches,PREG_OFFSET_CAPTURE|PREG_SET_ORDER);$count=count($matches);$matches[]=array(0=>array(1=>strlen($text)+1));$dt=$tx->getDocTypes();$docType=NULL;$docStack=array();$nodes=array();$param=NULL;$mod=new
+TexyModifier;$offset=0;$i=-1;do{if(!$docType)$docType=$tx->defaultDocument;if(isset($dt[$docType])&&$dt[$docType]['nested']){$level=1;do{$i++;$level+=$matches[$i][1][0]==='/'?+1:-1;}while($i<$count&&$level!==0);}else{$i++;}$end=$matches[$i][0][1]-1;if($end>$offset){$s=substr($text,$offset,$end-$offset);if(isset($dt[$docType])){$res=call_user_func_array($dt[$docType]['handler'],array($this,$s,$docType,$param,$mod));if($res!=NULL)$nodes[]=$res;}else{$el=TexyHtml::el();$el->parseBlock($tx,$s);$nodes[]=$el;}}if($i===$count)break;$match=$matches[$i];$offset=$match[0][1]+strlen($match[0][0])+1;if($match[1][0]==='/'){$docStack[]=$docType;$words=preg_split('# +#',$match[2][0],2,PREG_SPLIT_NO_EMPTY);if(!isset($words[0]))$words[0]=$this->defaultType;$docType='document/'.$words[0];$param=isset($words[1])?$words[1]:NULL;$mod=isset($match[3])?new
 TexyModifier($match[3][0]):new
-TexyModifier;$flag='<';}else{$param=NULL;$mod=new
-TexyModifier;if($match[2][0]!=NULL){$words=preg_split('# +#',$match[2][0],1,PREG_SPLIT_NO_EMPTY);$toClose='document/'.$words[0];while($docType&&$toClose!==$docType){$docType=array_pop($docStack);}}$docType=array_pop($docStack);$flag='-';}}while(1);return$nodes;}}class
+TexyModifier;}else{$param=NULL;$mod=new
+TexyModifier;$docType=array_pop($docStack);}}while(1);return$nodes;}}class
 TexyBlockParser
 extends
 TexyParser{private$text;private$offset;public
@@ -180,17 +180,15 @@ TexyDocumentModule
 extends
 TexyModule{protected$default=array('document/pre'=>TRUE,'document/code'=>TRUE,'document/html'=>TRUE,'document/text'=>TRUE,'document/texysource'=>TRUE,'document/comment'=>TRUE,'document/div'=>TRUE,);public
 function
-init(){$tx=$this->texy;$tx->registerDocType(array($this,'pattern'),'document/pre');$tx->registerDocType(array($this,'pattern'),'document/code');$tx->registerDocType(array($this,'pattern'),'document/html');$tx->registerDocType(array($this,'pattern'),'document/text');$tx->registerDocType(array($this,'pattern'),'document/texysource');$tx->registerDocType(array($this,'pattern'),'document/comment');$tx->registerDocType(array($this,'patternDiv'),'document/div');}public
+init(){$tx=$this->texy;$tx->registerDocType(array($this,'pattern'),'document/pre',FALSE);$tx->registerDocType(array($this,'pattern'),'document/code',FALSE);$tx->registerDocType(array($this,'pattern'),'document/html',FALSE);$tx->registerDocType(array($this,'pattern'),'document/text',FALSE);$tx->registerDocType(array($this,'pattern'),'document/texysource',FALSE);$tx->registerDocType(array($this,'pattern'),'document/comment',FALSE);$tx->registerDocType(array($this,'pattern'),'document/div',TRUE);}public
 function
-patternDiv($parser,$s,$doctype,$param,$mod,$flag){$tx=$this->texy;$el=TexyHtml::el();$s=$this->outdent($s);$el->parseDocument($tx,$s);if($flag[0]==='<'){$elX=TexyHtml::el('div');$mod->decorate($tx,$elX);array_unshift($el->childNodes,$tx->protect($elX->startTag()));}if($flag[1]==='>'){$el->childNodes[]=$tx->protect('</div>');}return$el;}public
-function
-pattern($parser,$s,$doctype,$param,$mod,$flag){$method=str_replace('/','',$doctype);if(is_callable(array($this->texy->handler,$method))){$res=$this->texy->handler->$method($this->texy,$s,$param,$mod,$doctype);if($res!==NULL)return$res;}return$this->factory($s,$doctype,$param,$mod);}public
+pattern($parser,$s,$doctype,$param,$mod){$method=str_replace('/','',$doctype);if(is_callable(array($this->texy->handler,$method))){$res=$this->texy->handler->$method($this->texy,$s,$param,$mod,$doctype);if($res!==NULL)return$res;}return$this->factory($s,$doctype,$param,$mod);}public
 function
 outdent($s){$s=trim($s,"\n");$spaces=strspn($s,' ');if($spaces)return
 preg_replace("#^ {1,$spaces}#m",'',$s);return$s;}public
 function
 factory($s,$doctype,$param=NULL,$mod=NULL){$tx=$this->texy;if($doctype==='document/texysource'){$s=$this->outdent($s);$el=TexyHtml::el();$el->parseBlock($tx,$s);$s=$tx->export($el);$doctype='document/code';$param='html';}if($doctype==='document/code'){$el=TexyHtml::el('pre');$mod->decorate($tx,$el);$el->class[]=$param;$el->childNodes[0]=TexyHtml::el('code');$s=$this->outdent($s);$s=Texy::encode($s);$s=$tx->protect($s);$el->childNodes[0]->setContent($s);return$el;}if($doctype==='document/pre'){$el=TexyHtml::el('pre');$mod->decorate($tx,$el);$el->class[]=$param;$s=$this->outdent($s);$s=Texy::encode($s);$s=$tx->protect($s);$el->setContent($s);return$el;}if($doctype==='document/html'){$lineParser=new
-TexyLineParser($tx);$lineParser->onlyHtml=TRUE;$s=trim($s,"\n");$s=$lineParser->parse($s);$s=Texy::decode($s);$s=Texy::encode($s);$s=$tx->unprotect($s);return$tx->protect($s)."\n";}if($doctype==='document/text'){$s=trim($s,"\n");$s=Texy::encode($s);$s=str_replace("\n",TexyHtml::el('br')->startTag(),$s);return$tx->protect($s)."\n";}if($doctype==='document/comment'){return"\n";}}} 
+TexyLineParser($tx);$lineParser->onlyHtml=TRUE;$s=trim($s,"\n");$s=$lineParser->parse($s);$s=Texy::decode($s);$s=Texy::encode($s);$s=$tx->unprotect($s);return$tx->protect($s)."\n";}if($doctype==='document/text'){$s=trim($s,"\n");$s=Texy::encode($s);$s=str_replace("\n",TexyHtml::el('br')->startTag(),$s);return$tx->protect($s)."\n";}if($doctype==='document/comment'){return"\n";}if($doctype==='document/div'){$el=TexyHtml::el('div');$mod->decorate($tx,$el);$s=$this->outdent($s);$el->parseDocument($tx,$s);return$el;}}} 
 
 class
 TexyHeadingModule
@@ -220,7 +218,7 @@ TexyHorizLineModule
 extends
 TexyModule{protected$default=array('horizline'=>TRUE);public
 function
-init(){$this->texy->registerBlockPattern(array($this,'pattern'),'#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER_H.'?()$#mU','horizline');}public
+init(){$this->texy->registerBlockPattern(array($this,'pattern'),'#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER.'?()$#mU','horizline');}public
 function
 pattern($parser,$matches){list(,,$mMod)=$matches;$el=TexyHtml::el('hr');$mod=new
 TexyModifier($mMod);$mod->decorate($this->texy,$el);return$el;}} 
@@ -535,7 +533,7 @@ registerLinePattern($handler,$pattern,$name){if(empty($this->allowed[$name]))ret
 function
 registerBlockPattern($handler,$pattern,$name){if(empty($this->allowed[$name]))return;$this->blockPatterns[$name]=array('handler'=>$handler,'pattern'=>$pattern.'m',);}public
 function
-registerDocType($handler,$name){if(empty($this->allowed[$name]))return;$this->docTypes[$name]=$handler;}protected
+registerDocType($handler,$name,$nested){if(empty($this->allowed[$name]))return;$this->docTypes[$name]=array('handler'=>$handler,'nested'=>$nested,);}protected
 function
 init(){if($this->handler&&!is_object($this->handler))throw
 new
