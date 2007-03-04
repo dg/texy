@@ -213,7 +213,7 @@ class TexyImageModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternImage($parser, $matches)
     {
@@ -239,12 +239,12 @@ class TexyImageModule extends TexyModule
         } else $link = NULL;
 
         // event wrapper
-        if (is_callable(array($tx->handler, 'wrapImage'))) {
-            $res = $tx->handler->wrapImage($tx, $image, $link);
+        if (is_callable(array($tx->handler, 'image'))) {
+            $res = $tx->handler->image($tx, $image, $link);
             if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($image, $link);
+        return $this->factory($image, $link);
     }
 
 
@@ -254,9 +254,9 @@ class TexyImageModule extends TexyModule
      *
      * @param TexyImage
      * @param TexyLink
-     * @return TexyHtml|string
+     * @return TexyHtml|string|FALSE
      */
-    public function proceed(TexyImage $image, $link)
+    public function factory(TexyImage $image, $link)
     {
         $tx = $this->texy;
         $src = Texy::completeURL($image->imageURL, $this->root);
@@ -334,7 +334,7 @@ class TexyImageModule extends TexyModule
 
         $tx->summary['images'][] = $el->src;
 
-        if ($link) return $tx->linkModule->proceed($link, $el);
+        if ($link) return $tx->linkModule->factory($link, $el);
 
         return $el;
     }

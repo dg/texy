@@ -53,17 +53,27 @@ class TexyDocumentModule extends TexyModule
      * Callback for: /--- div
      *
      * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param string
+     * @param string   content
+     * @param string   doctype - document/div
+     * @param string   --
      * @param TexyModifier
-     * @return TexyHtml|FALSE
+     * @param string   two character flag
+     * @return TexyHtml|string|FALSE
      */
-    public function patternDiv($parser, $content, $doctype, $desc, $mod)
+    public function patternDiv($parser, $s, $doctype, $param, $mod, $flag)
     {
-        $el = TexyHtml::el('div');
-        $mod->decorate($this->texy, $el);
-        $el->parseDocument($this->texy, $this->outdent($content));
+        $tx = $this->texy;
+        $el = TexyHtml::el();
+        $s = $this->outdent($s);
+        $el->parseDocument($tx, $s);
+        if ($flag[0] === '<') {
+            $elX = TexyHtml::el('div');
+            $mod->decorate($tx, $elX);
+            array_unshift($el->childNodes, $tx->protect($elX->startTag()));
+        }
+        if ($flag[1] === '>') {
+            $el->childNodes[] = $tx->protect('</div>');
+        }
         return $el;
     }
 
@@ -72,32 +82,22 @@ class TexyDocumentModule extends TexyModule
      * Callback for: /--- ???
      *
      * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param string
+     * @param string   content
+     * @param string   doctype
+     * @param string   additional parameter
      * @param TexyModifier
-     * @return TexyHtml|FALSE
+     * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $content, $doctype, $desc, $mod)
+    public function pattern($parser, $s, $doctype, $param, $mod, $flag)
     {
         // event wrapper
-        $methods = array(
-            'document/pre' => 'wrapPreDocument',
-            'document/code' => 'wrapCodeDocument',
-            'document/html' => 'wrapHtmlDocument',
-            'document/text' => 'wrapTextDocument',
-            'document/texysource' => 'wrapTexySourceDocument',
-            'document/comment' => 'wrapCommentDocument',
-        );
-        if (isset($methods[$doctype])) {
-            $method = $methods[$doctype];
-            if (is_callable(array($this->texy->handler, $method))) {
-                $res = $this->texy->handler->$method($this->texy, $content, $doctype, $desc, $mod);
-                if ($res !== NULL) return $res;
-            }
+        $method = str_replace('/', '', $doctype);
+        if (is_callable(array($this->texy->handler, $method))) {
+            $res = $this->texy->handler->$method($this->texy, $s, $param, $mod, $doctype);
+            if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($content, $doctype, $desc, $mod);
+        return $this->factory($s, $doctype, $param, $mod);
     }
 
 
@@ -113,62 +113,67 @@ class TexyDocumentModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param string
-     * @param string
-     * @param string
+     * @param string   content
+     * @param string   doctype
+     * @param string   additional parameter
      * @param TexyModifier
-     * @return TexyHtml
+     * @return TexyHtml|string|FALSE
      */
-    public function proceed($content, $doctype, $desc=NULL, $mod=NULL)
+    public function factory($s, $doctype, $param=NULL, $mod=NULL)
     {
         $tx = $this->texy;
+
+        if ($doctype === 'document/texysource') {
+            $s = $this->outdent($s);
+            $el = TexyHtml::el();
+            $el->parseBlock($tx, $s);
+            $s = $tx->export($el);
+            $doctype = 'document/code'; $param = 'html'; // continue...
+        }
+
         if ($doctype === 'document/code') {
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
-            $el->class[] = $desc; // lang
+            $el->class[] = $param; // lang
             $el->childNodes[0] = TexyHtml::el('code');
-            $el->childNodes[0]->setContent( $tx->protect( Texy::encode($this->outdent($content)) ) );
+            $s = $this->outdent($s);
+            $s = Texy::encode($s);
+            $s = $tx->protect($s);
+            $el->childNodes[0]->setContent($s);
             return $el;
         }
 
         if ($doctype === 'document/pre') {
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
-            $el->class[] = $desc; // lang
-            $el->setContent( $tx->protect( Texy::encode($this->outdent($content)) ) );
+            $el->class[] = $param; // lang
+            $s = $this->outdent($s);
+            $s = Texy::encode($s);
+            $s = $tx->protect($s);
+            $el->setContent($s);
             return $el;
         }
 
         if ($doctype === 'document/html') {
             $lineParser = new TexyLineParser($tx);
             $lineParser->onlyHtml = TRUE;
-            $content = $lineParser->parse($content);
-            $content = Texy::decode($content);
-            $content = Texy::encode($content);
-            $content = $tx->unprotect($content);
-            return TexyHtml::el()->setContent( $tx->protect($content) );
+            $s = trim($s, "\n");
+            $s = $lineParser->parse($s);
+            $s = Texy::decode($s);
+            $s = Texy::encode($s);
+            $s = $tx->unprotect($s);
+            return $tx->protect($s) . "\n";
         }
 
         if ($doctype === 'document/text') {
-            return TexyHtml::el('')->setContent( $tx->protect( nl2br( Texy::encode($content) ) ) );
-        }
-
-        if ($doctype === 'document/texysource') {
-            $el = TexyHtml::el();
-            $el->parseBlock($tx, $this->outdent($content));
-
-            $html = $tx->export($el);
-            $html = Texy::encode($html);
-
-            $el = TexyHtml::el('pre')->class('html');
-            $mod->decorate($tx, $el);
-            $el2 = TexyHtml::el('code');
-            $el->childNodes[] = $el2;
-            $el2->childNodes[] = $tx->protect($html);
-            return $el;
+            $s = trim($s, "\n");
+            $s = Texy::encode($s);
+            $s = str_replace("\n", TexyHtml::el('br')->startTag() , $s); // nl2br
+            return $tx->protect($s) . "\n";
         }
 
         if ($doctype === 'document/comment') {
+            return "\n";
         }
     }
 

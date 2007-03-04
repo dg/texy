@@ -222,7 +222,7 @@ class TexyPhraseModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternPhrase($parser, $matches, $phrase)
     {
@@ -256,12 +256,12 @@ class TexyPhraseModule extends TexyModule
         }
 
         // event wrapper
-        if (is_callable(array($tx->handler, 'wrapPhrase'))) {
-            $res = $tx->handler->wrapPhrase($tx, $phrase, $mContent, $mod, $link);
+        if (is_callable(array($tx->handler, 'phrase'))) {
+            $res = $tx->handler->phrase($tx, $phrase, $mContent, $mod, $link);
             if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($phrase, $mContent, $mod, $link);
+        return $this->factory($phrase, $mContent, $mod, $link);
     }
 
 
@@ -273,9 +273,9 @@ class TexyPhraseModule extends TexyModule
      * @param string
      * @param TexyModifier
      * @param TexyLink
-     * @return TexyHtml|string
+     * @return TexyHtml|string|FALSE
      */
-    public function proceed($phrase, $content, $mod, $link)
+    public function factory($phrase, $content, $mod, $link)
     {
         $tx = $this->texy;
 
@@ -301,7 +301,7 @@ class TexyPhraseModule extends TexyModule
 
         if ($tag === 'q') $el->cite = $mod->cite;
 
-        if ($link) return $tx->linkModule->proceed($link)->setContent($el);
+        if ($link) return $tx->linkModule->factory($link)->setContent($el);
 
         return $el;
     }
@@ -312,7 +312,7 @@ class TexyPhraseModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternNoTexy($parser, $matches)
     {
@@ -327,9 +327,11 @@ class TexyPhraseModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternCodeSwitch($parser, $matches)
-    {}
+    {
+        $this->tags['phrase/code'] = $matches[1];
+    }
 
 } // TexyPhraseModule

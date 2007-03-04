@@ -54,7 +54,7 @@ class TexyHtmlModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternComment($parser, $matches)
     {
@@ -62,9 +62,8 @@ class TexyHtmlModule extends TexyModule
 
         $tx = $this->texy;
 
-        // !! TODO
         if (is_callable(array($tx->handler, 'htmlComment')))
-            $tx->handler->htmlComment($tx, $match);
+            return $tx->handler->htmlComment($tx, $match);
 
         return $tx->protect($match, Texy::CONTENT_NONE);
     }
@@ -76,7 +75,7 @@ class TexyHtmlModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternTag($parser, $matches)
     {
@@ -117,7 +116,7 @@ class TexyHtmlModule extends TexyModule
 
         if (!$isOpening) { // closing tag? we are finished
             if (is_callable(array($tx->handler, 'htmlTag')))
-                $tx->handler->htmlTag($tx, $el, FALSE);
+                return $tx->handler->htmlTag($tx, $el, FALSE);
 
             return $tx->protect($el->endTag(), $el->getContentType());
         }
@@ -191,7 +190,7 @@ class TexyHtmlModule extends TexyModule
         }
 
         if (is_callable(array($tx->handler, 'htmlTag')))
-            $tx->handler->htmlTag($tx, $el, TRUE);
+            return $tx->handler->htmlTag($tx, $el, TRUE);
 
         return $tx->protect($el->startTag(), $el->getContentType());
     }

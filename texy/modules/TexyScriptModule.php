@@ -51,7 +51,7 @@ class TexyScriptModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function pattern($parser, $matches)
     {

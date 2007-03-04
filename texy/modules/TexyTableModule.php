@@ -64,7 +64,7 @@ class TexyTableModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternTable($parser, $matches)
     {
@@ -120,7 +120,7 @@ class TexyTableModule extends TexyModule
     /**
      * Handles single row: | xxx | xxx | xxx | .(..){..}[..]
      * @param TexyBlockParser
-     * @return TexyHtml
+     * @return TexyHtml|string|FALSE
      */
     protected function patternRow($parser)
     {

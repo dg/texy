@@ -58,7 +58,7 @@ class TexyDocumentParser extends TexyParser
         $dt = $tx->getDocTypes();
 
         preg_match_all(
-            '#^(?>([/\\\\])--+? *?)(.*)'.TEXY_MODIFIER_H.'?$#mU',
+            '#^(?>([/\\\\])--+?)([^.({[<>]*)'.TEXY_MODIFIER_H.'?$#mU',
             $text,
             $matches,
             PREG_OFFSET_CAPTURE | PREG_SET_ORDER
@@ -68,26 +68,35 @@ class TexyDocumentParser extends TexyParser
         $i = 0;
         $docType = NULL;
         $docStack = array();
-        $children = array();
-        $desc = NULL;
+        $nodes = array();
+        $param = NULL;
         $mod = new TexyModifier;
         $offset = 0;
         do {
-            if (!$docType) $docType = $tx->defaultDocument;
+            if (!$docType) {
+                $docType = $tx->defaultDocument;
+                $flag = '[';
+            }
 
-            $end = isset($matches[$i]) ? $matches[$i][0][1] - 1 : strlen($text);
+            if (isset($matches[$i])) {
+                $end = $matches[$i][0][1] - 1;
+                $flag .= $matches[$i][1][0] === '/' ? '-' : '>';
+            } else {
+                $end = strlen($text);
+                $flag .= ']';
+            }
 
             if ($end > $offset) {
                 $s = substr($text, $offset, $end - $offset);
 
                 if (isset($dt[$docType])) {
-                    $res = call_user_func_array($dt[$docType], array($this, $s, $docType, $desc, $mod));
-                    if ($res) $children[] = $res;
+                    $res = call_user_func_array($dt[$docType], array($this, $s, $docType, $param, $mod, $flag));
+                    if ($res != NULL) $nodes[] = $res;
 
-                } else { // handle as 'texy'
+                } else { // handle as document/texy
                     $el = TexyHtml::el();
                     $el->parseBlock($tx, $s);
-                    $children[] = $el;
+                    $nodes[] = $el;
                 }
             }
 
@@ -103,11 +112,12 @@ class TexyDocumentParser extends TexyParser
                 $words = preg_split('# +#', $match[2][0], 2, PREG_SPLIT_NO_EMPTY);
                 if (!isset($words[0])) $words[0] = $this->defaultType;
                 $docType = 'document/' . $words[0];
-                $desc = isset($words[1]) ? $words[1] : NULL;
+                $param = isset($words[1]) ? $words[1] : NULL;
                 $mod = isset($match[3]) ? new TexyModifier($match[3][0]) : new TexyModifier;
+                $flag = '<';
 
             } else { // closing
-                $desc = NULL;
+                $param = NULL;
                 $mod = new TexyModifier;
                 if ($match[2][0] != NULL) {
                     $words = preg_split('# +#', $match[2][0], 1, PREG_SPLIT_NO_EMPTY);
@@ -116,12 +126,14 @@ class TexyDocumentParser extends TexyParser
                         $docType = array_pop($docStack);
                     }
                 }
+
                 $docType = array_pop($docStack);
+                $flag = '-';
             }
 
         } while (1);
 
-        return $children;
+        return $nodes;
     }
 
 } // TexyDocumentParser
@@ -241,7 +253,7 @@ class TexyBlockParser extends TexyParser
         $tx = $this->texy;
         $this->text = $text;
         $this->offset = 0;
-        $children = array();
+        $nodes = array();
 
         $pb = $tx->getBlockPatterns();
         if (!$pb) return array(); // nothing to do
@@ -297,7 +309,7 @@ class TexyBlockParser extends TexyParser
                 foreach ($parts as $str) {
                     $str = trim($str);
                     if ($str === '') continue;
-                    $children[] = $this->genericBlock($str);
+                    $nodes[] = $this->genericBlock($str);
                 }
                 continue;
             }
@@ -311,20 +323,19 @@ class TexyBlockParser extends TexyParser
                 array($this, $arrMatches[$minKey], $minKey)
             );
 
-            if ($res instanceof TexyHtml) {
-                $children[] = $res;
-
-            } elseif ($res === FALSE || $this->offset <= $arrPos[$minKey]) { // module rejects text
+            if ($res === FALSE || $this->offset <= $arrPos[$minKey]) { // module rejects text
                 $this->offset = $arrPos[$minKey]; // turn offset back
                 $arrPos[$minKey] = -2;
                 continue;
+            } elseif ($res != NULL) {
+                $nodes[] = $res;
             }
 
             $arrPos[$minKey] = -1;
 
         } while (1);
 
-        return $children;
+        return $nodes;
     }
 
 } // TexyBlockParser
@@ -359,8 +370,8 @@ class TexyLineParser extends TexyParser
         if ($this->onlyHtml) {
             // special mode - parse only html tags
             $tmp = $tx->getLinePatterns();
-            $pl['html/tag'] = $tmp['html/tag'];
-            $pl['html/comment'] = $tmp['html/comment'];
+            if (isset($tmp['html/tag'])) $pl['html/tag'] = $tmp['html/tag'];
+            if (isset($tmp['html/comment'])) $pl['html/comment'] = $tmp['html/comment'];
             unset($tmp);
         } else {
             // normal mode

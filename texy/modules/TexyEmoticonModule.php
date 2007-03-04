@@ -77,7 +77,7 @@ class TexyEmoticonModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function pattern($parser, $matches)
     {
@@ -91,12 +91,12 @@ class TexyEmoticonModule extends TexyModule
             if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
                 // event wrapper
-                if (is_callable(array($tx->handler, 'wrapEmoticon'))) {
-                    $res = $tx->handler->wrapEmoticon($tx, $emoticon, $match, $file);
+                if (is_callable(array($tx->handler, 'emoticon'))) {
+                    $res = $tx->handler->emoticon($tx, $emoticon, $match, $file);
                     if ($res !== NULL) return $res;
                 }
 
-                return $this->proceed($emoticon, $match, $file);
+                return $this->factory($emoticon, $match, $file);
             }
         }
     }
@@ -109,9 +109,9 @@ class TexyEmoticonModule extends TexyModule
      * @param string
      * @param string
      * @param string
-     * @return TexyHtml|string
+     * @return TexyHtml|string|FALSE
      */
-    public function proceed($emoticon, $raw, $file)
+    public function factory($emoticon, $raw, $file)
     {
         $tx = $this->texy;
         $el = TexyHtml::el('img');

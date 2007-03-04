@@ -63,7 +63,7 @@ class TexyDefinitionListModule extends TexyListModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternDefList($parser, $matches)
     {

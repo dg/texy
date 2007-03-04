@@ -33,7 +33,7 @@ class myHandler {
      * @param TexyLink
      * @return TexyHtml|string
      */
-    function wrapImage($texy, $image, $link)
+    function image($texy, $image, $link)
     {
         if ($image->imageURL == 'user')  // accepts only [* user *]
         {
@@ -43,7 +43,7 @@ class myHandler {
             if ($link) $link->URL = 'image-big.gif'; // linked image
         }
 
-        return $texy->imageModule->proceed($image, $link);
+        return $texy->imageModule->factory($image, $link);
         // or return NULL;
     }
 

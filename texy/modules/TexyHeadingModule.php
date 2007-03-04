@@ -103,7 +103,7 @@ class TexyHeadingModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternUnderline($parser, $matches)
     {
@@ -124,12 +124,12 @@ class TexyHeadingModule extends TexyModule
             ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
         // event wrapper
-        if (is_callable(array($this->texy->handler, 'wrapHeading'))) {
-            $res = $this->texy->handler->wrapHeading($this->texy, $level, $mContent, $mod, FALSE);
+        if (is_callable(array($this->texy->handler, 'heading'))) {
+            $res = $this->texy->handler->heading($this->texy, $level, $mContent, $mod, FALSE);
             if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($level, $mContent, $mod, FALSE);
+        return $this->factory($level, $mContent, $mod, FALSE);
     }
 
 
@@ -142,7 +142,7 @@ class TexyHeadingModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternSurround($parser, $matches)
     {
@@ -161,12 +161,12 @@ class TexyHeadingModule extends TexyModule
             ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
         // event wrapper
-        if (is_callable(array($this->texy->handler, 'wrapHeading'))) {
-            $res = $this->texy->handler->wrapHeading($this->texy, $level, $mContent, $mod, TRUE);
+        if (is_callable(array($this->texy->handler, 'heading'))) {
+            $res = $this->texy->handler->heading($this->texy, $level, $mContent, $mod, TRUE);
             if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($level, $mContent, $mod, TRUE);
+        return $this->factory($level, $mContent, $mod, TRUE);
     }
 
 
@@ -178,9 +178,9 @@ class TexyHeadingModule extends TexyModule
      * @param string
      * @param TexyModifier
      * @param bool
-     * @return TexyHtml
+     * @return TexyHtml|string|FALSE
      */
-    public function proceed($level, $content, $mod, $surround)
+    public function factory($level, $content, $mod, $surround)
     {
         $tx = $this->texy;
         $el = new TexyHeadingElement;

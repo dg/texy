@@ -37,12 +37,11 @@ class myHandler
      *
      * @param Texy    base Texy object
      * @param string  text to highlight
-     * @param string  Texy doctype 'document/code'
      * @param string  language
      * @param TexyModifier modifier
      * @return TexyHtml
      */
-    function wrapCodeDocument($texy, $content, $doctype, $lang, $modifier)
+    function documentCode($texy, $content, $lang, $modifier)
     {
         $lang = strtoupper($lang);
         if ($lang == 'JAVASCRIPT') $lang = 'JS';

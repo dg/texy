@@ -57,7 +57,7 @@ class TexyFigureModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function pattern($parser, $matches)
     {
@@ -86,12 +86,12 @@ class TexyFigureModule extends TexyModule
         } else $link = NULL;
 
         // event wrapper
-        if (is_callable(array($tx->handler, 'wrapFigure'))) {
-            $res = $tx->handler->wrapFigure($tx, $image, $link, $mContent, $mod);
+        if (is_callable(array($tx->handler, 'figure'))) {
+            $res = $tx->handler->figure($tx, $image, $link, $mContent, $mod);
             if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($image, $link, $mContent, $mod);
+        return $this->factory($image, $link, $mContent, $mod);
     }
 
 
@@ -103,16 +103,16 @@ class TexyFigureModule extends TexyModule
      * @param TexyLink
      * @param string
      * @param TexyModifier
-     * @return TexyHtml|string
+     * @return TexyHtml|string|FALSE
      */
-    public function proceed(TexyImage $image, $link, $content, $mod)
+    public function factory(TexyImage $image, $link, $content, $mod)
     {
         $tx = $this->texy;
 
         $hAlign = $image->modifier->hAlign;
         $mod->hAlign = $image->modifier->hAlign = NULL;
 
-        $elImg = $tx->imageModule->proceed($image, $link);
+        $elImg = $tx->imageModule->factory($image, $link);
 
         $el = TexyHtml::el('div');
         if (!empty($image->width)) $el->style['width'] = ($image->width + $this->widthDelta) . 'px';

@@ -128,7 +128,7 @@ class TexyLinkModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternReference($parser, $matches)
     {
@@ -141,8 +141,8 @@ class TexyLinkModule extends TexyModule
 
         if (!$link) {
             // try handler
-            if (is_callable(array($tx->handler, 'reference')))
-                return $tx->handler->reference($tx, $name);
+            if (is_callable(array($tx->handler, 'newReference')))
+                return $tx->handler->newReference($tx, $name);
 
             // no change
             return FALSE;
@@ -165,12 +165,12 @@ class TexyLinkModule extends TexyModule
         }
 
         // event wrapper
-        if (is_callable(array($tx->handler, 'wrapReference'))) {
-            $res = $tx->handler->wrapReference($tx, $link, $content);
+        if (is_callable(array($tx->handler, 'linkReference'))) {
+            $res = $tx->handler->linkReference($tx, $link, $content);
             if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($link, $content);
+        return $this->factory($link, $content);
     }
 
 
@@ -181,7 +181,7 @@ class TexyLinkModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string  or FALSE when not accepted
+     * @return TexyHtml|string|FALSE
      */
     public function patternUrlEmail($parser, $matches, $name)
     {
@@ -193,13 +193,13 @@ class TexyLinkModule extends TexyModule
         $content = $this->textualURL($mURL);
 
         // event wrapper
-        $method = $name === 'link/email' ? 'wrapEmail' : 'wrapURL';
+        $method = $name === 'link/email' ? 'linkEmail' : 'linkURL';
         if (is_callable(array($this->texy->handler, $method))) {
             $res = $this->texy->handler->$method($this->texy, $link, $content);
             if ($res !== NULL) return $res;
         }
 
-        return $this->proceed($link, $content);
+        return $this->factory($link, $content);
     }
 
 
@@ -319,9 +319,9 @@ class TexyLinkModule extends TexyModule
      *
      * @param TexyLink
      * @param TexyHtml|string
-     * @return TexyHtml|string
+     * @return TexyHtml|string|FALSE
      */
-    public function proceed($link, $content=NULL)
+    public function factory($link, $content=NULL)
     {
         $tx = $this->texy;
 
