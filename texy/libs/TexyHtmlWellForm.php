@@ -85,7 +85,7 @@ class TexyHtmlWellForm
         //    [3] => ... (attributes)
         //    [4] => /   (empty)
 
-        if (isset(Texy::$emptyTags[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.$mEmpty.'>';
+        if (isset(TexyHtml::$emptyTags[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.$mEmpty.'>';
 
         if ($mClosing) {  // closing
             if (empty($this->tagUsed[$mTag])) return '';
@@ -94,7 +94,7 @@ class TexyHtmlWellForm
             $i = 1;
             while ($pair !== FALSE) {
                 $tag = $pair['tag'];
-                //if (Texy::$xhtml || !isset(self::$optional[$tag]))
+                //if (TexyHtml::$XHTML || !isset(self::$optional[$tag]))
                 $s .= '</'.$tag.'>';
                 $this->tagUsed[$tag]--;
                 if ($tag === $mTag) break;
@@ -103,7 +103,7 @@ class TexyHtmlWellForm
             }
             //if ($pair === FALSE) return '';
 
-            if (isset(Texy::$blockTags[$mTag])) {
+            if (isset(TexyHtml::$blockTags[$mTag])) {
                 array_splice($this->tagStack, -$i);
                 return $s;
             }
@@ -128,7 +128,7 @@ class TexyHtmlWellForm
                     isset($this->autoClose[$pair['tag']][$mTag]) ) {
 
                 $tag = $pair['tag'];
-                //if (Texy::$xhtml || !isset(self::$optional[$tag]))
+                //if (TexyHtml::$XHTML || !isset(self::$optional[$tag]))
                 $s .= '</'.$tag.'>';
                 $this->tagUsed[$tag]--;
                 unset($this->tagStack[key($this->tagStack)]);

@@ -185,15 +185,15 @@ class TexyHeadingModule extends TexyModule
         $tx = $this->texy;
         $el = new TexyHeadingElement;
         $mod->decorate($tx, $el);
-        $el->eXtra['level'] = $level;
-        $el->eXtra['top'] = $this->top;
+        $el->userData['level'] = $level;
+        $el->userData['top'] = $this->top;
         if ($this->balancing === self::DYNAMIC) {
             if ($isSurrounded)
-                $el->eXtra['deltaLevel'] = & $this->_deltaSurround;
+                $el->userData['deltaLevel'] = & $this->_deltaSurround;
             else
-                $el->eXtra['deltaLevel'] = & $this->_deltaUnderline;
+                $el->userData['deltaLevel'] = & $this->_deltaUnderline;
         } else {
-            $el->eXtra['deltaLevel'] = 0;
+            $el->userData['deltaLevel'] = 0;
         }
         $el->parseLine($tx, trim($content));
 
@@ -203,16 +203,18 @@ class TexyHeadingModule extends TexyModule
 
         // Table of Contents
         if ($this->generateID && empty($el->id)) {
-            $el->id = strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $title));
-            $el->id = str_replace(' ', '-', $el->id);
-            $el->id = $this->idPrefix . preg_replace('#[^a-z0-9_-]#i', '', $el->id);
+            $id = TexyUtf::utf2ascii($title);
+            $id = strtr($id, ' ', '-');
+            $id = preg_replace('#[^a-z0-9_-]#', '', strtolower($id));
+            $id = $this->idPrefix . $id;
             $counter = '';
-            if (isset($this->usedID[$el->id . $counter])) {
+            if (isset($this->usedID[$id . $counter])) {
                 $counter = 2;
-                while (isset($this->usedID[$el->id . '-' . $counter])) $counter++;
-                $el->id .= '-' . $counter;
+                while (isset($this->usedID[$id . '-' . $counter])) $counter++;
+                $id .= '-' . $counter;
             }
-            $this->usedID[$el->id] = TRUE;
+            $this->usedID[$id] = TRUE;
+            $el->id = $id;
         }
 
         $TOC = array(
@@ -221,7 +223,7 @@ class TexyHeadingModule extends TexyModule
             'level' => 0,
         );
         $this->TOC[] = & $TOC;
-        $el->eXtra['TOC'] = & $TOC;
+        $el->userData['TOC'] = & $TOC;
 
         return $el;
     }
@@ -245,9 +247,9 @@ class TexyHeadingElement extends TexyHtml
 
     public function startTag()
     {
-        $level = $this->eXtra['level'] + $this->eXtra['deltaLevel'] + $this->eXtra['top'];
+        $level = $this->userData['level'] + $this->userData['deltaLevel'] + $this->userData['top'];
         $this->elName = 'h' . min(6, max(1, $level));
-        $this->eXtra['TOC']['level'] = $level;
+        $this->userData['TOC']['level'] = $level;
         return parent::startTag();
     }
 

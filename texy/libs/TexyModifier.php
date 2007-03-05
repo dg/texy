@@ -91,7 +91,7 @@ class TexyModifier
                 $a = strpos($mod, '}', $p) + 1;
                 foreach (explode(';', substr($mod, $p + 1, $a - $p - 2)) as $value) {
                     $pair = explode(':', $value, 2);
-                    $prop = strtolower(trim($pair[0])); // strtolower protects TexyHtml's elName, eXtra, childNodes
+                    $prop = strtolower(trim($pair[0])); // strtolower protects TexyHtml's elName, userData, childNodes
                     if ($prop === '' || !isset($pair[1])) continue;
                     $value = trim($pair[1]);
 

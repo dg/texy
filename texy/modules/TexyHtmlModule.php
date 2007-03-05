@@ -91,7 +91,7 @@ class TexyHtmlModule extends TexyModule
 
         $tag = strtolower($mTag);
         // test for validity - not good!!
-        if (!isset(Texy::$blockTags[$tag]) && !isset(Texy::$inlineTags[$tag])) $tag = $mTag;  // undo lowercase
+        if (!isset(TexyHtml::$blockTags[$tag]) && !isset(TexyHtml::$inlineTags[$tag])) $tag = $mTag;  // undo lowercase
 
         // tag & attibutes
         $aTags = $tx->allowedTags; // speed-up
@@ -139,7 +139,7 @@ class TexyHtmlModule extends TexyModule
         );
 
         foreach ($matches2 as $m) {
-            $key = strtolower($m[1]); // strtolower protects TexyHtml's elName, eXtra, childNodes
+            $key = strtolower($m[1]); // strtolower protects TexyHtml's elName, userData, childNodes
 
             // skip disabled
             if ($aAttrs !== NULL && !isset($aAttrs[$key])) continue;

@@ -219,14 +219,8 @@ class TexyLinkModule extends TexyModule
      */
     public function addReference($name, $URL, $label=NULL, $modifier=NULL)
     {
-        if (function_exists('mb_strtolower')) {
-            $name = mb_strtolower($name, 'UTF-8');
-        } else {
-            $name = strtolower($name);
-        }
-
+        $name = TexyUtf::strtolower($name);
         if (!$modifier) $modifier = new TexyModifier;
-
         $link = new TexyLink;
         $link->URL = $URL;
         $link->label = $label;
@@ -245,12 +239,7 @@ class TexyLinkModule extends TexyModule
      */
     public function getReference($name)
     {
-        if (function_exists('mb_strtolower')) {
-            $name = mb_strtolower($name, 'UTF-8');
-        } else {
-            $name = strtolower($name);
-        }
-
+        $name = TexyUtf::strtolower($name);
         if (isset($this->references[$name])) {
             return clone $this->references[$name];
 

@@ -91,14 +91,8 @@ class TexyImageModule extends TexyModule
      */
     public function addReference($name, $URLs, $modifier=NULL)
     {
-        if (function_exists('mb_strtolower')) {
-            $name = mb_strtolower($name, 'UTF-8');
-        } else {
-            $name = strtolower($name);
-        }
-
+        $name = TexyUtf::strtolower($name);
         if (!$modifier) $modifier = new TexyModifier;
-
         $image = $this->factoryImage($URLs, NULL, FALSE);
         $image->modifier = $modifier;
         $image->name = $name;
@@ -115,12 +109,7 @@ class TexyImageModule extends TexyModule
      */
     public function getReference($name)
     {
-        if (function_exists('mb_strtolower')) {
-            $name = mb_strtolower($name, 'UTF-8');
-        } else {
-            $name = strtolower($name);
-        }
-
+        $name = TexyUtf::strtolower($name);
         if (isset($this->references[$name]))
             return clone $this->references[$name];
 
@@ -328,7 +317,7 @@ class TexyImageModule extends TexyModule
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
             $el->onmouseout = 'this.src=\'' . addSlashes($src) . '\'';
             static $counter; $counter++;
-            $attrs['onload'] = "preload_$counter=new Image();preload_$counter.src='" . addSlashes($overSrc) . "';this.onload=''";
+            $el->onload = "preload_$counter=new Image();preload_$counter.src='" . addSlashes($overSrc) . "';this.onload=''";
             $tx->summary['preload'][] = $overSrc;
         }
 

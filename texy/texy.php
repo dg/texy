@@ -34,6 +34,7 @@ require_once TEXY_DIR.'libs/TexyHtmlWellForm.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
+require_once TEXY_DIR.'libs/TexyUtf.php';
 require_once TEXY_DIR.'modules/TexyDocumentModule.php';
 require_once TEXY_DIR.'modules/TexyHeadingModule.php';
 require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
@@ -71,9 +72,6 @@ class Texy
     const CONTENT_INLINE =  "\x16";
     const CONTENT_TEXTUAL = "\x15";
     const CONTENT_BLOCK =   "\x14";
-
-    /** @var bool  use XHTML? */
-    static public $xhtml = TRUE;
 
     /** @var string  input & output text encoding */
     public $encoding = 'utf-8';
@@ -153,34 +151,6 @@ class Texy
         $formatter,
         $formatterModule, // back compatibility
         $wellForm;
-
-
-    /**
-     * HTML tags definitions
-     * notice: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
-     */
-    static public $blockTags = array(
-        'address'=>1,'blockquote'=>1,'caption'=>1,'col'=>1,'colgroup'=>1,'dd'=>1,'div'=>1,'dl'=>1,'dt'=>1,
-        'fieldset'=>1,'form'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,'h5'=>1,'h6'=>1,'hr'=>1,'iframe'=>1,'legend'=>1,
-        'li'=>1,'object'=>1,'ol'=>1,'p'=>1,'param'=>1,'pre'=>1,'table'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,
-        'th'=>1,'thead'=>1,'tr'=>1,'ul'=>1,/*'embed'=>1,*/);
-    // todo: iframe, object, are block?
-
-    static public $inlineTags = array(
-        'a'=>1,'abbr'=>1,'acronym'=>1,'area'=>1,'b'=>1,'big'=>1,'br'=>1,'button'=>1,'cite'=>1,'code'=>1,
-        'del'=>1,'dfn'=>1,'em'=>1,'i'=>1,'img'=>1,'input'=>1,'ins'=>1,'kbd'=>1,'label'=>1,'map'=>1,'noscript'=>1,
-        'optgroup'=>1,'option'=>1,'q'=>1,'samp'=>1,'script'=>1,'select'=>1,'small'=>1,'span'=>1,'strong'=>1,
-        'sub'=>1,'sup'=>1,'textarea'=>1,'tt'=>1,'var'=>1,);
-
-    static public $inlineCont = array(
-        'br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,
-        'applet'=>1,'isindex'=>1,);
-    // todo: use applet, isindex?
-
-    static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,'base'=>1,'col'=>1,
-        'link'=>1,'param'=>1,);
-
-    //static public $metaTag = array('html'=>1,'head'=>1,'body'=>1,'base'=>1,'meta'=>1,'link'=>1,'title'=>1,);
 
 
     /**
@@ -373,9 +343,8 @@ class Texy
          // initialization
         $this->init();
 
-        // convert to UTF-8
-        if (strcasecmp($this->encoding, 'utf-8') !== 0)
-            $text = iconv($this->encoding, 'utf-8', $text);
+        // convert to UTF-8 (and check source encoding)
+        $text = iconv($this->encoding, 'utf-8', $text);
 
         // remove special chars
         $text = self::wash($text);
@@ -424,9 +393,8 @@ class Texy
         // initialization
         $this->init();
 
-        // convert to UTF-8
-        if (strcasecmp($this->encoding, 'utf-8') !== 0)
-            $text = iconv($this->encoding, 'utf-8', $text);
+        // convert to UTF-8 (and check source encoding)
+        $text = iconv($this->encoding, 'utf-8', $text);
 
         // remove special chars
         $text = self::wash($text);
@@ -465,21 +433,7 @@ class Texy
             define('TEXY_NOTICE_SHOWED', TRUE);
         }
 
-        // convert from UTF-8
-        if (strcasecmp($this->encoding, 'utf-8') !== 0)
-        {
-            // prepare UTF-8 -> charset table
-            $this->_chars = & self::$charTables[strtolower($this->encoding)];
-            if (!$this->_chars) {
-                for ($i=128; $i<256; $i++) {
-                    $ch = iconv($this->encoding, 'UTF-8//IGNORE', chr($i));
-                    if ($ch) $this->_chars[$ch] = chr($i);
-                }
-            }
-
-            // convert
-            $html = preg_replace_callback('#[\x80-\x{FFFF}]#u', array($this, 'utfconv'), $html);
-        }
+        $html = TexyUtf::utf2html($html, $this->encoding);
 
         return $html;
     }
@@ -513,8 +467,7 @@ class Texy
             "\xC2\xA0" => ' ', // nbsp
         ));
 
-        if (strcasecmp($this->encoding, 'utf-8') !== 0)
-            $html = iconv('utf-8', $this->encoding.'//TRANSLIT', $html);
+        $html = iconv('utf-8', $this->encoding.'//TRANSLIT', $html);
 
         return $html;
     }
@@ -555,7 +508,7 @@ class Texy
         $s = $this->formatter->process($s);
 
         // remove HTML 4.01 optional tags
-        if (!self::$xhtml)
+        if (!TexyHtml::$XHTML)
             $html = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#', '', $html);
 
         // unfreeze spaces
@@ -604,7 +557,7 @@ class Texy
     {
         $this->allowedClasses = self::ALL;                  // classes and id are allowed
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
-        $this->allowedTags = array_merge(self::$blockTags, self::$inlineTags); // full support for valid HTML tags
+        $this->allowedTags = array_merge(TexyHtml::$blockTags, TexyHtml::$inlineTags); // full support for valid HTML tags
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
@@ -750,40 +703,10 @@ class Texy
     }
 
 
+
     public function getDocTypes()
     {
         return $this->docTypes;
-    }
-
-
-    /** @var array */
-    static private $charTables;
-
-    /** @var array */
-    private $_chars;
-
-    /**
-     * Converts UTF-8 to a) HTML entity or b) character in dest encoding
-     */
-    private function utfconv($m)
-    {
-        $m = $m[0];
-        if (isset($this->_chars[$m])) return $this->_chars[$m];
-
-        $ch1 = ord($m[0]);
-        $ch2 = ord($m[1]);
-        if (($ch2 >> 6) !== 2) return '';
-
-        if (($ch1 & 0xE0) === 0xC0)
-            return '&#' . ((($ch1 & 0x1F) << 6) + ($ch2 & 0x3F)) . ';';
-
-        if (($ch1 & 0xF0) === 0xE0) {
-            $ch3 = ord($m[2]);
-            if (($ch3 >> 6) !== 2) return '';
-            return '&#' . ((($ch1 & 0xF) << 12) + (($ch2 & 0x3F) << 06) + (($ch3 & 0x3F))) . ';';
-        }
-
-        return '';
     }
 
 

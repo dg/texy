@@ -68,13 +68,13 @@ class TexyScriptModule extends TexyModule
             array_walk($args, 'trim');
         }
 
-        if ($func==='texy')
-            return $this->texyHandler($args);
-
         if (is_callable(array($this->handler, $func))) {
             array_unshift($args, $this->texy);
             return call_user_func_array(array($this->handler, $func), $args);
         }
+
+        if ($func==='texy')
+            return $this->texyHandler($args);
 
         if (is_callable($this->handler))
             return call_user_func_array($this->handler, array($this->texy, $func, $args));

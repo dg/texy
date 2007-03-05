@@ -38,9 +38,43 @@ class TexyHtml
     public $childNodes;
 
     /** @var mixed  user data */
-    public $eXtra;
+    public $userData;
 
     /* element's attributes are not explicitly declared */
+
+
+    /** @var bool  use XHTML? */
+    static public $XHTML = TRUE;
+
+
+    /**
+     * HTML tags definitions
+     * notice: I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
+     */
+    static public $blockTags = array(
+        'address'=>1,'blockquote'=>1,'caption'=>1,'col'=>1,'colgroup'=>1,'dd'=>1,'div'=>1,'dl'=>1,'dt'=>1,
+        'fieldset'=>1,'form'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,'h5'=>1,'h6'=>1,'hr'=>1,'iframe'=>1,'legend'=>1,
+        'li'=>1,'object'=>1,'ol'=>1,'p'=>1,'param'=>1,'pre'=>1,'table'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,
+        'th'=>1,'thead'=>1,'tr'=>1,'ul'=>1,/*'embed'=>1,*/);
+    // todo: iframe, object, are block?
+
+    static public $inlineTags = array(
+        'a'=>1,'abbr'=>1,'acronym'=>1,'area'=>1,'b'=>1,'big'=>1,'br'=>1,'button'=>1,'cite'=>1,'code'=>1,
+        'del'=>1,'dfn'=>1,'em'=>1,'i'=>1,'img'=>1,'input'=>1,'ins'=>1,'kbd'=>1,'label'=>1,'map'=>1,'noscript'=>1,
+        'optgroup'=>1,'option'=>1,'q'=>1,'samp'=>1,'script'=>1,'select'=>1,'small'=>1,'span'=>1,'strong'=>1,
+        'sub'=>1,'sup'=>1,'textarea'=>1,'tt'=>1,'var'=>1,);
+
+    static public $inlineCont = array(
+        'br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,
+        'applet'=>1,'isindex'=>1,);
+    // todo: use applet, isindex?
+
+    static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,'base'=>1,'col'=>1,
+        'link'=>1,'param'=>1,);
+
+    //static public $metaTags = array('html'=>1,'head'=>1,'body'=>1,'base'=>1,'meta'=>1,'link'=>1,'title'=>1,);
+
+
 
 
     /**
@@ -52,7 +86,7 @@ class TexyHtml
     {
         $el = new self();
         $el->elName = $name;
-        if (isset(Texy::$emptyTags[$name])) $el->childNodes = FALSE;
+        if (isset(self::$emptyTags[$name])) $el->childNodes = FALSE;
         return $el;
     }
 
@@ -65,7 +99,7 @@ class TexyHtml
     public function setElement($name)
     {
         $this->elName = $name;
-        if (isset(Texy::$emptyTags[$name])) $el->childNodes = FALSE;
+        if (isset(self::$emptyTags[$name])) $el->childNodes = FALSE;
         return $this;
     }
 
@@ -174,7 +208,7 @@ class TexyHtml
 
         // for each attribute...
         $attrs = (array) $this;
-        unset($attrs['elName'], $attrs['childNodes'], $attrs['eXtra']);
+        unset($attrs['elName'], $attrs['childNodes'], $attrs['userData']);
 
         foreach ($attrs as $key => $value)
         {
@@ -184,7 +218,7 @@ class TexyHtml
             // true boolean attribute
             if ($value === TRUE) {
                 // in XHTML must use unminimized form
-                if (Texy::$xhtml) $s .= ' ' . $key . '="' . $key . '"';
+                if (self::$XHTML) $s .= ' ' . $key . '="' . $key . '"';
                 // in HTML should use minimized form
                 else $s .= ' ' . $key;
                 continue;
@@ -210,7 +244,7 @@ class TexyHtml
         }
 
         // finish start tag
-        if (Texy::$xhtml  && $this->childNodes === FALSE) return $s . ' />';
+        if (self::$XHTML  && $this->childNodes === FALSE) return $s . ' />';
         return $s . '>';
     }
 
@@ -252,8 +286,8 @@ class TexyHtml
      */
     public function getContentType()
     {
-        if (isset(Texy::$inlineCont[$this->elName])) return Texy::CONTENT_INLINE;
-        if (isset(Texy::$inlineTags[$this->elName])) return Texy::CONTENT_NONE;
+        if (isset(self::$inlineCont[$this->elName])) return Texy::CONTENT_INLINE;
+        if (isset(self::$inlineTags[$this->elName])) return Texy::CONTENT_NONE;
 
         return Texy::CONTENT_BLOCK;
     }
