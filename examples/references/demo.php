@@ -30,9 +30,17 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 class myHandler
 {
 
-    // reference handler
-    function newReference($texy, $refName)
+    /**
+     * User handler for unknown reference
+     *
+     * @param TexyLineParser
+     * @param string   [refName]
+     * @return TexyHtml|string
+     */
+    function newReference($parser, $refName)
     {
+        $texy = $parser->texy;
+
         $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 
         if (!isset($names[$refName])) return FALSE; // it's not my job

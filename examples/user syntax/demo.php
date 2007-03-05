@@ -44,6 +44,14 @@ $texy->registerLinePattern(
 );
 
 
+/**
+ * Pattern handler for my syntaxes
+ *
+ * @param TexyLineParser
+ * @param array   reg-exp matches
+ * @param string  pattern name (mySyntax1 or mySyntax2)
+ * @return TexyHtml|string
+ */
 function userHandler($parser, $matches, $name)
 {
     list($match, $mContent, $mMod) = $matches;

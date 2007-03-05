@@ -133,7 +133,7 @@ class TexyImageModule extends TexyModule
      * @param string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
      * @param string
      * @param bool
-     * @return TexyImage  output
+     * @return TexyImage
      */
     public function factoryImage($content, $mod, $tryRef=TRUE)
     {
@@ -240,7 +240,7 @@ class TexyImageModule extends TexyModule
 
         // event wrapper
         if (is_callable(array($tx->handler, 'image'))) {
-            $res = $tx->handler->image($tx, $image, $link);
+            $res = $tx->handler->image($parser, $image, $link);
             if ($res !== NULL) return $res;
         }
 
@@ -254,7 +254,7 @@ class TexyImageModule extends TexyModule
      *
      * @param TexyImage
      * @param TexyLink
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
     public function solve(TexyImage $image, $link)
     {

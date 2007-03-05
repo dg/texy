@@ -87,7 +87,7 @@ class TexyFigureModule extends TexyModule
 
         // event wrapper
         if (is_callable(array($tx->handler, 'figure'))) {
-            $res = $tx->handler->figure($tx, $image, $link, $mContent, $mod);
+            $res = $tx->handler->figure($parser, $image, $link, $mContent, $mod);
             if ($res !== NULL) return $res;
         }
 
@@ -103,7 +103,7 @@ class TexyFigureModule extends TexyModule
      * @param TexyLink
      * @param string
      * @param TexyModifier
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
     public function solve(TexyImage $image, $link, $content, $mod)
     {
@@ -119,8 +119,8 @@ class TexyFigureModule extends TexyModule
         $mod->decorate($tx, $el);
 
         $el->childNodes['img'] = $elImg;
-        $el->childNodes['caption'] = TexyHtml::el('');
-        $el->childNodes['caption']->parseBlock($tx, ltrim($content));
+        $el->childNodes['caption'] = TexyHtml::el('p');
+        $el->childNodes['caption']->parseLine($tx, ltrim($content));
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             $el->class[] = $this->leftClass;

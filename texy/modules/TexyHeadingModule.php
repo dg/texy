@@ -125,7 +125,7 @@ class TexyHeadingModule extends TexyModule
 
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {
-            $res = $this->texy->handler->heading($this->texy, $level, $mContent, $mod, FALSE);
+            $res = $this->texy->handler->heading($parser, $level, $mContent, $mod, FALSE);
             if ($res !== NULL) return $res;
         }
 
@@ -162,7 +162,7 @@ class TexyHeadingModule extends TexyModule
 
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {
-            $res = $this->texy->handler->heading($this->texy, $level, $mContent, $mod, TRUE);
+            $res = $this->texy->handler->heading($parser, $level, $mContent, $mod, TRUE);
             if ($res !== NULL) return $res;
         }
 
@@ -178,9 +178,9 @@ class TexyHeadingModule extends TexyModule
      * @param string
      * @param TexyModifier
      * @param bool
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
-    public function solve($level, $content, $mod, $surround)
+    public function solve($level, $content, $mod, $isSurrounded)
     {
         $tx = $this->texy;
         $el = new TexyHeadingElement;
@@ -188,7 +188,7 @@ class TexyHeadingModule extends TexyModule
         $el->eXtra['level'] = $level;
         $el->eXtra['top'] = $this->top;
         if ($this->balancing === self::DYNAMIC) {
-            if ($surround)
+            if ($isSurrounded)
                 $el->eXtra['deltaLevel'] = & $this->_deltaSurround;
             else
                 $el->eXtra['deltaLevel'] = & $this->_deltaUnderline;
@@ -240,6 +240,8 @@ class TexyHeadingModule extends TexyModule
  */
 class TexyHeadingElement extends TexyHtml
 {
+    public $elName = 'h?';
+
 
     public function startTag()
     {

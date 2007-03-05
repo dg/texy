@@ -141,8 +141,10 @@ class TexyLinkModule extends TexyModule
 
         if (!$link) {
             // try handler
-            if (is_callable(array($tx->handler, 'newReference')))
-                return $tx->handler->newReference($tx, $name);
+            if (is_callable(array($tx->handler, 'newReference'))) {
+                $res = $tx->handler->newReference($parser, $name);
+                if ($res !== NULL) return $res;
+            }
 
             // no change
             return FALSE;
@@ -166,7 +168,7 @@ class TexyLinkModule extends TexyModule
 
         // event wrapper
         if (is_callable(array($tx->handler, 'linkReference'))) {
-            $res = $tx->handler->linkReference($tx, $link, $content);
+            $res = $tx->handler->linkReference($parser, $link, $content);
             if ($res !== NULL) return $res;
         }
 
@@ -195,7 +197,7 @@ class TexyLinkModule extends TexyModule
         // event wrapper
         $method = $name === 'link/email' ? 'linkEmail' : 'linkURL';
         if (is_callable(array($this->texy->handler, $method))) {
-            $res = $this->texy->handler->$method($this->texy, $link, $content);
+            $res = $this->texy->handler->$method($parser, $link, $content);
             if ($res !== NULL) return $res;
         }
 
@@ -319,7 +321,7 @@ class TexyLinkModule extends TexyModule
      *
      * @param TexyLink
      * @param TexyHtml|string
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
     public function solve($link, $content=NULL)
     {

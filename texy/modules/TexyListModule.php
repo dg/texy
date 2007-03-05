@@ -70,7 +70,7 @@ class TexyListModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml|FALSE
      */
     public function patternList($parser, $matches)
     {
@@ -111,7 +111,11 @@ class TexyListModule extends TexyModule
             $count++;
         }
 
-        if (!$count) return FALSE;
+        if (!$count) return FALSE; // nemelo by nikdy nastat
+
+        // event listener
+        if (is_callable(array($tx->handler, 'afterList')))
+            $tx->handler->afterList($parser, $el, $mod);
 
         return $el;
     }
@@ -125,7 +129,7 @@ class TexyListModule extends TexyModule
      * @param string  bullet type
      * @param string  left space
      * @param string  html tag
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml|FALSE
      */
     public function patternItem($parser, $bullet, $indented, $tag)
     {

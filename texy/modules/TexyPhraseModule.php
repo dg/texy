@@ -257,7 +257,7 @@ class TexyPhraseModule extends TexyModule
 
         // event wrapper
         if (is_callable(array($tx->handler, 'phrase'))) {
-            $res = $tx->handler->phrase($tx, $phrase, $mContent, $mod, $link);
+            $res = $tx->handler->phrase($parser, $phrase, $mContent, $mod, $link);
             if ($res !== NULL) return $res;
         }
 
@@ -273,7 +273,7 @@ class TexyPhraseModule extends TexyModule
      * @param string
      * @param TexyModifier
      * @param TexyLink
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
     public function solve($phrase, $content, $mod, $link)
     {
@@ -312,7 +312,7 @@ class TexyPhraseModule extends TexyModule
      * @param TexyLineParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string|FALSE
+     * @return string
      */
     public function patternNoTexy($parser, $matches)
     {
@@ -327,11 +327,12 @@ class TexyPhraseModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string|FALSE
+     * @return string
      */
     public function patternCodeSwitch($parser, $matches)
     {
         $this->tags['phrase/code'] = $matches[1];
+        return "\n";
     }
 
 } // TexyPhraseModule

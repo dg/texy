@@ -92,7 +92,7 @@ class TexyEmoticonModule extends TexyModule
             {
                 // event wrapper
                 if (is_callable(array($tx->handler, 'emoticon'))) {
-                    $res = $tx->handler->emoticon($tx, $emoticon, $match, $file);
+                    $res = $tx->handler->emoticon($parser, $emoticon, $match, $file);
                     if ($res !== NULL) return $res;
                 }
 
@@ -109,7 +109,7 @@ class TexyEmoticonModule extends TexyModule
      * @param string
      * @param string
      * @param string
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
     public function solve($emoticon, $raw, $file)
     {

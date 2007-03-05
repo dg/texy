@@ -88,7 +88,11 @@ class TexyQuoteModule extends TexyModule
         $el->parseBlock($tx, $content);
 
         // no content?
-        if (!$el->childNodes) return;
+        if (!$el->childNodes) return FALSE;
+
+        // event listener
+        if (is_callable(array($tx->handler, 'afterBlockquote')))
+            $tx->handler->afterBlockquote($parser, $el, $mod);
 
         return $el;
     }

@@ -27,14 +27,17 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 class myHandler {
 
     /**
-     * User handler
-     * @param Texy
+     * User handler for images
+     *
+     * @param TexyLineParser
      * @param TexyImage
      * @param TexyLink
      * @return TexyHtml|string
      */
-    function image($texy, $image, $link)
+    function image($parser, $image, $link)
     {
+        $texy = $parser->texy;
+
         if ($image->imageURL == 'user')  // accepts only [* user *]
         {
             $image->imageURL = 'image.gif'; // image URL

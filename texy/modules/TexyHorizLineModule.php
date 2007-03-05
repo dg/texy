@@ -45,7 +45,7 @@ class TexyHorizLineModule extends TexyModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
     public function pattern($parser, $matches)
     {
@@ -53,9 +53,15 @@ class TexyHorizLineModule extends TexyModule
         //    [1] => ---
         //    [2] => .(title)[class]{style}<>
 
+        $tx = $this->texy;
         $el = TexyHtml::el('hr');
         $mod = new TexyModifier($mMod);
-        $mod->decorate($this->texy, $el);
+        $mod->decorate($tx, $el);
+
+        // event listener
+        if (is_callable(array($tx->handler, 'afterHorizline')))
+            $tx->handler->afterHorizline($parser, $el, $mod);
+
         return $el;
     }
 

@@ -63,7 +63,7 @@ class TexyDefinitionListModule extends TexyListModule
      * @param TexyBlockParser
      * @param array      regexp matches
      * @param string     pattern name
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml
      */
     public function patternDefList($parser, $matches)
     {
@@ -113,6 +113,11 @@ class TexyDefinitionListModule extends TexyListModule
 
             break;
         }
+
+        // event listener
+        if (is_callable(array($tx->handler, 'afterDefinitionList')))
+            $tx->handler->afterDefinitionList($parser, $el, $mod);
+
         return $el;
     }
 

@@ -33,7 +33,7 @@ class TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    public function __construct($texy, $element=NULL)
+    public function __construct(Texy $texy, $element=NULL)
     {
         $this->texy = $texy;
         $this->parentNode = $element;
@@ -113,7 +113,9 @@ class TexyDocumentParser extends TexyParser
                         $dt[$docType]['handler'],
                         array($this, $s, $docType, $param, $mod)
                     );
-                    if ($res != NULL) $nodes[] = $res;
+                    if ($res instanceof TexyHtml || is_string($res)) {
+                        $nodes[] = $res;
+                    }
 
                 } else { // handle as document/texy
                     $el = TexyHtml::el();
@@ -224,8 +226,9 @@ class TexyBlockParser extends TexyParser
             $mContent = preg_replace('#\n (?=\S)#', "\r", $mContent);
         }
 
-        $lineParser = new TexyLineParser($tx);
-        $content = $lineParser->parse($mContent);
+        $el = TexyHtml::el('p');
+        $el->parseLine($tx, $mContent);
+        $content = $el->childNodes;
 
         // check content type
         $contentType = Texy::CONTENT_NONE;
@@ -240,22 +243,22 @@ class TexyBlockParser extends TexyParser
         }
 
         // specify tag
-        if ($contentType === Texy::CONTENT_TEXTUAL) $tag = 'p';
-        elseif ($mMod) $tag = 'div';
-        elseif ($contentType === Texy::CONTENT_BLOCK) $tag = '';
-        else $tag = 'div';
+        if ($contentType !== Texy::CONTENT_TEXTUAL) {
+            if (!$mMod && $contentType === Texy::CONTENT_BLOCK) $el->elName = '';
+            else $el->elName = 'div';
+        }
+
+        $mod = new TexyModifier($mMod);
+        $mod->decorate($tx, $el);
 
         // add <br />
-        if ($tag && (strpos($content, "\r") !== FALSE)) {
+        if ($el->elName && (strpos($content, "\r") !== FALSE)) {
             $key = $tx->protect('<br />', Texy::CONTENT_INLINE);
             $content = str_replace("\r", $key, $content);
         };
         $content = strtr($content, "\r\n", '  ');
+        $el->childNodes = $content;
 
-        $mod = new TexyModifier($mMod);
-        $el = TexyHtml::el($tag);
-        $mod->decorate($tx, $el);
-        $el->childNodes[] = $content;
         return $el;
     }
 
@@ -342,10 +345,11 @@ class TexyBlockParser extends TexyParser
             );
 
             if ($res === FALSE || $this->offset <= $arrPos[$minKey]) { // module rejects text
+                // nemelo by se stat, rozdeli generic block
                 $this->offset = $arrPos[$minKey]; // turn offset back
                 $arrPos[$minKey] = -2;
                 continue;
-            } elseif ($res != NULL) {
+            } elseif ($res instanceof TexyHtml || is_string($res)) {
                 $nodes[] = $res;
             }
 
@@ -461,14 +465,12 @@ class TexyLineParser extends TexyParser
             } elseif ($res === FALSE) {
                 $arrPos[$minKey] = -2;
                 continue;
-            } elseif (!is_string($res)) {
-                $res = (string) $res;
             }
 
             $len = strlen($arrMatches[$minKey][0]);
             $text = substr_replace(
                 $text,
-                $res,
+                (string) $res,
                 $start,
                 $len
             );

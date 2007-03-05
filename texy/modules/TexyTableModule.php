@@ -112,6 +112,10 @@ class TexyTableModule extends TexyModule
             break;
         }
 
+        // event listener
+        if (is_callable(array($tx->handler, 'afterTable')))
+            $tx->handler->afterTable($parser, $el, $mod);
+
         return $el;
     }
 

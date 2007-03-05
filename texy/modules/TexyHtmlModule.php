@@ -62,8 +62,10 @@ class TexyHtmlModule extends TexyModule
 
         $tx = $this->texy;
 
-        if (is_callable(array($tx->handler, 'htmlComment')))
-            return $tx->handler->htmlComment($tx, $match);
+        if (is_callable(array($tx->handler, 'htmlComment'))) {
+            $res = $tx->handler->htmlComment($parser, $match);
+            if ($res !== NULL) return $res;
+        }
 
         return $tx->protect($match, Texy::CONTENT_NONE);
     }
@@ -115,8 +117,10 @@ class TexyHtmlModule extends TexyModule
         if ($aTags === Texy::ALL && $isEmpty) $el->_empty = TRUE; // force empty
 
         if (!$isOpening) { // closing tag? we are finished
-            if (is_callable(array($tx->handler, 'htmlTag')))
-                return $tx->handler->htmlTag($tx, $el, FALSE);
+            if (is_callable(array($tx->handler, 'htmlTag'))) {
+                $res = $tx->handler->htmlTag($parser, $el, FALSE);
+                if ($res !== NULL) return $res;
+            }
 
             return $tx->protect($el->endTag(), $el->getContentType());
         }
@@ -189,8 +193,10 @@ class TexyHtmlModule extends TexyModule
             }
         }
 
-        if (is_callable(array($tx->handler, 'htmlTag')))
-            return $tx->handler->htmlTag($tx, $el, TRUE);
+        if (is_callable(array($tx->handler, 'htmlTag'))) {
+            $res = $tx->handler->htmlTag($parser, $el, TRUE);
+            if ($res !== NULL) return $res;
+        }
 
         return $tx->protect($el->startTag(), $el->getContentType());
     }

@@ -63,11 +63,11 @@ class TexyDocumentModule extends TexyModule
         // event wrapper
         $method = str_replace('/', '', $doctype);
         if (is_callable(array($this->texy->handler, $method))) {
-            $res = $this->texy->handler->$method($this->texy, $s, $param, $mod, $doctype);
+            $res = $this->texy->handler->$method($parser, $s, $param, $mod, $doctype);
             if ($res !== NULL) return $res;
         }
 
-        return $this->solve($s, $doctype, $param, $mod);
+        return $this->solve($s, $param, $mod, $doctype);
     }
 
 
@@ -87,9 +87,9 @@ class TexyDocumentModule extends TexyModule
      * @param string   doctype
      * @param string   additional parameter
      * @param TexyModifier
-     * @return TexyHtml|string|FALSE
+     * @return TexyHtml|string
      */
-    public function solve($s, $doctype, $param=NULL, $mod=NULL)
+    public function solve($s, $param, $mod, $doctype)
     {
         $tx = $this->texy;
 

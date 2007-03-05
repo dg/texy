@@ -115,23 +115,38 @@ class Texy
     /** @var string */
     public $defaultDocument = 'document/texy';
 
-    /** @var TexyModule[]  default modules */
     public
+        /** @var TexyScriptModule */
         $scriptModule,
+        /** @var TexyHtmlModule */
         $htmlModule,
+        /** @var TexyImageModule */
         $imageModule,
+        /** @var TexyLinkModule */
         $linkModule,
+        /** @var TexyPhraseModule */
         $phraseModule,
+        /** @var TexyEmoticonModule */
         $emoticonModule,
+        /** @var TexyDocumentModule */
         $documentModule,
+        /** @var TexyHeadingModule */
         $headingModule,
+        /** @var TexyHorizLineModule */
         $horizLineModule,
+        /** @var TexyQuoteModule */
         $quoteModule,
+        /** @var TexyListModule */
         $listModule,
+        /** @var TexyDefinitionListModule */
         $definitionListModule,
+        /** @var TexyTableModule */
         $tableModule,
+        /** @var TexyFigureModule */
         $figureModule,
+        /** @var TexyTypographyModule */
         $typographyModule,
+        /** @var TexyLongWordsModule */
         $longWordsModule;
 
     public

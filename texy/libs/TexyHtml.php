@@ -227,6 +227,25 @@ class TexyHtml
     }
 
 
+    /**
+     * Is element empty?
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return $this->childNodes === FALSE;
+    }
+
+
+    /**
+     * Is element textual node?
+     * @return bool
+     */
+    public function isTextual()
+    {
+        return $this->childNodes !== FALSE && is_scalar($this->childNodes);
+    }
+
 
     /**
      * @return int

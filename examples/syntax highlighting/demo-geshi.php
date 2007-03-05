@@ -36,16 +36,18 @@ class myHandler
 {
 
     /**
-     * User handler
+     * User handler for code block
      *
-     * @param Texy    base Texy object
+     * @param TexyDocumentParser
      * @param string  text to highlight
      * @param string  language
      * @param TexyModifier modifier
      * @return TexyHtml
      */
-    function documentCode($texy, $content, $lang, $modifier)
+    function documentCode($parser, $content, $lang, $modifier)
     {
+        $texy = $parser->texy;
+
         global $geshiPath;
 
         if ($lang == 'html') $lang = 'html4strict';
