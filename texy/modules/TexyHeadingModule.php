@@ -129,7 +129,7 @@ class TexyHeadingModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($level, $mContent, $mod, FALSE);
+        return $this->solve($level, $mContent, $mod, FALSE);
     }
 
 
@@ -166,7 +166,7 @@ class TexyHeadingModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($level, $mContent, $mod, TRUE);
+        return $this->solve($level, $mContent, $mod, TRUE);
     }
 
 
@@ -180,7 +180,7 @@ class TexyHeadingModule extends TexyModule
      * @param bool
      * @return TexyHtml|string|FALSE
      */
-    public function factory($level, $content, $mod, $surround)
+    public function solve($level, $content, $mod, $surround)
     {
         $tx = $this->texy;
         $el = new TexyHeadingElement;

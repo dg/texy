@@ -80,7 +80,7 @@ class TexyQuoteModule extends TexyModule
                 $content .= $mContent . "\n";
             }
 
-            if (!$parser->receiveNext("#^\>(?:(\>|\ {1,$spaces}|:)(.*))?()$#mA", $matches)) break;
+            if (!$parser->next("#^\>(?:(\>|\ {1,$spaces}|:)(.*))?()$#mA", $matches)) break;
             list(, $mPrefix, $mContent) = $matches;
         } while (TRUE);
 

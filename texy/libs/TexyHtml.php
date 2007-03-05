@@ -29,8 +29,13 @@ class TexyHtml
     /** @var string  element's name */
     public $elName;
 
-    /** @var array|FALSE  element's content, FALSE means empty element */
-    public $childNodes = array();
+    /**
+     * @var mixed  element's content
+     *   array - child nodes
+     *   string - content as string (text-node)
+     *   FALSE - element is empty
+     */
+    public $childNodes;
 
     /** @var mixed  user data */
     public $eXtra;
@@ -79,12 +84,15 @@ class TexyHtml
 
     /**
      * Sets element's content
-     * @param string|TexyHtml object
+     * @param string object
      * @return TexyHtml  itself
      */
     public function setContent($content)
     {
-        $this->childNodes = array( $content );
+        if (!is_scalar($content))
+            throw new Exception('Content must be scalar');
+
+        $this->childNodes = $content;
         return $this;
     }
 
@@ -95,8 +103,20 @@ class TexyHtml
      */
     public function getContent()
     {
-        if (isset($this->childNodes[0])) return $this->childNodes[0];
-        return NULL;
+        if (is_array($this->childNodes)) return NULL;
+        return $this->childNodes;
+    }
+
+
+    /**
+     * Adds new child of element's content
+     * @param string|TexyHtml object
+     * @return TexyHtml  itself
+     */
+    public function addChild($content)
+    {
+        $this->childNodes[] = $content;
+        return $this;
     }
 
 
@@ -126,16 +146,19 @@ class TexyHtml
         if ($this->childNodes === FALSE) return $s;
 
         // add content
-        if (!is_array($this->childNodes))
-            throw new Exception('TexyHtml::childNodes bad usage.');
+        if (is_array($this->childNodes)) {
+            foreach ($this->childNodes as $val) {
+                if ($val instanceof self)
+                    $s .= $val->export($texy);
+                else
+                    $s .= $val;
+            }
+        } else {
+            $s .= $this->childNodes;
+        }
 
-        foreach ($this->childNodes as $val)
-            if ($val instanceof self) $s .= $val->export($texy);
-            else $s .= $val;
-
-        $s .= $texy->protect($this->endTag(), $ct);
-
-        return $s;
+        // add end tag
+        return $s . $texy->protect($this->endTag(), $ct);
     }
 
 
@@ -226,8 +249,8 @@ class TexyHtml
      */
     public function parseLine($texy, $s)
     {
-        $parser = new TexyLineParser($texy);
-        $this->childNodes[] = $parser->parse($s);
+        $parser = new TexyLineParser($texy, $this);
+        $parser->parse($s);
     }
 
 
@@ -240,8 +263,8 @@ class TexyHtml
      */
     public function parseBlock($texy, $s)
     {
-        $parser = new TexyBlockParser($texy);
-        $this->childNodes = $parser->parse($s);
+        $parser = new TexyBlockParser($texy, $this);
+        $parser->parse($s);
     }
 
 
@@ -254,8 +277,8 @@ class TexyHtml
      */
     public function parseDocument($texy, $s)
     {
-        $parser = new TexyDocumentParser($texy);
-        $this->childNodes = $parser->parse($s);
+        $parser = new TexyDocumentParser($texy, $this);
+        $parser->parse($s);
     }
 
 }

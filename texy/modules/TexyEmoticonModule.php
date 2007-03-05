@@ -96,7 +96,7 @@ class TexyEmoticonModule extends TexyModule
                     if ($res !== NULL) return $res;
                 }
 
-                return $this->factory($emoticon, $match, $file);
+                return $this->solve($emoticon, $match, $file);
             }
         }
     }
@@ -111,7 +111,7 @@ class TexyEmoticonModule extends TexyModule
      * @param string
      * @return TexyHtml|string|FALSE
      */
-    public function factory($emoticon, $raw, $file)
+    public function solve($emoticon, $raw, $file)
     {
         $tx = $this->texy;
         $el = TexyHtml::el('img');

@@ -22,13 +22,21 @@ if (!defined('TEXY')) die();
 
 class TexyParser
 {
-    /** @var Texy */
-    protected $texy;
+    /** @var Texy  READONLY */
+    public $texy;
+
+    /** @var TexyHtml  READONLY */
+    public $parentNode;
 
 
-    public function __construct($texy)
+    /**
+     * @param Texy
+     * @param TexyHtml
+     */
+    public function __construct($texy, $element=NULL)
     {
         $this->texy = $texy;
+        $this->parentNode = $element;
     }
 
     /**
@@ -52,6 +60,10 @@ class TexyDocumentParser extends TexyParser
     public $defaultType = 'pre';
 
 
+    /**
+     * @param string
+     * @return array
+     */
     public function parse($text)
     {
         $tx = $this->texy;
@@ -84,8 +96,9 @@ class TexyDocumentParser extends TexyParser
                 $level = 1;
                 do {
                     $i++;
+                    if ($i === $count) break;
                     $level += $matches[$i][1][0] === '/' ? +1 : -1;
-                } while ($i < $count && $level !== 0);
+                } while ($level !== 0);
             } else {
                 $i++;
             }
@@ -131,6 +144,9 @@ class TexyDocumentParser extends TexyParser
 
         } while (1);
 
+        if ($this->parentNode)
+            $this->parentNode->childNodes = $nodes;
+
         return $nodes;
     }
 
@@ -162,7 +178,7 @@ class TexyBlockParser extends TexyParser
 
     // match current line against RE.
     // if succesfull, increments current position and returns TRUE
-    public function receiveNext($pattern, &$matches)
+    public function next($pattern, &$matches)
     {
         $matches = NULL;
         $ok = preg_match(
@@ -245,6 +261,10 @@ class TexyBlockParser extends TexyParser
 
 
 
+    /**
+     * @param string
+     * @return array
+     */
     public function parse($text)
     {
         // initialization
@@ -333,6 +353,9 @@ class TexyBlockParser extends TexyParser
 
         } while (1);
 
+        if ($this->parentNode)
+            $this->parentNode->childNodes = $nodes;
+
         return $nodes;
     }
 
@@ -360,6 +383,10 @@ class TexyLineParser extends TexyParser
     public $onlyHtml;
 
 
+    /**
+     * @param string
+     * @return string
+     */
     public function parse($text)
     {
         $tx = $this->texy;
@@ -460,6 +487,9 @@ class TexyLineParser extends TexyParser
             }
 
         } while (1);
+
+        if ($this->parentNode)
+            $this->parentNode->childNodes = $text;
 
         return $text;
     }

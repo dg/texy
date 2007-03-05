@@ -242,7 +242,7 @@ class TexyPhraseModule extends TexyModule
             if ($mLink == NULL) {
                 if (!$mMod) return FALSE; // means "..."
             } else {
-                $link = $tx->linkModule->parse($mLink, $mMod, $mContent);
+                $link = $tx->linkModule->factoryLink($mLink, $mMod, $mContent);
             }
 
         } elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
@@ -252,7 +252,7 @@ class TexyPhraseModule extends TexyModule
             $mod->cite = $tx->quoteModule->citeLink($mLink);
 
         } elseif ($mLink != NULL) {
-            $link = $tx->linkModule->parse($mLink, NULL, $mContent);
+            $link = $tx->linkModule->factoryLink($mLink, NULL, $mContent);
         }
 
         // event wrapper
@@ -261,7 +261,7 @@ class TexyPhraseModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($phrase, $mContent, $mod, $link);
+        return $this->solve($phrase, $mContent, $mod, $link);
     }
 
 
@@ -275,7 +275,7 @@ class TexyPhraseModule extends TexyModule
      * @param TexyLink
      * @return TexyHtml|string|FALSE
      */
-    public function factory($phrase, $content, $mod, $link)
+    public function solve($phrase, $content, $mod, $link)
     {
         $tx = $this->texy;
 
@@ -290,18 +290,18 @@ class TexyPhraseModule extends TexyModule
             $el = $content;
 
         if ($phrase === 'phrase/strong+em') {
-            $el = TexyHtml::el($this->tags['phrase/em'])->setContent($el);
+            $el = TexyHtml::el($this->tags['phrase/em'])->addChild($el);
             $tag = $this->tags['phrase/strong'];
         }
 
         if ($tag) {
-            $el = TexyHtml::el($tag)->setContent($el);
+            $el = TexyHtml::el($tag)->addChild($el);
             $mod->decorate($tx, $el);
         }
 
         if ($tag === 'q') $el->cite = $mod->cite;
 
-        if ($link) return $tx->linkModule->factory($link)->setContent($el);
+        if ($link) return $tx->linkModule->solve($link)->addChild($el);
 
         return $el;
     }

@@ -170,7 +170,7 @@ class TexyLinkModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($link, $content);
+        return $this->solve($link, $content);
     }
 
 
@@ -199,7 +199,7 @@ class TexyLinkModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($link, $content);
+        return $this->solve($link, $content);
     }
 
 
@@ -277,7 +277,7 @@ class TexyLinkModule extends TexyModule
      * @param string
      * @return TexyLink
      */
-    public function parse($dest, $mMod, $label)
+    public function factoryLink($dest, $mMod, $label)
     {
         $tx = $this->texy;
         $type = TexyLink::NORMAL;
@@ -321,7 +321,7 @@ class TexyLinkModule extends TexyModule
      * @param TexyHtml|string
      * @return TexyHtml|string|FALSE
      */
-    public function factory($link, $content=NULL)
+    public function solve($link, $content=NULL)
     {
         $tx = $this->texy;
 
@@ -362,7 +362,7 @@ class TexyLinkModule extends TexyModule
         // popup on click
         if ($popup) $el->onclick = $this->popupOnClick;
 
-        if ($content !== NULL) $el->setContent($content);
+        if ($content !== NULL) $el->addChild($content);
 
         $tx->summary['links'][] = $el->href;
 

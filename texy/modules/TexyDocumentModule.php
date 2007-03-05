@@ -67,7 +67,7 @@ class TexyDocumentModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($s, $doctype, $param, $mod);
+        return $this->solve($s, $doctype, $param, $mod);
     }
 
 
@@ -89,7 +89,7 @@ class TexyDocumentModule extends TexyModule
      * @param TexyModifier
      * @return TexyHtml|string|FALSE
      */
-    public function factory($s, $doctype, $param=NULL, $mod=NULL)
+    public function solve($s, $doctype, $param=NULL, $mod=NULL)
     {
         $tx = $this->texy;
 

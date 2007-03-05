@@ -70,7 +70,7 @@ class TexyFigureModule extends TexyModule
         //    [6] => .(title)[class]{style}<>
 
         $tx = $this->texy;
-        $image = $tx->imageModule->parse($mURLs, $mImgMod.$mAlign, TRUE);
+        $image = $tx->imageModule->factoryImage($mURLs, $mImgMod.$mAlign);
         $mod = new TexyModifier($mMod);
         $mContent = ltrim($mContent);
 
@@ -81,7 +81,7 @@ class TexyFigureModule extends TexyModule
                 $link->type = TexyLink::AUTOIMAGE;
                 $link->modifier = new TexyModifier;
             } else {
-                $link = $tx->linkModule->parse($mLink, NULL, NULL);
+                $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
             }
         } else $link = NULL;
 
@@ -91,7 +91,7 @@ class TexyFigureModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($image, $link, $mContent, $mod);
+        return $this->solve($image, $link, $mContent, $mod);
     }
 
 
@@ -105,14 +105,14 @@ class TexyFigureModule extends TexyModule
      * @param TexyModifier
      * @return TexyHtml|string|FALSE
      */
-    public function factory(TexyImage $image, $link, $content, $mod)
+    public function solve(TexyImage $image, $link, $content, $mod)
     {
         $tx = $this->texy;
 
         $hAlign = $image->modifier->hAlign;
         $mod->hAlign = $image->modifier->hAlign = NULL;
 
-        $elImg = $tx->imageModule->factory($image, $link);
+        $elImg = $tx->imageModule->solve($image, $link);
 
         $el = TexyHtml::el('div');
         if (!empty($image->width)) $el->style['width'] = ($image->width + $this->widthDelta) . 'px';

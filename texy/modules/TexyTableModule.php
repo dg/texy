@@ -79,7 +79,7 @@ class TexyTableModule extends TexyModule
 
         $parser->moveBackward();
 
-        if ($parser->receiveNext('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
+        if ($parser->next('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
             list(, , $mContent, $mMod) = $matches;
             //    [1] => # / =
             //    [2] => ....
@@ -98,7 +98,7 @@ class TexyTableModule extends TexyModule
         $this->row = 0;
 
         while (TRUE) {
-            if ($parser->receiveNext('#^\|\-{3,}$#Um', $matches)) {
+            if ($parser->next('#^\|\-{3,}$#Um', $matches)) {
                 $this->isHead = !$this->isHead;
                 continue;
             }
@@ -126,7 +126,7 @@ class TexyTableModule extends TexyModule
     {
         $tx = $this->texy;
 
-        if (!$parser->receiveNext('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
+        if (!$parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
             return FALSE;
         }
         list(, $mContent, $mMod) = $matches;
@@ -189,7 +189,7 @@ class TexyTableModule extends TexyModule
             $mod->decorate($tx, $elField);
 
             $elField->parseLine($tx, $mContent);
-            if ($elField->childNodes[0] === '') $elField->childNodes[0]  = "\xC2\xA0"; // &nbsp;
+            if ($elField->childNodes === '') $elField->childNodes  = "\xC2\xA0"; // &nbsp;
 
             $elRow->childNodes[] = $elField;
             $this->last[$col] = $elField;

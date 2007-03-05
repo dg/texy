@@ -97,7 +97,7 @@ class TexyDefinitionListModule extends TexyListModule
                 continue;
             }
 
-            if ($parser->receiveNext($patternTerm, $matches)) {
+            if ($parser->next($patternTerm, $matches)) {
                 list(, $mContent, $mMod) = $matches;
                 //    [1] => ...
                 //    [2] => .(title)[class]{style}<>

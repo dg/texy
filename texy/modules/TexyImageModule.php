@@ -99,7 +99,7 @@ class TexyImageModule extends TexyModule
 
         if (!$modifier) $modifier = new TexyModifier;
 
-        $image = $this->parse($URLs, NULL, FALSE);
+        $image = $this->factoryImage($URLs, NULL, FALSE);
         $image->modifier = $modifier;
         $image->name = $name;
         $this->references[$name] = $image;
@@ -135,7 +135,7 @@ class TexyImageModule extends TexyModule
      * @param bool
      * @return TexyImage  output
      */
-    public function parse($content, $mod, $tryRef)
+    public function factoryImage($content, $mod, $tryRef=TRUE)
     {
         $image = $tryRef ? $this->getReference(trim($content)) : FALSE;
 
@@ -225,7 +225,7 @@ class TexyImageModule extends TexyModule
 
         $tx = $this->texy;
 
-        $image = $this->parse($mURLs, $mMod.$mAlign, TRUE);
+        $image = $this->factoryImage($mURLs, $mMod.$mAlign);
 
         if ($mLink) {
             if ($mLink === ':') {
@@ -234,7 +234,7 @@ class TexyImageModule extends TexyModule
                 $link->type = TexyLink::AUTOIMAGE;
                 $link->modifier = new TexyModifier;
             } else {
-                $link = $tx->linkModule->parse($mLink, NULL, NULL);
+                $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
             }
         } else $link = NULL;
 
@@ -244,7 +244,7 @@ class TexyImageModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $this->factory($image, $link);
+        return $this->solve($image, $link);
     }
 
 
@@ -256,7 +256,7 @@ class TexyImageModule extends TexyModule
      * @param TexyLink
      * @return TexyHtml|string|FALSE
      */
-    public function factory(TexyImage $image, $link)
+    public function solve(TexyImage $image, $link)
     {
         $tx = $this->texy;
         $src = Texy::completeURL($image->imageURL, $this->root);
@@ -334,7 +334,7 @@ class TexyImageModule extends TexyModule
 
         $tx->summary['images'][] = $el->src;
 
-        if ($link) return $tx->linkModule->factory($link, $el);
+        if ($link) return $tx->linkModule->solve($link, $el);
 
         return $el;
     }
