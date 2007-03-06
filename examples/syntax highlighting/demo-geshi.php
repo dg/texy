@@ -38,20 +38,24 @@ class myHandler
     /**
      * User handler for code block
      *
-     * @param TexyDocumentParser
+     * @param TexyBlockParser
+     * @param string  block type
      * @param string  text to highlight
      * @param string  language
      * @param TexyModifier modifier
      * @return TexyHtml
      */
-    function documentCode($parser, $content, $lang, $modifier)
+    public function block($parser, $blocktype, $content, $lang, $modifier)
     {
+        if ($blocktype !== 'block/code') 
+            return NULL; // NULL means 'don't handle'
+
         $texy = $parser->texy;
 
         global $geshiPath;
 
         if ($lang == 'html') $lang = 'html4strict';
-        $content = $texy->documentModule->outdent($content);
+        $content = $texy->blockModule->outdent($content);
         $geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
         // GeSHi could not find the language

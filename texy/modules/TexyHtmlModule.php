@@ -31,7 +31,7 @@ class TexyHtmlModule extends TexyModule
     );
 
 
-    public function init()
+    public function init(&$text)
     {
         $this->texy->registerLinePattern(
             array($this, 'patternTag'),

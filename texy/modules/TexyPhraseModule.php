@@ -73,7 +73,7 @@ class TexyPhraseModule extends TexyModule
 
 
 
-    public function init()
+    public function init(&$text)
     {
         $tx = $this->texy;
 /*

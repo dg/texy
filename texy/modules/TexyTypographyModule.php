@@ -62,12 +62,12 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
 
 
-    public function init()
+    public function init(&$text)
     {
         // CONTENT_NONE mark:    \x17-\x1F
         // CONTENT_INLINE mark:  \x16
         // CONTENT_TEXTUAL mark: \x17
-        // CONTENT_BLOCK: not used in linePostProcess
+        // CONTENT_BLOCK: not used in postLine
 
         $pairs = array(
             '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
@@ -78,6 +78,9 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
             '#([\x{2013}\x{2014}]) #u'                => "\$1\xc2\xa0",                    // dash &nbsp;
             '# --- #'                                 => " \xe2\x80\x94\xc2\xa0",          // em dash ---
             '# -- #'                                  => " \xe2\x80\x93\xc2\xa0",          // en dash --
+//            '# --> #'                                 => " \xe2\x86\x92 ",                 // right arrow ->
+//            '# <-- #'                                 => " \xe2\x86\x90 ",                 // left arrow ->
+//            '# <--> #'                                => " \xe2\x86\x94 ",                 // left right arrow <->
             '# -> #'                                  => " \xe2\x86\x92 ",                 // right arrow ->
             '# <- #'                                  => " \xe2\x86\x90 ",                 // left arrow ->
             '# <-> #'                                 => " \xe2\x86\x94 ",                 // left right arrow <->
@@ -120,7 +123,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
 
 
-    public function linePostProcess($text)
+    public function postLine($text)
     {
         if (empty($this->texy->allowed['typography'])) return $text;
 

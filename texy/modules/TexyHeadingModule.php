@@ -68,12 +68,12 @@ class TexyHeadingModule extends TexyModule
 
 
 
-    public function init()
+    public function init(&$text)
     {
         $this->texy->registerBlockPattern(
             array($this, 'patternUnderline'),
             '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
-          . '(\#|\*|\=|\-){3,}$#mU',
+          . '([\#*=-]{3,})$#mU',
             'heading/underlined'
         );
 
@@ -114,7 +114,7 @@ class TexyHeadingModule extends TexyModule
         //    [3] => ...
 
         $mod = new TexyModifier($mMod);
-        $level = $this->levels[$mLine];
+        $level = $this->levels[$mLine[0]];
 
         // dynamic headings balancing
         $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $level);
@@ -198,7 +198,7 @@ class TexyHeadingModule extends TexyModule
         $el->parseLine($tx, trim($content));
 
         // document title
-        $title = Texy::wash($el->getContent());
+        $title = Texy::_clean($el->getContent());
         if ($this->title === NULL) $this->title = $title;
 
         // Table of Contents

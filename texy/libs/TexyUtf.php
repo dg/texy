@@ -22,7 +22,7 @@ if (!defined('TEXY')) die();
 
 
 /**
- * HTML helper
+ * UTF-8 helper
  */
 class TexyUtf
 {

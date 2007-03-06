@@ -28,7 +28,7 @@ class TexyHorizLineModule extends TexyModule
     protected $default = array('horizline' => TRUE);
 
 
-    public function init()
+    public function init(&$text)
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),

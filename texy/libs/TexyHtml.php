@@ -160,11 +160,13 @@ class TexyHtml
      * @param array function arguments
      * @return TexyHtml  itself
      */
+     /*
     public function __call($m, $args)
     {
         $this->$m = $args[0];
         return $this;
     }
+    */
 
 
     /**
@@ -317,20 +319,6 @@ class TexyHtml
     public function parseBlock($texy, $s)
     {
         $parser = new TexyBlockParser($texy, $this);
-        $parser->parse($s);
-    }
-
-
-
-    /**
-     * Parses text as new document
-     * @param Texy
-     * @param string
-     * @return void
-     */
-    public function parseDocument($texy, $s)
-    {
-        $parser = new TexyDocumentParser($texy, $this);
         $parser->parse($s);
     }
 

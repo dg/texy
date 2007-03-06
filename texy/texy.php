@@ -35,7 +35,7 @@ require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
 require_once TEXY_DIR.'libs/TexyUtf.php';
-require_once TEXY_DIR.'modules/TexyDocumentModule.php';
+require_once TEXY_DIR.'modules/TexyBlockModule.php';
 require_once TEXY_DIR.'modules/TexyHeadingModule.php';
 require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
 require_once TEXY_DIR.'modules/TexyHtmlModule.php';
@@ -91,9 +91,6 @@ class Texy
     /** @var boolean  Do obfuscate e-mail addresses? */
     public $obfuscateEmail = TRUE;
 
-    /** @var int  TAB width (for converting tabs to spaces) */
-    public $tabWidth = 8;
-
     /** @var array  Parsing summary */
     public $summary = array(
         'images' => array(),
@@ -110,9 +107,6 @@ class Texy
     /** @var object  User handler object */
     public $handler;
 
-    /** @var string */
-    public $defaultDocument = 'document/texy';
-
     public
         /** @var TexyScriptModule */
         $scriptModule,
@@ -126,8 +120,8 @@ class Texy
         $phraseModule,
         /** @var TexyEmoticonModule */
         $emoticonModule,
-        /** @var TexyDocumentModule */
-        $documentModule,
+        /** @var TexyBlockModule */
+        $blockModule,
         /** @var TexyHeadingModule */
         $headingModule,
         /** @var TexyHorizLineModule */
@@ -169,8 +163,6 @@ class Texy
      */
     private $blockPatterns = array();
 
-    /** @var array */
-    private $docTypes = array();
 
     /** @var TexyDomElement  DOM structure for parsed text */
     private $DOM;
@@ -204,7 +196,6 @@ class Texy
 
         // default configuration
         $this->trustMode();
-        $this->allowed['document/texy'] = TRUE;
 
         // examples of link reference ;-)
         $mod = new TexyModifier;
@@ -231,7 +222,7 @@ class Texy
         $this->emoticonModule = new TexyEmoticonModule($this);
 
         // block parsing - order is not important
-        $this->documentModule = new TexyDocumentModule($this);
+        $this->blockModule = new TexyBlockModule($this);
         $this->headingModule = new TexyHeadingModule($this);
         $this->horizLineModule = new TexyHorizLineModule($this);
         $this->quoteModule = new TexyQuoteModule($this);
@@ -277,21 +268,34 @@ class Texy
 
 
 
-    public function registerDocType($handler, $name, $nested)
+
+    /**
+     * Convert Texy! document in (X)HTML code
+     * This is shortcut for parse() & toHtml()
+     *
+     * @param string   input text
+     * @param bool     is block or single line?
+     * @return string  output html code
+     */
+    public function process($text, $singleLine = FALSE)
     {
-        if (empty($this->allowed[$name])) return;
-        $this->docTypes[$name] = array(
-            'handler'     => $handler,
-            'nested'      => $nested,
-        );
+        $this->parse($text, $singleLine);
+        return $this->toHtml();
     }
 
 
+
     /**
-     * Initialization - called before every use
+     * Converts Texy! document into internal DOM structure ($this->DOM)
+     * Before converting it normalize text and call all pre-processing modules
+     *
+     * @param string
+     * @param bool     is block or single line?
+     * @return void
      */
-    protected function init()
+    public function parse($text, $singleLine = FALSE)
     {
+         // initialization
         if ($this->handler && !is_object($this->handler))
             throw new Exception('$texy->handler must be object. See documentation.');
 
@@ -305,115 +309,33 @@ class Texy
         if (is_array($this->allowedStyles)) $this->_styles = array_flip($this->allowedStyles);
         else $this->_styles = $this->allowedStyles;
 
+        $tmp = array($this->linePatterns, $this->blockPatterns);
+
+        // convert to UTF-8 (and check source encoding)
+        $text = iconv($this->encoding, 'utf-8', $text);
+
+        // standardize line endings and spaces
+        $text = self::wash($text);
+
         // init modules
-        foreach ($this->modules as $module) $module->init();
-    }
+        foreach ($this->modules as $module) $module->init($text);
 
-
-
-    /**
-     * Convert Texy! document in (X)HTML code
-     * This is shortcut for parse() & toHtml()
-     *
-     * @param string   input text
-     * @param bool     is block or single line?
-     * @return string  output html code
-     */
-    public function process($text, $singleLine = FALSE)
-    {
+        // parse!
+        $this->DOM = TexyHtml::el();
         if ($singleLine)
-            $this->parseLine($text);
+            $this->DOM->parseLine($this, $text);
         else
-            $this->parse($text);
-
-        return $this->toHtml();
-    }
-
-
-
-    /**
-     * Converts Texy! document into internal DOM structure ($this->DOM)
-     * Before converting it normalize text and call all pre-processing modules
-     *
-     * @param string
-     * @return void
-     */
-    public function parse($text)
-    {
-         // initialization
-        $this->init();
-
-        // convert to UTF-8 (and check source encoding)
-        $text = iconv($this->encoding, 'utf-8', $text);
-
-        // remove special chars
-        $text = self::wash($text);
-
-        // standardize line endings to unix-like  (dos, mac)
-        $text = str_replace("\r\n", "\n", $text); // DOS
-        $text = strtr($text, "\r", "\n"); // Mac
-
-        // replace tabs with spaces
-        while (strpos($text, "\t") !== FALSE)
-            $text = preg_replace_callback('#^(.*)\t#mU',
-                       create_function('$matches', "return \$matches[1] . str_repeat(' ', $this->tabWidth - strlen(\$matches[1]) % $this->tabWidth);"),
-                       $text);
-
-        // remove texy! comments
-        $text = preg_replace('#\xC2\xA7{2,}(?!\xC2\xA7).*(\xC2\xA7{2,}|$)(?!\xC2\xA7)#mU', '', $text);
-
-        // right trim
-        $text = preg_replace("#[\t ]+$#m", '', $text); // right trim
-
-        // pre-processing
-        foreach ($this->modules as $module)
-            $text = $module->preProcess($text);
-
-        // process
-        $this->DOM = TexyHtml::el();
-        $this->DOM->parseDocument($this, $text);
+            $this->DOM->parseBlock($this, $text);
 
         // user handler
         if (is_callable(array($this->handler, 'afterParse')))
-            $this->handler->afterParse($this, $this->DOM, FALSE);
+            $this->handler->afterParse($this, $this->DOM, $singleLine);
 
         // clean-up
-        $this->docTypes = $this->linePatterns = $this->blockPatterns = array();
+        list($this->linePatterns, $this->blockPatterns) = $tmp;
     }
 
 
-
-    /**
-     * Converts Texy! single line text into internal DOM structure ($this->DOM)
-     * @param string
-     * @return void
-     */
-    public function parseLine($text)
-    {
-        // initialization
-        $this->init();
-
-        // convert to UTF-8 (and check source encoding)
-        $text = iconv($this->encoding, 'utf-8', $text);
-
-        // remove special chars
-        $text = self::wash($text);
-
-        // standardize line endings to unix-like  (dos, mac)
-        $text = str_replace("\r\n", "\n", $text); // DOS
-        $text = strtr($text, "\r", "\n"); // Mac
-
-        // parse
-        $this->DOM = TexyHtml::el();
-        $this->DOM->parseLine($this, $text);
-
-        // user handler
-        if (is_callable(array($this->handler, 'afterParse')))
-            $this->handler->afterParse($this, $this->DOM, TRUE);
-
-        // clean-up
-        $this->docTypes = $this->linePatterns = $this->blockPatterns = array();
-    }
 
 
 
@@ -425,6 +347,7 @@ class Texy
     {
         // Convert DOM structure to (X)HTML code
         if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
+
         $html = $this->export($this->DOM);
 
         // this notice should remain!
@@ -448,6 +371,7 @@ class Texy
     {
         // Convert DOM structure to (X)HTML code
         if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
+
         $save = $this->formatter->lineWrap;
         $this->formatter->lineWrap = FALSE;
         $html = $this->export($this->DOM);
@@ -491,7 +415,7 @@ class Texy
             if ($module instanceof ITexyLineModule) {
                 foreach ($blocks as $n => $s) {
                     if ($n % 2 === 0 && $s !== '')
-                        $blocks[$n] = $module->linePostProcess($s);
+                        $blocks[$n] = $module->postLine($s);
                 }
             }
         }
@@ -596,9 +520,35 @@ class Texy
      * @param string
      * @return string
      */
-    static public function wash($s)
+    static public function _clean($s)
     {
         return preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
+    }
+
+
+
+    /**
+     * Removes special controls characters and standardize line endings and spaces
+     * @param string
+     * @return string
+     */
+    static public function wash($s)
+    {
+        // remove special chars
+        $s = self::_clean($s);
+
+        // standardize line endings to unix-like
+        $s = str_replace("\r\n", "\n", $s); // DOS
+        $s = strtr($s, "\r", "\n"); // Mac
+
+        // right trim
+        $s = preg_replace("#[\t ]+$#m", '', $s); // right trim
+
+        // replace tabs with spaces
+        while (strpos($s, "\t") !== FALSE)
+            $s = preg_replace_callback('#^(.*)\t#mU', array('Texy', 'tabCb'), $s);
+
+        return $s;
     }
 
 
@@ -704,9 +654,17 @@ class Texy
 
 
 
-    public function getDocTypes()
+    public function getModules()
     {
-        return $this->docTypes;
+        return $this->modules;
+    }
+
+
+
+    static private function tabCb($m)
+    {
+        // tab width = 8
+        return $m[1] . str_repeat(' ', 8 - strlen($m[1]) % 8);
     }
 
 

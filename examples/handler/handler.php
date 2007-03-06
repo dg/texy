@@ -25,88 +25,6 @@ $texy->handler = new myHandler;
 
 class myHandler
 {
-    /** Document types */
-
-    /**
-     * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param string
-     * @return TexyHtml|string|NULL
-     */
-    public function documentPre($parser, $content, $param, $modifier, $doctype)
-    {
-        // return $parser->texy->documentModule->solve($content, $param, $modifier, $doctype);
-    }
-
-    /**
-     * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param string
-     * @return TexyHtml|string|NULL
-     */
-    public function documentCode($parser, $content, $param, $modifier, $doctype)
-    {
-        // return $parser->texy->documentModule->solve($content, $param, $modifier, $doctype);
-    }
-
-    /**
-     * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param string
-     * @return TexyHtml|string|NULL
-     */
-    public function documentHtml($parser, $content, $param, $modifier, $doctype)
-    {
-        // return $parser->texy->documentModule->solve($content, $param, $modifier, $doctype);
-    }
-
-    /**
-     * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param string
-     * @return TexyHtml|string|NULL
-     */
-    public function documentText($parser, $content, $param, $modifier, $doctype)
-    {
-        // return $parser->texy->documentModule->solve($content, $param, $modifier, $doctype);
-    }
-
-    /**
-     * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param string
-     * @return TexyHtml|string|NULL
-     */
-    public function documentTexySource($parser, $content, $param, $modifier, $doctype)
-    {
-        // return $parser->texy->documentModule->solve($content, $param, $modifier, $doctype);
-    }
-
-    /**
-     * @param TexyDocumentParser
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param string
-     * @return TexyHtml|string|NULL
-     */
-    public function documentComment($parser, $content, $param, $modifier, $doctype)
-    {
-        // return $parser->texy->documentModule->solve($content, $param, $modifier, $doctype);
-    }
-
-
-
 
 
     /** Line parsing */
@@ -240,6 +158,19 @@ class myHandler
     public function heading($parser, $level, $content, $modifier, $isSurrounded)
     {
         // return $parser->texy->headingModule->solve($level, $content, $modifier, $isSurrounded);
+    }
+
+    /**
+     * @param TexyBlockParser
+     * @param string
+     * @param string
+     * @param string
+     * @param TexyModifier
+     * @return TexyHtml|string|NULL
+     */
+    public function block($parser, $blocktype, $content, $param, $modifier)
+    {
+        // return $parser->texy->blockModule->solve($blocktype, $content, $param, $modifier);
     }
 
     /**

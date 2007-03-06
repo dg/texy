@@ -77,7 +77,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyLineModule
 
 
 
-    public function linePostProcess($text)
+    public function postLine($text)
     {
         if (empty($this->texy->allowed['longwords'])) return $text;
 

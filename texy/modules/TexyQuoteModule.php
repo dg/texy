@@ -28,12 +28,12 @@ class TexyQuoteModule extends TexyModule
     protected $default = array('blockquote' => TRUE);
 
 
-    public function init()
+    public function init(&$text)
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
 //            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU',  // >>>>
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))?()$#mU',       // only >
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU',       // only >
             'blockquote'
         );
     }

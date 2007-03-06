@@ -27,6 +27,7 @@ class TexyImageModule extends TexyModule
 {
     protected $default = array(
         'image' => TRUE,
+        'image/definition' => TRUE,
     );
 
     /** @var string  root of relative images (http) */
@@ -69,7 +70,7 @@ class TexyImageModule extends TexyModule
 
 
 
-    public function init()
+    public function init(&$text)
     {
         // [*image*]:LINK
         $this->texy->registerLinePattern(
@@ -77,6 +78,14 @@ class TexyImageModule extends TexyModule
             '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U',
             'image'
         );
+
+        // [*image*]: urls .(title)[class]{style}
+        if ($this->texy->allowed['image/definition'])
+           $text = preg_replace_callback(
+               '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mU',
+               array($this, 'patternReferenceDef'),
+               $text
+           );
     }
 
 
@@ -158,20 +167,6 @@ class TexyImageModule extends TexyModule
 
         $image->modifier->setProperties($mod);
         return $image;
-    }
-
-
-    /**
-     * Text preprocessing
-     */
-    public function preProcess($text)
-    {
-        // [*image*]: urls .(title)[class]{style}
-        return preg_replace_callback(
-            '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?()$#mU',
-            array($this, 'patternReferenceDef'),
-            $text
-        );
     }
 
 
@@ -316,8 +311,7 @@ class TexyImageModule extends TexyModule
             $overSrc = Texy::completeURL($image->overURL, $this->root);
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
             $el->onmouseout = 'this.src=\'' . addSlashes($src) . '\'';
-            static $counter; $counter++;
-            $el->onload = "preload_$counter=new Image();preload_$counter.src='" . addSlashes($overSrc) . "';this.onload=''";
+            $el->onload = "var i=new Image();i.src='" . addSlashes($overSrc) . "';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
             $tx->summary['preload'][] = $overSrc;
         }
 

@@ -55,7 +55,7 @@ class TexyLinkModule extends TexyModule
 
 
 
-    public function init()
+    public function init(&$text)
     {
         self::$deadlock = array();
 
@@ -79,24 +79,17 @@ class TexyLinkModule extends TexyModule
             '#(?<=\s|^|\(|\[|\<|:)'.TEXY_EMAIL.'#i',
             'link/email'
         );
-    }
 
 
-
-    /**
-     * Text preprocessing
-     */
-    public function preProcess($text)
-    {
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
         if ($this->texy->allowed['link/definition'])
-            return preg_replace_callback(
-                '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?()$#mU',
+            $text = preg_replace_callback(
+                '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mU',
                 array($this, 'patternReferenceDef'),
                 $text
             );
-        return $text;
     }
+
 
 
 
@@ -297,7 +290,7 @@ class TexyLinkModule extends TexyModule
             $link->modifier = new TexyModifier;
         }
 
-        $link->URL = str_replace('%s', urlencode(Texy::wash($label)), $link->URL);
+        $link->URL = str_replace('%s', urlencode(Texy::_clean($label)), $link->URL);
         $link->modifier->setProperties($mMod);
         $link->type = $type;
         return $link;

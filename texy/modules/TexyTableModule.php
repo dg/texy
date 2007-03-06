@@ -40,7 +40,7 @@ class TexyTableModule extends TexyModule
 
 
 
-    public function init()
+    public function init(&$text)
     {
         $this->texy->registerBlockPattern(
             array($this, 'patternTable'),
@@ -98,7 +98,7 @@ class TexyTableModule extends TexyModule
         $this->row = 0;
 
         while (TRUE) {
-            if ($parser->next('#^\|\-{3,}$#Um', $matches)) {
+            if ($parser->next('#^\|[+-]{3,}$#Um', $matches)) {
                 $this->isHead = !$this->isHead;
                 continue;
             }

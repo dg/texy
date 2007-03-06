@@ -34,7 +34,7 @@ class TexyScriptModule extends TexyModule
     public $handler;
 
 
-    public function init()
+    public function init(&$text)
     {
         $this->texy->registerLinePattern(
             array($this, 'pattern'),

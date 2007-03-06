@@ -44,7 +44,7 @@ abstract class TexyModule
     /**
      * Registers all line & block patterns
      */
-    public function init()
+    public function init(&$text)
     {
     }
 
@@ -54,7 +54,7 @@ abstract class TexyModule
      * @param string
      * @return string
      */
-    public function preProcess($text)
+    public function preBlock($text)
     {
         return $text;
     }
@@ -79,6 +79,6 @@ interface ITexyLineModule
      * @param string
      * @return string
      */
-    public function linePostProcess($line);
+    public function postLine($line);
 
 }

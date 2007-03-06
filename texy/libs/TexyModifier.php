@@ -73,7 +73,6 @@ class TexyModifier
     public function setProperties($mod)
     {
         if (!$mod) return;
-        $mod = strtr($mod, "\n", ' ');
 
         $p = 0;
         $len = strlen($mod);
