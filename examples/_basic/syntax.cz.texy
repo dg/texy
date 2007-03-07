@@ -221,10 +221,6 @@ A další: ^^superscript^^ vs. __subscript__
 
 Kód: `<br />`
 
-Zmìna znaèky pro frázi 'kód':
-`=kbd
-
-A pak: `Ctrl-Alt-Del`
 
 
 s modifikátory
@@ -366,7 +362,7 @@ Quick-corrects
 - acronym NATO((North Atlantic Treaty Organisation))
 - abbr "et al."((a další))
 - náhrady(TM) nebo(R) za pøíslušné (C)entity
-- šipky <- a -> a <->
+- šipky <-- a --> a <--> ;
 - tøi teèky...
 - zachování HTML entit &amp;
 - a spousta dalšího :-)

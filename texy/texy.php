@@ -68,10 +68,10 @@ class Texy
     const NONE = FALSE;
 
     // types of protection marks
-    const CONTENT_NONE =    "\x17";
-    const CONTENT_INLINE =  "\x16";
+    const CONTENT_MARKUP = "\x17";
+    const CONTENT_REPLACED = "\x16";
     const CONTENT_TEXTUAL = "\x15";
-    const CONTENT_BLOCK =   "\x14";
+    const CONTENT_BLOCK = "\x14";
 
     /** @var string  input & output text encoding */
     public $encoding = 'utf-8';
@@ -348,7 +348,7 @@ class Texy
         // Convert DOM structure to (X)HTML code
         if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
 
-        $html = $this->export($this->DOM);
+        $html = $this->_toHtml( $this->DOM->export($this) );
 
         // this notice should remain!
         if (!defined('TEXY_NOTICE_SHOWED')) {
@@ -372,28 +372,11 @@ class Texy
         // Convert DOM structure to (X)HTML code
         if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
 
-        $save = $this->formatter->lineWrap;
-        $this->formatter->lineWrap = FALSE;
-        $html = $this->export($this->DOM);
-        $this->formatter->lineWrap = $save;
+        $text = $this->_toText( $this->DOM->export($this) );
 
-        // remove tags
-        $html = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $html);
-        $html = strip_tags($html);
-        $html = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $html);
+        $text = iconv('utf-8', $this->encoding.'//TRANSLIT', $text);
 
-        // entities -> chars
-        $html = Texy::decode($html);
-
-        // convert nbsp to normal space and remove shy
-        $html = strtr($html, array(
-            "\xC2\xAD" => '',  // shy
-            "\xC2\xA0" => ' ', // nbsp
-        ));
-
-        $html = iconv('utf-8', $this->encoding.'//TRANSLIT', $html);
-
-        return $html;
+        return $text;
     }
 
 
@@ -402,14 +385,12 @@ class Texy
      * Converts internal DOM structure to final HTML code in UTF-8
      * @return string
      */
-    public function export($el)
+    public function _toHtml($s)
     {
-        $s = $el->export($this);
-
         // decode HTML entities to UTF-8
         $s = self::decode($s);
 
-        // postprocessing
+        // line-postprocessing
         $blocks = explode(self::CONTENT_BLOCK, $s);
         foreach ($this->modules as $module) {
             if ($module instanceof ITexyLineModule) {
@@ -440,6 +421,37 @@ class Texy
 
         return $s;
     }
+
+
+
+    /**
+     * Converts internal DOM structure to final HTML code in UTF-8
+     * @return string
+     */
+    public function _toText($s)
+    {
+        $save = $this->formatter->lineWrap;
+        $this->formatter->lineWrap = FALSE;
+        $s = $this->_toHtml( $s );
+        $this->formatter->lineWrap = $save;
+
+        // remove tags
+        $s = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $s);
+        $s = strip_tags($s);
+        $s = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $s);
+
+        // entities -> chars
+        $s = Texy::decode($s);
+
+        // convert nbsp to normal space and remove shy
+        $s = strtr($s, array(
+            "\xC2\xAD" => '',  // shy
+            "\xC2\xA0" => ' ', // nbsp
+        ));
+
+        return $s;
+    }
+
 
 
 
@@ -481,7 +493,8 @@ class Texy
     {
         $this->allowedClasses = self::ALL;                  // classes and id are allowed
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
-        $this->allowedTags = array_merge(TexyHtml::$blockTags, TexyHtml::$inlineTags); // full support for valid HTML tags
+        $this->allowedTags = array_merge(TexyHtml::$blockTags, 
+            TexyHtml::$inlineTags, TexyHtml::$replacedTags); // full support for "valid" HTML tags
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
@@ -516,18 +529,6 @@ class Texy
 
 
     /**
-     * Removes special controls characters used by Texy!
-     * @param string
-     * @return string
-     */
-    static public function _clean($s)
-    {
-        return preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
-    }
-
-
-
-    /**
      * Removes special controls characters and standardize line endings and spaces
      * @param string
      * @return string
@@ -535,7 +536,7 @@ class Texy
     static public function wash($s)
     {
         // remove special chars
-        $s = self::_clean($s);
+        $s = preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
 
         // standardize line endings to unix-like
         $s = str_replace("\r\n", "\n", $s); // DOS

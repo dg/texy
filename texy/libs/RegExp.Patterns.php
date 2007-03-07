@@ -28,8 +28,8 @@ define('TEXY_CHAR',        'A-Za-z\x{c0}-\x{02af}\x{0370}-\x{1eff}');
 
 // marking meta-characters
 // any mark:               \x14-\x1F
-// CONTENT_NONE mark:      \x17-\x1F
-// CONTENT_INLINE mark:    \x16-\x1F
+// CONTENT_MARKUP mark:    \x17-\x1F
+// CONTENT_REPLACED mark:  \x16-\x1F
 // CONTENT_TEXTUAL mark:   \x17-\x1F
 // CONTENT_BLOCK:          \x18-\x1F
 define('TEXY_MARK',        "\x14-\x1F");

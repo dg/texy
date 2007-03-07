@@ -67,7 +67,7 @@ class TexyHtmlModule extends TexyModule
             if ($res !== NULL) return $res;
         }
 
-        return $tx->protect($match, Texy::CONTENT_NONE);
+        return $tx->protect($match, Texy::CONTENT_MARKUP);
     }
 
 
@@ -89,9 +89,8 @@ class TexyHtmlModule extends TexyModule
 
         $tx = $this->texy;
 
-        $tag = strtolower($mTag);
-        // test for validity - not good!!
-        if (!isset(TexyHtml::$blockTags[$tag]) && !isset(TexyHtml::$inlineTags[$tag])) $tag = $mTag;  // undo lowercase
+        // complete UPPER convert to lower
+        $tag = $mTag === strtoupper($mTag) ? strtolower($mTag) : $mTag;
 
         // tag & attibutes
         $aTags = $tx->allowedTags; // speed-up

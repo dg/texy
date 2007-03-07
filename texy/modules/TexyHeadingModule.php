@@ -73,7 +73,7 @@ class TexyHeadingModule extends TexyModule
         $this->texy->registerBlockPattern(
             array($this, 'patternUnderline'),
             '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
-          . '([\#*=-]{3,})$#mU',
+          . '(\#|\*|\=|\-){3,}$#mU',
             'heading/underlined'
         );
 
@@ -114,7 +114,7 @@ class TexyHeadingModule extends TexyModule
         //    [3] => ...
 
         $mod = new TexyModifier($mMod);
-        $level = $this->levels[$mLine[0]];
+        $level = $this->levels[$mLine];
 
         // dynamic headings balancing
         $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $level);
@@ -198,13 +198,13 @@ class TexyHeadingModule extends TexyModule
         $el->parseLine($tx, trim($content));
 
         // document title
-        $title = Texy::_clean($el->getContent());
+        $title = $tx->_toText($el->getContent());
         if ($this->title === NULL) $this->title = $title;
 
         // Table of Contents
         if ($this->generateID && empty($el->id)) {
             $id = TexyUtf::utf2ascii($title);
-            $id = strtr($id, ' ', '-');
+            $id = preg_replace('#[\s-]+#', '-', $id);
             $id = preg_replace('#[^a-z0-9_-]#', '', strtolower($id));
             $id = $this->idPrefix . $id;
             $counter = '';

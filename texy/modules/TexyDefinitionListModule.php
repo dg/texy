@@ -43,8 +43,8 @@ class TexyDefinitionListModule extends TexyListModule
 
         $this->texy->registerBlockPattern(
             array($this, 'patternDefList'),
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color:red}
-          . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'               // Term:
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'               // .{color:red}
+          . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'          // Term:
           . '(\ +)('.implode('|', $RE).')\ +\S.*$#mUu',  //    - description
             'list/definition'
         );

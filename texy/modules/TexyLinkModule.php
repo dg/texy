@@ -290,7 +290,7 @@ class TexyLinkModule extends TexyModule
             $link->modifier = new TexyModifier;
         }
 
-        $link->URL = str_replace('%s', urlencode(Texy::_clean($label)), $link->URL);
+        $link->URL = str_replace('%s', urlencode($tx->_toText($label)), $link->URL);
         $link->modifier->setProperties($mMod);
         $link->type = $type;
         return $link;

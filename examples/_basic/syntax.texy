@@ -220,10 +220,6 @@ And other: ^^superscript^^ vs. __subscript__
 
 Code: `<br />`
 
-Change code-phrases's tag:
-`=kbd
-
-And now: `Ctrl-Alt-Del`
 
 
 with modifiers
@@ -363,7 +359,7 @@ Quick-corrects
 - acronym NATO((North Atlantic Treaty Organisation))
 - abbr "et al."((and others))
 - quickCorrects like this(TM) this(R) or (C)this
-- arrows <- and -> and <->
+- arrows <-- and --> and <--> ;
 - ellipsis...
 - preserve HTML entities
 - and many others :-)

@@ -50,7 +50,7 @@ class TexyListModule extends TexyModule
 
         $this->texy->registerBlockPattern(
             array($this, 'patternList'),
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?'                    // .{color: red}
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'               // .{color: red}
           . '('.implode('|', $RE).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
             'list'
         );

@@ -363,7 +363,7 @@ Quick-corrects
 - acronym NATO((North Atlantic Treaty Organisation))
 - abbr "et al."((a další))
 - náhrady(TM) nebo(R) za pøíslušné entity(C)
-- šipky <- a -> a <->
+- šipky <-- a --> a <--> ;
 - tøi teèky...
 - zachování HTML entit &amp;
 - a spousta dalšího :-)

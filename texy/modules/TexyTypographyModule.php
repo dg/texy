@@ -64,9 +64,9 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
     public function init(&$text)
     {
-        // CONTENT_NONE mark:    \x17-\x1F
-        // CONTENT_INLINE mark:  \x16
-        // CONTENT_TEXTUAL mark: \x17
+        // CONTENT_MARKUP mark:   \x17-\x1F
+        // CONTENT_REPLACED mark: \x16
+        // CONTENT_TEXTUAL mark:  \x17
         // CONTENT_BLOCK: not used in postLine
 
         $pairs = array(
@@ -78,19 +78,16 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
             '#([\x{2013}\x{2014}]) #u'                => "\$1\xc2\xa0",                    // dash &nbsp;
             '# --- #'                                 => " \xe2\x80\x94\xc2\xa0",          // em dash ---
             '# -- #'                                  => " \xe2\x80\x93\xc2\xa0",          // en dash --
-//            '# --> #'                                 => " \xe2\x86\x92 ",                 // right arrow ->
-//            '# <-- #'                                 => " \xe2\x86\x90 ",                 // left arrow ->
-//            '# <--> #'                                => " \xe2\x86\x94 ",                 // left right arrow <->
-            '# -> #'                                  => " \xe2\x86\x92 ",                 // right arrow ->
-            '# <- #'                                  => " \xe2\x86\x90 ",                 // left arrow ->
-            '# <-> #'                                 => " \xe2\x86\x94 ",                 // left right arrow <->
+            '# -{1,2}> #'                             => " \xe2\x86\x92 ",                 // right arrow -->
+            '# <-{1,2} #'                             => " \xe2\x86\x90 ",                 // left arrow <--
+            '# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
             '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign x
             '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign x
             '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // 10x
             '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark  (TM)
             '#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
             '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright  (C)
-            '#\(EUR\)#'                               => "\xe2\x82\xac",                    // Euro  (EUR)
+            '#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro  (EUR)
             '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
             '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
             '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
@@ -118,7 +115,15 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
 
         $this->pattern = array_keys($pairs);
-	    $this->replace = array_values($pairs);
+        $this->replace = array_values($pairs);
+
+        /*
+        $this->texy->registerLinePattern(
+            array($this, 'pattern'),
+            '# -{2,3} | -{1,2}> | <-{1,2}>? #Us',
+            'typography'
+        );
+        */
     }
 
 
@@ -130,5 +135,31 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
         return preg_replace($this->pattern, $this->replace, $text);
     }
 
+
+
+    /**
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return string
+     */
+/*
+    public function pattern($parser, $matches)
+    {
+        list($match) = $matches;
+        return $match;
+        $repl = array(
+            ' --- '   => " \xe2\x80\x94\xc2\xa0",  // em dash ---
+            ' -- '    => " \xe2\x80\x93\xc2\xa0",  // en dash --
+            ' --> '   => " \xe2\x86\x92 ",         // right arrow -->
+            ' <-- '   => " \xe2\x86\x90 ",         // left arrow <--
+            ' <--> '  => " \xe2\x86\x94 ",         // left right arrow <-->
+            ' -> '    => " \xe2\x86\x92 ",         // right arrow -->
+            ' <- '    => " \xe2\x86\x90 ",         // left arrow <--
+            ' <-> '   => " \xe2\x86\x94 ",         // left right arrow <-->
+        );        
+        return $repl[$match];
+    }
+*/
 
 } // TexyTypographyModule

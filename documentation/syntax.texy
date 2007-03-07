@@ -362,7 +362,7 @@ Quick-corrects
 - acronym NATO((North Atlantic Treaty Organisation))
 - abbr "et al."((and others))
 - quickCorrects like this(TM) this(R) or this(C)
-- arrows <- and -> and <->
+- arrows <-- and --> and <--> ;
 - ellipsis...
 - preserve HTML entities
 - and many others :-)

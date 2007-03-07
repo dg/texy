@@ -118,13 +118,13 @@ class TexyBlockParser extends TexyParser
         $content = $el->childNodes;
 
         // check content type
-        $contentType = Texy::CONTENT_NONE;
+        $contentType = Texy::CONTENT_MARKUP;
         if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
             $contentType = Texy::CONTENT_BLOCK;
         } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
             $contentType = Texy::CONTENT_TEXTUAL;
         } else {
-            if (strpos($content, Texy::CONTENT_INLINE) !== FALSE) $contentType = Texy::CONTENT_INLINE;
+            if (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) $contentType = Texy::CONTENT_REPLACED;
             $s = trim( preg_replace('#['.TEXY_MARK.']+#', '', $content) );
             if (strlen($s)) $contentType = Texy::CONTENT_TEXTUAL;
         }
@@ -140,7 +140,7 @@ class TexyBlockParser extends TexyParser
 
         // add <br />
         if ($el->elName && (strpos($content, "\r") !== FALSE)) {
-            $key = $tx->protect('<br />', Texy::CONTENT_INLINE);
+            $key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
             $content = str_replace("\r", $key, $content);
         };
         $content = strtr($content, "\r\n", '  ');
