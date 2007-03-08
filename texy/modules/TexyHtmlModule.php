@@ -89,16 +89,21 @@ class TexyHtmlModule extends TexyModule
 
         $tx = $this->texy;
 
-        // complete UPPER convert to lower
-        $tag = $mTag === strtoupper($mTag) ? strtolower($mTag) : $mTag;
-
         // tag & attibutes
         $aTags = $tx->allowedTags; // speed-up
         if (!$aTags) return FALSE;  // all tags are disabled
+
         if (is_array($aTags)) {
-            if (!isset($aTags[$tag])) return FALSE; // this element not allowed
+            if (isset($aTags[$mTag])) {
+                $tag = $mTag;
+            } else {
+                $tag = strtolower($mTag);
+                if (!isset($aTags[$tag])) return FALSE; // this element not allowed
+            }
             $aAttrs = $aTags[$tag]; // allowed attrs
         } else {
+            // complete UPPER convert to lower
+            $tag = ($mTag === strtoupper($mTag)) ? strtolower($mTag) : $mTag;
             $aAttrs = NULL; // all attrs are allowed
         }
 

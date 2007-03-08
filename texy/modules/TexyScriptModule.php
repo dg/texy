@@ -25,7 +25,7 @@ if (!defined('TEXY')) die();
  */
 class TexyScriptModule extends TexyModule
 {
-    protected $default = array('script' => FALSE);
+    protected $default = array('script' => TRUE);
 
     /**
      * @var callback|object  script elements handler
@@ -69,7 +69,7 @@ class TexyScriptModule extends TexyModule
         }
 
         if (is_callable(array($this->handler, $func))) {
-            array_unshift($args, $this->texy);
+            array_unshift($args, $parser);
             return call_user_func_array(array($this->handler, $func), $args);
         }
 
@@ -77,7 +77,7 @@ class TexyScriptModule extends TexyModule
             return $this->texyHandler($args);
 
         if (is_callable($this->handler))
-            return call_user_func_array($this->handler, array($this->texy, $func, $args));
+            return call_user_func_array($this->handler, array($parser, $func, $args));
 
         return FALSE;
     }

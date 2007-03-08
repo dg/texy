@@ -203,10 +203,7 @@ class TexyHeadingModule extends TexyModule
 
         // Table of Contents
         if ($this->generateID && empty($el->id)) {
-            $id = TexyUtf::utf2ascii($title);
-            $id = preg_replace('#[\s-]+#', '-', $id);
-            $id = preg_replace('#[^a-z0-9_-]#', '', strtolower($id));
-            $id = $this->idPrefix . $id;
+            $id = $this->idPrefix . Texy::webalize($title);
             $counter = '';
             if (isset($this->usedID[$id . $counter])) {
                 $counter = 2;

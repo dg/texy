@@ -106,6 +106,7 @@ class myHandler
     public function newReference($parser, $name)
     {
         // return NULL;
+        // return $parser->texy->linkModule->solve($link, $content);
     }
 
     /**

@@ -336,10 +336,10 @@ class TexyLinkModule extends TexyModule
 
             } else {
                 // classic URL
-                $el->href = Texy::completeURL($link->URL, $this->root, $isAbsolute);
+                $el->href = Texy::completeURL($link->URL, $this->root);
 
                 // rel="nofollow"
-                if ($nofollow || ($this->forceNoFollow && $isAbsolute)) $el->rel[] = 'nofollow';
+                if ($nofollow || ($this->forceNoFollow && Texy::isAbsolute($link->URL))) $el->rel[] = 'nofollow';
             }
         }
 
@@ -367,10 +367,9 @@ class TexyLinkModule extends TexyModule
                    : $URL;
         }
 
-        if (preg_match('#^(https?://|ftp://|www\.|ftp\.|/)#i', $URL)) {
+        if (preg_match('#^(https?://|ftp://|www\.|/)#i', $URL)) {
 
             if (strncasecmp($URL, 'www.', 4) === 0) $parts = @parse_url('none://'.$URL);
-            elseif (strncasecmp($URL, 'ftp.', 4) === 0) $parts = @parse_url('none://'.$URL);
             else $parts = @parse_url($URL);
 
             if ($parts === FALSE) return $URL;

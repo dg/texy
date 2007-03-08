@@ -315,7 +315,7 @@ class Texy
         $text = iconv($this->encoding, 'utf-8', $text);
 
         // standardize line endings and spaces
-        $text = self::wash($text);
+        $text = self::normalize($text);
 
         // init modules
         foreach ($this->modules as $module) $module->init($text);
@@ -529,11 +529,11 @@ class Texy
 
 
     /**
-     * Removes special controls characters and standardize line endings and spaces
+     * Removes special controls characters and normalizes line endings and spaces
      * @param string
      * @return string
      */
-    static public function wash($s)
+    static public function normalize($s)
     {
         // remove special chars
         $s = preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
@@ -549,6 +549,25 @@ class Texy
         while (strpos($s, "\t") !== FALSE)
             $s = preg_replace_callback('#^(.*)\t#mU', array('Texy', 'tabCb'), $s);
 
+        // trailing spaces
+        $s = trim($s, "\n");
+
+        return $s;
+    }
+
+
+
+    /**
+     * Converts to web safe characters [a-z0-9.-] text
+     * @param string
+     * @return string
+     */
+    static public function webalize($s)
+    {
+        $s = TexyUtf::utf2ascii($s);
+        $s = preg_replace('#[\s-]+#', '-', $s);
+        $s = strtolower($s);
+        $s = preg_replace('#[^a-z0-9.-]+#', '', $s);
         return $s;
     }
 
@@ -605,19 +624,21 @@ class Texy
 
 
 
-    static public function completeURL($URL, $root, &$isAbsolute=NULL)
+    static public function isAbsolute($URL)
     {
-        if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $URL)) {
-            // absolute URL
-            $isAbsolute = TRUE;
+        return (bool) preg_match('#^(https?://|ftp://|www\\.|/)#i', $URL);
+    }
+
+
+
+    static public function completeURL($URL, $root)
+    {
+        if (self::isAbsolute($URL)) {
             $URL = str_replace('&amp;', '&', $URL); // replace unwanted &amp;
             if (strncasecmp($URL, 'www.', 4) === 0) return 'http://' . $URL;
-            elseif (strncasecmp($URL, 'ftp.', 4) === 0) return 'ftp://' . $URL;
             return $URL;
         }
 
-        // relative
-        $isAbsolute = FALSE;
         if ($root == NULL) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;
     }
@@ -626,7 +647,7 @@ class Texy
 
     static public function completePath($path, $root)
     {
-        if (preg_match('#^(https?://|ftp://|www\\.|ftp\\.|/)#i', $path)) return FALSE;
+        if (self::isAbsolute($path)) return FALSE;
         if (strpos($path, '..')) return FALSE;
         if ($root == NULL) return $path;
         return rtrim($root, '/\\') . '/' . $path;
