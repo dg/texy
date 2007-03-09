@@ -157,7 +157,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
             ' -> '    => " \xe2\x86\x92 ",         // right arrow -->
             ' <- '    => " \xe2\x86\x90 ",         // left arrow <--
             ' <-> '   => " \xe2\x86\x94 ",         // left right arrow <-->
-        );        
+        );
         return $repl[$match];
     }
 */

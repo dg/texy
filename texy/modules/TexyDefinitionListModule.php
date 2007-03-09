@@ -67,7 +67,7 @@ class TexyDefinitionListModule extends TexyListModule
      */
     public function patternDefList($parser, $matches)
     {
-        list(, $mMod, $mContentTerm, $mMod, $mSpaces, $mBullet) = $matches;
+        list(, $mMod, , , , $mBullet) = $matches;
         //   [1] => .(title)[class]{style}<>
         //   [2] => ...
         //   [3] => .(title)[class]{style}<>
@@ -92,7 +92,7 @@ class TexyDefinitionListModule extends TexyListModule
         $bullet = preg_quote($mBullet);
 
         while (TRUE) {
-            if ($elItem = $this->patternItem($parser, preg_quote($mBullet), TRUE, 'dd')) {
+            if ($elItem = $this->patternItem($parser, $bullet, TRUE, 'dd')) {
                 $el->childNodes[] = $elItem;
                 continue;
             }

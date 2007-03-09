@@ -90,8 +90,8 @@ class TexyBlockParser extends TexyParser
     public function moveBackward($linesCount = 1)
     {
         while (--$this->offset > 0)
-         if ($this->text{ $this->offset-1 } === "\n")
-             if (--$linesCount < 1) break;
+            if ($this->text{ $this->offset-1 } === "\n")
+                if (--$linesCount < 1) break;
 
         $this->offset = max($this->offset, 0);
     }
@@ -102,6 +102,7 @@ class TexyBlockParser extends TexyParser
     {
         $tx = $this->texy;
 
+        $matches = NULL;
         preg_match('#^(.*)'.TEXY_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
         list(, $mContent, $mMod, $mContent2) = $matches;
 
@@ -229,7 +230,6 @@ class TexyBlockParser extends TexyParser
             }
 
             $px = $pb[$minKey];
-            $matches = $arrMatches[$minKey];
             $this->offset = $arrPos[$minKey] + strlen($arrMatches[$minKey][0]) + 1;   // 1 = \n
 
             $res = call_user_func_array(

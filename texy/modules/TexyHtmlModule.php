@@ -27,8 +27,14 @@ class TexyHtmlModule extends TexyModule
 {
     protected $default = array(
         'html/tag' => TRUE,
-        'html/comment' => FALSE,
+        'html/comment' => TRUE,
     );
+
+
+    /** @var bool   pass HTML comments to output? */
+    public $passComment = FALSE;
+
+
 
 
     public function init(&$text)
@@ -60,15 +66,15 @@ class TexyHtmlModule extends TexyModule
     {
         list($match) = $matches;
 
-        $tx = $this->texy;
-
-        if (is_callable(array($tx->handler, 'htmlComment'))) {
-            $res = $tx->handler->htmlComment($parser, $match);
+        if (is_callable(array($this->texy->handler, 'htmlComment'))) {
+            $res = $this->texy->handler->htmlComment($parser, $match);
             if ($res !== NULL) return $res;
         }
 
-        return $tx->protect($match, Texy::CONTENT_MARKUP);
+        return $this->solveComment($match);
     }
+
+
 
 
     /**
@@ -81,7 +87,7 @@ class TexyHtmlModule extends TexyModule
      */
     public function patternTag($parser, $matches)
     {
-        list($match, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
+        list(, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
         //    [2] => tag
         //    [3] => attributes
@@ -89,52 +95,38 @@ class TexyHtmlModule extends TexyModule
 
         $tx = $this->texy;
 
-        // tag & attibutes
-        $aTags = $tx->allowedTags; // speed-up
-        if (!$aTags) return FALSE;  // all tags are disabled
-
-        if (is_array($aTags)) {
-            if (isset($aTags[$mTag])) {
-                $tag = $mTag;
-            } else {
-                $tag = strtolower($mTag);
-                if (!isset($aTags[$tag])) return FALSE; // this element not allowed
-            }
-            $aAttrs = $aTags[$tag]; // allowed attrs
-        } else {
-            // complete UPPER convert to lower
-            $tag = ($mTag === strtoupper($mTag)) ? strtolower($mTag) : $mTag;
-            $aAttrs = NULL; // all attrs are allowed
-        }
-
+        $isOpening = $mClosing !== '/';
         $isEmpty = $mEmpty === '/';
-        if (!$isEmpty && substr($mAttr, -1) === '/') {
+        if (!$isEmpty && substr($mAttr, -1) === '/') { // uvizlo v $mAttr?
             $mAttr = substr($mAttr, 0, -1);
             $isEmpty = TRUE;
         }
-        $isOpening = $mClosing !== '/';
 
-        if ($isEmpty && !$isOpening)  // error - can't close empty element
+        // error - can't close empty element
+        if ($isEmpty && !$isOpening)
             return FALSE;
 
-        $el = TexyHtml::el($tag);
-        if ($aTags === Texy::ALL && $isEmpty) $el->_empty = TRUE; // force empty
 
-        if (!$isOpening) { // closing tag? we are finished
+        // error - end element with atttrs
+        $mAttr = trim(strtr($mAttr, "\n", ' '));
+        if ($mAttr && !$isOpening)
+            return FALSE;
+
+
+        $el = TexyHtml::el($mTag);
+
+        // closing tag? we are finished
+        if (!$isOpening) {
             if (is_callable(array($tx->handler, 'htmlTag'))) {
                 $res = $tx->handler->htmlTag($parser, $el, FALSE);
                 if ($res !== NULL) return $res;
             }
 
-            return $tx->protect($el->endTag(), $el->getContentType());
+            return $this->solveTag($el, FALSE);
         }
 
-        // process attributes
-        if (is_array($aAttrs)) $aAttrs = array_flip($aAttrs);
-        else $aAttrs = NULL;
-
-        $mAttr = strtr($mAttr, "\n", ' ');
-
+        // parse attributes
+        $matches2 = NULL;
         preg_match_all(
             '#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is',
             $mAttr,
@@ -144,16 +136,70 @@ class TexyHtmlModule extends TexyModule
 
         foreach ($matches2 as $m) {
             $key = strtolower($m[1]); // strtolower protects TexyHtml's elName, userData, childNodes
-
-            // skip disabled
-            if ($aAttrs !== NULL && !isset($aAttrs[$key])) continue;
-
             $val = $m[2];
             if ($val == NULL) $el->$key = TRUE;
             elseif ($val{0} === '\'' || $val{0} === '"') $el->$key = Texy::decode(substr($val, 1, -1));
             else $el->$key = Texy::decode($val);
         }
 
+        if (is_callable(array($tx->handler, 'htmlTag'))) {
+            $res = $tx->handler->htmlTag($parser, $el, TRUE, $isEmpty);
+            if ($res !== NULL) return $res;
+        }
+
+        return $this->solveTag($el, TRUE, $isEmpty);
+    }
+
+
+
+
+    /**
+     * Finish invocation
+     *
+     * @param TexyHtml  element
+     * @param bool      is opening?
+     * @param bool      is empty?
+     * @return string|FALSE
+     */
+    public function solveTag(TexyHtml $el, $isOpening, $forceEmpty=NULL)
+    {
+        $tx = $this->texy;
+
+        // tag & attibutes
+        $aTags = $tx->allowedTags; // speed-up
+        if (!$aTags) return FALSE;  // all tags are disabled
+
+        if (is_array($aTags)) {
+            if (!isset($aTags[$el->elName])) {
+                $el->setElement(strtolower($el->elName));
+                if (!isset($aTags[$el->elName])) return FALSE; // this element not allowed
+            }
+            $aAttrs = $aTags[$el->elName]; // allowed attrs
+
+        } else {
+            // complete UPPER convert to lower
+            if ($el->elName === strtoupper($el->elName))
+                $el->setElement(strtolower($el->elName));
+            $aAttrs = NULL; // all attrs are allowed
+        }
+
+        // force empty
+        if ($forceEmpty && $aTags === Texy::ALL) $el->_empty = TRUE;
+
+        // closing tag? we are finished
+        if (!$isOpening) {
+            return $tx->protect($el->endTag(), $el->getContentType());
+        }
+
+        // process attributes
+        if (is_array($aAttrs)) {
+            $aAttrs = array_flip($aAttrs);
+            $aAttrs['elName'] = $aAttrs['childNodes'] = $aAttrs['userData'] = TRUE; // hack for TexyHtml default props
+
+            // skip disabled
+            foreach ($el as $key => $foo)
+                if (!isset($aAttrs[$key])) unset($el->$key);
+        }
 
         // apply allowedClasses
         if (isset($el->class)) {
@@ -186,23 +232,48 @@ class TexyHtmlModule extends TexyModule
             }
         }
 
-        if ($tag === 'img') {
+        if ($el->elName === 'img') {
             if (!isset($el->src)) return FALSE;
+
+            // absolute URL scheme check
+            if ($tx->urlSchemes && preg_match('#[a-z]+:#iA', $el->src) && !preg_match($tx->urlSchemes, $el->src)) return FALSE;
+
             $tx->summary['images'][] = $el->src;
 
-        } elseif ($tag === 'a') {
+        } elseif ($el->elName === 'a') {
             if (!isset($el->href) && !isset($el->name) && !isset($el->id)) return FALSE;
             if (isset($el->href)) {
+                if ($tx->linkModule->forceNoFollow && strpos($el->href, '//') !== FALSE) {
+                    if (isset($el->rel)) $el->rel = (array) $el->rel;
+                    $el->rel[] = 'nofollow';
+                }
+
+                // absolute URL scheme check
+                if ($tx->urlSchemes && preg_match('#[a-z]+:#iA', $el->href) && !preg_match($tx->urlSchemes, $el->href)) return FALSE;
+
                 $tx->summary['links'][] = $el->href;
             }
         }
 
-        if (is_callable(array($tx->handler, 'htmlTag'))) {
-            $res = $tx->handler->htmlTag($parser, $el, TRUE);
-            if ($res !== NULL) return $res;
-        }
-
         return $tx->protect($el->startTag(), $el->getContentType());
     }
+
+
+
+
+    /**
+     * Finish invocation
+     *
+     * @param string
+     * @return string
+     */
+    public function solveComment($content)
+    {
+        if ($this->passComment)
+            return $this->texy->protect($content, Texy::CONTENT_MARKUP);
+
+        return '';
+    }
+
 
 } // TexyHtmlModule

@@ -142,6 +142,7 @@ class TexyImageModule extends TexyModule
             $image = new TexyImage;
 
             // dimensions
+            $matches = NULL;
             if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $content[0], $matches)) {
                 $image->imageURL = trim($matches[1]);
                 $image->width = (int) $matches[2];
@@ -238,33 +239,15 @@ class TexyImageModule extends TexyModule
      *
      * @param TexyImage
      * @param TexyLink
-     * @return TexyHtml
+     * @return TexyHtml|FALSE
      */
     public function solve(TexyImage $image, $link)
     {
         $tx = $this->texy;
-        $src = Texy::completeURL($image->imageURL, $this->root);
-        $file = Texy::completePath($image->imageURL, $this->fileRoot);
+        $src = $tx->completeURL($image->imageURL, $this->root);
+        if ($src === FALSE) return FALSE;
 
-        if (substr($src, -4) === '.swf') {
-/*
-    <!--[if !IE]> -->
-    <object type="application/x-shockwave-flash" data="movie.swf" width="300" height="135">
-    <!-- <![endif]-->
-
-    <!--[if IE]>
-    <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="300" height="135"
-        codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0">
-        <param name="movie" value="movie.swf" />
-    <!--><!--dgx-->
-        <param name="loop" value="true" />
-        <param name="menu" value="false" />
-
-        <p><?=$modifier->title !== NULL ? $modifier->title : $this->defaultAlt;?></p>
-    </object>
-    <!-- <![endif]-->
-*/
-        }
+        $file = $tx->completePath($image->imageURL, $this->fileRoot);
 
         $mod = $image->modifier;
         $alt = $mod->title !== NULL ? $mod->title : $this->defaultAlt;
@@ -308,7 +291,7 @@ class TexyImageModule extends TexyModule
 
         // onmouseover actions generate
         if ($image->overURL !== NULL) {
-            $overSrc = Texy::completeURL($image->overURL, $this->root);
+            $overSrc = $tx->completeURL($image->overURL, $this->root);
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
             $el->onmouseout = 'this.src=\'' . addSlashes($src) . '\'';
             $el->onload = "var i=new Image();i.src='" . addSlashes($overSrc) . "';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";

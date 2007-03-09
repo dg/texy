@@ -33,12 +33,11 @@ class myHandler
      * @param TexyLineParser
      * @param string
      * @param string
-     * @param string
      * @return TexyHtml|string|FALSE|NULL
      */
-    public function emoticon($parser, $emoticon, $rawEmoticon, $file)
+    public function emoticon($parser, $emoticon, $rawEmoticon)
     {
-        // return $parser->texy->emoticonModule->solve($emoticon, $rawEmoticon, $file);
+        // return $parser->texy->emoticonModule->solve($emoticon, $rawEmoticon);
     }
 
     /**
@@ -114,19 +113,23 @@ class myHandler
      * @param string
      * @return TexyHtml|string|FALSE|NULL
      */
-    public function htmlComment($parser, $match)
+    public function htmlComment($parser, $content)
     {
         // return NULL;
+        // return $parser->texy->htmlModule->solveComment($content);
     }
 
     /**
      * @param TexyLineParser
-     * @param string
+     * @param TexyHtml
+     * @param bool
+     * @param bool
      * @return TexyHtml|string|FALSE|NULL
      */
-    public function htmlTag($parser, $el, $isOpening)
+    public function htmlTag($parser, $el, $isOpening, $forceEmpty=NULL)
     {
         // return NULL;
+        // return $parser->texy->htmlModule->solveTag($el, $isOpening, $forceEmpty);
     }
 
 

@@ -226,7 +226,7 @@ class TexyPhraseModule extends TexyModule
      */
     public function patternPhrase($parser, $matches, $phrase)
     {
-        list($match, $mContent, $mMod, $mLink) = $matches;
+        list(, $mContent, $mMod, $mLink) = $matches;
         //    [1] => **
         //    [2] => ...
         //    [3] => .(title)[class]{style}
@@ -301,7 +301,7 @@ class TexyPhraseModule extends TexyModule
 
         if ($tag === 'q') $el->cite = $mod->cite;
 
-        if ($link) return $tx->linkModule->solve($link)->addChild($el);
+        if ($link) return $tx->linkModule->solve($link, $el);
 
         return $el;
     }

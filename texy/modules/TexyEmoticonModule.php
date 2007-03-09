@@ -86,19 +86,21 @@ class TexyEmoticonModule extends TexyModule
         $tx = $this->texy;
 
         // find the closest match
-        foreach ($this->icons as $emoticon => $file)
+        foreach ($this->icons as $emoticon => $foo)
         {
             if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
                 // event wrapper
                 if (is_callable(array($tx->handler, 'emoticon'))) {
-                    $res = $tx->handler->emoticon($parser, $emoticon, $match, $file);
+                    $res = $tx->handler->emoticon($parser, $emoticon, $match);
                     if ($res !== NULL) return $res;
                 }
 
-                return $this->solve($emoticon, $match, $file);
+                return $this->solve($emoticon, $match);
             }
         }
+
+        return FALSE; // tohle se nestane
     }
 
 
@@ -108,18 +110,19 @@ class TexyEmoticonModule extends TexyModule
      *
      * @param string
      * @param string
-     * @param string
-     * @return TexyHtml
+     * @return TexyHtml|FALSE
      */
-    public function solve($emoticon, $raw, $file)
+    public function solve($emoticon, $raw)
     {
         $tx = $this->texy;
+        $file = $this->icons[$emoticon];
         $el = TexyHtml::el('img');
-        $el->src = Texy::completeURL($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+        $el->src = $tx->completeURL($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+        if ($el->src === FALSE) return FALSE;
         $el->alt = $raw;
         $el->class[] = $this->class;
 
-        $file = Texy::completePath($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
+        $file = $tx->completePath($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
         if (is_file($file)) {
             $size = getImageSize($file);
             if (is_array($size)) {

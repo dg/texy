@@ -138,9 +138,9 @@ class TexyListModule extends TexyModule
         $patternItem = "#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
 
         // first line (with bullet)
-        if (!$parser->next($patternItem, $matches)) {
-            return FALSE;
-        }
+        $matches = NULL;
+        if (!$parser->next($patternItem, $matches)) return FALSE;
+
         list(, $mIndent, $mNewLine, $mSpace, $mContent, $mMod) = $matches;
             //    [1] => indent
             //    [2] => \n

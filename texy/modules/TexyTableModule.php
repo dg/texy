@@ -130,9 +130,10 @@ class TexyTableModule extends TexyModule
     {
         $tx = $this->texy;
 
-        if (!$parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
+        $matches = NULL;
+        if (!$parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches))
             return FALSE;
-        }
+
         list(, $mContent, $mMod) = $matches;
         //    [1] => ....
         //    [2] => .(title)[class]{style}<>_

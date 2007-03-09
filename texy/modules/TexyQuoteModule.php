@@ -80,7 +80,7 @@ class TexyQuoteModule extends TexyModule
                 $content .= $mContent . "\n";
             }
 
-            if (!$parser->next("#^\>(?:(\>|\ {1,$spaces}|:)(.*))?()$#mA", $matches)) break;
+            if (!$parser->next("#^\\>(?:(\\>|\\ {1,$spaces}|:)(.*))?()$#mA", $matches)) break;
             list(, $mPrefix, $mContent) = $matches;
         } while (TRUE);
 
@@ -114,12 +114,12 @@ class TexyQuoteModule extends TexyModule
             $link = substr($link, 1, -1);
             $ref = $tx->linkModule->getReference($link);
             if ($ref) {
-                return Texy::completeURL($ref['URL'], $tx->linkModule->root);
+                return $tx->completeURL($ref['URL'], $tx->linkModule->root);
             } else {
-                return Texy::completeURL($link, $tx->linkModule->root);
+                return $tx->completeURL($link, $tx->linkModule->root);
             }
         } else { // direct URL
-            return Texy::completeURL($link, $tx->linkModule->root);
+            return $tx->completeURL($link, $tx->linkModule->root);
         }
     }
 

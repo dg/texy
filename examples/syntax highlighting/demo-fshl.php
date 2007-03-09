@@ -44,7 +44,7 @@ class myHandler
      */
     public function block($parser, $blocktype, $content, $lang, $modifier)
     {
-        if ($blocktype !== 'block/code') 
+        if ($blocktype !== 'block/code')
             return NULL; // NULL means 'don't handle'
 
         $texy = $parser->texy;

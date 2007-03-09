@@ -67,7 +67,7 @@ class TexyHtml
 
     /**
      * @var array  Replaced elements
-     * missing deprecated: applet, isindex;  
+     * missing deprecated: applet, isindex;
      * replaced element for Texy! purposes: br
      */
     static public $replacedTags = array(
@@ -108,7 +108,7 @@ class TexyHtml
     public function setElement($name)
     {
         $this->elName = $name;
-        if (isset(self::$emptyTags[$name])) $el->childNodes = FALSE;
+        if (isset(self::$emptyTags[$name])) $this->childNodes = FALSE;
         return $this;
     }
 
@@ -120,7 +120,7 @@ class TexyHtml
      */
     public function setAttrs($attrs)
     {
-        foreach ($attrs as $key => $value) $el->$key = $value;
+        foreach ($attrs as $key => $value) $this->$key = $value;
         return $this;
     }
 
@@ -299,7 +299,7 @@ class TexyHtml
     {
         if (is_array($this->childNodes)) {
             foreach ($this->childNodes as $key => $val)
-                if ($val instanceof self) 
+                if ($val instanceof self)
                     $this->childNodes[$key] = clone $val;
         }
     }

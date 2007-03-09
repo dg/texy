@@ -60,7 +60,7 @@ class TexyBlockModule extends TexyModule
         // autoclose exclusive blocks
         $text = preg_replace(
             '#^((?>/--+? *?)(?!div|texysource)[^\n]*)$((?:\n.*)*)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mUsi',
-            "\$1\$2\n\--",
+            "\$1\$2\n\\--",
             $text
         );
         return $text;
@@ -79,7 +79,7 @@ class TexyBlockModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $matches, $name)
+    public function pattern($parser, $matches)
     {
         list(, $mParam, $mMod, $mContent) = $matches;
         //    [1] => code | text | ...

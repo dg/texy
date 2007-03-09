@@ -91,6 +91,9 @@ class Texy
     /** @var boolean  Do obfuscate e-mail addresses? */
     public $obfuscateEmail = TRUE;
 
+    /** @var string  regexp to check URL schemes */
+    public $urlSchemes = NULL;
+
     /** @var array  Parsing summary */
     public $summary = array(
         'images' => array(),
@@ -414,7 +417,7 @@ class Texy
 
         // remove HTML 4.01 optional tags
         if (!TexyHtml::$XHTML)
-            $html = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#', '', $html);
+            $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#', '', $s);
 
         // unfreeze spaces
         $s = self::unfreezeSpaces($s);
@@ -478,6 +481,7 @@ class Texy
             'q'         => array(),
             'small'     => array(),
         );
+        $this->urlSchemes = '#https?:|ftp:|mailto:#Ai';
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
@@ -493,8 +497,9 @@ class Texy
     {
         $this->allowedClasses = self::ALL;                  // classes and id are allowed
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
-        $this->allowedTags = array_merge(TexyHtml::$blockTags, 
+        $this->allowedTags = array_merge(TexyHtml::$blockTags,
             TexyHtml::$inlineTags, TexyHtml::$replacedTags); // full support for "valid" HTML tags
+        $this->urlSchemes = NULL;
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
@@ -624,31 +629,56 @@ class Texy
 
 
 
-    static public function isAbsolute($URL)
+    /**
+     * Generates "real" URL
+     * @param string   user URL
+     * @param string   root for relative URL's
+     * @return string|FALSE
+     */
+    public function completeURL($URL, $root)
     {
-        return (bool) preg_match('#^(https?://|ftp://|www\\.|/)#i', $URL);
-    }
+        // invalid URL
+        if ($URL == NULL) return FALSE;
 
+        // special supported case
+        if (strncasecmp($URL, 'www.', 4) === 0) return 'http://' . $URL;
 
+        // special supported case
+        if (preg_match('#'.TEXY_EMAIL.'$#iA', $URL)) return 'mailto:' . $URL;
 
-    static public function completeURL($URL, $root)
-    {
-        if (self::isAbsolute($URL)) {
-            $URL = str_replace('&amp;', '&', $URL); // replace unwanted &amp;
-            if (strncasecmp($URL, 'www.', 4) === 0) return 'http://' . $URL;
-            return $URL;
+        // absolute URL with scheme
+        if (preg_match('#[a-z]+:#iA', $URL)) {
+            if ($this->urlSchemes && !preg_match($this->urlSchemes, $URL)) return FALSE;
+            // replace unwanted &amp;
+            return str_replace('&amp;', '&', $URL);
         }
 
+        // absolute URL without scheme
+        if ($URL[0] === '/') return $URL;
+
+        // relative URL
         if ($root == NULL) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;
     }
 
 
 
-    static public function completePath($path, $root)
+    /**
+     * Generates "real" file path
+     * @param string   user URL/path
+     * @param string   root for relative paths
+     * @return string|FALSE
+     */
+    public function completePath($path, $root)
     {
-        if (self::isAbsolute($path)) return FALSE;
+        // absolute URL
+        if (preg_match('#[a-z]+:|www\.|/|'.TEXY_EMAIL.'#iA', $path))
+            return FALSE;
+
+        // security
         if (strpos($path, '..')) return FALSE;
+
+        // relative path
         if ($root == NULL) return $path;
         return rtrim($root, '/\\') . '/' . $path;
     }

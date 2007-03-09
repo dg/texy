@@ -35,9 +35,6 @@ class TexyLinkModule extends TexyModule
     /** @var string  root of relative links */
     public $root = '';
 
-    /** @var string  for example: 'this.href="mailto:"+this.href.match(/./g).reverse().slice(0,-7).join("")'; */
-    public $emailOnClick;
-
     /** @var string image popup event */
     public $imageOnClick = 'return !popupImage(this.href)';  //
 
@@ -63,14 +60,14 @@ class TexyLinkModule extends TexyModule
         // [reference]
         $tx->registerLinePattern(
             array($this, 'patternReference'),
-            '#('.TEXY_LINK_REF.')#U',
+            '#(\[[^\[\]\*\n'.TEXY_MARK.']+\])#U',
             'link/reference'
         );
 
         // direct url and email
         $tx->registerLinePattern(
             array($this, 'patternUrlEmail'),
-            '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://|ftp\.)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
+            '#(?<=\s|^|\(|\[|\<|:)(?:https?://|www\.|ftp://)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
             'link/url'
         );
 
@@ -125,7 +122,7 @@ class TexyLinkModule extends TexyModule
      */
     public function patternReference($parser, $matches)
     {
-        list($match, $mRef) = $matches;
+        list(, $mRef) = $matches;
         //    [1] => [ref]
 
         $tx = $this->texy;
@@ -303,7 +300,7 @@ class TexyLinkModule extends TexyModule
      *
      * @param TexyLink
      * @param TexyHtml|string
-     * @return TexyHtml
+     * @return TexyHtml|string
      */
     public function solve($link, $content=NULL)
     {
@@ -325,23 +322,20 @@ class TexyLinkModule extends TexyModule
 
         if ($link->type === TexyLink::IMAGE || $link->type === TexyLink::AUTOIMAGE) {
             // image
-            $el->href = Texy::completeURL($link->URL, $tx->imageModule->linkedRoot);
+            $el->href = $tx->completeURL($link->URL, $tx->imageModule->linkedRoot);
             $el->onclick = $this->imageOnClick;
 
         } else {
-            if (preg_match('#^'.TEXY_EMAIL.'$#i', $link->URL)) {
-                // email
-                $el->href = 'mailto:' . $link->URL;
-                $el->onclick = $this->emailOnClick;
+            $el->href = $tx->completeURL($link->URL, $this->root);
 
-            } else {
-                // classic URL
-                $el->href = Texy::completeURL($link->URL, $this->root);
+            // rel="nofollow"
+            if ($nofollow || ($this->forceNoFollow && strpos($el->href, '//') !== FALSE))
+                $el->rel[] = 'nofollow';
 
-                // rel="nofollow"
-                if ($nofollow || ($this->forceNoFollow && Texy::isAbsolute($link->URL))) $el->rel[] = 'nofollow';
-            }
+            //if (strncasecmp($el->href, 'mailto:', 7) === 0) ... // check for email - not used
         }
+
+        if ($el->href === FALSE) return $content;
 
         // popup on click
         if ($popup) $el->onclick = $this->popupOnClick;
