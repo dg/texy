@@ -104,8 +104,11 @@ class TexyLinkModule extends TexyModule
         //    [3] => ...
         //    [4] => .(title)[class]{style}
 
-        $mod = new TexyModifier($mMod);
-        $this->addReference($mRef, $mLink, trim($mLabel), $mod);
+        $link = new TexyLink($mLink);
+        $link->label = trim($mLabel);
+        $link->modifier->setProperties($mMod);
+        $this->checkLink($link);
+        $this->addReference($mRef, $link);
         return '';
     }
 
@@ -133,14 +136,14 @@ class TexyLinkModule extends TexyModule
             // try handler
             if (is_callable(array($tx->handler, 'newReference'))) {
                 $res = $tx->handler->newReference($parser, $name);
-                if ($res !== NULL) return $res;
+                if ($res !== Texy::PROCEED) return $res;
             }
 
             // no change
             return FALSE;
         }
 
-        $link->type = TexyLink::REF;
+        $link->type = TexyLink::BRACKET;
 
         if ($link->label != '') {  // NULL or ''
             // prevent deadlock
@@ -153,13 +156,13 @@ class TexyLinkModule extends TexyModule
                 unset(self::$deadlock[$link->name]);
             }
         } else {
-            $content = $this->textualURL($link->URL);
+            $content = $this->textualURL($link);
         }
 
         // event wrapper
         if (is_callable(array($tx->handler, 'linkReference'))) {
             $res = $tx->handler->linkReference($parser, $link, $content);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solve($link, $content);
@@ -180,15 +183,15 @@ class TexyLinkModule extends TexyModule
         list($mURL) = $matches;
         //    [0] => URL
 
-        $link = new TexyLink;
-        $link->URL = $mURL;
-        $content = $this->textualURL($mURL);
+        $link = new TexyLink($mURL);
+        $this->checkLink($link);
+        $content = $this->textualURL($link);
 
         // event wrapper
         $method = $name === 'link/email' ? 'linkEmail' : 'linkURL';
         if (is_callable(array($this->texy->handler, $method))) {
             $res = $this->texy->handler->$method($parser, $link, $content);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solve($link, $content);
@@ -202,21 +205,13 @@ class TexyLinkModule extends TexyModule
      * Adds new named reference
      *
      * @param string  reference name
-     * @param string  URL
-     * @param string  optional label
-     * @param TexyModifier  optional modifier
+     * @param TexyLink
      * @return void
      */
-    public function addReference($name, $URL, $label=NULL, $modifier=NULL)
+    public function addReference($name, TexyLink $link)
     {
-        $name = TexyUtf::strtolower($name);
-        if (!$modifier) $modifier = new TexyModifier;
-        $link = new TexyLink;
-        $link->URL = $URL;
-        $link->label = $label;
-        $link->modifier = $modifier;
-        $link->name = $name;
-        $this->references[$name] = $link;
+        $link->name = TexyUtf::strtolower($name);
+        $this->references[$link->name] = $link;
     }
 
 
@@ -251,7 +246,6 @@ class TexyLinkModule extends TexyModule
 
 
 
-
     /**
      * @param string
      * @param string
@@ -261,11 +255,11 @@ class TexyLinkModule extends TexyModule
     public function factoryLink($dest, $mMod, $label)
     {
         $tx = $this->texy;
-        $type = TexyLink::NORMAL;
+        $type = TexyLink::COMMON;
 
         // [ref]
         if (strlen($dest)>1 && $dest{0} === '[' && $dest{1} !== '*') {
-            $type = TexyLink::REF;
+            $type = TexyLink::BRACKET;
             $dest = substr($dest, 1, -1);
             $link = $this->getReference($dest);
 
@@ -275,16 +269,14 @@ class TexyLinkModule extends TexyModule
             $dest = trim(substr($dest, 2, -2));
             $image = $tx->imageModule->getReference($dest);
             if ($image) {
-                $link = new TexyLink;
-                $link->URL = $image->linkedURL === NULL ? $image->imageURL : $image->linkedURL;
+                $link = new TexyLink($image->linkedURL === NULL ? $image->imageURL : $image->linkedURL);
                 $link->modifier = $image->modifier;
             }
         }
 
         if (empty($link)) {
-            $link = new TexyLink;
-            $link->URL = trim($dest);
-            $link->modifier = new TexyModifier;
+            $link = new TexyLink(trim($dest));
+            $this->checkLink($link);
         }
 
         $link->URL = str_replace('%s', urlencode($tx->_toText($label)), $link->URL);
@@ -304,6 +296,8 @@ class TexyLinkModule extends TexyModule
      */
     public function solve($link, $content=NULL)
     {
+        if ($link->URL == NULL) return $content;
+
         $tx = $this->texy;
 
         $el = TexyHtml::el('a');
@@ -316,26 +310,22 @@ class TexyLinkModule extends TexyModule
             $popup = isset($classes['popup']);
             unset($classes['nofollow'], $classes['popup']);
             $link->modifier->classes = array_flip($classes);
+            $el->href = NULL; // trick - move to front
             $link->modifier->decorate($tx, $el);
         }
 
-
-        if ($link->type === TexyLink::IMAGE || $link->type === TexyLink::AUTOIMAGE) {
+        if ($link->type === TexyLink::IMAGE) {
             // image
-            $el->href = $tx->completeURL($link->URL, $tx->imageModule->linkedRoot);
+            $el->href = Texy::absolutize($link->URL, $tx->imageModule->linkedRoot);
             $el->onclick = $this->imageOnClick;
 
         } else {
-            $el->href = $tx->completeURL($link->URL, $this->root);
+            $el->href = Texy::absolutize($link->URL, $this->root);
 
             // rel="nofollow"
             if ($nofollow || ($this->forceNoFollow && strpos($el->href, '//') !== FALSE))
                 $el->rel[] = 'nofollow';
-
-            //if (strncasecmp($el->href, 'mailto:', 7) === 0) ... // check for email - not used
         }
-
-        if ($el->href === FALSE) return $content;
 
         // popup on click
         if ($popup) $el->onclick = $this->popupOnClick;
@@ -348,13 +338,46 @@ class TexyLinkModule extends TexyModule
     }
 
 
+
+    /**
+     * Checks and corrects $URL
+     * @param TexyLink
+     * @return void
+     */
+    private function checkLink($link)
+    {
+        $tmp = $link->URL;
+
+        if (strncasecmp($link->URL, 'www.', 4) === 0) {
+            // special supported case
+            $link->URL = 'http://' . $link->URL;
+
+        } elseif (preg_match('#'.TEXY_EMAIL.'$#iA', $link->URL)) {
+            // email
+            $link->URL = 'mailto:' . $link->URL;
+
+        } elseif (preg_match('#[a-z]+:#iA', $link->URL)) {
+            // absolute URL with scheme - check scheme
+            if (!$this->texy->checkURL($link->URL)) $link->URL = NULL;
+
+            else $link->URL = str_replace('&amp;', '&', $link->URL); // replace unwanted &amp;
+        }
+
+        // save for custom handlers and next generations :-)
+        if ($link->URL !== $tmp) $link->raw = $tmp;
+    }
+
+
+
     /**
      * Returns textual representation of URL
-     * @param string
+     * @param TexyLink
      * @return string
      */
-    private function textualURL($URL)
+    private function textualURL($link)
     {
+        $URL = $link->raw === NULL ? $link->URL : $link->raw;
+
         if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) { // email
             return $this->texy->obfuscateEmail
                    ? strtr($URL, array('@' => "&#160;(at)&#160;"))
@@ -397,19 +420,43 @@ class TexyLinkModule extends TexyModule
 
 
 
+
+
+
+
 class TexyLink
 {
+    /** @see $type */
     const
-        NORMAL = 1,
-        REF = 2,
-        IMAGE = 3,
-        AUTOIMAGE = 4;
+        COMMON = 1,
+        BRACKET = 2,
+        IMAGE = 3;
 
+    /** @var string  URL in resolved form */
     public $URL;
-    public $label;
+
+    /** @var string  URL as written in text */
+    public $raw;
+
+    /** @var TexyModifier */
     public $modifier;
+
+    /** @var int  how was link created? */
+    public $type = self::COMMON;
+
+    /** @var string  optional label, used by references */
+    public $label;
+
+    /** @var string  reference name (if is stored as reference) */
     public $name;
-    public $type = self::NORMAL;
+
+
+
+    public function __construct($URL)
+    {
+        $this->URL = $URL;
+        $this->modifier = new TexyModifier;
+    }
 
 
     public function __clone()
@@ -417,6 +464,7 @@ class TexyLink
         if ($this->modifier)
             $this->modifier = clone $this->modifier;
     }
+
 
     /**
      * Undefined property usage prevention

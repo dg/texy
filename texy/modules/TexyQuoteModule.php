@@ -102,7 +102,7 @@ class TexyQuoteModule extends TexyModule
     /**
      * Converts cite source to URL
      * @param string
-     * @return string
+     * @return string|NULL
      */
     public function citeLink($link)
     {
@@ -113,14 +113,15 @@ class TexyQuoteModule extends TexyModule
         if ($link{0} === '[') { // [ref]
             $link = substr($link, 1, -1);
             $ref = $tx->linkModule->getReference($link);
-            if ($ref) {
-                return $tx->completeURL($ref['URL'], $tx->linkModule->root);
-            } else {
-                return $tx->completeURL($link, $tx->linkModule->root);
-            }
-        } else { // direct URL
-            return $tx->completeURL($link, $tx->linkModule->root);
+            if ($ref) return Texy::absolutize($ref['URL'], $tx->linkModule->root);
         }
+
+        if (!$tx->checkURL($link)) return NULL;
+
+        // special supported case
+        if (strncasecmp($link, 'www.', 4) === 0) return 'http://' . $link;
+
+        return Texy::absolutize($link, $tx->linkModule->root);
     }
 
 

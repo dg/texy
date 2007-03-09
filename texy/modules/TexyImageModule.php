@@ -91,21 +91,77 @@ class TexyImageModule extends TexyModule
 
 
     /**
+     * Callback for: [*image*]: urls .(title)[class]{style}
+     *
+     * @param array      regexp matches
+     * @return string
+     */
+    public function patternReferenceDef($matches)
+    {
+        list(, $mRef, $mURLs, $mMod) = $matches;
+        //    [1] => [* (reference) *]
+        //    [2] => urls
+        //    [3] => .(title)[class]{style}<>
+
+        $image = $this->factoryImage($mURLs, $mMod, FALSE);
+        $this->addReference($mRef, $image);
+        return '';
+    }
+
+
+
+    /**
+     * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string|FALSE
+     */
+    public function patternImage($parser, $matches)
+    {
+        list(, $mURLs, $mMod, $mAlign, $mLink) = $matches;
+        //    [1] => URLs
+        //    [2] => .(title)[class]{style}<>
+        //    [3] => * < >
+        //    [4] => url | [ref] | [*image*]
+
+        $tx = $this->texy;
+
+        $image = $this->factoryImage($mURLs, $mMod.$mAlign);
+
+        if ($mLink) {
+            if ($mLink === ':') {
+                $link = new TexyLink($image->linkedURL === NULL ? $image->imageURL : $image->linkedURL);
+                $link->raw = ':';
+                $link->type = TexyLink::IMAGE;
+            } else {
+                $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
+            }
+        } else $link = NULL;
+
+        // event wrapper
+        if (is_callable(array($tx->handler, 'image'))) {
+            $res = $tx->handler->image($parser, $image, $link);
+            if ($res !== Texy::PROCEED) return $res;
+        }
+
+        return $this->solve($image, $link);
+    }
+
+
+
+    /**
      * Adds new named reference to image
      *
      * @param string  reference name
-     * @param string  URLs
-     * @param TexyModifier  optional modifier
+     * @param TexyImage
      * @return void
      */
-    public function addReference($name, $URLs, $modifier=NULL)
+    public function addReference($name, TexyImage $image)
     {
-        $name = TexyUtf::strtolower($name);
-        if (!$modifier) $modifier = new TexyModifier;
-        $image = $this->factoryImage($URLs, NULL, FALSE);
-        $image->modifier = $modifier;
-        $image->name = $name;
-        $this->references[$name] = $image;
+        $image->name = TexyUtf::strtolower($name);
+        $this->references[$image->name] = $image;
     }
 
 
@@ -138,6 +194,7 @@ class TexyImageModule extends TexyModule
         $image = $tryRef ? $this->getReference(trim($content)) : FALSE;
 
         if (!$image) {
+            $tx = $this->texy;
             $content = explode('|', $content);
             $image = new TexyImage;
 
@@ -151,85 +208,23 @@ class TexyImageModule extends TexyModule
                 $image->imageURL = trim($content[0]);
             }
 
+            if (!$tx->checkURL($image->imageURL)) $image->imageURL = NULL;
+
             // onmouseover image
             if (isset($content[1])) {
                 $tmp = trim($content[1]);
-                if ($tmp !== '') $image->overURL = $tmp;
+                if ($tmp !== '' && $tx->checkURL($tmp)) $image->overURL = $tmp;
             }
 
             // linked image
             if (isset($content[2])) {
                 $tmp = trim($content[2]);
-                if ($tmp !== '') $image->linkedURL = $tmp;
+                if ($tmp !== '' && $tx->checkURL($tmp)) $image->linkedURL = $tmp;
             }
-
-            $image->modifier = new TexyModifier;
         }
 
         $image->modifier->setProperties($mod);
         return $image;
-    }
-
-
-
-    /**
-     * Callback for: [*image*]: urls .(title)[class]{style}
-     *
-     * @param array      regexp matches
-     * @return string
-     */
-    public function patternReferenceDef($matches)
-    {
-        list(, $mRef, $mURLs, $mMod) = $matches;
-        //    [1] => [* (reference) *]
-        //    [2] => urls
-        //    [3] => .(title)[class]{style}<>
-
-        $mod = new TexyModifier($mMod);
-        $this->addReference($mRef, $mURLs, $mod);
-        return '';
-    }
-
-
-
-    /**
-     * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
-     *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
-     * @return TexyHtml|string|FALSE
-     */
-    public function patternImage($parser, $matches)
-    {
-        list(, $mURLs, $mMod, $mAlign, $mLink) = $matches;
-        //    [1] => URLs
-        //    [2] => .(title)[class]{style}<>
-        //    [3] => * < >
-        //    [4] => url | [ref] | [*image*]
-
-        $tx = $this->texy;
-
-        $image = $this->factoryImage($mURLs, $mMod.$mAlign);
-
-        if ($mLink) {
-            if ($mLink === ':') {
-                $link = new TexyLink;
-                $link->URL = $image->linkedURL === NULL ? $image->imageURL : $image->linkedURL;
-                $link->type = TexyLink::AUTOIMAGE;
-                $link->modifier = new TexyModifier;
-            } else {
-                $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
-            }
-        } else $link = NULL;
-
-        // event wrapper
-        if (is_callable(array($tx->handler, 'image'))) {
-            $res = $tx->handler->image($parser, $image, $link);
-            if ($res !== NULL) return $res;
-        }
-
-        return $this->solve($image, $link);
     }
 
 
@@ -243,21 +238,21 @@ class TexyImageModule extends TexyModule
      */
     public function solve(TexyImage $image, $link)
     {
-        $tx = $this->texy;
-        $src = $tx->completeURL($image->imageURL, $this->root);
-        if ($src === FALSE) return FALSE;
+        if ($image->imageURL == NULL) return FALSE;
 
-        $file = $tx->completePath($image->imageURL, $this->fileRoot);
+        $tx = $this->texy;
 
         $mod = $image->modifier;
         $alt = $mod->title !== NULL ? $mod->title : $this->defaultAlt;
         $mod->title = NULL;
-
         $hAlign = $mod->hAlign;
         $mod->hAlign = NULL;
 
         $el = TexyHtml::el('img');
+        $el->src = NULL; // trick - move to front
         $mod->decorate($tx, $el);
+        $el->src = Texy::absolutize($image->imageURL, $this->root);
+        $el->alt = (string) $alt;  // needed
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->leftClass != '')
@@ -277,23 +272,25 @@ class TexyImageModule extends TexyModule
             $el->width = $image->width;
             $el->height = $image->height;
 
-        } elseif (is_file($file)) {
-            $size = getImageSize($file);
-            if (is_array($size)) {
-                $image->width = $el->width = $size[0];
-                $image->height = $el->height = $size[1];
+        } else {
+            // absolute URL & security check for double dot
+            if (!Texy::isAbsolute($image->imageURL) && strpos($image->imageURL, '..') === FALSE) {
+                $file = rtrim($this->fileRoot, '/\\') . '/' . $image->imageURL;
+                if (is_file($file)) {
+                    $size = getImageSize($file);
+                    if (is_array($size)) {
+                        $image->width = $el->width = $size[0];
+                        $image->height = $el->height = $size[1];
+                    }
+                }
             }
         }
 
-        $el->src = $src;
-        $el->alt = (string) $alt;  // needed
-
-
         // onmouseover actions generate
         if ($image->overURL !== NULL) {
-            $overSrc = $tx->completeURL($image->overURL, $this->root);
+            $overSrc = Texy::absolutize($image->overURL, $this->root);
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
-            $el->onmouseout = 'this.src=\'' . addSlashes($src) . '\'';
+            $el->onmouseout = 'this.src=\'' . addSlashes($el->src) . '\'';
             $el->onload = "var i=new Image();i.src='" . addSlashes($overSrc) . "';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
             $tx->summary['preload'][] = $overSrc;
         }
@@ -316,13 +313,33 @@ class TexyImageModule extends TexyModule
 
 class TexyImage
 {
+    /** @var string  base image URL */
     public $imageURL;
+
+    /** @var string  on-mouse-over image URL */
     public $overURL;
+
+    /** @var string  anchored image URL */
     public $linkedURL;
+
+    /** @var int  optional image width */
     public $width;
+
+    /** @var int  optional image height */
     public $height;
+
+    /** @var TexyModifier */
     public $modifier;
+
+    /** @var string  reference name (if is stored as reference) */
     public $name;
+
+
+
+    public function __construct()
+    {
+        $this->modifier = new TexyModifier;
+    }
 
 
     public function __clone()

@@ -126,7 +126,7 @@ class TexyHeadingModule extends TexyModule
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {
             $res = $this->texy->handler->heading($parser, $level, $mContent, $mod, FALSE);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solve($level, $mContent, $mod, FALSE);
@@ -163,7 +163,7 @@ class TexyHeadingModule extends TexyModule
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {
             $res = $this->texy->handler->heading($parser, $level, $mContent, $mod, TRUE);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solve($level, $mContent, $mod, TRUE);

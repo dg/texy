@@ -258,7 +258,7 @@ class TexyPhraseModule extends TexyModule
         // event wrapper
         if (is_callable(array($tx->handler, 'phrase'))) {
             $res = $tx->handler->phrase($parser, $phrase, $mContent, $mod, $link);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solve($phrase, $mContent, $mod, $link);

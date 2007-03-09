@@ -73,6 +73,9 @@ class Texy
     const CONTENT_TEXTUAL = "\x15";
     const CONTENT_BLOCK = "\x14";
 
+    // for event handlers
+    const PROCEED = NULL;
+
     /** @var string  input & output text encoding */
     public $encoding = 'utf-8';
 
@@ -200,12 +203,17 @@ class Texy
         // default configuration
         $this->trustMode();
 
-        // examples of link reference ;-)
-        $mod = new TexyModifier;
-        $mod->title = 'The best text -> HTML converter and formatter';
-        $this->linkModule->addReference('texy', 'http://texy.info/', 'Texy!', $mod);
-        $this->linkModule->addReference('google', 'http://www.google.com/search?q=%s');
-        $this->linkModule->addReference('wikipedia', 'http://en.wikipedia.org/wiki/Special:Search?search=%s');
+        // examples of link references ;-)
+        $link = new TexyLink('http://texy.info/');
+        $link->modifier->title = 'The best text -> HTML converter and formatter';
+        $link->label = 'Texy!';
+        $this->linkModule->addReference('texy', $link);
+
+        $link = new TexyLink('http://www.google.com/search?q=%s');
+        $this->linkModule->addReference('google', $link);
+
+        $link = new TexyLink('http://en.wikipedia.org/wiki/Special:Search?search=%s');
+        $this->linkModule->addReference('wikipedia', $link);
     }
 
 
@@ -630,57 +638,42 @@ class Texy
 
 
     /**
-     * Generates "real" URL
      * @param string   user URL
-     * @param string   root for relative URL's
-     * @return string|FALSE
+     * @return bool
      */
-    public function completeURL($URL, $root)
+    public function checkURL($URL)
     {
-        // invalid URL
-        if ($URL == NULL) return FALSE;
-
-        // special supported case
-        if (strncasecmp($URL, 'www.', 4) === 0) return 'http://' . $URL;
-
-        // special supported case
-        if (preg_match('#'.TEXY_EMAIL.'$#iA', $URL)) return 'mailto:' . $URL;
-
-        // absolute URL with scheme
-        if (preg_match('#[a-z]+:#iA', $URL)) {
-            if ($this->urlSchemes && !preg_match($this->urlSchemes, $URL)) return FALSE;
-            // replace unwanted &amp;
-            return str_replace('&amp;', '&', $URL);
-        }
-
-        // absolute URL without scheme
-        if ($URL[0] === '/') return $URL;
-
-        // relative URL
-        if ($root == NULL) return $URL;
-        return rtrim($root, '/\\') . '/' . $URL;
+        // absolute URL with scheme - check scheme
+        return $this->urlSchemes && preg_match('#[a-z]+:#iA', $URL)
+            ? preg_match($this->urlSchemes, $URL)
+            : TRUE;
     }
 
 
 
     /**
-     * Generates "real" file path
-     * @param string   user URL/path
-     * @param string   root for relative paths
-     * @return string|FALSE
+     * Is giver URL absolute?
+     * @param string  URL
+     * @return bool
      */
-    public function completePath($path, $root)
+    static public function isAbsolute($URL)
     {
-        // absolute URL
-        if (preg_match('#[a-z]+:|www\.|/|'.TEXY_EMAIL.'#iA', $path))
-            return FALSE;
+        // check for scheme: or absolute path or absolute URL
+        return preg_match('#[a-z]+:|/#iA', $URL);
+    }
 
-        // security
-        if (strpos($path, '..')) return FALSE;
 
-        // relative path
-        if ($root == NULL) return $path;
-        return rtrim($root, '/\\') . '/' . $path;
+
+    /**
+     * Makes URL absolute, if possible
+     * @param string  URL
+     * @param string  root
+     * @return string
+     */
+    static public function absolutize($URL, $root)
+    {
+        if ($root == NULL || self::isAbsolute($URL)) return $URL;
+        return rtrim($root, '/\\') . '/' . $URL;
     }
 
 

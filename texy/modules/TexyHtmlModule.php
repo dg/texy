@@ -68,7 +68,7 @@ class TexyHtmlModule extends TexyModule
 
         if (is_callable(array($this->texy->handler, 'htmlComment'))) {
             $res = $this->texy->handler->htmlComment($parser, $match);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solveComment($match);
@@ -119,7 +119,7 @@ class TexyHtmlModule extends TexyModule
         if (!$isOpening) {
             if (is_callable(array($tx->handler, 'htmlTag'))) {
                 $res = $tx->handler->htmlTag($parser, $el, FALSE);
-                if ($res !== NULL) return $res;
+                if ($res !== Texy::PROCEED) return $res;
             }
 
             return $this->solveTag($el, FALSE);
@@ -144,7 +144,7 @@ class TexyHtmlModule extends TexyModule
 
         if (is_callable(array($tx->handler, 'htmlTag'))) {
             $res = $tx->handler->htmlTag($parser, $el, TRUE, $isEmpty);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solveTag($el, TRUE, $isEmpty);
@@ -235,8 +235,7 @@ class TexyHtmlModule extends TexyModule
         if ($el->elName === 'img') {
             if (!isset($el->src)) return FALSE;
 
-            // absolute URL scheme check
-            if ($tx->urlSchemes && preg_match('#[a-z]+:#iA', $el->src) && !preg_match($tx->urlSchemes, $el->src)) return FALSE;
+            if (!$tx->checkURL($el->src)) return FALSE;
 
             $tx->summary['images'][] = $el->src;
 
@@ -248,8 +247,7 @@ class TexyHtmlModule extends TexyModule
                     $el->rel[] = 'nofollow';
                 }
 
-                // absolute URL scheme check
-                if ($tx->urlSchemes && preg_match('#[a-z]+:#iA', $el->href) && !preg_match($tx->urlSchemes, $el->href)) return FALSE;
+                if (!$tx->checkURL($el->href)) return FALSE;
 
                 $tx->summary['links'][] = $el->href;
             }

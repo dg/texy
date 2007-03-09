@@ -95,7 +95,7 @@ class TexyBlockModule extends TexyModule
         // event wrapper
         if (is_callable(array($this->texy->handler, 'block'))) {
             $res = $this->texy->handler->block($parser, $blocktype, $mContent, $param, $mod);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solve($blocktype, $mContent, $param, $mod);

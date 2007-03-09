@@ -48,7 +48,7 @@ class myHandler
     public function block($parser, $blocktype, $content, $lang, $modifier)
     {
         if ($blocktype !== 'block/code')
-            return NULL; // NULL means 'don't handle'
+            return Texy::PROCEED;
 
         $texy = $parser->texy;
 
@@ -59,7 +59,7 @@ class myHandler
         $geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
         // GeSHi could not find the language
-        if ($geshi->error) return NULL;
+        if ($geshi->error) return Texy::PROCEED;
 
         // do syntax-highlighting
         $geshi->set_encoding('UTF-8');

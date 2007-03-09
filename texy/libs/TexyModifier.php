@@ -158,10 +158,6 @@ class TexyModifier
             }
         }
 
-        // HACK (move to front)
-        $el->href = $el->src = NULL;
-
-
         // title
         $el->title = $this->title;
 

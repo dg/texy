@@ -93,7 +93,7 @@ class TexyEmoticonModule extends TexyModule
                 // event wrapper
                 if (is_callable(array($tx->handler, 'emoticon'))) {
                     $res = $tx->handler->emoticon($parser, $emoticon, $match);
-                    if ($res !== NULL) return $res;
+                    if ($res !== Texy::PROCEED) return $res;
                 }
 
                 return $this->solve($emoticon, $match);
@@ -117,12 +117,12 @@ class TexyEmoticonModule extends TexyModule
         $tx = $this->texy;
         $file = $this->icons[$emoticon];
         $el = TexyHtml::el('img');
-        $el->src = $tx->completeURL($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
-        if ($el->src === FALSE) return FALSE;
+        $el->src = Texy::absolutize($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
         $el->alt = $raw;
         $el->class[] = $this->class;
 
-        $file = $tx->completePath($file, $this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot);
+        // file path
+        $file = rtrim($this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
         if (is_file($file)) {
             $size = getImageSize($file);
             if (is_array($size)) {

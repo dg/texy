@@ -33,7 +33,7 @@ class myHandler
      * @param TexyLineParser
      * @param string
      * @param string
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function emoticon($parser, $emoticon, $rawEmoticon)
     {
@@ -44,7 +44,7 @@ class myHandler
      * @param TexyLineParser
      * @param TexyImage
      * @param TexyLink
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function image($parser, $image, $link)
     {
@@ -55,7 +55,7 @@ class myHandler
      * @param TexyLineParser
      * @param TexyLink
      * @param string
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function linkReference($parser, $link, $content)
     {
@@ -66,7 +66,7 @@ class myHandler
      * @param TexyLineParser
      * @param TexyLink
      * @param string
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function linkEmail($parser, $link, $content)
     {
@@ -77,7 +77,7 @@ class myHandler
      * @param TexyLineParser
      * @param TexyLink
      * @param string
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function linkURL($parser, $link, $content)
     {
@@ -90,7 +90,7 @@ class myHandler
      * @param string
      * @param TexyModifier
      * @param TexyLink
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function phrase($parser, $phrase, $content, $modifier, $link)
     {
@@ -100,22 +100,22 @@ class myHandler
     /**
      * @param TexyLineParser
      * @param string
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function newReference($parser, $name)
     {
-        // return NULL;
+        // return Texy::PROCEED;
         // return $parser->texy->linkModule->solve($link, $content);
     }
 
     /**
      * @param TexyLineParser
      * @param string
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function htmlComment($parser, $content)
     {
-        // return NULL;
+        // return Texy::PROCEED;
         // return $parser->texy->htmlModule->solveComment($content);
     }
 
@@ -124,11 +124,11 @@ class myHandler
      * @param TexyHtml
      * @param bool
      * @param bool
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function htmlTag($parser, $el, $isOpening, $forceEmpty=NULL)
     {
-        // return NULL;
+        // return Texy::PROCEED;
         // return $parser->texy->htmlModule->solveTag($el, $isOpening, $forceEmpty);
     }
 
@@ -144,7 +144,7 @@ class myHandler
      * @param TexyLink
      * @param string
      * @param TexyModifier
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function figure($parser, $image, $link, $content, $modifier)
     {
@@ -157,7 +157,7 @@ class myHandler
      * @param string
      * @param TexyModifier
      * @param bool
-     * @return TexyHtml|string|FALSE|NULL
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     public function heading($parser, $level, $content, $modifier, $isSurrounded)
     {
@@ -170,7 +170,7 @@ class myHandler
      * @param string
      * @param string
      * @param TexyModifier
-     * @return TexyHtml|string|NULL
+     * @return TexyHtml|string|Texy::PROCEED
      */
     public function block($parser, $blocktype, $content, $param, $modifier)
     {

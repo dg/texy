@@ -45,7 +45,7 @@ class myHandler
     public function block($parser, $blocktype, $content, $lang, $modifier)
     {
         if ($blocktype !== 'block/code')
-            return NULL; // NULL means 'don't handle'
+            return Texy::PROCEED;
 
         $texy = $parser->texy;
 
@@ -54,7 +54,7 @@ class myHandler
         if (!in_array(
                 $lang,
                 array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
-           ) return NULL;
+           ) return Texy::PROCEED;
 
         $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
 

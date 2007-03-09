@@ -76,10 +76,9 @@ class TexyFigureModule extends TexyModule
 
         if ($mLink) {
             if ($mLink === ':') {
-                $link = new TexyLink;
-                $link->URL = $image->linkedURL === NULL ? $image->imageURL : $image->linkedURL;
-                $link->type = TexyLink::AUTOIMAGE;
-                $link->modifier = new TexyModifier;
+                $link = new TexyLink($image->linkedURL === NULL ? $image->imageURL : $image->linkedURL);
+                $link->raw = ':';
+                $link->type = TexyLink::IMAGE;
             } else {
                 $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
             }
@@ -88,7 +87,7 @@ class TexyFigureModule extends TexyModule
         // event wrapper
         if (is_callable(array($tx->handler, 'figure'))) {
             $res = $tx->handler->figure($parser, $image, $link, $mContent, $mod);
-            if ($res !== NULL) return $res;
+            if ($res !== Texy::PROCEED) return $res;
         }
 
         return $this->solve($image, $link, $mContent, $mod);
@@ -112,7 +111,7 @@ class TexyFigureModule extends TexyModule
         $hAlign = $image->modifier->hAlign;
         $mod->hAlign = $image->modifier->hAlign = NULL;
 
-        $elImg = $tx->imageModule->solve($image, $link);
+        $elImg = $tx->imageModule->solve($image, $link); // returns TexyHtml or false!
 
         $el = TexyHtml::el('div');
         if (!empty($image->width)) $el->style['width'] = ($image->width + $this->widthDelta) . 'px';
