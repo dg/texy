@@ -132,7 +132,7 @@ class TexyImageModule extends TexyModule
 
         if ($mLink) {
             if ($mLink === ':') {
-                $link = new TexyLink($image->linkedURL === NULL ? $image->imageURL : $image->linkedURL);
+                $link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
                 $link->raw = ':';
                 $link->type = TexyLink::IMAGE;
             } else {
@@ -201,14 +201,14 @@ class TexyImageModule extends TexyModule
             // dimensions
             $matches = NULL;
             if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $content[0], $matches)) {
-                $image->imageURL = trim($matches[1]);
+                $image->URL = trim($matches[1]);
                 $image->width = (int) $matches[2];
                 $image->height = (int) $matches[3];
             } else {
-                $image->imageURL = trim($content[0]);
+                $image->URL = trim($content[0]);
             }
 
-            if (!$tx->checkURL($image->imageURL)) $image->imageURL = NULL;
+            if (!$tx->checkURL($image->URL)) $image->URL = NULL;
 
             // onmouseover image
             if (isset($content[1])) {
@@ -238,7 +238,7 @@ class TexyImageModule extends TexyModule
      */
     public function solve(TexyImage $image, $link)
     {
-        if ($image->imageURL == NULL) return FALSE;
+        if ($image->URL == NULL) return FALSE;
 
         $tx = $this->texy;
 
@@ -251,7 +251,7 @@ class TexyImageModule extends TexyModule
         $el = TexyHtml::el('img');
         $el->src = NULL; // trick - move to front
         $mod->decorate($tx, $el);
-        $el->src = Texy::absolutize($image->imageURL, $this->root);
+        $el->src = Texy::absolutize($image->URL, $this->root);
         $el->alt = (string) $alt;  // needed
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
@@ -274,8 +274,8 @@ class TexyImageModule extends TexyModule
 
         } else {
             // absolute URL & security check for double dot
-            if (!Texy::isAbsolute($image->imageURL) && strpos($image->imageURL, '..') === FALSE) {
-                $file = rtrim($this->fileRoot, '/\\') . '/' . $image->imageURL;
+            if (!Texy::isAbsolute($image->URL) && strpos($image->URL, '..') === FALSE) {
+                $file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
                 if (is_file($file)) {
                     $size = getImageSize($file);
                     if (is_array($size)) {
@@ -314,7 +314,7 @@ class TexyImageModule extends TexyModule
 class TexyImage
 {
     /** @var string  base image URL */
-    public $imageURL;
+    public $URL;
 
     /** @var string  on-mouse-over image URL */
     public $overURL;

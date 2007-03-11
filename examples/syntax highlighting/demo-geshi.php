@@ -23,7 +23,7 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 $geshiPath = dirname(__FILE__).'/geshi/';
-include_once $geshiPath . 'geshi.php';
+@include_once $geshiPath . 'geshi.php';
 
 
 if (!class_exists('Geshi'))

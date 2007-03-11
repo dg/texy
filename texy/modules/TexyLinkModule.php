@@ -269,7 +269,7 @@ class TexyLinkModule extends TexyModule
             $dest = trim(substr($dest, 2, -2));
             $image = $tx->imageModule->getReference($dest);
             if ($image) {
-                $link = new TexyLink($image->linkedURL === NULL ? $image->imageURL : $image->linkedURL);
+                $link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
                 $link->modifier = $image->modifier;
             }
         }
@@ -442,7 +442,7 @@ class TexyLink
     public $modifier;
 
     /** @var int  how was link created? */
-    public $type = self::COMMON;
+    public $type = TexyLink::COMMON;
 
     /** @var string  optional label, used by references */
     public $label;

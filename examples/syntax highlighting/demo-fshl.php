@@ -20,7 +20,7 @@
 require_once dirname(__FILE__).'/../../texy/texy.php';
 
 $fshlPath = dirname(__FILE__).'/fshl/';
-include_once $fshlPath . 'fshl.php';
+@include_once $fshlPath . 'fshl.php';
 
 
 if (!class_exists('fshlParser'))

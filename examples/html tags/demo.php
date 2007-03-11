@@ -50,7 +50,7 @@ function doIt($texy)
 header('Content-type: text/html; charset=utf-8');
 
 echo '<h2>Enable nearly all valid tags</h2>';
-$texy->allowedTags = array_merge(Texy::$blockTags, Texy::$inlineTags);
+$texy->allowedTags = array_merge(TexyHtml::$blockTags, TexyHtml::$inlineTags);
 doIt($texy);
 
 echo '<h2>Texy::ALL - enables all tags</h2>';

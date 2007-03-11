@@ -32,8 +32,9 @@ class TexyQuoteModule extends TexyModule
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU', // original
 //            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU',  // >>>>
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU',       // only >
+//            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU',       // only >
             'blockquote'
         );
     }
@@ -70,6 +71,17 @@ class TexyQuoteModule extends TexyModule
         $content = '';
         $spaces = '';
         do {
+            if ($mPrefix === ':') {
+                $mod->cite = $tx->quoteModule->citeLink($mContent);
+                $content .= "\n";
+            } else {
+                if ($spaces === '') $spaces = max(1, strlen($mPrefix));
+                $content .= $mContent . "\n";
+            }
+
+            if (!$parser->next("#^>(?:|(\\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
+
+/*
             if ($mPrefix === '>') {
                 $content .= $mPrefix . $mContent . "\n";
             } elseif ($mPrefix === ':') {
@@ -79,8 +91,9 @@ class TexyQuoteModule extends TexyModule
                 if ($spaces === '') $spaces = max(1, strlen($mPrefix));
                 $content .= $mContent . "\n";
             }
-
             if (!$parser->next("#^\\>(?:(\\>|\\ {1,$spaces}|:)(.*))?()$#mA", $matches)) break;
+*/
+
             list(, $mPrefix, $mContent) = $matches;
         } while (TRUE);
 

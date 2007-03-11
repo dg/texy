@@ -32,15 +32,15 @@ class myHandler {
      * @param TexyLineParser
      * @param TexyImage
      * @param TexyLink
-     * @return TexyHtml|string
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
     function image($parser, $image, $link)
     {
         $texy = $parser->texy;
 
-        if ($image->imageURL == 'user')  // accepts only [* user *]
+        if ($image->URL == 'user')  // accepts only [* user *]
         {
-            $image->imageURL = 'image.gif'; // image URL
+            $image->URL = 'image.gif'; // image URL
             $image->overURL = 'image-over.gif'; // onmouseover image
             $image->modifier->title = 'Texy! logo';
             if ($link) $link->URL = 'image-big.gif'; // linked image

@@ -76,7 +76,7 @@ class TexyFigureModule extends TexyModule
 
         if ($mLink) {
             if ($mLink === ':') {
-                $link = new TexyLink($image->linkedURL === NULL ? $image->imageURL : $image->linkedURL);
+                $link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
                 $link->raw = ':';
                 $link->type = TexyLink::IMAGE;
             } else {
