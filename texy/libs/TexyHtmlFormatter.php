@@ -105,8 +105,8 @@ class TexyHtmlFormatter
      */
     private function indent($matches)
     {
-        list($match, $mClosing, $mTag) = $matches;
-        //    [1] => /  (opening or closing element)
+        list($match, $mEnd, $mTag) = $matches;
+        //    [1] => /  (begin or end element)
         //    [2] => element
         //    [3] => attributes>
         $match = trim($match);
@@ -124,7 +124,7 @@ class TexyHtmlFormatter
                    . "\r"
                    . str_repeat("\t", $this->space);
 
-        if ($mClosing === '/') {
+        if ($mEnd === '/') {
             return "\x08"   // backspace
                    . $match
                    . "\n"

@@ -44,7 +44,7 @@ class TexyBlockModule extends TexyModule
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
-            '#^(?>/--+? *?([^\n]*)'.TEXY_MODIFIER_H.'?$)((?:\n(?0)|\n.*)*)(?:\n\\\\--.*$|\z)#mUsi',
+            '#^(?>/--+? *?(.*)'.TEXY_MODIFIER_H.'?$)((?:\n(?0)|\n.*)*)(?:\n\\\\--.*$|\z)#mUi',
             'blocks'
         );
     }
@@ -59,7 +59,7 @@ class TexyBlockModule extends TexyModule
     {
         // autoclose exclusive blocks
         $text = preg_replace(
-            '#^((?>/--+? *?)(?!div|texysource)[^\n]*)$((?:\n.*)*)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mUsi',
+            '#^((?>/--+ *)(?!div|texysource).*)$((?:\n.*)*?)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mi',
             "\$1\$2\n\\--",
             $text
         );

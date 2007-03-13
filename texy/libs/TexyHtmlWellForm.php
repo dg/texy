@@ -22,31 +22,46 @@ if (!defined('TEXY')) die();
 
 class TexyHtmlWellForm
 {
-/*
-    var $dontNestElements  = array(
-        'a'          => array('a'),
-        'pre'        => array('img', 'object', 'big', 'small', 'sub', 'sup'),
-        'button'     => array('input', 'select', 'textarea', 'label', 'button', 'form', 'fieldset', 'iframe', 'isindex'),
-        'label'      => array('label'),
-        'form'       => array('form'),
-    );
-*/
-
+    /** @var array */
     private $tagUsed;
+
+    /** @var array */
     private $tagStack;
+
+    /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
+    private $prohibits = array(
+        'a' => array('a'),
+        'img' => array('pre'),
+        'object' => array('pre'),
+        'big' => array('pre'),
+        'small' => array('pre'),
+        'sub' => array('pre'),
+        'sup' => array('pre'),
+        'input' => array('button'),
+        'select' => array('button'),
+        'textarea' => array('button'),
+        'label' => array('button', 'label'),
+        'button' => array('button'),
+        'form' => array('button', 'form'),
+        'fieldset' => array('button'),
+        'iframe' => array('button'),
+        'isindex' => array('button'),
+    );
+
     private $autoClose = array(
-        'tbody'      => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-        'colgroup'   => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-        'dd'         => array('dt'=>1, 'dd'=>1),
-        'dt'         => array('dt'=>1, 'dd'=>1),
-        'li'         => array('li'=>1),
-        'option'     => array('option'=>1),
-        'p'          => array('address'=>1, 'applet'=>1, 'blockquote'=>1, 'center'=>1, 'dir'=>1, 'div'=>1, 'dl'=>1, 'fieldset'=>1, 'form'=>1, 'h1'=>1, 'h2'=>1, 'h3'=>1, 'h4'=>1, 'h5'=>1, 'h6'=>1, 'hr'=>1, 'isindex'=>1, 'menu'=>1, 'object'=>1, 'ol'=>1, 'p'=>1, 'pre'=>1, 'table'=>1, 'ul'=>1),
-        'td'         => array('th'=>1, 'td'=>1, 'tr'=>1, 'thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-        'tfoot'      => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-        'th'         => array('th'=>1, 'td'=>1, 'tr'=>1, 'thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-        'thead'      => array('thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
-        'tr'         => array('tr'=>1, 'thead'=>1, 'tbody'=>1, 'tfoot'=>1, 'colgoup'=>1),
+        'tbody'    => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
+        'colgroup' => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
+        'dd'       => array('dt'=>1,'dd'=>1),
+        'dt'       => array('dt'=>1,'dd'=>1),
+        'li'       => array('li'=>1),
+        'option'   => array('option'=>1),
+        'p'        => array('address'=>1,'applet'=>1,'blockquote'=>1,'center'=>1,'dir'=>1,'div'=>1,'dl'=>1,'fieldset'=>1,'form'=>1,'h1'=>1,'h2'=>1,
+                        'h3'=>1,'h4'=>1,'h5'=>1,'h6'=>1,'hr'=>1,'isindex'=>1,'menu'=>1,'object'=>1,'ol'=>1,'p'=>1,'pre'=>1,'table'=>1,'ul'=>1),
+        'td'       => array('th'=>1,'td'=>1,'tr'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
+        'tfoot'    => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
+        'th'       => array('th'=>1,'td'=>1,'tr'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
+        'thead'    => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
+        'tr'       => array('tr'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
     );
 
 
@@ -79,56 +94,64 @@ class TexyHtmlWellForm
      */
     private function cb($matches)
     {
-        list(, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
+        list(, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
         //    [2] => TAG
         //    [3] => ... (attributes)
         //    [4] => /   (empty)
 
-        if (isset(TexyHtml::$emptyTags[$mTag]) || $mEmpty) return $mClosing ? '' : '<'.$mTag.$mAttr.$mEmpty.'>';
+        if (isset(TexyHtml::$emptyTags[$mTag]) || $mEmpty) return $mEnd ? '' : '<'.$mTag.$mAttr.$mEmpty.'>';
 
-        if ($mClosing) {  // closing
+        if ($mEnd) {  // end tag
+
+            // has start tag?
             if (empty($this->tagUsed[$mTag])) return '';
+
+            // autoclose tags
             $pair = end($this->tagStack);
             $s = '';
             $i = 1;
             while ($pair !== FALSE) {
                 $tag = $pair['tag'];
-                //if (TexyHtml::$XHTML || !isset(self::$optional[$tag]))
                 $s .= '</'.$tag.'>';
                 $this->tagUsed[$tag]--;
                 if ($tag === $mTag) break;
                 $pair = prev($this->tagStack);
                 $i++;
             }
-            //if ($pair === FALSE) return '';
 
             if (isset(TexyHtml::$blockTags[$mTag])) {
                 array_splice($this->tagStack, -$i);
                 return $s;
             }
 
+            // autoopen inline tags
             // not work in PHP 4.4.1 due bug #35063
             unset($this->tagStack[key($this->tagStack)]);
             $pair = current($this->tagStack);
             while ($pair !== FALSE) {
                 $s .= '<'.$pair['tag'].$pair['attr'].'>';
-                @$this->tagUsed[$pair['tag']]++;
+                $this->tagUsed[$pair['tag']]++;
                 $pair = next($this->tagStack);
             }
             return $s;
 
-        } else {        // opening
+        } else { // start tag
 
+            // check element prohibitions
+            if (isset($this->prohibits[$mTag])) {
+                foreach ($this->prohibits[$mTag] as $pTag)
+                    if (!empty($this->tagUsed[$pTag])) return '';
+            }
+
+            // check optional end tags (autoclose)
             $s = '';
-
             $pair = end($this->tagStack);
             while ($pair &&
                     isset($this->autoClose[$pair['tag']]) &&
                     isset($this->autoClose[$pair['tag']][$mTag]) ) {
 
                 $tag = $pair['tag'];
-                //if (TexyHtml::$XHTML || !isset(self::$optional[$tag]))
                 $s .= '</'.$tag.'>';
                 $this->tagUsed[$tag]--;
                 unset($this->tagStack[key($this->tagStack)]);
@@ -136,16 +159,15 @@ class TexyHtmlWellForm
                 $pair = end($this->tagStack);
             }
 
+            // open tag, put to stack, increase counter
             $pair = array(
                 'attr' => $mAttr,
                 'tag' => $mTag,
             );
             $this->tagStack[] = $pair;
-            @$this->tagUsed[$pair['tag']]++;
+            $tmp = &$this->tagUsed[$mTag]; $tmp++;
 
-
-            $s .= '<'.$mTag.$mAttr.'>';
-            return $s;
+            return $s . '<'.$mTag.$mAttr.'>';
         }
     }
 

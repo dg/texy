@@ -87,7 +87,7 @@ class TexyHtmlModule extends TexyModule
      */
     public function patternTag($parser, $matches)
     {
-        list(, $mClosing, $mTag, $mAttr, $mEmpty) = $matches;
+        list(, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
         //    [2] => tag
         //    [3] => attributes
@@ -95,7 +95,7 @@ class TexyHtmlModule extends TexyModule
 
         $tx = $this->texy;
 
-        $isOpening = $mClosing !== '/';
+        $isStart = $mEnd !== '/';
         $isEmpty = $mEmpty === '/';
         if (!$isEmpty && substr($mAttr, -1) === '/') { // uvizlo v $mAttr?
             $mAttr = substr($mAttr, 0, -1);
@@ -103,20 +103,20 @@ class TexyHtmlModule extends TexyModule
         }
 
         // error - can't close empty element
-        if ($isEmpty && !$isOpening)
+        if ($isEmpty && !$isStart)
             return FALSE;
 
 
         // error - end element with atttrs
         $mAttr = trim(strtr($mAttr, "\n", ' '));
-        if ($mAttr && !$isOpening)
+        if ($mAttr && !$isStart)
             return FALSE;
 
 
         $el = TexyHtml::el($mTag);
 
-        // closing tag? we are finished
-        if (!$isOpening) {
+        // end tag? we are finished
+        if (!$isStart) {
             if (is_callable(array($tx->handler, 'htmlTag'))) {
                 $res = $tx->handler->htmlTag($parser, $el, FALSE);
                 if ($res !== Texy::PROCEED) return $res;
@@ -157,11 +157,11 @@ class TexyHtmlModule extends TexyModule
      * Finish invocation
      *
      * @param TexyHtml  element
-     * @param bool      is opening?
+     * @param bool      is start tag?
      * @param bool      is empty?
      * @return string|FALSE
      */
-    public function solveTag(TexyHtml $el, $isOpening, $forceEmpty=NULL)
+    public function solveTag(TexyHtml $el, $isStart, $forceEmpty=NULL)
     {
         $tx = $this->texy;
 
@@ -186,8 +186,8 @@ class TexyHtmlModule extends TexyModule
         // force empty
         if ($forceEmpty && $aTags === Texy::ALL) $el->_empty = TRUE;
 
-        // closing tag? we are finished
-        if (!$isOpening) {
+        // end tag? we are finished
+        if (!$isStart) {
             return $tx->protect($el->endTag(), $el->getContentType());
         }
 

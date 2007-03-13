@@ -38,7 +38,7 @@ class myHandler {
         {
             $movie = Texy::absolutize($image->URL, $texy->imageModule->root);
 
-            $dimensions = 
+            $dimensions =
                    ($image->width ? 'width="'.$image->width.'" ' : '')
                 . ($image->height ? 'width="'.$image->height.'" ' : '');
 
@@ -91,5 +91,3 @@ echo '<hr />';
 echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
-
-

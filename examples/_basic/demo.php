@@ -28,8 +28,6 @@ $texy->allowed['phrase/del'] = TRUE;
 $texy->allowed['phrase/sup'] = TRUE;
 $texy->allowed['phrase/sub'] = TRUE;
 $texy->allowed['phrase/cite'] = TRUE;
-$texy->allowed['html/comment'] = TRUE;
-$texy->allowed['script'] = TRUE;
 
 
 // processing

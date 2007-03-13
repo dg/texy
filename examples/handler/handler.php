@@ -126,10 +126,10 @@ class myHandler
      * @param bool
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function htmlTag($parser, $el, $isOpening, $forceEmpty=NULL)
+    public function htmlTag($parser, $el, $isStart, $forceEmpty=NULL)
     {
         // return Texy::PROCEED;
-        // return $parser->texy->htmlModule->solveTag($el, $isOpening, $forceEmpty);
+        // return $parser->texy->htmlModule->solveTag($el, $isStart, $forceEmpty);
     }
 
 
