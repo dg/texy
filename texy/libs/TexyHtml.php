@@ -45,9 +45,8 @@ class TexyHtml
 
 
     /**
-     * @var array  Block elements
-     * missing deprecated: embed
-     * block elements for Texy! purposes: object, param
+     * @var array  inner-block elements
+     * missing deprecated: embed, center, dir, isindex, menu, (noframes)
      * I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
      */
     static public $blockTags = array(
@@ -57,24 +56,26 @@ class TexyHtml
         'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1,'ul'=>1,);
 
     /**
-     * @var array  Inline elements
+     * @var array  inner-inline elements
+     * missing $replacedTags
+     * missing deprecated: basefont, font, s, strike, u
      * plus block-inline elements (ins, del) and special (optgroup, option)
      */
     static public $inlineTags = array(
-        'a'=>1,'abbr'=>1,'acronym'=>1,'area'=>1,'b'=>1,'big'=>1,'cite'=>1,'code'=>1,'del'=>1,'dfn'=>1,'em'=>1,
+        'a'=>1,'abbr'=>1,'acronym'=>1,'area'=>1,'b'=>1,'bdo'=>1,'big'=>1,'cite'=>1,'code'=>1,'del'=>1,'dfn'=>1,'em'=>1,
         'i'=>1,'iframe'=>1,'ins'=>1,'kbd'=>1,'label'=>1,'optgroup'=>1,'option'=>1,'q'=>1,'samp'=>1,'small'=>1,
         'span'=>1,'strong'=>1,'sub'=>1,'sup'=>1,'tt'=>1,'var'=>1,);
 
     /**
-     * @var array  Replaced elements
-     * missing deprecated: applet, isindex;
-     * replaced element for Texy! purposes: br
+     * @var array  inner-replaced elements
+     * missing deprecated: applet
+     * for Texy! purposes: br
      */
     static public $replacedTags = array(
         'br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,);
 
     /**
-     * @var array  Empty elements
+     * @var array  empty elements
      */
     static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,'base'=>1,'col'=>1,
         'link'=>1,'param'=>1,);

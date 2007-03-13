@@ -1,21 +1,21 @@
-Texy! is sexy!
+ï»¿Texy! is sexy!
 **************
 
-Texy! je pøevadìè textu do formátovaného HTML kódu. Díky nìmu mùete
-psát strukturované dokumenty i bez znalosti nebo pouití jazyka HTML.
-Dokument napíšete v pøehledné, èistì textové, formì a Texy! jej
-automaticky pøevede do validního (X)HTML kódu.
+Texy! je pÅ™evadÄ›Ä textu do formÃ¡tovanÃ©ho HTML kÃ³du. DÃ­ky nÄ›mu mÅ¯Å¾ete
+psÃ¡t strukturovanÃ© dokumenty i bez znalosti nebo pouÅ¾itÃ­ jazyka HTML.
+Dokument napÃ­Å¡ete v pÅ™ehlednÃ©, ÄistÄ› textovÃ©, formÄ› a Texy! jej
+automaticky pÅ™evede do validnÃ­ho (X)HTML kÃ³du.
 
-Texy! je jedním z **nejkomplexnìjších** formátovaèù. Umí zpracovávat
-obrázky, odkazy, vnoøené seznamy, tabulky a má také plnou
-podporu CSS((Kaskádové styly)).
+Texy! je jednÃ­m z **nejkomplexnÄ›jÅ¡Ã­ch** formÃ¡tovaÄÅ¯. UmÃ­ zpracovÃ¡vat
+obrÃ¡zky, odkazy, vnoÅ™enÃ© seznamy, tabulky a mÃ¡ takÃ© plnou
+podporu CSS((KaskÃ¡dovÃ© styly)).
 
 
 
 Titulky
 =======
 
-=== Titulek niší úrovnì ====
+=== Titulek niÅ¾Å¡Ã­ ÃºrovnÄ› ====
 
 
 
@@ -24,22 +24,22 @@ Odstavce
 ==========
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim, placerat tincidunt, tincidunt ac, fringilla et, mauris.
-stále ten stejnı odstavec
- stále ten stejnı odstavec, ale øádek je oddìlen elementem  `<br>`
- a druhı oddìlenı øádek
+stÃ¡le ten stejnÃ½ odstavec
+ stÃ¡le ten stejnÃ½ odstavec, ale Å™Ã¡dek je oddÄ›len elementem  `<br>`
+ a druhÃ½ oddÄ›lenÃ½ Å™Ã¡dek
 
-Vycentrováno modifikátorem  .<>
+VycentrovÃ¡no modifikÃ¡torem  .<>
 
-Obarveno modifikátorem .{color:blue}
-
-
+Obarveno modifikÃ¡torem .{color:blue}
 
 
 
-Horizontální linky
+
+
+HorizontÃ¡lnÃ­ linky
 ==================
 
-ètyøi linky, ètyøi zpùsoby zápisu
+ÄtyÅ™i linky, ÄtyÅ™i zpÅ¯soby zÃ¡pisu
 
 ---
 
@@ -52,7 +52,7 @@ Horizontální linky
 
 
 
-Kód
+KÃ³d
 ===
 
 /---code php
@@ -63,22 +63,22 @@ Kód
   }
 \---
 
-Syntax-highlighting lze zprovoznit pouitím pøídaného modulu
+Syntax-highlighting lze zprovoznit pouÅ¾itÃ­m pÅ™Ã­danÃ©ho modulu
 
 
 
 
-Vypnutí Texy
+VypnutÃ­ Texy
 ============
 
 
 /---html
-  <em>pøíklad</em>: **this is not strong**
+  <em>pÅ™Ã­klad</em>: **this is not strong**
 \---
 
 
 /---text
-  <em>pøíklad</em>: **this is not strong**
+  <em>pÅ™Ã­klad</em>: **this is not strong**
 \---
 
 
@@ -97,7 +97,7 @@ Div
 
 
 
-vnoøení
+vnoÅ™enÃ­
 ------
 
 /---div .[header]
@@ -105,7 +105,7 @@ vnoøení
   ## This is a header.
 
   /---div
-    vnoøenı div
+    vnoÅ™enÃ½ div
   \---
 
   Texy! je sexy!
@@ -129,14 +129,14 @@ Citace
 >:http://www.microsoft.com
 
 
-vnoøení
+vnoÅ™enÃ­
 -------
 
 > ## Titulek
 >
-> > Vnoøená citace
+> > VnoÅ™enÃ¡ citace
 >
-> a zpìt do první úrovnì
+> a zpÄ›t do prvnÃ­ ÃºrovnÄ›
 
 
 
@@ -149,7 +149,7 @@ Odkazy
 - This picture [* image.gif *]:www.texy.info is clickable
 
 
-uitím referencí
+uÅ¾itÃ­m referencÃ­
 ----------------
 
 [homepage]:  http://texy.info/ Texy! .(this is homepage)
@@ -163,12 +163,12 @@ uitím referencí
 
 
 
-Obrázky
+ObrÃ¡zky
 =======
 
 [* image.gif *]
 
-v odstavích
+v odstavÃ­ch
 -----------
 
 [* image.gif <] Left-aligned image. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim, placerat tincidunt, tincidunt ac, fringilla et, mauris.
@@ -176,7 +176,7 @@ v odstavích
 [* image.gif >] Right-aligned image. Curabitur quam justo, hendrerit a, mattis ut, ultrices at, dui. In mollis. Ut pellentesque erat vehicula nunc. Ut ultricies. Nulla nunc velit, consequat vel, laoreet in, blandit et, eros.
 
 
-s událostí on-mouse-over
+s udÃ¡lostÃ­ on-mouse-over
 ------------------------
 
 [* image.gif | image-over.gif *]
@@ -185,10 +185,10 @@ s událostí on-mouse-over
 s popiskou
 ----------
 
-[* image.gif *] *** Toto je popiska pod obrázkem / fotkou
+[* image.gif *] *** Toto je popiska pod obrÃ¡zkem / fotkou
 
 
-uitím referencí
+uÅ¾itÃ­m referencÃ­
 ----------------
 
 What a beautiful logo [*picture*] :-)
@@ -196,7 +196,7 @@ What a beautiful logo [*picture*] :-)
 [*picture*]: image.gif .(alternative text)
 
 
-s modifikátorem
+s modifikÃ¡torem
 ---------------
 
 [* image.gif .{width:100px} *]
@@ -206,31 +206,31 @@ s modifikátorem
 
 
 
-Fráze
+FrÃ¡ze
 =====
 
-Ukázka: *zdùraznìné*, **silnì zdùraznìné** and ***nejsilnìji zdùraznìné***
+UkÃ¡zka: *zdÅ¯raznÄ›nÃ©*, **silnÄ› zdÅ¯raznÄ›nÃ©** and ***nejsilnÄ›ji zdÅ¯raznÄ›nÃ©***
 
-Krátkı citát: >>Lorem Ipsum Dolores<<:www.lipsum.com
+KrÃ¡tkÃ½ citÃ¡t: >>Lorem Ipsum Dolores<<:www.lipsum.com
 
-Zdroj, citovaná osoba: Jak ~~Frank Borland~~ øíkal, ...
+Zdroj, citovanÃ¡ osoba: Jak ~~Frank Borland~~ Å™Ã­kal, ...
 
-A další: ^^superscript^^ vs. __subscript__
+A dalÅ¡Ã­: ^^superscript^^ vs. __subscript__
 
-         ++pøidanı text++ vs. --odstranìnı text--
+         ++pÅ™idanÃ½ text++ vs. --odstranÄ›nÃ½ text--
 
-Kód: `<br />`
+KÃ³d: `<br />`
 
 
-s modifikátory
+s modifikÃ¡tory
 --------------
 
-**silnı a zelenı .{color:green}** jako Hulk
+**silnÃ½ a zelenÃ½ .{color:green}** jako Hulk
 
 
 
 
-Pøímé HTML tagy
+PÅ™Ã­mÃ© HTML tagy
 ===============
 
 This <strong>is strong</strong> text.
@@ -261,7 +261,7 @@ or
 
 
 
-èíslované
+ÄÃ­slovanÃ©
 ---------
 
 1.  Bird
@@ -286,7 +286,7 @@ III.  Parish
 
 
 
-vnoøené
+vnoÅ™enÃ©
 -------
 
 
@@ -306,44 +306,44 @@ c)  Parish
 
 
 
-definièní seznam
+definiÄnÃ­ seznam
 ---------------
 
-Koncert Divokı Bill:
-    - termín: 9. 12. 2004
-    - místo: Hala Vodová, Brno
-    - Cena: 260 Kè
+Koncert DivokÃ½ Bill:
+    - termÃ­n: 9. 12. 2004
+    - mÃ­sto: Hala VodovÃ¡, Brno
+    - Cena: 260 KÄ
 
 
-a s modifikátory:
+a s modifikÃ¡tory:
 
 
 .{color:red}
 triangl:   .{color:blue}
-    - trojúhelník      .{color:green}
-    - neladìnı bicí hudební nástroj
-    - tringulaèní vì
+    - trojÃºhelnÃ­k      .{color:green}
+    - neladÄ›nÃ½ bicÃ­ hudebnÃ­ nÃ¡stroj
+    - tringulaÄnÃ­ vÄ›Å¾
 
 
 
 
-Modifikátory
+ModifikÃ¡tory
 ============
 
-Lze pouít tyto druhy modifikátorù:
-- (titulek) popisné, pøidají objektu titulek (nebo alternativní text obrázkùm)
-- [class1 class2 #id] urèující tøídu a/nebo ID
-- {class:blue} pøímı zápis stylu
-- horizontální zarovnání:
+Lze pouÅ¾Ã­t tyto druhy modifikÃ¡torÅ¯:
+- (titulek) popisnÃ©, pÅ™idajÃ­ objektu titulek (nebo alternativnÃ­ text obrÃ¡zkÅ¯m)
+- [class1 class2 #id] urÄujÃ­cÃ­ tÅ™Ã­du a/nebo ID
+- {class:blue} pÅ™Ã­mÃ½ zÃ¡pis stylu
+- horizontÃ¡lnÃ­ zarovnÃ¡nÃ­:
   - doleva <
   - doprava >
-  - vycentrovanı <>
+  - vycentrovanÃ½ <>
   - do bloku =
 
-- vertikální zarovnání: (jen u tabulek)
+- vertikÃ¡lnÃ­ zarovnÃ¡nÃ­: (jen u tabulek)
   - nahoru ^
-  - na støed -
-  - dolù _
+  - na stÅ™ed -
+  - dolÅ¯ _
 
 
 
@@ -352,21 +352,21 @@ Lze pouít tyto druhy modifikátorù:
 Quick-corrects
 ==============
 
-- rozdìlení velmi dlouhıch slov podle èeskıch pravidel. Pøíklad: nejneobhospodaøovávatelnìjšími
-- klikatelné adresy www.dgx.cz, dave@dgx.cz (emaily jsou odolné vùèi spambotùm)
-- "èeské" 'typografické' uvozovky
-- pomlèka vs. spojovník: 10-15 vs. èesko-slovenskı
-- pomlèka: jedna -- dvì
-- typografickı køíek u rozmìrù 10 x 20
-- nedìlitelné mezery u telefonních èísel +420 776 552 046
-- vkládání nezalomitelnıch mezer za jednopísmenné pøedloky
+- rozdÄ›lenÃ­ velmi dlouhÃ½ch slov podle ÄeskÃ½ch pravidel. PÅ™Ã­klad: nejneobhospodaÅ™ovÃ¡vatelnÄ›jÅ¡Ã­mi
+- klikatelnÃ© adresy www.dgx.cz, dave@dgx.cz (emaily jsou odolnÃ© vÅ¯Äi spambotÅ¯m)
+- "ÄeskÃ©" 'typografickÃ©' uvozovky
+- pomlÄka vs. spojovnÃ­k: 10-15 vs. Äesko-slovenskÃ½
+- pomlÄka: jedna -- dvÄ›
+- typografickÃ½ kÅ™Ã­Å¾ek u rozmÄ›rÅ¯ 10 x 20
+- nedÄ›litelnÃ© mezery u telefonnÃ­ch ÄÃ­sel +420 776 552 046
+- vklÃ¡dÃ¡nÃ­ nezalomitelnÃ½ch mezer za jednopÃ­smennÃ© pÅ™edloÅ¾ky
 - acronym NATO((North Atlantic Treaty Organisation))
-- abbr "et al."((a další))
-- náhrady(TM) nebo(R) za pøíslušné entity(C)
-- šipky <-- a --> a <--> ;
-- tøi teèky...
-- zachování HTML entit &amp;
-- a spousta dalšího :-)
+- abbr "et al."((a dalÅ¡Ã­))
+- nÃ¡hrady(TM) nebo(R) za pÅ™Ã­sluÅ¡nÃ© entity(C)
+- Å¡ipky <-- a --> a <--> ;
+- tÅ™i teÄky...
+- zachovÃ¡nÃ­ HTML entit &amp;
+- a spousta dalÅ¡Ã­ho :-)
 
 
 
@@ -379,7 +379,7 @@ Tabulky
 | Adam      | Eva        | Franta
 
 
-s hlavièkou
+s hlaviÄkou
 -----------
 
 |-----------------------------
@@ -389,7 +389,7 @@ s hlavièkou
 | Cecilie    | Svobodova | 74
 
 
-nebo pouitím *
+nebo pouÅ¾itÃ­m *
 
 
 |* First Name | Jesus    | Cecilie
@@ -397,10 +397,10 @@ nebo pouitím *
 |* Age        | 33       | 74
 
 
-slouèení sloupcù
+slouÄenÃ­ sloupcÅ¯
 ----------------
 
-všimìte si zdvojeného ||
+vÅ¡imÄ›te si zdvojenÃ©ho ||
 
 |-----------------------------
 | Name                  || Age
@@ -409,7 +409,7 @@ všimìte si zdvojeného ||
 | Cecilie    | Svobodova | 74
 
 
-slouèení øádkù
+slouÄenÃ­ Å™Ã¡dkÅ¯
 --------------
 
 |-----------------------------
@@ -420,7 +420,7 @@ slouèení øádkù
 | Jim        | Beam      | 70
 
 
-modifikátory
+modifikÃ¡tory
 ---------
 
 .{color:red}

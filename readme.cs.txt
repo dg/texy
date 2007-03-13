@@ -2,25 +2,25 @@ Co je Texy!
 ===========
 
 
-Texy! je pøevadìè textu do formátovaného HTML kódu. Díky nìmu mù¾ete psát
-strukturované dokumenty i bez znalosti nebo pou¾ití jazyka HTML. Dokument
-napí¹ete v pøehledné, èistì textové, formì a Texy! jej automaticky pøevede do
-validního (X)HTML kódu.
+Texy! je pÅ™evadÄ›Ä textu do formÃ¡tovanÃ©ho HTML kÃ³du. DÃ­ky nÄ›mu mÅ¯Å¾ete psÃ¡t
+strukturovanÃ© dokumenty i bez znalosti nebo pouÅ¾itÃ­ jazyka HTML. Dokument
+napÃ­Å¡ete v pÅ™ehlednÃ©, ÄistÄ› textovÃ©, formÄ› a Texy! jej automaticky pÅ™evede do
+validnÃ­ho (X)HTML kÃ³du.
 
 
-Texy! je jedním z nejkomplexnìj¹ích formátovaèù. Umí zpracovávat obrázky,
-odkazy, vnoøené seznamy, tabulky a má také plnou podporu CSS a UTF-8.
+Texy! je jednÃ­m z nejkomplexnÄ›jÅ¡Ã­ch formÃ¡tovaÄÅ¯. UmÃ­ zpracovÃ¡vat obrÃ¡zky,
+odkazy, vnoÅ™enÃ© seznamy, tabulky a mÃ¡ takÃ© plnou podporu CSS a UTF-8.
 
 
-Texy! formátuje text v souladu s typografickımi pravidly. Zvlá¹tní pozornost je
-vìnována národním specifikùm. Texy! pøetahuje jednopísmenné pøedlo¾ky a spojky
-z koncù øádkù na øádek následující, rozdìluje pøíli¹ dlouhá slova podle slabik
-a podobnì.
+Texy! formÃ¡tuje text v souladu s typografickÃ½mi pravidly. ZvlÃ¡Å¡tnÃ­ pozornost je
+vÄ›novÃ¡na nÃ¡rodnÃ­m specifikÅ¯m. Texy! pÅ™etahuje jednopÃ­smennÃ© pÅ™edloÅ¾ky a spojky
+z koncÅ¯ Å™Ã¡dkÅ¯ na Å™Ã¡dek nÃ¡sledujÃ­cÃ­, rozdÄ›luje pÅ™Ã­liÅ¡ dlouhÃ¡ slova podle slabik
+a podobnÄ›.
 
 
-Kód je napsán v PHP s plnım vyu¾itím objektù. Navr¾en je tak, aby jeho
-roz¹íøení nebo pøizpùsobení specifickım potøebám bylo co nejjednodu¹¹í a obe¹lo
-se bez zásahu do zdrojového kódu.
+KÃ³d je napsÃ¡n v PHP s plnÃ½m vyuÅ¾itÃ­m objektÅ¯. NavrÅ¾en je tak, aby jeho
+rozÅ¡Ã­Å™enÃ­ nebo pÅ™izpÅ¯sobenÃ­ specifickÃ½m potÅ™ebÃ¡m bylo co nejjednoduÅ¡Å¡Ã­ a obeÅ¡lo
+se bez zÃ¡sahu do zdrojovÃ©ho kÃ³du.
 
 
 Texy je sexy!
@@ -28,12 +28,12 @@ Texy je sexy!
 
 
 
-Podpoøte Texy!
+PodpoÅ™te Texy!
 -------------
 
-Pokud se Vám Texy! líbí nebo jste se rozhodli jej pou¾ívat, podpoøte jej
-umístìním malé ikonky s odkazem na své stránky. Ikonky a vzorovı HTML code
-najdete v adresáøi /support-us/
+Pokud se VÃ¡m Texy! lÃ­bÃ­ nebo jste se rozhodli jej pouÅ¾Ã­vat, podpoÅ™te jej
+umÃ­stÄ›nÃ­m malÃ© ikonky s odkazem na svÃ© strÃ¡nky. Ikonky a vzorovÃ½ HTML code
+najdete v adresÃ¡Å™i /support-us/
 
 
 

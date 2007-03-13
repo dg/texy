@@ -1,52 +1,52 @@
-Jakou má Texy! licenèní politiku?
+ï»¿Jakou mÃ¡ Texy! licenÄnÃ­ politiku?
 =================================
 
-Texy! pouívá model "duální licence". Uivatelé se mohou rozhodnout, za budou
-produkt uívat v souladu se svobodnou GNU General Public License v2 (GPL) nebo
-komerèní licencí.
+Texy! pouÅ¾Ã­vÃ¡ model "duÃ¡lnÃ­ licence". UÅ¾ivatelÃ© se mohou rozhodnout, za budou
+produkt uÅ¾Ã­vat v souladu se svobodnou GNU General Public License v2 (GPL) nebo
+komerÄnÃ­ licencÃ­.
 
 
 GPL licence
 -----------
 
-Pod GPL licencí je Texy! k dispozici zdarma a bez záruky. Mùete si jej volnì
-stáhnout a poté upravovat a dále distribuovat. Mùete jej také zahrnout do
-svıch projektù, tyto však musí bıt takté šíøeny v souladu s podmínkami licence
-GPL. Ty stanovují, e kadá aplikace, kde je Texy! uito, musí bıt šíøena pod
-licencí GPL, tedy vèetnì kompletních zdrojovıch kódu a volnì.
+Pod GPL licencÃ­ je Texy! k dispozici zdarma a bez zÃ¡ruky. MÅ¯Å¾ete si jej volnÄ›
+stÃ¡hnout a potÃ© upravovat a dÃ¡le distribuovat. MÅ¯Å¾ete jej takÃ© zahrnout do
+svÃ½ch projektÅ¯, tyto vÅ¡ak musÃ­ bÃ½t taktÃ©Å¾ Å¡Ã­Å™eny v souladu s podmÃ­nkami licence
+GPL. Ty stanovujÃ­, Å¾e kaÅ¾dÃ¡ aplikace, kde je Texy! uÅ¾ito, musÃ­ bÃ½t Å¡Ã­Å™ena pod
+licencÃ­ GPL, tedy vÄetnÄ› kompletnÃ­ch zdrojovÃ½ch kÃ³du a volnÄ›.
 
 
-Komerèní licence
+KomerÄnÃ­ licence
 ----------------
 
-Autor Texy! David Grudl nabízí produkt také pod komerèní licencí. Ta je
-zajímavá pro firmy, které nechtìjí zveøejòovat zdrojové kódy svıch aplikací.
-David Grudl je oprávnìn nabízet Texy! pod komerèní licencí, nebo je vıhradním
-vlastníkem autorskıch práv k dílu. Samotnı program Texy! je pod obìma licencemi
-naprosto identickı.
+Autor Texy! David Grudl nabÃ­zÃ­ produkt takÃ© pod komerÄnÃ­ licencÃ­. Ta je
+zajÃ­mavÃ¡ pro firmy, kterÃ© nechtÄ›jÃ­ zveÅ™ejÅˆovat zdrojovÃ© kÃ³dy svÃ½ch aplikacÃ­.
+David Grudl je oprÃ¡vnÄ›n nabÃ­zet Texy! pod komerÄnÃ­ licencÃ­, neboÅ¥ je vÃ½hradnÃ­m
+vlastnÃ­kem autorskÃ½ch prÃ¡v k dÃ­lu. SamotnÃ½ program Texy! je pod obÄ›ma licencemi
+naprosto identickÃ½.
 
-Pøíklad: Firma prodává vlastní CMS aplikaci. Kdy se rozhodne do ní
-zakomponovat Texy!, musí zmìnit vlastní licenèní politiku a aplikaci zaèít
-nabízet pod GPL (volnì, vèetnì zdrojovıch kódù). To však není jejím zájem,
-proto radìji zakoupí Texy! pod komerèní licencí a mùe nadále komerènì prodávat
+PÅ™Ã­klad: Firma prodÃ¡vÃ¡ vlastnÃ­ CMS aplikaci. KdyÅ¾ se rozhodne do nÃ­
+zakomponovat Texy!, musÃ­ zmÄ›nit vlastnÃ­ licenÄnÃ­ politiku a aplikaci zaÄÃ­t
+nabÃ­zet pod GPL (volnÄ›, vÄetnÄ› zdrojovÃ½ch kÃ³dÅ¯). To vÅ¡ak nenÃ­ jejÃ­m zÃ¡jem,
+proto radÄ›ji zakoupÃ­ Texy! pod komerÄnÃ­ licencÃ­ a mÅ¯Å¾e nadÃ¡le komerÄnÄ› prodÃ¡vat
 svou aplikaci.
 
-Kolik komerèní licence stojí? Neváhejte se pøes email dave@dgx.cz zkontaktovat
-s autorem a domluvit si zajímavé podmínky.
+Kolik komerÄnÃ­ licence stojÃ­? NevÃ¡hejte se pÅ™es email dave@dgx.cz zkontaktovat
+s autorem a domluvit si zajÃ­mavÃ© podmÃ­nky.
 
 
-Proè je Texy! dodáván pod dvìma licencemi?
+ProÄ je Texy! dodÃ¡vÃ¡n pod dvÄ›ma licencemi?
 ------------------------------------------
 
-  - open source komunita získá bezplatnì vıbornı software
+  - open source komunita zÃ­skÃ¡ bezplatnÄ› vÃ½bornÃ½ software
 
-  - komerèní zákazníci Texy! mají monost získat spolehlivı, širokou komunitou
-    otestovanı software za relativnì nízkou cenu
+  - komerÄnÃ­ zÃ¡kaznÃ­ci Texy! majÃ­ moÅ¾nost zÃ­skat spolehlivÃ½, Å¡irokou komunitou
+    otestovanÃ½ software za relativnÄ› nÃ­zkou cenu
 
-  - byznys spojenı s Texy! zdravì funguje a zároveò posiluje hnutí Open Source.
-
-
+  - byznys spojenÃ½ s Texy! zdravÄ› funguje a zÃ¡roveÅˆ posiluje hnutÃ­ Open Source.
 
 
 
----(volnì inspirováno MySQL Licensing Policy FAQ)---
+
+
+---(volnÄ› inspirovÃ¡no MySQL Licensing Policy FAQ)---

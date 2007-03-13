@@ -30,7 +30,7 @@ class TexyHtmlWellForm
 
     /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
     private $prohibits = array(
-        'a' => array('a'),
+        'a' => array('a','button'),
         'img' => array('pre'),
         'object' => array('pre'),
         'big' => array('pre'),
@@ -49,19 +49,41 @@ class TexyHtmlWellForm
     );
 
     private $autoClose = array(
-        'tbody'    => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
-        'colgroup' => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
-        'dd'       => array('dt'=>1,'dd'=>1),
-        'dt'       => array('dt'=>1,'dd'=>1),
-        'li'       => array('li'=>1),
-        'option'   => array('option'=>1),
-        'p'        => array('address'=>1,'applet'=>1,'blockquote'=>1,'center'=>1,'dir'=>1,'div'=>1,'dl'=>1,'fieldset'=>1,'form'=>1,'h1'=>1,'h2'=>1,
-                        'h3'=>1,'h4'=>1,'h5'=>1,'h6'=>1,'hr'=>1,'isindex'=>1,'menu'=>1,'object'=>1,'ol'=>1,'p'=>1,'pre'=>1,'table'=>1,'ul'=>1),
-        'td'       => array('th'=>1,'td'=>1,'tr'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
-        'tfoot'    => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
-        'th'       => array('th'=>1,'td'=>1,'tr'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
-        'thead'    => array('thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
-        'tr'       => array('tr'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'colgoup'=>1),
+        'thead' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
+        'tbody' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
+        'tfoot' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
+        'colgoup' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
+        'dt' => array('dd'=>1,'dt'=>1),
+        'dd' => array('dd'=>1,'dt'=>1),
+        'li' => array('li'=>1),
+        'option' => array('option'=>1),
+        'address' => array('p'=>1),
+        'applet' => array('p'=>1),
+        'blockquote' => array('p'=>1),
+        'center' => array('p'=>1),
+        'dir' => array('p'=>1),
+        'div' => array('p'=>1),
+        'dl' => array('p'=>1),
+        'fieldset' => array('p'=>1),
+        'form' => array('p'=>1),
+        'h1' => array('p'=>1),
+        'h2' => array('p'=>1),
+        'h3' => array('p'=>1),
+        'h4' => array('p'=>1),
+        'h5' => array('p'=>1),
+        'h6' => array('p'=>1),
+        'hr' => array('p'=>1),
+        'isindex' => array('p'=>1),
+        'menu' => array('p'=>1),
+        'object' => array('p'=>1),
+        'ol' => array('p'=>1),
+        'p' => array('p'=>1),
+        'pre' => array('p'=>1),
+        'table' => array('p'=>1),
+        'ul' => array('p'=>1),
+        'th' => array('td'=>1,'th'=>1),
+        'td' => array('td'=>1,'th'=>1),
+        'tr' => array('td'=>1,'th'=>1,'tr'=>1),
     );
 
 
@@ -113,7 +135,7 @@ class TexyHtmlWellForm
             $i = 1;
             while ($pair !== FALSE) {
                 $tag = $pair['tag'];
-                $s .= '</'.$tag.'>';
+                if ($pair['show']) $s .= '</'.$tag.'>';
                 $this->tagUsed[$tag]--;
                 if ($tag === $mTag) break;
                 $pair = prev($this->tagStack);
@@ -130,7 +152,7 @@ class TexyHtmlWellForm
             unset($this->tagStack[key($this->tagStack)]);
             $pair = current($this->tagStack);
             while ($pair !== FALSE) {
-                $s .= '<'.$pair['tag'].$pair['attr'].'>';
+                if ($pair['show']) $s .= '<'.$pair['tag'].$pair['attr'].'>';
                 $this->tagUsed[$pair['tag']]++;
                 $pair = next($this->tagStack);
             }
@@ -138,36 +160,38 @@ class TexyHtmlWellForm
 
         } else { // start tag
 
+            $show = TRUE;
+            $s = '';
+
             // check element prohibitions
             if (isset($this->prohibits[$mTag])) {
                 foreach ($this->prohibits[$mTag] as $pTag)
-                    if (!empty($this->tagUsed[$pTag])) return '';
+                    if (!empty($this->tagUsed[$pTag])) { $show = FALSE; break; }
             }
 
             // check optional end tags (autoclose)
-            $s = '';
-            $pair = end($this->tagStack);
-            while ($pair &&
-                    isset($this->autoClose[$pair['tag']]) &&
-                    isset($this->autoClose[$pair['tag']][$mTag]) ) {
-
-                $tag = $pair['tag'];
-                $s .= '</'.$tag.'>';
-                $this->tagUsed[$tag]--;
-                unset($this->tagStack[key($this->tagStack)]);
-
+            if ($show && isset($this->autoClose[$mTag])) {
+                $auto = $this->autoClose[$mTag];
                 $pair = end($this->tagStack);
+                while ($pair && isset($auto[ $pair['tag'] ])) {
+                    if ($pair['show']) $s .= '</'.$pair['tag'].'>';
+                    $this->tagUsed[$pair['tag']]--;
+                    unset($this->tagStack[key($this->tagStack)]);
+
+                    $pair = end($this->tagStack);
+                }
             }
 
             // open tag, put to stack, increase counter
             $pair = array(
                 'attr' => $mAttr,
                 'tag' => $mTag,
+                'show' => $show,
             );
             $this->tagStack[] = $pair;
             $tmp = &$this->tagUsed[$mTag]; $tmp++;
 
-            return $s . '<'.$mTag.$mAttr.'>';
+            return $show ? $s . '<'.$mTag.$mAttr.'>' : '';
         }
     }
 
