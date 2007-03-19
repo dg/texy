@@ -32,7 +32,7 @@ class TexyHorizLineModule extends TexyModule
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
-            '#^(\- |\-|\* |\*){3,}\ *'.TEXY_MODIFIER.'?()$#mU',
+            '#^[*-]{3,}\ *'.TEXY_MODIFIER.'?()$#mU',
             'horizline'
         );
     }
@@ -49,7 +49,7 @@ class TexyHorizLineModule extends TexyModule
      */
     public function pattern($parser, $matches)
     {
-        list(, , $mMod) = $matches;
+        list(, $mMod) = $matches;
         //    [1] => ---
         //    [2] => .(title)[class]{style}<>
 

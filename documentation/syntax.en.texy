@@ -44,9 +44,6 @@ four horizontal lines, written in four ways:
 
 ***
 
-- - -
-
-* * *
 
 
 
@@ -214,7 +211,7 @@ Quotes: >>Lorem Ipsum Dolores<<:www.lipsum.com
 
 Cite: As ~~Frank Borland~~ said, ...
 
-And other: ^^superscript^^ vs. __subscript__
+And other: superscript m^2 vs. subscript O_2
 
          ++inserted text++ vs. --deleted text--
 
@@ -349,7 +346,7 @@ These types of modifiers are available:
 
 
 
-Quick-corrects
+Typography
 ==============
 
 - very long words division (with respect for language rules). Example: antidisestablishmentarianism

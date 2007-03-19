@@ -45,9 +45,6 @@ Horizontální linky
 
 ***
 
-- - -
-
-* * *
 
 
 
@@ -215,7 +212,7 @@ Krátký citát: >>Lorem Ipsum Dolores<<:www.lipsum.com
 
 Zdroj, citovaná osoba: Jak ~~Frank Borland~~ øíkal, ...
 
-A další: ^^superscript^^ vs. __subscript__
+A další: superscript m^2 vs. subscript O_2
 
          ++pøidaný text++ vs. --odstranìný text--
 
@@ -348,7 +345,7 @@ Lze použít tyto druhy modifikátorù:
 
 
 
-Quick-corrects
+Typografie
 ==============
 
 - rozdìlení velmi dlouhých slov podle èeských pravidel. Pøíklad: nejneobhospodaøovávatelnìjšími

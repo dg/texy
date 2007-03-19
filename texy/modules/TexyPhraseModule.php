@@ -38,6 +38,8 @@ class TexyPhraseModule extends TexyModule
         'phrase/notexy' => TRUE,     // ''....''
         'phrase/quote' => TRUE,      // >>quote<<:...
         'phrase/quicklink' => TRUE,  // ....:LINK
+        'phrase/sup-alt' => TRUE,    // superscript^2
+        'phrase/sub-alt' => TRUE,    // subscript_3
 
         'phrase/ins' => FALSE,       // ++inserted++
         'phrase/del' => FALSE,       // --deleted--
@@ -56,7 +58,9 @@ class TexyPhraseModule extends TexyModule
         'phrase/ins' => 'ins',
         'phrase/del' => 'del',
         'phrase/sup' => 'sup',
+        'phrase/sup-alt' => 'sup',
         'phrase/sub' => 'sub',
+        'phrase/sub-alt' => 'sub',
         'phrase/span' => 'a',
         'phrase/span-alt' => 'a',
         'phrase/cite' => 'cite',
@@ -134,11 +138,25 @@ class TexyPhraseModule extends TexyModule
             'phrase/sup'
         );
 
+        // m^2 alternative superscript
+        $tx->registerLinePattern(
+            array($this, 'patternSupSub'),
+            '#(?<=[a-z0-9])\^([0-9]{1,4})(?![a-z0-9])#Ui',
+            'phrase/sup-alt'
+        );
+
         // __subscript__
         $tx->registerLinePattern(
             array($this, 'patternPhrase'),
             '#(?<!\_)\_\_(?![\s_])([^\r\n]+)'.TEXY_MODIFIER.'?(?<![\s_])\_\_(?!\_)()#U',
             'phrase/sub'
+        );
+
+        // m_2 alternative subscript
+        $tx->registerLinePattern(
+            array($this, 'patternSupSub'),
+            '#(?<=[a-z])\_([0-9]{1,3})(?![a-z0-9])#Ui',
+            'phrase/sub-alt'
         );
 
         // "span"
@@ -258,6 +276,31 @@ class TexyPhraseModule extends TexyModule
         // event wrapper
         if (is_callable(array($tx->handler, 'phrase'))) {
             $res = $tx->handler->phrase($parser, $phrase, $mContent, $mod, $link);
+            if ($res !== Texy::PROCEED) return $res;
+        }
+
+        return $this->solve($phrase, $mContent, $mod, $link);
+    }
+
+
+
+    /**
+     * Callback for: any^2  any_2
+     *
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml|string|FALSE
+     */
+    public function patternSupSub($parser, $matches, $phrase)
+    {
+        list(, $mContent) = $matches;
+        $mod = new TexyModifier();
+        $link = NULL;
+
+        // event wrapper
+        if (is_callable(array($this->texy->handler, 'phrase'))) {
+            $res = $this->texy->handler->phrase($parser, $phrase, $mContent, $mod, $link);
             if ($res !== Texy::PROCEED) return $res;
         }
 
