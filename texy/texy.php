@@ -659,7 +659,7 @@ class Texy
     static public function isAbsolute($URL)
     {
         // check for scheme: or absolute path or absolute URL
-        return preg_match('#[a-z]+:|/#iA', $URL);
+        return preg_match('#[a-z]+:|[\#/]#iA', $URL);
     }
 
 

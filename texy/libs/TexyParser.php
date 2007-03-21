@@ -102,37 +102,46 @@ class TexyBlockParser extends TexyParser
     {
         $tx = $this->texy;
 
-        $matches = NULL;
-        preg_match('#^(.*)'.TEXY_MODIFIER_H.'?(\n.*)?()$#sU', $content, $matches);
-        list(, $mContent, $mMod, $mContent2) = $matches;
+        $content = trim($content);
 
-        // ....
-        //  ...  => \n
-        $mContent = trim($mContent . $mContent2);
+        // try to find modifier
+        $mMod = $matches = NULL;
+        if (preg_match('#\A(.*)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $content, $matches)) {
+            list(, $mC1, $mMod, $mC2) = $matches;
+            $content = trim($mC1 . $mC2);
+        }
+
+        if ($content === '') return FALSE;
+
+        // find hard linebreaks
         if ($tx->mergeLines) {
-            // \r means break line
-            $mContent = preg_replace('#\n (?=\S)#', "\r", $mContent);
+            // ....
+            //  ...  => \r means break line
+            $content = preg_replace('#\n (?=\S)#', "\r", $content);
         }
 
         $el = TexyHtml::el('p');
-        $el->parseLine($tx, $mContent);
+        $el->parseLine($tx, $content);
         $content = $el->childNodes;
 
         // check content type
-        $contentType = Texy::CONTENT_MARKUP;
         if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
             $contentType = Texy::CONTENT_BLOCK;
         } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
             $contentType = Texy::CONTENT_TEXTUAL;
+        } elseif (preg_match('#[^\s'.TEXY_MARK.']#', $content)) {
+            $contentType = Texy::CONTENT_TEXTUAL;
+        } elseif (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) {
+            $contentType = Texy::CONTENT_REPLACED;
         } else {
-            if (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) $contentType = Texy::CONTENT_REPLACED;
-            $s = trim( preg_replace('#['.TEXY_MARK.']+#', '', $content) );
-            if (strlen($s)) $contentType = Texy::CONTENT_TEXTUAL;
+            // $contentType = Texy::CONTENT_MARKUP;
+            // ignore empty
+            return FALSE;
         }
 
         // specify tag
         if ($contentType !== Texy::CONTENT_TEXTUAL) {
-            if (!$mMod && $contentType === Texy::CONTENT_BLOCK) $el->elName = '';
+            if (/*!$mMod &&*/ $contentType === Texy::CONTENT_BLOCK) $el->elName = '';
             else $el->elName = 'div';
         }
 
@@ -222,9 +231,8 @@ class TexyBlockParser extends TexyParser
                     $parts = preg_split('#(\n(?! )|\n{2,})#', $str);
 
                 foreach ($parts as $str) {
-                    $str = trim($str);
-                    if ($str === '') continue;
-                    $nodes[] = $this->genericBlock($str);
+                    $el = $this->genericBlock($str);
+                    if ($el) $nodes[] = $el;
                 }
                 continue;
             }

@@ -61,11 +61,15 @@ class TexyScriptModule extends TexyModule
         $func = trim($mContent);
         if ($func === '') return FALSE;
 
-        $args = NULL;
-        if (preg_match('#^([a-z_][a-z0-9_]*)\s*\(([^()]*)\)$#i', $func, $matches)) {
+        $args = $raw = NULL;
+        // function(arg, arg, ...)  or  function: arg, arg
+        if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:([^():]*))$#i', $func, $matches)) {
             $func = $matches[1];
-            $args = explode(',', $matches[2]);
-            array_walk($args, 'trim');
+            $raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
+            if ($raw === '')
+                $args = array();
+            else
+                $args = preg_split('#\s*,\s*#', $raw);
         }
 
         if (is_callable(array($this->handler, $func))) {
@@ -73,11 +77,11 @@ class TexyScriptModule extends TexyModule
             return call_user_func_array(array($this->handler, $func), $args);
         }
 
+        if (is_callable($this->handler))
+            return call_user_func_array($this->handler, array($parser, $func, $args, $raw));
+
         if ($func==='texy')
             return $this->texyHandler($args);
-
-        if (is_callable($this->handler))
-            return call_user_func_array($this->handler, array($parser, $func, $args));
 
         return FALSE;
     }
