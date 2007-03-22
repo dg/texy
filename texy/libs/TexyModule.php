@@ -42,22 +42,10 @@ abstract class TexyModule
 
 
     /**
-     * Registers all line & block patterns
+     * Called by $texy->parse
      */
-    public function init(&$text)
-    {
-    }
-
-
-    /**
-     * Full text pre-processing
-     * @param string
-     * @return string
-     */
-    public function preBlock($text)
-    {
-        return $text;
-    }
+    public function begin()
+    {}
 
 
     /**
@@ -71,14 +59,34 @@ abstract class TexyModule
 
 
 
-interface ITexyLineModule
+interface ITexyPreProcess
 {
+    /**
+     * Full text pre-processing
+     * @param string
+     * @return string
+     */
+    public function preProcess($text);
+}
 
+
+interface ITexyPreBlock
+{
+    /**
+     * Single block pre-processing
+     * @param string
+     * @return string
+     */
+    public function preBlock($block);
+}
+
+
+interface ITexyPostLine
+{
     /**
      * Single line post-processing
      * @param string
      * @return string
      */
     public function postLine($line);
-
 }

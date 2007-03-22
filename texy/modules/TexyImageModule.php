@@ -23,7 +23,7 @@ if (!defined('TEXY')) die();
 /**
  * Images module
  */
-class TexyImageModule extends TexyModule
+class TexyImageModule extends TexyModule implements ITexyPreProcess
 {
     protected $default = array(
         'image' => TRUE,
@@ -70,7 +70,7 @@ class TexyImageModule extends TexyModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         // [*image*]:LINK
         $this->texy->registerLinePattern(
@@ -78,7 +78,12 @@ class TexyImageModule extends TexyModule
             '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U',
             'image'
         );
+    }
 
+
+
+    public function preProcess($text)
+    {
         // [*image*]: urls .(title)[class]{style}
         if ($this->texy->allowed['image/definition'])
            $text = preg_replace_callback(
@@ -86,6 +91,8 @@ class TexyImageModule extends TexyModule
                array($this, 'patternReferenceDef'),
                $text
            );
+
+        return $text;
     }
 
 
@@ -274,7 +281,7 @@ class TexyImageModule extends TexyModule
 
         } else {
             // absolute URL & security check for double dot
-            if (!Texy::isAbsolute($image->URL) && strpos($image->URL, '..') === FALSE) {
+            if (Texy::isRelative($image->URL) && strpos($image->URL, '..') === FALSE) {
                 $file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
                 if (is_file($file)) {
                     $size = getImageSize($file);

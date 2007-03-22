@@ -28,7 +28,7 @@ class TexyQuoteModule extends TexyModule
     protected $default = array('blockquote' => TRUE);
 
 
-    public function init(&$text)
+    public function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),

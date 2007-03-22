@@ -23,7 +23,7 @@ if (!defined('TEXY')) die();
 /**
  * Typography replacements module
  */
-class TexyTypographyModule extends TexyModule implements ITexyLineModule
+class TexyTypographyModule extends TexyModule implements ITexyPostLine
 {
     protected $default = array('typography' => TRUE);
 
@@ -62,7 +62,7 @@ class TexyTypographyModule extends TexyModule implements ITexyLineModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         // CONTENT_MARKUP mark:   \x17-\x1F
         // CONTENT_REPLACED mark: \x16

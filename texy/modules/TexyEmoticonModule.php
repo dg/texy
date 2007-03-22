@@ -52,7 +52,7 @@ class TexyEmoticonModule extends TexyModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         if (empty($this->texy->allowed['emoticon'])) return;
 

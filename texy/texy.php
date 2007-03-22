@@ -30,7 +30,7 @@ define('TEXY_DIR',  dirname(__FILE__).'/');
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
 require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
-require_once TEXY_DIR.'libs/TexyHtmlWellForm.php';
+require_once TEXY_DIR.'libs/TexyHtmlWellFormer.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
@@ -95,7 +95,7 @@ class Texy
     public $obfuscateEmail = TRUE;
 
     /** @var string  regexp to check URL schemes */
-    public $urlSchemes = NULL;
+    public $urlSchemeFilter = NULL;
 
     /** @var array  Parsing summary */
     public $summary = array(
@@ -112,6 +112,9 @@ class Texy
 
     /** @var object  User handler object */
     public $handler;
+
+    /** @var bool  ignore stuff with only markup and spaecs? */
+    public $ignoreEmptyStuff = TRUE;
 
     public
         /** @var TexyScriptModule */
@@ -150,7 +153,7 @@ class Texy
     public
         $formatter,
         $formatterModule, // back compatibility
-        $wellForm;
+        $wellFormer;
 
 
     /**
@@ -185,6 +188,8 @@ class Texy
     /** @var array  for internal usage */
     public $_classes, $_styles;
 
+    /** @var array of ITexyPreBlock for internal parser usage */
+    public $_preBlockModules;
 
 
 
@@ -196,7 +201,7 @@ class Texy
 
         // load routines
         $this->formatter = new TexyHtmlFormatter();
-        $this->wellForm = new TexyHtmlWellForm();
+        $this->wellFormer = new TexyHtmlWellFormer();
 
         $this->formatterModule = $this->formatter; // back compatibility
 
@@ -249,7 +254,7 @@ class Texy
 
 
 
-    public function registerModule($module)
+    public function registerModule(TexyModule $module)
     {
         $this->modules[] = $module;
     }
@@ -329,7 +334,16 @@ class Texy
         $text = self::normalize($text);
 
         // init modules
-        foreach ($this->modules as $module) $module->init($text);
+        $ppm = $this->_preBlockModules = array();
+        foreach ($this->modules as $module) {
+            $module->begin();
+
+            if ($module instanceof ITexyPreProcess) $ppm[] = $module;
+            if ($module instanceof ITexyPreBlock) $this->_preBlockModules[] = $module;
+        }
+
+        // pre process
+        foreach ($ppm as $module) $text = $module->preProcess($text);
 
         // parse!
         $this->DOM = TexyHtml::el();
@@ -399,12 +413,12 @@ class Texy
     public function _toHtml($s)
     {
         // decode HTML entities to UTF-8
-        $s = self::decode($s);
+        $s = self::unescapeHtml($s);
 
         // line-postprocessing
         $blocks = explode(self::CONTENT_BLOCK, $s);
         foreach ($this->modules as $module) {
-            if ($module instanceof ITexyLineModule) {
+            if ($module instanceof ITexyPostLine) {
                 foreach ($blocks as $n => $s) {
                     if ($n % 2 === 0 && $s !== '')
                         $blocks[$n] = $module->postLine($s);
@@ -414,13 +428,13 @@ class Texy
         $s = implode(self::CONTENT_BLOCK, $blocks);
 
         // encode < > &
-        $s = self::encode($s);
+        $s = self::escapeHtml($s);
 
         // replace protected marks
         $s = $this->unProtect($s);
 
         // wellform and reformat HTML
-        $s = $this->wellForm->process($s);
+        $s = $this->wellFormer->process($s);
         $s = $this->formatter->process($s);
 
         // remove HTML 4.01 optional tags
@@ -452,7 +466,7 @@ class Texy
         $s = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $s);
 
         // entities -> chars
-        $s = Texy::decode($s);
+        $s = Texy::unescapeHtml($s);
 
         // convert nbsp to normal space and remove shy
         $s = strtr($s, array(
@@ -475,7 +489,7 @@ class Texy
         $this->allowedClasses = self::NONE;                 // no class or ID are allowed
         $this->allowedStyles  = self::NONE;                 // style modifiers are disabled
         $this->allowedTags = array(                         // only some "safe" HTML tags and attributes are allowed
-            'a'         => array('href'),
+            'a'         => array('href', 'title'),
             'acronym'   => array('title'),
             'b'         => array(),
             'br'        => array(),
@@ -489,11 +503,10 @@ class Texy
             'q'         => array(),
             'small'     => array(),
         );
-        $this->urlSchemes = '#https?:|ftp:|mailto:#Ai';
+        $this->urlSchemeFilter = '#https?:|ftp:|mailto:#A';
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
-        //$this->mergeLines = FALSE;                          // enter means <BR>
     }
 
 
@@ -507,11 +520,10 @@ class Texy
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
         $this->allowedTags = array_merge(TexyHtml::$blockTags,
             TexyHtml::$inlineTags, TexyHtml::$replacedTags); // full support for "valid" HTML tags
-        $this->urlSchemes = NULL;
+        $this->urlSchemeFilter = NULL;
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
-        //$this->mergeLines = TRUE;                           // enter doesn't means <BR>
     }
 
 
@@ -591,7 +603,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function encode($s)
+    static public function escapeHtml($s)
     {
         return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
     }
@@ -602,7 +614,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function decode($s)
+    static public function unescapeHtml($s)
     {
         if (strpos($s, '&') === FALSE) return $s;
         return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
@@ -638,28 +650,29 @@ class Texy
 
 
     /**
+     * Helpts filter bad URLs
      * @param string   user URL
      * @return bool
      */
     public function checkURL($URL)
     {
-        // absolute URL with scheme - check scheme
-        return $this->urlSchemes && preg_match('#[a-z]+:#iA', $URL)
-            ? preg_match($this->urlSchemes, $URL)
+        // absolute URL with scheme? check scheme!
+        return $this->urlSchemeFilter && preg_match('#[a-z][a-z0-9+.-]*:#iA', $URL)
+            ? preg_match($this->urlSchemeFilter, $URL)
             : TRUE;
     }
 
 
 
     /**
-     * Is giver URL absolute?
+     * Is given URL relative?
      * @param string  URL
      * @return bool
      */
-    static public function isAbsolute($URL)
+    static public function isRelative($URL)
     {
-        // check for scheme: or absolute path or absolute URL
-        return preg_match('#[a-z]+:|[\#/]#iA', $URL);
+        // check for scheme, or absolute path, or absolute URL
+        return !preg_match('#[a-z][a-z0-9+.-]*:|[\#/?]#iA', $URL);
     }
 
 
@@ -672,7 +685,7 @@ class Texy
      */
     static public function absolutize($URL, $root)
     {
-        if ($root == NULL || self::isAbsolute($URL)) return $URL;
+        if ($root == NULL || !self::isRelative($URL)) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;
     }
 
@@ -695,13 +708,6 @@ class Texy
     public function getDOM()
     {
         return $this->DOM;
-    }
-
-
-
-    public function getModules()
-    {
-        return $this->modules;
     }
 
 

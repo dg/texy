@@ -37,7 +37,7 @@ class TexyHtmlModule extends TexyModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         $this->texy->registerLinePattern(
             array($this, 'patternTag'),
@@ -138,8 +138,8 @@ class TexyHtmlModule extends TexyModule
             $key = strtolower($m[1]); // strtolower protects TexyHtml's elName, userData, childNodes
             $val = $m[2];
             if ($val == NULL) $el->$key = TRUE;
-            elseif ($val{0} === '\'' || $val{0} === '"') $el->$key = Texy::decode(substr($val, 1, -1));
-            else $el->$key = Texy::decode($val);
+            elseif ($val{0} === '\'' || $val{0} === '"') $el->$key = Texy::unescapeHtml(substr($val, 1, -1));
+            else $el->$key = Texy::unescapeHtml($val);
         }
 
         if (is_callable(array($tx->handler, 'htmlTag'))) {

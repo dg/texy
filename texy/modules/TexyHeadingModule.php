@@ -68,7 +68,7 @@ class TexyHeadingModule extends TexyModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'patternUnderline'),

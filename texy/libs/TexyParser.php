@@ -111,8 +111,6 @@ class TexyBlockParser extends TexyParser
             $content = trim($mC1 . $mC2);
         }
 
-        if ($content === '') return FALSE;
-
         // find hard linebreaks
         if ($tx->mergeLines) {
             // ....
@@ -122,31 +120,36 @@ class TexyBlockParser extends TexyParser
 
         $el = TexyHtml::el('p');
         $el->parseLine($tx, $content);
-        $content = $el->childNodes;
+        $content = $el->childNodes; // string
 
         // check content type
+        // block contains block tag
         if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
-            $contentType = Texy::CONTENT_BLOCK;
+            $el->elName = '';  // ignores modifier!
+
+        // block contains text (protected)
         } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
-            $contentType = Texy::CONTENT_TEXTUAL;
+            // leave element p
+
+        // block contains text
         } elseif (preg_match('#[^\s'.TEXY_MARK.']#', $content)) {
-            $contentType = Texy::CONTENT_TEXTUAL;
+            // leave element p
+
+        // block contains only replaced element
         } elseif (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) {
-            $contentType = Texy::CONTENT_REPLACED;
+            $el->elName = 'div';
+
+        // block contains only markup tags or spaces or nothig
         } else {
-            // $contentType = Texy::CONTENT_MARKUP;
-            // ignore empty
-            return FALSE;
+            if ($tx->ignoreEmptyStuff) return FALSE;
+            if (!$mMod) $el->elName = '';
         }
 
-        // specify tag
-        if ($contentType !== Texy::CONTENT_TEXTUAL) {
-            if (/*!$mMod &&*/ $contentType === Texy::CONTENT_BLOCK) $el->elName = '';
-            else $el->elName = 'div';
+        // apply modifier
+        if ($el->elName) {
+            $mod = new TexyModifier($mMod);
+            $mod->decorate($tx, $el);
         }
-
-        $mod = new TexyModifier($mMod);
-        $mod->decorate($tx, $el);
 
         // add <br />
         if ($el->elName && (strpos($content, "\r") !== FALSE)) {
@@ -170,7 +173,7 @@ class TexyBlockParser extends TexyParser
         $tx = $this->texy;
 
         // pre-processing
-        foreach ($tx->getModules() as $module)
+        foreach ($tx->_preBlockModules as $module)
             $text = $module->preBlock($text);
 
 

@@ -23,7 +23,7 @@ if (!defined('TEXY')) die();
 /**
  * Long words wrap module
  */
-class TexyLongWordsModule extends TexyModule implements ITexyLineModule
+class TexyLongWordsModule extends TexyModule implements ITexyPostLine
 {
     protected $default = array('longwords' => TRUE);
 

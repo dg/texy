@@ -23,7 +23,7 @@ if (!defined('TEXY')) die();
 /**
  * Special blocks module
  */
-class TexyBlockModule extends TexyModule
+class TexyBlockModule extends TexyModule implements ITexyPreBlock
 {
     protected $default = array(
         'blocks' => TRUE,
@@ -40,7 +40,7 @@ class TexyBlockModule extends TexyModule
     public $defaultType = 'pre';
 
 
-    public function init(&$text)
+    public function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
@@ -138,7 +138,7 @@ class TexyBlockModule extends TexyModule
             $el = TexyHtml::el();
             $el->parseBlock($tx, $s);
             $s = $tx->_toHtml( $el->export($tx) );
-            $blocktype = 'block/code'; $param = 'html'; // continue...
+            $blocktype = 'block/code'; $param = 'html'; // to be continue (as block/code)
         }
 
         if ($blocktype === 'block/code') {
@@ -148,7 +148,7 @@ class TexyBlockModule extends TexyModule
             $mod->decorate($tx, $el);
             $el->class[] = $param; // lang
             $el->childNodes[0] = TexyHtml::el('code');
-            $s = Texy::encode($s);
+            $s = Texy::escapeHtml($s);
             $s = $tx->protect($s);
             $el->childNodes[0]->setContent($s);
             return $el;
@@ -160,7 +160,7 @@ class TexyBlockModule extends TexyModule
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
             $el->class[] = $param; // lang
-            $s = Texy::encode($s);
+            $s = Texy::escapeHtml($s);
             $s = $tx->protect($s);
             $el->setContent($s);
             return $el;
@@ -172,8 +172,8 @@ class TexyBlockModule extends TexyModule
             $lineParser = new TexyLineParser($tx);
             $lineParser->onlyHtml = TRUE;
             $s = $lineParser->parse($s);
-            $s = Texy::decode($s);
-            $s = Texy::encode($s);
+            $s = Texy::unescapeHtml($s);
+            $s = Texy::escapeHtml($s);
             $s = $tx->unprotect($s);
             return $tx->protect($s) . "\n";
         }
@@ -181,7 +181,7 @@ class TexyBlockModule extends TexyModule
         if ($blocktype === 'block/text') {
             $s = trim($s, "\n");
             if ($s==='') return "\n";
-            $s = Texy::encode($s);
+            $s = Texy::escapeHtml($s);
             $s = str_replace("\n", TexyHtml::el('br')->startTag() , $s); // nl2br
             return $tx->protect($s) . "\n";
         }

@@ -20,7 +20,7 @@ if (!defined('TEXY')) die();
 
 
 
-class TexyHtmlWellForm
+class TexyHtmlWellFormer
 {
     /** @var array */
     private $tagUsed;

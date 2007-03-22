@@ -23,7 +23,7 @@ if (!defined('TEXY')) die();
 /**
  * Links module
  */
-class TexyLinkModule extends TexyModule
+class TexyLinkModule extends TexyModule implements ITexyPreProcess
 {
     protected $default = array(
         'link/reference' => TRUE,
@@ -52,7 +52,7 @@ class TexyLinkModule extends TexyModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         self::$deadlock = array();
 
@@ -76,8 +76,13 @@ class TexyLinkModule extends TexyModule
             '#(?<=\s|^|\(|\[|\<|:)'.TEXY_EMAIL.'#i',
             'link/email'
         );
+    }
 
 
+
+
+    public function preProcess($text)
+    {
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
         if ($this->texy->allowed['link/definition'])
             $text = preg_replace_callback(
@@ -85,8 +90,9 @@ class TexyLinkModule extends TexyModule
                 array($this, 'patternReferenceDef'),
                 $text
             );
-    }
 
+        return $text;
+    }
 
 
 

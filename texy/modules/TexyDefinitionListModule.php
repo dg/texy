@@ -35,7 +35,7 @@ class TexyDefinitionListModule extends TexyListModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         $RE = array();
         foreach ($this->bullets as $desc)

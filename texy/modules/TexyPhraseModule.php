@@ -77,7 +77,7 @@ class TexyPhraseModule extends TexyModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         $tx = $this->texy;
 /*
@@ -264,7 +264,7 @@ class TexyPhraseModule extends TexyModule
             }
 
         } elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
-            $mod->title = trim(Texy::decode($mLink));
+            $mod->title = trim(Texy::unescapeHtml($mLink));
 
         } elseif ($phrase === 'phrase/quote') {
             $mod->cite = $tx->quoteModule->citeLink($mLink);
@@ -328,7 +328,7 @@ class TexyPhraseModule extends TexyModule
             $tag = $link && $this->linksAllowed ? NULL : 'span';
 
         if ($phrase === 'phrase/code')
-            $el = $tx->protect(Texy::encode($content), Texy::CONTENT_TEXTUAL);
+            $el = $tx->protect(Texy::escapeHtml($content), Texy::CONTENT_TEXTUAL);
         else
             $el = $content;
 
@@ -360,7 +360,7 @@ class TexyPhraseModule extends TexyModule
     public function patternNoTexy($parser, $matches)
     {
         list(, $mContent) = $matches;
-        return $this->texy->protect(Texy::encode($mContent), Texy::CONTENT_TEXTUAL);
+        return $this->texy->protect(Texy::escapeHtml($mContent), Texy::CONTENT_TEXTUAL);
     }
 
 

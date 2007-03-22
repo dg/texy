@@ -42,7 +42,7 @@ class TexyListModule extends TexyModule
 
 
 
-    public function init(&$text)
+    public function begin()
     {
         $RE = array();
         foreach ($this->bullets as $desc)

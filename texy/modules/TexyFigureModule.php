@@ -40,7 +40,7 @@ class TexyFigureModule extends TexyModule
     public $widthDelta = 10;
 
 
-    public function init(&$text)
+    public function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),

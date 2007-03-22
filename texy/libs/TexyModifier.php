@@ -83,7 +83,7 @@ class TexyModifier
 
             if ($ch === '(') { // title
                 $a = strpos($mod, ')', $p) + 1;
-                $this->title = Texy::decode(trim(substr($mod, $p + 1, $a - $p - 2)));
+                $this->title = Texy::unescapeHtml(trim(substr($mod, $p + 1, $a - $p - 2)));
                 $p = $a;
 
             } elseif ($ch === '{') { // style & attributes
