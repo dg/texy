@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TEXY! BASIC DEMO
+ * TEXY! 1-2-3 START DEMO
  * --------------------------------------
  *
  * This source file is subject to the GNU GPL license.
@@ -47,5 +47,3 @@ echo '<hr />';
 echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
-
-?>
