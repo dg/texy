@@ -43,7 +43,7 @@ class myHandler {
             $image->URL = 'image.gif'; // image URL
             $image->overURL = 'image-over.gif'; // onmouseover image
             $image->modifier->title = 'Texy! logo';
-            if ($link) $link->URL = 'image-big.gif'; // linked image
+            if ($link) $link->URL = 'big.gif'; // linked image
         }
 
         return Texy::PROCEED;

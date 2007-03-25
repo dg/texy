@@ -362,7 +362,7 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
             // email
             $link->URL = 'mailto:' . $link->URL;
 
-        } elseif (preg_match('#[a-z]+:#iA', $link->URL)) {
+        } elseif (preg_match('#'.TEXY_URLSCHEME.'#iA', $link->URL)) {
             // absolute URL with scheme - check scheme
             if (!$this->texy->checkURL($link->URL)) $link->URL = NULL;
 

@@ -97,11 +97,13 @@ class TexyHtmlWellFormer
     {
         $this->tagStack = array();
         $this->tagUsed  = array();
+
         $text = preg_replace_callback('#<(/?)([a-z][a-z0-9._:-]*)(|\s.*)(/?)>()#Uis', array($this, 'cb'), $text);
+
         if ($this->tagStack) {
             $pair = end($this->tagStack);
             while ($pair !== FALSE) {
-                $text .= '</'.$pair['tag'].'>';
+                if ($pair['show']) $text .= '</'.$pair['tag'].'>';
                 $pair = prev($this->tagStack);
             }
         }

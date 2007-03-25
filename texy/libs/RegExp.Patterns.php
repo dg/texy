@@ -55,3 +55,4 @@ define('TEXY_LINK_URL',    '(?:\[[^\]\n]+\]|(?!\[)[^\s'.TEXY_MARK.']*?[^:);,.!?\
 define('TEXY_LINK',        '(?::('.TEXY_LINK_URL.'))');       // any link
 define('TEXY_LINK_N',      '(?::('.TEXY_LINK_URL.'|:))');     // any link (also unstated)
 define('TEXY_EMAIL',       '[a-z0-9.+_-]+@[a-z0-9.+_-]+\.[a-z]{2,}');    // name@exaple.com
+define('TEXY_URLSCHEME',   '[a-z][a-z0-9+.-]*:');    // http:  |  mailto:
