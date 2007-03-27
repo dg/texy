@@ -215,18 +215,18 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
                 $image->URL = trim($content[0]);
             }
 
-            if (!$tx->checkURL($image->URL)) $image->URL = NULL;
+            if (!$tx->checkURL($image->URL, 'i')) $image->URL = NULL;
 
             // onmouseover image
             if (isset($content[1])) {
                 $tmp = trim($content[1]);
-                if ($tmp !== '' && $tx->checkURL($tmp)) $image->overURL = $tmp;
+                if ($tmp !== '' && $tx->checkURL($tmp, 'i')) $image->overURL = $tmp;
             }
 
             // linked image
             if (isset($content[2])) {
                 $tmp = trim($content[2]);
-                if ($tmp !== '' && $tx->checkURL($tmp)) $image->linkedURL = $tmp;
+                if ($tmp !== '' && $tx->checkURL($tmp, 'a')) $image->linkedURL = $tmp;
             }
         }
 
@@ -258,7 +258,7 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         $el = TexyHtml::el('img');
         $el->src = NULL; // trick - move to front
         $mod->decorate($tx, $el);
-        $el->src = Texy::absolutize($image->URL, $this->root);
+        $el->src = Texy::prependRoot($image->URL, $this->root);
         $el->alt = (string) $alt;  // needed
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
@@ -295,7 +295,7 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
 
         // onmouseover actions generate
         if ($image->overURL !== NULL) {
-            $overSrc = Texy::absolutize($image->overURL, $this->root);
+            $overSrc = Texy::prependRoot($image->overURL, $this->root);
             $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
             $el->onmouseout = 'this.src=\'' . addSlashes($el->src) . '\'';
             $el->onload = "var i=new Image();i.src='" . addSlashes($overSrc) . "';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";

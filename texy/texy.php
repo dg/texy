@@ -94,8 +94,8 @@ class Texy
     /** @var boolean  Do obfuscate e-mail addresses? */
     public $obfuscateEmail = TRUE;
 
-    /** @var string  regexp to check URL schemes */
-    public $urlSchemeFilter = NULL;
+    /** @var array  regexps to check URL schemes */
+    public $urlSchemeFilters = NULL;
 
     /** @var array  Parsing summary */
     public $summary = array(
@@ -503,7 +503,9 @@ class Texy
             'q'         => array(),
             'small'     => array(),
         );
-        $this->urlSchemeFilter = '#https?:|ftp:|mailto:#A';
+        $this->urlSchemeFilters['a'] = '#https?:|ftp:|mailto:#A';
+        $this->urlSchemeFilters['i'] = '#https?:#A';
+        $this->urlSchemeFilters['c'] = '#http:#A';
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
@@ -520,7 +522,7 @@ class Texy
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
         $this->allowedTags = array_merge(TexyHtml::$blockTags,
             TexyHtml::$inlineTags, TexyHtml::$replacedTags); // full support for "valid" HTML tags
-        $this->urlSchemeFilter = NULL;
+        $this->urlSchemeFilters = NULL;
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
@@ -650,16 +652,20 @@ class Texy
 
 
     /**
-     * Helpts filter bad URLs
+     * Filters bad URLs
      * @param string   user URL
+     * @param string   type: a-anchor, i-image, c-cite
      * @return bool
      */
-    public function checkURL($URL)
+    public function checkURL($URL, $type)
     {
         // absolute URL with scheme? check scheme!
-        return $this->urlSchemeFilter && preg_match('#'.TEXY_URLSCHEME.'#iA', $URL)
-            ? (bool) preg_match($this->urlSchemeFilter, $URL)
-            : TRUE;
+        if (!empty($this->urlSchemeFilters[$type])
+            && preg_match('#'.TEXY_URLSCHEME.'#iA', $URL)
+            && !preg_match($this->urlSchemeFilters[$type], $URL))
+            return FALSE;
+
+        return TRUE;
     }
 
 
@@ -678,12 +684,12 @@ class Texy
 
 
     /**
-     * Makes URL absolute, if possible
+     * Prepends root to URL, if possible
      * @param string  URL
      * @param string  root
      * @return string
      */
-    static public function absolutize($URL, $root)
+    static public function prependRoot($URL, $root)
     {
         if ($root == NULL || !self::isRelative($URL)) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;

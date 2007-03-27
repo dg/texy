@@ -126,15 +126,15 @@ class TexyQuoteModule extends TexyModule
         if ($link{0} === '[') { // [ref]
             $link = substr($link, 1, -1);
             $ref = $tx->linkModule->getReference($link);
-            if ($ref) return Texy::absolutize($ref['URL'], $tx->linkModule->root);
+            if ($ref) return Texy::prependRoot($ref['URL'], $tx->linkModule->root);
         }
 
-        if (!$tx->checkURL($link)) return NULL;
+        if (!$tx->checkURL($link, 'c')) return NULL;
 
         // special supported case
         if (strncasecmp($link, 'www.', 4) === 0) return 'http://' . $link;
 
-        return Texy::absolutize($link, $tx->linkModule->root);
+        return Texy::prependRoot($link, $tx->linkModule->root);
     }
 
 

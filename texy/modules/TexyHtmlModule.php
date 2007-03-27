@@ -235,7 +235,7 @@ class TexyHtmlModule extends TexyModule
         if ($el->elName === 'img') {
             if (!isset($el->src)) return FALSE;
 
-            if (!$tx->checkURL($el->src)) return FALSE;
+            if (!$tx->checkURL($el->src, 'i')) return FALSE;
 
             $tx->summary['images'][] = $el->src;
 
@@ -247,7 +247,7 @@ class TexyHtmlModule extends TexyModule
                     $el->rel[] = 'nofollow';
                 }
 
-                if (!$tx->checkURL($el->href)) return FALSE;
+                if (!$tx->checkURL($el->href, 'a')) return FALSE;
 
                 $tx->summary['links'][] = $el->href;
             }

@@ -322,11 +322,11 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
 
         if ($link->type === TexyLink::IMAGE) {
             // image
-            $el->href = Texy::absolutize($link->URL, $tx->imageModule->linkedRoot);
+            $el->href = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
             $el->onclick = $this->imageOnClick;
 
         } else {
-            $el->href = Texy::absolutize($link->URL, $this->root);
+            $el->href = Texy::prependRoot($link->URL, $this->root);
 
             // rel="nofollow"
             if ($nofollow || ($this->forceNoFollow && strpos($el->href, '//') !== FALSE))
@@ -362,11 +362,11 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
             // email
             $link->URL = 'mailto:' . $link->URL;
 
-        } elseif (preg_match('#'.TEXY_URLSCHEME.'#iA', $link->URL)) {
-            // absolute URL with scheme - check scheme
-            if (!$this->texy->checkURL($link->URL)) $link->URL = NULL;
+        } elseif (!$this->texy->checkURL($link->URL, 'a'))
+            $link->URL = NULL;
 
-            else $link->URL = str_replace('&amp;', '&', $link->URL); // replace unwanted &amp;
+        } else {
+            $link->URL = str_replace('&amp;', '&', $link->URL); // replace unwanted &amp;
         }
 
         // save for custom handlers and next generations :-)
@@ -386,7 +386,7 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
 
         if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) { // email
             return $this->texy->obfuscateEmail
-                   ? strtr($URL, array('@' => "&#160;(at)&#160;"))
+                   ? str_replace('@', $this->texy->protect("&#64;<!---->", Texy::CONTENT_MARKUP), $URL)
                    : $URL;
         }
 

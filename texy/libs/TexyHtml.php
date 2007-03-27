@@ -249,9 +249,17 @@ class TexyHtml
 
                 if (!$tmp) continue;
                 $value = implode($key === 'style' ? ';' : ' ', $tmp);
+
+            } elseif ($key === 'href' && substr($value, 0, 7) === 'mailto:') {
+                // email-obfuscate hack
+                $tmp = '';
+                for ($i=0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
+                $s .= ' href="' . $tmp . '"';
+                continue;
             }
+
             // add new attribute
-            $value = str_replace(array('&', '"', '<', '>', '@'), array('&amp;', '&quot;', '&lt;', '&gt;', '&#64;'), $value);
+            $value = str_replace(array('&', '"', '<', '>'), array('&amp;', '&quot;', '&lt;', '&gt;'), $value);
             $s .= ' ' . $key . '="' . Texy::freezeSpaces($value) . '"';
         }
 

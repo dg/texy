@@ -238,8 +238,8 @@ class TexyHeadingElement extends TexyHtml
         $level = $this->userData['level'];
 
         if ($this->userData['map']) {
-            sort($this->userData['map']);
-            $level = array_search($level, $this->userData['map']);
+            asort($this->userData['map']);
+            $level = array_search($level, array_values($this->userData['map']), TRUE);
         }
 
         $level += $this->userData['top'];
