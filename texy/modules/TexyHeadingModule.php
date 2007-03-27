@@ -57,14 +57,14 @@ class TexyHeadingModule extends TexyModule
         '-' => 3,
     );
 
-
     /** @var array  used ID's */
     private $usedID;
 
-    private $_rangeUnderline;
-    private $_deltaUnderline;
-    private $_rangeSurround;
-    private $_deltaSurround;
+    /** @var array */
+    private $dynamicMap;
+
+    /** @var int */
+    private $dynamicTop;
 
 
 
@@ -83,13 +83,13 @@ class TexyHeadingModule extends TexyModule
             'heading/surrounded'
         );
 
-        $this->_rangeUnderline = array(10, 0);
-        $this->_rangeSurround = array(10, 0);
         $this->title = NULL;
-        $this->TOC = $this->usedID = array();
+        $this->usedID = array();
 
-        $foo = NULL; $this->_deltaUnderline = & $foo;
-        $bar = NULL; $this->_deltaSurround = & $bar;
+        // clear references
+        $foo1 = array(); $this->TOC = & $foo1;
+        $foo2 = array(); $this->dynamicMap = & $foo2;
+        $foo3 = -100; $this->dynamicTop = & $foo3;
     }
 
 
@@ -115,13 +115,6 @@ class TexyHeadingModule extends TexyModule
 
         $mod = new TexyModifier($mMod);
         $level = $this->levels[$mLine];
-
-        // dynamic headings balancing
-        $this->_rangeUnderline[0] = min($this->_rangeUnderline[0], $level);
-        $this->_rangeUnderline[1] = max($this->_rangeUnderline[1], $level);
-        $this->_deltaUnderline = -$this->_rangeUnderline[0];
-        $this->_deltaSurround = -$this->_rangeSurround[0] +
-            ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
 
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {
@@ -154,12 +147,6 @@ class TexyHeadingModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $level = 7 - min(7, max(2, strlen($mLine)));
 
-        // dynamic headings balancing
-        $this->_rangeSurround[0] = min($this->_rangeSurround[0], $level);
-        $this->_rangeSurround[1] = max($this->_rangeSurround[1], $level);
-        $this->_deltaSurround  = -$this->_rangeSurround[0] +
-            ($this->_rangeUnderline[1] ? ($this->_rangeUnderline[1] - $this->_rangeUnderline[0] + 1) : 0);
-
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {
             $res = $this->texy->handler->heading($parser, $level, $mContent, $mod, TRUE);
@@ -185,15 +172,19 @@ class TexyHeadingModule extends TexyModule
         $tx = $this->texy;
         $el = new TexyHeadingElement;
         $mod->decorate($tx, $el);
+
         $el->userData['level'] = $level;
         $el->userData['top'] = $this->top;
+        $el->userData['map'] = NULL;
+
         if ($this->balancing === self::DYNAMIC) {
-            if ($isSurrounded)
-                $el->userData['deltaLevel'] = & $this->_deltaSurround;
-            else
-                $el->userData['deltaLevel'] = & $this->_deltaUnderline;
-        } else {
-            $el->userData['deltaLevel'] = 0;
+            if ($isSurrounded) {
+                $this->dynamicTop = max($this->dynamicTop, $this->top - $level);
+                $el->userData['top'] = & $this->dynamicTop;
+            } else {
+                $this->dynamicMap[$level] = $level;
+                $el->userData['map'] = & $this->dynamicMap;
+            }
         }
         $el->parseLine($tx, trim($content));
 
@@ -244,7 +235,15 @@ class TexyHeadingElement extends TexyHtml
 
     public function startTag()
     {
-        $level = $this->userData['level'] + $this->userData['deltaLevel'] + $this->userData['top'];
+        $level = $this->userData['level'];
+
+        if ($this->userData['map']) {
+            sort($this->userData['map']);
+            $level = array_search($level, $this->userData['map']);
+        }
+
+        $level += $this->userData['top'];
+
         $this->elName = 'h' . min(6, max(1, $level));
         $this->userData['TOC']['level'] = $level;
         return parent::startTag();

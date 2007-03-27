@@ -69,9 +69,9 @@ echo '<hr />';
 
 $texy->headingModule->top       = 1;   // set headings top limit
 $texy->headingModule->balancing = TexyHeadingModule::FIXED;
-$texy->headingModule->levels['='] = 0;  // = means 0; top=1;       0 + 1 = 1 (h1)
-$texy->headingModule->levels['-'] = 1;  // - means 1; top=1;       1 + 1 = 2 (h2)
-$texy->headingModule->levels[5] = 2;    // ##### means 2; top=1;   2 + 1 = 3 (h3)
+
+$texy->headingModule->levels['='] = 0;  // = means 0 + top (1) = 1 (h1)
+$texy->headingModule->levels['-'] = 1;  // - means 1 + top (1) = 2 (h2)
 
 $html = $texy->process($text);  // that's all folks!
 
