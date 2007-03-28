@@ -362,7 +362,7 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
             // email
             $link->URL = 'mailto:' . $link->URL;
 
-        } elseif (!$this->texy->checkURL($link->URL, 'a'))
+        } elseif (!$this->texy->checkURL($link->URL, 'a')) {
             $link->URL = NULL;
 
         } else {

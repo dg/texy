@@ -191,6 +191,8 @@ class Texy
     /** @var array of ITexyPreBlock for internal parser usage */
     public $_preBlockModules;
 
+    /** @var int internal state (0=new, 1=parsing, 2=parsed) */
+    private $_state = 0;
 
 
 
@@ -311,12 +313,16 @@ class Texy
      */
     public function parse($text, $singleLine = FALSE)
     {
+        if ($this->_state === 1)
+            throw new Exception('Parsing is in progress yet.');
+
          // initialization
         if ($this->handler && !is_object($this->handler))
             throw new Exception('$texy->handler must be object. See documentation.');
 
         $this->_paragraphMode = TRUE;
         $this->marks = array();
+        $this->_state = 1;
 
         // speed-up
         if (is_array($this->allowedClasses)) $this->_classes = array_flip($this->allowedClasses);
@@ -358,6 +364,7 @@ class Texy
 
         // clean-up
         list($this->linePatterns, $this->blockPatterns) = $tmp;
+        $this->_state = 2;
     }
 
 
@@ -370,8 +377,7 @@ class Texy
      */
     public function toHtml()
     {
-        // Convert DOM structure to (X)HTML code
-        if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
+        if ($this->_state !== 2) throw new Exception('Call $texy->parse() first.');
 
         $html = $this->_toHtml( $this->DOM->export($this) );
 
@@ -394,8 +400,7 @@ class Texy
      */
     public function toText()
     {
-        // Convert DOM structure to (X)HTML code
-        if (!$this->DOM) throw new Exception('Call $texy->parse() first.');
+        if ($this->_state !== 2) throw new Exception('Call $texy->parse() first.');
 
         $text = $this->_toText( $this->DOM->export($this) );
 
@@ -585,16 +590,16 @@ class Texy
 
 
     /**
-     * Converts to web safe characters [a-z0-9.-] text
+     * Converts to web safe characters [a-z0-9_-] text
      * @param string
      * @return string
      */
     static public function webalize($s)
     {
         $s = TexyUtf::utf2ascii($s);
-        $s = preg_replace('#[\s-]+#', '-', $s);
         $s = strtolower($s);
-        $s = preg_replace('#[^a-z0-9.-]+#', '', $s);
+        $s = preg_replace('#[^a-z0-9_]+#', '-', $s);
+        $s = trim($s, '-');
         return $s;
     }
 

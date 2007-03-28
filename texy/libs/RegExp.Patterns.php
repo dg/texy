@@ -24,7 +24,7 @@ if (!defined('TEXY')) die();
 // Regular expression patterns
 
 // Unicode character classes
-define('TEXY_CHAR',        'A-Za-z\x{c0}-\x{02af}\x{0370}-\x{1eff}');
+define('TEXY_CHAR',        'A-Za-z\x{C0}-\x{2FF}\x{370}-\x{1EFF}');
 
 // marking meta-characters
 // any mark:               \x14-\x1F
