@@ -19,6 +19,7 @@
 if (!defined('TEXY')) die();
 
 
+TexyHtmlWellFormer::init();
 
 class TexyHtmlWellFormer
 {
@@ -29,7 +30,7 @@ class TexyHtmlWellFormer
     private $tagStack;
 
     /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
-    private $prohibits = array(
+    static private $prohibits = array(
         'a' => array('a','button'),
         'img' => array('pre'),
         'object' => array('pre'),
@@ -46,49 +47,13 @@ class TexyHtmlWellFormer
         'fieldset' => array('button'),
         'iframe' => array('button'),
         'isindex' => array('button'),
-
-        // spec due TexyHtmlFormatter
-        'textarea' => array('button', 'textarea'),
-        'pre' => array('pre', 'textarea'),
     );
 
-    private $autoClose = array(
-        'thead' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
-        'tbody' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
-        'tfoot' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
-        'colgoup' => array('tbody'=>1,'colgroup'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1),
-        'dt' => array('dd'=>1,'dt'=>1),
-        'dd' => array('dd'=>1,'dt'=>1),
-        'li' => array('li'=>1),
-        'option' => array('option'=>1),
-        'address' => array('p'=>1),
-        'applet' => array('p'=>1),
-        'blockquote' => array('p'=>1),
-        'center' => array('p'=>1),
-        'dir' => array('p'=>1),
-        'div' => array('p'=>1),
-        'dl' => array('p'=>1),
-        'fieldset' => array('p'=>1),
-        'form' => array('p'=>1),
-        'h1' => array('p'=>1),
-        'h2' => array('p'=>1),
-        'h3' => array('p'=>1),
-        'h4' => array('p'=>1),
-        'h5' => array('p'=>1),
-        'h6' => array('p'=>1),
-        'hr' => array('p'=>1),
-        'isindex' => array('p'=>1),
-        'menu' => array('p'=>1),
-        'object' => array('p'=>1),
-        'ol' => array('p'=>1),
-        'p' => array('p'=>1),
-        'pre' => array('p'=>1),
-        'table' => array('p'=>1),
-        'ul' => array('p'=>1),
-        'th' => array('td'=>1,'th'=>1),
-        'td' => array('td'=>1,'th'=>1),
-        'tr' => array('td'=>1,'th'=>1,'tr'=>1),
-    );
+    /** @var array */
+    static private $optional;
+
+    /** @var array */
+    static private $content;
 
 
 
@@ -102,15 +67,11 @@ class TexyHtmlWellFormer
         $this->tagStack = array();
         $this->tagUsed  = array();
 
-        $text = preg_replace_callback('#<(/?)([a-z][a-z0-9._:-]*)(|\s.*)(/?)>()#Uis', array($this, 'cb'), $text);
+        $text = preg_replace_callback('#<(/?)([a-z][a-z0-9._:-]*)(|\s.*)(/?)>|([^<]++)#Uis', array($this, 'cb'), $text);
 
-        if ($this->tagStack) {
-            $pair = end($this->tagStack);
-            while ($pair !== FALSE) {
-                if ($pair['show']) $text .= '</'.$pair['tag'].'>';
-                $pair = prev($this->tagStack);
-            }
-        }
+        foreach ($this->tagStack as $item)
+            if ($item['show']) $text .= '</'.$item['tag'].'>';
+
         return $text;
     }
 
@@ -122,13 +83,24 @@ class TexyHtmlWellFormer
      */
     private function cb($matches)
     {
+        // stuff between tags
+        if (isset($matches[5]))
+        {
+            $item = reset($this->tagStack);
+            if ($item && $item['content'] && !isset($item['content']['%DATA'])) return '';
+            return $matches[5];
+        }
+
         list(, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
         //    [2] => TAG
         //    [3] => ... (attributes)
         //    [4] => /   (empty)
 
-        if (isset(TexyHtml::$emptyTags[$mTag]) || $mEmpty) return $mEnd ? '' : '<'.$mTag.$mAttr.$mEmpty.'>';
+        //if (isset(TexyHtml::$emptyTags[$mTag]) || $mEmpty) return $mEnd ? '' : '<'.$mTag.$mAttr.$mEmpty.'>';
+        $mEmpty = $mEmpty || isset(TexyHtml::$emptyTags[$mTag]);
+        if ($mEmpty && $mEnd) return ''; // error
+
 
         if ($mEnd) {  // end tag
 
@@ -136,71 +108,199 @@ class TexyHtmlWellFormer
             if (empty($this->tagUsed[$mTag])) return '';
 
             // autoclose tags
-            $pair = end($this->tagStack);
             $s = '';
-            $i = 1;
-            while ($pair !== FALSE) {
-                $tag = $pair['tag'];
-                if ($pair['show']) $s .= '</'.$tag.'>';
+            $tmp = array();
+            $back = TRUE;
+            foreach ($this->tagStack as $i => $item)
+            {
+                $tag = $item['tag'];
+                if ($item['show']) $s .= '</'.$tag.'>';
                 $this->tagUsed[$tag]--;
+                $back = $back && isset(TexyHtml::$inlineTags[$tag]);
+                unset($this->tagStack[$i]);
                 if ($tag === $mTag) break;
-                $pair = prev($this->tagStack);
-                $i++;
+                array_unshift($tmp, $item);
             }
 
-            if (isset(TexyHtml::$blockTags[$mTag])) {
-                array_splice($this->tagStack, -$i);
-                return $s;
+            if (!$back || !$tmp) return $s;
+
+            // allowed-check (nejspis neni ani potreba)
+            $item = reset($this->tagStack);
+            if ($item && $item['content'] && !isset($item['content'][$tmp[0]['tag']])) return $s;
+
+            // autoopen tags
+            foreach ($tmp as $item)
+            {
+                if ($item['show']) $s .= '<'.$item['tag'].$item['attr'].'>';
+                $this->tagUsed[$item['tag']]++;
+                array_unshift($this->tagStack, $item);
             }
 
-            // autoopen inline tags
-            // not work in PHP 4.4.1 due bug #35063
-            unset($this->tagStack[key($this->tagStack)]);
-            $pair = current($this->tagStack);
-            while ($pair !== FALSE) {
-                if ($pair['show']) $s .= '<'.$pair['tag'].$pair['attr'].'>';
-                $this->tagUsed[$pair['tag']]++;
-                $pair = next($this->tagStack);
-            }
             return $s;
+
 
         } else { // start tag
 
             $show = TRUE;
+            $content = NULL;
             $s = '';
 
-            // check element prohibitions
-            if (isset($this->prohibits[$mTag])) {
-                foreach ($this->prohibits[$mTag] as $pTag)
+            // check element deep prohibitions
+            if (isset(self::$prohibits[$mTag])) {
+                foreach (self::$prohibits[$mTag] as $pTag)
                     if (!empty($this->tagUsed[$pTag])) { $show = FALSE; break; }
             }
 
-            // check optional end tags (autoclose)
-            if ($show && isset($this->autoClose[$mTag])) {
-                $auto = $this->autoClose[$mTag];
-                $pair = end($this->tagStack);
-                while ($pair && isset($auto[ $pair['tag'] ])) {
-                    if ($pair['show']) $s .= '</'.$pair['tag'].'>';
-                    $this->tagUsed[$pair['tag']]--;
-                    unset($this->tagStack[key($this->tagStack)]);
+            foreach ($this->tagStack as $i => $item)
+            {
+                $content = $item['content'];
 
-                    $pair = end($this->tagStack);
+                if (!$show || !$item['content'] || isset($content[$mTag])) break;
+
+                if (!$item['show'] || isset(self::$optional[ $item['tag'] ])) {
+                    if ($item['show']) $s .= '</'.$item['tag'].'>';
+                    $this->tagUsed[$item['tag']]--;
+                    unset($this->tagStack[$i]);
+                    $content = NULL;
+                    continue;
                 }
+
+                $show = FALSE; break;
+            }
+
+            if ($mEmpty) {
+                if ($show) $s .= $matches[0];
+                return $s;
+            }
+
+            if ($show) {
+                if ($mTag === 'ins' || $mTag === 'del') {
+                    // special case, leave $content
+                } else {
+                    if (isset(self::$content[$mTag]))
+                        $content = self::$content[$mTag];
+                    else
+                        $content = NULL;
+                }
+                $s .= '<'.$mTag.$mAttr.'>';
             }
 
             // open tag, put to stack, increase counter
-            $pair = array(
+            $item = array(
                 'attr' => $mAttr,
                 'tag' => $mTag,
                 'show' => $show,
+                'content' => $content,
             );
-            $this->tagStack[] = $pair;
+            array_unshift($this->tagStack, $item);
             $tmp = &$this->tagUsed[$mTag]; $tmp++;
 
-            return $show ? $s . '<'.$mTag.$mAttr.'>' : '';
+            return $s;
         }
     }
 
+
+
+
+    /**
+     * Initializes self::$content & self::$optional arrays
+     */
+    static public function init()
+    {
+        self::$optional = array_flip(array('colgroup','dd','dt','li','option',
+        'p','tbody','td','tfoot','th','thead','tr'));
+
+        // %block;
+        $b = array_flip(array('ins','del','p','h1','h2','h3','h4','h5','h6','ul','ol',
+        'dir','menu','dl','pre','div','center','blockquote','iframe','noscript','noframes',
+        'form','isindex','hr','table','address','fieldset'));
+
+        // %inline;
+        $i = array_flip(array('ins','del','tt','i','b','u','s','strike','big','small','font','em','strong',
+        'dfn','code','samp','kbd','var','cite','abbr','acronym','sub','sup','q','span','bdo','a','object',
+        'applet','img','basefont','br','script','map','input','select','textarea','label','button','%DATA'));
+
+        // DTD - compromise between loose and strict
+	self::$content = array(
+        'html' => array('head'=>1, 'body'=>1),
+        'head' => array('title'=>1, 'script'=>1, 'style'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'object'=>1, 'isindex'=>1),
+        'title' => array('%DATA'=>1),
+	'body' => $b + $i, // HTML loose: array('script'=>1) + $b,
+        'script' => NULL, //array('%DATA'=>1),
+        'style' => NULL, //array('%DATA'=>1),
+        'p' => $i,
+        'h1' => $i,
+        'h2' => $i,
+        'h3' => $i,
+        'h4' => $i,
+        'h5' => $i,
+        'h6' => $i,
+        'ul' => array('li'=>1),
+        'ol' => array('li'=>1),
+        'li' => $b + $i,
+        'dir' => array('li'=>1),
+        'menu' => array('li'=>1), // inline li, ignored
+        'dl' => array('dt'=>1,'dd'=>1),
+        'dt' => $i,
+        'dd' => $b + $i,
+        'pre' => array_flip(array('tt','i','b','u','s','strike','em','strong','dfn','code',
+            'samp','kbd','var','cite','abbr','acronym','q','span','bdo','a','br','script',
+            'map','input','select','textarea','label','button','%DATA')),
+        'div' => $b + $i,
+        'center' => $b + $i,
+        'blockquote' => array('script'=>1) + $b,
+        'iframe' => $b + $i,
+        'noscript' => $b + $i,
+        'noframes' => $b + $i,
+        'form' => array('script'=>1) + $b,
+        'table' => array('caption'=>1,'colgroup'=>1,'col'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'tr'=>1),
+        'caption' => $i,
+        'colgroup' => array('col'=>1),
+        'thead' => array('tr'=>1),
+        'tbody' => array('tr'=>1),
+        'tfoot' => array('tr'=>1),
+        'tr' => array('td'=>1,'th'=>1),
+        'td' => $b + $i,
+        'th' => $b + $i,
+        'address' => $i,
+        'fieldset' => array('legend'=>1) + $b + $i,
+        'legend' => $i,
+        'tt' => $i,
+        'i' => $i,
+        'b' => $i,
+        'u' => $i,
+        's' => $i,
+        'strike' => $i,
+        'big' => $i,
+        'small' => $i,
+        'font' => $i,
+        'em' => $i,
+        'strong' => $i,
+        'dfn' => $i,
+        'code' => $i,
+        'samp' => $i,
+        'kbd' => $i,
+        'var' => $i,
+        'cite' => $i,
+        'abbr' => $i,
+        'acronym' => $i,
+        'sub' => $i,
+        'sup' => $i,
+        'q' => $i,
+        'span' => $i,
+        'bdo' => $i,
+        'a' => $i,
+        'object' => array('param'=>1) + $b + $i,
+        'applet' => array('param'=>1) + $b + $i,
+        'map' => array('area'=>1) + $b,
+        'select' => array('option'=>1,'optgroup'=>1),
+        'optgroup' => array('option'=>1),
+        'option' => array('%DATA'=>1),
+        'textarea' => array('%DATA'=>1),
+        'label' => $i, // - label by self::$prohibits
+        'button' => $b + $i, // - a input select textarea label button form fieldset, by self::$prohibits
+        );
+    }
 
 
     /**

@@ -92,7 +92,7 @@ class TexyPhraseModule extends TexyModule
         // strong & em speciality
         $tx->registerLinePattern(
             array($this, 'patternPhrase'),
-            '#(?<!\*)\*\*\*(?![\s*])(.+)'.TEXY_MODIFIER.'?(?<![\s*])\*\*\*(?!\*)()'.TEXY_LINK.'??()#Us',
+            '#(?<!\*)\*\*\*(?![\s*])(.+)'.TEXY_MODIFIER.'?(?<![\s*])\*\*\*(?!\*)'.TEXY_LINK.'??()#Us',
             'phrase/strong+em'
         );
 
@@ -211,7 +211,7 @@ class TexyPhraseModule extends TexyModule
         // `code`
         $tx->registerLinePattern(
             array($this, 'patternPhrase'),
-            '#\`(\S[^'.TEXY_MARK.'\r\n]*)'.TEXY_MODIFIER.'?(?<!\s)\`()#U',
+            '#\`(\S[^'.TEXY_MARK.'\r\n]*)'.TEXY_MODIFIER.'?(?<!\s)\`'.TEXY_LINK.'??()#U',
             'phrase/code'
         );
 

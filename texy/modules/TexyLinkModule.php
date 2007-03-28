@@ -285,7 +285,9 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
             $this->checkLink($link);
         }
 
-        $link->URL = str_replace('%s', urlencode($tx->_toText($label)), $link->URL);
+        if (strpos($link->URL, '%s') !== FALSE) {
+            $link->URL = str_replace('%s', urlencode($tx->_toText($label)), $link->URL);
+        }
         $link->modifier->setProperties($mMod);
         $link->type = $type;
         return $link;
