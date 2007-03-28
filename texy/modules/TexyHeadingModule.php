@@ -73,13 +73,13 @@ class TexyHeadingModule extends TexyModule
         $this->texy->registerBlockPattern(
             array($this, 'patternUnderline'),
             '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
-          . '(\#|\*|\=|\-){3,}$#mU',
+          . '(\#{3,}|\*{3,}|={3,}|-{3,})$#mU',
             'heading/underlined'
         );
 
         $this->texy->registerBlockPattern(
             array($this, 'patternSurround'),
-            '#^((\#|\=){2,})(?!\\2)(.+)\\2*'.TEXY_MODIFIER_H.'?()$#mU',
+            '#^(\#{2,}+|={2,}+)(.+)'.TEXY_MODIFIER_H.'?()$#mU',
             'heading/surrounded'
         );
 
@@ -114,7 +114,7 @@ class TexyHeadingModule extends TexyModule
         //    [3] => ...
 
         $mod = new TexyModifier($mMod);
-        $level = $this->levels[$mLine];
+        $level = $this->levels[$mLine[0]];
 
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {
@@ -139,13 +139,14 @@ class TexyHeadingModule extends TexyModule
      */
     public function patternSurround($parser, $matches)
     {
-        list(, $mLine, , $mContent, $mMod) = $matches;
+        list(, $mLine, $mContent, $mMod) = $matches;
         //    [1] => ###
         //    [2] => ...
         //    [3] => .(title)[class]{style}<>
 
         $mod = new TexyModifier($mMod);
         $level = 7 - min(7, max(2, strlen($mLine)));
+        $mContent = rtrim($mContent, $mLine[0]);
 
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {

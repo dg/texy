@@ -184,7 +184,7 @@ class TexyHtmlModule extends TexyModule
         }
 
         // force empty
-        if ($forceEmpty && $aTags === Texy::ALL) $el->_empty = TRUE;
+        if ($forceEmpty && $aTags === Texy::ALL) $el->childNodes = FALSE;
 
         // end tag? we are finished
         if (!$isStart) {

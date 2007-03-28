@@ -78,9 +78,9 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
             '#([\x{2013}\x{2014}]) #u'                => "\$1\xc2\xa0",                    // dash &nbsp;
             '# --- #'                                 => " \xe2\x80\x94\xc2\xa0",          // em dash ---
             '# -- #'                                  => " \xe2\x80\x93\xc2\xa0",          // en dash --
-            '# -{1,2}> #'                             => " \xe2\x86\x92 ",                 // right arrow -->
-            '# <-{1,2} #'                             => " \xe2\x86\x90 ",                 // left arrow <--
             '# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
+            '#-{1,}> #'                               => " \xe2\x86\x92 ",                 // right arrow -->
+            '# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
             '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign x
             '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign x
             '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // 10x

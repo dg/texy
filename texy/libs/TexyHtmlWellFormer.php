@@ -46,6 +46,10 @@ class TexyHtmlWellFormer
         'fieldset' => array('button'),
         'iframe' => array('button'),
         'isindex' => array('button'),
+
+        // spec due TexyHtmlFormatter
+        'textarea' => array('button', 'textarea'),
+        'pre' => array('pre', 'textarea'),
     );
 
     private $autoClose = array(

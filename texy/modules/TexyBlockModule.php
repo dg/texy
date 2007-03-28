@@ -27,6 +27,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
 {
     protected $default = array(
         'blocks' => TRUE,
+        'block/default' => TRUE,
         'block/pre' => TRUE,
         'block/code' => TRUE,
         'block/html' => TRUE,
@@ -36,15 +37,13 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
         'block/div' => TRUE,
     );
 
-    /** @var string */
-    public $defaultType = 'pre';
 
 
     public function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
-            '#^(?>/--+? *?(.*)'.TEXY_MODIFIER_H.'?$)((?:\n(?0)|\n.*)*)(?:\n\\\\--.*$|\z)#mUi',
+            '#^/--++ *+(.*)'.TEXY_MODIFIER_H.'?$((?:\n(?0)|\n.*+)*)(?:\n\\\\--.*$|\z)#mUi',
             'blocks'
         );
     }
@@ -59,7 +58,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
     {
         // autoclose exclusive blocks
         $text = preg_replace(
-            '#^((?>/--+ *)(?!div|texysource).*)$((?:\n.*)*?)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mi',
+            '#^(/--++ *+(?!div|texysource).*)$((?:\n.*+)*?)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mi',
             "\$1\$2\n\\--",
             $text
         );
@@ -89,7 +88,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
 
         $mod = new TexyModifier($mMod);
         $parts = preg_split('#\s+#', $mParam, 2);
-        $blocktype = empty($parts[0]) ? 'block/' . $this->defaultType : 'block/' . $parts[0];
+        $blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
         $param = empty($parts[1]) ? NULL : $parts[1];
 
         // event wrapper
@@ -136,7 +135,8 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             $s = $this->outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el();
-            $el->parseBlock($tx, $s);
+            if ($param === 'line') $el->parseLine($tx, $s);
+            else $el->parseBlock($tx, $s);
             $s = $tx->_toHtml( $el->export($tx) );
             $blocktype = 'block/code'; $param = 'html'; // to be continue (as block/code)
         }
@@ -154,13 +154,29 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             return $el;
         }
 
-        if ($blocktype === 'block/pre') {
+        if ($blocktype === 'block/default') {
             $s = $this->outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
             $el->class[] = $param; // lang
             $s = Texy::escapeHtml($s);
+            $s = $tx->protect($s);
+            $el->setContent($s);
+            return $el;
+        }
+
+        if ($blocktype === 'block/pre') {
+            $s = $this->outdent($s);
+            if ($s==='') return "\n";
+            $el = TexyHtml::el('pre');
+            $mod->decorate($tx, $el);
+            $lineParser = new TexyLineParser($tx);
+            $lineParser->onlyHtml = TRUE;
+            $s = $lineParser->parse($s);
+            $s = Texy::unescapeHtml($s);
+            $s = Texy::escapeHtml($s);
+            $s = $tx->unprotect($s);
             $s = $tx->protect($s);
             $el->setContent($s);
             return $el;
