@@ -116,14 +116,6 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
 
         $this->pattern = array_keys($pairs);
         $this->replace = array_values($pairs);
-
-        /*
-        $this->texy->registerLinePattern(
-            array($this, 'pattern'),
-            '# -{2,3} | -{1,2}> | <-{1,2}>? #Us',
-            'typography'
-        );
-        */
     }
 
 
@@ -134,32 +126,5 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
 
         return preg_replace($this->pattern, $this->replace, $text);
     }
-
-
-
-    /**
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
-     * @return string
-     */
-/*
-    public function pattern($parser, $matches)
-    {
-        list($match) = $matches;
-        return $match;
-        $repl = array(
-            ' --- '   => " \xe2\x80\x94\xc2\xa0",  // em dash ---
-            ' -- '    => " \xe2\x80\x93\xc2\xa0",  // en dash --
-            ' --> '   => " \xe2\x86\x92 ",         // right arrow -->
-            ' <-- '   => " \xe2\x86\x90 ",         // left arrow <--
-            ' <--> '  => " \xe2\x86\x94 ",         // left right arrow <-->
-            ' -> '    => " \xe2\x86\x92 ",         // right arrow -->
-            ' <- '    => " \xe2\x86\x90 ",         // left arrow <--
-            ' <-> '   => " \xe2\x86\x94 ",         // left right arrow <-->
-        );
-        return $repl[$match];
-    }
-*/
 
 } // TexyTypographyModule

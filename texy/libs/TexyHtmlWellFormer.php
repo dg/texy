@@ -19,15 +19,25 @@
 if (!defined('TEXY')) die();
 
 
-TexyHtmlWellFormer::init();
-
 class TexyHtmlWellFormer
 {
+    /** @var bool  use Strict of Transitional DTD? */
+    static public $strict = FALSE;
+
     /** @var array */
     private $tagUsed;
 
     /** @var array */
     private $tagStack;
+
+    /** @var array */
+    static private $optional;
+
+    /** @var array */
+    static private $content;
+
+    /** @var bool */
+    static private $inited = FALSE;
 
     /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
     static private $prohibits = array(
@@ -49,13 +59,6 @@ class TexyHtmlWellFormer
         'isindex' => array('button'),
     );
 
-    /** @var array */
-    static private $optional;
-
-    /** @var array */
-    static private $content;
-
-
 
 
     /**
@@ -64,6 +67,12 @@ class TexyHtmlWellFormer
      */
     public function process($text)
     {
+        // lazy initialization
+        if (!self::$inited) {
+            self::init();
+            self::$inited = TRUE;
+        }
+
         $this->tagStack = array();
         $this->tagUsed  = array();
 
@@ -87,7 +96,9 @@ class TexyHtmlWellFormer
         if (isset($matches[5]))
         {
             $item = reset($this->tagStack);
-            if ($item && $item['content'] && !isset($item['content']['%DATA'])) return '';
+            if ($item) $content = $item['content'];
+            else $content = self::$content[NULL];
+            if ($content && !isset($content['%DATA'])) return '';
             return $matches[5];
         }
 
@@ -126,7 +137,9 @@ class TexyHtmlWellFormer
 
             // allowed-check (nejspis neni ani potreba)
             $item = reset($this->tagStack);
-            if ($item && $item['content'] && !isset($item['content'][$tmp[0]['tag']])) return $s;
+            if ($item) $content = $item['content'];
+            else $content = self::$content[NULL];
+            if ($content && !isset($content[$tmp[0]['tag']])) return $s;
 
             // autoopen tags
             foreach ($tmp as $item)
@@ -141,31 +154,35 @@ class TexyHtmlWellFormer
 
         } else { // start tag
 
-            $show = TRUE;
-            $content = NULL;
             $s = '';
+            $content = self::$content[NULL];
 
-            // check element deep prohibitions
-            if (isset(self::$prohibits[$mTag])) {
-                foreach (self::$prohibits[$mTag] as $pTag)
-                    if (!empty($this->tagUsed[$pTag])) { $show = FALSE; break; }
-            }
-
+            // optional end tag closing
             foreach ($this->tagStack as $i => $item)
             {
+                // is tag allowed here?
                 $content = $item['content'];
+                if (!$content || isset($content[$mTag])) break;
 
-                if (!$show || !$item['content'] || isset($content[$mTag])) break;
+                $tag = $item['tag'];
 
-                if (!$item['show'] || isset(self::$optional[ $item['tag'] ])) {
-                    if ($item['show']) $s .= '</'.$item['tag'].'>';
-                    $this->tagUsed[$item['tag']]--;
-                    unset($this->tagStack[$i]);
-                    $content = NULL;
-                    continue;
-                }
+                // auto-close hidden, optional and inline tags
+                if ($item['show'] && (!isset(self::$optional[$tag]) && !isset(TexyHtml::$inlineTags[$tag]))) break;
 
-                $show = FALSE; break;
+                // close it
+                if ($item['show']) $s .= '</'.$tag.'>';
+                $this->tagUsed[$tag]--;
+                unset($this->tagStack[$i]);
+                $content = self::$content[NULL];
+            }
+
+            // is tag allowed in this content?
+            $show = !$content || isset($content[$mTag]);
+
+            // check deep element prohibitions
+            if ($show && isset(self::$prohibits[$mTag])) {
+                foreach (self::$prohibits[$mTag] as $pTag)
+                    if (!empty($this->tagUsed[$pTag])) { $show = FALSE; break; }
             }
 
             if ($mEmpty) {
@@ -180,15 +197,15 @@ class TexyHtmlWellFormer
                     if (isset(self::$content[$mTag]))
                         $content = self::$content[$mTag];
                     else
-                        $content = NULL;
+                        $content = self::$content[NULL];
                 }
                 $s .= '<'.$mTag.$mAttr.'>';
             }
 
             // open tag, put to stack, increase counter
             $item = array(
-                'attr' => $mAttr,
                 'tag' => $mTag,
+                'attr' => $mAttr,
                 'show' => $show,
                 'content' => $content,
             );
@@ -221,11 +238,11 @@ class TexyHtmlWellFormer
         'applet','img','basefont','br','script','map','input','select','textarea','label','button','%DATA'));
 
         // DTD - compromise between loose and strict
-	self::$content = array(
+	    self::$content = array(
         'html' => array('head'=>1, 'body'=>1),
         'head' => array('title'=>1, 'script'=>1, 'style'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'object'=>1, 'isindex'=>1),
         'title' => array('%DATA'=>1),
-	'body' => $b + $i, // HTML loose: array('script'=>1) + $b,
+	    'body' => self::$strict ? array('script'=>1) + $b : $b + $i,
         'script' => NULL, //array('%DATA'=>1),
         'style' => NULL, //array('%DATA'=>1),
         'p' => $i,
@@ -239,7 +256,7 @@ class TexyHtmlWellFormer
         'ol' => array('li'=>1),
         'li' => $b + $i,
         'dir' => array('li'=>1),
-        'menu' => array('li'=>1), // inline li, ignored
+        'menu' => array('li'=>1), // it's inline-li, ignored
         'dl' => array('dt'=>1,'dd'=>1),
         'dt' => $i,
         'dd' => $b + $i,
@@ -248,11 +265,11 @@ class TexyHtmlWellFormer
             'map','input','select','textarea','label','button','%DATA')),
         'div' => $b + $i,
         'center' => $b + $i,
-        'blockquote' => array('script'=>1) + $b,
+        'blockquote' => self::$strict ? array('script'=>1) + $b : $b + $i,
         'iframe' => $b + $i,
         'noscript' => $b + $i,
         'noframes' => $b + $i,
-        'form' => array('script'=>1) + $b,
+        'form' => self::$strict ? array('script'=>1) + $b : $b + $i,
         'table' => array('caption'=>1,'colgroup'=>1,'col'=>1,'thead'=>1,'tbody'=>1,'tfoot'=>1,'tr'=>1),
         'caption' => $i,
         'colgroup' => array('col'=>1),
@@ -262,7 +279,7 @@ class TexyHtmlWellFormer
         'tr' => array('td'=>1,'th'=>1),
         'td' => $b + $i,
         'th' => $b + $i,
-        'address' => $i,
+        'address' => self::$strict ? $i : array('p'=>1) + $i,
         'fieldset' => array('legend'=>1) + $b + $i,
         'legend' => $i,
         'tt' => $i,
@@ -299,6 +316,7 @@ class TexyHtmlWellFormer
         'textarea' => array('%DATA'=>1),
         'label' => $i, // - label by self::$prohibits
         'button' => $b + $i, // - a input select textarea label button form fieldset, by self::$prohibits
+        NULL => $b + $i, // "base content"
         );
     }
 

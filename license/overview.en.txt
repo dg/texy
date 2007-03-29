@@ -49,6 +49,4 @@ Why does Texy! offer two licenses?
 
 
 
-
-
----(based on MySQL Licensing Policy FAQ)---
+(based on MySQL Licensing Policy FAQ)

@@ -31,7 +31,7 @@ Support Texy!
 -------------
 
 If you like or use Texy!, support it by placing small button to your website.
-Choose buttons and look at exemplary HTML code in directory /support-us/
+Choose buttons and look at exemplary HTML code in directory /icons/
 
 
 

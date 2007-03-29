@@ -1,4 +1,4 @@
-﻿----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
   Tento text je neoficiálním překladem GNU General Public License (GNU GPL). Nebyl
 vydán nadací Free Software Foundation a nevyjadřuje právní podstatu podmínek pro
 šíření softwaru používajícího GNU GPL - tomuto účelu slouží výhradně původní

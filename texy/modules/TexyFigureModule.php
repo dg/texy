@@ -31,10 +31,10 @@ class TexyFigureModule extends TexyModule
     public $class = 'figure';
 
     /** @var string  left-floated box CSS class */
-    public $leftClass = 'figure-left';
+    public $leftClass;
 
     /** @var string  right-floated box CSS class */
-    public $rightClass = 'figure-right';
+    public $rightClass;
 
     /** @var int  how calculate div's width */
     public $widthDelta = 10;
@@ -122,9 +122,17 @@ class TexyFigureModule extends TexyModule
         $el->childNodes['caption']->parseLine($tx, ltrim($content));
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
-            $el->class[] = $this->leftClass;
+            if ($this->leftClass != '')
+                $el->class[] = $this->leftClass;
+            else
+                $el->style['float'] = 'left';
+
         } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
-            $el->class[] = $this->rightClass;
+
+            if ($this->rightClass != '')
+                $el->class[] = $this->rightClass;
+            else
+                $el->style['float'] = 'right';
         } elseif ($this->class)
             $el->class[] = $this->class;
 

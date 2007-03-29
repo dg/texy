@@ -36,7 +36,7 @@ class myHandler {
 
         if (substr($image->URL, -4) === '.swf')  // accepts only *.swf
         {
-            $movie = Texy::absolutize($image->URL, $texy->imageModule->root);
+            $movie = Texy::prependRoot($image->URL, $texy->imageModule->root);
 
             $dimensions =
                    ($image->width ? 'width="'.$image->width.'" ' : '')

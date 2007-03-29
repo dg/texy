@@ -37,7 +37,7 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
     public $linkedRoot = 'images/';
 
     /** @var string  physical location of images on server */
-    public $fileRoot;
+    public $fileRoot = 'images/';
 
     /** @var string  left-floated images CSS class */
     public $leftClass;
@@ -50,8 +50,6 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
 
     private $references = array();
 
-    // back compatiblity
-    public $rootPrefix = '';
 
 
 
@@ -60,11 +58,9 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
     {
         parent::__construct($texy);
 
-        // back compatiblity
-        $this->rootPrefix = & $this->fileRoot;
-
-        if (isset($_SERVER['SCRIPT_NAME'])) {
-            $this->fileRoot = dirname($_SERVER['SCRIPT_NAME']); // physical location on server
+        if (isset($_SERVER['SCRIPT_FILENAME'])) {
+            // physical location on server
+            $this->fileRoot = dirname($_SERVER['SCRIPT_FILENAME']) . '/' . $this->root;
         }
     }
 

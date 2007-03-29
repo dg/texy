@@ -12,14 +12,14 @@
  * @license    GNU GENERAL PUBLIC LICENSE v2
  * @package    Texy
  * @category   Text
- * @version    2.0beta for PHP5 $Revision$ $Date$
+ * @version    2.0 beta $Revision$ $Date$
  */
 
 
 if (version_compare(PHP_VERSION , '5.0.0', '<'))
     die('Texy! needs PHP version 5');
 
-define('TEXY', 'Version 2.0beta $Revision$');
+define('TEXY', 'Version 2.0 beta $Revision$');
 
 
 /**
@@ -152,7 +152,6 @@ class Texy
 
     public
         $formatter,
-        $formatterModule, // back compatibility
         $wellFormer;
 
 
@@ -204,8 +203,6 @@ class Texy
         // load routines
         $this->formatter = new TexyHtmlFormatter();
         $this->wellFormer = new TexyHtmlWellFormer();
-
-        $this->formatterModule = $this->formatter; // back compatibility
 
         // default configuration
         $this->trustMode();

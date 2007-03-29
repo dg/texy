@@ -1,52 +1,62 @@
-﻿Jakou má Texy! licenční politiku?
+Jakou má Texy! licenční politiku?
 =================================
 
-Texy! používá model "duální licence". Uživatelé se mohou rozhodnout, za budou
-produkt užívat v souladu se svobodnou GNU General Public License v2 (GPL) nebo
-komerční licencí.
+Texy používá model "duální licence". Uživatelé se mohou rozhodnout, v souladu se 
+kterou licencí budou produkt užívat. Aplikace Texy je přitom pod oběma licencemi 
+naprosto identická.
 
 
 GPL licence
 -----------
 
-Pod GPL licencí je Texy! k dispozici zdarma a bez záruky. Můžete si jej volně
-stáhnout a poté upravovat a dále distribuovat. Můžete jej také zahrnout do
-svých projektů, tyto však musí být taktéž šířeny v souladu s podmínkami licence
-GPL. Ty stanovují, že každá aplikace, kde je Texy! užito, musí být šířena pod
-licencí GPL, tedy včetně kompletních zdrojových kódu a volně.
+Pod svobodnou GNU General Public License v2 je Texy šířeno zdarma a bez jakékoliv 
+záruky. Licence Vám umožňuje Texy zdarma stáhnout, libovolně upravovat a používat 
+ve svých aplikacích. 
+
+Vaši aplikaci můžete také dále distribuovat, ale pouze pod licencí GPL. Tedy zcela 
+volně, včetně zdrojových kódů a nedotčených zmínek o vlastnictví autorských 
+práv (tzv. copyrightů).
+
+Upozornění: bezplatná distribuce je také distribucí!
+
+Příklad: Přejete si použít Texy na vlastním webu. To dovoluje licence GPL. 
+Texy tedy můžete použít zdarma, "dotace":prispejte jsou čistě dobrovolné.
 
 
-Komerční licence
+
+Komerční licence 
 ----------------
 
-Autor Texy! David Grudl nabízí produkt také pod komerční licencí. Ta je
-zajímavá pro firmy, které nechtějí zveřejňovat zdrojové kódy svých aplikací.
-David Grudl je oprávněn nabízet Texy! pod komerční licencí, neboť je výhradním
-vlastníkem autorských práv k dílu. Samotný program Texy! je pod oběma licencemi
-naprosto identický.
+Pokrývá všechny případy, kdy není možné využít GPL licence. Například tehdy, 
+používáte-li ve své aplikaci Texy, ale nechcete ji šířit pod licencí GPL. 
 
-Příklad: Firma prodává vlastní CMS aplikaci. Když se rozhodne do ní
-zakomponovat Texy!, musí změnit vlastní licenční politiku a aplikaci začít
-nabízet pod GPL (volně, včetně zdrojových kódů). To však není jejím zájem,
-proto raději zakoupí Texy! pod komerční licencí a může nadále komerčně prodávat
-svou aplikaci.
+Příklad: Firma prodává vlastní CMS systém. Ráda by do něj zakomponovala Texy, 
+ale přitom nechce systém šířit pod GPL. Proto použije Texy pod komerční licencí.
 
-Kolik komerční licence stojí? Neváhejte se přes email dave@dgx.cz zkontaktovat
-s autorem a domluvit si zajímavé podmínky.
+Cena za jednu licenci je 490 Kč + DPH. V případě zájmu o více licencí se můžeme 
+domluvit na množstevní slevě.
+
+Máte zájem o komerční licenci? Napište mi na dave@dgx.cz  
 
 
-Proč je Texy! dodáván pod dvěma licencemi?
+tázky ohledně licencí Vám rád zodpovím ve fóru: http://forum.texy.info/
+
+
+
+Proč je Texy dodáváno pod dvěma licencemi?
 ------------------------------------------
 
-  - open source komunita získá bezplatně výborný software
+- díky GPL licenci získá Open Source komunita bezplatně výborný software
+  
+- díky komerční licenci získají zákazníci spolehlivý, širokou komunitou otestovaný software za nízkou cenu
 
-  - komerční zákazníci Texy! mají možnost získat spolehlivý, širokou komunitou
-    otestovaný software za relativně nízkou cenu
-
-  - byznys spojený s Texy! zdravě funguje a zároveň posiluje hnutí Open Source.
-
-
-
+- byznys spojený s Texy zdravě funguje a zároveň posiluje hnutí Open Source.
+ 
+(volně inspirováno MySQL Licensing Policy FAQ)
 
 
----(volně inspirováno MySQL Licensing Policy FAQ)---
+
+Doprogramování speciálních funkcí
+----------------------------
+
+Je možné se domluvit na doprogramování speciálních funkcí do Texy.
