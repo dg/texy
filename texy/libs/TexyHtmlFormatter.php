@@ -106,7 +106,9 @@ class TexyHtmlFormatter
         $text = strtr($text, "\r", "\n");
 
         // greedy chars
-        $text = preg_replace("#\\t? *\\x08 *#", '', $text);
+        $text = preg_replace("#\\x07 *#", '', $text);
+        // back-tabs
+        $text = preg_replace("#\\t? *\\x08#", '', $text);
 
         // line wrap
         if ($this->lineWrap > 0)
@@ -250,7 +252,7 @@ class TexyHtmlFormatter
 
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
-                    return $s . "\n" . str_repeat("\t", max(0, $this->space - 1)) . $matches[0] . "\x08";
+                    return $s . $matches[0] . "\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
                 if ($this->indent && !isset(self::$inline[$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
@@ -268,7 +270,7 @@ class TexyHtmlFormatter
                 // format output
                 if ($this->indent && !isset(self::$inline[$mTag])) {
                     $close = "\x08" . '</'.$mTag.'>' . "\n" . str_repeat("\t", $this->space);
-                    $s .= "\n" . str_repeat("\t", $this->space++) . '<'.$mTag.$mAttr.'>' . "\x08";
+                    $s .= "\n" . str_repeat("\t", $this->space++) . '<'.$mTag.$mAttr.'>' . "\x07";
                 } else {
                     $close = '</'.$mTag.'>';
                     $s .= '<'.$mTag.$mAttr.'>';
