@@ -36,8 +36,6 @@ class myHandler {
      */
     function image($parser, $image, $link)
     {
-        $texy = $parser->texy;
-
         if ($image->URL == 'user')  // accepts only [* user *]
         {
             $image->URL = 'image.gif'; // image URL

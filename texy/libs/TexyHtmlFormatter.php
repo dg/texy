@@ -30,6 +30,9 @@ class TexyHtmlFormatter
     /** @var int  wrap width, doesn't include indent space */
     public $lineWrap = 80;
 
+    /** @var int  indent space counter */
+    private $space;
+
 
 
     /** @var array  DTD */
@@ -67,14 +70,17 @@ class TexyHtmlFormatter
     /** @var array */
     private $tagStack;
 
-    /** @var int  indent space counter */
-    private $space;
+    /** @var Texy */
+    private $texy;
 
 
-    public function __construct()
+
+    public function __construct($texy)
     {
+        $this->texy = $texy;
         if (!self::$dtd) self::init();
     }
+
 
 
     /**
@@ -127,7 +133,7 @@ class TexyHtmlFormatter
             $item = reset($this->tagStack);
             if ($item) {
                 // text not allowed?
-                if ($item['content'] && !isset($item['content']['%DATA'])) return '';
+                if (!isset($item['content']['%DATA'])) return '';
 
                 // inside pre & textarea preserve spaces
                 if (!empty($this->tagUsed['pre']) || !empty($this->tagUsed['textarea']))
@@ -179,7 +185,7 @@ class TexyHtmlFormatter
             $item = reset($this->tagStack);
             if ($item) $content = $item['content'];
             else $content = self::$dtd[NULL];
-            if ($content && !isset($content[$tmp[0]['tag']])) return $s;
+            if (!isset($content[$tmp[0]['tag']])) return $s;
 
             // autoopen tags
             foreach ($tmp as $item)
@@ -192,54 +198,68 @@ class TexyHtmlFormatter
             return $s;
 
 
+
         } else { // start tag
 
             $s = '';
             $content = self::$dtd[NULL];
 
-            // optional end tag closing
-            foreach ($this->tagStack as $i => $item)
-            {
-                // is tag allowed here?
-                $content = $item['content'];
-                if (!$content || isset($content[$mTag])) break;
+            if (!isset(self::$dtd[$mTag])) {
+                // unknown (non-html) tag
+                $allowed = $this->texy->allowedTags === Texy::ALL;
+                $item = reset($this->tagStack);
+                if ($item) $content = $item['content'];
 
-                $tag = $item['tag'];
 
-                // auto-close hidden, optional and inline tags
-                if ($item['close'] && (!isset(self::$optional[$tag]) && !isset(self::$inline[$tag]))) break;
+            } else {
+                // optional end tag closing
+                foreach ($this->tagStack as $i => $item)
+                {
+                    // is tag allowed here?
+                    $content = $item['content'];
+                    if (isset($content[$mTag])) break;
 
-                // close it
-                if ($item['close']) {
-                    $s .= $item['close'];
-                    if (!isset(self::$inline[$tag])) $this->space--;
+                    $tag = $item['tag'];
+
+                    // auto-close hidden, optional and inline tags
+                    if ($item['close'] && (!isset(self::$optional[$tag]) && !isset(self::$inline[$tag]))) break;
+
+                    // close it
+                    if ($item['close']) {
+                        $s .= $item['close'];
+                        if (!isset(self::$inline[$tag])) $this->space--;
+                    }
+                    $this->tagUsed[$tag]--;
+                    unset($this->tagStack[$i]);
+                    $content = self::$dtd[NULL];
                 }
-                $this->tagUsed[$tag]--;
-                unset($this->tagStack[$i]);
-                $content = self::$dtd[NULL];
+
+                // is tag allowed in this content?
+                $allowed = isset($content[$mTag]);
+
+                // check deep element prohibitions
+                if ($allowed && isset(self::$prohibits[$mTag])) {
+                    foreach (self::$prohibits[$mTag] as $pTag)
+                        if (!empty($this->tagUsed[$pTag])) { $allowed = FALSE; break; }
+                }
             }
 
-            // is tag allowed in this content?
-            $allowed = !$content || isset($content[$mTag]);
-
-            // check deep element prohibitions
-            if ($allowed && isset(self::$prohibits[$mTag])) {
-                foreach (self::$prohibits[$mTag] as $pTag)
-                    if (!empty($this->tagUsed[$pTag])) { $allowed = FALSE; break; }
-            }
-
-            // empty elements se neukladaji do stack
+            // empty elements se neukladaji do zasobniku
             if ($mEmpty) {
                 if (!$allowed) return $s;
+
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
                     return $s . "\n" . str_repeat("\t", max(0, $this->space - 1)) . $matches[0] . "\x08";
-                elseif ($this->indent && !isset(self::$inline[$mTag])) {
+
+                if ($this->indent && !isset(self::$inline[$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
                     return $s . $space . $matches[0] . $space;
-                } else
-                    return $s . $matches[0];
+                }
+
+                return $s . $matches[0];
             }
+
 
             if ($allowed) {
                 // receive new content (ins & del are special cases)
@@ -257,6 +277,7 @@ class TexyHtmlFormatter
                 // TODO: problematic formatting of select / options, object / params
 
             } else $close = '';
+
 
             // open tag, put to stack, increase counter
             $item = array(
@@ -295,14 +316,19 @@ class TexyHtmlFormatter
         'p','tbody','td','tfoot','th','thead','tr'));
 
         // %block;
-        $b = array_flip(array('ins','del','p','h1','h2','h3','h4','h5','h6','ul','ol',
-            'dir','menu','dl','pre','div','center','blockquote','iframe','noscript','noframes',
-            'form','isindex','hr','table','address','fieldset'));
+        $b = array_flip(array('ins','del','p','h1','h2','h3','h4','h5','h6','ul','ol','dl','pre',
+            'div','blockquote','noscript','noframes','form','hr','table','address','fieldset'));
+
+        if (!Texy::$strictDTD) $b += array('dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1);
 
         // %inline;
-        self::$inline = $i = array_flip(array('ins','del','tt','i','b','u','s','strike','big','small','font','em','strong',
-            'dfn','code','samp','kbd','var','cite','abbr','acronym','sub','sup','q','span','bdo','a','object',
-            'applet','img','basefont','br','script','map','input','select','textarea','label','button','%DATA'));
+        $i = array_flip(array('ins','del','tt','i','b','big','small','em','strong','dfn','code',
+            'samp','kbd','var','cite','abbr','acronym','sub','sup','q','span','bdo','a','object',
+            'img','br','script','map','input','select','textarea','label','button','%DATA'));
+
+        if (!Texy::$strictDTD) $i += array('u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1);
+
+        self::$inline = $i;
 
         // DTD - compromise between loose and strict
         self::$dtd = array(
@@ -312,8 +338,8 @@ class TexyHtmlFormatter
             'head' => array('title'=>1, 'script'=>1, 'style'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'object'=>1, 'isindex'=>1),
             'title' => array('%DATA'=>1),
             'body' => Texy::$strictDTD ? array('script'=>1) + $b : $b + $i,
-            'script' => NULL, //array('%DATA'=>1),
-            'style' => NULL, //array('%DATA'=>1),
+            'script' => FALSE, //array('%DATA'=>1),
+            'style' => FALSE, //array('%DATA'=>1),
             'p' => $i,
             'h1' => $i,
             'h2' => $i,
@@ -327,9 +353,7 @@ class TexyHtmlFormatter
             'dl' => array('dt'=>1,'dd'=>1),
             'dt' => $i,
             'dd' => $b + $i,
-            'pre' => array_flip(array('tt','i','b','u','s','strike','em','strong','dfn','code',
-                'samp','kbd','var','cite','abbr','acronym','q','span','bdo','a','br','script',
-                'map','input','select','textarea','label','button','%DATA')),
+            'pre' => array_flip(array_diff(array_keys($i), array('img','object','applet','big','small','sub','sup','font','basefont'))),
             'div' => $b + $i,
             'blockquote' => Texy::$strictDTD ? array('script'=>1) + $b : $b + $i,
             'noscript' => $b + $i,
@@ -375,8 +399,8 @@ class TexyHtmlFormatter
             'textarea' => array('%DATA'=>1),
             'label' => $i, // - label by self::$prohibits
             'button' => $b + $i, // - a input select textarea label button form fieldset, by self::$prohibits
-            'ins' => NULL, // special
-            'del' => NULL, // special
+            'ins' => FALSE, // special
+            'del' => FALSE, // special
             // empty
             'img' => FALSE,
             'hr' => FALSE,

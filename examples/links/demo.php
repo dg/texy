@@ -40,17 +40,16 @@ class myHandler
         // is there link?
         if (!$link) return Texy::PROCEED;
 
-         if (Texy::isRelative($link->URL)) {
+        if (Texy::isRelative($link->URL)) {
             // modifiy link
             $link->URL = 'index?page=' . urlencode($link->URL);
-            return Texy::PROCEED;
-         }
 
-         if (substr($link->URL, 0, 5) === 'wiki:') {
+        } elseif (substr($link->URL, 0, 5) === 'wiki:') {
             // modifiy link
-             $link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
-             return Texy::PROCEED;
-         }
+            $link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
+        }
+
+        return Texy::PROCEED;
     }
 
 }

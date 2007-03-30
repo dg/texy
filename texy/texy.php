@@ -202,7 +202,7 @@ class Texy
         $this->loadModules();
 
         // load routines
-        $this->formatter = new TexyHtmlFormatter();
+        $this->formatter = new TexyHtmlFormatter($this);
 
         // default configuration
         $this->trustMode();
@@ -521,8 +521,8 @@ class Texy
     {
         $this->allowedClasses = self::ALL;                  // classes and id are allowed
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
-        $this->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd)); // full support for valid HTML tags
-        $this->urlSchemeFilters = NULL;
+        $this->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd)); // all valid HTML tags
+        $this->urlSchemeFilters = NULL;                     // disable URL scheme filter
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"

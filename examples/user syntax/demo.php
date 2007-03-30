@@ -54,7 +54,7 @@ $texy->registerLinePattern(
  */
 function userHandler($parser, $matches, $name)
 {
-    list($match, $mContent, $mMod) = $matches;
+    list(, $mContent, $mMod) = $matches;
 
     global $texy;
 

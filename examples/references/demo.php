@@ -39,8 +39,6 @@ class myHandler
      */
     function newReference($parser, $refName)
     {
-        $texy = $parser->texy;
-
         $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 
         if (!isset($names[$refName])) return FALSE; // it's not my job
