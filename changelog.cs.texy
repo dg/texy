@@ -1,23 +1,24 @@
 Changelog
 *********
 
-Verze 2.0 beta (rev. 108)
+Verze 2.0 beta (rev. 109)
 =========
 
 29. 3. 2007 .[date]
 
-třída Texy
-----
-- opravena řada chyb 
 - výstup je mnohem dokonalejší, zpracování rychlejší
+- řada drobných vylepšení
 - zcela nové API, perfektní podpora pro vlastní handlery
 
+třída Texy
+----
 - odstraněno `$texy->utf`, místo něj `$texy->encoding` s výchozí hodnotou `utf-8`
 - Texy na výstupu využije všechny znaky z kódování `$texy->encoding`. Jen ty, co v kódování nejsou, nahradí **číselnou** entitou
 - nová vlastnost `$texy->allowed` - sjednocené povolování a zakazování syntaxe, viz Moduly
 - nový způsob maskování emailů
 - nová vlastnost `$texy->urlSchemeFilters` & `$texy->ignoreEmptyStuff` (popsáno v dokumentaci)
 - nový univerzální handler `$texy->handler`. Dřívější handlery odstraněny
+- nová vlastnost `Texy::$strictDTD` - lze přepínat mezi striktním a transitional DTD
 - změny názvu modulů:
    - $texy->imageDescModule -> $texy->figureModule
    - $texy->smiliesModule -> $texy->emoticonModule
@@ -125,7 +126,7 @@ phraseModule
 - nový syntax ''notexy''
 - syntaxe `++inserted++ --deleted--` `^^superscript^^ __subscript__` `~~cite~~` ve výchozím nastavení vypnuté
 - nová vlastnost `$linksAllowed` - lze hromadně zakázat odkazy u frází
-- na každou frázi lze napojit vlastní handler `phrase()` 
+- na každou frázi lze napojit vlastní handler `phrase()` (viz příklad 'Links')
 
 quoteModule
 -----------
@@ -157,15 +158,15 @@ typographyModule
 - vylepšená syntax: `----->` dlouhé šipky
 - zapínání/vypínání syntaxe: `$texy->allowed['typography']`
 
-TexyWellFormer
+TexyHtmlFormatter
 --------------
 - zajišťuje, že výstup z Texy je tzv. well-formed, opravuje neplatné křížení tagů atd.
-- výstup nyní kontroluje mnohem precizněji!
-- `TexyHtmlWellFormer::$strict` - lze přepínat mezi striktním a transitional DTD
+- výstup nyní kontroluje mnohem precizněji, zohledňuje `Texy::$strictDTD`
 
 TexyDOM a zděděné třídy
 -----------------------
 - odstraněno, náhradou je TexyHtml (obdoba NHtml, viz http://www.dgx.cz/trine/item/nhtml-pomocnik-php-programatora)
+- vlastnost TexyHtml::$XHTML - přepínač mezi XHTML a HTML výstupem
 - ve všech handlerech se nyní operuje s elementy reprezentovanými tímto objektem, manipulace je tedy extrémně snadná
 
 

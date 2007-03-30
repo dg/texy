@@ -43,46 +43,16 @@ class TexyHtml
     /** @var bool  use XHTML syntax? */
     static public $XHTML = TRUE;
 
+    /** @var array  replaced elements + br */
+    static private $replacedTags = array('br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,
+        'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,'applet'=>1);
 
-    /**
-     * @var array  inner-block elements
-     * missing deprecated: embed, center, dir, isindex, menu, (noframes)
-     * I use a little trick - isset($array[$item]) is much faster than in_array($item, $array)
-     */
-    static public $blockTags = array(
-        'address'=>1,'blockquote'=>1,'caption'=>1,'col'=>1,'colgroup'=>1,'dd'=>1,'div'=>1,'dl'=>1,'dt'=>1,
-        'fieldset'=>1,'form'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,'h5'=>1,'h6'=>1,'hr'=>1,'legend'=>1,
-        'li'=>1,'map'=>1,'noscript'=>1,'object'=>1,'ol'=>1,'p'=>1,'param'=>1,'pre'=>1,'table'=>1,'tbody'=>1,
-        'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1,'ul'=>1,);
-
-    /**
-     * @var array  inner-inline elements
-     * missing $replacedTags
-     * missing deprecated: basefont, font, s, strike, u
-     * plus block-inline elements (ins, del) and special (optgroup, option)
-     */
-    static public $inlineTags = array(
-        'a'=>1,'abbr'=>1,'acronym'=>1,'area'=>1,'b'=>1,'bdo'=>1,'big'=>1,'cite'=>1,'code'=>1,'del'=>1,'dfn'=>1,'em'=>1,
-        'i'=>1,'iframe'=>1,'ins'=>1,'kbd'=>1,'label'=>1,'optgroup'=>1,'option'=>1,'q'=>1,'samp'=>1,'small'=>1,
-        'span'=>1,'strong'=>1,'sub'=>1,'sup'=>1,'tt'=>1,'var'=>1,);
-
-    /**
-     * @var array  inner-replaced elements
-     * missing deprecated: applet
-     * for Texy! purposes: br
-     */
-    static public $replacedTags = array(
-        'br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,);
-
-    /**
-     * @var array  empty elements
-     */
-    static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,'base'=>1,'col'=>1,
-        'link'=>1,'param'=>1,);
+    /** @var array  empty elements */
+    static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
+        'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1);
 
 
     /* element's attributes are not explicitly declared */
-
 
 
 
@@ -320,7 +290,7 @@ class TexyHtml
     public function getContentType()
     {
         if (isset(self::$replacedTags[$this->elName])) return Texy::CONTENT_REPLACED;
-        if (isset(self::$inlineTags[$this->elName])) return Texy::CONTENT_MARKUP;
+        if (isset(TexyHtmlFormatter::$inline[$this->elName])) return Texy::CONTENT_MARKUP;
 
         return Texy::CONTENT_BLOCK;
     }

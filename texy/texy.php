@@ -30,7 +30,6 @@ define('TEXY_DIR',  dirname(__FILE__).'/');
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
 require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
-require_once TEXY_DIR.'libs/TexyHtmlWellFormer.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
@@ -116,6 +115,9 @@ class Texy
     /** @var bool  ignore stuff with only markup and spaecs? */
     public $ignoreEmptyStuff = TRUE;
 
+    /** @var bool  use Strict of Transitional DTD? */
+    static public $strictDTD = FALSE;
+
     public
         /** @var TexyScriptModule */
         $scriptModule,
@@ -151,8 +153,7 @@ class Texy
         $longWordsModule;
 
     public
-        $formatter,
-        $wellFormer;
+        $formatter;
 
 
     /**
@@ -202,7 +203,6 @@ class Texy
 
         // load routines
         $this->formatter = new TexyHtmlFormatter();
-        $this->wellFormer = new TexyHtmlWellFormer();
 
         // default configuration
         $this->trustMode();
@@ -436,7 +436,6 @@ class Texy
         $s = $this->unProtect($s);
 
         // wellform and reformat HTML
-        $s = $this->wellFormer->process($s);
         $s = $this->formatter->process($s);
 
         // remove HTML 4.01 optional tags
@@ -522,8 +521,7 @@ class Texy
     {
         $this->allowedClasses = self::ALL;                  // classes and id are allowed
         $this->allowedStyles  = self::ALL;                  // inline styles are allowed
-        $this->allowedTags = array_merge(TexyHtml::$blockTags,
-            TexyHtml::$inlineTags, TexyHtml::$replacedTags); // full support for "valid" HTML tags
+        $this->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd)); // full support for valid HTML tags
         $this->urlSchemeFilters = NULL;
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions

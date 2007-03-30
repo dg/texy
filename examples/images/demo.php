@@ -89,15 +89,3 @@ print_r($texy->summary['images']);
 echo 'onmouseover images:';
 print_r($texy->summary['preload']);
 echo '</pre>';
-
-
-
-
-// build preload script!
-$script = "var preloadImg = new Array();\n";
-foreach ($texy->summary['preload'] as $key => $image)
-    $script .= "preloadImg[$key] = new Image(); preloadImg[$key].src='".htmlSpecialChars($image, ENT_QUOTES)."';\n";
-
-echo '<pre>';
-echo $script;
-echo '</pre>';
