@@ -132,7 +132,7 @@ class TexyBlockParser extends TexyParser
             // leave element p
 
         // block contains text
-        } elseif (preg_match('#[^\s'.TEXY_MARK.']#', $content)) {
+        } elseif (preg_match('#[^\s'.TEXY_MARK.']#u', $content)) {
             // leave element p
 
         // block contains only replaced element

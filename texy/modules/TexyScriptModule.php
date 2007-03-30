@@ -63,13 +63,13 @@ class TexyScriptModule extends TexyModule
 
         $args = $raw = NULL;
         // function(arg, arg, ...)  or  function: arg, arg
-        if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:([^():]*))$#i', $func, $matches)) {
+        if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:([^():]*))$#iu', $func, $matches)) {
             $func = $matches[1];
             $raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
             if ($raw === '')
                 $args = array();
             else
-                $args = preg_split('#\s*,\s*#', $raw);
+                $args = preg_split('#\s*,\s*#u', $raw);
         }
 
         if (is_callable(array($this->handler, $func))) {

@@ -91,6 +91,10 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
             '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
             '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
             '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
+
+            '#(?<=[^\s\x17])\s+([\x17-\x1F]+)(?=\s)#u'=> "\$1",                            // remove intermarkup space phase 1
+            '#(?<=\s)([\x17-\x1F]+)\s+#u'             => "\$1",                            // remove intermarkup space phase 2
+
             '#(?<=.{50})\s+(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
 
             // nbsp space between number and word, symbol, punctation, currency symbol

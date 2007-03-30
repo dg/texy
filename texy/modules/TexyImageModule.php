@@ -71,7 +71,7 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         // [*image*]:LINK
         $this->texy->registerLinePattern(
             array($this, 'patternImage'),
-            '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#U',
+            '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#Uu',
             'image'
         );
     }
@@ -83,7 +83,7 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         // [*image*]: urls .(title)[class]{style}
         if ($this->texy->allowed['image/definition'])
            $text = preg_replace_callback(
-               '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mU',
+               '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
                array($this, 'patternReferenceDef'),
                $text
            );

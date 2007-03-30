@@ -94,7 +94,7 @@ class TexyHtmlFormatter
         $this->tagUsed  = array();
 
         // wellform and reformat
-        $text = preg_replace_callback('#<(/?)([a-z][a-z0-9._:-]*)(|\s.*)(/?)>|([^<]++)#Uis', array($this, 'cb'), $text);
+        $text = preg_replace_callback('#<(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)(/?)>|([^<]++)#Uis', array($this, 'cb'), $text);
 
         foreach ($this->tagStack as $item) $text .= $item['close'];
 

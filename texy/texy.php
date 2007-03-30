@@ -440,7 +440,7 @@ class Texy
 
         // remove HTML 4.01 optional tags
         if (!TexyHtml::$XHTML)
-            $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#', '', $s);
+            $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
 
         // unfreeze spaces
         $s = self::unfreezeSpaces($s);

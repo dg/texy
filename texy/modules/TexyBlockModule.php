@@ -87,7 +87,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
         //    [4] => ... content
 
         $mod = new TexyModifier($mMod);
-        $parts = preg_split('#\s+#', $mParam, 2);
+        $parts = preg_split('#\s+#u', $mParam, 2);
         $blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
         $param = empty($parts[1]) ? NULL : $parts[1];
 

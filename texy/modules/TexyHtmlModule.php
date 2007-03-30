@@ -41,7 +41,7 @@ class TexyHtmlModule extends TexyModule
     {
         $this->texy->registerLinePattern(
             array($this, 'patternTag'),
-            '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>#is',
+            '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>#isu',
             'html/tag'
         );
 
@@ -128,7 +128,7 @@ class TexyHtmlModule extends TexyModule
         // parse attributes
         $matches2 = NULL;
         preg_match_all(
-            '#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is',
+            '#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
             $mAttr,
             $matches2,
             PREG_SET_ORDER

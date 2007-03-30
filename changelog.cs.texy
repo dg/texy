@@ -1,14 +1,12 @@
 Changelog
 *********
 
-Verze 2.0 beta (rev. 110)
+Verze 2.0 beta (rev. 111)
 =========
 
-29. 3. 2007 .[date]
+30. 3. 2007 .[date]
 
-- výstup je mnohem dokonalejší, zpracování rychlejší
-- řada drobných vylepšení
-- zcela nové API, perfektní podpora pro vlastní handlery
+- mnohem dokonalejší výstup, zcela nové API, perfektní podpora pro vlastní handlery, opravena řada chyb
 
 třída Texy
 ----
