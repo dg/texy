@@ -41,13 +41,28 @@ class TexyModifier
     const VALIGN_MIDDLE =  'middle';
     const VALIGN_BOTTOM =  'bottom';
 
+    /** @var string */
     public $id;
+
+    /** @var array */
     public $classes = array();
+
+    /** @var array */
     public $styles = array();
+
+    /** @var array */
     public $attrs = array();
+
+    /** @var string */
     public $hAlign;
+
+    /** @var string */
     public $vAlign;
+
+    /** @var string */
     public $title;
+
+    /** @var string */
     public $cite;
 
     /** @var array  list of properties which are regarded as HTML element attributes */
@@ -64,6 +79,9 @@ class TexyModifier
     );
 
 
+    /**
+     * @param string modifier to parse
+     */
     public function __construct($mod=NULL)
     {
         $this->setProperties($mod);
@@ -159,7 +177,8 @@ class TexyModifier
         }
 
         // title
-        $el->title = $this->title;
+        if ($this->title !== NULL)
+            $el->title = $texy->typographyModule->postLine($this->title);
 
         // classes & ID
         if ($this->classes || $this->id !== NULL) {

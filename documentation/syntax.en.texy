@@ -249,12 +249,6 @@ List
 
 or
 
-+   Red
-+   Green
-+   Blue
-
-or
-
 -   Red
 -   Green
 -   Blue
@@ -292,9 +286,9 @@ nested
 
 a)  Bird
   I.  Bird
-    +   Red
-    +   Green
-    +   Blue
+    -   Red
+    -   Green
+    -   Blue
   II.  McHale
   III.  Parish
 b)  McHale

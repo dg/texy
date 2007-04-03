@@ -28,16 +28,17 @@ class TexyListModule extends TexyModule
     protected $default = array('list' => TRUE);
 
     public $bullets = array(
-                    //  rexexp           list-style-type  tag
-        '*'  => array('\*',              '',              'ul'),
-        '-'  => array('[\x{2013}-]',     '',              'ul'),
-        '+'  => array('\+',              '',              'ul'),
-        '1.' => array('\d{1,3}\.\ ',     '',              'ol'),
-        '1)' => array('\d{1,3}\)',       '',              'ol'),
-        'I.' => array('[IVX]{1,4}\.\ ',  'upper-roman',   'ol'),
-        'I)' => array('[IVX]+\)',        'upper-roman',   'ol'), // before A) !
-        'a)' => array('[a-z]\)',         'lower-alpha',   'ol'),
-        'A)' => array('[A-Z]\)',         'upper-alpha',   'ol'),
+                  //  first rexexp          tag   list-style-type   next regexp
+        '*'  => array('\*\ ',               'ul', ''),
+        '-'  => array('[\x{2013}-](?![>-])','ul', ''),
+        '+'  => array('\+\ ',               'ul', ''),
+        '1.' => array('1\.\ ',              'ol', '',             '\d{1,3}\.\ '),
+//        '1.' => array('\d{1,3}\.\ ',        'ol', ''),
+        '1)' => array('\d{1,3}\)\ ',        'ol', ''),
+        'I.' => array('I\.\ ',              'ol', 'upper-roman',  '[IVX]{1,4}\.\ '),
+        'I)' => array('[IVX]+\)\ ',         'ol', 'upper-roman'), // before A) !
+        'a)' => array('[a-z]\)\ ',          'ol', 'lower-alpha'),
+        'A)' => array('[A-Z]\)\ ',          'ol', 'upper-alpha'),
     );
 
 
@@ -50,8 +51,8 @@ class TexyListModule extends TexyModule
 
         $this->texy->registerBlockPattern(
             array($this, 'patternList'),
-            '#^(?:'.TEXY_MODIFIER_H.'\n)?'               // .{color: red}
-          . '('.implode('|', $RE).')(\n?)\ +\S.*$#mUu',  // item (unmatched)
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'          // .{color: red}
+          . '('.implode('|', $RE).')\ *\S.*$#mUu',  // item (unmatched)
             'list'
         );
     }
@@ -74,21 +75,21 @@ class TexyListModule extends TexyModule
      */
     public function patternList($parser, $matches)
     {
-        list(, $mMod, $mBullet, $mNewLine) = $matches;
+        list(, $mMod, $mBullet) = $matches;
         //    [1] => .(title)[class]{style}<>
         //    [2] => bullet * + - 1) a) A) IV)
-        //    [3] => \n
 
         $tx = $this->texy;
 
         $el = TexyHtml::el();
 
-        $bullet = '';
+        $bullet = $min = NULL;
         foreach ($this->bullets as $type => $desc)
             if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
-                $bullet = $desc[0];
-                $el->elName = $desc[2];
-                $el->style['list-style-type'] = $desc[1];
+                $bullet = isset($desc[3]) ? $desc[3] : $desc[0];
+                $min = isset($desc[3]) ? 2 : 1;
+                $el->elName = $desc[1];
+                $el->style['list-style-type'] = $desc[2];
 		        if ($el->elName === 'ol') {
                     if ($type[0] === '1' && (int) $mBullet > 1)
                         $el->start = (int) $mBullet;
@@ -103,15 +104,12 @@ class TexyListModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $el);
 
-        $parser->moveBackward($mNewLine ? 2 : 1);
+        $parser->moveBackward(1);
 
-        $count = 0;
-        while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li')) {
+        while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li'))
             $el->childNodes[] = $elItem;
-            $count++;
-        }
 
-        if (!$count) return FALSE; // nemelo by nikdy nastat
+        if (count($el->childNodes) < $min) return FALSE;
 
         // event listener
         if (is_callable(array($tx->handler, 'afterList')))
@@ -135,25 +133,24 @@ class TexyListModule extends TexyModule
     {
         $tx =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
-        $patternItem = "#^\n?($spacesBase)$bullet(\n?)(\\ +)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
+        $patternItem = "#^\n?($spacesBase)$bullet(\\ *)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
 
-        // first line (with bullet)
+        // first line with bullet
         $matches = NULL;
         if (!$parser->next($patternItem, $matches)) return FALSE;
 
-        list(, $mIndent, $mNewLine, $mSpace, $mContent, $mMod) = $matches;
+        list(, $mIndent, $mSpace, $mContent, $mMod) = $matches;
             //    [1] => indent
-            //    [2] => \n
-            //    [3] => space
-            //    [4] => ...
-            //    [5] => .(title)[class]{style}<>
+            //    [2] => space
+            //    [3] => ...
+            //    [4] => .(title)[class]{style}<>
 
         $elItem = TexyHtml::el($tag);
         $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $elItem);
 
         // next lines
-        $spaces = $mNewLine ? strlen($mSpace) : '';
+        $spaces = '';
         $content = ' ' . $mContent; // trick
         while ($parser->next('#^(\n*)'.$mIndent.'(\ {1,'.$spaces.'})(.*)()$#Am', $matches)) {
             list(, $mBlank, $mSpaces, $mContent) = $matches;
@@ -171,7 +168,7 @@ class TexyListModule extends TexyModule
         $elItem->parseBlock($tx, $content);
         $tx->_paragraphMode = $tmp;
 
-        if ($elItem->childNodes[0] instanceof TexyHtml) {
+        if (isset($elItem->childNodes[0]) && $elItem->childNodes[0] instanceof TexyHtml) {
             $elItem->childNodes[0]->elName = '';
         }
 

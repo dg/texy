@@ -1,6 +1,15 @@
 Changelog
 *********
 
+Verze 2.0 beta (rev. 113)
+=========
+
+4. 4. 2007 .[date]
+
+- vylepšna syntax seznamů, viz "fórum":http://forum.texy.info/viewtopic.php?id=399
+- aktivovány typografické úpravy v atributech title
+
+
 Verze 2.0 beta (rev. 111)
 =========
 
@@ -20,13 +29,13 @@ třída Texy
 - změny názvu modulů:
    - $texy->imageDescModule -> $texy->figureModule
    - $texy->smiliesModule -> $texy->emoticonModule
-   - $texy->quickCorrectModule -> $texy->typographyModule    
+   - $texy->quickCorrectModule -> $texy->typographyModule
    - $texy->formatterModule -> $texy->formatter (bez Module)
 - `Texy::safeMode()` vypíná syntax `link/definition` (viz dále) a mírně upravená je tabulka povolených tagů (viz zdrojový kód)
 - nová funkce `Texy::normalize()` - upraví text do normalizované podoby (odstraní pravostranné mezery, sjednotí oddělovače řádků, ...)
 - nová funkce `Texy::webalize()` - upraví text do podoby webového identifikátoru (`'žlutý kůň'` -> `'zluty-kun'`)
 - odstraněno `Texy::addReference()` a `Texy::getReference()`, náhrada v modulech linkModule a imageModule
-- podpora pro escapovaní znaků: * ) 
+- podpora pro escapovaní znaků: * )
    - pak `\ *test` je chápán jako `*test` a nikoliv `\<em>test`
    - obdobně lze použít závorku v modifikátoru: `"blabla .(to je (můj\ ) názor)"`
    - další escapovaný znak viz tableModule
@@ -89,7 +98,7 @@ imageModule
 - nový chytrý preloader - není potřeba doplňovat žádný JavaScript!
 - `$rootPrefix` přejmenováno na `$fileRoot` - výchozí hodnota je získávána chytřejším způsobem
 - nová třída `TexyImage`, což je popisovač obrázku (viz zdrojový kód), používán dalšími metodami a handlery
-- nové metody `addReference()` & `getReference()` - programátorské přidání a zjištění obrázkové reference 
+- nové metody `addReference()` & `getReference()` - programátorské přidání a zjištění obrázkové reference
 - na každý obrázek lze napojit vlastní handler `image()` (viz příklad 'Images')
 - zapínání/vypínání syntaxe: `$texy->allowed['image']` & `$texy->allowed['image/definition']`
 
@@ -99,14 +108,14 @@ linkModule
 - zrušeno automatické vkládání ftp:// před odkazy ve tvaru ftp.xxx
 - vylepšená podpora pro `$forceNoFollow`
 - nová třída `TexyLink`, což je popisovač odkazu (viz zdrojový kód), používán dalšími metodami a handlery
-- nové metody `addReference()` & `getReference()` - programátorské přidání a zjištění reference 
+- nové metody `addReference()` & `getReference()` - programátorské přidání a zjištění reference
 - na každou referenci lze napojit vlastní handler `linkReference()` (viz příklad 'References')
 - na každé nalezené URL a email lze napojit vlastní handler `linkURL()` resp. `linkEmail()`
 - zapínání/vypínání syntaxe: `link/reference`, `link/email`, `link/url`, `link/definition`
 
 listModule a definitionListModule
 ---------------------------------
-- nyní akceptuje i typografickou odrážku 
+- nyní akceptuje i typografickou odrážku
 - na hotový seznam lze napojit vlastní handler `afterList()` resp. `afterDefinitionList()`
 - zapínání/vypínání syntaxe: `$texy->allowed['list']` resp. `$texy->allowed['list/definition']`
 
@@ -192,11 +201,11 @@ experimentální verze, jde o **přepis pro PHP 5** (pro PHP 4 používejte verz
 - CHG: změna: konstany `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC` a `TEXY_HEADING_FIXED` jsou nyní: `Texy::ALL`, `Texy:NONE`, `TexyHeadingModule::DYNAMIC` a `TexyHeadingModule::FIXED`
 - CHG: přístup k některým proměnným (`$element->content, $texy->DOM`, ...) je řešen přes gettery (`$element->getContent(), $texy->getDOM()`, ...)
 - CHG: odstraněno: Texy::reinit(), podpora pro `/--form`
-- CHG: atributy `href` a `src` u HTML značek se nyní nezpracovávají 
+- CHG: atributy `href` a `src` u HTML značek se nyní nezpracovávají
 - CHG: jinak se mohou chovat HTML komentáře (TODO)
 
 
-Verze 1.1 
+Verze 1.1
 =========
 
 6. 6. 2006 .[date]
@@ -246,7 +255,7 @@ Fix pro 1.0rc5
 - CHG: `<td></td>` upraveno na `<td>&nbsp;</td>`
 
 
-Verze 1.0rc5 
+Verze 1.0rc5
 ============
 
 25. 5. 2005 .[date]
@@ -269,7 +278,7 @@ Verze 1.0rc4
 
 - NEW: nová "vychytávka":/cs/try/qqa7q - blok `/-- source`
 - CHG: každý modul má zkratku (referenci) ve formátu `$texy->xyzModule`
-- CHG: **aktivace UTF** přes `$texy->utf = true;` 
+- CHG: **aktivace UTF** přes `$texy->utf = true;`
 - CHG: vylepšení tabulek
 - CHG: **úprava syntaxe** číslovaných seznamů:
    - je možnost syntaxi konfigurovat, např. `$texy->listModule->allowed['*'] = false`
@@ -280,7 +289,7 @@ Verze 1.0rc4
 
 
 
-Verze 1.0rc3 
+Verze 1.0rc3
 ============
 
 9. 3. 2005 .[date]
@@ -293,26 +302,26 @@ Verze 1.0rc3
 
 
 
-Verze 1.0rc2 
+Verze 1.0rc2
 ============
 
 27. 2. 2005 .[date]
 
 - NEW: metody `safeMode()` a `trustMode()`
 - NEW: modul **TexyHtmlModule:** - seznam všech povolených tagů určuje proměnná $allowed
-- CHG: modul **TexyBlockModule:** 
+- CHG: modul **TexyBlockModule:**
    - ukázalo se, že blok `/--notexy` nevyhovuje všem požadavkům, takže je nahrazen bloky `/--text` a `/--html`. "Demo":/cs/try/nwpm1
-   
 
 
-Verze 1.0rc1 
+
+Verze 1.0rc1
 ============
 
 23. 2. 2005 .[date]
 
 - NEW: obrázky podporují **width & height** atributy, včetně autodetekce nebo manuálního zadání. Syntax je `[* image.gif 50x30 *]`
 - NEW: kromě dynamických titulků lze použít i **fixní**. Další informace najdete v příkladu 'Headings'
-- FIX: podpora pro "dlouhé smajlíky" jako `:-)))))` 
+- FIX: podpora pro "dlouhé smajlíky" jako `:-)))))`
 
 
 <!--
@@ -322,4 +331,3 @@ CHG: Changed functionality or behaviour
 INT: Internal change
 P45: Migration from PHP 4 to PHP 5
 -->
-

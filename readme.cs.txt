@@ -31,11 +31,11 @@ Texy je sexy!
 Podpořte Texy!
 -------------
 
-Pokud byste rádi vyjádřili uznání za čas, který autor strávil jeho vývojem, 
-nebo pokud Vám Texy dobře slouží a chtěli byste podpořit jeho další vývoj, 
+Pokud byste rádi vyjádřili uznání za čas, který autor strávil jeho vývojem,
+nebo pokud Vám Texy dobře slouží a chtěli byste podpořit jeho další vývoj,
 pošlete prosím příspěvek v jakékoliv výši (viz http://texy.info/cs/prispejte)
 
-Texy můžete podpořit také umístěním ikonky na své stránky. Ikonky a vzorový 
+Texy můžete podpořit také umístěním ikonky na své stránky. Ikonky a vzorový
 HTML kód najdete v adresáři /icons/
 
 

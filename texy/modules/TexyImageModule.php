@@ -246,7 +246,7 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         $tx = $this->texy;
 
         $mod = $image->modifier;
-        $alt = $mod->title !== NULL ? $mod->title : $this->defaultAlt;
+        $alt = $mod->title !== NULL ? $tx->typographyModule->postLine($mod->title) : $this->defaultAlt;
         $mod->title = NULL;
         $hAlign = $mod->hAlign;
         $mod->hAlign = NULL;

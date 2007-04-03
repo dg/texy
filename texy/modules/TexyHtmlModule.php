@@ -202,16 +202,24 @@ class TexyHtmlModule extends TexyModule
         }
 
         // apply allowedClasses
+        $tmp = $tx->_classes; // speed-up
         if (isset($el->class)) {
-            $tmp = $tx->_classes; // speed-up
             if (is_array($tmp)) {
                 $el->class = explode(' ', $el->class);
                 foreach ($el->class as $key => $val)
                     if (!isset($tmp[$val])) unset($el->class[$key]); // id & class are case-sensitive in XHTML
 
+            } elseif ($tmp !== Texy::ALL) {
+                $el->class = NULL;
+            }
+        }
+
+        // apply allowedClasses for ID
+        if (isset($el->id)) {
+            if (is_array($tmp)) {
                 if (!isset($tmp['#' . $el->id])) $el->id = NULL;
             } elseif ($tmp !== Texy::ALL) {
-                $el->class = $el->id = NULL;
+                $el->id = NULL;
             }
         }
 
