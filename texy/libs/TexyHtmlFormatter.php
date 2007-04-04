@@ -94,8 +94,13 @@ class TexyHtmlFormatter
         $this->tagUsed  = array();
 
         // wellform and reformat
-        $text = preg_replace_callback('#<(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)(/?)>|([^<]++)#Uis', array($this, 'cb'), $text);
+        $text = preg_replace_callback(
+            '#(.*)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)(/?))>()#Uis',
+            array($this, 'cb'),
+            $text . '</end/>'
+        );
 
+        // empty out stack
         foreach ($this->tagStack as $item) $text .= $item['close'];
 
         // right trim
@@ -129,42 +134,47 @@ class TexyHtmlFormatter
      */
     private function cb($matches)
     {
-        // stuff between tags
-        if (isset($matches[5]))
-        {
+        // html tag
+        list(, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
+        //    [1] => text
+        //    [1] => !-- comment --
+        //    [2] => /
+        //    [3] => TAG
+        //    [4] => ... (attributes)
+        //    [5] => /   (empty)
+
+        $s = '';
+
+        // phase #1 - stuff between tags
+        if ($mText !== '') {
             $item = reset($this->tagStack);
-            if ($item) {
-                // text not allowed?
-                if (!isset($item['content']['%DATA'])) return '';
+            // text not allowed?
+            if ($item && !isset($item['content']['%DATA'])) { }
 
-                // inside pre & textarea preserve spaces
-                if (!empty($this->tagUsed['pre']) || !empty($this->tagUsed['textarea']))
-                    return Texy::freezeSpaces($matches[5]);
-
-            }
+            // inside pre & textarea preserve spaces
+            elseif (!empty($this->tagUsed['pre']) || !empty($this->tagUsed['textarea']))
+                $s = Texy::freezeSpaces($mText);
 
             // otherwise shrink multiple spaces
-            return preg_replace('#[ \n]+#', ' ', $matches[5]);
+            else $s = preg_replace('#[ \n]+#', ' ', $mText);
         }
 
-        // html tag
-        list(, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
-        //    [1] => /
-        //    [2] => TAG
-        //    [3] => ... (attributes)
-        //    [4] => /   (empty)
 
+        // phase #2 - HTML comment
+        if ($mComment) return $s . '<' . Texy::freezeSpaces($mComment) . '>';
+
+
+        // phase #3 - HTML tag
         $mEmpty = $mEmpty || isset(TexyHtml::$emptyTags[$mTag]);
-        if ($mEmpty && $mEnd) return ''; // error
+        if ($mEmpty && $mEnd) return $s; // bad tag; /end/
 
 
         if ($mEnd) {  // end tag
 
             // has start tag?
-            if (empty($this->tagUsed[$mTag])) return '';
+            if (empty($this->tagUsed[$mTag])) return $s;
 
             // autoclose tags
-            $s = '';
             $tmp = array();
             $back = TRUE;
             foreach ($this->tagStack as $i => $item)
@@ -197,13 +207,9 @@ class TexyHtmlFormatter
                 array_unshift($this->tagStack, $item);
             }
 
-            return $s;
-
-
 
         } else { // start tag
 
-            $s = '';
             $content = self::$dtd[NULL];
 
             if (!isset(self::$dtd[$mTag])) {
@@ -252,14 +258,14 @@ class TexyHtmlFormatter
 
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
-                    return $s . $matches[0] . "\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
+                    return $s .  '<' . $mTag . $mAttr . "/>\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
                 if ($this->indent && !isset(self::$inline[$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
-                    return $s . $space . $matches[0] . $space;
+                    return $s . $space . '<' . $mTag . $mAttr . '/>' . $space;
                 }
 
-                return $s . $matches[0];
+                return $s . '<' . $mTag . $mAttr . '/>';
             }
 
 
@@ -290,9 +296,9 @@ class TexyHtmlFormatter
             );
             array_unshift($this->tagStack, $item);
             $tmp = &$this->tagUsed[$mTag]; $tmp++;
-
-            return $s;
         }
+
+        return $s;
     }
 
 
@@ -321,14 +327,24 @@ class TexyHtmlFormatter
         $b = array_flip(array('ins','del','p','h1','h2','h3','h4','h5','h6','ul','ol','dl','pre',
             'div','blockquote','noscript','noframes','form','hr','table','address','fieldset'));
 
-        if (!Texy::$strictDTD) $b += array('dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1);
+        if (!Texy::$strictDTD) $b += array(
+            // transitional
+            'dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1,
+            // proprietary
+            'marquee'=>1,
+        );
 
         // %inline;
         $i = array_flip(array('ins','del','tt','i','b','big','small','em','strong','dfn','code',
             'samp','kbd','var','cite','abbr','acronym','sub','sup','q','span','bdo','a','object',
             'img','br','script','map','input','select','textarea','label','button','%DATA'));
 
-        if (!Texy::$strictDTD) $i += array('u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1);
+        if (!Texy::$strictDTD) $i += array(
+            // transitional
+            'u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1,
+            // proprietary
+            'embed'=>1,'wbr'=>1,'nobr'=>1,'canvas'=>1,
+        );
 
         self::$inline = $i;
 
@@ -340,8 +356,8 @@ class TexyHtmlFormatter
             'head' => array('title'=>1, 'script'=>1, 'style'=>1, 'base'=>1, 'meta'=>1, 'link'=>1, 'object'=>1, 'isindex'=>1),
             'title' => array('%DATA'=>1),
             'body' => Texy::$strictDTD ? array('script'=>1) + $b : $b + $i,
-            'script' => FALSE, //array('%DATA'=>1),
-            'style' => FALSE, //array('%DATA'=>1),
+            'script' => array('%DATA'=>1),
+            'style' => array('%DATA'=>1),
             'p' => $i,
             'h1' => $i,
             'h2' => $i,
@@ -401,8 +417,9 @@ class TexyHtmlFormatter
             'textarea' => array('%DATA'=>1),
             'label' => $i, // - label by self::$prohibits
             'button' => $b + $i, // - a input select textarea label button form fieldset, by self::$prohibits
-            'ins' => FALSE, // special
-            'del' => FALSE, // special
+            // special cases
+            'ins' => 0,
+            'del' => 0,
             // empty
             'img' => FALSE,
             'hr' => FALSE,
@@ -417,6 +434,7 @@ class TexyHtmlFormatter
         );
 
         if (!Texy::$strictDTD) self::$dtd += array(
+            // transitional
             'dir' => array('li'=>1),
             'menu' => array('li'=>1), // it's inline-li, ignored
             'center' => $b + $i,
@@ -430,7 +448,16 @@ class TexyHtmlFormatter
             'basefont' => FALSE,
             'frame' => FALSE,
             'isindex' => FALSE,
+
+            // proprietary
+            'marquee'=> $b + $i,
+            'embed'=> $i,
+            'nobr'=> $i,
+            'canvas'=> $i,
+            'wbr' => FALSE,
         );
+
+        // missing: FRAMESET, FRAME, BGSOUND, XMP, ...
     }
 
 

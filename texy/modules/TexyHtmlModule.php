@@ -32,7 +32,7 @@ class TexyHtmlModule extends TexyModule
 
 
     /** @var bool   pass HTML comments to output? */
-    public $passComment = FALSE;
+    public $passComment = TRUE;
 
 
 

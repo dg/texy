@@ -45,12 +45,11 @@ class TexyHtml
 
     /** @var array  replaced elements + br */
     static private $replacedTags = array('br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,
-        'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,'applet'=>1);
+        'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,'applet'=>1,'embed'=>1,'canvas'=>1);
 
     /** @var array  empty elements */
     static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
-        'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1);
-
+        'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1);
 
     /* element's attributes are not explicitly declared */
 

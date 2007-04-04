@@ -509,6 +509,7 @@ class Texy
         $this->urlSchemeFilters['c'] = '#http:#A';
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
+        $this->allowed['html/comment'] = FALSE;             // disable HTML comments
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
     }
 
@@ -525,6 +526,7 @@ class Texy
         $this->urlSchemeFilters = NULL;                     // disable URL scheme filter
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
+        $this->allowed['html/comment'] = TRUE;              // enable HTML comments
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
     }
 
