@@ -451,9 +451,9 @@ class TexyHtmlFormatter
 
             // proprietary
             'marquee'=> $b + $i,
-            'embed'=> $i,
             'nobr'=> $i,
             'canvas'=> $i,
+            'embed'=> FALSE,
             'wbr' => FALSE,
         );
 
