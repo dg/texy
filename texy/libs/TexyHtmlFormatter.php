@@ -38,11 +38,9 @@ class TexyHtmlFormatter
     /** @var array  DTD */
     static public $dtd;
 
-    /** @var array  inline elements */
-    static public $inline;
-
-    /** @var array  elements with optional end tag */
-    static private $optional;
+    /** @var array  elements with optional end tag in HTML */
+    static private $optional = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
+        'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1);
 
     /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
     static private $prohibits = array(
@@ -64,6 +62,27 @@ class TexyHtmlFormatter
         'isindex' => array('button'),
     );
 
+    /** @var array  %block; elements */
+    static public $block = array('ins'=>1,'del'=>1,'p'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,
+        'h5'=>1,'h6'=>1,'ul'=>1,'ol'=>1,'dl'=>1,'pre'=>1,'div'=>1,'blockquote'=>1,'noscript'=>1,
+        'noframes'=>1,'form'=>1,'hr'=>1,'table'=>1,'address'=>1,'fieldset'=>1);
+
+    static public $_blockLoose = array(
+        'dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1, // transitional
+        'marquee'=>1, // proprietary
+    );
+
+    /** @var array  %inline; elements */
+    static public $inline = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
+        'strong'=>1,'dfn'=>1,'code'=>1,'samp'=>1,'kbd'=>1,'var'=>1,'cite'=>1,'abbr'=>1,'acronym'=>1,
+        'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
+        'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,'%DATA'=>1);
+
+    static public $_inlineLoose = array(
+        'u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1, // transitional
+        'embed'=>1,'wbr'=>1,'nobr'=>1,'canvas'=>1, // proprietary
+    );
+
     /** @var array */
     private $tagUsed;
 
@@ -78,7 +97,7 @@ class TexyHtmlFormatter
     public function __construct($texy)
     {
         $this->texy = $texy;
-        if (!self::$dtd) self::init();
+        if (!self::$dtd) self::initDTD();
     }
 
 
@@ -258,7 +277,7 @@ class TexyHtmlFormatter
 
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
-                    return $s .  '<' . $mTag . $mAttr . "/>\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
+                    return rtrim($s) .  '<' . $mTag . $mAttr . "/>\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
                 if ($this->indent && !isset(self::$inline[$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
@@ -316,37 +335,17 @@ class TexyHtmlFormatter
 
 
     /**
-     * Initializes self::$dtd & self::$optional arrays
+     * Initializes self::$dtd array
      */
-    static public function init()
+    static public function initDTD()
     {
-        self::$optional = array_flip(array('colgroup','dd','dt','li','option',
-        'p','tbody','td','tfoot','th','thead','tr'));
-
         // %block;
-        $b = array_flip(array('ins','del','p','h1','h2','h3','h4','h5','h6','ul','ol','dl','pre',
-            'div','blockquote','noscript','noframes','form','hr','table','address','fieldset'));
-
-        if (!Texy::$strictDTD) $b += array(
-            // transitional
-            'dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1,
-            // proprietary
-            'marquee'=>1,
-        );
+        if (!Texy::$strictDTD) self::$block += self::$_blockLoose;
+        $b = self::$block;
 
         // %inline;
-        $i = array_flip(array('ins','del','tt','i','b','big','small','em','strong','dfn','code',
-            'samp','kbd','var','cite','abbr','acronym','sub','sup','q','span','bdo','a','object',
-            'img','br','script','map','input','select','textarea','label','button','%DATA'));
-
-        if (!Texy::$strictDTD) $i += array(
-            // transitional
-            'u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1,
-            // proprietary
-            'embed'=>1,'wbr'=>1,'nobr'=>1,'canvas'=>1,
-        );
-
-        self::$inline = $i;
+        if (!Texy::$strictDTD) self::$inline += self::$_inlineLoose;
+        $i = self::$inline;
 
         // DTD - compromise between loose and strict
         self::$dtd = array(

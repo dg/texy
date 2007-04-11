@@ -106,7 +106,7 @@ class TexyBlockParser extends TexyParser
 
         // try to find modifier
         $mMod = $matches = NULL;
-        if (preg_match('#\A(.*)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $content, $matches)) {
+        if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $content, $matches)) {
             list(, $mC1, $mMod, $mC2) = $matches;
             $content = trim($mC1 . $mC2);
         }
@@ -116,6 +116,8 @@ class TexyBlockParser extends TexyParser
             // ....
             //  ...  => \r means break line
             $content = preg_replace('#\n (?=\S)#', "\r", $content);
+        } else {
+            $content = preg_replace('#\n#', "\r", $content);
         }
 
         $el = TexyHtml::el('p');

@@ -34,6 +34,11 @@ class TexyScriptModule extends TexyModule
     public $handler;
 
 
+    /** @var string  arguments separator */
+    public $separator = ',';
+
+
+
     public function begin()
     {
         $this->texy->registerLinePattern(
@@ -63,13 +68,13 @@ class TexyScriptModule extends TexyModule
 
         $args = $raw = NULL;
         // function(arg, arg, ...)  or  function: arg, arg
-        if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:([^():]*))$#iu', $func, $matches)) {
+        if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu', $func, $matches)) {
             $func = $matches[1];
             $raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
             if ($raw === '')
                 $args = array();
             else
-                $args = preg_split('#\s*,\s*#u', $raw);
+                $args = preg_split('#\s*' . preg_quote($this->separator, '#') . '\s*#u', $raw);
         }
 
         if (is_callable(array($this->handler, $func))) {
