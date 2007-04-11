@@ -1,18 +1,12 @@
 <?php
 
 /**
- * Texy! universal text -> html converter
- * --------------------------------------
+ * This file is part of the Texy! formatter (http://texy.info/)
  *
- * This source file is subject to the GNU GPL license.
+ * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
  *
- * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2007 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE v2
- * @package    Texy
- * @category   Text
  * @version    $Revision$ $Date$
+ * @package    Texy
  */
 
 // security - include texy.php, not this file

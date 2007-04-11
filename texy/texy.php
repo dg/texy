@@ -1,25 +1,33 @@
 <?php
 
 /**
- * Texy! universal text -> html converter
- * --------------------------------------
+ * Texy! - plain text to html converter
+ * ------------------------------------
  *
- * This source file is subject to the GNU GPL license.
+ * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
  *
- * @author     David Grudl aka -dgx- <dave@dgx.cz>
- * @link       http://texy.info/
- * @copyright  Copyright (c) 2004-2007 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE v2
- * @package    Texy
- * @category   Text
- * @version    2.0 beta $Revision$ $Date$
+ * for PHP 5.0.0 and newer
+ *
+ * @link      http://texy.info/
+ * @license   GNU GENERAL PUBLIC LICENSE version 2
+ * @package   Texy
+ * @category  Text
+ * @version   2.0 beta (Revision: $WCREV$, Date: $WCDATE$)
  */
 
 
-if (version_compare(PHP_VERSION , '5.0.0', '<'))
-    die('Texy! needs PHP version 5');
+/**
+ * This file is part of the Texy! formatter (http://texy.info/)
+ *
+ * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
+ *
+ * @version  $Revision$ $Date$
+ * @package  Texy
+ */
 
-define('TEXY', 'Version 2.0 beta $Revision$');
+
+
+define('TEXY', '2.0 beta (Revision: $WCREV$, Date: $WCDATE$)');
 
 
 /**
