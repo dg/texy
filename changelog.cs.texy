@@ -1,6 +1,17 @@
 Changelog
 *********
 
+Verze 2.0 Release Candidate 1 (rev. 119)
+=========
+
+13. 4. 2007 .[date]
+
+- Texy2 by mělo být připraveno na ostrý provoz
+- kompaktní knihovna přejmenována `texy-compact.php` -> `texy.compact.php`
+- TexyDefinitionListModule začleněn do TexyListModule
+- nová syntax `---section---` -> rozdělení dokumentu do sekcí (TexySectionModule)
+
+
 Verze 2.0 beta (rev. 113)
 =========
 

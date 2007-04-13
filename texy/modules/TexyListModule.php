@@ -19,35 +19,44 @@ if (!defined('TEXY')) die();
  */
 class TexyListModule extends TexyModule
 {
-    protected $default = array('list' => TRUE);
+    protected $default = array('list' => TRUE, 'list/definition' => TRUE);
 
     public $bullets = array(
-                  //  first rexexp          tag   list-style-type   next regexp
-        '*'  => array('\*\ ',               'ul', ''),
-        '-'  => array('[\x{2013}-](?![>-])','ul', ''),
-        '+'  => array('\+\ ',               'ul', ''),
-        '1.' => array('1\.\ ',              'ol', '',             '\d{1,3}\.\ '),
-//        '1.' => array('\d{1,3}\.\ ',        'ol', ''),
-        '1)' => array('\d{1,3}\)\ ',        'ol', ''),
-        'I.' => array('I\.\ ',              'ol', 'upper-roman',  '[IVX]{1,4}\.\ '),
-        'I)' => array('[IVX]+\)\ ',         'ol', 'upper-roman'), // before A) !
-        'a)' => array('[a-z]\)\ ',          'ol', 'lower-alpha'),
-        'A)' => array('[A-Z]\)\ ',          'ol', 'upper-alpha'),
+                  //  first-rexexp          ordered   list-style-type   next-regexp
+        '*'  => array('\*\ ',               0, ''),
+        '-'  => array('[\x{2013}-](?![>-])',0, ''),
+        '+'  => array('\+\ ',               0, ''),
+        '1.' => array('1\.\ ', /*\d{1,3}*/  1, '',             '\d{1,3}\.\ '),
+        '1)' => array('\d{1,3}\)\ ',        1, ''),
+        'I.' => array('I\.\ ',              1, 'upper-roman',  '[IVX]{1,4}\.\ '),
+        'I)' => array('[IVX]+\)\ ',         1, 'upper-roman'), // before A) !
+        'a)' => array('[a-z]\)\ ',          1, 'lower-alpha'),
+        'A)' => array('[A-Z]\)\ ',          1, 'upper-alpha'),
     );
 
 
 
     public function begin()
     {
-        $RE = array();
-        foreach ($this->bullets as $desc)
-            if (is_array($desc)) $RE[] = $desc[0];
+        $RE = $REul = array();
+        foreach ($this->bullets as $desc) {
+            $RE[] = $desc[0];
+            if (!$desc[1]) $REul[] = $desc[0];
+        }
 
         $this->texy->registerBlockPattern(
             array($this, 'patternList'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?'          // .{color: red}
           . '('.implode('|', $RE).')\ *\S.*$#mUu',  // item (unmatched)
             'list'
+        );
+
+        $this->texy->registerBlockPattern(
+            array($this, 'patternDefList'),
+            '#^(?:'.TEXY_MODIFIER_H.'\n)?'               // .{color:red}
+          . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'          // Term:
+          . '(\ ++)('.implode('|', $REul).')\ *\S.*$#mUu',  // - description
+            'list/definition'
         );
     }
 
@@ -82,7 +91,7 @@ class TexyListModule extends TexyModule
             if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
                 $bullet = isset($desc[3]) ? $desc[3] : $desc[0];
                 $min = isset($desc[3]) ? 2 : 1;
-                $el->elName = $desc[1];
+                $el->elName = $desc[1] ? 'ol' : 'ul';
                 $el->style['list-style-type'] = $desc[2];
 		        if ($el->elName === 'ol') {
                     if ($type[0] === '1' && (int) $mBullet > 1)
@@ -115,6 +124,76 @@ class TexyListModule extends TexyModule
 
 
     /**
+     * Callback for:
+     *
+     *  Term: .(title)[class]{style}>
+     *    - description 1
+     *    - description 2
+     *    - description 3
+     *
+     * @param TexyBlockParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return TexyHtml
+     */
+    public function patternDefList($parser, $matches)
+    {
+        list(, $mMod, , , , $mBullet) = $matches;
+        //   [1] => .(title)[class]{style}<>
+        //   [2] => ...
+        //   [3] => .(title)[class]{style}<>
+        //   [4] => space
+        //   [5] => - * +
+
+        $tx = $this->texy;
+
+        $bullet = NULL;
+        foreach ($this->bullets as $type => $desc)
+            if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
+                $bullet = isset($desc[3]) ? $desc[3] : $desc[0];
+                break;
+            }
+
+        $el = TexyHtml::el('dl');
+        $mod = new TexyModifier($mMod);
+        $mod->decorate($tx, $el);
+        $parser->moveBackward(2);
+
+        $patternTerm = '#^\n?(\S.*)\:\ *'.TEXY_MODIFIER_H.'?()$#mUA';
+
+        while (TRUE) {
+            if ($elItem = $this->patternItem($parser, $bullet, TRUE, 'dd')) {
+                $el->childNodes[] = $elItem;
+                continue;
+            }
+
+            if ($parser->next($patternTerm, $matches)) {
+                list(, $mContent, $mMod) = $matches;
+                //    [1] => ...
+                //    [2] => .(title)[class]{style}<>
+
+                $elItem = TexyHtml::el('dt');
+                $mod = new TexyModifier($mMod);
+                $mod->decorate($tx, $elItem);
+
+                $elItem->parseLine($tx, $mContent);
+                $el->childNodes[] = $elItem;
+                continue;
+            }
+
+            break;
+        }
+
+        // event listener
+        if (is_callable(array($tx->handler, 'afterDefinitionList')))
+            $tx->handler->afterDefinitionList($parser, $el, $mod);
+
+        return $el;
+    }
+
+
+
+    /**
      * Callback for single list item
      *
      * @param TexyBlockParser
@@ -127,17 +206,16 @@ class TexyListModule extends TexyModule
     {
         $tx =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
-        $patternItem = "#^\n?($spacesBase)$bullet(\\ *)(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
+        $patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
 
         // first line with bullet
         $matches = NULL;
         if (!$parser->next($patternItem, $matches)) return FALSE;
 
-        list(, $mIndent, $mSpace, $mContent, $mMod) = $matches;
+        list(, $mIndent, $mContent, $mMod) = $matches;
             //    [1] => indent
-            //    [2] => space
-            //    [3] => ...
-            //    [4] => .(title)[class]{style}<>
+            //    [2] => ...
+            //    [3] => .(title)[class]{style}<>
 
         $elItem = TexyHtml::el($tag);
         $mod = new TexyModifier($mMod);

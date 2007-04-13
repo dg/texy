@@ -1,4 +1,4 @@
-texy-compact.php
+texy.compact.php
 ----------------
 
 This is shrinked single-file version of Texy!, useful when you don't want to modify library, but just use it.

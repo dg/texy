@@ -23,7 +23,7 @@ class TexyScriptModule extends TexyModule
 
     /**
      * @var callback|object  script elements handler
-     * function myUserFunc($element, string $identifier, array/NULL $args)
+     * function myFunc($parser, $cmd, $args, $raw)
      */
     public $handler;
 
@@ -57,13 +57,13 @@ class TexyScriptModule extends TexyModule
         list(, $mContent) = $matches;
         //    [1] => ...
 
-        $func = trim($mContent);
-        if ($func === '') return FALSE;
+        $cmd = trim($mContent);
+        if ($cmd === '') return FALSE;
 
         $args = $raw = NULL;
         // function(arg, arg, ...)  or  function: arg, arg
-        if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu', $func, $matches)) {
-            $func = $matches[1];
+        if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu', $cmd, $matches)) {
+            $cmd = $matches[1];
             $raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
             if ($raw === '')
                 $args = array();
@@ -71,22 +71,32 @@ class TexyScriptModule extends TexyModule
                 $args = preg_split('#\s*' . preg_quote($this->separator, '#') . '\s*#u', $raw);
         }
 
-        if (is_callable(array($this->handler, $func))) {
-            array_unshift($args, $parser);
-            return call_user_func_array(array($this->handler, $func), $args);
+        if ($this->handler) {
+            // Texy 1.x way
+            if (is_callable(array($this->handler, $cmd))) {
+                array_unshift($args, $parser);
+                return call_user_func_array(array($this->handler, $cmd), $args);
+            }
+
+            if (is_callable($this->handler))
+                return call_user_func_array($this->handler, array($parser, $cmd, $args, $raw));
         }
 
-        if (is_callable($this->handler))
-            return call_user_func_array($this->handler, array($parser, $func, $args, $raw));
+        // Texy 2 way
+        // event wrapper
+        if (is_callable(array($this->texy->handler, 'script'))) {
+            $res = $this->texy->handler->script($parser, $cmd, $args, $raw);
+            if ($res !== Texy::PROCEED) return $res;
+        }
 
-        if ($func==='texy')
+        if ($cmd==='texy')
             return $this->texyHandler($args);
 
         return FALSE;
     }
 
 
-
+    // for future usage
     public function texyHandler($args)
     {
         return '';

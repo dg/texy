@@ -89,7 +89,7 @@ class TexyHeadingModule extends TexyModule
 
 
     /**
-     * Callback for:
+     * Callback for underlined heading
      *
      *  Heading .(title)[class]{style}>
      *  -------------------------------
@@ -122,7 +122,7 @@ class TexyHeadingModule extends TexyModule
 
 
     /**
-     * Callback for:
+     * Callback for surrounded heading
      *
      *   ### Heading .(title)[class]{style}>
      *
@@ -140,7 +140,7 @@ class TexyHeadingModule extends TexyModule
 
         $mod = new TexyModifier($mMod);
         $level = 7 - min(7, max(2, strlen($mLine)));
-        $mContent = rtrim($mContent, $mLine[0]);
+        $mContent = rtrim($mContent, $mLine[0] . ' ');
 
         // event wrapper
         if (is_callable(array($this->texy->handler, 'heading'))) {

@@ -132,7 +132,17 @@ class myHandler
         // return $parser->texy->htmlModule->solveTag($el, $isStart, $forceEmpty);
     }
 
-
+    /**
+     * @param TexyLineParser
+     * @param string  command
+     * @param array   arguments
+     * @param string  arguments in raw format
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
+     */
+    public function script($parser, $cmd, $args, $raw)
+    {
+        // return Texy::PROCEED;
+    }
 
 
 
@@ -162,6 +172,16 @@ class myHandler
     public function heading($parser, $level, $content, $modifier, $isSurrounded)
     {
         // return $parser->texy->headingModule->solve($level, $content, $modifier, $isSurrounded);
+    }
+
+    /**
+     * @param TexyBlockParser
+     * @param string
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
+     */
+    public function section($parser, $content)
+    {
+        // return $parser->texy->headingModule->solveSection($content);
     }
 
     /**

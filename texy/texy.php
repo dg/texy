@@ -12,7 +12,7 @@
  * @license   GNU GENERAL PUBLIC LICENSE version 2
  * @package   Texy
  * @category  Text
- * @version   2.0 beta (Revision: $WCREV$, Date: $WCDATE$)
+ * @version   2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)
  */
 
 
@@ -27,7 +27,7 @@
 
 
 
-define('TEXY', '2.0 beta (Revision: $WCREV$, Date: $WCDATE$)');
+define('TEXY', '2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)');
 
 
 /**
@@ -50,12 +50,12 @@ require_once TEXY_DIR.'modules/TexyFigureModule.php';
 require_once TEXY_DIR.'modules/TexyImageModule.php';
 require_once TEXY_DIR.'modules/TexyLinkModule.php';
 require_once TEXY_DIR.'modules/TexyListModule.php';
-require_once TEXY_DIR.'modules/TexyDefinitionListModule.php';
 require_once TEXY_DIR.'modules/TexyLongWordsModule.php';
 require_once TEXY_DIR.'modules/TexyPhraseModule.php';
 require_once TEXY_DIR.'modules/TexyQuoteModule.php';
 require_once TEXY_DIR.'modules/TexyScriptModule.php';
 require_once TEXY_DIR.'modules/TexyEmoticonModule.php';
+require_once TEXY_DIR.'modules/TexySectionModule.php';
 require_once TEXY_DIR.'modules/TexyTableModule.php';
 require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
@@ -149,14 +149,14 @@ class Texy
         $quoteModule,
         /** @var TexyListModule */
         $listModule,
-        /** @var TexyDefinitionListModule */
-        $definitionListModule,
         /** @var TexyTableModule */
         $tableModule,
         /** @var TexyFigureModule */
         $figureModule,
         /** @var TexyTypographyModule */
         $typographyModule,
+        /** @var TexySectionModule */
+        $sectionModule,
         /** @var TexyLongWordsModule */
         $longWordsModule;
 
@@ -250,9 +250,9 @@ class Texy
         $this->horizLineModule = new TexyHorizLineModule($this);
         $this->quoteModule = new TexyQuoteModule($this);
         $this->listModule = new TexyListModule($this);
-        $this->definitionListModule = new TexyDefinitionListModule($this);
         $this->tableModule = new TexyTableModule($this);
         $this->figureModule = new TexyFigureModule($this);
+        $this->sectionModule = new TexySectionModule($this);
 
         // post process - order is not important
         $this->typographyModule = new TexyTypographyModule($this);
@@ -518,6 +518,7 @@ class Texy
         $this->allowed['image'] = FALSE;                    // disable images
         $this->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $this->allowed['html/comment'] = FALSE;             // disable HTML comments
+        $this->allowed['section'] = FALSE;                  // disable sections
         $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
     }
 
@@ -535,6 +536,7 @@ class Texy
         $this->allowed['image'] = TRUE;                     // enable images
         $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $this->allowed['html/comment'] = TRUE;              // enable HTML comments
+        $this->allowed['section'] = TRUE;                   // disable sections
         $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
     }
 

@@ -1,4 +1,4 @@
-Texy! version 2.0 beta
+Texy! version 2.0 RC 1
 
 Revision: $WCREV$
 Date: $WCDATE$
