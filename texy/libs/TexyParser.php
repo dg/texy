@@ -22,16 +22,10 @@ class TexyParser
     /** @var TexyHtml  READONLY */
     public $parentNode;
 
+    /** @var array */
+    public $patterns;
 
-    /**
-     * @param Texy
-     * @param TexyHtml
-     */
-    public function __construct(Texy $texy, $element=NULL)
-    {
-        $this->texy = $texy;
-        $this->parentNode = $element;
-    }
+
 
     /**
      * Undefined property usage prevention
@@ -57,6 +51,17 @@ class TexyBlockParser extends TexyParser
     /** @var int */
     private $offset;
 
+
+    /**
+     * @param Texy
+     * @param TexyHtml
+     */
+    public function __construct(Texy $texy, $element=NULL)
+    {
+        $this->texy = $texy;
+        $this->parentNode = $element;
+        $this->patterns = $texy->getBlockPatterns();
+    }
 
 
     // match current line against RE.
@@ -94,74 +99,6 @@ class TexyBlockParser extends TexyParser
 
 
 
-    private function genericBlock($content)
-    {
-        $tx = $this->texy;
-
-        $content = trim($content);
-
-        // try to find modifier
-        $mMod = $matches = NULL;
-        if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $content, $matches)) {
-            list(, $mC1, $mMod, $mC2) = $matches;
-            $content = trim($mC1 . $mC2);
-        }
-
-        // find hard linebreaks
-        if ($tx->mergeLines) {
-            // ....
-            //  ...  => \r means break line
-            $content = preg_replace('#\n (?=\S)#', "\r", $content);
-        } else {
-            $content = preg_replace('#\n#', "\r", $content);
-        }
-
-        $el = TexyHtml::el('p');
-        $el->parseLine($tx, $content);
-        $content = $el->childNodes; // string
-
-        // check content type
-        // block contains block tag
-        if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
-            $el->elName = '';  // ignores modifier!
-
-        // block contains text (protected)
-        } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
-            // leave element p
-
-        // block contains text
-        } elseif (preg_match('#[^\s'.TEXY_MARK.']#u', $content)) {
-            // leave element p
-
-        // block contains only replaced element
-        } elseif (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) {
-            $el->elName = 'div';
-
-        // block contains only markup tags or spaces or nothig
-        } else {
-            if ($tx->ignoreEmptyStuff) return FALSE;
-            if (!$mMod) $el->elName = '';
-        }
-
-        // apply modifier
-        if ($el->elName) {
-            $mod = new TexyModifier($mMod);
-            $mod->decorate($tx, $el);
-        }
-
-        // add <br />
-        if ($el->elName && (strpos($content, "\r") !== FALSE)) {
-            $key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
-            $content = str_replace("\r", $key, $content);
-        };
-        $content = strtr($content, "\r\n", '  ');
-        $el->childNodes = $content;
-
-        return $el;
-    }
-
-
-
     /**
      * @param string
      * @return array
@@ -179,8 +116,9 @@ class TexyBlockParser extends TexyParser
         $this->text = $text;
         $this->offset = 0;
         $nodes = array();
+        $hasHandler = is_callable(array($tx->handler, 'paragraph'));
 
-        $pb = $tx->getBlockPatterns();
+        $pb = $this->patterns;
         if (!$pb) return array(); // nothing to do
 
         $keys = array_keys($pb);
@@ -226,13 +164,31 @@ class TexyBlockParser extends TexyParser
                 $str = substr($text, $this->offset, $next - $this->offset);
                 $this->offset = $next;
 
-                if ($tx->_paragraphMode)
+                if ($tx->paragraphModule->mode)
                     $parts = preg_split('#(\n{2,})#', $str);
                 else
                     $parts = preg_split('#(\n(?! )|\n{2,})#', $str);
 
-                foreach ($parts as $str) {
-                    $el = $this->genericBlock($str);
+
+                foreach ($parts as $str)
+                {
+                    $str = trim($str);
+
+                    // try to find modifier
+                    $mod = new TexyModifier;
+                    $matches = NULL;
+                    if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $str, $matches)) {
+                        list(, $mC1, $mMod, $mC2) = $matches;
+                        $str = trim($mC1 . $mC2);
+                        $mod->setProperties($mMod);
+                    }
+
+                    // event wrapper
+                    $el = Texy::PROCEED;
+                    if ($hasHandler) $el = $tx->handler->paragraph($this, $str, $mod);
+
+                    if ($el === Texy::PROCEED) $el = $tx->paragraphModule->solve($str, $mod);
+
                     if ($el) $nodes[] = $el;
                 }
                 continue;
@@ -282,8 +238,18 @@ class TexyLineParser extends TexyParser
     /** @var bool */
     public $again;
 
-    /** @var bool */
-    public $onlyHtml;
+
+
+    /**
+     * @param Texy
+     * @param TexyHtml
+     */
+    public function __construct(Texy $texy, $element=NULL)
+    {
+        $this->texy = $texy;
+        $this->parentNode = $element;
+        $this->patterns = $texy->getLinePatterns();
+    }
 
 
     /**
@@ -295,18 +261,7 @@ class TexyLineParser extends TexyParser
         $tx = $this->texy;
 
         // initialization
-        if ($this->onlyHtml) {
-            // special mode - parse only html tags
-            $tmp = $tx->getLinePatterns();
-            if (isset($tmp['html/tag'])) $pl['html/tag'] = $tmp['html/tag'];
-            if (isset($tmp['html/comment'])) $pl['html/comment'] = $tmp['html/comment'];
-            unset($tmp);
-        } else {
-            // normal mode
-            $pl = $tx->getLinePatterns();
-            // special escape sequences
-            $text = str_replace(array('\)', '\*'), array('&#x29;', '&#x2A;'), $text);
-        }
+        $pl = $this->patterns;
         if (!$pl) return $text; // nothing to do
 
         $offset = 0;

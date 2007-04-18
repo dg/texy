@@ -298,6 +298,9 @@ class TexyHtml
      */
     public function parseLine($texy, $s)
     {
+        // special escape sequences
+        $s = str_replace(array('\)', '\*'), array('&#x29;', '&#x2A;'), $s);
+
         $parser = new TexyLineParser($texy, $this);
         $parser->parse($s);
     }

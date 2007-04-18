@@ -150,6 +150,17 @@ class myHandler
 
     /**
      * @param TexyBlockParser
+     * @param string
+     * @param TexyModifier
+     * @return TexyHtml|string|FALSE|Texy::PROCEED
+     */
+    public function paragraph($parser, $content, $modifier)
+    {
+        // return $parser->texy->paragraphModule->solve($content, $modifier);
+    }
+
+    /**
+     * @param TexyBlockParser
      * @param TexyImage
      * @param TexyLink
      * @param string

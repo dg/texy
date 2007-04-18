@@ -166,7 +166,13 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
             $lineParser = new TexyLineParser($tx);
-            $lineParser->onlyHtml = TRUE;
+            // special mode - parse only html tags
+            $tmp = $lineParser->patterns;
+            $lineParser->patterns = array();
+            if (isset($tmp['html/tag'])) $lineParser->patterns['html/tag'] = $tmp['html/tag'];
+            if (isset($tmp['html/comment'])) $lineParser->patterns['html/comment'] = $tmp['html/comment'];
+            unset($tmp);
+
             $s = $lineParser->parse($s);
             $s = Texy::unescapeHtml($s);
             $s = Texy::escapeHtml($s);
@@ -180,7 +186,13 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             $s = trim($s, "\n");
             if ($s==='') return "\n";
             $lineParser = new TexyLineParser($tx);
-            $lineParser->onlyHtml = TRUE;
+            // special mode - parse only html tags
+            $tmp = $lineParser->patterns;
+            $lineParser->patterns = array();
+            if (isset($tmp['html/tag'])) $lineParser->patterns['html/tag'] = $tmp['html/tag'];
+            if (isset($tmp['html/comment'])) $lineParser->patterns['html/comment'] = $tmp['html/comment'];
+            unset($tmp);
+
             $s = $lineParser->parse($s);
             $s = Texy::unescapeHtml($s);
             $s = Texy::escapeHtml($s);

@@ -35,6 +35,9 @@ class TexyModifier
     const VALIGN_MIDDLE =  'middle';
     const VALIGN_BOTTOM =  'bottom';
 
+    /** @var var */
+    public $empty = TRUE;
+
     /** @var string */
     public $id;
 
@@ -85,6 +88,7 @@ class TexyModifier
     public function setProperties($mod)
     {
         if (!$mod) return;
+        $this->empty = FALSE;
 
         $p = 0;
         $len = strlen($mod);

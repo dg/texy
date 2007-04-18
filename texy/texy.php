@@ -42,6 +42,7 @@ require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
 require_once TEXY_DIR.'libs/TexyUtf.php';
+require_once TEXY_DIR.'modules/TexyParagraphModule.php';
 require_once TEXY_DIR.'modules/TexyBlockModule.php';
 require_once TEXY_DIR.'modules/TexyHeadingModule.php';
 require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
@@ -129,6 +130,8 @@ class Texy
     public
         /** @var TexyScriptModule */
         $scriptModule,
+        /** @var TexyParagraphModule */
+        $paragraphModule,
         /** @var TexyHtmlModule */
         $htmlModule,
         /** @var TexyImageModule */
@@ -167,16 +170,14 @@ class Texy
     /**
      * Registered regexps and associated handlers for inline parsing
      * @var array of ('handler' => callback
-     *                'pattern' => regular expression
-     *                'name'    => pattern's name)
+     *                'pattern' => regular expression)
      */
     private $linePatterns = array();
 
     /**
      * Registered regexps and associated handlers for block parsing
      * @var array of ('handler' => callback
-     *                'pattern' => regular expression
-     *                'name'    => pattern's name)
+     *                'pattern' => regular expression)
      */
     private $blockPatterns = array();
 
@@ -189,9 +190,6 @@ class Texy
 
     /** @var array  Texy protect markup table */
     private $marks = array();
-
-    /** @var bool  how split paragraphs (internal usage) */
-    public $_paragraphMode;
 
     /** @var array  for internal usage */
     public $_classes, $_styles;
@@ -245,6 +243,7 @@ class Texy
         $this->emoticonModule = new TexyEmoticonModule($this);
 
         // block parsing - order is not important
+        $this->paragraphModule = new TexyParagraphModule($this);
         $this->blockModule = new TexyBlockModule($this);
         $this->headingModule = new TexyHeadingModule($this);
         $this->horizLineModule = new TexyHorizLineModule($this);
@@ -325,7 +324,6 @@ class Texy
         if ($this->handler && !is_object($this->handler))
             throw new Exception('$texy->handler must be object. See documentation.');
 
-        $this->_paragraphMode = TRUE;
         $this->marks = array();
         $this->_state = 1;
 
