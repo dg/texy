@@ -1,6 +1,15 @@
 Changelog
 *********
 
+Verze 2.0 Release Candidate 1 (rev. 122)
+=========
+
+26. 4. 2007 .[date]
+
+- $texy->safeMode() a trustMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy) nebo trustMode($texy)
+- klonování třídy Texy není podporováno
+
+
 Verze 2.0 Release Candidate 1 (rev. 119)
 =========
 
@@ -50,6 +59,9 @@ třída Texy
    - pak `\ *test` je chápán jako `*test` a nikoliv `\<em>test`
    - obdobně lze použít závorku v modifikátoru: `"blabla .(to je (můj\ ) názor)"`
    - další escapovaný znak viz tableModule
+- Texy::summary je nyní pole
+- konstany `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC` a `TEXY_HEADING_FIXED` jsou nyní: `Texy::ALL`, `Texy:NONE`, `TexyHeadingModule::DYNAMIC` a `TexyHeadingModule::FIXED`
+
 
 moduly obecně
 -------------
@@ -190,33 +202,19 @@ TexyDOM a zděděné třídy
 
 
 
-Verze 1.1b & 1.2a
-=================
+Verze 1.1b
+==========
 
 1. 2. 2007 .[date]
 
+- NEW: podporuje "proměnné v odkazech":http://forum.texy.info/viewtopic.php?id=316
 - FIX: opraveny tabulky v TexyLongWordsModule & TexyQuickCorrectModule
 - FIX: oprava TexyFormatterModule (chybějící mezery v HTML blocks)
 - CHG: zobrazují se HTML komentáře
-- NEW: verze 1.1 nyní také podporuje "proměnné v odkazech":http://forum.texy.info/viewtopic.php?id=316
 
 
-Verze 1.2
-=========
 
-7. 10. 2006 .[date]
-
-experimentální verze, jde o **přepis pro PHP 5** (pro PHP 4 používejte verzi 1.1)
-- NEW: navíc podporuje "proměnné v odkazech":http://forum.texy.info/viewtopic.php?id=316
-- CHG: Texy::summary je nyní pole
-- CHG: změna: konstany `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC` a `TEXY_HEADING_FIXED` jsou nyní: `Texy::ALL`, `Texy:NONE`, `TexyHeadingModule::DYNAMIC` a `TexyHeadingModule::FIXED`
-- CHG: přístup k některým proměnným (`$element->content, $texy->DOM`, ...) je řešen přes gettery (`$element->getContent(), $texy->getDOM()`, ...)
-- CHG: odstraněno: Texy::reinit(), podpora pro `/--form`
-- CHG: atributy `href` a `src` u HTML značek se nyní nezpracovávají
-- CHG: jinak se mohou chovat HTML komentáře (TODO)
-
-
-Verze 1.1
+Verze 1.1 
 =========
 
 6. 6. 2006 .[date]

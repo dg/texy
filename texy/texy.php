@@ -90,20 +90,20 @@ class Texy
     /** @var array  Texy! syntax configuration */
     public $allowed = array();
 
-    /** @var TRUE|FALSE|array  Allowed HTML tags */
+     /** @var TRUE|FALSE|array  Allowed HTML tags */
     public $allowedTags;
 
     /** @var TRUE|FALSE|array  Allowed classes */
-    public $allowedClasses;
+    public $allowedClasses = Texy::ALL; // all classes and id are allowed
 
     /** @var TRUE|FALSE|array  Allowed inline CSS style */
-    public $allowedStyles;
+    public $allowedStyles = Texy::ALL;  // all inline styles are allowed
 
     /** @var boolean  Do obfuscate e-mail addresses? */
     public $obfuscateEmail = TRUE;
 
     /** @var array  regexps to check URL schemes */
-    public $urlSchemeFilters = NULL;
+    public $urlSchemeFilters = NULL; // disable URL scheme filter
 
     /** @var array  Parsing summary */
     public $summary = array(
@@ -210,8 +210,8 @@ class Texy
         // load routines
         $this->formatter = new TexyHtmlFormatter($this);
 
-        // default configuration
-        $this->trustMode();
+        // accepts all valid HTML tags by default
+        $this->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd));
 
         // examples of link references ;-)
         $link = new TexyLink('http://texy.info/');
@@ -488,54 +488,23 @@ class Texy
 
 
     /**
-     * Switch Texy! configuration to the safe mode
-     * Suitable for web comments and other usages, where input text may insert attacker
+     * @deprecated
      */
     public function safeMode()
     {
-        $this->allowedClasses = self::NONE;                 // no class or ID are allowed
-        $this->allowedStyles  = self::NONE;                 // style modifiers are disabled
-        $this->allowedTags = array(                         // only some "safe" HTML tags and attributes are allowed
-            'a'         => array('href', 'title'),
-            'acronym'   => array('title'),
-            'b'         => array(),
-            'br'        => array(),
-            'cite'      => array(),
-            'code'      => array(),
-            'em'        => array(),
-            'i'         => array(),
-            'strong'    => array(),
-            'sub'       => array(),
-            'sup'       => array(),
-            'q'         => array(),
-            'small'     => array(),
-        );
-        $this->urlSchemeFilters['a'] = '#https?:|ftp:|mailto:#A';
-        $this->urlSchemeFilters['i'] = '#https?:#A';
-        $this->urlSchemeFilters['c'] = '#http:#A';
-        $this->allowed['image'] = FALSE;                    // disable images
-        $this->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
-        $this->allowed['html/comment'] = FALSE;             // disable HTML comments
-        $this->allowed['section'] = FALSE;                  // disable sections
-        $this->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
+        trigger_error('$texy->safeMode() is deprecated. Use TexyConfigurator::safeMode($texy)', E_USER_WARNING);
+        TexyConfigurator::safeMode($this);
     }
 
 
 
     /**
-     * Switch Texy! configuration to the (default) trust mode
+     * @deprecated
      */
     public function trustMode()
     {
-        $this->allowedClasses = self::ALL;                  // classes and id are allowed
-        $this->allowedStyles  = self::ALL;                  // inline styles are allowed
-        $this->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd)); // all valid HTML tags
-        $this->urlSchemeFilters = NULL;                     // disable URL scheme filter
-        $this->allowed['image'] = TRUE;                     // enable images
-        $this->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
-        $this->allowed['html/comment'] = TRUE;              // enable HTML comments
-        $this->allowed['section'] = TRUE;                   // disable sections
-        $this->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
+        trigger_error('$texy->trustMode() is deprecated. Use TexyConfigurator::trustMode($texy)', E_USER_WARNING);
+        TexyConfigurator::trustMode($this);
     }
 
 
@@ -595,15 +564,17 @@ class Texy
 
 
     /**
-     * Converts to web safe characters [a-z0-9_-] text
+     * Converts to web safe characters [a-z0-9-] text
+     * @param string
      * @param string
      * @return string
      */
-    static public function webalize($s)
+    static public function webalize($s, $charlist=NULL)
     {
         $s = TexyUtf::utf2ascii($s);
         $s = strtolower($s);
-        $s = preg_replace('#[^a-z0-9_]+#', '-', $s);
+        if ($charlist) $charlist = preg_quote($charlist, '#');
+        $s = preg_replace('#[^a-z0-9'.$charlist.']+#', '-', $s);
         $s = trim($s, '-');
         return $s;
     }
@@ -621,6 +592,7 @@ class Texy
     }
 
 
+
     /**
      * Texy! version of html_entity_decode (always UTF-8, much faster than original!)
      * @param string
@@ -631,6 +603,7 @@ class Texy
         if (strpos($s, '&') === FALSE) return $s;
         return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
     }
+
 
 
     /**
@@ -747,6 +720,9 @@ class Texy
 
 
 
+    public function __clone() { throw new Exception("Clone is not supported."); }
+
+
     /**
      * Undefined property usage prevention
      */
@@ -754,3 +730,82 @@ class Texy
     function __set($nm, $val) { $this->__get($nm); }
 
 } // Texy
+
+
+
+
+
+
+
+
+/**
+ * Texy basic configurators
+ *
+ * <code>
+ *     $texy = new Texy();
+ *     TexyConfigurator::safeMode($texy);
+ * </code>
+ */
+class TexyConfigurator
+{
+    static public $safeTags = array(
+        'a'         => array('href', 'title'),
+        'acronym'   => array('title'),
+        'b'         => array(),
+        'br'        => array(),
+        'cite'      => array(),
+        'code'      => array(),
+        'em'        => array(),
+        'i'         => array(),
+        'strong'    => array(),
+        'sub'       => array(),
+        'sup'       => array(),
+        'q'         => array(),
+        'small'     => array(),
+    );
+
+
+
+    /**
+     * Configure Texy! for web comments and other usages, where input text may insert attacker
+     *
+     * @param Texy  object to configure
+     * @return void
+     */
+    static public function safeMode(Texy $texy)
+    {
+        $texy->allowedClasses = Texy::NONE;                 // no class or ID are allowed
+        $texy->allowedStyles  = Texy::NONE;                 // style modifiers are disabled
+        $texy->allowedTags = self::$safeTags;               // only some "safe" HTML tags and attributes are allowed
+        $texy->urlSchemeFilters['a'] = '#https?:|ftp:|mailto:#A';
+        $texy->urlSchemeFilters['i'] = '#https?:#A';
+        $texy->urlSchemeFilters['c'] = '#http:#A';
+        $texy->allowed['image'] = FALSE;                    // disable images
+        $texy->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
+        $texy->allowed['html/comment'] = FALSE;             // disable HTML comments
+        $texy->allowed['section'] = FALSE;                  // disable sections
+        $texy->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
+    }
+
+
+
+    /**
+     * Switch Texy! configuration to the (default) trust mode
+     *
+     * @param Texy  object to configure
+     * @return void
+     */
+    static public function trustMode(Texy $texy)
+    {
+        $texy->allowedClasses = Texy::ALL;                  // classes and id are allowed
+        $texy->allowedStyles  = Texy::ALL;                  // inline styles are allowed
+        $texy->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd)); // all valid HTML tags
+        $texy->urlSchemeFilters = NULL;                     // disable URL scheme filter
+        $texy->allowed['image'] = TRUE;                     // enable images
+        $texy->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
+        $texy->allowed['html/comment'] = TRUE;              // enable HTML comments
+        $texy->allowed['section'] = TRUE;                   // disable sections
+        $texy->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
+    }
+
+}

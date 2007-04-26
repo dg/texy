@@ -65,7 +65,7 @@ $texy = new Texy();
 
 // configuration
 $texy->handler = new myHandler;  // references link [1] [2] will be processed through user function
-$texy->safeMode();               // safe mode prevets attacker to inject some HTML code and disable images
+TexyConfigurator::safeMode($texy);     // safe mode prevets attacker to inject some HTML code and disable images
 
 // how generally disable links or enable images? here is a way:
 //    $disallow = array('image', 'figure', 'linkReference', 'linkEmail', 'linkURL', 'linkQuick');

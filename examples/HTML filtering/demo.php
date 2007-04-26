@@ -50,7 +50,7 @@ function doIt($texy)
 header('Content-type: text/html; charset=utf-8');
 
 echo '<h2>Enable nearly all valid tags</h2>';
-$texy->trustMode();
+TexyConfigurator::trustMode($texy);
 doIt($texy);
 
 echo '<h2>Texy::ALL - enables all tags</h2>';
@@ -58,7 +58,7 @@ $texy->allowedTags = Texy::ALL;
 doIt($texy);
 
 echo '<h2>safeMode() - enables only some "safe" tags</h2>';
-$texy->safeMode();
+TexyConfigurator::safeMode($texy);
 doIt($texy);
 
 echo '<h2>Texy::NONE - disables all tags</h2>';

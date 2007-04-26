@@ -35,6 +35,7 @@ class TexyModifier
     const VALIGN_MIDDLE =  'middle';
     const VALIGN_BOTTOM =  'bottom';
 
+    // TODO!
     /** @var var */
     public $empty = TRUE;
 
