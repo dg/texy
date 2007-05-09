@@ -312,29 +312,29 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
             $popup = isset($classes['popup']);
             unset($classes['nofollow'], $classes['popup']);
             $link->modifier->classes = array_flip($classes);
-            $el->href = NULL; // trick - move to front
+            $el['href'] = NULL; // trick - move to front
             $link->modifier->decorate($tx, $el);
         }
 
         if ($link->type === TexyLink::IMAGE) {
             // image
-            $el->href = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
-            $el->onclick = $this->imageOnClick;
+            $el['href'] = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
+            $el['onclick'] = $this->imageOnClick;
 
         } else {
-            $el->href = Texy::prependRoot($link->URL, $this->root);
+            $el['href'] = Texy::prependRoot($link->URL, $this->root);
 
             // rel="nofollow"
-            if ($nofollow || ($this->forceNoFollow && strpos($el->href, '//') !== FALSE))
-                $el->rel[] = 'nofollow';
+            if ($nofollow || ($this->forceNoFollow && strpos($el['href'], '//') !== FALSE))
+                $el['rel'] = 'nofollow';
         }
 
         // popup on click
-        if ($popup) $el->onclick = $this->popupOnClick;
+        if ($popup) $el['onclick'] = $this->popupOnClick;
 
         if ($content !== NULL) $el->addChild($content);
 
-        $tx->summary['links'][] = $el->href;
+        $tx->summary['links'][] = $el['href'];
 
         return $el;
     }

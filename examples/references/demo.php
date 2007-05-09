@@ -46,10 +46,10 @@ class myHandler
         $name = $names[$refName];  // some range checing
 
         $el = TexyHtml::el('a');
-        $el->href = '#comm-' . $refName; // set link destination
-        $el->class[] = 'comment';        // set class name
-        $el->rel = 'nofollow';           // enable rel="nofollow"
-        $el->childNodes[] = "[$refName] $name:";  // set link label (with Texy formatting)
+        $el['href'] = '#comm-' . $refName; // set link destination
+        $el['class'][] = 'comment';        // set class name
+        $el['rel'] = 'nofollow';           // enable rel="nofollow"
+        $el->setText("[$refName] $name:"); // set link label (with Texy formatting)
         return $el;
     }
 
@@ -81,13 +81,6 @@ $html = $texy->process($text);  // that's all folks!
 // echo formated output
 header('Content-type: text/html; charset=utf-8');
 echo $html;
-
-
-// echo all embedded links
-echo '<hr />';
-echo '<pre>';
-print_r($texy->summary['links']);
-echo '</pre>';
 
 
 // do some antispam filtering - this is just very simple example ;-)

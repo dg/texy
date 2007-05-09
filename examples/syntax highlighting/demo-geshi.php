@@ -82,7 +82,7 @@ class myHandler
         // protect output is in HTML
         $content = $texy->protect($content);
 
-        return TexyHtml::el()->setContent($content);
+        return TexyHtml::el()->setText($content);
     }
 
 }

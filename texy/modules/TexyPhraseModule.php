@@ -336,7 +336,7 @@ class TexyPhraseModule extends TexyModule
             $mod->decorate($tx, $el);
         }
 
-        if ($tag === 'q') $el->cite = $mod->cite;
+        if ($tag === 'q') $el['cite'] = $mod->cite;
 
         if ($link) return $tx->linkModule->solve($link, $el);
 

@@ -53,12 +53,12 @@ class TexyParagraphModule extends TexyModule
 
         $el = TexyHtml::el('p');
         $el->parseLine($tx, $content);
-        $content = $el->childNodes; // string
+        $content = $el->getText(); // string
 
         // check content type
         // block contains block tag
         if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
-            $el->elName = '';  // ignores modifier!
+            $el->name = '';  // ignores modifier!
 
         // block contains text (protected)
         } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
@@ -70,24 +70,24 @@ class TexyParagraphModule extends TexyModule
 
         // block contains only replaced element
         } elseif (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) {
-            $el->elName = 'div';
+            $el->name = 'div';
 
         // block contains only markup tags or spaces or nothig
         } else {
             if ($tx->ignoreEmptyStuff) return FALSE;
-            if ($mod->empty) $el->elName = '';
+            if ($mod->empty) $el->name = '';
         }
 
         // apply modifier
-        if ($el->elName && $mod) $mod->decorate($tx, $el);
+        if ($el->name && $mod) $mod->decorate($tx, $el);
 
         // add <br />
-        if ($el->elName && (strpos($content, "\r") !== FALSE)) {
+        if ($el->name && (strpos($content, "\r") !== FALSE)) {
             $key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
             $content = str_replace("\r", $key, $content);
         };
         $content = strtr($content, "\r\n", '  ');
-        $el->childNodes = $content;
+        $el->setText($content);
 
         return $el;
     }

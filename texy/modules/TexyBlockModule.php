@@ -138,13 +138,12 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
         if ($blocktype === 'block/code') {
             $s = $this->outdent($s);
             if ($s==='') return "\n";
-            $el = TexyHtml::el('pre');
-            $mod->decorate($tx, $el);
-            $el->class[] = $param; // lang
-            $el->childNodes[0] = TexyHtml::el('code');
             $s = Texy::escapeHtml($s);
             $s = $tx->protect($s);
-            $el->childNodes[0]->setContent($s);
+            $el = TexyHtml::el('pre');
+            $mod->decorate($tx, $el);
+            $el['class'][] = $param; // lang
+            $el->add('code')->setText($s);
             return $el;
         }
 
@@ -153,10 +152,10 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
-            $el->class[] = $param; // lang
+            $el['class'][] = $param; // lang
             $s = Texy::escapeHtml($s);
             $s = $tx->protect($s);
-            $el->setContent($s);
+            $el->setText($s);
             return $el;
         }
 
@@ -178,7 +177,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             $s = Texy::escapeHtml($s);
             $s = $tx->unprotect($s);
             $s = $tx->protect($s);
-            $el->setContent($s);
+            $el->setText($s);
             return $el;
         }
 

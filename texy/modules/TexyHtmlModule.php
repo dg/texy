@@ -129,11 +129,11 @@ class TexyHtmlModule extends TexyModule
         );
 
         foreach ($matches2 as $m) {
-            $key = strtolower($m[1]); // strtolower protects TexyHtml's elName, userData, childNodes
+            $key = strtolower($m[1]);
             $val = $m[2];
-            if ($val == NULL) $el->$key = TRUE;
-            elseif ($val{0} === '\'' || $val{0} === '"') $el->$key = Texy::unescapeHtml(substr($val, 1, -1));
-            else $el->$key = Texy::unescapeHtml($val);
+            if ($val == NULL) $el->attrs[$key] = TRUE;
+            elseif ($val{0} === '\'' || $val{0} === '"') $el->attrs[$key] = Texy::unescapeHtml(substr($val, 1, -1));
+            else $el->attrs[$key] = Texy::unescapeHtml($val);
         }
 
         if (is_callable(array($tx->handler, 'htmlTag'))) {
@@ -164,94 +164,95 @@ class TexyHtmlModule extends TexyModule
         if (!$aTags) return FALSE;  // all tags are disabled
 
         if (is_array($aTags)) {
-            if (!isset($aTags[$el->elName])) {
-                $el->setElement(strtolower($el->elName));
-                if (!isset($aTags[$el->elName])) return FALSE; // this element not allowed
+            if (!isset($aTags[$el->name])) {
+                $el->setName(strtolower($el->name));
+                if (!isset($aTags[$el->name])) return FALSE; // this element not allowed
             }
-            $aAttrs = $aTags[$el->elName]; // allowed attrs
+            $aAttrs = $aTags[$el->name]; // allowed attrs
 
         } else {
             // complete UPPER convert to lower
-            if ($el->elName === strtoupper($el->elName))
-                $el->setElement(strtolower($el->elName));
+            if ($el->name === strtoupper($el->name))
+                $el->setName(strtolower($el->name));
             $aAttrs = NULL; // all attrs are allowed
         }
 
         // force empty
-        if ($forceEmpty && $aTags === Texy::ALL) $el->childNodes = FALSE;
+        if ($forceEmpty && $aTags === Texy::ALL) $el->isEmpty = TRUE;
 
         // end tag? we are finished
         if (!$isStart) {
             return $tx->protect($el->endTag(), $el->getContentType());
         }
 
+        $elAttrs = & $el->attrs;
+
         // process attributes
         if (is_array($aAttrs)) {
             $aAttrs = array_flip($aAttrs);
-            $aAttrs['elName'] = $aAttrs['childNodes'] = $aAttrs['userData'] = TRUE; // hack for TexyHtml default props
 
             // skip disabled
-            foreach ($el as $key => $foo)
-                if (!isset($aAttrs[$key])) unset($el->$key);
+            foreach ($elAttrs as $key => $foo)
+                if (!isset($aAttrs[$key])) unset($elAttrs[$key]);
         }
 
         // apply allowedClasses
         $tmp = $tx->_classes; // speed-up
-        if (isset($el->class)) {
+        if (isset($elAttrs['class'])) {
             if (is_array($tmp)) {
-                $el->class = explode(' ', $el->class);
-                foreach ($el->class as $key => $val)
-                    if (!isset($tmp[$val])) unset($el->class[$key]); // id & class are case-sensitive in XHTML
+                $elAttrs['class'] = explode(' ', $elAttrs['class']);
+                foreach ($elAttrs['class'] as $key => $val)
+                    if (!isset($tmp[$val])) unset($elAttrs['class'][$key]); // id & class are case-sensitive in XHTML
 
             } elseif ($tmp !== Texy::ALL) {
-                $el->class = NULL;
+                $elAttrs['class'] = NULL;
             }
         }
 
         // apply allowedClasses for ID
-        if (isset($el->id)) {
+        if (isset($elAttrs['id'])) {
             if (is_array($tmp)) {
-                if (!isset($tmp['#' . $el->id])) $el->id = NULL;
+                if (!isset($tmp['#' . $elAttrs['id']])) $elAttrs['id'] = NULL;
             } elseif ($tmp !== Texy::ALL) {
-                $el->id = NULL;
+                $elAttrs['id'] = NULL;
             }
         }
 
         // apply allowedStyles
-        if (isset($el->style)) {
+        if (isset($elAttrs['style'])) {
             $tmp = $tx->_styles;  // speed-up
             if (is_array($tmp)) {
-                $styles = explode(';', $el->style);
-                $el->style = NULL;
+                $styles = explode(';', $elAttrs['style']);
+                $elAttrs['style'] = NULL;
                 foreach ($styles as $value) {
                     $pair = explode(':', $value, 2);
                     $prop = trim($pair[0]);
                     if (isset($pair[1]) && isset($tmp[strtolower($prop)])) // CSS is case-insensitive
-                        $el->style[$prop] = $pair[1];
+                        $elAttrs['style'][$prop] = $pair[1];
                 }
             } elseif ($tmp !== Texy::ALL) {
-                $el->style = NULL;
+                $elAttrs['style'] = NULL;
             }
         }
 
-        if ($el->elName === 'img') {
-            if (!isset($el->src)) return FALSE;
+        if ($el->name === 'img') {
+            if (!isset($elAttrs['src'])) return FALSE;
 
-            if (!$tx->checkURL($el->src, 'i')) return FALSE;
+            if (!$tx->checkURL($elAttrs['src'], 'i')) return FALSE;
 
-            $tx->summary['images'][] = $el->src;
+            $tx->summary['images'][] = $elAttrs['src'];
 
-        } elseif ($el->elName === 'a') {
-            if (!isset($el->href) && !isset($el->name) && !isset($el->id)) return FALSE;
-            if (isset($el->href)) {
-                if ($tx->linkModule->forceNoFollow && strpos($el->href, '//') !== FALSE) {
-                    if (isset($el->rel)) $el->rel = (array) $el->rel;
-                    $el->rel[] = 'nofollow';
+        } elseif ($el->name === 'a') {
+            if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) return FALSE;
+            if (isset($elAttrs['href'])) {
+                if ($tx->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== FALSE) {
+                    if (isset($elAttrs['rel'])) $elAttrs['rel'] = (array) $elAttrs['rel'];
+                    $elAttrs['rel'][] = 'nofollow';
                 }
 
-                if (!$tx->checkURL($el->href, 'a')) return FALSE;
+                if (!$tx->checkURL($elAttrs['href'], 'a')) return FALSE;
 
-                $tx->summary['links'][] = $el->href;
+                $tx->summary['links'][] = $elAttrs['href'];
             }
         }
 

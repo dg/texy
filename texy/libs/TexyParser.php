@@ -345,7 +345,7 @@ class TexyLineParser extends TexyParser
         } while (1);
 
         if ($this->parentNode)
-            $this->parentNode->childNodes = $text;
+            $this->parentNode->setText($text);
 
         return $text;
     }

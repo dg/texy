@@ -17,22 +17,31 @@ if (!defined('TEXY')) die();
 
 /**
  * HTML helper
+ *
+ * usage:
+ *       $anchor = TexyHtml::el('a')->href($link)->setText('Texy');
+ *       $el['href'] = $link;
+ *
+ *       echo $el->startTag(), $el->endTag();
+ *
  */
-class TexyHtml
+class TexyHtml implements ArrayAccess
 {
     /** @var string  element's name */
-    public $elName;
+    public $name;
+
+    /** @var array  element's attributes */
+    public $attrs = array();
 
     /**
      * @var mixed  element's content
      *   array - child nodes
      *   string - content as string (text-node)
-     *   FALSE - element is empty
      */
     public $childNodes;
 
-    /** @var mixed  user data */
-    public $userData;
+    /** @var bool  is element empty? */
+    public $isEmpty;
 
     /** @var bool  use XHTML syntax? */
     static public $XHTML = TRUE;
@@ -45,22 +54,28 @@ class TexyHtml
     static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
         'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1,'embed'=>1);
 
-    /* element's attributes are not explicitly declared */
-
-
 
 
     /**
-     * TexyHtml element's factory
+     * @param string element name
+     * @param array element's attributes
+     */
+    public function __construct($name=NULL, $attrs=NULL)
+    {
+        if ($name !== NULL) $this->setName($name);
+        if ($attrs !== NULL) $this->setAttrs($attrs);
+    }
+
+
+    /**
+     * Static factory
      * @param string element name (or NULL)
+     * @param array element's attributes
      * @return TexyHtml
      */
-    static public function el($name=NULL)
+    static public function el($name=NULL, $attrs=NULL)
     {
-        $el = new self();
-        $el->elName = $name;
-        if (isset(self::$emptyTags[$name])) $el->childNodes = FALSE;
-        return $el;
+        return new self($name, $attrs);
     }
 
 
@@ -69,10 +84,13 @@ class TexyHtml
      * @param string
      * @return TexyHtml  itself
      */
-    public function setElement($name)
+    public function setName($name)
     {
-        $this->elName = $name;
-        if (isset(self::$emptyTags[$name])) $this->childNodes = FALSE;
+        if ($name !== NULL && !is_string($name))
+            throw new Exception('Name must be string or NULL');
+
+        $this->name = $name;
+        $this->isEmpty = isset(self::$emptyTags[$name]);
         return $this;
     }
 
@@ -84,62 +102,160 @@ class TexyHtml
      */
     public function setAttrs($attrs)
     {
-        foreach ($attrs as $key => $value) $this->$key = $value;
+        if ($attrs === NULL) {
+            $this->attrs = array();
+
+        } else {
+            if (!is_array($attrs))
+                throw new Exception('Attributes must be array');
+
+            $this->attrs = $attrs;
+        }
         return $this;
     }
 
 
     /**
-     * Sets element's content
-     * @param string object
+     * Sets element's textual content
+     * @param string
      * @return TexyHtml  itself
      */
-    public function setContent($content)
+    public function setText($text)
     {
-        if (!is_scalar($content))
+        if ($text === NULL)
+            $text = '';
+        elseif (!is_scalar($text))
             throw new Exception('Content must be scalar');
 
-        $this->childNodes = $content;
+        $this->childNodes = $text;
         return $this;
     }
 
 
+
     /**
-     * Gets element's content
+     * Gets element's textual content
      * @return string
      */
-    public function getContent()
+    public function getText()
     {
-        if (is_array($this->childNodes)) return NULL;
+        if (is_array($this->childNodes)) return FALSE;
+
         return $this->childNodes;
     }
 
 
+
     /**
-     * Adds new child of element's content
+     * Adds new element's child
      * @param string|TexyHtml object
      * @return TexyHtml  itself
      */
-    public function addChild($content)
+    public function addChild($child)
     {
-        $this->childNodes[] = $content;
+        $this->childNodes[] = $child;
         return $this;
+    }
+
+
+    /**
+     * Returns child node
+     * @param mixed index
+     * @return TexyHtml|string
+     */
+    public function getChild($index)
+    {
+        if (isset($this->childNodes[$index]))
+            return $this->childNodes[$index];
+
+        return NULL;
+    }
+
+
+    /**
+     * Adds and creates new TexyHtml child
+     * @param string|TexyHtml  elements's name or TexyHtml object
+     * @return TexyHtml
+     */
+    public function add($child)
+    {
+        if (!($child instanceof self))
+            $child = new self($child);
+
+        return $this->childNodes[] = $child;
     }
 
 
     /**
      * Overloaded setter for element's attribute
-     * @param string function name
-     * @param array function arguments
+     * @param string attribute name
+     * @param array value
      * @return TexyHtml  itself
      */
-     /*
+/*
     public function __call($m, $args)
     {
-        $this->$m = $args[0];
+        $this->attrs[$m] = $args[0];
         return $this;
     }
-    */
+*/
+
+
+    /** these are the required ArrayAccess functions */
+    /**
+     * Getter for element's attribute
+     * @param string attribute name
+     * @return mixed
+     */
+    public function offsetGet($i)
+    {
+        if (isset($this->attrs[$i])) {
+            if (is_array($this->attrs[$i]))
+                $this->attrs[$i] = new ArrayObject($this->attrs[$i]);
+
+            return $this->attrs[$i];
+        }
+
+        // special cases
+        if ($i === 'style' || $i === 'class') {
+            return $this->attrs[$i] = new ArrayObject;
+        }
+
+        return NULL;
+    }
+
+    /**
+     * Setter for element's attribute
+     * @param string attribute name
+     * @param mixed value
+     * @return void
+     */
+    public function offsetSet($i, $value)
+    {
+        if ($i === NULL) throw new Exception('Invalid TexyHtml usage.');
+        $this->attrs[$i] = $value;
+    }
+
+    /**
+     * Exists element's attribute?
+     * @param string attribute name
+     * @return bool
+     */
+    public function offsetExists($i)
+    {
+        return isset($this->attrs[$i]);
+    }
+
+    /**
+     * Unsets element's attribute
+     * @param string attribute name
+     * @return void
+     */
+    public function offsetUnset($i)
+    {
+        unset($this->attrs[$i]);
+    }
+    /** end required ArrayAccess functions */
 
 
     /**
@@ -152,7 +268,7 @@ class TexyHtml
         $s = $texy->protect($this->startTag(), $ct);
 
         // empty elements are finished now
-        if ($this->childNodes === FALSE) return $s;
+        if ($this->isEmpty) return $s;
 
         // add content
         if (is_array($this->childNodes)) {
@@ -177,15 +293,12 @@ class TexyHtml
      */
     public function startTag()
     {
-        if (!$this->elName) return '';
+        if (!$this->name) return '';
 
-        $s = '<' . $this->elName;
+        $s = '<' . $this->name;
 
-        // for each attribute...
-        $attrs = (array) $this;
-        unset($attrs['elName'], $attrs['childNodes'], $attrs['userData']);
-
-        foreach ($attrs as $key => $value)
+        if (is_array($this->attrs))
+        foreach ($this->attrs as $key => $value)
         {
             // skip NULLs and false boolean attributes
             if ($value === NULL || $value === FALSE) continue;
@@ -198,7 +311,7 @@ class TexyHtml
                 else $s .= ' ' . $key;
                 continue;
 
-            } elseif (is_array($value)) {
+            } elseif (is_array($value) || is_object($value)) {
 
                 // prepare into temporary array
                 $tmp = NULL;
@@ -227,7 +340,7 @@ class TexyHtml
         }
 
         // finish start tag
-        if (self::$XHTML && $this->childNodes === FALSE) return $s . ' />';
+        if (self::$XHTML && $this->isEmpty) return $s . ' />';
         return $s . '>';
     }
 
@@ -238,19 +351,9 @@ class TexyHtml
      */
     public function endTag()
     {
-        if ($this->elName && $this->childNodes !== FALSE)
-            return '</' . $this->elName . '>';
+        if ($this->name && !$this->isEmpty)
+            return '</' . $this->name . '>';
         return '';
-    }
-
-
-    /**
-     * Is element empty?
-     * @return bool
-     */
-    public function isEmpty()
-    {
-        return $this->childNodes === FALSE;
     }
 
 
@@ -260,7 +363,7 @@ class TexyHtml
      */
     public function isTextual()
     {
-        return $this->childNodes !== FALSE && is_scalar($this->childNodes);
+        return !$this->isEmpty && is_scalar($this->childNodes);
     }
 
 
@@ -282,8 +385,8 @@ class TexyHtml
      */
     public function getContentType()
     {
-        if (isset(self::$replacedTags[$this->elName])) return Texy::CONTENT_REPLACED;
-        if (isset(TexyHtmlFormatter::$inline[$this->elName])) return Texy::CONTENT_MARKUP;
+        if (isset(self::$replacedTags[$this->name])) return Texy::CONTENT_REPLACED;
+        if (isset(TexyHtmlFormatter::$inline[$this->name])) return Texy::CONTENT_MARKUP;
 
         return Texy::CONTENT_BLOCK;
     }
@@ -319,5 +422,12 @@ class TexyHtml
         $parser = new TexyBlockParser($texy, $this);
         $parser->parse($s);
     }
+
+
+    /**
+     * Undefined property usage prevention
+     */
+    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
+    function __set($nm, $val) { $this->__get($nm); }
 
 }

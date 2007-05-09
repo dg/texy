@@ -91,15 +91,15 @@ class TexyListModule extends TexyModule
             if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
                 $bullet = isset($desc[3]) ? $desc[3] : $desc[0];
                 $min = isset($desc[3]) ? 2 : 1;
-                $el->elName = $desc[1] ? 'ol' : 'ul';
-                $el->style['list-style-type'] = $desc[2];
-		        if ($el->elName === 'ol') {
+                $el->name = $desc[1] ? 'ol' : 'ul';
+                $el['style']['list-style-type'] = $desc[2];
+                if ($desc[1]) { // ol
                     if ($type[0] === '1' && (int) $mBullet > 1)
-                        $el->start = (int) $mBullet;
+                        $el['start'] = (int) $mBullet;
                     elseif ($type[0] === 'a' && $mBullet[0] > 'a')
-                        $el->start = ord($mBullet[0]) - 96;
+                        $el['start'] = ord($mBullet[0]) - 96;
                     elseif ($type[0] === 'A' && $mBullet[0] > 'A')
-                        $el->start = ord($mBullet[0]) - 64;
+                        $el['start'] = ord($mBullet[0]) - 64;
                 }
                 break;
             }
@@ -110,7 +110,7 @@ class TexyListModule extends TexyModule
         $parser->moveBackward(1);
 
         while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li'))
-            $el->childNodes[] = $elItem;
+            $el->addChild($elItem);
 
         if (count($el->childNodes) < $min) return FALSE;
 
@@ -163,7 +163,7 @@ class TexyListModule extends TexyModule
 
         while (TRUE) {
             if ($elItem = $this->patternItem($parser, $bullet, TRUE, 'dd')) {
-                $el->childNodes[] = $elItem;
+                $el->addChild($elItem);
                 continue;
             }
 
@@ -177,7 +177,7 @@ class TexyListModule extends TexyModule
                 $mod->decorate($tx, $elItem);
 
                 $elItem->parseLine($tx, $mContent);
-                $el->childNodes[] = $elItem;
+                $el->addChild($elItem);
                 continue;
             }
 
@@ -240,8 +240,8 @@ class TexyListModule extends TexyModule
         $elItem->parseBlock($tx, $content);
         $tx->paragraphModule->mode = $tmp;
 
-        if (isset($elItem->childNodes[0]) && $elItem->childNodes[0] instanceof TexyHtml) {
-            $elItem->childNodes[0]->elName = '';
+        if ($elItem->getChild(0) instanceof TexyHtml) {
+            $elItem->getChild(0)->setName(NULL);
         }
 
         return $elItem;

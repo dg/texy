@@ -285,7 +285,7 @@ Verze 1.0rc4
 
 16. 3. 2005 .[date]
 
-- NEW: nová "vychytávka":/cs/try/qqa7q - blok `/-- source`
+- NEW: nová "vychytávka":/cs/try/ddjp9 - blok `/-- source`
 - CHG: každý modul má zkratku (referenci) ve formátu `$texy->xyzModule`
 - CHG: **aktivace UTF** přes `$texy->utf = true;`
 - CHG: vylepšení tabulek

@@ -62,13 +62,12 @@ class myHandler
         $content = $parser->highlightString($lang, $content);
         $content = $texy->protect($content);
 
-        $el = TexyHtml::el('code');
-        $el->setContent( $content );
-
         $elPre = TexyHtml::el('pre');
         if ($modifier) $modifier->decorate($texy, $elPre);
-        $elPre->class = strtolower($lang);
-        $elPre->addChild($el);
+        $elPre['class'] = strtolower($lang);
+
+        $elCode = $elPre->add('code');
+        $elCode->setText($content);
 
         return $elPre;
     }

@@ -66,8 +66,8 @@ function userHandler($parser, $matches, $name)
     $mod = new TexyModifier($mMod);
     $mod->decorate($texy, $el);
 
-    $el->class = 'myclass';
-    $el->setContent($mContent);
+    $el['class'] = 'myclass';
+    $el->setText($mContent);
 
     // parse inner content of this element
     $parser->again = TRUE;

@@ -42,8 +42,10 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
     /** @var string  default alternative text */
     public $defaultAlt = '';
 
-    private $references = array();
+    /** @var string  images onload handler */
+    public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
 
+    private $references = array();
 
 
 
@@ -246,28 +248,28 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         $mod->hAlign = NULL;
 
         $el = TexyHtml::el('img');
-        $el->src = NULL; // trick - move to front
+        $el['src'] = NULL; // trick - move to front
         $mod->decorate($tx, $el);
-        $el->src = Texy::prependRoot($image->URL, $this->root);
-        $el->alt = (string) $alt;  // needed
+        $el['src'] = Texy::prependRoot($image->URL, $this->root);
+        $el['alt'] = (string) $alt;  // needed
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->leftClass != '')
-                $el->class[] = $this->leftClass;
+                $el['class'][] = $this->leftClass;
             else
-                $el->style['float'] = 'left';
+                $el['style']['float'] = 'left';
 
         } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
 
             if ($this->rightClass != '')
-                $el->class[] = $this->rightClass;
+                $el['class'][] = $this->rightClass;
             else
-                $el->style['float'] = 'right';
+                $el['style']['float'] = 'right';
         }
 
         if ($image->width || $image->height) {
-            $el->width = $image->width;
-            $el->height = $image->height;
+            $el['width'] = $image->width;
+            $el['height'] = $image->height;
 
         } else {
             // absolute URL & security check for double dot
@@ -276,8 +278,8 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
                 if (is_file($file)) {
                     $size = getImageSize($file);
                     if (is_array($size)) {
-                        $image->width = $el->width = $size[0];
-                        $image->height = $el->height = $size[1];
+                        $image->width = $el['width'] = $size[0];
+                        $image->height = $el['height'] = $size[1];
                     }
                 }
             }
@@ -286,13 +288,13 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         // onmouseover actions generate
         if ($image->overURL !== NULL) {
             $overSrc = Texy::prependRoot($image->overURL, $this->root);
-            $el->onmouseover = 'this.src=\'' . addSlashes($overSrc) . '\'';
-            $el->onmouseout = 'this.src=\'' . addSlashes($el->src) . '\'';
-            $el->onload = "var i=new Image();i.src='" . addSlashes($overSrc) . "';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
+            $el['onmouseover'] = 'this.src=\'' . addSlashes($overSrc) . '\'';
+            $el['onmouseout'] = 'this.src=\'' . addSlashes($el['src']) . '\'';
+            $el['onload'] = str_replace('%i', addSlashes($overSrc), $this->onLoad);
             $tx->summary['preload'][] = $overSrc;
         }
 
-        $tx->summary['images'][] = $el->src;
+        $tx->summary['images'][] = $el['src'];
 
         if ($link) return $tx->linkModule->solve($link, $el);
 

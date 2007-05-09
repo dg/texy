@@ -91,11 +91,11 @@ class TexyQuoteModule extends TexyModule
             list(, $mPrefix, $mContent) = $matches;
         } while (TRUE);
 
-        $el->cite = $mod->cite;
+        $el['cite'] = $mod->cite;
         $el->parseBlock($tx, $content);
 
         // no content?
-        if (!$el->childNodes) return FALSE;
+        if (!count($el->childNodes)) return FALSE;
 
         // event listener
         if (is_callable(array($tx->handler, 'afterBlockquote')))

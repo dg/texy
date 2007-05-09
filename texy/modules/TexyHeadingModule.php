@@ -168,27 +168,26 @@ class TexyHeadingModule extends TexyModule
         $el = new TexyHeadingElement;
         $mod->decorate($tx, $el);
 
-        $el->userData['level'] = $level;
-        $el->userData['top'] = $this->top;
-        $el->userData['map'] = NULL;
+        $el->level = $level;
+        $el->top = $this->top;
 
         if ($this->balancing === self::DYNAMIC) {
             if ($isSurrounded) {
                 $this->dynamicTop = max($this->dynamicTop, $this->top - $level);
-                $el->userData['top'] = & $this->dynamicTop;
+                $el->top = & $this->dynamicTop;
             } else {
                 $this->dynamicMap[$level] = $level;
-                $el->userData['map'] = & $this->dynamicMap;
+                $el->map = & $this->dynamicMap;
             }
         }
         $el->parseLine($tx, trim($content));
 
         // document title
-        $title = $tx->_toText($el->getContent());
+        $title = $tx->_toText($el->getText());
         if ($this->title === NULL) $this->title = $title;
 
         // Table of Contents
-        if ($this->generateID && empty($el->id)) {
+        if ($this->generateID && empty($el['id'])) {
             $id = $this->idPrefix . Texy::webalize($title);
             $counter = '';
             if (isset($this->usedID[$id . $counter])) {
@@ -197,16 +196,16 @@ class TexyHeadingModule extends TexyModule
                 $id .= '-' . $counter;
             }
             $this->usedID[$id] = TRUE;
-            $el->id = $id;
+            $el['id'] = $id;
         }
 
         $TOC = array(
-            'id' => isset($el->id) ? $el->id : NULL,
+            'id' => $el['id'],
             'title' => $title,
             'level' => 0,
         );
         $this->TOC[] = & $TOC;
-        $el->userData['TOC'] = & $TOC;
+        $el->TOC = & $TOC;
 
         return $el;
     }
@@ -225,22 +224,27 @@ class TexyHeadingModule extends TexyModule
  */
 class TexyHeadingElement extends TexyHtml
 {
-    public $elName = 'h?';
+    public $name = 'h?';
+
+    public $level;
+    public $top;
+    public $map;
+    public $TOC;
 
 
     public function startTag()
     {
-        $level = $this->userData['level'];
+        $level = $this->level;
 
-        if ($this->userData['map']) {
-            asort($this->userData['map']);
-            $level = array_search($level, array_values($this->userData['map']), TRUE);
+        if ($this->map) {
+            asort($this->map);
+            $level = array_search($level, array_values($this->map), TRUE);
         }
 
-        $level += $this->userData['top'];
+        $level += $this->top;
 
-        $this->elName = 'h' . min(6, max(1, $level));
-        $this->userData['TOC']['level'] = $level;
+        $this->name = 'h' . min(6, max(1, $level));
+        $this->TOC['level'] = $level;
         return parent::startTag();
     }
 

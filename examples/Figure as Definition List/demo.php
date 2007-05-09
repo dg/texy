@@ -37,15 +37,15 @@ class myHandler {
         $el = $parser->texy->figureModule->solve($image, $link, $content, $modifier);
 
         // change div -> dl
-        $el->elName = 'dl';
-
-        // wrap img into dt
-        $dd = TexyHtml::el('dt');
-        $dd->addChild( $el->childNodes['img'] );
-        $el->childNodes['img'] = $dd;
+        $el->setName('dl');
 
         // change p -> dd
-        $el->childNodes['caption']->elName = 'dd';
+        $el->childNodes['caption']->setName('dd');
+
+        // wrap img into dt
+        $img = $el->childNodes['img'];
+        $el->childNodes['img'] = TexyHtml::el('dt')->addChild($img);
+
         return $el;
     }
 

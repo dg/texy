@@ -79,11 +79,10 @@ class TexyTableModule extends TexyModule
             //    [2] => ....
             //    [3] => .(title)[class]{style}<>
 
-            $caption = TexyHtml::el('caption');
+            $caption = $el->add('caption');
             $mod = new TexyModifier($mMod);
             $mod->decorate($tx, $caption);
             $caption->parseLine($tx, $mContent);
-            $el->childNodes[] = $caption;
         }
 
         $this->isHead = FALSE;
@@ -98,7 +97,7 @@ class TexyTableModule extends TexyModule
             }
 
             if ($elRow = $this->patternRow($parser)) {
-                $el->childNodes[] = $elRow;
+                $el->addChild($elRow);
                 $this->row++;
                 continue;
             }
@@ -137,9 +136,9 @@ class TexyTableModule extends TexyModule
         $mod->decorate($tx, $elRow);
 
         if ($this->row % 2 === 0) {
-            if ($this->oddClass) $elRow->class[] = $this->oddClass;
+            if ($this->oddClass) $elRow['class'][] = $this->oddClass;
         } else {
-            if ($this->evenClass) $elRow->class[] = $this->evenClass;
+            if ($this->evenClass) $elRow['class'][] = $this->evenClass;
         }
 
         $col = 0;
@@ -184,13 +183,13 @@ class TexyTableModule extends TexyModule
             $mod->setProperties($mMod);
 
             $elField = new TexyTableFieldElement;
-            $elField->elName = $this->isHead || ($mHead === '*') ? 'th' : 'td';
+            $elField->setName($this->isHead || ($mHead === '*') ? 'th' : 'td');
             $mod->decorate($tx, $elField);
 
             $elField->parseLine($tx, $mContent);
             if ($elField->childNodes === '') $elField->childNodes  = "\xC2\xA0"; // &nbsp;
 
-            $elRow->childNodes[] = $elField;
+            $elRow->addChild($elField);
             $this->last[$col] = $elField;
             $col++;
         }
@@ -214,8 +213,8 @@ class TexyTableFieldElement extends TexyHtml
 
     public function startTag()
     {
-        if ($this->colspan == 1) $this->colspan = NULL;
-        if ($this->rowspan == 1) $this->rowspan = NULL;
+        $this->attrs['colspan'] = $this->colspan < 2 ? NULL : $this->colspan;
+        $this->attrs['rowspan'] = $this->rowspan < 2 ? NULL : $this->rowspan;
         return parent::startTag();
     }
 

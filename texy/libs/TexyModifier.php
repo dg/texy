@@ -107,7 +107,7 @@ class TexyModifier
                 $a = strpos($mod, '}', $p) + 1;
                 foreach (explode(';', substr($mod, $p + 1, $a - $p - 2)) as $value) {
                     $pair = explode(':', $value, 2);
-                    $prop = strtolower(trim($pair[0])); // strtolower protects TexyHtml's elName, userData, childNodes
+                    $prop = strtolower(trim($pair[0]));
                     if ($prop === '' || !isset($pair[1])) continue;
                     $value = trim($pair[1]);
 
@@ -160,8 +160,8 @@ class TexyModifier
         } elseif ($tmp === Texy::ALL) {
             $el->setAttrs($this->attrs);
 
-        } elseif (is_array($tmp) && isset($tmp[$el->elName])) {
-            $tmp = $tmp[$el->elName];
+        } elseif (is_array($tmp) && isset($tmp[$el->name])) {
+            $tmp = $tmp[$el->name];
 
             if ($tmp === Texy::ALL) {
                 $el->setAttrs($this->attrs);
@@ -170,26 +170,28 @@ class TexyModifier
                 if (is_array($tmp) && count($tmp)) {
                     $tmp = array_flip($tmp);
                     foreach ($this->attrs as $key => $val)
-                        if (isset($tmp[$key])) $el->$key = $val;
+                        if (isset($tmp[$key])) $el->attrs[$key] = $val;
                 }
             }
         }
 
+        $elAttrs = & $el->attrs;
+
         // title
         if ($this->title !== NULL)
-            $el->title = $texy->typographyModule->postLine($this->title);
+            $elAttrs['title'] = $texy->typographyModule->postLine($this->title);
 
         // classes & ID
         if ($this->classes || $this->id !== NULL) {
             $tmp = $texy->_classes; // speed-up
             if ($tmp === Texy::ALL) {
-                foreach ($this->classes as $val) $el->class[] = $val;
-                $el->id = $this->id;
+                foreach ($this->classes as $val) $elAttrs['class'][] = $val;
+                $elAttrs['id'] = $this->id;
             } elseif (is_array($tmp)) {
                 foreach ($this->classes as $val)
-                    if (isset($tmp[$val])) $el->class[] = $val;
+                    if (isset($tmp[$val])) $elAttrs['class'][] = $val;
 
-                if (isset($tmp['#' . $this->id])) $el->id = $this->id;
+                if (isset($tmp['#' . $this->id])) $elAttrs['id'] = $this->id;
             }
         }
 
@@ -197,16 +199,16 @@ class TexyModifier
         if ($this->styles) {
             $tmp = $texy->_styles;  // speed-up
             if ($tmp === Texy::ALL) {
-                foreach ($this->styles as $prop => $val) $el->style[$prop] = $val;
+                foreach ($this->styles as $prop => $val) $elAttrs['style'][$prop] = $val;
             } elseif (is_array($tmp)) {
                 foreach ($this->styles as $prop => $val)
-                    if (isset($tmp[$prop])) $el->style[$prop] = $val;
+                    if (isset($tmp[$prop])) $elAttrs['style'][$prop] = $val;
             }
         }
 
         // align
-        if ($this->hAlign) $el->style['text-align'] = $this->hAlign;
-        if ($this->vAlign) $el->style['vertical-align'] = $this->vAlign;
+        if ($this->hAlign) $elAttrs['style']['text-align'] = $this->hAlign;
+        if ($this->vAlign) $elAttrs['style']['vertical-align'] = $this->vAlign;
 
         return $el;
     }

@@ -111,20 +111,20 @@ class TexyEmoticonModule extends TexyModule
         $tx = $this->texy;
         $file = $this->icons[$emoticon];
         $el = TexyHtml::el('img');
-        $el->src = Texy::prependRoot($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
-        $el->alt = $raw;
-        $el->class[] = $this->class;
+        $el['src'] = Texy::prependRoot($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+        $el['alt'] = $raw;
+        $el['class'][] = $this->class;
 
         // file path
         $file = rtrim($this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
         if (is_file($file)) {
             $size = getImageSize($file);
             if (is_array($size)) {
-                $el->width = $size[0];
-                $el->height = $size[1];
+                $el['width'] = $size[0];
+                $el['height'] = $size[1];
             }
         }
-        $tx->summary['images'][] = $el->src;
+        $tx->summary['images'][] = $el['src'];
         return $el;
     }
 
