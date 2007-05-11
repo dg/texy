@@ -40,11 +40,11 @@ class myHandler {
         $el->setName('dl');
 
         // change p -> dd
-        $el->childNodes['caption']->setName('dd');
+        $el->children['caption']->setName('dd');
 
         // wrap img into dt
-        $img = $el->childNodes['img'];
-        $el->childNodes['img'] = TexyHtml::el('dt')->addChild($img);
+        $img = $el->children['img'];
+        $el->children['img'] = TexyHtml::el('dt')->addChild($img);
 
         return $el;
     }

@@ -111,9 +111,9 @@ class TexyFigureModule extends TexyModule
         if (!empty($image->width)) $el['style']['width'] = ($image->width + $this->widthDelta) . 'px';
         $mod->decorate($tx, $el);
 
-        $el->childNodes['img'] = $elImg;
-        $el->childNodes['caption'] = TexyHtml::el('p');
-        $el->childNodes['caption']->parseLine($tx, ltrim($content));
+        $el->children['img'] = $elImg;
+        $el->children['caption'] = TexyHtml::el('p');
+        $el->children['caption']->parseLine($tx, ltrim($content));
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->leftClass != '')

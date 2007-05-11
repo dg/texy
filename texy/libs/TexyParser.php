@@ -20,7 +20,7 @@ class TexyParser
     public $texy;
 
     /** @var TexyHtml  READONLY */
-    public $parentNode;
+    public $parent;
 
     /** @var array */
     public $patterns;
@@ -59,7 +59,7 @@ class TexyBlockParser extends TexyParser
     public function __construct(Texy $texy, $element=NULL)
     {
         $this->texy = $texy;
-        $this->parentNode = $element;
+        $this->parent = $element;
         $this->patterns = $texy->getBlockPatterns();
     }
 
@@ -215,8 +215,8 @@ class TexyBlockParser extends TexyParser
 
         } while (1);
 
-        if ($this->parentNode)
-            $this->parentNode->childNodes = $nodes;
+        if ($this->parent)
+            $this->parent->children = $nodes;
 
         return $nodes;
     }
@@ -247,7 +247,7 @@ class TexyLineParser extends TexyParser
     public function __construct(Texy $texy, $element=NULL)
     {
         $this->texy = $texy;
-        $this->parentNode = $element;
+        $this->parent = $element;
         $this->patterns = $texy->getLinePatterns();
     }
 
@@ -344,8 +344,8 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        if ($this->parentNode)
-            $this->parentNode->setText($text);
+        if ($this->parent)
+            $this->parent->setText($text);
 
         return $text;
     }

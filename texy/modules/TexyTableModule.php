@@ -187,7 +187,7 @@ class TexyTableModule extends TexyModule
             $mod->decorate($tx, $elField);
 
             $elField->parseLine($tx, $mContent);
-            if ($elField->childNodes === '') $elField->childNodes  = "\xC2\xA0"; // &nbsp;
+            if ($elField->children === '') $elField->children  = "\xC2\xA0"; // &nbsp;
 
             $elRow->addChild($elField);
             $this->last[$col] = $elField;

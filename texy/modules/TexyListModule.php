@@ -112,7 +112,7 @@ class TexyListModule extends TexyModule
         while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li'))
             $el->addChild($elItem);
 
-        if (count($el->childNodes) < $min) return FALSE;
+        if (count($el->children) < $min) return FALSE;
 
         // event listener
         if (is_callable(array($tx->handler, 'afterList')))

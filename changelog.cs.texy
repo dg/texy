@@ -1,6 +1,14 @@
 Changelog
 *********
 
+Verze 2.0 Release Candidate 1 (rev. 124)
+=========
+
+5. 5. 2007 .[date]
+
+- přepsána knihovna TexyHtml
+
+
 Verze 2.0 Release Candidate 1 (rev. 122)
 =========
 
@@ -196,7 +204,7 @@ TexyHtmlFormatter
 TexyDOM a zděděné třídy
 -----------------------
 - odstraněno, náhradou je TexyHtml (obdoba NHtml, viz http://www.dgx.cz/trine/item/nhtml-pomocnik-php-programatora)
-- vlastnost TexyHtml::$XHTML - přepínač mezi XHTML a HTML výstupem
+- vlastnost TexyHtml::$xhtml - přepínač mezi XHTML a HTML výstupem
 - ve všech handlerech se nyní operuje s elementy reprezentovanými tímto objektem, manipulace je tedy extrémně snadná
 
 
@@ -214,7 +222,7 @@ Verze 1.1b
 
 
 
-Verze 1.1 
+Verze 1.1
 =========
 
 6. 6. 2006 .[date]

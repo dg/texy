@@ -38,13 +38,13 @@ class TexyHtml implements ArrayAccess
      *   array - child nodes
      *   string - content as string (text-node)
      */
-    public $childNodes;
+    public $children;
 
     /** @var bool  is element empty? */
     public $isEmpty;
 
     /** @var bool  use XHTML syntax? */
-    static public $XHTML = TRUE;
+    static public $xhtml = TRUE;
 
     /** @var array  replaced elements + br */
     static private $replacedTags = array('br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,
@@ -127,7 +127,7 @@ class TexyHtml implements ArrayAccess
         elseif (!is_scalar($text))
             throw new Exception('Content must be scalar');
 
-        $this->childNodes = $text;
+        $this->children = $text;
         return $this;
     }
 
@@ -139,9 +139,9 @@ class TexyHtml implements ArrayAccess
      */
     public function getText()
     {
-        if (is_array($this->childNodes)) return FALSE;
+        if (is_array($this->children)) return FALSE;
 
-        return $this->childNodes;
+        return $this->children;
     }
 
 
@@ -153,7 +153,7 @@ class TexyHtml implements ArrayAccess
      */
     public function addChild($child)
     {
-        $this->childNodes[] = $child;
+        $this->children[] = $child;
         return $this;
     }
 
@@ -165,8 +165,8 @@ class TexyHtml implements ArrayAccess
      */
     public function getChild($index)
     {
-        if (isset($this->childNodes[$index]))
-            return $this->childNodes[$index];
+        if (isset($this->children[$index]))
+            return $this->children[$index];
 
         return NULL;
     }
@@ -182,7 +182,7 @@ class TexyHtml implements ArrayAccess
         if (!($child instanceof self))
             $child = new self($child);
 
-        return $this->childNodes[] = $child;
+        return $this->children[] = $child;
     }
 
 
@@ -271,15 +271,15 @@ class TexyHtml implements ArrayAccess
         if ($this->isEmpty) return $s;
 
         // add content
-        if (is_array($this->childNodes)) {
-            foreach ($this->childNodes as $val) {
+        if (is_array($this->children)) {
+            foreach ($this->children as $val) {
                 if ($val instanceof self)
                     $s .= $val->export($texy);
                 else
                     $s .= $val;
             }
         } else {
-            $s .= $this->childNodes;
+            $s .= $this->children;
         }
 
         // add end tag
@@ -306,7 +306,7 @@ class TexyHtml implements ArrayAccess
             // true boolean attribute
             if ($value === TRUE) {
                 // in XHTML must use unminimized form
-                if (self::$XHTML) $s .= ' ' . $key . '="' . $key . '"';
+                if (self::$xhtml) $s .= ' ' . $key . '="' . $key . '"';
                 // in HTML should use minimized form
                 else $s .= ' ' . $key;
                 continue;
@@ -340,7 +340,7 @@ class TexyHtml implements ArrayAccess
         }
 
         // finish start tag
-        if (self::$XHTML && $this->isEmpty) return $s . ' />';
+        if (self::$xhtml && $this->isEmpty) return $s . ' />';
         return $s . '>';
     }
 
@@ -363,19 +363,19 @@ class TexyHtml implements ArrayAccess
      */
     public function isTextual()
     {
-        return !$this->isEmpty && is_scalar($this->childNodes);
+        return !$this->isEmpty && is_scalar($this->children);
     }
 
 
     /**
-     * Clones all childnodes too
+     * Clones all children too
      */
     public function __clone()
     {
-        if (is_array($this->childNodes)) {
-            foreach ($this->childNodes as $key => $val)
+        if (is_array($this->children)) {
+            foreach ($this->children as $key => $val)
                 if ($val instanceof self)
-                    $this->childNodes[$key] = clone $val;
+                    $this->children[$key] = clone $val;
         }
     }
 

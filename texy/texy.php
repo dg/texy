@@ -445,7 +445,7 @@ class Texy
         $s = $this->formatter->process($s);
 
         // remove HTML 4.01 optional tags
-        if (!TexyHtml::$XHTML)
+        if (!TexyHtml::$xhtml)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
 
         // unfreeze spaces
