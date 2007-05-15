@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -187,7 +187,7 @@ class TexyHeadingModule extends TexyModule
         if ($this->title === NULL) $this->title = $title;
 
         // Table of Contents
-        if ($this->generateID && empty($el['id'])) {
+        if ($this->generateID && empty($el->attrs['id'])) {
             $id = $this->idPrefix . Texy::webalize($title);
             $counter = '';
             if (isset($this->usedID[$id . $counter])) {
@@ -196,7 +196,7 @@ class TexyHeadingModule extends TexyModule
                 $id .= '-' . $counter;
             }
             $this->usedID[$id] = TRUE;
-            $el['id'] = $id;
+            $el->attrs['id'] = $id;
         }
 
         $TOC = array(

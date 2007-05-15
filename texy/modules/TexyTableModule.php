@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -136,9 +136,9 @@ class TexyTableModule extends TexyModule
         $mod->decorate($tx, $elRow);
 
         if ($this->row % 2 === 0) {
-            if ($this->oddClass) $elRow['class'][] = $this->oddClass;
+            if ($this->oddClass) $elRow->attrs['class'][] = $this->oddClass;
         } else {
-            if ($this->evenClass) $elRow['class'][] = $this->evenClass;
+            if ($this->evenClass) $elRow->attrs['class'][] = $this->evenClass;
         }
 
         $col = 0;

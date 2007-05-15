@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -27,11 +27,11 @@ class TexyEmoticonModule extends TexyModule
         ':-('  =>  'sad.gif',
         ';-)'  =>  'wink.gif',
         ':-D'  =>  'biggrin.gif',
-        '8-O'  =>  'eek.gif',
+        '8-O' => 'eek.gif',
         '8-)'  =>  'cool.gif',
         ':-?'  =>  'confused.gif',
-        ':-x'  =>  'mad.gif',
-        ':-P'  =>  'razz.gif',
+        ':-x' => 'mad.gif',
+        ':-P' => 'razz.gif',
         ':-|'  =>  'neutral.gif',
     );
 
@@ -111,20 +111,20 @@ class TexyEmoticonModule extends TexyModule
         $tx = $this->texy;
         $file = $this->icons[$emoticon];
         $el = TexyHtml::el('img');
-        $el['src'] = Texy::prependRoot($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
-        $el['alt'] = $raw;
-        $el['class'][] = $this->class;
+        $el->attrs['src'] = Texy::prependRoot($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+        $el->attrs['alt'] = $raw;
+        $el->attrs['class'][] = $this->class;
 
         // file path
         $file = rtrim($this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
         if (is_file($file)) {
             $size = getImageSize($file);
             if (is_array($size)) {
-                $el['width'] = $size[0];
-                $el['height'] = $size[1];
+                $el->attrs['width'] = $size[0];
+                $el->attrs['height'] = $size[1];
             }
         }
-        $tx->summary['images'][] = $el['src'];
+        $tx->summary['images'][] = $el->attrs['src'];
         return $el;
     }
 

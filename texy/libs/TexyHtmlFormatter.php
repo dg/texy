@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 class TexyHtmlFormatter

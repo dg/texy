@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -142,7 +142,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             $s = $tx->protect($s);
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
-            $el['class'][] = $param; // lang
+            $el->attrs['class'][] = $param; // lang
             $el->add('code')->setText($s);
             return $el;
         }
@@ -152,7 +152,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
-            $el['class'][] = $param; // lang
+            $el->attrs['class'][] = $param; // lang
             $s = Texy::escapeHtml($s);
             $s = $tx->protect($s);
             $el->setText($s);

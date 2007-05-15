@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -75,9 +75,9 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
             '# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
             '#-{1,}> #'                               => " \xe2\x86\x92 ",                 // right arrow -->
             '# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
-//            '# <={1,2}> #'                            => " \xe2\x87\x94 ",                 // left right arrow <==>
-//            '#={1,}> #'                               => " \xe2\x87\x92 ",                 // right arrow ==>
-//            '# <={1,}#'                               => " \xe2\x87\x90 ",                 // left arrow <==
+//            '# <={1,2}> #'                            => " \xe2\x87\x94 ",                 // left right arrow <==> (is supported by IE7 ?)
+            '#={1,}> #'                               => " \xe2\x87\x92 ",                 // right arrow ==>
+//            '# <={1,}#'                               => " \xe2\x87\x90 ",                 // left arrow <== (not supported by IE)
             '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign x
             '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign x
             '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // 10x

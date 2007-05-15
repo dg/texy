@@ -1,12 +1,13 @@
 Changelog
 *********
 
-Verze 2.0 Release Candidate 1 (rev. 124)
+Verze 2.0 Release Candidate 1 (rev. 125)
 =========
 
 5. 5. 2007 .[date]
 
-- přepsána knihovna TexyHtml
+- přepsána knihovna TexyHtml - k vlastnostem elementu se nyní přistupuje přes `$el['src'] = 'image.gif'` namísto původního `$el->src = 'image.gif'`
+- zrušena konstanta TEXY, přidána konstanta Texy::VERSION
 
 
 Verze 2.0 Release Candidate 1 (rev. 122)

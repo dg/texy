@@ -27,9 +27,6 @@
 
 
 
-define('TEXY', '2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)');
-
-
 /**
  * Absolute filesystem path to the Texy package
  */
@@ -74,6 +71,9 @@ class Texy
     // configuration directives
     const ALL = TRUE;
     const NONE = FALSE;
+
+    // Texy version
+    const VERSION = '2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)';
 
     // types of protection marks
     const CONTENT_MARKUP = "\x17";

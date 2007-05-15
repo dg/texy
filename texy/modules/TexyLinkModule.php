@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -312,29 +312,29 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
             $popup = isset($classes['popup']);
             unset($classes['nofollow'], $classes['popup']);
             $link->modifier->classes = array_flip($classes);
-            $el['href'] = NULL; // trick - move to front
+            $el->attrs['href'] = NULL; // trick - move to front
             $link->modifier->decorate($tx, $el);
         }
 
         if ($link->type === TexyLink::IMAGE) {
             // image
-            $el['href'] = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
-            $el['onclick'] = $this->imageOnClick;
+            $el->attrs['href'] = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
+            $el->attrs['onclick'] = $this->imageOnClick;
 
         } else {
-            $el['href'] = Texy::prependRoot($link->URL, $this->root);
+            $el->attrs['href'] = Texy::prependRoot($link->URL, $this->root);
 
             // rel="nofollow"
-            if ($nofollow || ($this->forceNoFollow && strpos($el['href'], '//') !== FALSE))
-                $el['rel'] = 'nofollow';
+            if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== FALSE))
+                $el->attrs['rel'] = 'nofollow';
         }
 
         // popup on click
-        if ($popup) $el['onclick'] = $this->popupOnClick;
+        if ($popup) $el->attrs['onclick'] = $this->popupOnClick;
 
         if ($content !== NULL) $el->addChild($content);
 
-        $tx->summary['links'][] = $el['href'];
+        $tx->summary['links'][] = $el->attrs['href'];
 
         return $el;
     }

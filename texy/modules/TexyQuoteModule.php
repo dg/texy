@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -91,7 +91,7 @@ class TexyQuoteModule extends TexyModule
             list(, $mPrefix, $mContent) = $matches;
         } while (TRUE);
 
-        $el['cite'] = $mod->cite;
+        $el->attrs['cite'] = $mod->cite;
         $el->parseBlock($tx, $content);
 
         // no content?

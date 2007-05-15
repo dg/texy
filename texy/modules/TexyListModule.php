@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -92,14 +92,14 @@ class TexyListModule extends TexyModule
                 $bullet = isset($desc[3]) ? $desc[3] : $desc[0];
                 $min = isset($desc[3]) ? 2 : 1;
                 $el->name = $desc[1] ? 'ol' : 'ul';
-                $el['style']['list-style-type'] = $desc[2];
+                $el->attrs['style']['list-style-type'] = $desc[2];
                 if ($desc[1]) { // ol
                     if ($type[0] === '1' && (int) $mBullet > 1)
-                        $el['start'] = (int) $mBullet;
+                        $el->attrs['start'] = (int) $mBullet;
                     elseif ($type[0] === 'a' && $mBullet[0] > 'a')
-                        $el['start'] = ord($mBullet[0]) - 96;
+                        $el->attrs['start'] = ord($mBullet[0]) - 96;
                     elseif ($type[0] === 'A' && $mBullet[0] > 'A')
-                        $el['start'] = ord($mBullet[0]) - 64;
+                        $el->attrs['start'] = ord($mBullet[0]) - 64;
                 }
                 break;
             }

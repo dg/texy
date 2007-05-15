@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!defined('TEXY')) die();
+if (!class_exists('Texy', FALSE)) die();
 
 
 
@@ -108,7 +108,7 @@ class TexyFigureModule extends TexyModule
         $elImg = $tx->imageModule->solve($image, $link); // returns TexyHtml or false!
 
         $el = TexyHtml::el('div');
-        if (!empty($image->width)) $el['style']['width'] = ($image->width + $this->widthDelta) . 'px';
+        if (!empty($image->width)) $el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
         $mod->decorate($tx, $el);
 
         $el->children['img'] = $elImg;
@@ -117,18 +117,18 @@ class TexyFigureModule extends TexyModule
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->leftClass != '')
-                $el['class'][] = $this->leftClass;
+                $el->attrs['class'][] = $this->leftClass;
             else
-                $el['style']['float'] = 'left';
+                $el->attrs['style']['float'] = 'left';
 
         } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
 
             if ($this->rightClass != '')
-                $el['class'][] = $this->rightClass;
+                $el->attrs['class'][] = $this->rightClass;
             else
-                $el['style']['float'] = 'right';
+                $el->attrs['style']['float'] = 'right';
         } elseif ($this->class)
-            $el['class'][] = $this->class;
+            $el->attrs['class'][] = $this->class;
 
         return $el;
     }
