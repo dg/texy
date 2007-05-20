@@ -242,7 +242,7 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         $tx = $this->texy;
 
         $mod = $image->modifier;
-        $alt = $mod->title !== NULL ? $tx->typographyModule->postLine($mod->title) : $this->defaultAlt;
+        $alt = $mod->title;
         $mod->title = NULL;
         $hAlign = $mod->hAlign;
         $mod->hAlign = NULL;
@@ -251,7 +251,10 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
         $el->attrs['src'] = NULL; // trick - move to front
         $mod->decorate($tx, $el);
         $el->attrs['src'] = Texy::prependRoot($image->URL, $this->root);
-        $el->attrs['alt'] = (string) $alt;  // needed
+        if (!isset($el->attrs['alt'])) {
+            if ($alt !== NULL) $el->attrs['alt'] = $tx->typographyModule->postLine($alt);
+            else $el->attrs['alt'] = $this->defaultAlt;
+        }
 
         if ($hAlign === TexyModifier::HALIGN_LEFT) {
             if ($this->leftClass != '')

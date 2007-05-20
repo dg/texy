@@ -161,20 +161,21 @@ class TexyHtmlModule extends TexyModule
 
         // tag & attibutes
         $aTags = $tx->allowedTags; // speed-up
-        if (!$aTags) return FALSE;  // all tags are disabled
+        if (!$aTags) {
+            return FALSE;  // all tags are disabled
 
-        if (is_array($aTags)) {
+        } elseif (is_array($aTags)) {
             if (!isset($aTags[$el->name])) {
                 $el->setName(strtolower($el->name));
                 if (!isset($aTags[$el->name])) return FALSE; // this element not allowed
             }
             $aAttrs = $aTags[$el->name]; // allowed attrs
 
-        } else {
+        } else { // allowedTags === Texy::ALL
             // complete UPPER convert to lower
             if ($el->name === strtoupper($el->name))
                 $el->setName(strtolower($el->name));
-            $aAttrs = NULL; // all attrs are allowed
+            $aAttrs = Texy::ALL; // all attrs are allowed
         }
 
         // force empty
@@ -188,10 +189,13 @@ class TexyHtmlModule extends TexyModule
         $elAttrs = & $el->attrs;
 
         // process attributes
-        if (is_array($aAttrs)) {
-            $aAttrs = array_flip($aAttrs);
+        if (!$aAttrs) {
+            $elAttrs = array();
+
+        } elseif (is_array($aAttrs)) {
 
             // skip disabled
+            $aAttrs = array_flip($aAttrs);
             foreach ($elAttrs as $key => $foo)
                 if (!isset($aAttrs[$key])) unset($elAttrs[$key]);
         }

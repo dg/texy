@@ -34,7 +34,7 @@ define('TEXY_DIR',  dirname(__FILE__).'/');
 
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
-require_once TEXY_DIR.'libs/TexyHtmlFormatter.php';
+require_once TEXY_DIR.'libs/TexyHtmlCleaner.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
@@ -164,7 +164,7 @@ class Texy
         $longWordsModule;
 
     public
-        $formatter;
+        $cleaner;
 
 
     /**
@@ -208,10 +208,11 @@ class Texy
         $this->loadModules();
 
         // load routines
-        $this->formatter = new TexyHtmlFormatter($this);
+        $this->cleaner = new TexyHtmlCleaner($this);
 
-        // accepts all valid HTML tags by default
-        $this->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd));
+        // accepts all valid HTML tags and attributes by default
+        foreach (TexyHtmlCleaner::$dtd as $tag => $dtd)
+            $this->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
 
         // examples of link references ;-)
         $link = new TexyLink('http://texy.info/');
@@ -442,7 +443,7 @@ class Texy
         $s = $this->unProtect($s);
 
         // wellform and reformat HTML
-        $s = $this->formatter->process($s);
+        $s = $this->cleaner->process($s);
 
         // remove HTML 4.01 optional tags
         if (!TexyHtml::$xhtml)
@@ -462,10 +463,10 @@ class Texy
      */
     public function _toText($s)
     {
-        $save = $this->formatter->lineWrap;
-        $this->formatter->lineWrap = FALSE;
+        $save = $this->cleaner->lineWrap;
+        $this->cleaner->lineWrap = FALSE;
         $s = $this->_toHtml( $s );
-        $this->formatter->lineWrap = $save;
+        $this->cleaner->lineWrap = $save;
 
         // remove tags
         $s = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $s);
@@ -511,7 +512,7 @@ class Texy
 
     /**
      * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04
-     * which are ignored by TexyHtmlFormatter routine
+     * which are ignored by TexyHtmlCleaner routine
      * @param string
      * @return string
      */
@@ -799,7 +800,9 @@ class TexyConfigurator
     {
         $texy->allowedClasses = Texy::ALL;                  // classes and id are allowed
         $texy->allowedStyles  = Texy::ALL;                  // inline styles are allowed
-        $texy->allowedTags = array_flip(array_keys(TexyHtmlFormatter::$dtd)); // all valid HTML tags
+        $texy->allowedTags = array();                       // all valid HTML tags
+        foreach (TexyHtmlCleaner::$dtd as $tag => $dtd)
+            $texy->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
         $texy->urlSchemeFilters = NULL;                     // disable URL scheme filter
         $texy->allowed['image'] = TRUE;                     // enable images
         $texy->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions

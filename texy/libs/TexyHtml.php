@@ -63,7 +63,13 @@ class TexyHtml implements ArrayAccess
     public function __construct($name=NULL, $attrs=NULL)
     {
         if ($name !== NULL) $this->setName($name);
-        if ($attrs !== NULL) $this->setAttrs($attrs);
+        if ($attrs !== NULL) {
+            if (!is_array($attrs))
+                throw new Exception('Attributes must be array');
+
+            $this->attrs = $attrs;
+        }
+        return $this;
     }
 
 
@@ -91,26 +97,6 @@ class TexyHtml implements ArrayAccess
 
         $this->name = $name;
         $this->isEmpty = isset(self::$emptyTags[$name]);
-        return $this;
-    }
-
-
-    /**
-     * Sets element's attributes
-     * @param array
-     * @return TexyHtml  itself
-     */
-    public function setAttrs($attrs)
-    {
-        if ($attrs === NULL) {
-            $this->attrs = array();
-
-        } else {
-            if (!is_array($attrs))
-                throw new Exception('Attributes must be array');
-
-            $this->attrs = $attrs;
-        }
         return $this;
     }
 
@@ -386,7 +372,7 @@ class TexyHtml implements ArrayAccess
     public function getContentType()
     {
         if (isset(self::$replacedTags[$this->name])) return Texy::CONTENT_REPLACED;
-        if (isset(TexyHtmlFormatter::$inline[$this->name])) return Texy::CONTENT_MARKUP;
+        if (isset(TexyHtmlCleaner::$inline[$this->name])) return Texy::CONTENT_MARKUP;
 
         return Texy::CONTENT_BLOCK;
     }

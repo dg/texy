@@ -26,7 +26,7 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 $texy = new Texy();
-$texy->formatter->baseIndent  = 1;
+$texy->cleaner->baseIndent  = 1;
 
 
 

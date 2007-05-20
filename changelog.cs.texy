@@ -1,6 +1,16 @@
 Changelog
 *********
 
+Verze 2.0 Release Candidate 1 (rev. 126)
+=========
+
+20. 5. 2007 .[date]
+
+- vnitřní DTD validátor TexyHtmlCleaner nyní kontroluje i platnost atributů
+- opravena chyba zadávání atributů před modifikátor .{attr:value}
+- změna názvu $texy->formatterModule -> $texy->cleaner
+
+
 Verze 2.0 Release Candidate 1 (rev. 125)
 =========
 
@@ -55,11 +65,10 @@ třída Texy
 - nová vlastnost `$texy->urlSchemeFilters` & `$texy->ignoreEmptyStuff` (popsáno v dokumentaci)
 - nový univerzální handler `$texy->handler`. Dřívější handlery odstraněny
 - nová vlastnost `Texy::$strictDTD` - lze přepínat mezi striktním a transitional DTD
-- změny názvu modulů:
+- změny názvů modulů:
    - $texy->imageDescModule -> $texy->figureModule
    - $texy->smiliesModule -> $texy->emoticonModule
    - $texy->quickCorrectModule -> $texy->typographyModule
-   - $texy->formatterModule -> $texy->formatter (bez Module)
 - `Texy::safeMode()` vypíná syntax `link/definition` (viz dále) a mírně upravená je tabulka povolených tagů (viz zdrojový kód)
 - nová funkce `Texy::normalize()` - upraví text do normalizované podoby (odstraní pravostranné mezery, sjednotí oddělovače řádků, ...)
 - nová funkce `Texy::webalize()` - upraví text do podoby webového identifikátoru (`'žlutý kůň'` -> `'zluty-kun'`)
@@ -197,7 +206,7 @@ typographyModule
 - vylepšená syntax: `----->` dlouhé šipky
 - zapínání/vypínání syntaxe: `$texy->allowed['typography']`
 
-TexyHtmlFormatter
+TexyHtmlCleaner
 --------------
 - zajišťuje, že výstup z Texy je tzv. well-formed, opravuje neplatné křížení tagů atd.
 - výstup nyní kontroluje mnohem precizněji, zohledňuje `Texy::$strictDTD`

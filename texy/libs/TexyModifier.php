@@ -153,29 +153,27 @@ class TexyModifier
      */
     public function decorate($texy, $el)
     {
+        $elAttrs = & $el->attrs;
+
         // tag & attibutes
         $tmp = $texy->allowedTags; // speed-up
         if (!$this->attrs) {
 
         } elseif ($tmp === Texy::ALL) {
-            $el->setAttrs($this->attrs);
+            $elAttrs = $this->attrs;
 
         } elseif (is_array($tmp) && isset($tmp[$el->name])) {
             $tmp = $tmp[$el->name];
 
             if ($tmp === Texy::ALL) {
-                $el->setAttrs($this->attrs);
+                $elAttrs = $this->attrs;
 
-            } else {
-                if (is_array($tmp) && count($tmp)) {
-                    $tmp = array_flip($tmp);
-                    foreach ($this->attrs as $key => $val)
-                        if (isset($tmp[$key])) $el->attrs[$key] = $val;
-                }
+            } elseif (is_array($tmp) && count($tmp)) {
+                $tmp = array_flip($tmp);
+                foreach ($this->attrs as $key => $val)
+                    if (isset($tmp[$key])) $el->attrs[$key] = $val;
             }
         }
-
-        $elAttrs = & $el->attrs;
 
         // title
         if ($this->title !== NULL)
