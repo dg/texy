@@ -99,6 +99,9 @@ class Texy
     /** @var TRUE|FALSE|array  Allowed inline CSS style */
     public $allowedStyles = Texy::ALL;  // all inline styles are allowed
 
+    /** @var int  TAB width (for converting tabs to spaces) */
+    public $tabWidth = 8;
+
     /** @var boolean  Do obfuscate e-mail addresses? */
     public $obfuscateEmail = TRUE;
 
@@ -363,6 +366,11 @@ class Texy
         // standardize line endings and spaces
         $text = self::normalize($text);
 
+        // replace tabs with spaces
+        while (strpos($text, "\t") !== FALSE)
+            $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
+
+
         // init modules
         $this->_preBlockModules = array();
         foreach ($this->modules as $module) {
@@ -568,10 +576,6 @@ class Texy
         // right trim
         $s = preg_replace("#[\t ]+$#m", '', $s); // right trim
 
-        // replace tabs with spaces
-        while (strpos($s, "\t") !== FALSE)
-            $s = preg_replace_callback('#^(.*)\t#mU', array('Texy', 'tabCb'), $s);
-
         // trailing spaces
         $s = trim($s, "\n");
 
@@ -718,10 +722,9 @@ class Texy
 
 
 
-    static private function tabCb($m)
+    private function tabCb($m)
     {
-        // tab width = 8
-        return $m[1] . str_repeat(' ', 8 - strlen($m[1]) % 8);
+        return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
     }
 
 
