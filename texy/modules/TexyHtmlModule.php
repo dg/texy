@@ -58,14 +58,14 @@ class TexyHtmlModule extends TexyModule
      */
     public function patternComment($parser, $matches)
     {
-        list($match) = $matches;
+        list(, $mComment) = $matches;
 
         if (is_callable(array($this->texy->handler, 'htmlComment'))) {
-            $res = $this->texy->handler->htmlComment($parser, $match);
+            $res = $this->texy->handler->htmlComment($parser, $mComment);
             if ($res !== Texy::PROCEED) return $res;
         }
 
-        return $this->solveComment($match);
+        return $this->solveComment($mComment);
     }
 
 
@@ -274,10 +274,13 @@ class TexyHtmlModule extends TexyModule
      */
     public function solveComment($content)
     {
-        if ($this->passComment)
-            return $this->texy->protect($content, Texy::CONTENT_MARKUP);
+        if (!$this->passComment) return '';
 
-        return '';
+        // sanitize comment
+        $content = preg_replace('#-{2,}#', '-', $content);
+        $content = rtrim($content, '-');
+
+        return $this->texy->protect('<!--' . $content . '-->', Texy::CONTENT_MARKUP);
     }
 
 

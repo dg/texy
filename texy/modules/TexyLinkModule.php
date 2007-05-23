@@ -17,7 +17,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Links module
  */
-class TexyLinkModule extends TexyModule implements ITexyPreProcess
+class TexyLinkModule extends TexyModule implements ITexyPreBlock
 {
     protected $default = array(
         'link/reference' => TRUE,
@@ -75,10 +75,16 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
 
 
 
-    public function preProcess($text)
+    /**
+     * Single block pre-processing
+     * @param string
+     * @param bool
+     * @return string
+     */
+    public function preBlock($text, $topLevel)
     {
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-        if ($this->texy->allowed['link/definition'])
+        if ($topLevel && $this->texy->allowed['link/definition'])
             $text = preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
                 array($this, 'patternReferenceDef'),
@@ -332,7 +338,12 @@ class TexyLinkModule extends TexyModule implements ITexyPreProcess
         // popup on click
         if ($popup) $el->attrs['onclick'] = $this->popupOnClick;
 
-        if ($content !== NULL) $el->addChild($content);
+        if ($content !== NULL) {
+            if ($content instanceof TexyHtml)
+                $el->addChild($content);
+            else
+                $el->setText($content);
+        }
 
         $tx->summary['links'][] = $el->attrs['href'];
 

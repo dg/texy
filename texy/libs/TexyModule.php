@@ -53,25 +53,15 @@ abstract class TexyModule
 
 
 
-interface ITexyPreProcess
-{
-    /**
-     * Full text pre-processing
-     * @param string
-     * @return string
-     */
-    public function preProcess($text);
-}
-
-
 interface ITexyPreBlock
 {
     /**
      * Single block pre-processing
      * @param string
+     * @param bool
      * @return string
      */
-    public function preBlock($block);
+    public function preBlock($block, $topLevel);
 }
 
 

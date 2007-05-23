@@ -322,21 +322,21 @@ class TexyPhraseModule extends TexyModule
             $tag = $link && $this->linksAllowed ? NULL : 'span';
 
         if ($phrase === 'phrase/code')
-            $el = $tx->protect(Texy::escapeHtml($content), Texy::CONTENT_TEXTUAL);
-        else
-            $el = $content;
+            $content = $tx->protect(Texy::escapeHtml($content), Texy::CONTENT_TEXTUAL);
 
         if ($phrase === 'phrase/strong+em') {
-            $el = TexyHtml::el($this->tags['phrase/em'])->addChild($el);
-            $tag = $this->tags['phrase/strong'];
-        }
-
-        if ($tag) {
-            $el = TexyHtml::el($tag)->addChild($el);
+            $el = TexyHtml::el($this->tags['phrase/strong']);
+            $el->add($this->tags['phrase/em'])->setText($content);
             $mod->decorate($tx, $el);
-        }
 
-        if ($tag === 'q') $el->attrs['cite'] = $mod->cite;
+        } elseif ($tag) {
+            $el = TexyHtml::el($tag)->setText($content);
+            $mod->decorate($tx, $el);
+
+            if ($tag === 'q') $el->attrs['cite'] = $mod->cite;
+        } else {
+            $el = $content; // trick
+        }
 
         if ($link) return $tx->linkModule->solve($link, $el);
 

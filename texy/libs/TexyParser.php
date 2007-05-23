@@ -51,6 +51,9 @@ class TexyBlockParser extends TexyParser
     /** @var int */
     private $offset;
 
+    /** @var bool */
+    public $topLevel = FALSE;
+
 
     /**
      * @param Texy
@@ -109,7 +112,7 @@ class TexyBlockParser extends TexyParser
 
         // pre-processing
         foreach ($tx->_preBlockModules as $module)
-            $text = $module->preBlock($text);
+            $text = $module->preBlock($text, $this->topLevel);
 
 
         // parser initialization
@@ -207,8 +210,12 @@ class TexyBlockParser extends TexyParser
                 $this->offset = $arrPos[$minKey]; // turn offset back
                 $arrPos[$minKey] = -2;
                 continue;
-            } elseif ($res instanceof TexyHtml || is_string($res)) {
+
+            } elseif ($res instanceof TexyHtml) {
                 $nodes[] = $res;
+
+            } elseif (is_string($res)) {
+                $nodes[] = TexyHtml::text($res);
             }
 
             $arrPos[$minKey] = -1;

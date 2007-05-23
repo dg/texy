@@ -300,12 +300,32 @@ class Texy
      * @param bool     is block or single line?
      * @return string  output html code
      */
-    public function process($text, $singleLine = FALSE)
+    public function process($text, $singleLine=FALSE)
     {
         $this->parse($text, $singleLine);
         return $this->toHtml();
     }
 
+
+
+    /**
+     * Makes only typographic corrections
+     * @param string   input text
+     * @return string  output code (in UTF!)
+     */
+    public function processTypo($text)
+    {
+        // convert to UTF-8 (and check source encoding)
+        $text = iconv($this->encoding, 'utf-8', $text);
+
+        // standardize line endings and spaces
+        $text = self::normalize($text);
+
+        $this->typographyModule->begin();
+        $text = $this->typographyModule->postLine($text);
+
+        return $text;
+    }
 
 
     /**
@@ -316,7 +336,7 @@ class Texy
      * @param bool     is block or single line?
      * @return void
      */
-    public function parse($text, $singleLine = FALSE)
+    public function parse($text, $singleLine=FALSE)
     {
         if ($this->_state === 1)
             throw new Exception('Parsing is in progress yet.');
@@ -344,23 +364,19 @@ class Texy
         $text = self::normalize($text);
 
         // init modules
-        $ppm = $this->_preBlockModules = array();
+        $this->_preBlockModules = array();
         foreach ($this->modules as $module) {
             $module->begin();
 
-            if ($module instanceof ITexyPreProcess) $ppm[] = $module;
             if ($module instanceof ITexyPreBlock) $this->_preBlockModules[] = $module;
         }
-
-        // pre process
-        foreach ($ppm as $module) $text = $module->preProcess($text);
 
         // parse!
         $this->DOM = TexyHtml::el();
         if ($singleLine)
             $this->DOM->parseLine($this, $text);
         else
-            $this->DOM->parseBlock($this, $text);
+            $this->DOM->parseBlock($this, $text, TRUE);
 
         // user handler
         if (is_callable(array($this->handler, 'afterParse')))
@@ -445,7 +461,7 @@ class Texy
         // wellform and reformat HTML
         $s = $this->cleaner->process($s);
 
-        // remove HTML 4.01 optional tags
+        // remove HTML 4.01 optional end tags
         if (!TexyHtml::$xhtml)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
 

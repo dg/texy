@@ -96,7 +96,7 @@ class TexyFigureModule extends TexyModule
      * @param TexyLink
      * @param string
      * @param TexyModifier
-     * @return TexyHtml
+     * @return TexyHtml|FALSE
      */
     public function solve(TexyImage $image, $link, $content, $mod)
     {
@@ -106,6 +106,7 @@ class TexyFigureModule extends TexyModule
         $mod->hAlign = $image->modifier->hAlign = NULL;
 
         $elImg = $tx->imageModule->solve($image, $link); // returns TexyHtml or false!
+        if (!$elImg) return FALSE;
 
         $el = TexyHtml::el('div');
         if (!empty($image->width)) $el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';

@@ -44,11 +44,12 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
 
 
     /**
-     * Full text pre-processing
+     * Single block pre-processing
      * @param string
+     * @param bool
      * @return string
      */
-    public function preBlock($text)
+    public function preBlock($text, $topLevel)
     {
         // autoclose exclusive blocks
         $text = preg_replace(

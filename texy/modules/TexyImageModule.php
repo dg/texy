@@ -17,7 +17,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Images module
  */
-class TexyImageModule extends TexyModule implements ITexyPreProcess
+class TexyImageModule extends TexyModule implements ITexyPreBlock
 {
     protected $default = array(
         'image' => TRUE,
@@ -74,10 +74,16 @@ class TexyImageModule extends TexyModule implements ITexyPreProcess
 
 
 
-    public function preProcess($text)
+    /**
+     * Single block pre-processing
+     * @param string
+     * @param bool
+     * @return string
+     */
+    public function preBlock($text, $topLevel)
     {
         // [*image*]: urls .(title)[class]{style}
-        if ($this->texy->allowed['image/definition'])
+        if ($topLevel && $this->texy->allowed['image/definition'])
            $text = preg_replace_callback(
                '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
                array($this, 'patternReferenceDef'),

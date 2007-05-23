@@ -35,7 +35,7 @@ class TexyHtml implements ArrayAccess
 
     /**
      * @var mixed  element's content
-     *   array - child nodes
+     *   array of TexyHtml - child nodes
      *   string - content as string (text-node)
      */
     public $children;
@@ -57,23 +57,6 @@ class TexyHtml implements ArrayAccess
 
 
     /**
-     * @param string element name
-     * @param array element's attributes
-     */
-    public function __construct($name=NULL, $attrs=NULL)
-    {
-        if ($name !== NULL) $this->setName($name);
-        if ($attrs !== NULL) {
-            if (!is_array($attrs))
-                throw new Exception('Attributes must be array');
-
-            $this->attrs = $attrs;
-        }
-        return $this;
-    }
-
-
-    /**
      * Static factory
      * @param string element name (or NULL)
      * @param array element's attributes
@@ -81,7 +64,32 @@ class TexyHtml implements ArrayAccess
      */
     static public function el($name=NULL, $attrs=NULL)
     {
-        return new self($name, $attrs);
+        $el = new self;
+
+        if ($name !== NULL)
+            $el->setName($name);
+
+        if ($attrs !== NULL) {
+            if (!is_array($attrs))
+                throw new Exception('Attributes must be array');
+
+            $el->attrs = $attrs;
+        }
+
+        return $el;
+    }
+
+
+    /**
+     * Static factory for textual element
+     * @param string
+     * @return TexyHtml
+     */
+    static public function text($text)
+    {
+        $el = new self;
+        $el->setText($text);
+        return $el;
     }
 
 
@@ -134,10 +142,10 @@ class TexyHtml implements ArrayAccess
 
     /**
      * Adds new element's child
-     * @param string|TexyHtml object
+     * @param TexyHtml object
      * @return TexyHtml  itself
      */
-    public function addChild($child)
+    public function addChild(TexyHtml $child)
     {
         $this->children[] = $child;
         return $this;
@@ -147,7 +155,7 @@ class TexyHtml implements ArrayAccess
     /**
      * Returns child node
      * @param mixed index
-     * @return TexyHtml|string
+     * @return TexyHtml
      */
     public function getChild($index)
     {
@@ -163,11 +171,13 @@ class TexyHtml implements ArrayAccess
      * @param string|TexyHtml  elements's name or TexyHtml object
      * @return TexyHtml
      */
-    public function add($child)
+    public function add($name)
     {
-        if (!($child instanceof self))
-            $child = new self($child);
+        if ($name instanceof self)
+            return $this->children[] = $name;
 
+        $child = new self;
+        $child->setName($name);
         return $this->children[] = $child;
     }
 
@@ -258,12 +268,9 @@ class TexyHtml implements ArrayAccess
 
         // add content
         if (is_array($this->children)) {
-            foreach ($this->children as $val) {
-                if ($val instanceof self)
-                    $s .= $val->export($texy);
-                else
-                    $s .= $val;
-            }
+            foreach ($this->children as $val)
+                $s .= $val->export($texy);
+
         } else {
             $s .= $this->children;
         }
@@ -360,8 +367,7 @@ class TexyHtml implements ArrayAccess
     {
         if (is_array($this->children)) {
             foreach ($this->children as $key => $val)
-                if ($val instanceof self)
-                    $this->children[$key] = clone $val;
+                $this->children[$key] = clone $val;
         }
     }
 
@@ -401,11 +407,13 @@ class TexyHtml implements ArrayAccess
      * Parses text as block
      * @param Texy
      * @param string
+     * @param bool
      * @return void
      */
-    public function parseBlock($texy, $s)
+    public function parseBlock($texy, $s, $topLevel=FALSE)
     {
         $parser = new TexyBlockParser($texy, $this);
+        $parser->topLevel = $topLevel;
         $parser->parse($s);
     }
 
