@@ -53,7 +53,6 @@ require_once TEXY_DIR.'modules/TexyPhraseModule.php';
 require_once TEXY_DIR.'modules/TexyQuoteModule.php';
 require_once TEXY_DIR.'modules/TexyScriptModule.php';
 require_once TEXY_DIR.'modules/TexyEmoticonModule.php';
-require_once TEXY_DIR.'modules/TexySectionModule.php';
 require_once TEXY_DIR.'modules/TexyTableModule.php';
 require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
@@ -161,8 +160,6 @@ class Texy
         $figureModule,
         /** @var TexyTypographyModule */
         $typographyModule,
-        /** @var TexySectionModule */
-        $sectionModule,
         /** @var TexyLongWordsModule */
         $longWordsModule;
 
@@ -228,6 +225,15 @@ class Texy
 
         $link = new TexyLink('http://en.wikipedia.org/wiki/Special:Search?search=%s');
         $this->linkModule->addReference('wikipedia', $link);
+
+        // mbstring.func_overload fix
+        if (function_exists('mb_get_info')) {
+            $mb = mb_get_info();
+            if ($mb['func_overload'] & 2 && $mb['internal_encoding'][0] === 'U') { // U??
+                mb_internal_encoding('pass');
+                trigger_error('Texy: mb_internal_encoding changed to pass', E_USER_WARNING);
+            }
+        }
     }
 
 
@@ -255,7 +261,6 @@ class Texy
         $this->listModule = new TexyListModule($this);
         $this->tableModule = new TexyTableModule($this);
         $this->figureModule = new TexyFigureModule($this);
-        $this->sectionModule = new TexySectionModule($this);
 
         // post process - order is not important
         $this->typographyModule = new TexyTypographyModule($this);
@@ -803,7 +808,6 @@ class TexyConfigurator
         $texy->allowed['image'] = FALSE;                    // disable images
         $texy->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $texy->allowed['html/comment'] = FALSE;             // disable HTML comments
-        $texy->allowed['section'] = FALSE;                  // disable sections
         $texy->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
     }
 
@@ -826,7 +830,6 @@ class TexyConfigurator
         $texy->allowed['image'] = TRUE;                     // enable images
         $texy->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
         $texy->allowed['html/comment'] = TRUE;              // enable HTML comments
-        $texy->allowed['section'] = TRUE;                   // disable sections
         $texy->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
     }
 

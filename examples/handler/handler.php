@@ -188,16 +188,6 @@ class myHandler
     /**
      * @param TexyBlockParser
      * @param string
-     * @return TexyHtml|string|FALSE|Texy::PROCEED
-     */
-    public function section($parser, $content)
-    {
-        // return $parser->texy->headingModule->solveSection($content);
-    }
-
-    /**
-     * @param TexyBlockParser
-     * @param string
      * @param string
      * @param string
      * @param TexyModifier
