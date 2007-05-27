@@ -324,7 +324,7 @@ class Texy
     public function processTypo($text)
     {
         // convert to UTF-8 (and check source encoding)
-        $text = iconv($this->encoding, 'utf-8', $text);
+        $text = TexyUtf::toUtf($text, $this->encoding);
 
         // standardize line endings and spaces
         $text = self::normalize($text);
@@ -366,7 +366,7 @@ class Texy
         $tmp = array($this->linePatterns, $this->blockPatterns);
 
         // convert to UTF-8 (and check source encoding)
-        $text = iconv($this->encoding, 'utf-8', $text);
+        $text = TexyUtf::toUtf($text, $this->encoding);
 
         // standardize line endings and spaces
         $text = self::normalize($text);
@@ -437,7 +437,7 @@ class Texy
 
         $text = $this->_toText( $this->DOM->export($this) );
 
-        $text = iconv('utf-8', $this->encoding.'//TRANSLIT', $text);
+        $text = TexyUtf::utfTo($text, $this->encoding);
 
         return $text;
     }
@@ -473,10 +473,6 @@ class Texy
 
         // wellform and reformat HTML
         $s = $this->cleaner->process($s);
-
-        // remove HTML 4.01 optional end tags
-        if (!TexyHtml::$xhtml)
-            $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
 
         // unfreeze spaces
         $s = self::unfreezeSpaces($s);

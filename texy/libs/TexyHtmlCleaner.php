@@ -111,43 +111,47 @@ class TexyHtmlCleaner
      * Converts <strong><em> ... </strong> ... </em>
      * into <strong><em> ... </em></strong><em> ... </em>
      */
-    public function process($text)
+    public function process($s)
     {
         $this->space = $this->baseIndent;
         $this->tagStack = array();
         $this->tagUsed  = array();
 
         // wellform and reformat
-        $text = preg_replace_callback(
-            '#(.*)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)(/?))>()#Uis',
+        $s = preg_replace_callback(
+            '#(.*)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
             array($this, 'cb'),
-            $text . '</end/>'
+            $s . '</end/>'
         );
 
         // empty out stack
-        foreach ($this->tagStack as $item) $text .= $item['close'];
+        foreach ($this->tagStack as $item) $s .= $item['close'];
 
         // right trim
-        $text = preg_replace("#[\t ]+(\n|\r|$)#", '$1', $text); // right trim
+        $s = preg_replace("#[\t ]+(\n|\r|$)#", '$1', $s); // right trim
 
         // join double \r to single \n
-        $text = str_replace("\r\r", "\n", $text);
-        $text = strtr($text, "\r", "\n");
+        $s = str_replace("\r\r", "\n", $s);
+        $s = strtr($s, "\r", "\n");
 
         // greedy chars
-        $text = preg_replace("#\\x07 *#", '', $text);
+        $s = preg_replace("#\\x07 *#", '', $s);
         // back-tabs
-        $text = preg_replace("#\\t? *\\x08#", '', $text);
+        $s = preg_replace("#\\t? *\\x08#", '', $s);
 
         // line wrap
         if ($this->lineWrap > 0)
-            $text = preg_replace_callback(
+            $s = preg_replace_callback(
                 '#^(\t*)(.*)$#m',
                 array($this, 'wrap'),
-                $text
+                $s
             );
 
-        return $text;
+        // remove HTML 4.01 optional end tags
+        if (!TexyHtml::$xhtml)
+            $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
+
+        return $s;
     }
 
 
@@ -280,16 +284,18 @@ class TexyHtmlCleaner
             if ($mEmpty) {
                 if (!$allowed) return $s;
 
+                if (TexyHtml::$xhtml) $mAttr .= " /";
+
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
-                    return rtrim($s) .  '<' . $mTag . $mAttr . "/>\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
+                    return rtrim($s) .  '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
                 if ($this->indent && !isset(self::$inline[$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
-                    return $s . $space . '<' . $mTag . $mAttr . '/>' . $space;
+                    return $s . $space . '<' . $mTag . $mAttr . '>' . $space;
                 }
 
-                return $s . '<' . $mTag . $mAttr . '/>';
+                return $s . '<' . $mTag . $mAttr . '>';
             }
 
 

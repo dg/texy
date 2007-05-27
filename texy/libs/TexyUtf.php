@@ -37,6 +37,14 @@ class TexyUtf
     }
 
 
+    /**
+     * Converts from UTF-8 to dest encoding
+     */
+    static public function utfTo($s, $encoding)
+    {
+        return iconv('utf-8', $encoding.'//TRANSLIT', $s);
+    }
+
 
     /**
      * StrToLower in UTF-8

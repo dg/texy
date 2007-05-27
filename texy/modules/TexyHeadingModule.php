@@ -81,9 +81,9 @@ class TexyHeadingModule extends TexyModule
         $this->usedID = array();
 
         // clear references
-        $foo1 = array(); $this->TOC = & $foo1;
-        $foo2 = array(); $this->dynamicMap = & $foo2;
-        $foo3 = -100; $this->dynamicTop = & $foo3;
+        $this->TOC = array();
+        $foo1 = array(); $this->dynamicMap = & $foo1;
+        $foo2 = -100; $this->dynamicTop = & $foo2;
     }
 
 
@@ -200,7 +200,7 @@ class TexyHeadingModule extends TexyModule
         }
 
         $TOC = array(
-            'id' => $el['id'],
+            'id' => isset($el->attrs['id']) ? $el->attrs['id'] : NULL,
             'title' => $title,
             'level' => 0,
         );
