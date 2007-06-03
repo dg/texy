@@ -326,7 +326,7 @@ class TexyPhraseModule extends TexyModule
 
         if ($phrase === 'phrase/strong+em') {
             $el = TexyHtml::el($this->tags['phrase/strong']);
-            $el->add($this->tags['phrase/em'])->setText($content);
+            $el->add($this->tags['phrase/em'], $content);
             $mod->decorate($tx, $el);
 
         } elseif ($tag) {

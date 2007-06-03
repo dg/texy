@@ -168,16 +168,15 @@ class TexyHtml implements ArrayAccess
 
     /**
      * Adds and creates new TexyHtml child
-     * @param string|TexyHtml  elements's name or TexyHtml object
+     * @param string  elements's name
+     * @param string optional textual content
      * @return TexyHtml
      */
-    public function add($name)
+    public function add($name, $text=NULL)
     {
-        if ($name instanceof self)
-            return $this->children[] = $name;
-
         $child = new self;
         $child->setName($name);
+        if ($text !== NULL) $child->setText($text);
         return $this->children[] = $child;
     }
 
@@ -195,6 +194,24 @@ class TexyHtml implements ArrayAccess
         return $this;
     }
 */
+
+
+    /**
+     * Special setter for element's attribute
+     * @param string path
+     * @param array query
+     * @return TexyHtml  itself
+     */
+    public function href($path, $query=NULL)
+    {
+        if ($query) {
+            $query = http_build_query($query, NULL, '&');
+            if ($query !== '') $path .= '?' . $query;
+        }
+        $this->attrs['href'] = $path;
+        return $this;
+    }
+
 
 
     /** these are the required ArrayAccess functions */

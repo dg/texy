@@ -144,7 +144,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
             $el->attrs['class'][] = $param; // lang
-            $el->add('code')->setText($s);
+            $el->add('code', $s);
             return $el;
         }
 

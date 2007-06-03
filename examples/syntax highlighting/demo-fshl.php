@@ -66,8 +66,7 @@ class myHandler
         if ($modifier) $modifier->decorate($texy, $elPre);
         $elPre['class'] = strtolower($lang);
 
-        $elCode = $elPre->add('code');
-        $elCode->setText($content);
+        $elCode = $elPre->add('code', $content);
 
         return $elPre;
     }

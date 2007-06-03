@@ -24,6 +24,9 @@ class TexyHtmlCleaner
     /** @var int  wrap width, doesn't include indent space */
     public $lineWrap = 80;
 
+    /** @var bool  remove optional HTML end tags? */
+    public $removeOptional = TRUE;
+
     /** @var int  indent space counter */
     private $space;
 
@@ -148,7 +151,7 @@ class TexyHtmlCleaner
             );
 
         // remove HTML 4.01 optional end tags
-        if (!TexyHtml::$xhtml)
+        if (!TexyHtml::$xhtml && $this->removeOptional)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
 
         return $s;

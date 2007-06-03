@@ -63,6 +63,11 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
         // CONTENT_TEXTUAL mark:  \x17
         // CONTENT_BLOCK: not used in postLine
 
+        if (isset(self::$locales[$this->locale]))
+            $locale = self::$locales[$this->locale];
+        else // fall back
+            $locale = self::$locales['en'];
+
         $pairs = array(
             '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
             '#(?<=[\d ])-(?=[\d ])#'                  => "\xe2\x80\x93",                   // en dash  -
@@ -101,19 +106,10 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
             // space between preposition and word
             '#(?<=^|[^0-9'.TEXY_CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s+([\x17-\x1F]*[0-9'.TEXY_CHAR.'])#mus'
                                                       => "\$1\xc2\xa0\$2",
+
+            '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
+            '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
         );
-
-        if (isset(self::$locales[$this->locale]))
-        {
-            $info = self::$locales[$this->locale];
-
-            // double ""
-            $pairs['#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U'] = $info['doubleQuotes'][0].'$1'.$info['doubleQuotes'][1];
-
-            // single ''
-            $pairs['#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu'] = $info['singleQuotes'][0].'$1'.$info['singleQuotes'][1];
-        }
-
 
         $this->pattern = array_keys($pairs);
         $this->replace = array_values($pairs);
