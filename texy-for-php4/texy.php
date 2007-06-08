@@ -6,7 +6,7 @@
  *
  * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
  *
- * for PHP 5.0.0 and newer
+ * for PHP 4.3.3 and newer
  *
  * @link      http://texy.info/
  * @license   GNU GENERAL PUBLIC LICENSE version 2
@@ -58,11 +58,43 @@ require_once TEXY_DIR.'modules/TexyTableModule.php';
 require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
 
-// Texy for PHP4 back compatibility
-define('TEXY_ALL',  TRUE);
-define('TEXY_NONE',  FALSE);
-define('TEXY_VERSION',  Texy::VERSION);
-define('TEXY_PROCEED',  NULL);
+
+
+/**
+ * PHP 4 Clone emulation
+ *
+ * Example: $obj = clone ($dolly)
+ */
+if (PHP_VERSION < 5) eval('
+    function clone($obj)
+    {
+        foreach($obj as $key => $value) {
+            $obj->$key = & $value;               // reference to new variable
+            $GLOBALS[\'$$HIDDEN$$\'][] = & $value; // and generate reference
+            unset($value);
+        }
+
+        // call $obj->__clone()
+        if (is_callable(array(&$obj, \'__clone\'))) $obj->__clone();
+
+        return $obj;
+    }
+');
+
+
+
+define('TEXY_ALL',  TRUE); /* class constant */
+define('TEXY_NONE',  FALSE); /* class constant */
+define('TEXY_VERSION',  '2.0 FOR PHP4 RC 1 (Revision: $WCREV$, Date: $WCDATE$)'); /* class constant */
+define('TEXY_CONTENT_MARKUP',  "\x17"); /* class constant */
+define('TEXY_CONTENT_REPLACED',  "\x16"); /* class constant */
+define('TEXY_CONTENT_TEXTUAL',  "\x15"); /* class constant */
+define('TEXY_CONTENT_BLOCK',  "\x14"); /* class constant */
+define('TEXY_PROCEED',  NULL); /* class constant */
+
+/** @var bool  use Strict of Transitional DTD? */
+$GLOBALS['Texy::$strictDTD'] = FALSE; /* class static property */
+
 
 
 /**
@@ -75,69 +107,50 @@ define('TEXY_PROCEED',  NULL);
  */
 class Texy
 {
-    // configuration directives
-    const ALL = TRUE;
-    const NONE = FALSE;
-
-    // Texy version
-    const VERSION = '2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)';
-
-    // types of protection marks
-    const CONTENT_MARKUP = "\x17";
-    const CONTENT_REPLACED = "\x16";
-    const CONTENT_TEXTUAL = "\x15";
-    const CONTENT_BLOCK = "\x14";
-
-    // for event handlers
-    const PROCEED = NULL;
-
     /** @var string  input & output text encoding */
-    public $encoding = 'utf-8';
+    var $encoding = 'utf-8';
 
     /** @var array  Texy! syntax configuration */
-    public $allowed = array();
+    var $allowed = array();
 
      /** @var TRUE|FALSE|array  Allowed HTML tags */
-    public $allowedTags;
+    var $allowedTags;
 
     /** @var TRUE|FALSE|array  Allowed classes */
-    public $allowedClasses = Texy::ALL; // all classes and id are allowed
+    var $allowedClasses = TEXY_ALL; // all classes and id are allowed
 
     /** @var TRUE|FALSE|array  Allowed inline CSS style */
-    public $allowedStyles = Texy::ALL;  // all inline styles are allowed
+    var $allowedStyles = TEXY_ALL;  // all inline styles are allowed
 
     /** @var int  TAB width (for converting tabs to spaces) */
-    public $tabWidth = 8;
+    var $tabWidth = 8;
 
     /** @var boolean  Do obfuscate e-mail addresses? */
-    public $obfuscateEmail = TRUE;
+    var $obfuscateEmail = TRUE;
 
     /** @var array  regexps to check URL schemes */
-    public $urlSchemeFilters = NULL; // disable URL scheme filter
+    var $urlSchemeFilters = NULL; // disable URL scheme filter
 
     /** @var array  Parsing summary */
-    public $summary = array(
+    var $summary = array(
         'images' => array(),
         'links' => array(),
         'preload' => array(),
     );
 
     /** @var string  Generated stylesheet */
-    public $styleSheet = '';
+    var $styleSheet = '';
 
     /** @var bool  Paragraph merging mode */
-    public $mergeLines = TRUE;
+    var $mergeLines = TRUE;
 
     /** @var object  User handler object */
-    public $handler;
+    var $handler;
 
     /** @var bool  ignore stuff with only markup and spaecs? */
-    public $ignoreEmptyStuff = TRUE;
+    var $ignoreEmptyStuff = TRUE;
 
-    /** @var bool  use Strict of Transitional DTD? */
-    static public $strictDTD = FALSE;
-
-    public
+    var
         /** @var TexyScriptModule */
         $scriptModule,
         /** @var TexyParagraphModule */
@@ -171,8 +184,7 @@ class Texy
         /** @var TexyLongWordsModule */
         $longWordsModule;
 
-    public
-        $cleaner;
+    var $cleaner;
 
 
     /**
@@ -180,37 +192,37 @@ class Texy
      * @var array of ('handler' => callback
      *                'pattern' => regular expression)
      */
-    private $linePatterns = array();
+    var $linePatterns = array(); /* private */
 
     /**
      * Registered regexps and associated handlers for block parsing
      * @var array of ('handler' => callback
      *                'pattern' => regular expression)
      */
-    private $blockPatterns = array();
+    var $blockPatterns = array(); /* private */
 
 
     /** @var TexyDomElement  DOM structure for parsed text */
-    private $DOM;
+    var $DOM; /* private */
 
     /** @var TexyModule[]  List of all modules */
-    private $modules;
+    var $modules; /* private */
 
     /** @var array  Texy protect markup table */
-    private $marks = array();
+    var $marks = array(); /* private */
 
     /** @var array  for internal usage */
-    public $_classes, $_styles;
+    var $_classes, $_styles;
 
     /** @var array of ITexyPreBlock for internal parser usage */
-    public $_preBlockModules;
+    var $_preBlockModules;
 
     /** @var int internal state (0=new, 1=parsing, 2=parsed) */
-    private $_state = 0;
+    var $_state = 0; /* private */
 
 
 
-    public function __construct()
+    function __construct()
     {
         // load all modules
         $this->loadModules();
@@ -219,7 +231,7 @@ class Texy
         $this->cleaner = new TexyHtmlCleaner($this);
 
         // accepts all valid HTML tags and attributes by default
-        foreach (TexyHtmlCleaner::$dtd as $tag => $dtd)
+        foreach ($GLOBALS['TexyHtmlCleaner::$dtd']as $tag => $dtd)
             $this->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
 
         // examples of link references ;-)
@@ -250,7 +262,7 @@ class Texy
      * Create array of all used modules ($this->modules)
      * This array can be changed by overriding this method (by subclasses)
      */
-    protected function loadModules()
+    function loadModules() /* protected */
     {
         // Line parsing - order is not important
         $this->scriptModule = new TexyScriptModule($this);
@@ -277,14 +289,14 @@ class Texy
 
 
 
-    public function registerModule(TexyModule $module)
+    function registerModule(/*TexyModule*/ $module)
     {
         $this->modules[] = $module;
     }
 
 
 
-    public function registerLinePattern($handler, $pattern, $name)
+    function registerLinePattern($handler, $pattern, $name)
     {
         if (empty($this->allowed[$name])) return;
         $this->linePatterns[$name] = array(
@@ -295,7 +307,7 @@ class Texy
 
 
 
-    public function registerBlockPattern($handler, $pattern, $name)
+    function registerBlockPattern($handler, $pattern, $name)
     {
         // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
         if (empty($this->allowed[$name])) return;
@@ -316,7 +328,7 @@ class Texy
      * @param bool     is block or single line?
      * @return string  output html code
      */
-    public function process($text, $singleLine=FALSE)
+    function process($text, $singleLine=FALSE)
     {
         $this->parse($text, $singleLine);
         return $this->toHtml();
@@ -329,13 +341,13 @@ class Texy
      * @param string   input text
      * @return string  output code (in UTF!)
      */
-    public function processTypo($text)
+    function processTypo($text)
     {
         // convert to UTF-8 (and check source encoding)
         $text = TexyUtf::toUtf($text, $this->encoding);
 
         // standardize line endings and spaces
-        $text = self::normalize($text);
+        $text = Texy::normalize($text);
 
         $this->typographyModule->begin();
         $text = $this->typographyModule->postLine($text);
@@ -352,14 +364,18 @@ class Texy
      * @param bool     is block or single line?
      * @return void
      */
-    public function parse($text, $singleLine=FALSE)
+    function parse($text, $singleLine=FALSE)
     {
-        if ($this->_state === 1)
-            throw new Exception('Parsing is in progress yet.');
+        if ($this->_state === 1) {
+            trigger_error('Parsing is in progress yet.', E_USER_ERROR);
+            return FALSE;
+        }
 
          // initialization
-        if ($this->handler && !is_object($this->handler))
-            throw new Exception('$texy->handler must be object. See documentation.');
+        if ($this->handler && !is_object($this->handler)) {
+            trigger_error('$texy->handler must be object. See documentation.', E_USER_ERROR);
+            return FALSE;
+        }
 
         $this->marks = array();
         $this->_state = 1;
@@ -377,7 +393,7 @@ class Texy
         $text = TexyUtf::toUtf($text, $this->encoding);
 
         // standardize line endings and spaces
-        $text = self::normalize($text);
+        $text = Texy::normalize($text);
 
         // replace tabs with spaces
         while (strpos($text, "\t") !== FALSE)
@@ -389,7 +405,7 @@ class Texy
         foreach ($this->modules as $module) {
             $module->begin();
 
-            if ($module instanceof ITexyPreBlock) $this->_preBlockModules[] = $module;
+            if (isset($module->interface['ITexyPreBlock'])) $this->_preBlockModules[] = $module;
         }
 
         // parse!
@@ -416,9 +432,12 @@ class Texy
      * Converts internal DOM structure to final HTML code
      * @return string
      */
-    public function toHtml()
+    function toHtml()
     {
-        if ($this->_state !== 2) throw new Exception('Call $texy->parse() first.');
+        if ($this->_state !== 2) {
+            trigger_error('Call $texy->parse() first.', E_USER_ERROR);
+            return FALSE;
+        }
 
         $html = $this->_toHtml( $this->DOM->export($this) );
 
@@ -439,9 +458,12 @@ class Texy
      * Converts internal DOM structure to pure Text
      * @return string
      */
-    public function toText()
+    function toText()
     {
-        if ($this->_state !== 2) throw new Exception('Call $texy->parse() first.');
+        if ($this->_state !== 2) {
+            trigger_error('Call $texy->parse() first.', E_USER_ERROR);
+            return FALSE;
+        }
 
         $text = $this->_toText( $this->DOM->export($this) );
 
@@ -456,25 +478,25 @@ class Texy
      * Converts internal DOM structure to final HTML code in UTF-8
      * @return string
      */
-    public function _toHtml($s)
+    function _toHtml($s)
     {
         // decode HTML entities to UTF-8
-        $s = self::unescapeHtml($s);
+        $s = Texy::unescapeHtml($s);
 
         // line-postprocessing
-        $blocks = explode(self::CONTENT_BLOCK, $s);
+        $blocks = explode(TEXY_CONTENT_BLOCK, $s);
         foreach ($this->modules as $module) {
-            if ($module instanceof ITexyPostLine) {
+            if (isset($module->interface['ITexyPostLine'])) {
                 foreach ($blocks as $n => $s) {
                     if ($n % 2 === 0 && $s !== '')
                         $blocks[$n] = $module->postLine($s);
                 }
             }
         }
-        $s = implode(self::CONTENT_BLOCK, $blocks);
+        $s = implode(TEXY_CONTENT_BLOCK, $blocks);
 
         // encode < > &
-        $s = self::escapeHtml($s);
+        $s = Texy::escapeHtml($s);
 
         // replace protected marks
         $s = $this->unProtect($s);
@@ -483,7 +505,7 @@ class Texy
         $s = $this->cleaner->process($s);
 
         // unfreeze spaces
-        $s = self::unfreezeSpaces($s);
+        $s = Texy::unfreezeSpaces($s);
 
         return $s;
     }
@@ -494,7 +516,7 @@ class Texy
      * Converts internal DOM structure to final HTML code in UTF-8
      * @return string
      */
-    public function _toText($s)
+    function _toText($s)
     {
         $save = $this->cleaner->lineWrap;
         $this->cleaner->lineWrap = FALSE;
@@ -524,7 +546,7 @@ class Texy
     /**
      * @deprecated
      */
-    public function safeMode()
+    function safeMode()
     {
         trigger_error('$texy->safeMode() is deprecated. Use TexyConfigurator::safeMode($texy)', E_USER_WARNING);
         TexyConfigurator::safeMode($this);
@@ -535,7 +557,7 @@ class Texy
     /**
      * @deprecated
      */
-    public function trustMode()
+    function trustMode()
     {
         trigger_error('$texy->trustMode() is deprecated. Trust configuration is by default.', E_USER_WARNING);
         TexyConfigurator::trustMode($this);
@@ -549,7 +571,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function freezeSpaces($s)
+    function freezeSpaces($s) /* static */
     {
         return strtr($s, " \t\r\n", "\x01\x02\x03\x04");
     }
@@ -561,7 +583,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function unfreezeSpaces($s)
+    function unfreezeSpaces($s) /* static */
     {
         return strtr($s, "\x01\x02\x03\x04", " \t\r\n");
     }
@@ -573,7 +595,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function normalize($s)
+    function normalize($s) /* static */
     {
         // remove special chars
         $s = preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
@@ -599,7 +621,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function webalize($s, $charlist=NULL)
+    function webalize($s, $charlist=NULL) /* static */
     {
         $s = TexyUtf::utf2ascii($s);
         $s = strtolower($s);
@@ -616,7 +638,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function escapeHtml($s)
+    function escapeHtml($s) /* static */
     {
         return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
     }
@@ -628,10 +650,81 @@ class Texy
      * @param string
      * @return string
      */
-    static public function unescapeHtml($s)
+    function unescapeHtml($s) /* static */
     {
         if (strpos($s, '&') === FALSE) return $s;
-        return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+
+        if (PHP_VERSION >= 5) return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+
+        static $entity=array('&AElig;'=>'&#198;','&Aacute;'=>'&#193;','&Acirc;'=>'&#194;','&Agrave;'=>'&#192;','&Alpha;'=>'&#913;','&Aring;'=>'&#197;','&Atilde;'=>'&#195;','&Auml;'=>'&#196;',
+            '&Beta;'=>'&#914;','&Ccedil;'=>'&#199;','&Chi;'=>'&#935;','&Dagger;'=>'&#8225;','&Delta;'=>'&#916;','&ETH;'=>'&#208;','&Eacute;'=>'&#201;','&Ecirc;'=>'&#202;',
+            '&Egrave;'=>'&#200;','&Epsilon;'=>'&#917;','&Eta;'=>'&#919;','&Euml;'=>'&#203;','&Gamma;'=>'&#915;','&Iacute;'=>'&#205;','&Icirc;'=>'&#206;','&Igrave;'=>'&#204;',
+            '&Iota;'=>'&#921;','&Iuml;'=>'&#207;','&Kappa;'=>'&#922;','&Lambda;'=>'&#923;','&Mu;'=>'&#924;','&Ntilde;'=>'&#209;','&Nu;'=>'&#925;','&OElig;'=>'&#338;',
+            '&Oacute;'=>'&#211;','&Ocirc;'=>'&#212;','&Ograve;'=>'&#210;','&Omega;'=>'&#937;','&Omicron;'=>'&#927;','&Oslash;'=>'&#216;','&Otilde;'=>'&#213;','&Ouml;'=>'&#214;',
+            '&Phi;'=>'&#934;','&Pi;'=>'&#928;','&Prime;'=>'&#8243;','&Psi;'=>'&#936;','&Rho;'=>'&#929;','&Scaron;'=>'&#352;','&Sigma;'=>'&#931;','&THORN;'=>'&#222;',
+            '&Tau;'=>'&#932;','&Theta;'=>'&#920;','&Uacute;'=>'&#218;','&Ucirc;'=>'&#219;','&Ugrave;'=>'&#217;','&Upsilon;'=>'&#933;','&Uuml;'=>'&#220;','&Xi;'=>'&#926;',
+            '&Yacute;'=>'&#221;','&Yuml;'=>'&#376;','&Zeta;'=>'&#918;','&aacute;'=>'&#225;','&acirc;'=>'&#226;','&acute;'=>'&#180;','&aelig;'=>'&#230;','&agrave;'=>'&#224;',
+            '&alefsym;'=>'&#8501;','&alpha;'=>'&#945;','&amp;'=>'&#38;','&and;'=>'&#8743;','&ang;'=>'&#8736;','&apos;'=>'&#39;','&aring;'=>'&#229;','&asymp;'=>'&#8776;',
+            '&atilde;'=>'&#227;','&auml;'=>'&#228;','&bdquo;'=>'&#8222;','&beta;'=>'&#946;','&brvbar;'=>'&#166;','&bull;'=>'&#8226;','&cap;'=>'&#8745;','&ccedil;'=>'&#231;',
+            '&cedil;'=>'&#184;','&cent;'=>'&#162;','&chi;'=>'&#967;','&circ;'=>'&#710;','&clubs;'=>'&#9827;','&cong;'=>'&#8773;','&copy;'=>'&#169;','&crarr;'=>'&#8629;',
+            '&cup;'=>'&#8746;','&curren;'=>'&#164;','&dArr;'=>'&#8659;','&dagger;'=>'&#8224;','&darr;'=>'&#8595;','&deg;'=>'&#176;','&delta;'=>'&#948;','&diams;'=>'&#9830;',
+            '&divide;'=>'&#247;','&eacute;'=>'&#233;','&ecirc;'=>'&#234;','&egrave;'=>'&#232;','&empty;'=>'&#8709;','&emsp;'=>'&#8195;','&ensp;'=>'&#8194;','&epsilon;'=>'&#949;',
+            '&equiv;'=>'&#8801;','&eta;'=>'&#951;','&eth;'=>'&#240;','&euml;'=>'&#235;','&euro;'=>'&#8364;','&exist;'=>'&#8707;','&fnof;'=>'&#402;','&forall;'=>'&#8704;',
+            '&frac12;'=>'&#189;','&frac14;'=>'&#188;','&frac34;'=>'&#190;','&frasl;'=>'&#8260;','&gamma;'=>'&#947;','&ge;'=>'&#8805;','&gt;'=>'&#62;','&hArr;'=>'&#8660;',
+            '&harr;'=>'&#8596;','&hearts;'=>'&#9829;','&hellip;'=>'&#8230;','&iacute;'=>'&#237;','&icirc;'=>'&#238;','&iexcl;'=>'&#161;','&igrave;'=>'&#236;','&image;'=>'&#8465;',
+            '&infin;'=>'&#8734;','&int;'=>'&#8747;','&iota;'=>'&#953;','&iquest;'=>'&#191;','&isin;'=>'&#8712;','&iuml;'=>'&#239;','&kappa;'=>'&#954;','&lArr;'=>'&#8656;',
+            '&lambda;'=>'&#955;','&lang;'=>'&#9001;','&laquo;'=>'&#171;','&larr;'=>'&#8592;','&lceil;'=>'&#8968;','&ldquo;'=>'&#8220;','&le;'=>'&#8804;','&lfloor;'=>'&#8970;',
+            '&lowast;'=>'&#8727;','&loz;'=>'&#9674;','&lrm;'=>'&#8206;','&lsaquo;'=>'&#8249;','&lsquo;'=>'&#8216;','&lt;'=>'&#60;','&macr;'=>'&#175;','&mdash;'=>'&#8212;',
+            '&micro;'=>'&#181;','&middot;'=>'&#183;','&minus;'=>'&#8722;','&mu;'=>'&#956;','&nabla;'=>'&#8711;','&nbsp;'=>'&#160;','&ndash;'=>'&#8211;','&ne;'=>'&#8800;',
+            '&ni;'=>'&#8715;','&not;'=>'&#172;','&notin;'=>'&#8713;','&nsub;'=>'&#8836;','&ntilde;'=>'&#241;','&nu;'=>'&#957;','&oacute;'=>'&#243;','&ocirc;'=>'&#244;',
+            '&oelig;'=>'&#339;','&ograve;'=>'&#242;','&oline;'=>'&#8254;','&omega;'=>'&#969;','&omicron;'=>'&#959;','&oplus;'=>'&#8853;','&or;'=>'&#8744;','&ordf;'=>'&#170;',
+            '&ordm;'=>'&#186;','&oslash;'=>'&#248;','&otilde;'=>'&#245;','&otimes;'=>'&#8855;','&ouml;'=>'&#246;','&para;'=>'&#182;','&part;'=>'&#8706;','&permil;'=>'&#8240;',
+            '&perp;'=>'&#8869;','&phi;'=>'&#966;','&pi;'=>'&#960;','&piv;'=>'&#982;','&plusmn;'=>'&#177;','&pound;'=>'&#163;','&prime;'=>'&#8242;','&prod;'=>'&#8719;',
+            '&prop;'=>'&#8733;','&psi;'=>'&#968;','&quot;'=>'&#34;','&rArr;'=>'&#8658;','&radic;'=>'&#8730;','&rang;'=>'&#9002;','&raquo;'=>'&#187;','&rarr;'=>'&#8594;',
+            '&rceil;'=>'&#8969;','&rdquo;'=>'&#8221;','&real;'=>'&#8476;','&reg;'=>'&#174;','&rfloor;'=>'&#8971;','&rho;'=>'&#961;','&rlm;'=>'&#8207;','&rsaquo;'=>'&#8250;',
+            '&rsquo;'=>'&#8217;','&sbquo;'=>'&#8218;','&scaron;'=>'&#353;','&sdot;'=>'&#8901;','&sect;'=>'&#167;','&shy;'=>'&#173;','&sigma;'=>'&#963;','&sigmaf;'=>'&#962;',
+            '&sim;'=>'&#8764;','&spades;'=>'&#9824;','&sub;'=>'&#8834;','&sube;'=>'&#8838;','&sum;'=>'&#8721;','&sup1;'=>'&#185;','&sup2;'=>'&#178;','&sup3;'=>'&#179;',
+            '&sup;'=>'&#8835;','&supe;'=>'&#8839;','&szlig;'=>'&#223;','&tau;'=>'&#964;','&there4;'=>'&#8756;','&theta;'=>'&#952;','&thetasym;'=>'&#977;','&thinsp;'=>'&#8201;',
+            '&thorn;'=>'&#254;','&tilde;'=>'&#732;','&times;'=>'&#215;','&trade;'=>'&#8482;','&uArr;'=>'&#8657;','&uacute;'=>'&#250;','&uarr;'=>'&#8593;','&ucirc;'=>'&#251;',
+            '&ugrave;'=>'&#249;','&uml;'=>'&#168;','&upsih;'=>'&#978;','&upsilon;'=>'&#965;','&uuml;'=>'&#252;','&weierp;'=>'&#8472;','&xi;'=>'&#958;','&yacute;'=>'&#253;',
+            '&yen;'=>'&#165;','&yuml;'=>'&#255;','&zeta;'=>'&#950;','&zwj;'=>'&#8205;','&zwnj;'=>'&#8204;',
+        );
+
+        // named -> numeric
+        $s = str_replace(array_keys($entity), array_values($entity), $s);
+
+        // numeric -> unicode
+        $s = preg_replace_callback(
+            '#&(\\#x[0-9a-fA-F]+|\\#[0-9]+);#',
+            array('Texy', '_entityCb'),
+            $s
+        );
+
+        return $s;
+    }
+
+
+    /**
+     * Callback for preg_replace_callback() in toText()
+     *
+     * @param array    matched entity
+     * @return string  decoded entity
+     */
+    function _entityCb($matches)
+    {
+        list(, $entity) = $matches;
+
+        $ord = ($entity{1} == 'x')
+             ? hexdec(substr($entity, 2))
+             : (int) substr($entity, 1);
+
+        if ($ord<128)  // ASCII
+            return chr($ord);
+
+        if ($ord<2048) return chr(($ord>>6)+192) . chr(($ord&63)+128);
+        if ($ord<65536) return chr(($ord>>12)+224) . chr((($ord>>6)&63)+128) . chr(($ord&63)+128);
+        if ($ord<2097152) return chr(($ord>>18)+240) . chr((($ord>>12)&63)+128) . chr((($ord>>6)&63)+128) . chr(($ord&63)+128);
+        return $match; // invalid entity
     }
 
 
@@ -642,7 +735,7 @@ class Texy
      * @param int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
-    public function protect($child, $contentType=self::CONTENT_BLOCK)
+    function protect($child, $contentType=TEXY_CONTENT_BLOCK)
     {
         if ($child==='') return '';
 
@@ -657,7 +750,7 @@ class Texy
 
 
 
-    public function unProtect($html)
+    function unProtect($html)
     {
         return strtr($html, $this->marks);
     }
@@ -670,7 +763,7 @@ class Texy
      * @param string   type: a-anchor, i-image, c-cite
      * @return bool
      */
-    public function checkURL($URL, $type)
+    function checkURL($URL, $type)
     {
         // absolute URL with scheme? check scheme!
         if (!empty($this->urlSchemeFilters[$type])
@@ -688,7 +781,7 @@ class Texy
      * @param string  URL
      * @return bool
      */
-    static public function isRelative($URL)
+    function isRelative($URL) /* static */
     {
         // check for scheme, or absolute path, or absolute URL
         return !preg_match('#'.TEXY_URLSCHEME.'|[\#/?]#iA', $URL);
@@ -702,57 +795,62 @@ class Texy
      * @param string  root
      * @return string
      */
-    static public function prependRoot($URL, $root)
+    function prependRoot($URL, $root) /* static */
     {
-        if ($root == NULL || !self::isRelative($URL)) return $URL;
+        if ($root == NULL || !Texy::isRelative($URL)) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;
     }
 
 
 
-    public function getLinePatterns()
+    function getLinePatterns()
     {
         return $this->linePatterns;
     }
 
 
 
-    public function getBlockPatterns()
+    function getBlockPatterns()
     {
         return $this->blockPatterns;
     }
 
 
 
-    public function getDOM()
+    function getDOM()
     {
         return $this->DOM;
     }
 
 
 
-    private function tabCb($m)
+    function tabCb($m) /* private */
     {
         return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
     }
 
 
 
-    public function free()
+    function free()
     {
         foreach (array_keys(get_object_vars($this)) as $key)
             $this->$key = NULL;
     }
 
 
+    function __clone()
+    {
+        trigger_error('Clone is not supported.', E_USER_ERROR);
+    }
 
-    public function __clone() { throw new Exception("Clone is not supported."); }
 
+    function Texy()  /* PHP 4 constructor */
+    {
+        // generate references (see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4)
+        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
 
-    /**
-     * Undefined property usage prevention
-     */
-    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
-    function __set($nm, $val) { $this->__get($nm); }
+        $args = func_get_args();
+        call_user_func_array(array(&$this, '__construct'), $args);
+    }
 
 }

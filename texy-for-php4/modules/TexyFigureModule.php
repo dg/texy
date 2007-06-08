@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,22 +19,22 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyFigureModule extends TexyModule
 {
-    protected $syntax = array('figure' => TRUE);
+    var $syntax = array('figure' => TRUE); /* protected */
 
     /** @var string  non-floated box CSS class */
-    public $class = 'figure';
+    var $class = 'figure';
 
     /** @var string  left-floated box CSS class */
-    public $leftClass;
+    var $leftClass;
 
     /** @var string  right-floated box CSS class */
-    public $rightClass;
+    var $rightClass;
 
     /** @var int  how calculate div's width */
-    public $widthDelta = 10;
+    var $widthDelta = 10;
 
 
-    public function begin()
+    function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
@@ -53,7 +53,7 @@ class TexyFigureModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $matches)
+    function pattern($parser, $matches)
     {
         list(, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod) = $matches;
         //    [1] => URLs
@@ -72,7 +72,7 @@ class TexyFigureModule extends TexyModule
             if ($mLink === ':') {
                 $link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
                 $link->raw = ':';
-                $link->type = TexyLink::IMAGE;
+                $link->type = TexyLink_IMAGE;
             } else {
                 $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
             }
@@ -81,7 +81,7 @@ class TexyFigureModule extends TexyModule
         // event wrapper
         if (is_callable(array($tx->handler, 'figure'))) {
             $res = $tx->handler->figure($parser, $image, $link, $mContent, $mod);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         return $this->solve($image, $link, $mContent, $mod);
@@ -98,7 +98,7 @@ class TexyFigureModule extends TexyModule
      * @param TexyModifier
      * @return TexyHtml|FALSE
      */
-    public function solve(TexyImage $image, $link, $content, $mod)
+    function solve(/*TexyImage*/ $image, $link, $content, $mod)
     {
         $tx = $this->texy;
 
@@ -116,13 +116,13 @@ class TexyFigureModule extends TexyModule
         $el->children['caption'] = TexyHtml::el('p');
         $el->children['caption']->parseLine($tx, ltrim($content));
 
-        if ($hAlign === TexyModifier::HALIGN_LEFT) {
+        if ($hAlign === TexyModifier_HALIGN_LEFT) {
             if ($this->leftClass != '')
                 $el->attrs['class'][] = $this->leftClass;
             else
                 $el->attrs['style']['float'] = 'left';
 
-        } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
+        } elseif ($hAlign === TexyModifier_HALIGN_RIGHT)  {
 
             if ($this->rightClass != '')
                 $el->attrs['class'][] = $this->rightClass;

@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,10 +19,10 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    protected $syntax = array('horizline' => TRUE);
+    var $syntax = array('horizline' => TRUE); /* protected */
 
 
-    public function begin()
+    function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
@@ -41,7 +41,7 @@ class TexyHorizLineModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml
      */
-    public function pattern($parser, $matches)
+    function pattern($parser, $matches)
     {
         list(, $mMod) = $matches;
         //    [1] => ---

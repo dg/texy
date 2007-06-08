@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyPhraseModule extends TexyModule
 {
-    protected $syntax = array(
+    var $syntax = array(
         'phrase/strong+em' => TRUE,  // ***strong+emphasis***
         'phrase/strong' => TRUE,     // **strong**
         'phrase/em' => TRUE,         // //emphasis//
@@ -43,9 +43,9 @@ class TexyPhraseModule extends TexyModule
 
         // back compatibility
         'deprecated/codeswitch' => FALSE,// `=...
-    );
+    ); /* protected */
 
-    public $tags = array(
+    var $tags = array(
         'phrase/strong' => 'strong', // or 'b'
         'phrase/em' => 'em', // or 'i'
         'phrase/em-alt' => 'em',
@@ -67,11 +67,11 @@ class TexyPhraseModule extends TexyModule
 
 
     /** @var bool  are links allowed? */
-    public $linksAllowed = TRUE;
+    var $linksAllowed = TRUE;
 
 
 
-    public function begin()
+    function begin()
     {
         $tx = $this->texy;
 /*
@@ -236,7 +236,7 @@ class TexyPhraseModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function patternPhrase($parser, $matches, $phrase)
+    function patternPhrase($parser, $matches, $phrase)
     {
         list(, $mContent, $mMod, $mLink) = $matches;
         //    [1] => **
@@ -270,7 +270,7 @@ class TexyPhraseModule extends TexyModule
         // event wrapper
         if (is_callable(array($tx->handler, 'phrase'))) {
             $res = $tx->handler->phrase($parser, $phrase, $mContent, $mod, $link);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         return $this->solve($phrase, $mContent, $mod, $link);
@@ -286,7 +286,7 @@ class TexyPhraseModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function patternSupSub($parser, $matches, $phrase)
+    function patternSupSub($parser, $matches, $phrase)
     {
         list(, $mContent) = $matches;
         $mod = new TexyModifier();
@@ -295,7 +295,7 @@ class TexyPhraseModule extends TexyModule
         // event wrapper
         if (is_callable(array($this->texy->handler, 'phrase'))) {
             $res = $this->texy->handler->phrase($parser, $phrase, $mContent, $mod, $link);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         return $this->solve($phrase, $mContent, $mod, $link);
@@ -312,7 +312,7 @@ class TexyPhraseModule extends TexyModule
      * @param TexyLink
      * @return TexyHtml
      */
-    public function solve($phrase, $content, $mod, $link)
+    function solve($phrase, $content, $mod, $link)
     {
         $tx = $this->texy;
 
@@ -322,7 +322,7 @@ class TexyPhraseModule extends TexyModule
             $tag = $link && $this->linksAllowed ? NULL : 'span';
 
         if ($phrase === 'phrase/code')
-            $content = $tx->protect(Texy::escapeHtml($content), Texy::CONTENT_TEXTUAL);
+            $content = $tx->protect(Texy::escapeHtml($content), TEXY_CONTENT_TEXTUAL);
 
         if ($phrase === 'phrase/strong+em') {
             $el = TexyHtml::el($this->tags['phrase/strong']);
@@ -330,7 +330,7 @@ class TexyPhraseModule extends TexyModule
             $mod->decorate($tx, $el);
 
         } elseif ($tag) {
-            $el = TexyHtml::el($tag)->setText($content);
+            $el = TexyHtml::el($tag); $el->setText($content);
             $mod->decorate($tx, $el);
 
             if ($tag === 'q') $el->attrs['cite'] = $mod->cite;
@@ -351,10 +351,10 @@ class TexyPhraseModule extends TexyModule
      * @param string     pattern name
      * @return string
      */
-    public function patternNoTexy($parser, $matches)
+    function patternNoTexy($parser, $matches)
     {
         list(, $mContent) = $matches;
-        return $this->texy->protect(Texy::escapeHtml($mContent), Texy::CONTENT_TEXTUAL);
+        return $this->texy->protect(Texy::escapeHtml($mContent), TEXY_CONTENT_TEXTUAL);
     }
 
 
@@ -366,7 +366,7 @@ class TexyPhraseModule extends TexyModule
      * @param string     pattern name
      * @return string
      */
-    public function patternCodeSwitch($parser, $matches)
+    function patternCodeSwitch($parser, $matches)
     {
         $this->tags['phrase/code'] = $matches[1];
         return "\n";

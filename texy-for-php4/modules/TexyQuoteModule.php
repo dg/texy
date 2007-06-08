@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,10 +19,10 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    protected $syntax = array('blockquote' => TRUE);
+    var $syntax = array('blockquote' => TRUE); /* protected */
 
 
-    public function begin()
+    function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
@@ -49,7 +49,7 @@ class TexyQuoteModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $matches)
+    function pattern($parser, $matches)
     {
         list(, $mMod, $mPrefix, $mContent) = $matches;
         //    [1] => .(title)[class]{style}<>
@@ -111,7 +111,7 @@ class TexyQuoteModule extends TexyModule
      * @param string
      * @return string|NULL
      */
-    public function citeLink($link)
+    function citeLink($link)
     {
         $tx = $this->texy;
 

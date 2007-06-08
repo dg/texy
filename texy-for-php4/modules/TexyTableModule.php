@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,22 +19,22 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyTableModule extends TexyModule
 {
-    protected $syntax = array('table' => TRUE);
+    var $syntax = array('table' => TRUE); /* protected */
 
     /** @var string  CSS class for odd rows */
 
-    public $oddClass;
+    var $oddClass;
     /** @var string  CSS class for even rows */
-    public $evenClass;
+    var $evenClass;
 
-    private $isHead;
-    private $colModifier;
-    private $last;
-    private $row;
+    var $isHead; /* private */
+    var $colModifier; /* private */
+    var $last; /* private */
+    var $row; /* private */
 
 
 
-    public function begin()
+    function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'patternTable'),
@@ -60,7 +60,7 @@ class TexyTableModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function patternTable($parser, $matches)
+    function patternTable($parser, $matches)
     {
         list(, $mMod) = $matches;
         //    [1] => .(title)[class]{style}<>_
@@ -119,7 +119,7 @@ class TexyTableModule extends TexyModule
      * @param TexyBlockParser
      * @return TexyHtml|string|FALSE
      */
-    protected function patternRow($parser)
+    function patternRow($parser) /* protected */
     {
         $tx = $this->texy;
 
@@ -176,7 +176,7 @@ class TexyTableModule extends TexyModule
             }
 
             if (isset($this->colModifier[$col]))
-                $mod = clone $this->colModifier[$col];
+                $mod = clone ($this->colModifier[$col]);
             else
                 $mod = new TexyModifier;
 
@@ -207,11 +207,11 @@ class TexyTableModule extends TexyModule
  */
 class TexyTableFieldElement extends TexyHtml
 {
-    public $colspan = 1;
-    public $rowspan = 1;
+    var $colspan = 1;
+    var $rowspan = 1;
 
 
-    public function startTag()
+    function startTag()
     {
         $this->attrs['colspan'] = $this->colspan < 2 ? NULL : $this->colspan;
         $this->attrs['rowspan'] = $this->rowspan < 2 ? NULL : $this->rowspan;

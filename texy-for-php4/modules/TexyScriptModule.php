@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,21 +19,21 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyScriptModule extends TexyModule
 {
-    protected $syntax = array('script' => TRUE);
+    var $syntax = array('script' => TRUE); /* protected */
 
     /**
      * @var callback|object  script elements handler
      * function myFunc($parser, $cmd, $args, $raw)
      */
-    public $handler;
+    var $handler;
 
 
     /** @var string  arguments separator */
-    public $separator = ',';
+    var $separator = ',';
 
 
 
-    public function begin()
+    function begin()
     {
         $this->texy->registerLinePattern(
             array($this, 'pattern'),
@@ -52,7 +52,7 @@ class TexyScriptModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $matches)
+    function pattern($parser, $matches)
     {
         list(, $mContent) = $matches;
         //    [1] => ...
@@ -86,7 +86,7 @@ class TexyScriptModule extends TexyModule
         // event wrapper
         if (is_callable(array($this->texy->handler, 'script'))) {
             $res = $this->texy->handler->script($parser, $cmd, $args, $raw);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         if ($cmd==='texy')
@@ -96,7 +96,7 @@ class TexyScriptModule extends TexyModule
     }
 
 
-    public function texyHandler($args)
+    function texyHandler($args)
     {
         if (!$args) return FALSE;
 

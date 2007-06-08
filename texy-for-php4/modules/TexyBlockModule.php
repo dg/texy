@@ -10,16 +10,16 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
 /**
  * Special blocks module
  */
-class TexyBlockModule extends TexyModule implements ITexyPreBlock
+class TexyBlockModule extends TexyModule /* implements ITexyPreBlock */
 {
-    protected $syntax = array(
+    var $syntax = array(
         'blocks' => TRUE,
         'block/default' => TRUE,
         'block/pre' => TRUE,
@@ -29,11 +29,12 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
         'block/texysource' => TRUE,
         'block/comment' => TRUE,
         'block/div' => TRUE,
-    );
+    ); /* protected */
+
+    var $interface = array('ITexyPreBlock'=>1);
 
 
-
-    public function begin()
+    function begin()
     {
         $this->texy->registerBlockPattern(
             array($this, 'pattern'),
@@ -49,7 +50,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
      * @param bool
      * @return string
      */
-    public function preBlock($text, $topLevel)
+    function preBlock($text, $topLevel)
     {
         // autoclose exclusive blocks
         $text = preg_replace(
@@ -73,7 +74,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $matches)
+    function pattern($parser, $matches)
     {
         list(, $mParam, $mMod, $mContent) = $matches;
         //    [1] => code | text | ...
@@ -89,14 +90,14 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
         // event wrapper
         if (is_callable(array($this->texy->handler, 'block'))) {
             $res = $this->texy->handler->block($parser, $blocktype, $mContent, $param, $mod);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         return $this->solve($blocktype, $mContent, $param, $mod);
     }
 
 
-    public function outdent($s)
+    function outdent($s)
     {
         $s = trim($s, "\n");
         $spaces = strspn($s, ' ');
@@ -114,7 +115,7 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
      * @param TexyModifier
      * @return TexyHtml|string|FALSE
      */
-    public function solve($blocktype, $s, $param, $mod)
+    function solve($blocktype, $s, $param, $mod)
     {
         $tx = $this->texy;
 
@@ -204,7 +205,8 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
             $s = trim($s, "\n");
             if ($s==='') return "\n";
             $s = Texy::escapeHtml($s);
-            $s = str_replace("\n", TexyHtml::el('br')->startTag() , $s); // nl2br
+            $tmp = TexyHtml::el('br');
+            $s = str_replace("\n", $tmp->startTag() , $s); // nl2br
             return $tx->protect($s) . "\n";
         }
 
@@ -224,4 +226,4 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
         return FALSE;
     }
 
-} // TexyBlockModule
+} 

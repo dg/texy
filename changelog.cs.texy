@@ -1,51 +1,25 @@
 Changelog
 *********
 
-Verze 2.0 Release Candidate 1 (rev. 128)
+Verze 2.0 Release Candidate 1 (rev. 131)
 =========
 
-23. 5. 2007 .[date]
+8. 6. 2007 .[date]
 
+- balík nyní obsahuje verzi pro PH4
+- nové konfigurační funkce TexyConfigurator::disableLinks & TexyConfigurator::disableImages
+- $texy->safeMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy). 
+- zrušeno trustMode() - jde totiž o výchozí nastavení Texy
 - vnitřní DTD validátor TexyHtmlCleaner nyní kontroluje i platnost atributů
 - opravena chyba zadávání atributů před modifikátor .{attr:value}
 - změna názvu $texy->formatterModule -> $texy->cleaner
 - vráceno zpět $texy->tabWidth
 - mbstring.func_overload fix
-
-
-Verze 2.0 Release Candidate 1 (rev. 125)
-=========
-
-5. 5. 2007 .[date]
-
 - přepsána knihovna TexyHtml - k vlastnostem elementu se nyní přistupuje přes `$el['src'] = 'image.gif'` namísto původního `$el->src = 'image.gif'`
 - zrušena konstanta TEXY, přidána konstanta Texy::VERSION
-
-
-Verze 2.0 Release Candidate 1 (rev. 122)
-=========
-
-26. 4. 2007 .[date]
-
-- $texy->safeMode() a trustMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy) nebo trustMode($texy)
 - klonování třídy Texy není podporováno
-
-
-Verze 2.0 Release Candidate 1 (rev. 119)
-=========
-
-13. 4. 2007 .[date]
-
-- Texy2 by mělo být připraveno na ostrý provoz
 - kompaktní knihovna přejmenována `texy-compact.php` -> `texy.compact.php`
 - TexyDefinitionListModule začleněn do TexyListModule
-
-
-Verze 2.0 beta (rev. 113)
-=========
-
-4. 4. 2007 .[date]
-
 - vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/viewtopic.php?id=399
 - aktivovány typografické úpravy v atributech title
 

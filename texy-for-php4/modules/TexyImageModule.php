@@ -10,47 +10,49 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
 /**
  * Images module
  */
-class TexyImageModule extends TexyModule implements ITexyPreBlock
+class TexyImageModule extends TexyModule /* implements ITexyPreBlock */
 {
-    protected $syntax = array(
+    var $syntax = array(
         'image' => TRUE,
         'image/definition' => TRUE,
-    );
+    ); /* protected */
+
+    var $interface = array('ITexyPreBlock'=>1);
 
     /** @var string  root of relative images (http) */
-    public $root = 'images/';
+    var $root = 'images/';
 
     /** @var string  root of linked images (http) */
-    public $linkedRoot = 'images/';
+    var $linkedRoot = 'images/';
 
     /** @var string  physical location of images on server */
-    public $fileRoot = 'images/';
+    var $fileRoot = 'images/';
 
     /** @var string  left-floated images CSS class */
-    public $leftClass;
+    var $leftClass;
 
     /** @var string  right-floated images CSS class */
-    public $rightClass;
+    var $rightClass;
 
     /** @var string  default alternative text */
-    public $defaultAlt = '';
+    var $defaultAlt = '';
 
     /** @var string  images onload handler */
-    public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
+    var $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
 
-    private $references = array();
-
-
+    var $references = array(); /* private */
 
 
-    public function __construct($texy)
+
+
+    function __construct($texy)
     {
         parent::__construct($texy);
 
@@ -62,7 +64,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
 
 
 
-    public function begin()
+    function begin()
     {
         // [*image*]:LINK
         $this->texy->registerLinePattern(
@@ -80,7 +82,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
      * @param bool
      * @return string
      */
-    public function preBlock($text, $topLevel)
+    function preBlock($text, $topLevel)
     {
         // [*image*]: urls .(title)[class]{style}
         if ($topLevel && $this->texy->allowed['image/definition'])
@@ -101,7 +103,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
      * @param array      regexp matches
      * @return string
      */
-    public function patternReferenceDef($matches)
+    function patternReferenceDef($matches)
     {
         list(, $mRef, $mURLs, $mMod) = $matches;
         //    [1] => [* (reference) *]
@@ -123,7 +125,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function patternImage($parser, $matches)
+    function patternImage($parser, $matches)
     {
         list(, $mURLs, $mMod, $mAlign, $mLink) = $matches;
         //    [1] => URLs
@@ -139,7 +141,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
             if ($mLink === ':') {
                 $link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
                 $link->raw = ':';
-                $link->type = TexyLink::IMAGE;
+                $link->type = TexyLink_IMAGE;
             } else {
                 $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
             }
@@ -148,7 +150,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
         // event wrapper
         if (is_callable(array($tx->handler, 'image'))) {
             $res = $tx->handler->image($parser, $image, $link);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         return $this->solve($image, $link);
@@ -163,7 +165,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
      * @param TexyImage
      * @return void
      */
-    public function addReference($name, TexyImage $image)
+    function addReference($name, /*TexyImage*/ $image)
     {
         $image->name = TexyUtf::strtolower($name);
         $this->references[$image->name] = $image;
@@ -177,11 +179,11 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
      * @param string  reference name
      * @return TexyImage  reference descriptor (or FALSE)
      */
-    public function getReference($name)
+    function getReference($name)
     {
         $name = TexyUtf::strtolower($name);
         if (isset($this->references[$name]))
-            return clone $this->references[$name];
+            return clone ($this->references[$name]);
 
         return FALSE;
     }
@@ -194,7 +196,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
      * @param bool
      * @return TexyImage
      */
-    public function factoryImage($content, $mod, $tryRef=TRUE)
+    function factoryImage($content, $mod, $tryRef=TRUE)
     {
         $image = $tryRef ? $this->getReference(trim($content)) : FALSE;
 
@@ -241,7 +243,7 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
      * @param TexyLink
      * @return TexyHtml|FALSE
      */
-    public function solve(TexyImage $image, $link)
+    function solve(/*TexyImage*/ $image, $link)
     {
         if ($image->URL == NULL) return FALSE;
 
@@ -262,13 +264,13 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
             else $el->attrs['alt'] = $this->defaultAlt;
         }
 
-        if ($hAlign === TexyModifier::HALIGN_LEFT) {
+        if ($hAlign === TexyModifier_HALIGN_LEFT) {
             if ($this->leftClass != '')
                 $el->attrs['class'][] = $this->leftClass;
             else
                 $el->attrs['style']['float'] = 'left';
 
-        } elseif ($hAlign === TexyModifier::HALIGN_RIGHT)  {
+        } elseif ($hAlign === TexyModifier_HALIGN_RIGHT)  {
 
             if ($this->rightClass != '')
                 $el->attrs['class'][] = $this->rightClass;
@@ -322,43 +324,48 @@ class TexyImageModule extends TexyModule implements ITexyPreBlock
 class TexyImage
 {
     /** @var string  base image URL */
-    public $URL;
+    var $URL;
 
     /** @var string  on-mouse-over image URL */
-    public $overURL;
+    var $overURL;
 
     /** @var string  anchored image URL */
-    public $linkedURL;
+    var $linkedURL;
 
     /** @var int  optional image width */
-    public $width;
+    var $width;
 
     /** @var int  optional image height */
-    public $height;
+    var $height;
 
     /** @var TexyModifier */
-    public $modifier;
+    var $modifier;
 
     /** @var string  reference name (if is stored as reference) */
-    public $name;
+    var $name;
 
 
 
-    public function __construct()
+    function __construct()
     {
         $this->modifier = new TexyModifier;
     }
 
 
-    public function __clone()
+    function __clone()
     {
         if ($this->modifier)
-            $this->modifier = clone $this->modifier;
+            $this->modifier = clone ($this->modifier);
     }
 
-    /**
-     * Undefined property usage prevention
-     */
-    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
-    function __set($nm, $val) { $this->__get($nm); }
+
+    function TexyImage()  /* PHP 4 constructor */
+    {
+        // generate references (see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4)
+        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
+
+        // call php5 constructor
+        $args = func_get_args();
+        call_user_func_array(array(&$this, '__construct'), $args);
+    }
 }

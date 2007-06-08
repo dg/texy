@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,9 +19,9 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyListModule extends TexyModule
 {
-    protected $syntax = array('list' => TRUE, 'list/definition' => TRUE);
+    var $syntax = array('list' => TRUE, 'list/definition' => TRUE); /* protected */
 
-    public $bullets = array(
+    var $bullets = array(
                   //  first-rexexp          ordered   list-style-type   next-regexp
         '*'  => array('\*\ ',               0, ''),
         '-'  => array('[\x{2013}-](?![>-])',0, ''),
@@ -36,7 +36,7 @@ class TexyListModule extends TexyModule
 
 
 
-    public function begin()
+    function begin()
     {
         $RE = $REul = array();
         foreach ($this->bullets as $desc) {
@@ -76,7 +76,7 @@ class TexyListModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|FALSE
      */
-    public function patternList($parser, $matches)
+    function patternList($parser, $matches)
     {
         list(, $mMod, $mBullet) = $matches;
         //    [1] => .(title)[class]{style}<>
@@ -136,7 +136,7 @@ class TexyListModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml
      */
-    public function patternDefList($parser, $matches)
+    function patternDefList($parser, $matches)
     {
         list(, $mMod, , , , $mBullet) = $matches;
         //   [1] => .(title)[class]{style}<>
@@ -202,7 +202,7 @@ class TexyListModule extends TexyModule
      * @param string  html tag
      * @return TexyHtml|FALSE
      */
-    public function patternItem($parser, $bullet, $indented, $tag)
+    function patternItem($parser, $bullet, $indented, $tag)
     {
         $tx =  $this->texy;
         $spacesBase = $indented ? ('\ {1,}') : '';
@@ -240,8 +240,8 @@ class TexyListModule extends TexyModule
         $elItem->parseBlock($tx, $content);
         $tx->paragraphModule->mode = $tmp;
 
-        if ($elItem->getChild(0) instanceof TexyHtml) {
-            $elItem->getChild(0)->setName(NULL);
+        if (is_a($elItem->getChild(0), 'TexyHtml')) {
+            $tmp = $elItem->getChild(0); $tmp->setName(NULL);
         }
 
         return $elItem;

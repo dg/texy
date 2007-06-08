@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,10 +19,10 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyEmoticonModule extends TexyModule
 {
-    protected $syntax = array('emoticon' => FALSE);
+    var $syntax = array('emoticon' => FALSE); /* protected */
 
     /** @var array  supported emoticons and image files */
-    public $icons = array (
+    var $icons = array (
         ':-)'  =>  'smile.gif',
         ':-('  =>  'sad.gif',
         ';-)'  =>  'wink.gif',
@@ -36,17 +36,17 @@ class TexyEmoticonModule extends TexyModule
     );
 
     /** @var string  CSS class for emoticons */
-    public $class;
+    var $class;
 
     /** @var string  root of relative images (default value is $texy->imageModule->root) */
-    public $root;
+    var $root;
 
     /** @var string  physical location of images on server (default value is $texy->imageModule->fileRoot) */
-    public $fileRoot;
+    var $fileRoot;
 
 
 
-    public function begin()
+    function begin()
     {
         if (empty($this->texy->allowed['emoticon'])) return;
 
@@ -73,7 +73,7 @@ class TexyEmoticonModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $matches)
+    function pattern($parser, $matches)
     {
         $match = $matches[0];
 
@@ -87,7 +87,7 @@ class TexyEmoticonModule extends TexyModule
                 // event wrapper
                 if (is_callable(array($tx->handler, 'emoticon'))) {
                     $res = $tx->handler->emoticon($parser, $emoticon, $match);
-                    if ($res !== Texy::PROCEED) return $res;
+                    if ($res !== TEXY_PROCEED) return $res;
                 }
 
                 return $this->solve($emoticon, $match);
@@ -106,7 +106,7 @@ class TexyEmoticonModule extends TexyModule
      * @param string
      * @return TexyHtml|FALSE
      */
-    public function solve($emoticon, $raw)
+    function solve($emoticon, $raw)
     {
         $tx = $this->texy;
         $file = $this->icons[$emoticon];

@@ -10,54 +10,49 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
 /**
  * Long words wrap module
  */
-class TexyLongWordsModule extends TexyModule implements ITexyPostLine
+class TexyLongWordsModule extends TexyModule /* implements ITexyPostLine */
 {
-    protected $syntax = array('longwords' => TRUE);
+    var $syntax = array('longwords' => TRUE); /* protected */
 
-    public $wordLimit = 20;
+    var $interface = array('ITexyPostLine'=>1);
 
+    var $wordLimit = 20;
 
-    const
-        DONT = 0,   // don't hyphenate
-        HERE = 1,   // hyphenate here
-        AFTER = 2;  // hyphenate after
-
-
-    private $consonants = array(
+    var $consonants = array(
         'b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','z',
         'B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Z',
         "\xc4\x8d","\xc4\x8f","\xc5\x88","\xc5\x99","\xc5\xa1","\xc5\xa5","\xc5\xbe", //czech utf-8
-        "\xc4\x8c","\xc4\x8e","\xc5\x87","\xc5\x98","\xc5\xa0","\xc5\xa4","\xc5\xbd");
+        "\xc4\x8c","\xc4\x8e","\xc5\x87","\xc5\x98","\xc5\xa0","\xc5\xa4","\xc5\xbd"); /* private */
 
-    private $vowels = array(
+    var $vowels = array(
         'a','e','i','o','u','y',
         'A','E','I','O','U','Y',
         "\xc3\xa1","\xc3\xa9","\xc4\x9b","\xc3\xad","\xc3\xb3","\xc3\xba","\xc5\xaf","\xc3\xbd", //czech utf-8
-        "\xc3\x81","\xc3\x89","\xc4\x9a","\xc3\x8d","\xc3\x93","\xc3\x9a","\xc5\xae","\xc3\x9d");
+        "\xc3\x81","\xc3\x89","\xc4\x9a","\xc3\x8d","\xc3\x93","\xc3\x9a","\xc5\xae","\xc3\x9d"); /* private */
 
-    private $before_r = array(
+    var $before_r = array(
         'b','B','c','C','d','D','f','F','g','G','k','K','p','P','r','R','t','T','v','V',
-        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4"); //czech utf-8
+        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4"); /* private */ //czech utf-8
 
-    private $before_l = array(
+    var $before_l = array(
         'b','B','c','C','d','D','f','F','g','G','k','K','l','L','p','P','t','T','v','V',
-        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\xa5","\xc5\xa4"); //czech utf-8
+        "\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\xa5","\xc5\xa4"); /* private */ //czech utf-8
 
-    private $before_h = array('c','C','s','S');
+    var $before_h = array('c','C','s','S'); /* private */
 
-    private $doubleVowels = array('a','A','o','O');
-
-
+    var $doubleVowels = array('a','A','o','O'); /* private */
 
 
-    public function __construct($texy)
+
+
+    function __construct($texy)
     {
         parent::__construct($texy);
 
@@ -71,7 +66,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyPostLine
 
 
 
-    public function postLine($text)
+    function postLine($text)
     {
         if (empty($this->texy->allowed['longwords'])) return $text;
 
@@ -89,7 +84,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyPostLine
      * @param array
      * @return string
      */
-    private function pattern($matches)
+    function pattern($matches) /* private */
     {
         list($mWord) = $matches;
         //    [0] => lllloooonnnnggggwwwoorrdddd
@@ -128,52 +123,52 @@ class TexyLongWordsModule extends TexyModule implements ITexyPostLine
         $a = 0; $last = 1;
 
         while (++$a < $len) {
-            $hyphen = self::DONT; // Do not hyphenate
+            $hyphen = 0; // Do not hyphenate
             do {
                 if ($s[$a] === "\xC2\xA0") { $a++; continue 2; } // here and after never
 
-                if ($s[$a] === '.') { $hyphen = self::HERE; break; }
+                if ($s[$a] === '.') { $hyphen = 1; break; }
 
                 if (isset($consonants[$s[$a]])) {  // souhlásky
 
                     if (isset($vowels[$s[$a+1]])) {
-                        if (isset($vowels[$s[$a-1]])) $hyphen = self::HERE;
+                        if (isset($vowels[$s[$a-1]])) $hyphen = 1;
                         break;
                     }
 
-                    if (($s[$a] === 's') && ($s[$a-1] === 'n') && isset($consonants[$s[$a+1]])) { $hyphen = self::AFTER; break; }
+                    if (($s[$a] === 's') && ($s[$a-1] === 'n') && isset($consonants[$s[$a+1]])) { $hyphen = 2; break; }
 
                     if (isset($consonants[$s[$a+1]]) && isset($vowels[$s[$a-1]])) {
                         if ($s[$a+1] === 'r') {
-                            $hyphen = isset($before_r[$s[$a]]) ? self::HERE : self::AFTER;
+                            $hyphen = isset($before_r[$s[$a]]) ? 1: 2;
                             break;
                         }
 
                         if ($s[$a+1] === 'l') {
-                            $hyphen = isset($before_l[$s[$a]]) ? self::HERE : self::AFTER;
+                            $hyphen = isset($before_l[$s[$a]]) ? 1: 2;
                             break;
                         }
 
                         if ($s[$a+1] === 'h') { // CH
-                            $hyphen = isset($before_h[$s[$a]]) ? self::DONT : self::AFTER;
+                            $hyphen = isset($before_h[$s[$a]]) ? 0: 2;
                             break;
                         }
 
-                        $hyphen = self::AFTER;
+                        $hyphen = 2;
                         break;
                     }
 
                     break;
                 }   // konec souhlasky
 
-                if (($s[$a] === 'u') && isset($doubleVowels[$s[$a-1]])) { $hyphen = self::AFTER; break; }
-                if (isset($vowels[$s[$a]]) && isset($vowels[$s[$a-1]])) { $hyphen = self::HERE; break; }
+                if (($s[$a] === 'u') && isset($doubleVowels[$s[$a-1]])) { $hyphen = 2; break; }
+                if (isset($vowels[$s[$a]]) && isset($vowels[$s[$a-1]])) { $hyphen = 1; break; }
 
             } while(0);
 
-            if ($hyphen === self::DONT && ($a - $last > $this->wordLimit*0.6)) $positions[] = $last = $a-1; // Hyphenate here
-            if ($hyphen === self::HERE) $positions[] = $last = $a-1; // Hyphenate here
-            if ($hyphen === self::AFTER) { $positions[] = $last = $a; $a++; } // Hyphenate after
+            if ($hyphen === 0 && ($a - $last > $this->wordLimit*0.6)) $positions[] = $last = $a-1; // Hyphenate here
+            if ($hyphen === 1) $positions[] = $last = $a-1; // Hyphenate here
+            if ($hyphen === 2) { $positions[] = $last = $a; $a++; } // Hyphenate after
 
         } // while
 

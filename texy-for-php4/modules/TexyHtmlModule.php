@@ -10,7 +10,7 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
 
@@ -19,19 +19,19 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyHtmlModule extends TexyModule
 {
-    protected $syntax = array(
+    var $syntax = array(
         'html/tag' => TRUE,
         'html/comment' => TRUE,
-    );
+    ); /* protected */
 
 
     /** @var bool   pass HTML comments to output? */
-    public $passComment = TRUE;
+    var $passComment = TRUE;
 
 
 
 
-    public function begin()
+    function begin()
     {
         $this->texy->registerLinePattern(
             array($this, 'patternTag'),
@@ -56,13 +56,13 @@ class TexyHtmlModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function patternComment($parser, $matches)
+    function patternComment($parser, $matches)
     {
         list(, $mComment) = $matches;
 
         if (is_callable(array($this->texy->handler, 'htmlComment'))) {
             $res = $this->texy->handler->htmlComment($parser, $mComment);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         return $this->solveComment($mComment);
@@ -79,7 +79,7 @@ class TexyHtmlModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function patternTag($parser, $matches)
+    function patternTag($parser, $matches)
     {
         list(, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
         //    [1] => /
@@ -113,7 +113,7 @@ class TexyHtmlModule extends TexyModule
         if (!$isStart) {
             if (is_callable(array($tx->handler, 'htmlTag'))) {
                 $res = $tx->handler->htmlTag($parser, $el, FALSE);
-                if ($res !== Texy::PROCEED) return $res;
+                if ($res !== TEXY_PROCEED) return $res;
             }
 
             return $this->solveTag($el, FALSE);
@@ -138,7 +138,7 @@ class TexyHtmlModule extends TexyModule
 
         if (is_callable(array($tx->handler, 'htmlTag'))) {
             $res = $tx->handler->htmlTag($parser, $el, TRUE, $isEmpty);
-            if ($res !== Texy::PROCEED) return $res;
+            if ($res !== TEXY_PROCEED) return $res;
         }
 
         return $this->solveTag($el, TRUE, $isEmpty);
@@ -155,7 +155,7 @@ class TexyHtmlModule extends TexyModule
      * @param bool      is empty?
      * @return string|FALSE
      */
-    public function solveTag(TexyHtml $el, $isStart, $forceEmpty=NULL)
+    function solveTag(/*TexyHtml*/ $el, $isStart, $forceEmpty=NULL)
     {
         $tx = $this->texy;
 
@@ -175,11 +175,11 @@ class TexyHtmlModule extends TexyModule
             // complete UPPER convert to lower
             if ($el->name === strtoupper($el->name))
                 $el->setName(strtolower($el->name));
-            $aAttrs = Texy::ALL; // all attrs are allowed
+            $aAttrs = TEXY_ALL; // all attrs are allowed
         }
 
         // force empty
-        if ($forceEmpty && $aTags === Texy::ALL) $el->isEmpty = TRUE;
+        if ($forceEmpty && $aTags === TEXY_ALL) $el->isEmpty = TRUE;
 
         // end tag? we are finished
         if (!$isStart) {
@@ -208,7 +208,7 @@ class TexyHtmlModule extends TexyModule
                 foreach ($elAttrs['class'] as $key => $val)
                     if (!isset($tmp[$val])) unset($elAttrs['class'][$key]); // id & class are case-sensitive in XHTML
 
-            } elseif ($tmp !== Texy::ALL) {
+            } elseif ($tmp !== TEXY_ALL) {
                 $elAttrs['class'] = NULL;
             }
         }
@@ -217,7 +217,7 @@ class TexyHtmlModule extends TexyModule
         if (isset($elAttrs['id'])) {
             if (is_array($tmp)) {
                 if (!isset($tmp['#' . $elAttrs['id']])) $elAttrs['id'] = NULL;
-            } elseif ($tmp !== Texy::ALL) {
+            } elseif ($tmp !== TEXY_ALL) {
                 $elAttrs['id'] = NULL;
             }
         }
@@ -234,7 +234,7 @@ class TexyHtmlModule extends TexyModule
                     if (isset($pair[1]) && isset($tmp[strtolower($prop)])) // CSS is case-insensitive
                         $elAttrs['style'][$prop] = $pair[1];
                 }
-            } elseif ($tmp !== Texy::ALL) {
+            } elseif ($tmp !== TEXY_ALL) {
                 $elAttrs['style'] = NULL;
             }
         }
@@ -272,7 +272,7 @@ class TexyHtmlModule extends TexyModule
      * @param string
      * @return string
      */
-    public function solveComment($content)
+    function solveComment($content)
     {
         if (!$this->passComment) return '';
 
@@ -280,7 +280,7 @@ class TexyHtmlModule extends TexyModule
         $content = preg_replace('#-{2,}#', '-', $content);
         $content = rtrim($content, '-');
 
-        return $this->texy->protect('<!--' . $content . '-->', Texy::CONTENT_MARKUP);
+        return $this->texy->protect('<!--' . $content . '-->', TEXY_CONTENT_MARKUP);
     }
 
 

@@ -10,63 +10,66 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
+
+
+
+$GLOBALS['TexyTypographyModule::$locales'] = array(
+    'cs' => array(
+        'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
+        'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
+    ),
+
+    'en' => array(
+        'singleQuotes' => array("\xe2\x80\x98", "\xe2\x80\x99"), // U+2018, U+2019
+        'doubleQuotes' => array("\xe2\x80\x9c", "\xe2\x80\x9d"), // U+201C, U+201D
+    ),
+
+    'fr' => array(
+        'singleQuotes' => array("\xe2\x80\xb9", "\xe2\x80\xba"), // U+2039, U+203A
+        'doubleQuotes' => array("\xc2\xab", "\xc2\xbb"),         // U+00AB, U+00BB
+    ),
+
+    'de' => array(
+        'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
+        'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
+    ),
+
+    'pl' => array(
+        'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x99"), // U+201A, U+2019
+        'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9d"), // U+201E, U+201D
+    ),
+);
 
 
 /**
  * Typography replacements module
  */
-class TexyTypographyModule extends TexyModule implements ITexyPostLine
+class TexyTypographyModule extends TexyModule /* implements ITexyPostLine */
 {
-    protected $syntax = array('typography' => TRUE);
+    var $syntax = array('typography' => TRUE); /* protected */
+
+    var $interface = array('ITexyPostLine'=>1);
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
-    static public $locales = array(
-        'cs' => array(
-            'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
-            'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
-        ),
+    var $locale = 'cs';
 
-        'en' => array(
-            'singleQuotes' => array("\xe2\x80\x98", "\xe2\x80\x99"), // U+2018, U+2019
-            'doubleQuotes' => array("\xe2\x80\x9c", "\xe2\x80\x9d"), // U+201C, U+201D
-        ),
-
-        'fr' => array(
-            'singleQuotes' => array("\xe2\x80\xb9", "\xe2\x80\xba"), // U+2039, U+203A
-            'doubleQuotes' => array("\xc2\xab", "\xc2\xbb"),         // U+00AB, U+00BB
-        ),
-
-        'de' => array(
-            'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
-            'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
-        ),
-
-        'pl' => array(
-            'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x99"), // U+201A, U+2019
-            'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9d"), // U+201E, U+201D
-        ),
-    );
-
-    public $locale = 'cs';
-
-    private $pattern, $replace;
+    var $pattern, $replace; /* private */
 
 
-
-    public function begin()
+    function begin()
     {
         // CONTENT_MARKUP mark:   \x17-\x1F
         // CONTENT_REPLACED mark: \x16
         // CONTENT_TEXTUAL mark:  \x17
         // CONTENT_BLOCK: not used in postLine
 
-        if (isset(self::$locales[$this->locale]))
-            $locale = self::$locales[$this->locale];
+        if (isset($GLOBALS['TexyTypographyModule::$locales'][$this->locale]))
+            $locale = $GLOBALS['TexyTypographyModule::$locales'][$this->locale];
         else // fall back
-            $locale = self::$locales['en'];
+            $locale = $GLOBALS['TexyTypographyModule::$locales']['en'];
 
         $pairs = array(
             '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
@@ -117,11 +120,11 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
 
 
 
-    public function postLine($text)
+    function postLine($text)
     {
         if (empty($this->texy->allowed['typography'])) return $text;
 
         return preg_replace($this->pattern, $this->replace, $text);
     }
 
-} // TexyTypographyModule
+} 
