@@ -12,7 +12,7 @@
  * @license   GNU GENERAL PUBLIC LICENSE version 2
  * @package   Texy
  * @category  Text
- * @version   2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)
+ * @version   2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
  */
 
 
@@ -80,7 +80,7 @@ class Texy
     const NONE = FALSE;
 
     // Texy version
-    const VERSION = '2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)';
+    const VERSION = '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)';
 
     // types of protection marks
     const CONTENT_MARKUP = "\x17";
@@ -236,7 +236,7 @@ class Texy
 
         // mbstring.func_overload fix
         if (function_exists('mb_get_info')) {
-            $mb = mb_get_info();
+            $mb = mb_get_info('all'); // all for PHP < 4.4.3
             if ($mb['func_overload'] & 2 && $mb['internal_encoding'][0] === 'U') { // U??
                 mb_internal_encoding('pass');
                 trigger_error('Texy: mb_internal_encoding changed to pass', E_USER_WARNING);

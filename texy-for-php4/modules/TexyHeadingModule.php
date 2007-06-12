@@ -174,7 +174,7 @@ class TexyHeadingModule extends TexyModule
         $el = new TexyHeadingElement;
         $mod->decorate($tx, $el);
 
-        $el->level = $level;
+        $el->_level = $level;
         $el->PHP4['top'] = $this->top;
 
         if ($this->balancing === TexyHeadingModule_DYNAMIC) {
@@ -230,12 +230,7 @@ class TexyHeadingModule extends TexyModule
  */
 class TexyHeadingElement extends TexyHtml
 {
-    var $name = 'h?';
-
-    var $level;
-    //var $top;
-    //var $map;
-    //var $TOC;
+    var $_level;
     var $PHP4 = array(
         'top' => NULL,
         'map' => NULL,
@@ -244,7 +239,7 @@ class TexyHeadingElement extends TexyHtml
 
     function startTag()
     {
-        $level = $this->level;
+        $level = $this->_level;
 
         if ($this->PHP4['map']) {
             asort($this->PHP4['map']);
@@ -253,7 +248,7 @@ class TexyHeadingElement extends TexyHtml
 
         $level += $this->PHP4['top'];
 
-        $this->name = 'h' . min(6, max(1, $level));
+        $this->setName('h' . min(6, max(1, $level)));
         $this->PHP4['TOC']['level'] = $level;
         return parent::startTag();
     }

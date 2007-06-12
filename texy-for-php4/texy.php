@@ -12,7 +12,7 @@
  * @license   GNU GENERAL PUBLIC LICENSE version 2
  * @package   Texy
  * @category  Text
- * @version   2.0 RC 1 (Revision: $WCREV$, Date: $WCDATE$)
+ * @version   2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
  */
 
 
@@ -85,7 +85,7 @@ if (PHP_VERSION < 5) eval('
 
 define('TEXY_ALL',  TRUE); /* class constant */
 define('TEXY_NONE',  FALSE); /* class constant */
-define('TEXY_VERSION',  '2.0 FOR PHP4 RC 1 (Revision: $WCREV$, Date: $WCDATE$)'); /* class constant */
+define('TEXY_VERSION',  '2.0 FOR PHP4 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)'); /* class constant */
 define('TEXY_CONTENT_MARKUP',  "\x17"); /* class constant */
 define('TEXY_CONTENT_REPLACED',  "\x16"); /* class constant */
 define('TEXY_CONTENT_TEXTUAL',  "\x15"); /* class constant */
@@ -248,7 +248,7 @@ class Texy
 
         // mbstring.func_overload fix
         if (function_exists('mb_get_info')) {
-            $mb = mb_get_info();
+            $mb = mb_get_info('all'); // all for PHP < 4.4.3
             if ($mb['func_overload'] & 2 && $mb['internal_encoding'][0] === 'U') { // U??
                 mb_internal_encoding('pass');
                 trigger_error('Texy: mb_internal_encoding changed to pass', E_USER_WARNING);

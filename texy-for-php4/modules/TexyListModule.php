@@ -91,7 +91,7 @@ class TexyListModule extends TexyModule
             if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
                 $bullet = isset($desc[3]) ? $desc[3] : $desc[0];
                 $min = isset($desc[3]) ? 2 : 1;
-                $el->name = $desc[1] ? 'ol' : 'ul';
+                $el->setName($desc[1] ? 'ol' : 'ul');
                 $el->attrs['style']['list-style-type'] = $desc[2];
                 if ($desc[1]) { // ol
                     if ($type[0] === '1' && (int) $mBullet > 1)

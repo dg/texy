@@ -58,7 +58,7 @@ class TexyParagraphModule extends TexyModule
         // check content type
         // block contains block tag
         if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
-            $el->name = '';  // ignores modifier!
+            $el->setName(NULL);  // ignores modifier!
 
         // block contains text (protected)
         } elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
@@ -70,22 +70,25 @@ class TexyParagraphModule extends TexyModule
 
         // block contains only replaced element
         } elseif (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) {
-            $el->name = 'div';
+            $el->setName('div');
 
         // block contains only markup tags or spaces or nothig
         } else {
             if ($tx->ignoreEmptyStuff) return FALSE;
-            if ($mod->empty) $el->name = '';
+            if ($mod->empty) $el->setName(NULL);
         }
 
-        // apply modifier
-        if ($el->name && $mod) $mod->decorate($tx, $el);
+        if ($el->getName()) {
+            // apply modifier
+            if ($mod) $mod->decorate($tx, $el);
 
-        // add <br />
-        if ($el->name && (strpos($content, "\r") !== FALSE)) {
-            $key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
-            $content = str_replace("\r", $key, $content);
-        };
+            // add <br />
+            if (strpos($content, "\r") !== FALSE) {
+                $key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
+                $content = str_replace("\r", $key, $content);
+            };
+        }
+
         $content = strtr($content, "\r\n", '  ');
         $el->setText($content);
 

@@ -160,26 +160,30 @@ class TexyHtmlModule extends TexyModule
         $tx = $this->texy;
 
         // tag & attibutes
-        $aTags = $tx->allowedTags; // speed-up
-        if (!$aTags) {
+        $allowedTags = $tx->allowedTags; // speed-up
+        if (!$allowedTags)
             return FALSE;  // all tags are disabled
 
-        } elseif (is_array($aTags)) {
-            if (!isset($aTags[$el->name])) {
-                $el->setName(strtolower($el->name));
-                if (!isset($aTags[$el->name])) return FALSE; // this element not allowed
+        $name = $el->getName();
+        if (is_array($allowedTags)) {
+            if (!isset($allowedTags[$name])) {
+                $name = strtolower($name);
+                if (!isset($allowedTags[$name])) return FALSE; // this element not allowed
+                $el->setName($name);
             }
-            $aAttrs = $aTags[$el->name]; // allowed attrs
+            $allowedAttrs = $allowedTags[$name]; // allowed attrs
 
         } else { // allowedTags === Texy::ALL
             // complete UPPER convert to lower
-            if ($el->name === strtoupper($el->name))
-                $el->setName(strtolower($el->name));
-            $aAttrs = Texy::ALL; // all attrs are allowed
-        }
+            if ($name === strtoupper($name)) {
+                $name = strtolower($name);
+                $el->setName($name);
+            }
 
-        // force empty
-        if ($forceEmpty && $aTags === Texy::ALL) $el->isEmpty = TRUE;
+            if ($forceEmpty) $el->isEmpty(TRUE);
+
+            $allowedAttrs = Texy::ALL; // all attrs are allowed
+        }
 
         // end tag? we are finished
         if (!$isStart) {
@@ -189,15 +193,15 @@ class TexyHtmlModule extends TexyModule
         $elAttrs = & $el->attrs;
 
         // process attributes
-        if (!$aAttrs) {
+        if (!$allowedAttrs) {
             $elAttrs = array();
 
-        } elseif (is_array($aAttrs)) {
+        } elseif (is_array($allowedAttrs)) {
 
             // skip disabled
-            $aAttrs = array_flip($aAttrs);
+            $allowedAttrs = array_flip($allowedAttrs);
             foreach ($elAttrs as $key => $foo)
-                if (!isset($aAttrs[$key])) unset($elAttrs[$key]);
+                if (!isset($allowedAttrs[$key])) unset($elAttrs[$key]);
         }
 
         // apply allowedClasses
@@ -239,14 +243,14 @@ class TexyHtmlModule extends TexyModule
             }
         }
 
-        if ($el->name === 'img') {
+        if ($name === 'img') {
             if (!isset($elAttrs['src'])) return FALSE;
 
             if (!$tx->checkURL($elAttrs['src'], 'i')) return FALSE;
 
             $tx->summary['images'][] = $elAttrs['src'];
 
-        } elseif ($el->name === 'a') {
+        } elseif ($name === 'a') {
             if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) return FALSE;
             if (isset($elAttrs['href'])) {
                 if ($tx->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== FALSE) {
@@ -278,7 +282,7 @@ class TexyHtmlModule extends TexyModule
 
         // sanitize comment
         $content = preg_replace('#-{2,}#', '-', $content);
-        $content = rtrim($content, '-');
+        $content = trim($content, '-');
 
         return $this->texy->protect('<!--' . $content . '-->', Texy::CONTENT_MARKUP);
     }

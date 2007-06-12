@@ -33,12 +33,12 @@ $GLOBALS['TexyHtml::$emptyTags'] = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'me
  *
  * usage:
  *       $anchor = TexyHtml::el('a')->href($link)->setText('Texy');
- *       $el['href'] = $link;
+ *       $el->attrs['class'] = 'myclass';
  *
  *       echo $el->startTag(), $el->endTag();
  *
  */
-class TexyHtml /* implements ArrayAccess */
+class TexyHtml
 {
     /** @var string  element's name */
     var $name;
@@ -110,6 +110,28 @@ class TexyHtml /* implements ArrayAccess */
         $this->name = $name;
         $this->isEmpty = isset($GLOBALS['TexyHtml::$emptyTags'][$name]);
         return $this;
+    }
+
+
+    /**
+     * Returns element's name
+     * @return string
+     */
+    function getName()
+    {
+        return $this->name;
+    }
+
+
+    /**
+     * Is element empty?
+     * @param optional setter
+     * @return bool
+     */
+    function isEmpty($val=NULL)
+    {
+        if (is_bool($val)) $this->isEmpty = $val;
+        return $this->isEmpty;
     }
 
 
@@ -188,18 +210,22 @@ class TexyHtml /* implements ArrayAccess */
 
 
     /**
-     * Overloaded setter for element's attribute
-     * @param string attribute name
-     * @param array value
+    /**
+     * Special setter for element's attribute
+     * @param string path
+     * @param array query
      * @return TexyHtml  itself
      */
-/*
-    public function __call($m, $args)
+    function href($path, $params=NULL)
     {
-        $this->attrs[$m] = $args[0];
+        if ($params) {
+        	// missing http_build_query in PHP5
+            //$query = http_build_query($params, NULL, '&');
+            if ($query !== '') $path .= '?' . $query;
+        }
+        $this->attrs['href'] = $path;
         return $this;
     }
-*/
 
 
     /**
@@ -252,7 +278,7 @@ class TexyHtml /* implements ArrayAccess */
                 else $s .= ' ' . $key;
                 continue;
 
-            } elseif (is_array($value) || is_object($value)) {
+            } elseif (is_array($value)) {
 
                 // prepare into temporary array
                 $tmp = NULL;

@@ -64,7 +64,7 @@ class myHandler
 
         $elPre = TexyHtml::el('pre');
         if ($modifier) $modifier->decorate($texy, $elPre);
-        $elPre['class'] = strtolower($lang);
+        $elPre->class = strtolower($lang);
 
         $elCode = $elPre->add('code', $content);
 

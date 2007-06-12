@@ -168,16 +168,16 @@ class TexyHeadingModule extends TexyModule
         $el = new TexyHeadingElement;
         $mod->decorate($tx, $el);
 
-        $el->level = $level;
-        $el->top = $this->top;
+        $el->_level = $level;
+        $el->_top = $this->top;
 
         if ($this->balancing === self::DYNAMIC) {
             if ($isSurrounded) {
                 $this->dynamicTop = max($this->dynamicTop, $this->top - $level);
-                $el->top = & $this->dynamicTop;
+                $el->_top = & $this->dynamicTop;
             } else {
                 $this->dynamicMap[$level] = $level;
-                $el->map = & $this->dynamicMap;
+                $el->_map = & $this->dynamicMap;
             }
         }
         $el->parseLine($tx, trim($content));
@@ -205,7 +205,7 @@ class TexyHeadingModule extends TexyModule
             'level' => 0,
         );
         $this->TOC[] = & $TOC;
-        $el->TOC = & $TOC;
+        $el->_TOC = & $TOC;
 
         return $el;
     }
@@ -224,27 +224,25 @@ class TexyHeadingModule extends TexyModule
  */
 class TexyHeadingElement extends TexyHtml
 {
-    public $name = 'h?';
-
-    public $level;
-    public $top;
-    public $map;
-    public $TOC;
+    public $_level;
+    public $_top;
+    public $_map;
+    public $_TOC;
 
 
     public function startTag()
     {
-        $level = $this->level;
+        $level = $this->_level;
 
-        if ($this->map) {
-            asort($this->map);
-            $level = array_search($level, array_values($this->map), TRUE);
+        if ($this->_map) {
+            asort($this->_map);
+            $level = array_search($level, array_values($this->_map), TRUE);
         }
 
-        $level += $this->top;
+        $level += $this->_top;
 
-        $this->name = 'h' . min(6, max(1, $level));
-        $this->TOC['level'] = $level;
+        $this->setName('h' . min(6, max(1, $level)));
+        $this->_TOC['level'] = $level;
         return parent::startTag();
     }
 

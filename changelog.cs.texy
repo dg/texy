@@ -1,35 +1,51 @@
 Changelog
 *********
 
-Verze 2.0 Release Candidate 1 (rev. 131)
+
+Verze 2.0 Beta 2
 =========
 
-8. 6. 2007 .[date]
+rev. 133
+- POZOR: přepsání knihovny TexyHtml stornováno! K vlastnostem elementu se opět přistupuje přes `$el->src = 'image.gif'`, nikoliv `$el['src'] = 'image.gif'`. Omlouvám se za způsobené komplikace.
 
-- balík nyní obsahuje verzi pro PH4
+rev. 131
+- balík nyní obsahuje verzi pro PHP4
 - nové konfigurační funkce TexyConfigurator::disableLinks & TexyConfigurator::disableImages
-- $texy->safeMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy). 
+- $texy->safeMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy).
 - zrušeno trustMode() - jde totiž o výchozí nastavení Texy
+- mbstring.func_overload fix
+- vráceno zpět $texy->tabWidth
+
+rev. 126
 - vnitřní DTD validátor TexyHtmlCleaner nyní kontroluje i platnost atributů
 - opravena chyba zadávání atributů před modifikátor .{attr:value}
 - změna názvu $texy->formatterModule -> $texy->cleaner
-- vráceno zpět $texy->tabWidth
-- mbstring.func_overload fix
+
+rev. 125
 - přepsána knihovna TexyHtml - k vlastnostem elementu se nyní přistupuje přes `$el['src'] = 'image.gif'` namísto původního `$el->src = 'image.gif'`
 - zrušena konstanta TEXY, přidána konstanta Texy::VERSION
+
+rev. 122
+- $texy->safeMode() a trustMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy) nebo trustMode($texy)
 - klonování třídy Texy není podporováno
+
+rev. 119
+- Texy2 by mělo být připraveno na ostrý provoz
 - kompaktní knihovna přejmenována `texy-compact.php` -> `texy.compact.php`
 - TexyDefinitionListModule začleněn do TexyListModule
+
+rev. 113
 - vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/viewtopic.php?id=399
 - aktivovány typografické úpravy v atributech title
 
 
-Verze 2.0 beta (rev. 111)
+
+
+Verze 2.0 Beta (rev. 111)
 =========
 
-30. 3. 2007 .[date]
-
 - mnohem dokonalejší výstup, zcela nové API, perfektní podpora pro vlastní handlery, opravena řada chyb
+
 
 třída Texy
 ----

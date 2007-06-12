@@ -20,15 +20,18 @@ if (!class_exists('Texy', FALSE)) die();
  *
  * usage:
  *       $anchor = TexyHtml::el('a')->href($link)->setText('Texy');
- *       $el['href'] = $link;
+ *       $el->class = 'myclass';
  *
  *       echo $el->startTag(), $el->endTag();
  *
  */
-class TexyHtml implements ArrayAccess
+class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
 {
     /** @var string  element's name */
-    public $name;
+    private $name;
+
+    /** @var bool  is element empty? */
+    private $isEmpty;
 
     /** @var array  element's attributes */
     public $attrs = array();
@@ -39,9 +42,6 @@ class TexyHtml implements ArrayAccess
      *   string - content as string (text-node)
      */
     public $children;
-
-    /** @var bool  is element empty? */
-    public $isEmpty;
 
     /** @var bool  use XHTML syntax? */
     static public $xhtml = TRUE;
@@ -106,6 +106,28 @@ class TexyHtml implements ArrayAccess
         $this->name = $name;
         $this->isEmpty = isset(self::$emptyTags[$name]);
         return $this;
+    }
+
+
+    /**
+     * Returns element's name
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+
+    /**
+     * Is element empty?
+     * @param optional setter
+     * @return bool
+     */
+    public function isEmpty($val=NULL)
+    {
+        if (is_bool($val)) $this->isEmpty = $val;
+        return $this->isEmpty;
     }
 
 
@@ -183,6 +205,29 @@ class TexyHtml implements ArrayAccess
 
     /**
      * Overloaded setter for element's attribute
+     * @param string    property name
+     * @param mixed     property value
+     * @return void
+     */
+    public function __set($nm, $val)
+    {
+        $this->attrs[$nm] = $val;
+    }
+
+
+    /**
+     * Overloaded getter for element's attribute
+     * @param string    property name
+     * @return mixed    property value
+     */
+    public function &__get($nm)
+    {
+        return $this->attrs[$nm];
+    }
+
+
+    /**
+     * Overloaded setter for element's attribute
      * @param string attribute name
      * @param array value
      * @return TexyHtml  itself
@@ -202,73 +247,15 @@ class TexyHtml implements ArrayAccess
      * @param array query
      * @return TexyHtml  itself
      */
-    public function href($path, $query=NULL)
+    public function href($path, $params=NULL)
     {
-        if ($query) {
-            $query = http_build_query($query, NULL, '&');
+        if ($params) {
+            $query = http_build_query($params, NULL, '&');
             if ($query !== '') $path .= '?' . $query;
         }
         $this->attrs['href'] = $path;
         return $this;
     }
-
-
-
-    /** these are the required ArrayAccess functions */
-    /**
-     * Getter for element's attribute
-     * @param string attribute name
-     * @return mixed
-     */
-    public function offsetGet($i)
-    {
-        if (isset($this->attrs[$i])) {
-            if (is_array($this->attrs[$i]))
-                $this->attrs[$i] = new ArrayObject($this->attrs[$i]);
-
-            return $this->attrs[$i];
-        }
-
-        // special cases
-        if ($i === 'style' || $i === 'class') {
-            return $this->attrs[$i] = new ArrayObject;
-        }
-
-        return NULL;
-    }
-
-    /**
-     * Setter for element's attribute
-     * @param string attribute name
-     * @param mixed value
-     * @return void
-     */
-    public function offsetSet($i, $value)
-    {
-        if ($i === NULL) throw new Exception('Invalid TexyHtml usage.');
-        $this->attrs[$i] = $value;
-    }
-
-    /**
-     * Exists element's attribute?
-     * @param string attribute name
-     * @return bool
-     */
-    public function offsetExists($i)
-    {
-        return isset($this->attrs[$i]);
-    }
-
-    /**
-     * Unsets element's attribute
-     * @param string attribute name
-     * @return void
-     */
-    public function offsetUnset($i)
-    {
-        unset($this->attrs[$i]);
-    }
-    /** end required ArrayAccess functions */
 
 
     /**
@@ -321,7 +308,7 @@ class TexyHtml implements ArrayAccess
                 else $s .= ' ' . $key;
                 continue;
 
-            } elseif (is_array($value) || is_object($value)) {
+            } elseif (is_array($value)) {
 
                 // prepare into temporary array
                 $tmp = NULL;
@@ -435,10 +422,15 @@ class TexyHtml implements ArrayAccess
     }
 
 
-    /**
-     * Undefined property usage prevention
-     */
-    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
-    function __set($nm, $val) { $this->__get($nm); }
 
+
+    // TODO: REMOVE
+    public function offsetGet($i)
+    {
+        trigger_error('Manipulace s atributy pres $el[\'attr\']=VALUE je od revize 133 zrusena', E_USER_WARNING);
+    }
+
+    public function offsetSet($i, $value) { $this->offsetGet(NULL); }
+    public function offsetExists($i) { $this->offsetGet(NULL); }
+    public function offsetUnset($i) { $this->offsetGet(NULL); }
 }

@@ -164,8 +164,8 @@ class TexyModifier
         } elseif ($tmp === TEXY_ALL) {
             $elAttrs = $this->attrs;
 
-        } elseif (is_array($tmp) && isset($tmp[$el->name])) {
-            $tmp = $tmp[$el->name];
+        } elseif (is_array($tmp) && isset($tmp[$el->getName()])) {
+            $tmp = $tmp[$el->getName()];
 
             if ($tmp === TEXY_ALL) {
                 $elAttrs = $this->attrs;
