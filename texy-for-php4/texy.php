@@ -4,7 +4,10 @@
  * Texy! - plain text to html converter
  * ------------------------------------
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
+ * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ *
+ * This source file is subject to the GNU GPL license that is bundled
+ * with this package in the file license.txt.
  *
  * for PHP 4.3.3 and newer
  *
@@ -19,7 +22,7 @@
 /**
  * This file is part of the Texy! formatter (http://texy.info/)
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
+ * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
  *
  * @version  $Revision$ $Date$
  * @package  Texy

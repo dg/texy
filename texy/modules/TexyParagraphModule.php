@@ -3,7 +3,7 @@
 /**
  * This file is part of the Texy! formatter (http://texy.info/)
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
+ * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
  *
  * @version  $Revision: 119 $ $Date: 2007-04-13 21:04:57 +0200 (pá, 13 IV 2007) $
  * @package  Texy

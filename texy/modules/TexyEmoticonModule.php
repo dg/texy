@@ -3,7 +3,7 @@
 /**
  * This file is part of the Texy! formatter (http://texy.info/)
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- <dave@dgx.cz>
+ * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
  *
  * @version  $Revision$ $Date$
  * @package  Texy
@@ -22,17 +22,17 @@ class TexyEmoticonModule extends TexyModule
     protected $syntax = array('emoticon' => FALSE);
 
     /** @var array  supported emoticons and image files */
-    public $icons = array (
-        ':-)'  =>  'smile.gif',
-        ':-('  =>  'sad.gif',
-        ';-)'  =>  'wink.gif',
-        ':-D'  =>  'biggrin.gif',
+    public $icons = array(
+        ':-)' => 'smile.gif',
+        ':-(' => 'sad.gif',
+        ';-)' => 'wink.gif',
+        ':-D' => 'biggrin.gif',
         '8-O' => 'eek.gif',
-        '8-)'  =>  'cool.gif',
-        ':-?'  =>  'confused.gif',
+        '8-)' => 'cool.gif',
+        ':-?' => 'confused.gif',
         ':-x' => 'mad.gif',
         ':-P' => 'razz.gif',
-        ':-|'  =>  'neutral.gif',
+        ':-|' => 'neutral.gif',
     );
 
     /** @var string  CSS class for emoticons */

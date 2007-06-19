@@ -1,30 +1,55 @@
-Co je Texy!
-===========
+Texy2 (c) David Grudl, 2004-2007 (http://www.dgx.cz)
 
 
-Texy! je převaděč textu do formátovaného HTML kódu. Díky němu můžete psát
-strukturované dokumenty i bez znalosti nebo použití jazyka HTML. Dokument
-napíšete v přehledné, čistě textové, formě a Texy! jej automaticky převede do
-validního (X)HTML kódu.
 
+Seznámení
+---------
 
-Texy! je jedním z nejkomplexnějších formátovačů. Umí zpracovávat obrázky,
-odkazy, vnořené seznamy, tabulky a má také plnou podporu CSS a UTF-8.
+Děkuji za stažení Texy!
 
+Texy je program, díky kterému můžete snadno, bez odborných znalostí,
+psát texty na webové stránky.
 
-Texy! formátuje text v souladu s typografickými pravidly. Zvláštní pozornost je
-věnována národním specifikům. Texy! přetahuje jednopísmenné předložky a spojky
-z konců řádků na řádek následující, rozděluje příliš dlouhá slova podle slabik
-a podobně.
+Chcete zvýraznit písmo? Vytvořit nadpis či odrážky? Přidat obrázek
+nebo tabulku? Nemusíte zápasit se složitým textovým editorem.
+Stačí psát prostý text a Texy už úpravu zvládne za vás. Výsledkem
+bude hezky zformátovaná stránka.
 
-
-Kód je napsán v PHP s plným využitím objektů. Navržen je tak, aby jeho
+Kód je napsán v PHP 5 s plným využitím objektů. Navržen je tak, aby jeho
 rozšíření nebo přizpůsobení specifickým potřebám bylo co nejjednodušší a obešlo
 se bez zásahu do zdrojového kódu.
 
-
 Texy je sexy!
 
+
+
+Licence
+-------
+
+Texy je svobodný program. Můžete ho zdarma stáhnout, libovolně upravovat
+a používat ve svých aplikacích v souladu s podmínkami GNU General Public License v2.
+Přečtěte si pozorně licenční podmínky v souboru license.txt.
+
+Autor Texy David Grudl nabízí možnost licencovat knihovnu pod komerční licencí
+pro organizace, které nechtějí zveřejňovat zdrojové kódy svých aplikací. Cenu a podmínky
+najdete na stránkách http://texy.info, nebo kontaktujte přímo autora na dave@dgx.cz.
+
+
+
+Dokumentace a příklady
+----------------------
+
+Příklady najdete v adresáři 'examples'. Dokumentace je k dispozici na webových stránkách:
+
+http://texy.info/
+
+
+
+Texy.compact.php
+----------------
+
+Jde o zhuštěnou jednosouborovou verzi Texy. Je totožná s normální verzí,
+redukováno bylo pouze bílé místo a komentáře.
 
 
 
@@ -40,8 +65,6 @@ HTML kód najdete v adresáři /icons/
 
 
 
-
-Copyright
----------
-
-Texy! (C) David Grudl, 2004-2007
+-----
+Chcete-li další informace, navštivte autorův weblog:
+http://www.dgx.cz/trine/
