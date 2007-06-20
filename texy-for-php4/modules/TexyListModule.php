@@ -247,4 +247,4 @@ class TexyListModule extends TexyModule
         return $elItem;
     }
 
-} // TexyListModule
+}

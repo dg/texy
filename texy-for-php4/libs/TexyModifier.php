@@ -226,4 +226,4 @@ class TexyModifier
         $args = func_get_args();
         call_user_func_array(array(&$this, '__construct'), $args);
     }
-} // TexyModifier
+}

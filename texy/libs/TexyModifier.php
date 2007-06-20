@@ -219,4 +219,4 @@ class TexyModifier
     function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
     function __set($nm, $val) { $this->__get($nm); }
 
-} // TexyModifier
+}

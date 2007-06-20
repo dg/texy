@@ -109,4 +109,4 @@ class TexyScriptModule extends TexyModule
         return '';
     }
 
-} // TexyScriptModule
+}

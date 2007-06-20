@@ -197,7 +197,7 @@ class TexyTableModule extends TexyModule
         return $elRow;
     }
 
-} // TexyTableModule
+}
 
 
 
@@ -218,4 +218,4 @@ class TexyTableFieldElement extends TexyHtml
         return parent::startTag();
     }
 
-} // TexyTableFieldElement
+}

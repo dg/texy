@@ -228,7 +228,7 @@ class TexyBlockParser extends TexyParser
         return $nodes;
     }
 
-} // TexyBlockParser
+}
 
 
 
@@ -357,4 +357,4 @@ class TexyLineParser extends TexyParser
         return $text;
     }
 
-} // TexyLineParser
+}

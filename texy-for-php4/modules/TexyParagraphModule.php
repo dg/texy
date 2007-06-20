@@ -96,4 +96,4 @@ class TexyParagraphModule extends TexyModule
     }
 
 
-} // TexyParagraphModule
+}

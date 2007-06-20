@@ -74,7 +74,7 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
             '#,-#'                                    => ",\xe2\x80\x93",                  // en dash ,-
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
-            '#([\x{2013}\x{2014}]) #u'                => "\$1\xc2\xa0",                    // dash &nbsp;
+            '#([\x{2013}\x{2014}]) #u'                => "\$1\xc2\xa0",                    // &nbsp; after dash
             '# --- #'                                 => " \xe2\x80\x94\xc2\xa0",          // em dash ---
             '# -- #'                                  => " \xe2\x80\x93\xc2\xa0",          // en dash --
             '# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
@@ -100,7 +100,7 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
             '#(?<=.{50})\s+(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
 
             // nbsp space between number and word, symbol, punctation, currency symbol
-            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+[\x17-\x1F]*)\s+([\x17-\x1F]*['.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+[\x17-\x1F]*)\s+([\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
                                                       => "\$1\xc2\xa0\$2",
 
             // space between preposition and word
@@ -124,4 +124,4 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
         return preg_replace($this->pattern, $this->replace, $text);
     }
 
-} // TexyTypographyModule
+} 

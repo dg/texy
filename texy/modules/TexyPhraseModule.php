@@ -372,4 +372,4 @@ class TexyPhraseModule extends TexyModule
         return "\n";
     }
 
-} // TexyPhraseModule
+}

@@ -313,7 +313,7 @@ class TexyImageModule extends TexyModule /* implements ITexyPreBlock */
     }
 
 
-} // TexyImageModule
+}
 
 
 

@@ -224,4 +224,4 @@ class TexyBlockModule extends TexyModule implements ITexyPreBlock
         return FALSE;
     }
 
-} // TexyBlockModule
+}

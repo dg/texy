@@ -288,4 +288,4 @@ class TexyHtmlModule extends TexyModule
     }
 
 
-} // TexyHtmlModule
+}

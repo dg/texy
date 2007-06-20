@@ -199,4 +199,4 @@ class TexyLongWordsModule extends TexyModule implements ITexyPostLine
         return implode("\xC2\xAD", $syllables);;
     }
 
-} // TexyLongWordsModule
+}

@@ -59,4 +59,4 @@ class TexyHorizLineModule extends TexyModule
         return $el;
     }
 
-} // TexyHorizlineModule
+}

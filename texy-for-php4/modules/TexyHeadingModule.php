@@ -217,7 +217,7 @@ class TexyHeadingModule extends TexyModule
     }
 
 
-} // TexyHeadingModule
+}
 
 
 
@@ -253,4 +253,4 @@ class TexyHeadingElement extends TexyHtml
         return parent::startTag();
     }
 
-} // TexyHeadingElement
+}

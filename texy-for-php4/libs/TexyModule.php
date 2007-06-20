@@ -56,4 +56,4 @@ class TexyModule /* abstract  */
         call_user_func_array(array(&$this, '__construct'), $args);
     }
 
-} // TexyModule
+}

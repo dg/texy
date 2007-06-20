@@ -424,7 +424,7 @@ class TexyLinkModule extends TexyModule implements ITexyPreBlock
 
 
 
-} // TexyLinkModule
+}
 
 
 
