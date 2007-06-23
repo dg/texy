@@ -153,6 +153,10 @@ class Texy
     /** @var bool  ignore stuff with only markup and spaecs? */
     var $ignoreEmptyStuff = TRUE;
 
+    /** @var bool  use XHTML syntax? */
+    var $xhtml = TRUE;
+
+
     var
         /** @var TexyScriptModule */
         $scriptModule,
@@ -234,7 +238,7 @@ class Texy
         $this->cleaner = new TexyHtmlCleaner($this);
 
         // accepts all valid HTML tags and attributes by default
-        foreach ($GLOBALS['TexyHtmlCleaner::$dtd']as $tag => $dtd)
+        foreach ($this->cleaner->dtd as $tag => $dtd)
             $this->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
 
         // examples of link references ;-)
@@ -254,7 +258,7 @@ class Texy
             $mb = mb_get_info('all'); // all for PHP < 4.4.3
             if ($mb['func_overload'] & 2 && $mb['internal_encoding'][0] === 'U') { // U??
                 mb_internal_encoding('pass');
-                trigger_error('Texy: mb_internal_encoding changed to pass', E_USER_WARNING);
+                trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
             }
         }
     }
@@ -543,28 +547,6 @@ class Texy
         return $s;
     }
 
-
-
-
-    /**
-     * @deprecated
-     */
-    function safeMode()
-    {
-        trigger_error('$texy->safeMode() is deprecated. Use TexyConfigurator::safeMode($texy)', E_USER_WARNING);
-        TexyConfigurator::safeMode($this);
-    }
-
-
-
-    /**
-     * @deprecated
-     */
-    function trustMode()
-    {
-        trigger_error('$texy->trustMode() is deprecated. Trust configuration is by default.', E_USER_WARNING);
-        TexyConfigurator::trustMode($this);
-    }
 
 
 

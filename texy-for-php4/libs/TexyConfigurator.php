@@ -71,18 +71,7 @@ class TexyConfigurator
      */
     function trustMode(/*Texy*/ $texy) /* static */
     {
-        trigger_error('trustMode() is deprecated. Trust configuration is by default.', E_USER_WARNING);
-
-        $texy->allowedClasses = TEXY_ALL;                  // classes and id are allowed
-        $texy->allowedStyles  = TEXY_ALL;                  // inline styles are allowed
-        $texy->allowedTags = array();                       // all valid HTML tags
-        foreach ($GLOBALS['TexyHtmlCleaner::$dtd']as $tag => $dtd)
-            $texy->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
-        $texy->urlSchemeFilters = NULL;                     // disable URL scheme filter
-        $texy->allowed['image'] = TRUE;                     // enable images
-        $texy->allowed['link/definition'] = TRUE;           // enable [ref]: URL  reference definitions
-        $texy->allowed['html/comment'] = TRUE;              // enable HTML comments
-        $texy->linkModule->forceNoFollow = FALSE;           // disable automatic rel="nofollow"
+        trigger_error('trustMode() is deprecated. This is default configuration.', E_USER_WARNING);
     }
 
 

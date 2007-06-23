@@ -30,7 +30,6 @@ class TexyHtmlCleaner
     /** @var int  indent space counter */
     private $space;
 
-
     /**
      * DTD descriptor
      *   $dtd[element][0] - allowed attributes (as array keys)
@@ -38,7 +37,10 @@ class TexyHtmlCleaner
      * @var array
      * @see TexyHtmlCleaner::initDTD()
      */
-    static public $dtd;
+    public $dtd;
+
+    /** @var array cache */
+    static private $dtdCache;
 
     /** @var array  elements with optional end tag in HTML */
     static private $optional = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
@@ -64,27 +66,6 @@ class TexyHtmlCleaner
         'isindex' => array('button'),
     );
 
-    /** @var array  %block; elements */
-    static public $block = array('ins'=>1,'del'=>1,'p'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,
-        'h5'=>1,'h6'=>1,'ul'=>1,'ol'=>1,'dl'=>1,'pre'=>1,'div'=>1,'blockquote'=>1,'noscript'=>1,
-        'noframes'=>1,'form'=>1,'hr'=>1,'table'=>1,'address'=>1,'fieldset'=>1);
-
-    static public $_blockLoose = array(
-        'dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1, // transitional
-        'marquee'=>1, // proprietary
-    );
-
-    /** @var array  %inline; elements */
-    static public $inline = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
-        'strong'=>1,'dfn'=>1,'code'=>1,'samp'=>1,'kbd'=>1,'var'=>1,'cite'=>1,'abbr'=>1,'acronym'=>1,
-        'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
-        'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,'%DATA'=>1);
-
-    static public $_inlineLoose = array(
-        'u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1, // transitional
-        'embed'=>1,'wbr'=>1,'nobr'=>1,'canvas'=>1, // proprietary
-    );
-
     /** @var array */
     private $tagUsed;
 
@@ -102,10 +83,7 @@ class TexyHtmlCleaner
     public function __construct($texy)
     {
         $this->texy = $texy;
-
-        if (!self::$dtd) self::initDTD();
-        // special "base content"
-        $this->baseDTD = self::$dtd['div'][1] + array('html'=>1);
+        $this->initDTD();
     }
 
 
@@ -119,6 +97,8 @@ class TexyHtmlCleaner
         $this->space = $this->baseIndent;
         $this->tagStack = array();
         $this->tagUsed  = array();
+        // special "base content"
+        $this->baseDTD = $this->dtd['div'][1] + array('html'=>1);
 
         // wellform and reformat
         $s = preg_replace_callback(
@@ -151,7 +131,7 @@ class TexyHtmlCleaner
             );
 
         // remove HTML 4.01 optional end tags
-        if (!TexyHtml::$xhtml && $this->removeOptional)
+        if (!$this->texy->xhtml && $this->removeOptional)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
 
         return $s;
@@ -213,10 +193,10 @@ class TexyHtmlCleaner
                 $tag = $item['tag'];
                 if ($item['close']) {
                     $s .= $item['close'];
-                    if (!isset(self::$inline[$tag])) $this->space--;
+                    if (!isset(TexyHtml::$inline[$tag])) $this->space--;
                 }
                 $this->tagUsed[$tag]--;
-                $back = $back && isset(self::$inline[$tag]);
+                $back = $back && isset(TexyHtml::$inline[$tag]);
                 unset($this->tagStack[$i]);
                 if ($tag === $mTag) break;
                 array_unshift($tmp, $item);
@@ -243,9 +223,9 @@ class TexyHtmlCleaner
 
             $content = $this->baseDTD;
 
-            if (!isset(self::$dtd[$mTag][1])) {
+            if (!isset($this->dtd[$mTag])) {
                 // unknown (non-html) tag
-                $allowed = $this->texy->allowedTags === Texy::ALL;
+                $allowed = TRUE;
                 $item = reset($this->tagStack);
                 if ($item) $content = $item['content'];
 
@@ -261,12 +241,12 @@ class TexyHtmlCleaner
                     $tag = $item['tag'];
 
                     // auto-close hidden, optional and inline tags
-                    if ($item['close'] && (!isset(self::$optional[$tag]) && !isset(self::$inline[$tag]))) break;
+                    if ($item['close'] && (!isset(self::$optional[$tag]) && !isset(TexyHtml::$inline[$tag]))) break;
 
                     // close it
                     if ($item['close']) {
                         $s .= $item['close'];
-                        if (!isset(self::$inline[$tag])) $this->space--;
+                        if (!isset(TexyHtml::$inline[$tag])) $this->space--;
                     }
                     $this->tagUsed[$tag]--;
                     unset($this->tagStack[$i]);
@@ -287,13 +267,13 @@ class TexyHtmlCleaner
             if ($mEmpty) {
                 if (!$allowed) return $s;
 
-                if (TexyHtml::$xhtml) $mAttr .= " /";
+                if ($this->texy->xhtml) $mAttr .= " /";
 
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
                     return rtrim($s) .  '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-                if ($this->indent && !isset(self::$inline[$mTag])) {
+                if ($this->indent && !isset(TexyHtml::$inline[$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
                     return $s . $space . '<' . $mTag . $mAttr . '>' . $space;
                 }
@@ -304,10 +284,10 @@ class TexyHtmlCleaner
 
             if ($allowed) {
                 // receive new content (ins & del are special cases)
-                if (!empty(self::$dtd[$mTag][1])) $content = self::$dtd[$mTag][1];
+                if (!empty($this->dtd[$mTag][1])) $content = $this->dtd[$mTag][1];
 
                 // format output
-                if ($this->indent && !isset(self::$inline[$mTag])) {
+                if ($this->indent && !isset(TexyHtml::$inline[$mTag])) {
                     $close = "\x08" . '</'.$mTag.'>' . "\n" . str_repeat("\t", $this->space);
                     $s .= "\n" . str_repeat("\t", $this->space++) . '<'.$mTag.$mAttr.'>' . "\x07";
                 } else {
@@ -349,11 +329,15 @@ class TexyHtmlCleaner
 
 
     /**
-     * Initializes self::$dtd array
+     * Initializes $this->dtd array
      */
-    static public function initDTD()
+    private function initDTD()
     {
         $strict = Texy::$strictDTD;
+        if (isset(self::$dtdCache[$strict])) {
+            $this->dtd = self::$dtdCache[$strict];
+            return;
+        }
 
         // attributes
         $coreattrs = array('id'=>1,'class'=>1,'style'=>1,'title'=>1,'xml:id'=>1); // extra: xml:id
@@ -363,18 +347,33 @@ class TexyHtmlCleaner
         $cellalign = $attrs + array('align'=>1,'char'=>1,'charoff'=>1,'valign'=>1);
 
         // content elements
+
         // %block;
-        if (!$strict) self::$block += self::$_blockLoose;
-        $b = self::$block;
+        $b = array('ins'=>1,'del'=>1,'p'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,
+            'h5'=>1,'h6'=>1,'ul'=>1,'ol'=>1,'dl'=>1,'pre'=>1,'div'=>1,'blockquote'=>1,'noscript'=>1,
+            'noframes'=>1,'form'=>1,'hr'=>1,'table'=>1,'address'=>1,'fieldset'=>1);
+
+        if (!$strict) $b += array(
+            'dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1, // transitional
+            'marquee'=>1, // proprietary
+        );
 
         // %inline;
-        if (!$strict) self::$inline += self::$_inlineLoose;
-        $i = self::$inline;
+        $i = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
+            'strong'=>1,'dfn'=>1,'code'=>1,'samp'=>1,'kbd'=>1,'var'=>1,'cite'=>1,'abbr'=>1,'acronym'=>1,
+            'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
+            'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,'%DATA'=>1);
+
+        if (!$strict) $i += array(
+            'u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1, // transitional
+            'embed'=>1,'wbr'=>1,'nobr'=>1,'canvas'=>1, // proprietary
+        );
+
 
         $bi = $b + $i;
 
         // build DTD
-        self::$dtd = array(
+        $this->dtd = array(
         'html' => array(
              $strict ? $i18n + array('xmlns'=>1) : $i18n + array('version'=>1,'xmlns'=>1), // extra: xmlns
              array('head'=>1,'body'=>1),
@@ -689,12 +688,14 @@ class TexyHtmlCleaner
 
 
 
-        if ($strict) return;
-
+        if ($strict) {
+            self::$dtdCache[$strict] = $this->dtd;
+            return;
+        }
 
 
         // LOOSE DTD
-        self::$dtd += array(
+        $this->dtd += array(
         // transitional
         'dir' => array(
              $attrs + array('compact'=>1),
@@ -769,20 +770,20 @@ class TexyHtmlCleaner
         );
 
         // transitional modified
-        self::$dtd['a'][0] += array('target'=>1);
-        self::$dtd['area'][0] += array('target'=>1);
-        self::$dtd['body'][0] += array('background'=>1,'bgcolor'=>1,'text'=>1,'link'=>1,'vlink'=>1,'alink'=>1);
-        self::$dtd['form'][0] += array('target'=>1);
-        self::$dtd['img'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
-        self::$dtd['input'][0] += array('align'=>1);
-        self::$dtd['link'][0] += array('target'=>1);
-        self::$dtd['object'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
-        self::$dtd['script'][0] += array('language'=>1);
-        self::$dtd['table'][0] += array('align'=>1,'bgcolor'=>1);
-        self::$dtd['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
-        self::$dtd['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
+        $this->dtd['a'][0] += array('target'=>1);
+        $this->dtd['area'][0] += array('target'=>1);
+        $this->dtd['body'][0] += array('background'=>1,'bgcolor'=>1,'text'=>1,'link'=>1,'vlink'=>1,'alink'=>1);
+        $this->dtd['form'][0] += array('target'=>1);
+        $this->dtd['img'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
+        $this->dtd['input'][0] += array('align'=>1);
+        $this->dtd['link'][0] += array('target'=>1);
+        $this->dtd['object'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
+        $this->dtd['script'][0] += array('language'=>1);
+        $this->dtd['table'][0] += array('align'=>1,'bgcolor'=>1);
+        $this->dtd['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
+        $this->dtd['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
 
-
+        self::$dtdCache[$strict] = $this->dtd;
         // missing: FRAMESET, FRAME, BGSOUND, XMP, ...
     }
 
