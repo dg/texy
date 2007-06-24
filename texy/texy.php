@@ -11,21 +11,20 @@
  *
  * for PHP 5.0.0 and newer
  *
- * @link      http://texy.info/
- * @license   GNU GENERAL PUBLIC LICENSE version 2
- * @package   Texy
- * @category  Text
- * @version   2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
+ * @author     David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ * @license    GNU GENERAL PUBLIC LICENSE version 2
+ * @version    2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
+ * @category   Text
+ * @package    Texy
+ * @link       http://texy.info/
  */
 
 
 /**
  * This file is part of the Texy! formatter (http://texy.info/)
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
- *
- * @version  $Revision$ $Date$
- * @package  Texy
+ * @version    $Revision$ $Date$
  */
 
 
@@ -736,6 +735,7 @@ class Texy
 
     /**
      * Access to undeclared property
+     * @throws Exception
      */
     function __get($nm) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }
     function __set($nm, $val) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }

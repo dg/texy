@@ -3,10 +3,12 @@
 /**
  * This file is part of the Texy! formatter (http://texy.info/)
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
- *
- * @version  $Revision$ $Date$
- * @package  Texy
+ * @author     David Grudl
+ * @copyright  Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ * @license    GNU GENERAL PUBLIC LICENSE version 2
+ * @version    $Revision$ $Date$
+ * @category   Text
+ * @package    Texy
  */
 
 // security - include texy.php, not this file
