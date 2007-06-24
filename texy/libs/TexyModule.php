@@ -43,10 +43,11 @@ abstract class TexyModule
 
 
     /**
-     * Undefined property usage prevention
+     * Access to undeclared property
      */
-    function __get($nm) { throw new Exception("Undefined property '" . get_class($this) . "::$$nm'"); }
-    function __set($nm, $val) { $this->__get($nm); }
+    function __get($nm) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }
+    function __set($nm, $val) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }
+    function __unset($nm) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }
 
 }
 
