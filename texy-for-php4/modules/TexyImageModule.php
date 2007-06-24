@@ -264,13 +264,13 @@ class TexyImageModule extends TexyModule /* implements ITexyPreBlock */
             else $el->attrs['alt'] = $this->defaultAlt;
         }
 
-        if ($hAlign === TexyModifier_HALIGN_LEFT) {
+        if ($hAlign === 'left') {
             if ($this->leftClass != '')
                 $el->attrs['class'][] = $this->leftClass;
             else
                 $el->attrs['style']['float'] = 'left';
 
-        } elseif ($hAlign === TexyModifier_HALIGN_RIGHT)  {
+        } elseif ($hAlign === 'right')  {
 
             if ($this->rightClass != '')
                 $el->attrs['class'][] = $this->rightClass;

@@ -218,6 +218,30 @@ class TexyHtml
 
 
     /**
+     * Overloaded setter for element's attribute
+     * @param string    property name
+     * @param mixed     property value
+     * @return void
+     */
+    function __set($nm, $val)
+    {
+        // works only in PHP5
+        $this->attrs[$nm] = $val;
+    }
+
+
+    /**
+     * Overloaded getter for element's attribute
+     * @param string    property name
+     * @return mixed    property value
+     */
+    function &__get($nm)
+    {
+        // works only in PHP5
+        return $this->attrs[$nm];
+    }
+
+
     /**
      * Special setter for element's attribute
      * @param string path

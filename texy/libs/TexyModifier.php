@@ -27,14 +27,6 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyModifier
 {
-    const HALIGN_LEFT =    'left';
-    const HALIGN_RIGHT =   'right';
-    const HALIGN_CENTER =  'center';
-    const HALIGN_JUSTIFY = 'justify';
-    const VALIGN_TOP =     'top';
-    const VALIGN_MIDDLE =  'middle';
-    const VALIGN_BOTTOM =  'bottom';
-
     // TODO!
     /** @var var */
     public $empty = TRUE;
@@ -132,13 +124,13 @@ class TexyModifier
                 $p = $a;
             }
             // alignment
-            elseif ($ch === '^') { $this->vAlign = self::VALIGN_TOP; $p++; }
-            elseif ($ch === '-') { $this->vAlign = self::VALIGN_MIDDLE; $p++; }
-            elseif ($ch === '_') { $this->vAlign = self::VALIGN_BOTTOM; $p++; }
-            elseif ($ch === '=') { $this->hAlign = self::HALIGN_JUSTIFY; $p++; }
-            elseif ($ch === '>') { $this->hAlign = self::HALIGN_RIGHT; $p++; }
-            elseif (substr($mod, $p, 2) === '<>') { $this->hAlign = self::HALIGN_CENTER; $p+=2; }
-            elseif ($ch === '<') { $this->hAlign = self::HALIGN_LEFT; $p++; }
+            elseif ($ch === '^') { $this->vAlign = 'top'; $p++; }
+            elseif ($ch === '-') { $this->vAlign = 'middle'; $p++; }
+            elseif ($ch === '_') { $this->vAlign = 'bottom'; $p++; }
+            elseif ($ch === '=') { $this->hAlign = 'justify'; $p++; }
+            elseif ($ch === '>') { $this->hAlign = 'right'; $p++; }
+            elseif (substr($mod, $p, 2) === '<>') { $this->hAlign = 'center'; $p+=2; }
+            elseif ($ch === '<') { $this->hAlign = 'left'; $p++; }
             else { break; }
         }
     }

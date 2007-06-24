@@ -15,15 +15,6 @@ if (!class_exists('Texy')) die();
 
 
 
-define('TexyModifier_HALIGN_LEFT',     'left'); /* class constant */
-define('TexyModifier_HALIGN_RIGHT',    'right'); /* class constant */
-define('TexyModifier_HALIGN_CENTER',   'center'); /* class constant */
-define('TexyModifier_HALIGN_JUSTIFY',  'justify'); /* class constant */
-define('TexyModifier_VALIGN_TOP',      'top'); /* class constant */
-define('TexyModifier_VALIGN_MIDDLE',   'middle'); /* class constant */
-define('TexyModifier_VALIGN_BOTTOM',   'bottom'); /* class constant */
-
-
 /** @var array  list of properties which are regarded as HTML element attributes */
 $GLOBALS['TexyModifier::$elAttrs'] = array(
     'abbr'=>1,'accesskey'=>1,'align'=>1,'alt'=>1,'archive'=>1,'axis'=>1,'bgcolor'=>1,'cellpadding'=>1,
@@ -134,13 +125,13 @@ class TexyModifier
                 $p = $a;
             }
             // alignment
-            elseif ($ch === '^') { $this->vAlign = TexyModifier_VALIGN_TOP; $p++; }
-            elseif ($ch === '-') { $this->vAlign = TexyModifier_VALIGN_MIDDLE; $p++; }
-            elseif ($ch === '_') { $this->vAlign = TexyModifier_VALIGN_BOTTOM; $p++; }
-            elseif ($ch === '=') { $this->hAlign = TexyModifier_HALIGN_JUSTIFY; $p++; }
-            elseif ($ch === '>') { $this->hAlign = TexyModifier_HALIGN_RIGHT; $p++; }
-            elseif (substr($mod, $p, 2) === '<>') { $this->hAlign = TexyModifier_HALIGN_CENTER; $p+=2; }
-            elseif ($ch === '<') { $this->hAlign = TexyModifier_HALIGN_LEFT; $p++; }
+            elseif ($ch === '^') { $this->vAlign = 'top'; $p++; }
+            elseif ($ch === '-') { $this->vAlign = 'middle'; $p++; }
+            elseif ($ch === '_') { $this->vAlign = 'bottom'; $p++; }
+            elseif ($ch === '=') { $this->hAlign = 'justify'; $p++; }
+            elseif ($ch === '>') { $this->hAlign = 'right'; $p++; }
+            elseif (substr($mod, $p, 2) === '<>') { $this->hAlign = 'center'; $p+=2; }
+            elseif ($ch === '<') { $this->hAlign = 'left'; $p++; }
             else { break; }
         }
     }

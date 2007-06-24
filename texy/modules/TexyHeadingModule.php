@@ -21,7 +21,7 @@ class TexyHeadingModule extends TexyModule
 {
     const
         DYNAMIC = 1,  // auto-leveling
-        FIXED =   2;  // fixed-leveling
+        FIXED = 2;  // fixed-leveling
 
     protected $syntax = array('heading/surrounded' => TRUE, 'heading/underlined' => TRUE);
 
