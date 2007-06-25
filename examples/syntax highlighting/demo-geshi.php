@@ -8,12 +8,8 @@
  *       - define user callback (for /--code elements)
  *       - load language, highlight and return stylesheet + html output
  *
- * This source file is subject to the GNU GPL license.
- *
- * @link       http://texy.info/
- * @author     David Grudl aka -dgx- (http://www.dgx.cz)
- * @copyright  Copyright (c) 2004-2007 David Grudl
- * @license    GNU GENERAL PUBLIC LICENSE v2
+ * @author   David Grudl aka -dgx- (http://www.dgx.cz)
+ * @version  $Revision$ $Date$
  */
 
 

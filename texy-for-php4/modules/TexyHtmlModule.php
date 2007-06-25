@@ -132,10 +132,10 @@ class TexyHtmlModule extends TexyModule
 
         foreach ($matches2 as $m) {
             $key = strtolower($m[1]);
-            $val = $m[2];
-            if ($val == NULL) $el->attrs[$key] = TRUE;
-            elseif ($val{0} === '\'' || $val{0} === '"') $el->attrs[$key] = Texy::unescapeHtml(substr($val, 1, -1));
-            else $el->attrs[$key] = Texy::unescapeHtml($val);
+            $value = $m[2];
+            if ($value == NULL) $el->attrs[$key] = TRUE;
+            elseif ($value{0} === '\'' || $value{0} === '"') $el->attrs[$key] = Texy::unescapeHtml(substr($value, 1, -1));
+            else $el->attrs[$key] = Texy::unescapeHtml($value);
         }
 
         if (is_callable(array($tx->handler, 'htmlTag'))) {
@@ -211,8 +211,8 @@ class TexyHtmlModule extends TexyModule
         if (isset($elAttrs['class'])) {
             if (is_array($tmp)) {
                 $elAttrs['class'] = explode(' ', $elAttrs['class']);
-                foreach ($elAttrs['class'] as $key => $val)
-                    if (!isset($tmp[$val])) unset($elAttrs['class'][$key]); // id & class are case-sensitive in XHTML
+                foreach ($elAttrs['class'] as $key => $value)
+                    if (!isset($tmp[$value])) unset($elAttrs['class'][$key]); // id & class are case-sensitive in XHTML
 
             } elseif ($tmp !== TEXY_ALL) {
                 $elAttrs['class'] = NULL;

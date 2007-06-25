@@ -164,8 +164,8 @@ class TexyModifier
 
             } elseif (is_array($tmp) && count($tmp)) {
                 $tmp = array_flip($tmp);
-                foreach ($this->attrs as $key => $val)
-                    if (isset($tmp[$key])) $el->attrs[$key] = $val;
+                foreach ($this->attrs as $key => $value)
+                    if (isset($tmp[$key])) $el->attrs[$key] = $value;
             }
         }
 
@@ -177,11 +177,11 @@ class TexyModifier
         if ($this->classes || $this->id !== NULL) {
             $tmp = $texy->_classes; // speed-up
             if ($tmp === Texy::ALL) {
-                foreach ($this->classes as $val) $elAttrs['class'][] = $val;
+                foreach ($this->classes as $value) $elAttrs['class'][] = $value;
                 $elAttrs['id'] = $this->id;
             } elseif (is_array($tmp)) {
-                foreach ($this->classes as $val)
-                    if (isset($tmp[$val])) $elAttrs['class'][] = $val;
+                foreach ($this->classes as $value)
+                    if (isset($tmp[$value])) $elAttrs['class'][] = $value;
 
                 if (isset($tmp['#' . $this->id])) $elAttrs['id'] = $this->id;
             }
@@ -191,10 +191,10 @@ class TexyModifier
         if ($this->styles) {
             $tmp = $texy->_styles;  // speed-up
             if ($tmp === Texy::ALL) {
-                foreach ($this->styles as $prop => $val) $elAttrs['style'][$prop] = $val;
+                foreach ($this->styles as $prop => $value) $elAttrs['style'][$prop] = $value;
             } elseif (is_array($tmp)) {
-                foreach ($this->styles as $prop => $val)
-                    if (isset($tmp[$prop])) $elAttrs['style'][$prop] = $val;
+                foreach ($this->styles as $prop => $value)
+                    if (isset($tmp[$prop])) $elAttrs['style'][$prop] = $value;
             }
         }
 
@@ -207,11 +207,13 @@ class TexyModifier
 
 
 
-    /**
+    /**#@+
      * Access to undeclared property
+     * @throws Exception
      */
-    function __get($nm) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }
-    function __set($nm, $val) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }
-    function __unset($nm) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$nm"); }
+    function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    /**#@-*/
 
 }

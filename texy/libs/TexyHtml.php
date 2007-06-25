@@ -135,9 +135,9 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param optional setter
      * @return bool
      */
-    public function isEmpty($val=NULL)
+    public function isEmpty($value=NULL)
     {
-        if (is_bool($val)) $this->isEmpty = $val;
+        if (is_bool($value)) $this->isEmpty = $value;
         return $this->isEmpty;
     }
 
@@ -220,9 +220,9 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param mixed     property value
      * @return void
      */
-    public function __set($nm, $val)
+    public function __set($name, $value)
     {
-        $this->attrs[$nm] = $val;
+        $this->attrs[$name] = $value;
     }
 
 
@@ -231,9 +231,9 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string    property name
      * @return mixed    property value
      */
-    public function &__get($nm)
+    public function &__get($name)
     {
-        return $this->attrs[$nm];
+        return $this->attrs[$name];
     }
 
 
@@ -283,8 +283,8 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
 
         // add content
         if (is_array($this->children)) {
-            foreach ($this->children as $val)
-                $s .= $val->export($texy);
+            foreach ($this->children as $value)
+                $s .= $value->export($texy);
 
         } else {
             $s .= $this->children;
@@ -381,8 +381,8 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
     public function __clone()
     {
         if (is_array($this->children)) {
-            foreach ($this->children as $key => $val)
-                $this->children[$key] = clone $val;
+            foreach ($this->children as $key => $value)
+                $this->children[$key] = clone $value;
         }
     }
 

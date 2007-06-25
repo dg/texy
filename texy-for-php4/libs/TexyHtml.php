@@ -139,9 +139,9 @@ class TexyHtml
      * @param optional setter
      * @return bool
      */
-    function isEmpty($val=NULL)
+    function isEmpty($value=NULL)
     {
-        if (is_bool($val)) $this->isEmpty = $val;
+        if (is_bool($value)) $this->isEmpty = $value;
         return $this->isEmpty;
     }
 
@@ -226,10 +226,10 @@ class TexyHtml
      * @param mixed     property value
      * @return void
      */
-    function __set($nm, $val)
+    function __set($name, $value)
     {
         // works only in PHP5
-        $this->attrs[$nm] = $val;
+        $this->attrs[$name] = $value;
     }
 
 
@@ -238,10 +238,10 @@ class TexyHtml
      * @param string    property name
      * @return mixed    property value
      */
-    function &__get($nm)
+    function &__get($name)
     {
         // works only in PHP5
-        return $this->attrs[$nm];
+        return $this->attrs[$name];
     }
 
 
@@ -277,8 +277,8 @@ class TexyHtml
 
         // add content
         if (is_array($this->children)) {
-            foreach ($this->children as $val)
-                $s .= $val->export($texy);
+            foreach ($this->children as $value)
+                $s .= $value->export($texy);
 
         } else {
             $s .= $this->children;
@@ -375,8 +375,8 @@ class TexyHtml
     function __clone()
     {
         if (is_array($this->children)) {
-            foreach ($this->children as $key => $val)
-                $this->children[$key] = clone ($val);
+            foreach ($this->children as $key => $value)
+                $this->children[$key] = clone ($value);
         }
     }
 
