@@ -18,7 +18,7 @@ if (!class_exists('Texy')) die();
 
 
 /** @var array */
-$GLOBALS['TexyLinkModule::$deadlock'] = NULL; /* class static private property */
+$GLOBALS['TexyLinkModule::$deadlock'] = NULL; /* class private static property */
 
 
 /**

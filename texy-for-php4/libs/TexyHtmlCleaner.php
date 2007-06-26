@@ -18,7 +18,7 @@ if (!class_exists('Texy')) die();
 
 /** @var array  elements with optional end tag in HTML */
 $GLOBALS['TexyHtmlCleaner::$optional'] = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
-    'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1); /* class static private property */
+    'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1); /* class private static property */
 
 /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
 $GLOBALS['TexyHtmlCleaner::$prohibits'] = array(
@@ -38,7 +38,7 @@ $GLOBALS['TexyHtmlCleaner::$prohibits'] = array(
     'fieldset' => array('button'),
     'iframe' => array('button'),
     'isindex' => array('button'),
-); /* class static private property */
+); /* class private static property */
 
 /** @var array cache */
 $GLOBALS['TexyHtmlCleaner::$dtdCache'] = array();

@@ -26,7 +26,7 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyConfigurator
 {
-    static public $safeTags = array(
+    public static $safeTags = array(
         'a'         => array('href', 'title'),
         'acronym'   => array('title'),
         'b'         => array(),
@@ -50,7 +50,7 @@ class TexyConfigurator
      * @param Texy  object to configure
      * @return void
      */
-    static public function safeMode(Texy $texy)
+    public static function safeMode(Texy $texy)
     {
         $texy->allowedClasses = Texy::NONE;                 // no class or ID are allowed
         $texy->allowedStyles  = Texy::NONE;                 // style modifiers are disabled
@@ -73,7 +73,7 @@ class TexyConfigurator
      * @return void
      * @deprecated
      */
-    static public function trustMode(Texy $texy)
+    public static function trustMode(Texy $texy)
     {
         trigger_error('trustMode() is deprecated. This is default configuration.', E_USER_WARNING);
     }
@@ -86,7 +86,7 @@ class TexyConfigurator
      * @param Texy  object to configure
      * @return void
      */
-    static public function disableLinks(Texy $texy)
+    public static function disableLinks(Texy $texy)
     {
         $texy->allowed['link/reference'] = FALSE;
         $texy->allowed['link/email'] = FALSE;
@@ -106,7 +106,7 @@ class TexyConfigurator
      * @param Texy  object to configure
      * @return void
      */
-    static public function disableImages(Texy $texy)
+    public static function disableImages(Texy $texy)
     {
         $texy->allowed['image'] = FALSE;
         $texy->allowed['figure'] = FALSE;

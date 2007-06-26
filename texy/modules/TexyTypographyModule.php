@@ -25,7 +25,7 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
-    static public $locales = array(
+    public static $locales = array(
         'cs' => array(
             'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
             'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C

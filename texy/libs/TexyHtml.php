@@ -47,18 +47,18 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
     public $children;
 
     /** @var bool  use XHTML syntax? */
-    static public $xhtml = TRUE;
+    public static $xhtml = TRUE;
 
     /** @var array  replaced elements + br */
-    static private $replacedTags = array('br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,
+    private static $replacedTags = array('br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,
         'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,'applet'=>1,'embed'=>1,'canvas'=>1);
 
     /** @var array  empty elements */
-    static public $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
+    public static $emptyTags = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
         'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1,'embed'=>1);
 
     /** @var array  %inline; elements */
-    static public $inline = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
+    public static $inline = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
         'strong'=>1,'dfn'=>1,'code'=>1,'samp'=>1,'kbd'=>1,'var'=>1,'cite'=>1,'abbr'=>1,'acronym'=>1,
         'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
         'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,
@@ -73,7 +73,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param array element's attributes
      * @return TexyHtml
      */
-    static public function el($name=NULL, $attrs=NULL)
+    public static function el($name=NULL, $attrs=NULL)
     {
         $el = new self;
 
@@ -96,7 +96,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string
      * @return TexyHtml
      */
-    static public function text($text)
+    public static function text($text)
     {
         $el = new self;
         $el->setText($text);

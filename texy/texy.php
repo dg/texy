@@ -137,7 +137,7 @@ class Texy
     public $ignoreEmptyStuff = TRUE;
 
     /** @var bool  use Strict of Transitional DTD? */
-    static public $strictDTD = FALSE;
+    public static $strictDTD = FALSE;
 
     /** @var bool  use XHTML syntax? */
     public $xhtml = TRUE;
@@ -533,7 +533,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function freezeSpaces($s)
+    public static function freezeSpaces($s)
     {
         return strtr($s, " \t\r\n", "\x01\x02\x03\x04");
     }
@@ -545,7 +545,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function unfreezeSpaces($s)
+    public static function unfreezeSpaces($s)
     {
         return strtr($s, "\x01\x02\x03\x04", " \t\r\n");
     }
@@ -557,7 +557,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function normalize($s)
+    public static function normalize($s)
     {
         // remove special chars
         $s = preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
@@ -583,7 +583,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function webalize($s, $charlist=NULL)
+    public static function webalize($s, $charlist=NULL)
     {
         $s = TexyUtf::utf2ascii($s);
         $s = strtolower($s);
@@ -600,7 +600,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function escapeHtml($s)
+    public static function escapeHtml($s)
     {
         return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
     }
@@ -612,7 +612,7 @@ class Texy
      * @param string
      * @return string
      */
-    static public function unescapeHtml($s)
+    public static function unescapeHtml($s)
     {
         if (strpos($s, '&') === FALSE) return $s;
         return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
@@ -672,7 +672,7 @@ class Texy
      * @param string  URL
      * @return bool
      */
-    static public function isRelative($URL)
+    public static function isRelative($URL)
     {
         // check for scheme, or absolute path, or absolute URL
         return !preg_match('#'.TEXY_URLSCHEME.'|[\#/?]#iA', $URL);
@@ -686,7 +686,7 @@ class Texy
      * @param string  root
      * @return string
      */
-    static public function prependRoot($URL, $root)
+    public static function prependRoot($URL, $root)
     {
         if ($root == NULL || !self::isRelative($URL)) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;

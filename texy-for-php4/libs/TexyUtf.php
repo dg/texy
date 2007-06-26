@@ -19,10 +19,10 @@ if (!class_exists('Texy')) die();
 
 
 /** @var array */
-$GLOBALS['TexyUtf::$xlat'] = NULL; /* class static private property */
+$GLOBALS['TexyUtf::$xlat'] = NULL; /* class private static property */
 
 /** @var array */
-$GLOBALS['TexyUtf::$xlatCache'] = NULL; /* class static private property */
+$GLOBALS['TexyUtf::$xlatCache'] = NULL; /* class private static property */
 
 
 /**
@@ -104,7 +104,7 @@ class TexyUtf
     /**
      * Callback; converts UTF-8 to HTML entity OR character in dest encoding
      */
-    function cb($m) /* static private */
+    function cb($m) /* private static */
     {
         $m = $m[0];
         if (isset($GLOBALS['TexyUtf::$xlat'][$m])) return $GLOBALS['TexyUtf::$xlat'][$m];

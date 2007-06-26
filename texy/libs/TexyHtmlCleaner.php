@@ -42,14 +42,14 @@ class TexyHtmlCleaner
     public $dtd;
 
     /** @var array cache */
-    static private $dtdCache;
+    private static $dtdCache;
 
     /** @var array  elements with optional end tag in HTML */
-    static private $optional = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
+    private static $optional = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
         'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1);
 
     /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
-    static private $prohibits = array(
+    private static $prohibits = array(
         'a' => array('a','button'),
         'img' => array('pre'),
         'object' => array('pre'),

@@ -44,7 +44,7 @@ class TexyLinkModule extends TexyModule implements ITexyPreBlock
     protected $references = array();
 
     /** @var array */
-    static private $deadlock;
+    private static $deadlock;
 
 
 
