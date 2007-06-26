@@ -35,9 +35,9 @@ class myHandler {
         case 'youtube':
             $video = htmlSpecialChars($parts[1]);
             $dimensions = 'width="'.($image->width ? $image->width : 425).'" height="'.($image->height ? $image->height : 350).'"';
-            $code = '<object '.$dimensions.'>'
+            $code = '<div><object '.$dimensions.'>'
                 . '<param name="movie" value="http://www.youtube.com/v/'.$video.'" /><param name="wmode" value="transparent" />'
-                . '<embed src="http://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object>';
+                . '<embed src="http://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
 
             return $parser->texy->protect($code, Texy::CONTENT_BLOCK);
         }
@@ -46,7 +46,6 @@ class myHandler {
     }
 
 }
-
 
 $texy = new Texy();
 $texy->handler = new myHandler;

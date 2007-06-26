@@ -79,9 +79,9 @@ class TexyTypographyModule extends TexyModule /* implements ITexyPostLine */
             '#,-#'                                    => ",\xe2\x80\x93",                  // en dash ,-
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
-            '#([\x{2013}\x{2014}]) #u'                => "\$1\xc2\xa0",                    // &nbsp; after dash
-            '# --- #'                                 => " \xe2\x80\x94\xc2\xa0",          // em dash ---
-            '# -- #'                                  => " \xe2\x80\x93\xc2\xa0",          // en dash --
+            '# ([\x{2013}\x{2014}])#u'                => "\xc2\xa0\$1",                    // &nbsp; behind dash
+            '# --- #'                                 => "\xc2\xa0\xe2\x80\x94 ",          // em dash ---
+            '# -- #'                                  => "\xc2\xa0\xe2\x80\x93 ",          // en dash --
             '# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
             '#-{1,}> #'                               => " \xe2\x86\x92 ",                 // right arrow -->
             '# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
