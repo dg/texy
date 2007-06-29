@@ -63,7 +63,7 @@ class TexyBlockParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    function __construct(/*Texy*/ $texy, $element=NULL)
+    function __construct(/*Texy*/ $texy, $element = NULL)
     {
         $this->texy = $texy;
         $this->parent = $element;
@@ -255,7 +255,7 @@ class TexyLineParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    function __construct(/*Texy*/ $texy, $element=NULL)
+    function __construct(/*Texy*/ $texy, $element = NULL)
     {
         $this->texy = $texy;
         $this->parent = $element;

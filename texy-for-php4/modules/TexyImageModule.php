@@ -198,7 +198,7 @@ class TexyImageModule extends TexyModule /* implements ITexyPreBlock */
      * @param bool
      * @return TexyImage
      */
-    function factoryImage($content, $mod, $tryRef=TRUE)
+    function factoryImage($content, $mod, $tryRef = TRUE)
     {
         $image = $tryRef ? $this->getReference(trim($content)) : FALSE;
 

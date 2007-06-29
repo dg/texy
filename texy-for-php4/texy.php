@@ -334,7 +334,7 @@ class Texy
      * @param bool     is block or single line?
      * @return string  output html code
      */
-    function process($text, $singleLine=FALSE)
+    function process($text, $singleLine = FALSE)
     {
         $this->parse($text, $singleLine);
         return $this->toHtml();
@@ -370,7 +370,7 @@ class Texy
      * @param bool     is block or single line?
      * @return void
      */
-    function parse($text, $singleLine=FALSE)
+    function parse($text, $singleLine = FALSE)
     {
         if ($this->_state === 1) {
             trigger_error('Parsing is in progress yet.', E_USER_ERROR);
@@ -605,7 +605,7 @@ class Texy
      * @param string
      * @return string
      */
-    function webalize($s, $charlist=NULL) /* static */
+    function webalize($s, $charlist = NULL) /* static */
     {
         $s = TexyUtf::utf2ascii($s);
         $s = strtolower($s);
@@ -640,7 +640,7 @@ class Texy
 
         if (PHP_VERSION >= 5) return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 
-        static $entity=array('&AElig;'=>'&#198;','&Aacute;'=>'&#193;','&Acirc;'=>'&#194;','&Agrave;'=>'&#192;','&Alpha;'=>'&#913;','&Aring;'=>'&#197;','&Atilde;'=>'&#195;','&Auml;'=>'&#196;',
+        static $entity = array('&AElig;'=>'&#198;','&Aacute;'=>'&#193;','&Acirc;'=>'&#194;','&Agrave;'=>'&#192;','&Alpha;'=>'&#913;','&Aring;'=>'&#197;','&Atilde;'=>'&#195;','&Auml;'=>'&#196;',
             '&Beta;'=>'&#914;','&Ccedil;'=>'&#199;','&Chi;'=>'&#935;','&Dagger;'=>'&#8225;','&Delta;'=>'&#916;','&ETH;'=>'&#208;','&Eacute;'=>'&#201;','&Ecirc;'=>'&#202;',
             '&Egrave;'=>'&#200;','&Epsilon;'=>'&#917;','&Eta;'=>'&#919;','&Euml;'=>'&#203;','&Gamma;'=>'&#915;','&Iacute;'=>'&#205;','&Icirc;'=>'&#206;','&Igrave;'=>'&#204;',
             '&Iota;'=>'&#921;','&Iuml;'=>'&#207;','&Kappa;'=>'&#922;','&Lambda;'=>'&#923;','&Mu;'=>'&#924;','&Ntilde;'=>'&#209;','&Nu;'=>'&#925;','&OElig;'=>'&#338;',
@@ -719,7 +719,7 @@ class Texy
      * @param int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
-    function protect($child, $contentType=TEXY_CONTENT_BLOCK)
+    function protect($child, $contentType = TEXY_CONTENT_BLOCK)
     {
         if ($child==='') return '';
 

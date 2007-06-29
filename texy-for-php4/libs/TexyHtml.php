@@ -73,7 +73,7 @@ class TexyHtml
      * @param array element's attributes
      * @return TexyHtml
      */
-    function el($name=NULL, $attrs=NULL) /* static */
+    function el($name = NULL, $attrs = NULL) /* static */
     {
         $el = new TexyHtml;
 
@@ -139,7 +139,7 @@ class TexyHtml
      * @param optional setter
      * @return bool
      */
-    function isEmpty($value=NULL)
+    function isEmpty($value = NULL)
     {
         if (is_bool($value)) $this->isEmpty = $value;
         return $this->isEmpty;
@@ -211,7 +211,7 @@ class TexyHtml
      * @param string optional textual content
      * @return TexyHtml
      */
-    function add($name, $text=NULL)
+    function add($name, $text = NULL)
     {
         $child = new TexyHtml;
         $child->setName($name);
@@ -251,7 +251,7 @@ class TexyHtml
      * @param array query
      * @return TexyHtml  itself
      */
-    function href($path, $params=NULL)
+    function href($path, $params = NULL)
     {
         if ($params) {
         	// missing http_build_query in PHP5
@@ -331,7 +331,7 @@ class TexyHtml
             } elseif ($key === 'href' && substr($value, 0, 7) === 'mailto:') {
                 // email-obfuscate hack
                 $tmp = '';
-                for ($i=0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
+                for ($i = 0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
                 $s .= ' href="' . $tmp . '"';
                 continue;
             }
@@ -419,7 +419,7 @@ class TexyHtml
      * @param bool
      * @return void
      */
-    function parseBlock($texy, $s, $topLevel=FALSE)
+    function parseBlock($texy, $s, $topLevel = FALSE)
     {
         $parser = new TexyBlockParser($texy, $this);
         $parser->topLevel = $topLevel;

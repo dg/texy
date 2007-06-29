@@ -322,7 +322,7 @@ class Texy
      * @param bool     is block or single line?
      * @return string  output html code
      */
-    public function process($text, $singleLine=FALSE)
+    public function process($text, $singleLine = FALSE)
     {
         $this->parse($text, $singleLine);
         return $this->toHtml();
@@ -358,7 +358,7 @@ class Texy
      * @param bool     is block or single line?
      * @return void
      */
-    public function parse($text, $singleLine=FALSE)
+    public function parse($text, $singleLine = FALSE)
     {
         if ($this->_state === 1)
             throw new Exception('Parsing is in progress yet.');
@@ -583,7 +583,7 @@ class Texy
      * @param string
      * @return string
      */
-    public static function webalize($s, $charlist=NULL)
+    public static function webalize($s, $charlist = NULL)
     {
         $s = TexyUtf::utf2ascii($s);
         $s = strtolower($s);
@@ -597,6 +597,7 @@ class Texy
 
     /**
      * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!)
+     * note: &quot; is not encoded!
      * @param string
      * @return string
      */
@@ -626,7 +627,7 @@ class Texy
      * @param int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
-    public function protect($child, $contentType=self::CONTENT_BLOCK)
+    public function protect($child, $contentType = self::CONTENT_BLOCK)
     {
         if ($child==='') return '';
 

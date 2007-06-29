@@ -157,7 +157,7 @@ class TexyHtmlModule extends TexyModule
      * @param bool      is empty?
      * @return string|FALSE
      */
-    public function solveTag(TexyHtml $el, $isStart, $forceEmpty=NULL)
+    public function solveTag(TexyHtml $el, $isStart, $forceEmpty = NULL)
     {
         $tx = $this->texy;
 

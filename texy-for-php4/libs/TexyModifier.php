@@ -75,7 +75,7 @@ class TexyModifier
     /**
      * @param string modifier to parse
      */
-    function __construct($mod=NULL)
+    function __construct($mod = NULL)
     {
         $this->setProperties($mod);
     }

@@ -306,7 +306,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
      * @param TexyHtml|string
      * @return TexyHtml|string
      */
-    function solve($link, $content=NULL)
+    function solve($link, $content = NULL)
     {
         if ($link->URL == NULL) return $content;
 

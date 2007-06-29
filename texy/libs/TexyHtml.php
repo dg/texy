@@ -73,7 +73,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param array element's attributes
      * @return TexyHtml
      */
-    public static function el($name=NULL, $attrs=NULL)
+    public static function el($name = NULL, $attrs = NULL)
     {
         $el = new self;
 
@@ -135,7 +135,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param optional setter
      * @return bool
      */
-    public function isEmpty($value=NULL)
+    public function isEmpty($value = NULL)
     {
         if (is_bool($value)) $this->isEmpty = $value;
         return $this->isEmpty;
@@ -205,7 +205,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string optional textual content
      * @return TexyHtml
      */
-    public function add($name, $text=NULL)
+    public function add($name, $text = NULL)
     {
         $child = new self;
         $child->setName($name);
@@ -258,7 +258,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param array query
      * @return TexyHtml  itself
      */
-    public function href($path, $params=NULL)
+    public function href($path, $params = NULL)
     {
         if ($params) {
             $query = http_build_query($params, NULL, '&');
@@ -337,7 +337,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
             } elseif ($key === 'href' && substr($value, 0, 7) === 'mailto:') {
                 // email-obfuscate hack
                 $tmp = '';
-                for ($i=0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
+                for ($i = 0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
                 $s .= ' href="' . $tmp . '"';
                 continue;
             }
@@ -425,7 +425,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param bool
      * @return void
      */
-    public function parseBlock($texy, $s, $topLevel=FALSE)
+    public function parseBlock($texy, $s, $topLevel = FALSE)
     {
         $parser = new TexyBlockParser($texy, $this);
         $parser->topLevel = $topLevel;

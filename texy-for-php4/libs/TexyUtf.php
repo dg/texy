@@ -89,7 +89,7 @@ class TexyUtf
         // prepare UTF-8 -> charset table
         $GLOBALS['TexyUtf::$xlat']= & $GLOBALS['TexyUtf::$xlatCache'][strtolower($encoding)];
         if (!$GLOBALS['TexyUtf::$xlat']) {
-            for ($i=128; $i<256; $i++) {
+            for ($i = 128; $i<256; $i++) {
                 $ch = iconv($encoding, 'UTF-8//IGNORE', chr($i));
                 if ($ch) $GLOBALS['TexyUtf::$xlat'][$ch] = chr($i);
             }
