@@ -76,7 +76,7 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
             '#,-#'                                    => ",\xe2\x80\x93",                  // en dash ,-
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
-            '# ([\x{2013}\x{2014}])#u'                => "\xc2\xa0\$1",                    // &nbsp; behind dash
+            '# ([\x{2013}\x{2014}])#u'                => "\xc2\xa0\$1",                    // &nbsp; behind dash (dash stays at line end)
             '# --- #'                                 => "\xc2\xa0\xe2\x80\x94 ",          // em dash ---
             '# -- #'                                  => "\xc2\xa0\xe2\x80\x93 ",          // en dash --
             '# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
@@ -85,13 +85,13 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
 //            '# <={1,2}> #'                            => " \xe2\x87\x94 ",                 // left right arrow <==> (is supported by IE7 ?)
             '#={1,}> #'                               => " \xe2\x87\x92 ",                 // right arrow ==>
 //            '# <={1,}#'                               => " \xe2\x87\x90 ",                 // left arrow <== (not supported by IE)
-            '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign x
-            '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign x
-            '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // 10x
-            '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark  (TM)
+            '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign 123 x 123 x 123
+            '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign 123 x 123
+            '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // dimension sign 123x
+            '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark (TM)
             '#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
-            '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright  (C)
-            '#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro  (EUR)
+            '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright (C)
+            '#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro (EUR)
             '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
             '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
             '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
@@ -101,8 +101,8 @@ class TexyTypographyModule extends TexyModule implements ITexyPostLine
 
             '#(?<=.{50})\s+(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
 
-            // nbsp space between number and word, symbol, punctation, currency symbol
-            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+[\x17-\x1F]*)\s+([\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+            // nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
+            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+\.?[\x17-\x1F]*)\s+([\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
                                                       => "\$1\xc2\xa0\$2",
 
             // space between preposition and word

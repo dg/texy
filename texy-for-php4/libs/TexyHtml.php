@@ -299,46 +299,47 @@ class TexyHtml
 
         $s = '<' . $this->name;
 
-        if (is_array($this->attrs))
-        foreach ($this->attrs as $key => $value)
-        {
-            // skip NULLs and false boolean attributes
-            if ($value === NULL || $value === FALSE) continue;
+        if (is_array($this->attrs)) {
+            foreach ($this->attrs as $key => $value)
+            {
+                // skip NULLs and false boolean attributes
+                if ($value === NULL || $value === FALSE) continue;
 
-            // true boolean attribute
-            if ($value === TRUE) {
-                // in XHTML must use unminimized form
-                if ($GLOBALS['TexyHtml::$xhtml']) $s .= ' ' . $key . '="' . $key . '"';
-                // in HTML should use minimized form
-                else $s .= ' ' . $key;
-                continue;
+                // true boolean attribute
+                if ($value === TRUE) {
+                    // in XHTML must use unminimized form
+                    if ($GLOBALS['TexyHtml::$xhtml']) $s .= ' ' . $key . '="' . $key . '"';
+                    // in HTML should use minimized form
+                    else $s .= ' ' . $key;
+                    continue;
 
-            } elseif (is_array($value)) {
+                } elseif (is_array($value)) {
 
-                // prepare into temporary array
-                $tmp = NULL;
-                foreach ($value as $k => $v) {
-                    // skip NULLs & empty string; composite 'style' vs. 'others'
-                    if ($v == NULL) continue;
+                    // prepare into temporary array
+                    $tmp = NULL;
+                    foreach ($value as $k => $v) {
+                        // skip NULLs & empty string; composite 'style' vs. 'others'
+                        if ($v == NULL) continue;
 
-                    if (is_string($k)) $tmp[] = $k . ':' . $v;
-                    else $tmp[] = $v;
+                        if (is_string($k)) $tmp[] = $k . ':' . $v;
+                        else $tmp[] = $v;
+                    }
+
+                    if (!$tmp) continue;
+                    $value = implode($key === 'style' ? ';' : ' ', $tmp);
+
+                } elseif ($key === 'href' && substr($value, 0, 7) === 'mailto:') {
+                    // email-obfuscate hack
+                    $tmp = '';
+                    for ($i = 0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
+                    $s .= ' href="' . $tmp . '"';
+                    continue;
                 }
 
-                if (!$tmp) continue;
-                $value = implode($key === 'style' ? ';' : ' ', $tmp);
-
-            } elseif ($key === 'href' && substr($value, 0, 7) === 'mailto:') {
-                // email-obfuscate hack
-                $tmp = '';
-                for ($i = 0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
-                $s .= ' href="' . $tmp . '"';
-                continue;
+                // add new attribute
+                $value = str_replace(array('&', '"', '<', '>'), array('&amp;', '&quot;', '&lt;', '&gt;'), $value);
+                $s .= ' ' . $key . '="' . Texy::freezeSpaces($value) . '"';
             }
-
-            // add new attribute
-            $value = str_replace(array('&', '"', '<', '>'), array('&amp;', '&quot;', '&lt;', '&gt;'), $value);
-            $s .= ' ' . $key . '="' . Texy::freezeSpaces($value) . '"';
         }
 
         // finish start tag
