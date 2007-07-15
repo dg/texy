@@ -91,10 +91,10 @@ class TexyTypographyModule extends TexyModule /* implements ITexyPostLine */
             '#(\d+)( ?)x\\2(\d+)\\2x\\2(\d+)#'        => "\$1\xc3\x97\$3\xc3\x97\$4",      // dimension sign 123 x 123 x 123
             '#(\d+)( ?)x\\2(\d+)#'                    => "\$1\xc3\x97\$3",                 // dimension sign 123 x 123
             '#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // dimension sign 123x
-            '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark  (TM)
+            '#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark (TM)
             '#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
-            '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright  (C)
-            '#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro  (EUR)
+            '#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright (C)
+            '#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro (EUR)
             '#(\d{1,3}) (\d{3}) (\d{3}) (\d{3})#'     => "\$1\xc2\xa0\$2\xc2\xa0\$3\xc2\xa0\$4", // (phone) number 1 123 123 123
             '#(\d{1,3}) (\d{3}) (\d{3})#'             => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // (phone) number 1 123 123
             '#(\d{1,3}) (\d{3})#'                     => "\$1\xc2\xa0\$2",                 // number 1 123
@@ -105,12 +105,12 @@ class TexyTypographyModule extends TexyModule /* implements ITexyPostLine */
             '#(?<=.{50})\s+(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
 
             // nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+\.?[\x17-\x1F]*)\s+([\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
-                                                      => "\$1\xc2\xa0\$2",
+            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+\.?[\x17-\x1F]*)\s+(?=[\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+                                                      => "\$1\xc2\xa0",
 
             // space between preposition and word
-            '#(?<=^|[^0-9'.TEXY_CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s+([\x17-\x1F]*[0-9'.TEXY_CHAR.'])#mus'
-                                                      => "\$1\xc2\xa0\$2",
+            '#(?<=^|[^0-9'.TEXY_CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s+(?=[\x17-\x1F]*[0-9'.TEXY_CHAR.'])#mus'
+                                                      => "\$1\xc2\xa0",
 
             '#(?<!"|\w)"(?!\ |")(.+)(?<!\ |")"(?!")()#U' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
             '#(?<!\'|\w)\'(?!\ |\')(.+)(?<!\ |\')\'(?!\')()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
