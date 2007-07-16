@@ -166,7 +166,7 @@ class TexyHtmlCleaner
             if ($item && !isset($item['content']['%DATA'])) { }
 
             // inside pre & textarea preserve spaces
-            elseif (!empty($this->tagUsed['pre']) || !empty($this->tagUsed['textarea']))
+            elseif (!empty($this->tagUsed['pre']) || !empty($this->tagUsed['textarea']) || !empty($this->tagUsed['script']))
                 $s = Texy::freezeSpaces($mText);
 
             // otherwise shrink multiple spaces
