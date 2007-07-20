@@ -5,7 +5,7 @@
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
- * @license    GNU GENERAL PUBLIC LICENSE version 2
+ * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
  * @version    $Revision$ $Date$
  * @category   Text
  * @package    Texy

@@ -31,7 +31,7 @@ License
 -------
 
 This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE version 2 as published by
+it under the terms of the GNU GENERAL PUBLIC LICENSE version 2 or 3 as published by
 the Free Software Foundation. See license.txt in this directory
 for a copy of the license.
 
