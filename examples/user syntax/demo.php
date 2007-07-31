@@ -21,41 +21,55 @@ $texy->allowed['phraseStrongEm'] = FALSE;
 $texy->allowed['phraseStrong'] = FALSE;
 $texy->allowed['phraseEm'] = FALSE;
 
-$texy->allowed['mySyntax1'] = TRUE;
-$texy->allowed['mySyntax2'] = TRUE;
+$texy->allowed['myInlineSyntax1'] = TRUE;
+$texy->allowed['myInlineSyntax2'] = TRUE;
+$texy->allowed['myBlockSyntax1'] = TRUE;
+
+
+// register my syntaxes:
 
 
 // add new syntax: *bold*
 $texy->registerLinePattern(
-    'userHandler',
-    '#(?<!\*)\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U',
-    'mySyntax1'
+    'userInlineHandler',  // callback function or method
+    '#(?<!\*)\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U', // regular expression
+    'myInlineSyntax1' // any syntax name
 );
 
 // add new syntax: _italic_
 $texy->registerLinePattern(
-    'userHandler',
+    'userInlineHandler',
     '#(?<!_)_(?!\ |_)(.+)'.TEXY_MODIFIER.'?(?<!\ |_)_(?!_)()#U',
-    'mySyntax2'
+    'myInlineSyntax2'
 );
 
 
+// add new syntax: .h1 ...
+$texy->registerBlockPattern(
+    'userBlockHandler',
+    '#^\.([a-z0-9]+)\n(.+)$#m', // block patterns must be multiline and line-anchored
+    'myBlockSyntax1'
+);
+
+
+
+
 /**
- * Pattern handler for my syntaxes
+ * Pattern handler for inline syntaxes
  *
  * @param TexyLineParser
  * @param array   reg-exp matches
- * @param string  pattern name (mySyntax1 or mySyntax2)
+ * @param string  pattern name (myInlineSyntax1 or myInlineSyntax2)
  * @return TexyHtml|string
  */
-function userHandler($parser, $matches, $name)
+function userInlineHandler($parser, $matches, $name)
 {
     list(, $mContent, $mMod) = $matches;
 
-    global $texy;
+    $texy = $parser->texy;
 
     // create element
-    $tag = $name === 'mySyntax1' ? 'b' : 'i';
+    $tag = $name === 'myInlineSyntax1' ? 'b' : 'i';
     $el = TexyHtml::el($tag);
 
     // apply modifier
@@ -70,6 +84,42 @@ function userHandler($parser, $matches, $name)
 
     return $el;
 }
+
+
+
+
+/**
+ * Pattern handler for block syntaxes
+ *
+ * @param TexyBlockParser
+ * @param array      regexp matches
+ * @param string     pattern name (myBlockSyntax1)
+ * @return TexyHtml|string|FALSE
+ */
+function userBlockHandler($parser, $matches, $name)
+{
+    list(, $mTag, $mText) = $matches;
+
+    $texy = $parser->texy;
+
+    // create element
+    if ($mTag === 'perex') {
+        $el = TexyHtml::el('div');
+        $el->class[] = 'perex';
+
+    } else {
+        $el = TexyHtml::el($mTag);
+    }
+
+    // create content
+    $el->parseLine($texy, $mText);
+
+    return $el;
+}
+
+
+
+
 
 
 // processing
