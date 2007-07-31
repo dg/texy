@@ -31,10 +31,10 @@ class myHandler
      * @param TexyLink
      * @return TexyHtml|string|FALSE|NULL
      */
-    public function phrase($parser, $phrase, $content, $modifier, $link)
+    function phrase($parser, $phrase, $content, $modifier, $link)
     {
         // is there link?
-        if (!$link) return Texy::PROCEED;
+        if (!$link) return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
 
         if (Texy::isRelative($link->URL)) {
             // modifiy link
@@ -45,7 +45,7 @@ class myHandler
             $link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
         }
 
-        return Texy::PROCEED;
+        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
     }
 
 }

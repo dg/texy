@@ -40,7 +40,7 @@ class myHandler {
             if ($link) $link->URL = 'big.gif'; // linked image
         }
 
-        return Texy::PROCEED;
+        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
         // or return $texy->imageModule->solve($image, $link);
     }
 

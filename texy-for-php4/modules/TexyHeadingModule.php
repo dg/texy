@@ -17,8 +17,8 @@ if (!class_exists('Texy')) die();
 
 
 
-define('TexyHeadingModule_DYNAMIC',  1);  // auto-leveling
-define('TexyHeadingModule_FIXED', 2);
+define('TEXY_HEADING_DYNAMIC',  1);  // auto-leveling
+define('TEXY_HEADING_FIXED', 2);
 
 /**
  * Heading module
@@ -45,7 +45,7 @@ class TexyHeadingModule extends TexyModule
     var $top = 1;
 
     /** @var int  balancing mode */
-    var $balancing = TexyHeadingModule_DYNAMIC;
+    var $balancing = TEXY_HEADING_DYNAMIC;
 
     /** @var array  when $balancing = TexyHeadingModule::FIXED */
     var $levels = array(
@@ -179,7 +179,7 @@ class TexyHeadingModule extends TexyModule
         $el->_level = $level;
         $el->PHP4['top'] = $this->top;
 
-        if ($this->balancing === TexyHeadingModule_DYNAMIC) {
+        if ($this->balancing === TEXY_HEADING_DYNAMIC) {
             if ($isSurrounded) {
                 $this->PHP4['dynamicTop'] = max($this->PHP4['dynamicTop'], $this->top - $level);
                 $el->PHP4['top'] = & $this->PHP4['dynamicTop'];

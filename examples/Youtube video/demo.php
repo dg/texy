@@ -29,7 +29,7 @@ class myHandler {
     function image($parser, $image, $link)
     {
         $parts = explode(':', $image->URL);
-        if (count($parts) !== 2) return Texy::PROCEED;
+        if (count($parts) !== 2) return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
 
         switch ($parts[0]) {
         case 'youtube':
@@ -39,10 +39,10 @@ class myHandler {
                 . '<param name="movie" value="http://www.youtube.com/v/'.$video.'" /><param name="wmode" value="transparent" />'
                 . '<embed src="http://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
 
-            return $parser->texy->protect($code, Texy::CONTENT_BLOCK);
+            return $parser->texy->protect($code, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
         }
 
-        return Texy::PROCEED;
+        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
     }
 
 }

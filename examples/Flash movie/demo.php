@@ -57,10 +57,10 @@ codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#ve
 </object>
 <!-- <![endif]-->
 ';
-            return $texy->protect($code, Texy::CONTENT_BLOCK);
+            return $texy->protect($code, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
         }
 
-        return Texy::PROCEED;
+        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
         // or return $texy->imageModule->solve($image, $link);
     }
 

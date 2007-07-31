@@ -27,7 +27,7 @@ class myHandler {
      * @param TexyModifier
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function figure($parser, $image, $link, $content, $modifier)
+    function figure($parser, $image, $link, $content, $modifier)
     {
         // finish invocation by default way
         $el = $parser->texy->figureModule->solve($image, $link, $content, $modifier);
@@ -39,8 +39,9 @@ class myHandler {
         $el->children['caption']->setName('dd');
 
         // wrap img into dt
-        $img = $el->children['img'];
-        $el->children['img'] = TexyHtml::el('dt')->addChild($img);
+        $dt = TexyHtml::el('dt');
+        $dt->addChild($el->children['img']);
+        $el->children['img'] = $dt;
 
         return $el;
     }

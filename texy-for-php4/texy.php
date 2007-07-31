@@ -85,14 +85,15 @@ if (PHP_VERSION < 5) eval('
 
 
 
-define('TEXY_ALL',  TRUE); /* class constant */
-define('TEXY_NONE',  FALSE); /* class constant */
-define('TEXY_VERSION',  '2.0 FOR PHP4 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)'); /* class constant */
-define('TEXY_CONTENT_MARKUP',  "\x17"); /* class constant */
-define('TEXY_CONTENT_REPLACED',  "\x16"); /* class constant */
-define('TEXY_CONTENT_TEXTUAL',  "\x15"); /* class constant */
-define('TEXY_CONTENT_BLOCK',  "\x14"); /* class constant */
-define('TEXY_PROCEED',  NULL); /* class constant */
+define('TEXY_ALL',  TRUE);
+define('TEXY_NONE',  FALSE);
+define('TEXY_VERSION',  '2.0 FOR PHP4 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
+define('TEXY_CONTENT_MARKUP',  "\x17");
+define('TEXY_CONTENT_REPLACED',  "\x16");
+define('TEXY_CONTENT_TEXTUAL',  "\x15");
+define('TEXY_CONTENT_BLOCK',  "\x14");
+define('TEXY_PROCEED',  NULL);
+
 
 /** @var bool  use Strict of Transitional DTD? */
 $GLOBALS['Texy::$strictDTD'] = FALSE; /* class static property */

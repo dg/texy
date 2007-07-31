@@ -22,8 +22,8 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 class MyTexy extends Texy
 {
-    public $cachePath = './cache/';
-    public $time;
+    var $cachePath = './cache/';
+    var $time;
 
 
     function __construct()

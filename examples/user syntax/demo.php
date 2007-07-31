@@ -76,7 +76,7 @@ function userInlineHandler($parser, $matches, $name)
     $mod = new TexyModifier($mMod);
     $mod->decorate($texy, $el);
 
-    $el->class = 'myclass';
+    $el->attrs['class'] = 'myclass';
     $el->setText($mContent);
 
     // parse inner content of this element
@@ -105,7 +105,7 @@ function userBlockHandler($parser, $matches, $name)
     // create element
     if ($mTag === 'perex') {
         $el = TexyHtml::el('div');
-        $el->class[] = 'perex';
+        $el->attrs['class'][] = 'perex';
 
     } else {
         $el = TexyHtml::el($mTag);

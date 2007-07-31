@@ -38,10 +38,10 @@ class myHandler
      * @param TexyModifier modifier
      * @return TexyHtml
      */
-    public function block($parser, $blocktype, $content, $lang, $modifier)
+    function block($parser, $blocktype, $content, $lang, $modifier)
     {
         if ($blocktype !== 'block/code')
-            return Texy::PROCEED;
+            return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
 
         $texy = $parser->texy;
 
@@ -50,7 +50,7 @@ class myHandler
         if (!in_array(
                 $lang,
                 array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
-           ) return Texy::PROCEED;
+           ) return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
 
         $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
 
@@ -60,7 +60,7 @@ class myHandler
 
         $elPre = TexyHtml::el('pre');
         if ($modifier) $modifier->decorate($texy, $elPre);
-        $elPre->class = strtolower($lang);
+        $elPre->attrs['class'] = strtolower($lang);
 
         $elCode = $elPre->add('code', $content);
 

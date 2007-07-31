@@ -41,10 +41,10 @@ class myHandler
      * @param TexyModifier modifier
      * @return TexyHtml
      */
-    public function block($parser, $blocktype, $content, $lang, $modifier)
+    function block($parser, $blocktype, $content, $lang, $modifier)
     {
         if ($blocktype !== 'block/code')
-            return Texy::PROCEED;
+            return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
 
         $texy = $parser->texy;
 
@@ -55,7 +55,7 @@ class myHandler
         $geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
         // GeSHi could not find the language
-        if ($geshi->error) return Texy::PROCEED;
+        if ($geshi->error) return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
 
         // do syntax-highlighting
         $geshi->set_encoding('UTF-8');
@@ -78,7 +78,9 @@ class myHandler
         // protect output is in HTML
         $content = $texy->protect($content);
 
-        return TexyHtml::el()->setText($content);
+        $el = TexyHtml::el();
+        $el->setText($content);
+        return $el;
     }
 
 }

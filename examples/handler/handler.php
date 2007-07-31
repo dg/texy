@@ -31,7 +31,7 @@ class myHandler
      * @param string
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function emoticon($parser, $emoticon, $rawEmoticon)
+    function emoticon($parser, $emoticon, $rawEmoticon)
     {
         // return $parser->texy->emoticonModule->solve($emoticon, $rawEmoticon);
     }
@@ -42,7 +42,7 @@ class myHandler
      * @param TexyLink
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function image($parser, $image, $link)
+    function image($parser, $image, $link)
     {
         // return $parser->texy->imageModule->solve($image, $link);
     }
@@ -53,7 +53,7 @@ class myHandler
      * @param string
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function linkReference($parser, $link, $content)
+    function linkReference($parser, $link, $content)
     {
         // return $parser->texy->linkModule->solve($link, $content);
     }
@@ -64,7 +64,7 @@ class myHandler
      * @param string
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function linkEmail($parser, $link, $content)
+    function linkEmail($parser, $link, $content)
     {
         // return $parser->texy->linkModule->solve($link, $content);
     }
@@ -75,7 +75,7 @@ class myHandler
      * @param string
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function linkURL($parser, $link, $content)
+    function linkURL($parser, $link, $content)
     {
         // return $parser->texy->linkModule->solve($link, $content);
     }
@@ -88,7 +88,7 @@ class myHandler
      * @param TexyLink
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function phrase($parser, $phrase, $content, $modifier, $link)
+    function phrase($parser, $phrase, $content, $modifier, $link)
     {
         // return $parser->texy->phraseModule->solve($phrase, $content, $modifier, $link);
     }
@@ -98,7 +98,7 @@ class myHandler
      * @param string
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function newReference($parser, $name)
+    function newReference($parser, $name)
     {
         // return Texy::PROCEED;
         // return $parser->texy->linkModule->solve($link, $content);
@@ -109,7 +109,7 @@ class myHandler
      * @param string
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function htmlComment($parser, $content)
+    function htmlComment($parser, $content)
     {
         // return Texy::PROCEED;
         // return $parser->texy->htmlModule->solveComment($content);
@@ -122,7 +122,7 @@ class myHandler
      * @param bool
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function htmlTag($parser, $el, $isStart, $forceEmpty=NULL)
+    function htmlTag($parser, $el, $isStart, $forceEmpty=NULL)
     {
         // return Texy::PROCEED;
         // return $parser->texy->htmlModule->solveTag($el, $isStart, $forceEmpty);
@@ -135,7 +135,7 @@ class myHandler
      * @param string  arguments in raw format
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function script($parser, $cmd, $args, $raw)
+    function script($parser, $cmd, $args, $raw)
     {
         // return Texy::PROCEED;
     }
@@ -150,7 +150,7 @@ class myHandler
      * @param TexyModifier
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function paragraph($parser, $content, $modifier)
+    function paragraph($parser, $content, $modifier)
     {
         // return $parser->texy->paragraphModule->solve($content, $modifier);
     }
@@ -163,7 +163,7 @@ class myHandler
      * @param TexyModifier
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function figure($parser, $image, $link, $content, $modifier)
+    function figure($parser, $image, $link, $content, $modifier)
     {
         // return $parser->texy->figureModule->solve($image, $link, $content, $modifier);
     }
@@ -176,7 +176,7 @@ class myHandler
      * @param bool
      * @return TexyHtml|string|FALSE|Texy::PROCEED
      */
-    public function heading($parser, $level, $content, $modifier, $isSurrounded)
+    function heading($parser, $level, $content, $modifier, $isSurrounded)
     {
         // return $parser->texy->headingModule->solve($level, $content, $modifier, $isSurrounded);
     }
@@ -189,7 +189,7 @@ class myHandler
      * @param TexyModifier
      * @return TexyHtml|string|Texy::PROCEED
      */
-    public function block($parser, $blocktype, $content, $param, $modifier)
+    function block($parser, $blocktype, $content, $param, $modifier)
     {
         // return $parser->texy->blockModule->solve($blocktype, $content, $param, $modifier);
     }
@@ -200,7 +200,7 @@ class myHandler
      * @param TexyModifier
      * @return void
      */
-    public function afterList($parser, $element, $modifier)
+    function afterList($parser, $element, $modifier)
     {
     }
 
@@ -210,7 +210,7 @@ class myHandler
      * @param TexyModifier
      * @return void
      */
-    public function afterDefinitionList($parser, $element, $modifier)
+    function afterDefinitionList($parser, $element, $modifier)
     {
     }
 
@@ -220,7 +220,7 @@ class myHandler
      * @param TexyModifier
      * @return void
      */
-    public function afterTable($parser, $element, $modifier)
+    function afterTable($parser, $element, $modifier)
     {
     }
 
@@ -230,7 +230,7 @@ class myHandler
      * @param TexyModifier
      * @return void
      */
-    public function afterBlockquote($parser, $element, $modifier)
+    function afterBlockquote($parser, $element, $modifier)
     {
     }
 
@@ -240,7 +240,7 @@ class myHandler
      * @param TexyModifier
      * @return void
      */
-    public function afterHorizline($parser, $element, $modifier)
+    function afterHorizline($parser, $element, $modifier)
     {
     }
 
@@ -254,7 +254,7 @@ class myHandler
      * @param bool
      * @return void
      */
-    public function afterParse($texy, $DOM, $isSingleLine)
+    function afterParse($texy, $DOM, $isSingleLine)
     {
     }
 }

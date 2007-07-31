@@ -42,9 +42,9 @@ class myHandler
         $name = $names[$refName];  // some range checing
 
         $el = TexyHtml::el('a');
-        $el->href = '#comm-' . $refName; // set link destination
-        $el->class[] = 'comment';        // set class name
-        $el->rel = 'nofollow';           // enable rel="nofollow"
+        $el->attrs['href'] = '#comm-' . $refName; // set link destination
+        $el->attrs['class'][] = 'comment';        // set class name
+        $el->attrs['rel'] = 'nofollow';           // enable rel="nofollow"
         $el->setText("[$refName] $name:"); // set link label (with Texy formatting)
         return $el;
     }

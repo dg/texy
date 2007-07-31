@@ -60,11 +60,19 @@ require_once TEXY_DIR.'modules/TexyTableModule.php';
 require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
 
-// Texy for PHP4 back compatibility
-define('TEXY_ALL',  TRUE);
-define('TEXY_NONE',  FALSE);
+
+
+// for PHP 4 backward compatibility
+define('TEXY_ALL',  Texy::ALL);
+define('TEXY_NONE',  Texy::NONE);
 define('TEXY_VERSION',  Texy::VERSION);
-define('TEXY_PROCEED',  NULL);
+define('TEXY_CONTENT_MARKUP', Texy::CONTENT_MARKUP);
+define('TEXY_CONTENT_REPLACED', Texy::CONTENT_REPLACED);
+define('TEXY_CONTENT_TEXTUAL', Texy::CONTENT_TEXTUAL);
+define('TEXY_CONTENT_BLOCK', Texy::CONTENT_BLOCK);
+define('TEXY_PROCEED',  Texy::PROCEED);
+
+
 
 
 /**

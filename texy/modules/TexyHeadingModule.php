@@ -16,6 +16,11 @@ if (!class_exists('Texy', FALSE)) die();
 
 
 
+// for PHP 4 backward compatibility
+define('TEXY_HEADING_FIXED',  TexyHeadingModule::FIXED);
+define('TEXY_HEADING_DYNAMIC',  TexyHeadingModule::DYNAMIC);
+
+
 /**
  * Heading module
  */
