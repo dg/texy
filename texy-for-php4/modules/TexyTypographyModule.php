@@ -75,13 +75,13 @@ class TexyTypographyModule extends TexyModule /* implements ITexyPostLine */
 
         $pairs = array(
             '#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
-            '#(?<=[\d ])-(?=[\d ])#'                  => "\xe2\x80\x93",                   // 123 en dash 123
+            '#(?<=[\d ])-(?=[\d ])#'                  => "\xe2\x80\x93",                   // en dash 123-123
+            '#(?<=[\d '.TEXY_CHAR.'])--(?=[\d '.TEXY_CHAR.'])#u' => "\xe2\x80\x93",        // en dash alphanum--alphanum
             '#,-#'                                    => ",\xe2\x80\x93",                  // en dash ,-
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
             '#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
-            '# ([\x{2013}\x{2014}])#u'                => "\xc2\xa0\$1",                    // &nbsp; behind dash (dash stays at line end)
             '# --- #'                                 => "\xc2\xa0\xe2\x80\x94 ",          // em dash ---
-            '# -- #'                                  => "\xc2\xa0\xe2\x80\x93 ",          // en dash --
+            '# ([\x{2013}\x{2014}])#u'                => "\xc2\xa0\$1",                    // &nbsp; behind dash (dash stays at line end)
             '# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
             '#-{1,}> #'                               => " \xe2\x86\x92 ",                 // right arrow -->
             '# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
