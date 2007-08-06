@@ -96,7 +96,7 @@ class TexyUtf
         }
 
         // convert
-        return preg_replace_callback('#[\x80-\x{FFFF}]#u', array(__CLASS__, '_cb'), $s);
+        return preg_replace_callback('#[\x80-\x{FFFF}]#u', array(__CLASS__, 'cb'), $s);
     }
 
 
@@ -104,7 +104,7 @@ class TexyUtf
     /**
      * Callback; converts UTF-8 to HTML entity OR character in dest encoding
      */
-    function _cb($m) /* private static */
+    function cb($m) /* private static */
     {
         $m = $m[0];
         if (isset($GLOBALS['TexyUtf::$xlat'][$m])) return $GLOBALS['TexyUtf::$xlat'][$m];

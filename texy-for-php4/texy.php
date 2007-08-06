@@ -405,7 +405,7 @@ class Texy
 
         // replace tabs with spaces
         while (strpos($text, "\t") !== FALSE)
-            $text = preg_replace_callback('#^(.*)\t#mU', array($this, '_tabCb'), $text);
+            $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
 
 
         // init modules
@@ -810,7 +810,7 @@ class Texy
 
 
 
-    function _tabCb($m) /* private */
+    function tabCb($m) /* private */
     {
         return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
     }

@@ -98,7 +98,7 @@ class TexyTableModule extends TexyModule
                 continue;
             }
 
-            if ($elRow = $this->_patternRow($parser)) {
+            if ($elRow = $this->patternRow($parser)) {
                 $el->addChild($elRow);
                 $this->row++;
                 continue;
@@ -121,7 +121,7 @@ class TexyTableModule extends TexyModule
      * @param TexyBlockParser
      * @return TexyHtml|string|FALSE
      */
-    function _patternRow($parser) /* private */
+    function patternRow($parser) /* private */
     {
         $tx = $this->texy;
 

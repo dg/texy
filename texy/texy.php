@@ -220,7 +220,7 @@ class Texy
     public $_preBlockModules;
 
     /** @var int internal state (0=new, 1=parsing, 2=parsed) */
-    private $_state = 0;
+    private $state = 0;
 
 
 
@@ -369,7 +369,7 @@ class Texy
      */
     public function parse($text, $singleLine = FALSE)
     {
-        if ($this->_state === 1)
+        if ($this->state === 1)
             throw new Exception('Parsing is in progress yet.');
 
          // initialization
@@ -377,7 +377,7 @@ class Texy
             throw new Exception('$texy->handler must be object. See documentation.');
 
         $this->marks = array();
-        $this->_state = 1;
+        $this->state = 1;
 
         // speed-up
         if (is_array($this->allowedClasses)) $this->_classes = array_flip($this->allowedClasses);
@@ -396,7 +396,7 @@ class Texy
 
         // replace tabs with spaces
         while (strpos($text, "\t") !== FALSE)
-            $text = preg_replace_callback('#^(.*)\t#mU', array($this, '_tabCb'), $text);
+            $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
 
 
         // init modules
@@ -420,7 +420,7 @@ class Texy
 
         // clean-up
         list($this->linePatterns, $this->blockPatterns) = $tmp;
-        $this->_state = 2;
+        $this->state = 2;
     }
 
 
@@ -433,7 +433,7 @@ class Texy
      */
     public function toHtml()
     {
-        if ($this->_state !== 2) throw new Exception('Call $texy->parse() first.');
+        if ($this->state !== 2) throw new Exception('Call $texy->parse() first.');
 
         $html = $this->_toHtml( $this->DOM->export($this) );
 
@@ -456,7 +456,7 @@ class Texy
      */
     public function toText()
     {
-        if ($this->_state !== 2) throw new Exception('Call $texy->parse() first.');
+        if ($this->state !== 2) throw new Exception('Call $texy->parse() first.');
 
         $text = $this->_toText( $this->DOM->export($this) );
 
@@ -725,7 +725,7 @@ class Texy
 
 
 
-    private function _tabCb($m)
+    private function tabCb($m)
     {
         return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
     }

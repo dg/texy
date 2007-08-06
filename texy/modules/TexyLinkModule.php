@@ -89,7 +89,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
         if ($topLevel && $this->texy->allowed['link/definition'])
             $text = preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
-                array($this, '_patternReferenceDef'),
+                array($this, 'patternReferenceDef'),
                 $text
             );
 
@@ -104,7 +104,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
      * @param array      regexp matches
      * @return string
      */
-    private function _patternReferenceDef($matches)
+    private function patternReferenceDef($matches)
     {
         list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
         //    [1] => [ (reference) ]
@@ -115,7 +115,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
         $link = new TexyLink($mLink);
         $link->label = trim($mLabel);
         $link->modifier->setProperties($mMod);
-        $this->_checkLink($link);
+        $this->checkLink($link);
         $this->addReference($mRef, $link);
         return '';
     }
@@ -164,7 +164,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
                 unset(self::$deadlock[$link->name]);
             }
         } else {
-            $content = $this->_textualURL($link);
+            $content = $this->textualURL($link);
         }
 
         // event wrapper
@@ -192,8 +192,8 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
         //    [0] => URL
 
         $link = new TexyLink($mURL);
-        $this->_checkLink($link);
-        $content = $this->_textualURL($link);
+        $this->checkLink($link);
+        $content = $this->textualURL($link);
 
         // event wrapper
         $method = $name === 'link/email' ? 'linkEmail' : 'linkURL';
@@ -284,7 +284,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
 
         if (empty($link)) {
             $link = new TexyLink(trim($dest));
-            $this->_checkLink($link);
+            $this->checkLink($link);
         }
 
         if (strpos($link->URL, '%s') !== FALSE) {
@@ -359,7 +359,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
      * @param TexyLink
      * @return void
      */
-    private function _checkLink($link)
+    private function checkLink($link)
     {
         $link->raw = $link->URL;
 
@@ -386,7 +386,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
      * @param TexyLink
      * @return string
      */
-    private function _textualURL($link)
+    private function textualURL($link)
     {
         $URL = $link->raw === NULL ? $link->URL : $link->raw;
 
