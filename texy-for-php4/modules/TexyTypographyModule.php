@@ -48,11 +48,11 @@ $GLOBALS['TexyTypographyModule::$locales'] = array(
 /**
  * Typography replacements module
  */
-class TexyTypographyModule extends TexyModule /* implements ITexyPostLine */
+class TexyTypographyModule extends TexyModule /* implements TexyPostLineInterface */
 {
-    var $syntax = array('typography' => TRUE); /* protected */
+    var $syntax = array('typography' => TRUE);
 
-    var $interface = array('ITexyPostLine'=>1);
+    var $interface = array('TexyPostLineInterface'=>1);
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 

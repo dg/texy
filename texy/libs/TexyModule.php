@@ -25,7 +25,7 @@ abstract class TexyModule
     protected $texy;
 
     /** @var array  list of syntax to allow */
-    protected $syntax = array();
+    public $syntax = array();
 
 
 
@@ -33,7 +33,6 @@ abstract class TexyModule
     {
         $this->texy = $texy;
         $texy->registerModule($this);
-        $texy->allowed = array_merge($texy->allowed, $this->syntax);
     }
 
 
@@ -58,7 +57,7 @@ abstract class TexyModule
 
 
 
-interface ITexyPreBlock
+interface TexyPreBlockInterface
 {
     /**
      * Single block pre-processing
@@ -70,7 +69,7 @@ interface ITexyPreBlock
 }
 
 
-interface ITexyPostLine
+interface TexyPostLineInterface
 {
     /**
      * Single line post-processing

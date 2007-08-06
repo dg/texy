@@ -21,7 +21,7 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    protected $syntax = array('blockquote' => TRUE);
+    public $syntax = array('blockquote' => TRUE);
 
 
     public function begin()

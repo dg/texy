@@ -21,7 +21,7 @@ if (!class_exists('Texy')) die();
  */
 class TexyFigureModule extends TexyModule
 {
-    var $syntax = array('figure' => TRUE); /* protected */
+    var $syntax = array('figure' => TRUE);
 
     /** @var string  non-floated box CSS class */
     var $class = 'figure';

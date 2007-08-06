@@ -19,9 +19,9 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Typography replacements module
  */
-class TexyTypographyModule extends TexyModule implements ITexyPostLine
+class TexyTypographyModule extends TexyModule implements TexyPostLineInterface
 {
-    protected $syntax = array('typography' => TRUE);
+    public $syntax = array('typography' => TRUE);
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 

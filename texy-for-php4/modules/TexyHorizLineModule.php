@@ -21,7 +21,7 @@ if (!class_exists('Texy')) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    var $syntax = array('horizline' => TRUE); /* protected */
+    var $syntax = array('horizline' => TRUE);
 
 
     function begin()

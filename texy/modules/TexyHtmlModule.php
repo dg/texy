@@ -21,7 +21,7 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyHtmlModule extends TexyModule
 {
-    protected $syntax = array(
+    public $syntax = array(
         'html/tag' => TRUE,
         'html/comment' => TRUE,
     );

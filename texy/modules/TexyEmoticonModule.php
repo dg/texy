@@ -21,7 +21,7 @@ if (!class_exists('Texy', FALSE)) die();
  */
 class TexyEmoticonModule extends TexyModule
 {
-    protected $syntax = array('emoticon' => FALSE);
+    public $syntax = array('emoticon' => FALSE);
 
     /** @var array  supported emoticons and image files */
     public $icons = array(

@@ -24,7 +24,7 @@ class TexyHtmlModule extends TexyModule
     var $syntax = array(
         'html/tag' => TRUE,
         'html/comment' => TRUE,
-    ); /* protected */
+    );
 
 
     /** @var bool   pass HTML comments to output? */

@@ -21,7 +21,7 @@ if (!class_exists('Texy')) die();
  */
 class TexyScriptModule extends TexyModule
 {
-    var $syntax = array('script' => TRUE); /* protected */
+    var $syntax = array('script' => TRUE);
 
     /**
      * @var callback|object  script elements handler

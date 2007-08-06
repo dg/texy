@@ -19,9 +19,9 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Images module
  */
-class TexyImageModule extends TexyModule implements ITexyPreBlock
+class TexyImageModule extends TexyModule implements TexyPreBlockInterface
 {
-    protected $syntax = array(
+    public $syntax = array(
         'image' => TRUE,
         'image/definition' => TRUE,
     );

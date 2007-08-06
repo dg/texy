@@ -65,7 +65,7 @@ class TexyHtmlCleaner
      *   $dtd[element][0] - allowed attributes (as array keys)
      *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
      * @var array
-     * @see TexyHtmlCleaner::initDTD()
+     * @see TexyHtmlCleaner::_initDTD()
      */
     var $dtd;
 
@@ -86,7 +86,7 @@ class TexyHtmlCleaner
     function __construct($texy)
     {
         $this->texy = $texy;
-        $this->initDTD();
+        $this->_initDTD();
     }
 
 
@@ -106,7 +106,7 @@ class TexyHtmlCleaner
         // wellform and reformat
         $s = preg_replace_callback(
             '#(.*)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
-            array($this, 'cb'),
+            array($this, '_cb'),
             $s . '</end/>'
         );
 
@@ -129,7 +129,7 @@ class TexyHtmlCleaner
         if ($this->lineWrap > 0)
             $s = preg_replace_callback(
                 '#^(\t*)(.*)$#m',
-                array($this, 'wrap'),
+                array($this, '_wrap'),
                 $s
             );
 
@@ -146,7 +146,7 @@ class TexyHtmlCleaner
      * Callback function: <tag> | </tag> | ....
      * @return string
      */
-    function cb($matches) /* private */
+    function _cb($matches) /* private */
     {
         // html tag
         list(, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
@@ -323,7 +323,7 @@ class TexyHtmlCleaner
      * Callback function: wrap lines
      * @return string
      */
-    function wrap($m) /* private */
+    function _wrap($m) /* private */
     {
         list(, $space, $s) = $m;
         return $space . wordwrap($s, $this->lineWrap, "\n" . $space);
@@ -334,7 +334,7 @@ class TexyHtmlCleaner
     /**
      * Initializes $this->dtd array
      */
-    function initDTD() /* static */
+    function _initDTD() /* static */
     {
         $strict = $GLOBALS['Texy::$strictDTD'];
         if (isset($GLOBALS['TexyHtmlCleaner::$dtdCache'][$strict])) {

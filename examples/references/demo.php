@@ -39,7 +39,7 @@ class myHandler
 
         if (!isset($names[$refName])) return FALSE; // it's not my job
 
-        $name = $names[$refName];  // some range checing
+        $name = $names[$refName];
 
         $el = TexyHtml::el('a');
         $el->attrs['href'] = '#comm-' . $refName; // set link destination

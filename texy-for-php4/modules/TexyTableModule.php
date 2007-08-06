@@ -21,7 +21,7 @@ if (!class_exists('Texy')) die();
  */
 class TexyTableModule extends TexyModule
 {
-    var $syntax = array('table' => TRUE); /* protected */
+    var $syntax = array('table' => TRUE);
 
     /** @var string  CSS class for odd rows */
 
@@ -98,7 +98,7 @@ class TexyTableModule extends TexyModule
                 continue;
             }
 
-            if ($elRow = $this->patternRow($parser)) {
+            if ($elRow = $this->_patternRow($parser)) {
                 $el->addChild($elRow);
                 $this->row++;
                 continue;
@@ -121,7 +121,7 @@ class TexyTableModule extends TexyModule
      * @param TexyBlockParser
      * @return TexyHtml|string|FALSE
      */
-    function patternRow($parser) /* protected */
+    function _patternRow($parser) /* private */
     {
         $tx = $this->texy;
 

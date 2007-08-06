@@ -19,9 +19,9 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Long words wrap module
  */
-class TexyLongWordsModule extends TexyModule implements ITexyPostLine
+class TexyLongWordsModule extends TexyModule implements TexyPostLineInterface
 {
-    protected $syntax = array('longwords' => TRUE);
+    public $syntax = array('longwords' => TRUE);
 
     public $wordLimit = 20;
 
@@ -79,7 +79,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyPostLine
 
         return preg_replace_callback(
             '#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
-            array($this, 'pattern'),
+            array($this, '_pattern'),
             $text);
     }
 
@@ -91,7 +91,7 @@ class TexyLongWordsModule extends TexyModule implements ITexyPostLine
      * @param array
      * @return string
      */
-    private function pattern($matches)
+    private function _pattern($matches)
     {
         list($mWord) = $matches;
         //    [0] => lllloooonnnnggggwwwoorrdddd

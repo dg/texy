@@ -19,14 +19,14 @@ if (!class_exists('Texy')) die();
 /**
  * Images module
  */
-class TexyImageModule extends TexyModule /* implements ITexyPreBlock */
+class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
 {
     var $syntax = array(
         'image' => TRUE,
         'image/definition' => TRUE,
-    ); /* protected */
+    );
 
-    var $interface = array('ITexyPreBlock'=>1);
+    var $interface = array('TexyPreBlockInterface'=>1);
 
     /** @var string  root of relative images (http) */
     var $root = 'images/';

@@ -25,7 +25,7 @@ class TexyModule /* abstract  */
     var $texy; /* protected */
 
     /** @var array  list of syntax to allow */
-    var $syntax = array(); /* protected */
+    var $syntax = array();
 
     /** @var string */
     var $interface;
@@ -35,7 +35,6 @@ class TexyModule /* abstract  */
     {
         $this->texy = $texy;
         $texy->registerModule($this);
-        $texy->allowed = array_merge($texy->allowed, $this->syntax);
     }
 
 

@@ -27,7 +27,7 @@ class TexyHeadingModule extends TexyModule
 {
 // fixed-leveling
 
-    var $syntax = array('heading/surrounded' => TRUE, 'heading/underlined' => TRUE); /* protected */
+    var $syntax = array('heading/surrounded' => TRUE, 'heading/underlined' => TRUE);
 
     /** @var string  textual content of first heading */
     var $title;

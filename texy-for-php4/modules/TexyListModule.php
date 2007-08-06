@@ -21,7 +21,7 @@ if (!class_exists('Texy')) die();
  */
 class TexyListModule extends TexyModule
 {
-    var $syntax = array('list' => TRUE, 'list/definition' => TRUE); /* protected */
+    var $syntax = array('list' => TRUE, 'list/definition' => TRUE);
 
     var $bullets = array(
                   //  first-rexexp          ordered   list-style-type   next-regexp

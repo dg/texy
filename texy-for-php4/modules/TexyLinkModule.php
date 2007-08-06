@@ -24,16 +24,16 @@ $GLOBALS['TexyLinkModule::$deadlock'] = NULL; /* class private static property *
 /**
  * Links module
  */
-class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
+class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
 {
     var $syntax = array(
         'link/reference' => TRUE,
         'link/email' => TRUE,
         'link/url' => TRUE,
         'link/definition' => TRUE,
-    ); /* protected */
+    );
 
-    var $interface = array('ITexyPreBlock'=>1);
+    var $interface = array('TexyPreBlockInterface'=>1);
 
     /** @var string  root of relative links */
     var $root = '';
@@ -48,7 +48,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
     var $forceNoFollow = FALSE;
 
     /** @var array link references */
-    var $references = array(); /* protected */
+    var $references = array(); /* private */
 
     function begin()
     {
@@ -91,7 +91,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
         if ($topLevel && $this->texy->allowed['link/definition'])
             $text = preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
-                array($this, 'patternReferenceDef'),
+                array($this, '_patternReferenceDef'),
                 $text
             );
 
@@ -106,7 +106,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
      * @param array      regexp matches
      * @return string
      */
-    function patternReferenceDef($matches) /* private */
+    function _patternReferenceDef($matches) /* private */
     {
         list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
         //    [1] => [ (reference) ]
@@ -117,7 +117,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
         $link = new TexyLink($mLink);
         $link->label = trim($mLabel);
         $link->modifier->setProperties($mMod);
-        $this->checkLink($link);
+        $this->_checkLink($link);
         $this->addReference($mRef, $link);
         return '';
     }
@@ -166,7 +166,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
                 unset($GLOBALS['TexyLinkModule::$deadlock'][$link->name]);
             }
         } else {
-            $content = $this->textualURL($link);
+            $content = $this->_textualURL($link);
         }
 
         // event wrapper
@@ -194,8 +194,8 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
         //    [0] => URL
 
         $link = new TexyLink($mURL);
-        $this->checkLink($link);
-        $content = $this->textualURL($link);
+        $this->_checkLink($link);
+        $content = $this->_textualURL($link);
 
         // event wrapper
         $method = $name === 'link/email' ? 'linkEmail' : 'linkURL';
@@ -286,7 +286,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
 
         if (empty($link)) {
             $link = new TexyLink(trim($dest));
-            $this->checkLink($link);
+            $this->_checkLink($link);
         }
 
         if (strpos($link->URL, '%s') !== FALSE) {
@@ -361,7 +361,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
      * @param TexyLink
      * @return void
      */
-    function checkLink($link) /* private */
+    function _checkLink($link) /* private */
     {
         $tmp = $link->URL;
 
@@ -391,7 +391,7 @@ class TexyLinkModule extends TexyModule /* implements ITexyPreBlock */
      * @param TexyLink
      * @return string
      */
-    function textualURL($link) /* private */
+    function _textualURL($link) /* private */
     {
         $URL = $link->raw === NULL ? $link->URL : $link->raw;
 

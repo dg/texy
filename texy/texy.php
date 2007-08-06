@@ -216,7 +216,7 @@ class Texy
     /** @var array  for internal usage */
     public $_classes, $_styles;
 
-    /** @var array of ITexyPreBlock for internal parser usage */
+    /** @var array of TexyPreBlockInterface for internal parser usage */
     public $_preBlockModules;
 
     /** @var int internal state (0=new, 1=parsing, 2=parsed) */
@@ -294,6 +294,7 @@ class Texy
     public function registerModule(TexyModule $module)
     {
         $this->modules[] = $module;
+        $this->allowed = array_merge($this->allowed, $module->syntax);
     }
 
 
@@ -395,7 +396,7 @@ class Texy
 
         // replace tabs with spaces
         while (strpos($text, "\t") !== FALSE)
-            $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
+            $text = preg_replace_callback('#^(.*)\t#mU', array($this, '_tabCb'), $text);
 
 
         // init modules
@@ -403,7 +404,7 @@ class Texy
         foreach ($this->modules as $module) {
             $module->begin();
 
-            if ($module instanceof ITexyPreBlock) $this->_preBlockModules[] = $module;
+            if ($module instanceof TexyPreBlockInterface) $this->_preBlockModules[] = $module;
         }
 
         // parse!
@@ -478,7 +479,7 @@ class Texy
         // line-postprocessing
         $blocks = explode(self::CONTENT_BLOCK, $s);
         foreach ($this->modules as $module) {
-            if ($module instanceof ITexyPostLine) {
+            if ($module instanceof TexyPostLineInterface) {
                 foreach ($blocks as $n => $s) {
                     if ($n % 2 === 0 && $s !== '')
                         $blocks[$n] = $module->postLine($s);
@@ -724,7 +725,7 @@ class Texy
 
 
 
-    private function tabCb($m)
+    private function _tabCb($m)
     {
         return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
     }

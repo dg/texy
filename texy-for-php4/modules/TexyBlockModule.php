@@ -19,7 +19,7 @@ if (!class_exists('Texy')) die();
 /**
  * Special blocks module
  */
-class TexyBlockModule extends TexyModule /* implements ITexyPreBlock */
+class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
 {
     var $syntax = array(
         'blocks' => TRUE,
@@ -31,9 +31,9 @@ class TexyBlockModule extends TexyModule /* implements ITexyPreBlock */
         'block/texysource' => TRUE,
         'block/comment' => TRUE,
         'block/div' => TRUE,
-    ); /* protected */
+    );
 
-    var $interface = array('ITexyPreBlock'=>1);
+    var $interface = array('TexyPreBlockInterface'=>1);
 
 
     function begin()

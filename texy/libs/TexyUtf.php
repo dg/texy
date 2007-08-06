@@ -89,13 +89,13 @@ class TexyUtf
         self::$xlat = & self::$xlatCache[strtolower($encoding)];
         if (!self::$xlat) {
             for ($i = 128; $i<256; $i++) {
-                $ch = iconv($encoding, 'UTF-8//IGNORE', chr($i));
+                $ch = @iconv($encoding, 'UTF-8//IGNORE', chr($i));
                 if ($ch) self::$xlat[$ch] = chr($i);
             }
         }
 
         // convert
-        return preg_replace_callback('#[\x80-\x{FFFF}]#u', array(__CLASS__, 'cb'), $s);
+        return preg_replace_callback('#[\x80-\x{FFFF}]#u', array(__CLASS__, '_cb'), $s);
     }
 
 
@@ -103,7 +103,7 @@ class TexyUtf
     /**
      * Callback; converts UTF-8 to HTML entity OR character in dest encoding
      */
-    private static function cb($m)
+    private static function _cb($m)
     {
         $m = $m[0];
         if (isset(self::$xlat[$m])) return self::$xlat[$m];

@@ -45,7 +45,7 @@ class TexyPhraseModule extends TexyModule
 
         // back compatibility
         'deprecated/codeswitch' => FALSE,// `=...
-    ); /* protected */
+    );
 
     var $tags = array(
         'phrase/strong' => 'strong', // or 'b'
