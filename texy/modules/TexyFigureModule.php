@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * The captioned figures
  */
-class TexyFigureModule extends TexyModule
+final class TexyFigureModule extends TexyModule
 {
     public $syntax = array('figure' => TRUE);
 

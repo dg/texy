@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Links module
  */
-class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
+final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
 {
     public $syntax = array(
         'link/reference' => TRUE,
@@ -436,7 +436,7 @@ class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
 
 
 
-class TexyLink
+final class TexyLink
 {
     /** @see $type */
     const
@@ -482,8 +482,8 @@ class TexyLink
      * Access to undeclared property
      * @throws Exception
      */
-    function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     /**#@-*/
 }

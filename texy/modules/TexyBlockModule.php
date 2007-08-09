@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Special blocks module
  */
-class TexyBlockModule extends TexyModule implements TexyPreBlockInterface
+final class TexyBlockModule extends TexyModule implements TexyPreBlockInterface
 {
     public $syntax = array(
         'blocks' => TRUE,

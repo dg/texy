@@ -24,7 +24,7 @@ define('TEXY_HEADING_DYNAMIC',  TexyHeadingModule::DYNAMIC);
 /**
  * Heading module
  */
-class TexyHeadingModule extends TexyModule
+final class TexyHeadingModule extends TexyModule
 {
     const
         DYNAMIC = 1,  // auto-leveling

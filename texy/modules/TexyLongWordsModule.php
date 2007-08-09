@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Long words wrap module
  */
-class TexyLongWordsModule extends TexyModule implements TexyPostLineInterface
+final class TexyLongWordsModule extends TexyModule implements TexyPostLineInterface
 {
     public $syntax = array('longwords' => TRUE);
 

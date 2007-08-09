@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Table module
  */
-class TexyTableModule extends TexyModule
+final class TexyTableModule extends TexyModule
 {
     public $syntax = array('table' => TRUE);
 

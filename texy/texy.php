@@ -291,7 +291,7 @@ class Texy
 
 
 
-    public function registerModule(TexyModule $module)
+    final public function registerModule(TexyModule $module)
     {
         $this->modules[] = $module;
         $this->allowed = array_merge($this->allowed, $module->syntax);
@@ -299,7 +299,7 @@ class Texy
 
 
 
-    public function registerLinePattern($handler, $pattern, $name)
+    final public function registerLinePattern($handler, $pattern, $name)
     {
         if (empty($this->allowed[$name])) return;
         $this->linePatterns[$name] = array(
@@ -310,7 +310,7 @@ class Texy
 
 
 
-    public function registerBlockPattern($handler, $pattern, $name)
+    final public function registerBlockPattern($handler, $pattern, $name)
     {
         // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
         if (empty($this->allowed[$name])) return;
@@ -367,7 +367,7 @@ class Texy
      * @param bool     is block or single line?
      * @return void
      */
-    public function parse($text, $singleLine = FALSE)
+    final public function parse($text, $singleLine = FALSE)
     {
         if ($this->state === 1)
             throw new Exception('Parsing is in progress yet.');
@@ -431,7 +431,7 @@ class Texy
      * Converts internal DOM structure to final HTML code
      * @return string
      */
-    public function toHtml()
+    final public function toHtml()
     {
         if ($this->state !== 2) throw new Exception('Call $texy->parse() first.');
 
@@ -454,7 +454,7 @@ class Texy
      * Converts internal DOM structure to pure Text
      * @return string
      */
-    public function toText()
+    final public function toText()
     {
         if ($this->state !== 2) throw new Exception('Call $texy->parse() first.');
 
@@ -471,7 +471,7 @@ class Texy
      * Converts internal DOM structure to final HTML code in UTF-8
      * @return string
      */
-    public function _toHtml($s)
+    final public function _toHtml($s)
     {
         // decode HTML entities to UTF-8
         $s = self::unescapeHtml($s);
@@ -509,7 +509,7 @@ class Texy
      * Converts internal DOM structure to final HTML code in UTF-8
      * @return string
      */
-    public function _toText($s)
+    final public function _toText($s)
     {
         $save = $this->cleaner->lineWrap;
         $this->cleaner->lineWrap = FALSE;
@@ -542,7 +542,7 @@ class Texy
      * @param string
      * @return string
      */
-    public static function freezeSpaces($s)
+    final public static function freezeSpaces($s)
     {
         return strtr($s, " \t\r\n", "\x01\x02\x03\x04");
     }
@@ -554,7 +554,7 @@ class Texy
      * @param string
      * @return string
      */
-    public static function unfreezeSpaces($s)
+    final public static function unfreezeSpaces($s)
     {
         return strtr($s, "\x01\x02\x03\x04", " \t\r\n");
     }
@@ -566,7 +566,7 @@ class Texy
      * @param string
      * @return string
      */
-    public static function normalize($s)
+    final public static function normalize($s)
     {
         // remove special chars
         $s = preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
@@ -592,7 +592,7 @@ class Texy
      * @param string
      * @return string
      */
-    public static function webalize($s, $charlist = NULL)
+    final public static function webalize($s, $charlist = NULL)
     {
         $s = TexyUtf::utf2ascii($s);
         $s = strtolower($s);
@@ -610,7 +610,7 @@ class Texy
      * @param string
      * @return string
      */
-    public static function escapeHtml($s)
+    final public static function escapeHtml($s)
     {
         return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
     }
@@ -622,7 +622,7 @@ class Texy
      * @param string
      * @return string
      */
-    public static function unescapeHtml($s)
+    final public static function unescapeHtml($s)
     {
         if (strpos($s, '&') === FALSE) return $s;
         return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
@@ -636,7 +636,7 @@ class Texy
      * @param int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
-    public function protect($child, $contentType = self::CONTENT_BLOCK)
+    final public function protect($child, $contentType = self::CONTENT_BLOCK)
     {
         if ($child==='') return '';
 
@@ -651,7 +651,7 @@ class Texy
 
 
 
-    public function unProtect($html)
+    final public function unProtect($html)
     {
         return strtr($html, $this->marks);
     }
@@ -664,7 +664,7 @@ class Texy
      * @param string   type: a-anchor, i-image, c-cite
      * @return bool
      */
-    public function checkURL($URL, $type)
+    final public function checkURL($URL, $type)
     {
         // absolute URL with scheme? check scheme!
         if (!empty($this->urlSchemeFilters[$type])
@@ -682,7 +682,7 @@ class Texy
      * @param string  URL
      * @return bool
      */
-    public static function isRelative($URL)
+    final public static function isRelative($URL)
     {
         // check for scheme, or absolute path, or absolute URL
         return !preg_match('#'.TEXY_URLSCHEME.'|[\#/?]#iA', $URL);
@@ -696,7 +696,7 @@ class Texy
      * @param string  root
      * @return string
      */
-    public static function prependRoot($URL, $root)
+    final public static function prependRoot($URL, $root)
     {
         if ($root == NULL || !self::isRelative($URL)) return $URL;
         return rtrim($root, '/\\') . '/' . $URL;
@@ -704,21 +704,21 @@ class Texy
 
 
 
-    public function getLinePatterns()
+    final public function getLinePatterns()
     {
         return $this->linePatterns;
     }
 
 
 
-    public function getBlockPatterns()
+    final public function getBlockPatterns()
     {
         return $this->blockPatterns;
     }
 
 
 
-    public function getDOM()
+    final public function getDOM()
     {
         return $this->DOM;
     }
@@ -732,7 +732,7 @@ class Texy
 
 
 
-    public function free()
+    final public function free()
     {
         foreach (array_keys(get_object_vars($this)) as $key)
             $this->$key = NULL;
@@ -740,16 +740,16 @@ class Texy
 
 
 
-    public function __clone() { throw new Exception("Clone is not supported."); }
+    final public function __clone() { throw new Exception("Clone is not supported."); }
 
 
     /**#@+
      * Access to undeclared property
      * @throws Exception
      */
-    function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     /**#@-*/
 
 }

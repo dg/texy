@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Blockquote module
  */
-class TexyQuoteModule extends TexyModule
+final class TexyQuoteModule extends TexyModule
 {
     public $syntax = array('blockquote' => TRUE);
 

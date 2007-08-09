@@ -33,9 +33,9 @@ class TexyParser
      * Access to undeclared property
      * @throws Exception
      */
-    function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     /**#@-*/
 
 }
@@ -74,7 +74,7 @@ class TexyBlockParser extends TexyParser
 
     // match current line against RE.
     // if succesfull, increments current position and returns TRUE
-    public function next($pattern, &$matches)
+    final public function next($pattern, &$matches)
     {
         $matches = NULL;
         $ok = preg_match(
@@ -94,7 +94,7 @@ class TexyBlockParser extends TexyParser
 
 
 
-    public function moveBackward($linesCount = 1)
+    final public function moveBackward($linesCount = 1)
     {
         while (--$this->offset > 0)
             if ($this->text{ $this->offset-1 } === "\n") {

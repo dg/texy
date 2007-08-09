@@ -15,7 +15,7 @@
 if (!class_exists('Texy', FALSE)) die();
 
 
-class TexyHtmlCleaner
+final class TexyHtmlCleaner
 {
     /** @var bool  indent HTML code? */
     public $indent = TRUE;
@@ -794,9 +794,9 @@ class TexyHtmlCleaner
      * Access to undeclared property
      * @throws Exception
      */
-    function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     /**#@-*/
 
 }

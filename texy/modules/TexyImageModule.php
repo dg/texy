@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Images module
  */
-class TexyImageModule extends TexyModule implements TexyPreBlockInterface
+final class TexyImageModule extends TexyModule implements TexyPreBlockInterface
 {
     public $syntax = array(
         'image' => TRUE,
@@ -321,7 +321,7 @@ class TexyImageModule extends TexyModule implements TexyPreBlockInterface
 
 
 
-class TexyImage
+final class TexyImage
 {
     /** @var string  base image URL */
     public $URL;
@@ -362,8 +362,8 @@ class TexyImage
      * Access to undeclared property
      * @throws Exception
      */
-    function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     /**#@-*/
 }

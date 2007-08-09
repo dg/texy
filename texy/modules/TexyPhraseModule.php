@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Phrases module
  */
-class TexyPhraseModule extends TexyModule
+final class TexyPhraseModule extends TexyModule
 {
     public $syntax = array(
         'phrase/strong+em' => TRUE,  // ***strong+emphasis***

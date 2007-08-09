@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Paragraph module
  */
-class TexyParagraphModule extends TexyModule
+final class TexyParagraphModule extends TexyModule
 {
     /** @var bool  how split paragraphs (internal usage) */
     public $mode;

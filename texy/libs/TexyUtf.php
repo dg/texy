@@ -20,7 +20,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * UTF-8 helper
  */
-class TexyUtf
+final class TexyUtf
 {
     /** @var array */
     private static $xlat;

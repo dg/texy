@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Ordered / unordered nested list module
  */
-class TexyListModule extends TexyModule
+final class TexyListModule extends TexyModule
 {
     public $syntax = array('list' => TRUE, 'list/definition' => TRUE);
 

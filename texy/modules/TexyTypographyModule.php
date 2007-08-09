@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Typography replacements module
  */
-class TexyTypographyModule extends TexyModule implements TexyPostLineInterface
+final class TexyTypographyModule extends TexyModule implements TexyPostLineInterface
 {
     public $syntax = array('typography' => TRUE);
 

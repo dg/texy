@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Html tags module
  */
-class TexyHtmlModule extends TexyModule
+final class TexyHtmlModule extends TexyModule
 {
     public $syntax = array(
         'html/tag' => TRUE,

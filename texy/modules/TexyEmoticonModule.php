@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Emoticon module
  */
-class TexyEmoticonModule extends TexyModule
+final class TexyEmoticonModule extends TexyModule
 {
     public $syntax = array('emoticon' => FALSE);
 

@@ -77,12 +77,14 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
     {
         $el = new self;
 
-        if ($name !== NULL)
+        if ($name !== NULL) {
             $el->setName($name);
+        }
 
         if ($attrs !== NULL) {
-            if (!is_array($attrs))
+            if (!is_array($attrs)) {
                 throw new Exception('Attributes must be array');
+            }
 
             $el->attrs = $attrs;
         }
@@ -109,10 +111,11 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string
      * @return TexyHtml  itself
      */
-    public function setName($name)
+    final public function setName($name)
     {
-        if ($name !== NULL && !is_string($name))
+        if ($name !== NULL && !is_string($name)) {
             throw new Exception('Name must be string or NULL');
+        }
 
         $this->name = $name;
         $this->isEmpty = isset(self::$emptyTags[$name]);
@@ -124,7 +127,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * Returns element's name
      * @return string
      */
-    public function getName()
+    final public function getName()
     {
         return $this->name;
     }
@@ -135,9 +138,12 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param optional setter
      * @return bool
      */
-    public function isEmpty($value = NULL)
+    final public function isEmpty($value = NULL)
     {
-        if (is_bool($value)) $this->isEmpty = $value;
+        if (is_bool($value)) {
+            $this->isEmpty = $value;
+        }
+
         return $this->isEmpty;
     }
 
@@ -147,12 +153,13 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string
      * @return TexyHtml  itself
      */
-    public function setText($text)
+    final public function setText($text)
     {
-        if ($text === NULL)
+        if ($text === NULL) {
             $text = '';
-        elseif (!is_scalar($text))
+        } elseif (!is_scalar($text)) {
             throw new Exception('Content must be scalar');
+        }
 
         $this->children = $text;
         return $this;
@@ -164,9 +171,11 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * Gets element's textual content
      * @return string
      */
-    public function getText()
+    final public function getText()
     {
-        if (is_array($this->children)) return FALSE;
+        if (is_array($this->children)) {
+            return FALSE;
+        }
 
         return $this->children;
     }
@@ -178,7 +187,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param TexyHtml object
      * @return TexyHtml  itself
      */
-    public function addChild(TexyHtml $child)
+    final public function addChild(TexyHtml $child)
     {
         $this->children[] = $child;
         return $this;
@@ -190,10 +199,11 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param mixed index
      * @return TexyHtml
      */
-    public function getChild($index)
+    final public function getChild($index)
     {
-        if (isset($this->children[$index]))
+        if (isset($this->children[$index])) {
             return $this->children[$index];
+        }
 
         return NULL;
     }
@@ -205,11 +215,13 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string optional textual content
      * @return TexyHtml
      */
-    public function add($name, $text = NULL)
+    final public function add($name, $text = NULL)
     {
         $child = new self;
         $child->setName($name);
-        if ($text !== NULL) $child->setText($text);
+        if ($text !== NULL) {
+            $child->setText($text);
+        }
         return $this->children[] = $child;
     }
 
@@ -220,7 +232,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param mixed     property value
      * @return void
      */
-    public function __set($name, $value)
+    final public function __set($name, $value)
     {
         $this->attrs[$name] = $value;
     }
@@ -231,7 +243,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string    property name
      * @return mixed    property value
      */
-    public function &__get($name)
+    final public function &__get($name)
     {
         return $this->attrs[$name];
     }
@@ -244,7 +256,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @return TexyHtml  itself
      */
 /*
-    public function __call($m, $args)
+    final public function __call($m, $args)
     {
         $this->attrs[$m] = $args[0];
         return $this;
@@ -258,7 +270,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param array query
      * @return TexyHtml  itself
      */
-    public function href($path, $params = NULL)
+    final public function href($path, $params = NULL)
     {
         if ($params) {
             $query = http_build_query($params, NULL, '&');
@@ -273,13 +285,15 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * Renders element's start tag, content and end tag
      * @return string
      */
-    public function export($texy)
+    final public function export($texy)
     {
         $ct = $this->getContentType();
         $s = $texy->protect($this->startTag(), $ct);
 
         // empty elements are finished now
-        if ($this->isEmpty) return $s;
+        if ($this->isEmpty) {
+            return $s;
+        }
 
         // add content
         if (is_array($this->children)) {
@@ -301,7 +315,9 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      */
     public function startTag()
     {
-        if (!$this->name) return '';
+        if (!$this->name) {
+            return '';
+        }
 
         $s = '<' . $this->name;
 
@@ -370,7 +386,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * Is element textual node?
      * @return bool
      */
-    public function isTextual()
+    final public function isTextual()
     {
         return !$this->isEmpty && is_scalar($this->children);
     }
@@ -379,7 +395,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
     /**
      * Clones all children too
      */
-    public function __clone()
+    final public function __clone()
     {
         if (is_array($this->children)) {
             foreach ($this->children as $key => $value)
@@ -391,7 +407,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
     /**
      * @return int
      */
-    public function getContentType()
+    final public function getContentType()
     {
         if (isset(self::$replacedTags[$this->name])) return Texy::CONTENT_REPLACED;
         if (isset(self::$inline[$this->name])) return Texy::CONTENT_MARKUP;
@@ -407,7 +423,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param string
      * @return void
      */
-    public function parseLine($texy, $s)
+    final public function parseLine($texy, $s)
     {
         // TODO!
         // special escape sequences
@@ -426,7 +442,7 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
      * @param bool
      * @return void
      */
-    public function parseBlock($texy, $s, $topLevel = FALSE)
+    final public function parseBlock($texy, $s, $topLevel = FALSE)
     {
         $parser = new TexyBlockParser($texy, $this);
         $parser->topLevel = $topLevel;
@@ -437,12 +453,12 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
 
 
     // TODO: REMOVE
-    public function offsetGet($i)
+    final public function offsetGet($i)
     {
         trigger_error('Manipulace s atributy pres $el[\'attr\']=VALUE je od revize 133 zrusena', E_USER_WARNING);
     }
 
-    public function offsetSet($i, $value) { $this->offsetGet(NULL); }
-    public function offsetExists($i) { $this->offsetGet(NULL); }
-    public function offsetUnset($i) { $this->offsetGet(NULL); }
+    final public function offsetSet($i, $value) { $this->offsetGet(NULL); }
+    final public function offsetExists($i) { $this->offsetGet(NULL); }
+    final public function offsetUnset($i) { $this->offsetGet(NULL); }
 }

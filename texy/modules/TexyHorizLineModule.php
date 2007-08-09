@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Horizontal line module
  */
-class TexyHorizLineModule extends TexyModule
+final class TexyHorizLineModule extends TexyModule
 {
     public $syntax = array('horizline' => TRUE);
 

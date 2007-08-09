@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Scripts module
  */
-class TexyScriptModule extends TexyModule
+final class TexyScriptModule extends TexyModule
 {
     public $syntax = array('script' => TRUE);
 
