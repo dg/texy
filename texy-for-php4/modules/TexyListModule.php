@@ -21,8 +21,6 @@ if (!class_exists('Texy')) die();
  */
 class TexyListModule extends TexyModule
 {
-    var $syntax = array('list' => TRUE, 'list/definition' => TRUE);
-
     var $bullets = array(
                   //  first-rexexp          ordered   list-style-type   next-regexp
         '*'  => array('\*\ ',               0, ''),
@@ -36,6 +34,15 @@ class TexyListModule extends TexyModule
         'A)' => array('[A-Z]\)\ ',          1, 'upper-alpha'),
     );
 
+
+
+    function __construct($texy)
+    {
+        parent::__construct($texy);
+
+        $texy->allowed['list'] = TRUE;
+        $texy->allowed['list/definition'] = TRUE;
+    }
 
 
     function begin()
@@ -117,8 +124,7 @@ class TexyListModule extends TexyModule
         if (count($el->children) < $min) return FALSE;
 
         // event listener
-        if (is_callable(array($tx->handler, 'afterList')))
-            $tx->handler->afterList($parser, $el, $mod);
+        $tx->invokeAfterHandlers('afterList', array($parser, $el, $mod));
 
         return $el;
     }
@@ -187,8 +193,7 @@ class TexyListModule extends TexyModule
         }
 
         // event listener
-        if (is_callable(array($tx->handler, 'afterDefinitionList')))
-            $tx->handler->afterDefinitionList($parser, $el, $mod);
+        $tx->invokeAfterHandlers('afterDefinitionList', array($parser, $el, $mod));
 
         return $el;
     }

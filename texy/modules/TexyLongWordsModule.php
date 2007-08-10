@@ -21,8 +21,6 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyLongWordsModule extends TexyModule implements TexyPostLineInterface
 {
-    public $syntax = array('longwords' => TRUE);
-
     public $wordLimit = 20;
 
 
@@ -69,6 +67,8 @@ final class TexyLongWordsModule extends TexyModule implements TexyPostLineInterf
         $this->before_l = array_flip($this->before_l);
         $this->before_h = array_flip($this->before_h);
         $this->doubleVowels = array_flip($this->doubleVowels);
+
+        $texy->allowed['longwords'] = TRUE;
     }
 
 

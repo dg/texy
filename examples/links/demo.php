@@ -19,35 +19,29 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
-// this is user callback object for processing Texy events
-class myHandler
+/**
+ * @param TexyHandlerInvocation  handler invocation
+ * @param string
+ * @param string
+ * @param TexyModifier
+ * @param TexyLink
+ * @return TexyHtml|string|FALSE
+ */
+function phraseHandler($invocation, $phrase, $content, $modifier, $link)
 {
+    // is there link?
+    if (!$link) return $invocation->proceed();
 
-    /**
-     * @param TexyLineParser
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param TexyLink
-     * @return TexyHtml|string|FALSE|NULL
-     */
-    function phrase($parser, $phrase, $content, $modifier, $link)
-    {
-        // is there link?
-        if (!$link) return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
+    if (Texy::isRelative($link->URL)) {
+        // modifiy link
+        $link->URL = 'index?page=' . urlencode($link->URL);
 
-        if (Texy::isRelative($link->URL)) {
-            // modifiy link
-            $link->URL = 'index?page=' . urlencode($link->URL);
-
-        } elseif (substr($link->URL, 0, 5) === 'wiki:') {
-            // modifiy link
-            $link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
-        }
-
-        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
+    } elseif (substr($link->URL, 0, 5) === 'wiki:') {
+        // modifiy link
+        $link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
     }
 
+    return $invocation->proceed();
 }
 
 
@@ -55,7 +49,7 @@ class myHandler
 $texy = new Texy();
 
 // configuration
-$texy->handler = new myHandler;
+$texy->addHandler('phrase', 'phraseHandler');
 
 // processing
 $text = file_get_contents('sample.texy');

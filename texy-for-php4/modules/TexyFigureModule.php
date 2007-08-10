@@ -21,8 +21,6 @@ if (!class_exists('Texy')) die();
  */
 class TexyFigureModule extends TexyModule
 {
-    var $syntax = array('figure' => TRUE);
-
     /** @var string  non-floated box CSS class */
     var $class = 'figure';
 
@@ -36,9 +34,13 @@ class TexyFigureModule extends TexyModule
     var $widthDelta = 10;
 
 
-    function begin()
+    function __construct($texy)
     {
-        $this->texy->registerBlockPattern(
+        parent::__construct($texy);
+
+        $texy->addHandler('figure', array($this, 'solve'));
+
+        $texy->registerBlockPattern(
             array($this, 'pattern'),
             '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mUu',
             'figure'
@@ -80,13 +82,7 @@ class TexyFigureModule extends TexyModule
             }
         } else $link = NULL;
 
-        // event wrapper
-        if (is_callable(array($tx->handler, 'figure'))) {
-            $res = $tx->handler->figure($parser, $image, $link, $mContent, $mod);
-            if ($res !== TEXY_PROCEED) return $res;
-        }
-
-        return $this->solve($image, $link, $mContent, $mod);
+        return $tx->invokeHandlers('figure', $parser, array($image, $link, $mContent, $mod));
     }
 
 
@@ -94,20 +90,21 @@ class TexyFigureModule extends TexyModule
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param TexyImage
      * @param TexyLink
      * @param string
      * @param TexyModifier
      * @return TexyHtml|FALSE
      */
-    function solve(/*TexyImage*/ $image, $link, $content, $mod)
+    function solve($invocation, /*TexyImage*/ $image, $link, $content, $mod)
     {
         $tx = $this->texy;
 
         $hAlign = $image->modifier->hAlign;
         $mod->hAlign = $image->modifier->hAlign = NULL;
 
-        $elImg = $tx->imageModule->solve($image, $link); // returns TexyHtml or false!
+        $elImg = $tx->imageModule->solve(NULL, $image, $link); // returns TexyHtml or false!
         if (!$elImg) return FALSE;
 
         $el = TexyHtml::el('div');

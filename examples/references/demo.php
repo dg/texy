@@ -22,33 +22,27 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
-// this is user callback object for processing Texy events
-class myHandler
+/**
+ * User handler for unknown reference
+ *
+ * @param TexyHandlerInvocation  handler invocation
+ * @param string   [refName]
+ * @return TexyHtml|string
+ */
+function newReferenceHandler($parser, $refName)
 {
+    $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 
-    /**
-     * User handler for unknown reference
-     *
-     * @param TexyLineParser
-     * @param string   [refName]
-     * @return TexyHtml|string
-     */
-    function newReference($parser, $refName)
-    {
-        $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
+    if (!isset($names[$refName])) return FALSE; // it's not my job
 
-        if (!isset($names[$refName])) return FALSE; // it's not my job
+    $name = $names[$refName];
 
-        $name = $names[$refName];
-
-        $el = TexyHtml::el('a');
-        $el->attrs['href'] = '#comm-' . $refName; // set link destination
-        $el->attrs['class'][] = 'comment';        // set class name
-        $el->attrs['rel'] = 'nofollow';           // enable rel="nofollow"
-        $el->setText("[$refName] $name:"); // set link label (with Texy formatting)
-        return $el;
-    }
-
+    $el = TexyHtml::el('a');
+    $el->attrs['href'] = '#comm-' . $refName; // set link destination
+    $el->attrs['class'][] = 'comment';        // set class name
+    $el->attrs['rel'] = 'nofollow';           // enable rel="nofollow"
+    $el->setText("[$refName] $name:"); // set link label (with Texy formatting)
+    return $el;
 }
 
 
@@ -59,8 +53,10 @@ class myHandler
 
 $texy = new Texy();
 
+// references link [1] [2] will be processed through user function
+$texy->addHandler('newReference', 'newReferenceHandler');
+
 // configuration
-$texy->handler = new myHandler;  // references link [1] [2] will be processed through user function
 TexyConfigurator::safeMode($texy);     // safe mode prevets attacker to inject some HTML code and disable images
 
 // how generally disable links or enable images? here is a way:

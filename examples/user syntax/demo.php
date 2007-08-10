@@ -21,10 +21,6 @@ $texy->allowed['phraseStrongEm'] = FALSE;
 $texy->allowed['phraseStrong'] = FALSE;
 $texy->allowed['phraseEm'] = FALSE;
 
-$texy->allowed['myInlineSyntax1'] = TRUE;
-$texy->allowed['myInlineSyntax2'] = TRUE;
-$texy->allowed['myBlockSyntax1'] = TRUE;
-
 
 // register my syntaxes:
 
@@ -66,7 +62,7 @@ function userInlineHandler($parser, $matches, $name)
 {
     list(, $mContent, $mMod) = $matches;
 
-    $texy = $parser->texy;
+    $texy = $parser->getTexy();
 
     // create element
     $tag = $name === 'myInlineSyntax1' ? 'b' : 'i';
@@ -100,7 +96,7 @@ function userBlockHandler($parser, $matches, $name)
 {
     list(, $mTag, $mText) = $matches;
 
-    $texy = $parser->texy;
+    $texy = $parser->getTexy();
 
     // create element
     if ($mTag === 'perex') {

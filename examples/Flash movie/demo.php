@@ -15,34 +15,31 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
-class myHandler {
+/**
+ * User handler for images
+ *
+ * @param TexyHandlerInvocation  handler invocation
+ * @param TexyImage
+ * @param TexyLink
+ * @return TexyHtml|string|FALSE
+ */
+function imageHandler($invocation, $image, $link)
+{
+    $texy = $invocation->getTexy();
 
-
-    /**
-     * User handler for images
-     *
-     * @param TexyLineParser
-     * @param TexyImage
-     * @param TexyLink
-     * @return TexyHtml|string|FALSE|Texy::PROCEED
-     */
-    function image($parser, $image, $link)
+    if (substr($image->URL, -4) === '.swf')  // accepts only *.swf
     {
-        $texy = $parser->texy;
+        $movie = Texy::prependRoot($image->URL, $texy->imageModule->root);
 
-        if (substr($image->URL, -4) === '.swf')  // accepts only *.swf
-        {
-            $movie = Texy::prependRoot($image->URL, $texy->imageModule->root);
+        $dimensions =
+               ($image->width ? 'width="'.$image->width.'" ' : '')
+            . ($image->height ? 'width="'.$image->height.'" ' : '');
 
-            $dimensions =
-                   ($image->width ? 'width="'.$image->width.'" ' : '')
-                . ($image->height ? 'width="'.$image->height.'" ' : '');
+        $movie = htmlSpecialChars($movie);
+        $altContent = htmlSpecialChars($image->modifier->title);
 
-            $movie = htmlSpecialChars($movie);
-            $altContent = htmlSpecialChars($image->modifier->title);
-
-            // @see http://www.dgx.cz/trine/item/how-to-correctly-insert-a-flash-into-xhtml
-            $code = '
+        // @see http://www.dgx.cz/trine/item/how-to-correctly-insert-a-flash-into-xhtml
+        $code = '
 <!--[if !IE]> -->
 <object type="application/x-shockwave-flash" data="'.$movie.'" '.$dimensions.'>
 <!-- <![endif]-->
@@ -57,18 +54,15 @@ codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#ve
 </object>
 <!-- <![endif]-->
 ';
-            return $texy->protect($code, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
-        }
-
-        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
-        // or return $texy->imageModule->solve($image, $link);
+        return $texy->protect($code, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
     }
 
+    return $invocation->proceed();
 }
 
 
 $texy = new Texy();
-$texy->handler = new myHandler;
+$texy->addHandler('image', 'imageHandler');
 
 
 // processing

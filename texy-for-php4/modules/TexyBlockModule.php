@@ -21,24 +21,27 @@ if (!class_exists('Texy')) die();
  */
 class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
 {
-    var $syntax = array(
-        'blocks' => TRUE,
-        'block/default' => TRUE,
-        'block/pre' => TRUE,
-        'block/code' => TRUE,
-        'block/html' => TRUE,
-        'block/text' => TRUE,
-        'block/texysource' => TRUE,
-        'block/comment' => TRUE,
-        'block/div' => TRUE,
-    );
 
     var $interface = array('TexyPreBlockInterface'=>1);
 
 
-    function begin()
+    function __construct($texy)
     {
-        $this->texy->registerBlockPattern(
+        parent::__construct($texy);
+
+        //$texy->allowed['blocks'] = TRUE;
+        $texy->allowed['block/default'] = TRUE;
+        $texy->allowed['block/pre'] = TRUE;
+        $texy->allowed['block/code'] = TRUE;
+        $texy->allowed['block/html'] = TRUE;
+        $texy->allowed['block/text'] = TRUE;
+        $texy->allowed['block/texysource'] = TRUE;
+        $texy->allowed['block/comment'] = TRUE;
+        $texy->allowed['block/div'] = TRUE;
+
+        $texy->addHandler('block', array($this, 'solve'));
+
+        $texy->registerBlockPattern(
             array($this, 'pattern'),
             '#^/--++ *+(.*)'.TEXY_MODIFIER_H.'?$((?:\n(?0)|\n.*+)*)(?:\n\\\\--.*$|\z)#mUi',
             'blocks'
@@ -89,13 +92,7 @@ class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
         $blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
         $param = empty($parts[1]) ? NULL : $parts[1];
 
-        // event wrapper
-        if (is_callable(array($this->texy->handler, 'block'))) {
-            $res = $this->texy->handler->block($parser, $blocktype, $mContent, $param, $mod);
-            if ($res !== TEXY_PROCEED) return $res;
-        }
-
-        return $this->solve($blocktype, $mContent, $param, $mod);
+        return $this->texy->invokeHandlers('block', $parser, array($blocktype, $mContent, $param, $mod));
     }
 
 
@@ -111,13 +108,14 @@ class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param string   blocktype
      * @param string   content
      * @param string   additional parameter
      * @param TexyModifier
      * @return TexyHtml|string|FALSE
      */
-    function solve($blocktype, $s, $param, $mod)
+    function solve($invocation, $blocktype, $s, $param, $mod)
     {
         $tx = $this->texy;
 

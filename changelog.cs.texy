@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 155
+- nový systém handlerů. Odstraněno `$texy->handler` a konstanta `Texy::PROCEED`. Přidáno `$texy::addHandler()`. Více ve "fóru":http://forum.texy.info/viewtopic.php?pid=1871
+
 rev. 150
 - všechny příklady nyní fungují i v PHP 4. Jen je potřeba "inkludovat" odpovídající verzi Texy.
 - verze pro PHP 5 podporuje kvůli zpětné kompatibilitě i původní konstanty `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC`, `TEXY_HEADING_FIXED`, `TEXY_PROCEED`, `TEXY_CONTENT_*`

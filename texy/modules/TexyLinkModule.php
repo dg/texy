@@ -21,13 +21,6 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
 {
-    public $syntax = array(
-        'link/reference' => TRUE,
-        'link/email' => TRUE,
-        'link/url' => TRUE,
-        'link/definition' => TRUE,
-    );
-
     /** @var string  root of relative links */
     public $root = '';
 
@@ -48,30 +41,42 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
 
 
 
-    public function begin()
+    public function __construct($texy)
     {
-        self::$deadlock = array();
+        parent::__construct($texy);
 
-        $tx = $this->texy;
+        $texy->allowed['link/definition'] = TRUE;
+
+        $texy->addHandler('newReference', array($this, 'solveNewReference'));
+        $texy->addHandler('linkReference', array($this, 'solve'));
+        $texy->addHandler('linkEmail', array($this, 'solve'));
+        $texy->addHandler('linkURL', array($this, 'solve'));
+
         // [reference]
-        $tx->registerLinePattern(
+        $texy->registerLinePattern(
             array($this, 'patternReference'),
             '#(\[[^\[\]\*\n'.TEXY_MARK.']+\])#U',
             'link/reference'
         );
 
         // direct url and email
-        $tx->registerLinePattern(
+        $texy->registerLinePattern(
             array($this, 'patternUrlEmail'),
             '#(?<=^|[\s(\[<:])(?:https?://|www\.|ftp://)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
             'link/url'
         );
 
-        $tx->registerLinePattern(
+        $texy->registerLinePattern(
             array($this, 'patternUrlEmail'),
             '#(?<=^|[\s(\[\<:])'.TEXY_EMAIL.'#iu',
             'link/email'
         );
+    }
+
+
+    public function begin()
+    {
+        self::$deadlock = array();
     }
 
 
@@ -141,14 +146,7 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
         $link = $this->getReference($name);
 
         if (!$link) {
-            // try handler
-            if (is_callable(array($tx->handler, 'newReference'))) {
-                $res = $tx->handler->newReference($parser, $name);
-                if ($res !== Texy::PROCEED) return $res;
-            }
-
-            // no change
-            return FALSE;
+            return $tx->invokeHandlers('newReference', $parser, array($name));
         }
 
         $link->type = TexyLink::BRACKET;
@@ -167,13 +165,7 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
             $content = $this->textualURL($link);
         }
 
-        // event wrapper
-        if (is_callable(array($tx->handler, 'linkReference'))) {
-            $res = $tx->handler->linkReference($parser, $link, $content);
-            if ($res !== Texy::PROCEED) return $res;
-        }
-
-        return $this->solve($link, $content);
+        return $tx->invokeHandlers('linkReference', $parser, array($link, $content));
     }
 
 
@@ -195,14 +187,11 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
         $this->checkLink($link);
         $content = $this->textualURL($link);
 
-        // event wrapper
-        $method = $name === 'link/email' ? 'linkEmail' : 'linkURL';
-        if (is_callable(array($this->texy->handler, $method))) {
-            $res = $this->texy->handler->$method($parser, $link, $content);
-            if ($res !== Texy::PROCEED) return $res;
-        }
-
-        return $this->solve($link, $content);
+        return $this->texy->invokeHandlers(
+            $name === 'link/email' ? 'linkEmail' : 'linkURL',
+            $parser,
+            array($link, $content)
+        );
     }
 
 
@@ -300,11 +289,12 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param TexyLink
      * @param TexyHtml|string
      * @return TexyHtml|string
      */
-    public function solve($link, $content = NULL)
+    public function solve($invocation, $link, $content = NULL)
     {
         if ($link->URL == NULL) return $content;
 
@@ -350,6 +340,21 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
         $tx->summary['links'][] = $el->attrs['href'];
 
         return $el;
+    }
+
+
+
+    /**
+     * Finish invocation
+     *
+     * @param TexyHandlerInvocation  handler invocation
+     * @param string
+     * @return FALSE
+     */
+    public function solveNewReference($invocation, $name)
+    {
+        // no change
+        return FALSE;
     }
 
 

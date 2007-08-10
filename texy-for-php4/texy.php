@@ -42,6 +42,7 @@ require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
 require_once TEXY_DIR.'libs/TexyUtf.php';
 require_once TEXY_DIR.'libs/TexyConfigurator.php';
+require_once TEXY_DIR.'libs/TexyHandlerInvocation.php';
 require_once TEXY_DIR.'modules/TexyParagraphModule.php';
 require_once TEXY_DIR.'modules/TexyBlockModule.php';
 require_once TEXY_DIR.'modules/TexyHeadingModule.php';
@@ -92,7 +93,6 @@ define('TEXY_CONTENT_MARKUP',  "\x17");
 define('TEXY_CONTENT_REPLACED',  "\x16");
 define('TEXY_CONTENT_TEXTUAL',  "\x15");
 define('TEXY_CONTENT_BLOCK',  "\x14");
-define('TEXY_PROCEED',  NULL);
 
 
 /** @var bool  use Strict of Transitional DTD? */
@@ -147,9 +147,6 @@ class Texy
     /** @var bool  Paragraph merging mode */
     var $mergeLines = TRUE;
 
-    /** @var object  User handler object */
-    var $handler;
-
     /** @var bool  ignore stuff with only markup and spaecs? */
     var $ignoreEmptyStuff = TRUE;
 
@@ -200,6 +197,7 @@ class Texy
      *                'pattern' => regular expression)
      */
     var $linePatterns = array(); /* private */
+    var $_linePatterns; /* private */
 
     /**
      * Registered regexps and associated handlers for block parsing
@@ -207,6 +205,7 @@ class Texy
      *                'pattern' => regular expression)
      */
     var $blockPatterns = array(); /* private */
+    var $_blockPatterns; /* private */
 
 
     /** @var TexyDomElement  DOM structure for parsed text */
@@ -225,7 +224,10 @@ class Texy
     var $_preBlockModules;
 
     /** @var int internal state (0=new, 1=parsing, 2=parsed) */
-    var $_state = 0; /* private */
+    var $state = 0; /* private */
+
+    /** @var array of events and registered handlers */
+    var $handlers = array(); /* private */
 
 
 
@@ -299,14 +301,15 @@ class Texy
     function registerModule(/*TexyModule*/ $module)
     {
         $this->modules[] = $module;
-        $this->allowed = array_merge($this->allowed, $module->syntax);
     }
 
 
 
     function registerLinePattern($handler, $pattern, $name)
     {
-        if (empty($this->allowed[$name])) return;
+        if (!isset($this->allowed[$name])) {
+            $this->allowed[$name] = TRUE;
+        }
         $this->linePatterns[$name] = array(
             'handler'     => $handler,
             'pattern'     => $pattern,
@@ -318,7 +321,9 @@ class Texy
     function registerBlockPattern($handler, $pattern, $name)
     {
         // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
-        if (empty($this->allowed[$name])) return;
+        if (!isset($this->allowed[$name])) {
+            $this->allowed[$name] = TRUE;
+        }
         $this->blockPatterns[$name] = array(
             'handler'     => $handler,
             'pattern'     => $pattern  . 'm',  // force multiline
@@ -374,19 +379,14 @@ class Texy
      */
     function parse($text, $singleLine = FALSE)
     {
-        if ($this->_state === 1) {
+        if ($this->state === 1) {
             trigger_error('Parsing is in progress yet.', E_USER_ERROR);
             return FALSE;
         }
 
          // initialization
-        if ($this->handler && !is_object($this->handler)) {
-            trigger_error('$texy->handler must be object. See documentation.', E_USER_ERROR);
-            return FALSE;
-        }
-
         $this->marks = array();
-        $this->_state = 1;
+        $this->state = 1;
 
         // speed-up
         if (is_array($this->allowedClasses)) $this->_classes = array_flip($this->allowedClasses);
@@ -394,8 +394,6 @@ class Texy
 
         if (is_array($this->allowedStyles)) $this->_styles = array_flip($this->allowedStyles);
         else $this->_styles = $this->allowedStyles;
-
-        $tmp = array($this->linePatterns, $this->blockPatterns);
 
         // convert to UTF-8 (and check source encoding)
         $text = TexyUtf::toUtf($text, $this->encoding);
@@ -416,6 +414,16 @@ class Texy
             if (isset($module->interface['TexyPreBlockInterface'])) $this->_preBlockModules[] = $module;
         }
 
+        // select patterns
+        $this->_linePatterns = $this->linePatterns;
+        $this->_blockPatterns = $this->blockPatterns;
+        foreach ($this->_linePatterns as $pattern => $foo) {
+            if (empty($this->allowed[$pattern])) unset($this->_linePatterns[$pattern]);
+        }
+        foreach ($this->_blockPatterns as $pattern => $foo) {
+            if (empty($this->allowed[$pattern])) unset($this->_blockPatterns[$pattern]);
+        }
+
         // parse!
         $this->DOM = TexyHtml::el();
         if ($singleLine)
@@ -424,12 +432,9 @@ class Texy
             $this->DOM->parseBlock($this, $text, TRUE);
 
         // user handler
-        if (is_callable(array($this->handler, 'afterParse')))
-            $this->handler->afterParse($this, $this->DOM, $singleLine);
+        $this->invokeAfterHandlers('afterParse', array($this, $this->DOM, $singleLine));
 
-        // clean-up
-        list($this->linePatterns, $this->blockPatterns) = $tmp;
-        $this->_state = 2;
+        $this->state = 2;
     }
 
 
@@ -442,7 +447,7 @@ class Texy
      */
     function toHtml()
     {
-        if ($this->_state !== 2) {
+        if ($this->state !== 2) {
             trigger_error('Call $texy->parse() first.', E_USER_ERROR);
             return FALSE;
         }
@@ -468,7 +473,7 @@ class Texy
      */
     function toText()
     {
-        if ($this->_state !== 2) {
+        if ($this->state !== 2) {
             trigger_error('Call $texy->parse() first.', E_USER_ERROR);
             return FALSE;
         }
@@ -550,6 +555,53 @@ class Texy
 
 
 
+    /**
+     * Add new event handler
+     *
+     * @param string   event name
+     * @param callback
+     * @return void
+     */
+    function addHandler($event, $callback)
+    {
+        $this->handlers[$event][] = $callback;
+    }
+
+
+    /**
+     * Invoke registered around-handlers
+     *
+     * @param string   event name
+     * @param TexyParser  actual parser object
+     * @param array    arguments passed into handler
+     * @return mixed
+     */
+    function invokeHandlers($event, $parser, $args)
+    {
+        if (!isset($this->handlers[$event])) return FALSE;
+
+        $invocation = new TexyHandlerInvocation($this->handlers[$event], $parser, $args);
+        return $invocation->proceed();
+    }
+
+
+    /**
+     * Invoke registered after-handlers
+     *
+     * @param string   event name
+     * @param array    arguments passed into handler
+     * @return void
+     */
+    function invokeAfterHandlers($event, $args)
+    {
+        if (!isset($this->handlers[$event])) return FALSE;
+
+        foreach ($this->handlers[$event] as $handler) {
+            call_user_func_array($handler, $args);
+        }
+    }
+
+
 
     /**
      * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04
@@ -621,6 +673,7 @@ class Texy
 
     /**
      * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!)
+     * note: &quot; is not encoded!
      * @param string
      * @return string
      */
@@ -791,14 +844,14 @@ class Texy
 
     function getLinePatterns()
     {
-        return $this->linePatterns;
+        return $this->_linePatterns;
     }
 
 
 
     function getBlockPatterns()
     {
-        return $this->blockPatterns;
+        return $this->_blockPatterns;
     }
 
 

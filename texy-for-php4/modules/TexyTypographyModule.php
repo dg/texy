@@ -50,8 +50,6 @@ $GLOBALS['TexyTypographyModule::$locales'] = array(
  */
 class TexyTypographyModule extends TexyModule /* implements TexyPostLineInterface */
 {
-    var $syntax = array('typography' => TRUE);
-
     var $interface = array('TexyPostLineInterface'=>1);
 
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
@@ -59,6 +57,13 @@ class TexyTypographyModule extends TexyModule /* implements TexyPostLineInterfac
     var $locale = 'cs';
 
     var $pattern, $replace; /* private */
+
+
+    function __construct($texy)
+    {
+        parent::__construct($texy);
+        $texy->allowed['typography'] = TRUE;
+    }
 
 
     function begin()

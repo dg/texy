@@ -17,40 +17,36 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
-class myHandler {
+/**
+ * @param TexyHandlerInvocation  handler invocation
+ * @param TexyImage
+ * @param TexyLink
+ * @param string
+ * @param TexyModifier
+ * @return TexyHtml|string|FALSE
+ */
+function figureHandler($invocation, $image, $link, $content, $modifier)
+{
+    // finish invocation by default way
+    $el = $invocation->proceed();
 
-    /**
-     * @param TexyBlockParser
-     * @param TexyImage
-     * @param TexyLink
-     * @param string
-     * @param TexyModifier
-     * @return TexyHtml|string|FALSE|Texy::PROCEED
-     */
-    function figure($parser, $image, $link, $content, $modifier)
-    {
-        // finish invocation by default way
-        $el = $parser->texy->figureModule->solve($image, $link, $content, $modifier);
+    // change div -> dl
+    $el->setName('dl');
 
-        // change div -> dl
-        $el->setName('dl');
+    // change p -> dd
+    $el->children['caption']->setName('dd');
 
-        // change p -> dd
-        $el->children['caption']->setName('dd');
+    // wrap img into dt
+    $dt = TexyHtml::el('dt');
+    $dt->addChild($el->children['img']);
+    $el->children['img'] = $dt;
 
-        // wrap img into dt
-        $dt = TexyHtml::el('dt');
-        $dt->addChild($el->children['img']);
-        $el->children['img'] = $dt;
-
-        return $el;
-    }
-
+    return $el;
 }
 
 
 $texy = new Texy();
-$texy->handler = new myHandler;
+$texy->addHandler('figure', 'figureHandler');
 
 // optionally set CSS classes
 /*

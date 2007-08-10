@@ -21,11 +21,9 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyTableModule extends TexyModule
 {
-    public $syntax = array('table' => TRUE);
-
     /** @var string  CSS class for odd rows */
-
     public $oddClass;
+
     /** @var string  CSS class for even rows */
     public $evenClass;
 
@@ -36,9 +34,11 @@ final class TexyTableModule extends TexyModule
 
 
 
-    public function begin()
+    public function __construct($texy)
     {
-        $this->texy->registerBlockPattern(
+        parent::__construct($texy);
+
+        $texy->registerBlockPattern(
             array($this, 'patternTable'),
             '#^(?:'.TEXY_MODIFIER_HV.'\n)?'   // .{color: red}
           . '\|.*()$#mU',                     // | ....
@@ -108,8 +108,7 @@ final class TexyTableModule extends TexyModule
         }
 
         // event listener
-        if (is_callable(array($tx->handler, 'afterTable')))
-            $tx->handler->afterTable($parser, $el, $mod);
+        $tx->invokeAfterHandlers('afterTable', array($parser, $el, $mod));
 
         return $el;
     }

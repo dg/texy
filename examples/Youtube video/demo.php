@@ -15,40 +15,37 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
-class myHandler {
+/**
+ * User handler for images
+ *
+ * @param TexyHandlerInvocation  handler invocation
+ * @param TexyImage
+ * @param TexyLink
+ * @return TexyHtml|string|FALSE
+ */
+function imageHandler($invocation, $image, $link)
+{
+    $parts = explode(':', $image->URL);
+    if (count($parts) !== 2) return $invocation->proceed();
 
+    switch ($parts[0]) {
+    case 'youtube':
+        $video = htmlSpecialChars($parts[1]);
+        $dimensions = 'width="'.($image->width ? $image->width : 425).'" height="'.($image->height ? $image->height : 350).'"';
+        $code = '<div><object '.$dimensions.'>'
+            . '<param name="movie" value="http://www.youtube.com/v/'.$video.'" /><param name="wmode" value="transparent" />'
+            . '<embed src="http://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
 
-    /**
-     * User handler for images
-     *
-     * @param TexyLineParser
-     * @param TexyImage
-     * @param TexyLink
-     * @return TexyHtml|string|FALSE|Texy::PROCEED
-     */
-    function image($parser, $image, $link)
-    {
-        $parts = explode(':', $image->URL);
-        if (count($parts) !== 2) return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
-
-        switch ($parts[0]) {
-        case 'youtube':
-            $video = htmlSpecialChars($parts[1]);
-            $dimensions = 'width="'.($image->width ? $image->width : 425).'" height="'.($image->height ? $image->height : 350).'"';
-            $code = '<div><object '.$dimensions.'>'
-                . '<param name="movie" value="http://www.youtube.com/v/'.$video.'" /><param name="wmode" value="transparent" />'
-                . '<embed src="http://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
-
-            return $parser->texy->protect($code, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
-        }
-
-        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
+        $texy = $invocation->getTexy();
+        return $texy->protect($code, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
     }
 
+    return $invocation->proceed();
 }
 
+
 $texy = new Texy();
-$texy->handler = new myHandler;
+$texy->addHandler('image', 'imageHandler');
 
 
 // processing

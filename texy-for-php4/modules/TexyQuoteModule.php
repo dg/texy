@@ -21,12 +21,12 @@ if (!class_exists('Texy')) die();
  */
 class TexyQuoteModule extends TexyModule
 {
-    var $syntax = array('blockquote' => TRUE);
 
-
-    function begin()
+    function __construct($texy)
     {
-        $this->texy->registerBlockPattern(
+        parent::__construct($texy);
+
+        $texy->registerBlockPattern(
             array($this, 'pattern'),
             '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ +|:)(\S.*)$#mU', // original
 //            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU',  // >>>>
@@ -100,8 +100,7 @@ class TexyQuoteModule extends TexyModule
         if (!count($el->children)) return FALSE;
 
         // event listener
-        if (is_callable(array($tx->handler, 'afterBlockquote')))
-            $tx->handler->afterBlockquote($parser, $el, $mod);
+        $tx->invokeAfterHandlers('afterBlockquote', array($parser, $el, $mod));
 
         return $el;
     }

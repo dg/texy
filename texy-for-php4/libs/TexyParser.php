@@ -18,15 +18,23 @@ if (!class_exists('Texy')) die();
 
 class TexyParser
 {
-    /** @var Texy  READONLY */
+    /** @var Texy  protected */
     var $texy;
 
-    /** @var TexyHtml  READONLY */
+    /** @var TexyHtml  protected */
     var $parent;
 
     /** @var array */
     var $patterns;
 
+
+    /**
+     * @return Texy
+     */
+    function getTexy()
+    {
+        return $this->texy;
+    }
 
 
     function TexyParser()  /* PHP 4 constructor */
@@ -123,7 +131,6 @@ class TexyBlockParser extends TexyParser
         $this->text = $text;
         $this->offset = 0;
         $nodes = array();
-        $hasHandler = is_callable(array($tx->handler, 'paragraph'));
 
         $pb = $this->patterns;
         if (!$pb) return array(); // nothing to do
@@ -190,12 +197,7 @@ class TexyBlockParser extends TexyParser
                         $mod->setProperties($mMod);
                     }
 
-                    // event wrapper
-                    $el = TEXY_PROCEED;
-                    if ($hasHandler) $el = $tx->handler->paragraph($this, $str, $mod);
-
-                    if ($el === TEXY_PROCEED) $el = $tx->paragraphModule->solve($str, $mod);
-
+                    $el = $tx->invokeHandlers('paragraph', $this, array($str, $mod));
                     if ($el) $nodes[] = $el;
                 }
                 continue;

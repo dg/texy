@@ -21,8 +21,6 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyTypographyModule extends TexyModule implements TexyPostLineInterface
 {
-    public $syntax = array('typography' => TRUE);
-
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
     public static $locales = array(
@@ -55,6 +53,14 @@ final class TexyTypographyModule extends TexyModule implements TexyPostLineInter
     public $locale = 'cs';
 
     private $pattern, $replace;
+
+
+
+    public function __construct($texy)
+    {
+        parent::__construct($texy);
+        $texy->allowed['typography'] = TRUE;
+    }
 
 
 

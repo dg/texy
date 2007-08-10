@@ -21,18 +21,17 @@ if (!class_exists('Texy')) die();
  */
 class TexyHorizLineModule extends TexyModule
 {
-    var $syntax = array('horizline' => TRUE);
 
-
-    function begin()
+    function __construct($texy)
     {
-        $this->texy->registerBlockPattern(
+        parent::__construct($texy);
+
+        $texy->registerBlockPattern(
             array($this, 'pattern'),
             '#^(?:\*{3,}|-{3,})\ *'.TEXY_MODIFIER.'?()$#mU',
             'horizline'
         );
     }
-
 
 
     /**
@@ -54,9 +53,7 @@ class TexyHorizLineModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $el);
 
-        // event listener
-        if (is_callable(array($tx->handler, 'afterHorizline')))
-            $tx->handler->afterHorizline($parser, $el, $mod);
+        $tx->invokeAfterHandlers('afterHorizline', array($parser, $el, $mod));
 
         return $el;
     }

@@ -24,55 +24,52 @@ if (!class_exists('fshlParser'))
 
 
 
-// this is user callback object for processing Texy events
-class myHandler
+/**
+ * User handler for code block
+ *
+ * @param TexyHandlerInvocation  handler invocation
+ * @param string  block type
+ * @param string  text to highlight
+ * @param string  language
+ * @param TexyModifier modifier
+ * @return TexyHtml
+ */
+function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 {
-
-    /**
-     * User handler for code block
-     *
-     * @param TexyBlockParser
-     * @param string  block type
-     * @param string  text to highlight
-     * @param string  language
-     * @param TexyModifier modifier
-     * @return TexyHtml
-     */
-    function block($parser, $blocktype, $content, $lang, $modifier)
-    {
-        if ($blocktype !== 'block/code')
-            return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
-
-        $texy = $parser->texy;
-
-        $lang = strtoupper($lang);
-        if ($lang == 'JAVASCRIPT') $lang = 'JS';
-        if (!in_array(
-                $lang,
-                array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
-           ) return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
-
-        $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
-
-        $content = $texy->blockModule->outdent($content);
-        $content = $parser->highlightString($lang, $content);
-        $content = $texy->protect($content);
-
-        $elPre = TexyHtml::el('pre');
-        if ($modifier) $modifier->decorate($texy, $elPre);
-        $elPre->attrs['class'] = strtolower($lang);
-
-        $elCode = $elPre->add('code', $content);
-
-        return $elPre;
+    if ($blocktype !== 'block/code') {
+        return $invocation->proceed();
     }
 
+    $texy = $invocation->getTexy();
+
+    $lang = strtoupper($lang);
+    if ($lang == 'JAVASCRIPT') $lang = 'JS';
+    if (!in_array(
+            $lang,
+            array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
+       ) {
+        return $invocation->proceed();
+    }
+
+    $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
+
+    $content = $texy->blockModule->outdent($content);
+    $content = $parser->highlightString($lang, $content);
+    $content = $texy->protect($content);
+
+    $elPre = TexyHtml::el('pre');
+    if ($modifier) $modifier->decorate($texy, $elPre);
+    $elPre->attrs['class'] = strtolower($lang);
+
+    $elCode = $elPre->add('code', $content);
+
+    return $elPre;
 }
 
 
 
 $texy = new Texy();
-$texy->handler = new myHandler;
+$texy->addHandler('block', 'blockHandler');
 
 // processing
 $text = file_get_contents('sample.texy');

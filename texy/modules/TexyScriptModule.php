@@ -21,8 +21,6 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyScriptModule extends TexyModule
 {
-    public $syntax = array('script' => TRUE);
-
     /**
      * @var callback|object  script elements handler
      * function myFunc($parser, $cmd, $args, $raw)
@@ -35,9 +33,13 @@ final class TexyScriptModule extends TexyModule
 
 
 
-    public function begin()
+    public function __construct($texy)
     {
-        $this->texy->registerLinePattern(
+        parent::__construct($texy);
+
+        $texy->addHandler('script', array($this, 'solve'));
+
+        $texy->registerLinePattern(
             array($this, 'pattern'),
             '#\{\{([^'.TEXY_MARK.']+)\}\}()#U',
             'script'
@@ -73,8 +75,8 @@ final class TexyScriptModule extends TexyModule
                 $args = preg_split('#\s*' . preg_quote($this->separator, '#') . '\s*#u', $raw);
         }
 
+        // Texy 1.x way
         if ($this->handler) {
-            // Texy 1.x way
             if (is_callable(array($this->handler, $cmd))) {
                 array_unshift($args, $parser);
                 return call_user_func_array(array($this->handler, $cmd), $args);
@@ -85,30 +87,34 @@ final class TexyScriptModule extends TexyModule
         }
 
         // Texy 2 way
-        // event wrapper
-        if (is_callable(array($this->texy->handler, 'script'))) {
-            $res = $this->texy->handler->script($parser, $cmd, $args, $raw);
-            if ($res !== Texy::PROCEED) return $res;
-        }
-
-        if ($cmd==='texy')
-            return $this->texyHandler($args);
-
-        return FALSE;
+        return $this->texy->invokeHandlers('script', $parser, array($cmd, $args, $raw));
     }
 
 
-    public function texyHandler($args)
+    /**
+     * Finish invocation
+     *
+     * @param TexyHandlerInvocation  handler invocation
+     * @param string  command
+     * @param array   arguments
+     * @param string  arguments in raw format
+     * @return TexyHtml|string|FALSE
+     */
+    public function solve($invocation, $cmd, $args, $raw)
     {
-        if (!$args) return FALSE;
+        if ($cmd === 'texy') {
+            if (!$args) return FALSE;
 
-        switch ($args[0]) {
-        case 'nofollow':
-            $this->texy->linkModule->forceNoFollow = TRUE;
-            break;
+            switch ($args[0]) {
+            case 'nofollow':
+                $this->texy->linkModule->forceNoFollow = TRUE;
+                break;
+            }
+            return '';
+
+        } else {
+            return FALSE;
         }
-
-        return '';
     }
 
 }

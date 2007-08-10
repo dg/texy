@@ -21,27 +21,26 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyHtmlModule extends TexyModule
 {
-    public $syntax = array(
-        'html/tag' => TRUE,
-        'html/comment' => TRUE,
-    );
-
 
     /** @var bool   pass HTML comments to output? */
     public $passComment = TRUE;
 
 
 
-
-    public function begin()
+    public function __construct($texy)
     {
-        $this->texy->registerLinePattern(
+        parent::__construct($texy);
+
+        $texy->addHandler('htmlComment', array($this, 'solveComment'));
+        $texy->addHandler('htmlTag', array($this, 'solveTag'));
+
+        $texy->registerLinePattern(
             array($this, 'patternTag'),
             '#<(/?)([a-z][a-z0-9_:-]*)((?:\s+[a-z0-9:-]+|=\s*"[^"'.TEXY_MARK.']*"|=\s*\'[^\''.TEXY_MARK.']*\'|=[^\s>'.TEXY_MARK.']+)*)\s*(/?)>#isu',
             'html/tag'
         );
 
-        $this->texy->registerLinePattern(
+        $texy->registerLinePattern(
             array($this, 'patternComment'),
             '#<!--([^'.TEXY_MARK.']*?)-->#is',
             'html/comment'
@@ -61,13 +60,7 @@ final class TexyHtmlModule extends TexyModule
     public function patternComment($parser, $matches)
     {
         list(, $mComment) = $matches;
-
-        if (is_callable(array($this->texy->handler, 'htmlComment'))) {
-            $res = $this->texy->handler->htmlComment($parser, $mComment);
-            if ($res !== Texy::PROCEED) return $res;
-        }
-
-        return $this->solveComment($mComment);
+        return $this->texy->invokeHandlers('htmlComment', $parser, array($mComment));
     }
 
 
@@ -113,12 +106,7 @@ final class TexyHtmlModule extends TexyModule
 
         // end tag? we are finished
         if (!$isStart) {
-            if (is_callable(array($tx->handler, 'htmlTag'))) {
-                $res = $tx->handler->htmlTag($parser, $el, FALSE);
-                if ($res !== Texy::PROCEED) return $res;
-            }
-
-            return $this->solveTag($el, FALSE);
+            return $tx->invokeHandlers('htmlTag', $parser, array($el, FALSE));
         }
 
         // parse attributes
@@ -138,12 +126,7 @@ final class TexyHtmlModule extends TexyModule
             else $el->attrs[$key] = Texy::unescapeHtml($value);
         }
 
-        if (is_callable(array($tx->handler, 'htmlTag'))) {
-            $res = $tx->handler->htmlTag($parser, $el, TRUE, $isEmpty);
-            if ($res !== Texy::PROCEED) return $res;
-        }
-
-        return $this->solveTag($el, TRUE, $isEmpty);
+        return $tx->invokeHandlers('htmlTag', $parser, array($el, TRUE, $isEmpty));
     }
 
 
@@ -152,12 +135,13 @@ final class TexyHtmlModule extends TexyModule
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param TexyHtml  element
      * @param bool      is start tag?
      * @param bool      is empty?
      * @return string|FALSE
      */
-    public function solveTag(TexyHtml $el, $isStart, $forceEmpty = NULL)
+    public function solveTag($invocation, TexyHtml $el, $isStart, $forceEmpty = NULL)
     {
         $tx = $this->texy;
 
@@ -275,10 +259,11 @@ final class TexyHtmlModule extends TexyModule
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param string
      * @return string
      */
-    public function solveComment($content)
+    public function solveComment($invocation, $content)
     {
         if (!$this->passComment) return '';
 

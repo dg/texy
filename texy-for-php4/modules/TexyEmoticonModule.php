@@ -21,8 +21,6 @@ if (!class_exists('Texy')) die();
  */
 class TexyEmoticonModule extends TexyModule
 {
-    var $syntax = array('emoticon' => FALSE);
-
     /** @var array  supported emoticons and image files */
     var $icons = array (
         ':-)'  =>  'smile.gif',
@@ -46,6 +44,14 @@ class TexyEmoticonModule extends TexyModule
     /** @var string  physical location of images on server (default value is $texy->imageModule->fileRoot) */
     var $fileRoot;
 
+
+
+    function __construct($texy)
+    {
+        parent::__construct($texy);
+        $texy->allowed['emoticon'] = FALSE;
+        $texy->addHandler('emoticon', array($this, 'solve'));
+    }
 
 
     function begin()
@@ -86,13 +92,7 @@ class TexyEmoticonModule extends TexyModule
         {
             if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
-                // event wrapper
-                if (is_callable(array($tx->handler, 'emoticon'))) {
-                    $res = $tx->handler->emoticon($parser, $emoticon, $match);
-                    if ($res !== TEXY_PROCEED) return $res;
-                }
-
-                return $this->solve($emoticon, $match);
+                return $tx->invokeHandlers('emoticon', $parser, array($emoticon, $match));
             }
         }
 
@@ -104,11 +104,12 @@ class TexyEmoticonModule extends TexyModule
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param string
      * @param string
      * @return TexyHtml|FALSE
      */
-    function solve($emoticon, $raw)
+    function solve($invocation, $emoticon, $raw)
     {
         $tx = $this->texy;
         $file = $this->icons[$emoticon];

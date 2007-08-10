@@ -26,6 +26,13 @@ class TexyParagraphModule extends TexyModule
 
 
 
+    function __construct($texy)
+    {
+        parent::__construct($texy);
+        $texy->addHandler('paragraph', array($this, 'solve'));
+    }
+
+
     function begin()
     {
         $this->mode = TRUE;
@@ -36,11 +43,12 @@ class TexyParagraphModule extends TexyModule
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param string
      * @param TexyModifier
      * @return TexyHtml|FALSE
      */
-    function solve($content, $mod)
+    function solve($invocation, $content, $mod)
     {
         $tx = $this->texy;
 

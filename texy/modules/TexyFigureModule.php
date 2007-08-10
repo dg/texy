@@ -21,8 +21,6 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyFigureModule extends TexyModule
 {
-    public $syntax = array('figure' => TRUE);
-
     /** @var string  non-floated box CSS class */
     public $class = 'figure';
 
@@ -36,9 +34,13 @@ final class TexyFigureModule extends TexyModule
     public $widthDelta = 10;
 
 
-    public function begin()
+    public function __construct($texy)
     {
-        $this->texy->registerBlockPattern(
+        parent::__construct($texy);
+
+        $texy->addHandler('figure', array($this, 'solve'));
+
+        $texy->registerBlockPattern(
             array($this, 'pattern'),
             '#^'.TEXY_IMAGE.TEXY_LINK_N.'?? +\*\*\* +(.*)'.TEXY_MODIFIER_H.'?()$#mUu',
             'figure'
@@ -80,13 +82,7 @@ final class TexyFigureModule extends TexyModule
             }
         } else $link = NULL;
 
-        // event wrapper
-        if (is_callable(array($tx->handler, 'figure'))) {
-            $res = $tx->handler->figure($parser, $image, $link, $mContent, $mod);
-            if ($res !== Texy::PROCEED) return $res;
-        }
-
-        return $this->solve($image, $link, $mContent, $mod);
+        return $tx->invokeHandlers('figure', $parser, array($image, $link, $mContent, $mod));
     }
 
 
@@ -94,20 +90,21 @@ final class TexyFigureModule extends TexyModule
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param TexyImage
      * @param TexyLink
      * @param string
      * @param TexyModifier
      * @return TexyHtml|FALSE
      */
-    public function solve(TexyImage $image, $link, $content, $mod)
+    public function solve($invocation, TexyImage $image, $link, $content, $mod)
     {
         $tx = $this->texy;
 
         $hAlign = $image->modifier->hAlign;
         $mod->hAlign = $image->modifier->hAlign = NULL;
 
-        $elImg = $tx->imageModule->solve($image, $link); // returns TexyHtml or false!
+        $elImg = $tx->imageModule->solve(NULL, $image, $link); // returns TexyHtml or false!
         if (!$elImg) return FALSE;
 
         $el = TexyHtml::el('div');

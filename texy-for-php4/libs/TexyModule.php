@@ -24,9 +24,6 @@ class TexyModule /* abstract  */
     /** @var Texy */
     var $texy; /* protected */
 
-    /** @var array  list of syntax to allow */
-    var $syntax = array();
-
     /** @var string */
     var $interface;
 

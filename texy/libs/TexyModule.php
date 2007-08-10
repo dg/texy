@@ -24,9 +24,6 @@ abstract class TexyModule
     /** @var Texy */
     protected $texy;
 
-    /** @var array  list of syntax to allow */
-    public $syntax = array();
-
 
 
     public function __construct($texy)

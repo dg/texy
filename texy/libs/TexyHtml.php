@@ -28,7 +28,7 @@ if (!class_exists('Texy', FALSE)) die();
  *
  * @property mixed element's attributes
  */
-class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
+class TexyHtml
 {
     /** @var string  element's name */
     private $name;
@@ -449,16 +449,4 @@ class TexyHtml implements ArrayAccess // TODO: use ArrayAccess for children
         $parser->parse($s);
     }
 
-
-
-
-    // TODO: REMOVE
-    final public function offsetGet($i)
-    {
-        trigger_error('Manipulace s atributy pres $el[\'attr\']=VALUE je od revize 133 zrusena', E_USER_WARNING);
-    }
-
-    final public function offsetSet($i, $value) { $this->offsetGet(NULL); }
-    final public function offsetExists($i) { $this->offsetGet(NULL); }
-    final public function offsetUnset($i) { $this->offsetGet(NULL); }
 }

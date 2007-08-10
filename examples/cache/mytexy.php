@@ -2,7 +2,7 @@
 
 /**
  * TEXY! CACHE DEMO
- * --------------------------------------
+ * ----------------
  *
  * @author   David Grudl aka -dgx- (http://www.dgx.cz)
  * @version  $Revision$ $Date$

@@ -25,10 +25,6 @@ define('TEXY_HEADING_FIXED', 2);
  */
 class TexyHeadingModule extends TexyModule
 {
-// fixed-leveling
-
-    var $syntax = array('heading/surrounded' => TRUE, 'heading/underlined' => TRUE);
-
     /** @var string  textual content of first heading */
     var $title;
 
@@ -70,21 +66,29 @@ class TexyHeadingModule extends TexyModule
     );
 
 
-    function begin()
+    function __construct($texy)
     {
-        $this->texy->registerBlockPattern(
+        parent::__construct($texy);
+
+        $texy->addHandler('heading', array($this, 'solve'));
+
+        $texy->registerBlockPattern(
             array($this, 'patternUnderline'),
             '#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
           . '(\#{3,}|\*{3,}|={3,}|-{3,})$#mU',
             'heading/underlined'
         );
 
-        $this->texy->registerBlockPattern(
+        $texy->registerBlockPattern(
             array($this, 'patternSurround'),
             '#^(\#{2,}+|={2,}+)(.+)'.TEXY_MODIFIER_H.'?()$#mU',
             'heading/surrounded'
         );
+    }
 
+
+    function begin()
+    {
         $this->title = NULL;
         $this->usedID = array();
 
@@ -117,14 +121,7 @@ class TexyHeadingModule extends TexyModule
 
         $mod = new TexyModifier($mMod);
         $level = $this->levels[$mLine[0]];
-
-        // event wrapper
-        if (is_callable(array($this->texy->handler, 'heading'))) {
-            $res = $this->texy->handler->heading($parser, $level, $mContent, $mod, FALSE);
-            if ($res !== TEXY_PROCEED) return $res;
-        }
-
-        return $this->solve($level, $mContent, $mod, FALSE);
+        return $this->texy->invokeHandlers('heading', $parser, array($level, $mContent, $mod, FALSE));
     }
 
 
@@ -149,14 +146,7 @@ class TexyHeadingModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $level = 7 - min(7, max(2, strlen($mLine)));
         $mContent = rtrim($mContent, $mLine[0] . ' ');
-
-        // event wrapper
-        if (is_callable(array($this->texy->handler, 'heading'))) {
-            $res = $this->texy->handler->heading($parser, $level, $mContent, $mod, TRUE);
-            if ($res !== TEXY_PROCEED) return $res;
-        }
-
-        return $this->solve($level, $mContent, $mod, TRUE);
+        return $this->texy->invokeHandlers('heading', $parser, array($level, $mContent, $mod, TRUE));
     }
 
 
@@ -164,13 +154,14 @@ class TexyHeadingModule extends TexyModule
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param int
      * @param string
      * @param TexyModifier
      * @param bool
      * @return TexyHtml
      */
-    function solve($level, $content, $mod, $isSurrounded)
+    function solve($invocation, $level, $content, $mod, $isSurrounded)
     {
         $tx = $this->texy;
         $el = new TexyHeadingElement;

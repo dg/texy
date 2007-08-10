@@ -20,35 +20,30 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 
-class myHandler {
-
-    /**
-     * User handler for images
-     *
-     * @param TexyLineParser
-     * @param TexyImage
-     * @param TexyLink
-     * @return TexyHtml|string|FALSE|Texy::PROCEED
-     */
-    function image($parser, $image, $link)
+/**
+ * User handler for images
+ *
+ * @param TexyHandlerInvocation  handler invocation
+ * @param TexyImage
+ * @param TexyLink
+ * @return TexyHtml|string|FALSE
+ */
+function imageHandler($invocation, $image, $link)
+{
+    if ($image->URL == 'user')  // accepts only [* user *]
     {
-        if ($image->URL == 'user')  // accepts only [* user *]
-        {
-            $image->URL = 'image.gif'; // image URL
-            $image->overURL = 'image-over.gif'; // onmouseover image
-            $image->modifier->title = 'Texy! logo';
-            if ($link) $link->URL = 'big.gif'; // linked image
-        }
-
-        return TEXY_PROCEED; // or Texy::PROCEED in PHP 5
-        // or return $texy->imageModule->solve($image, $link);
+        $image->URL = 'image.gif'; // image URL
+        $image->overURL = 'image-over.gif'; // onmouseover image
+        $image->modifier->title = 'Texy! logo';
+        if ($link) $link->URL = 'big.gif'; // linked image
     }
 
+    return $invocation->proceed();
 }
 
 
 $texy = new Texy();
-$texy->handler = new myHandler;
+$texy->addHandler('image', 'imageHandler');
 $texy->imageModule->root       = 'imagesdir/';       // "in-line" images root
 $texy->imageModule->linkedRoot = 'imagesdir/big/';   // "linked" images root
 $texy->imageModule->leftClass  = 'my-left-class';    // left-floated image modifier

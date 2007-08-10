@@ -2,7 +2,7 @@
 
 /**
  * TEXY! CACHE DEMO
- * --------------------------------------
+ * ----------------
  *
  * This demo shows how cache Texy! output and
  * demonstrates advantages of inheriting from base Texy object

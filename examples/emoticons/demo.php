@@ -21,6 +21,7 @@ $texy = new Texy();
 
 // EMOTICONS ARE DISABLED BY DEFAULT!
 $texy->allowed['emoticon'] = TRUE;
+
 // configure it
 $texy->emoticonModule->class = 'smilie';
 $texy->emoticonModule->icons[':oops:'] = 'redface.gif';  // user-defined emoticon

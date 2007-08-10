@@ -21,11 +21,6 @@ if (!class_exists('Texy')) die();
  */
 class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
 {
-    var $syntax = array(
-        'image' => TRUE,
-        'image/definition' => TRUE,
-    );
-
     var $interface = array('TexyPreBlockInterface'=>1);
 
     /** @var string  root of relative images (http) */
@@ -62,14 +57,13 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
             // physical location on server
             $this->fileRoot = dirname($_SERVER['SCRIPT_FILENAME']) . '/' . $this->root;
         }
-    }
 
+        $texy->allowed['image/definition'] = TRUE;
 
+        $texy->addHandler('image', array($this, 'solve'));
 
-    function begin()
-    {
         // [*image*]:LINK
-        $this->texy->registerLinePattern(
+        $texy->registerLinePattern(
             array($this, 'patternImage'),
             '#'.TEXY_IMAGE.TEXY_LINK_N.'??()#Uu',
             'image'
@@ -149,13 +143,7 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
             }
         } else $link = NULL;
 
-        // event wrapper
-        if (is_callable(array($tx->handler, 'image'))) {
-            $res = $tx->handler->image($parser, $image, $link);
-            if ($res !== TEXY_PROCEED) return $res;
-        }
-
-        return $this->solve($image, $link);
+        return $tx->invokeHandlers('image', $parser, array($image, $link));
     }
 
 
@@ -241,11 +229,12 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
     /**
      * Finish invocation
      *
+     * @param TexyHandlerInvocation  handler invocation
      * @param TexyImage
      * @param TexyLink
      * @return TexyHtml|FALSE
      */
-    function solve(/*TexyImage*/ $image, $link)
+    function solve($invocation, /*TexyImage*/ $image, $link)
     {
         if ($image->URL == NULL) return FALSE;
 
@@ -309,7 +298,7 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
 
         $tx->summary['images'][] = $el->attrs['src'];
 
-        if ($link) return $tx->linkModule->solve($link, $el);
+        if ($link) return $tx->linkModule->solve(NULL, $link, $el);
 
         return $el;
     }
