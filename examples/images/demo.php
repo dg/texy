@@ -38,7 +38,7 @@ function imageHandler($invocation, $image, $link)
         if ($link) $link->URL = 'big.gif'; // linked image
     }
 
-    return $invocation->proceed();
+    return $invocation->proceed($image, $link);
 }
 
 

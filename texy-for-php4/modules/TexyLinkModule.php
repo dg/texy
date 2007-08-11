@@ -152,7 +152,7 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
             return $tx->invokeHandlers('newReference', $parser, array($name));
         }
 
-        $link->type = TexyLink_BRACKET;
+        $link->type = TEXY_LINK_BRACKET;
 
         if ($link->label != '') {  // NULL or ''
             // prevent deadlock
@@ -255,17 +255,17 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
     function factoryLink($dest, $mMod, $label)
     {
         $tx = $this->texy;
-        $type = TexyLink_COMMON;
+        $type = TEXY_LINK_COMMON;
 
         // [ref]
         if (strlen($dest)>1 && $dest{0} === '[' && $dest{1} !== '*') {
-            $type = TexyLink_BRACKET;
+            $type = TEXY_LINK_BRACKET;
             $dest = substr($dest, 1, -1);
             $link = $this->getReference($dest);
 
         // [* image *]
         } elseif (strlen($dest)>1 && $dest{0} === '[' && $dest{1} === '*') {
-            $type = TexyLink_IMAGE;
+            $type = TEXY_LINK_IMAGE;
             $dest = trim(substr($dest, 2, -2));
             $image = $tx->imageModule->getReference($dest);
             if ($image) {
@@ -280,7 +280,7 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
         }
 
         if (strpos($link->URL, '%s') !== FALSE) {
-            $link->URL = str_replace('%s', urlencode($tx->_toText($label)), $link->URL);
+            $link->URL = str_replace('%s', urlencode($tx->stringToText($label)), $link->URL);
         }
         $link->modifier->setProperties($mMod);
         $link->type = $type;
@@ -317,7 +317,7 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
             $link->modifier->decorate($tx, $el);
         }
 
-        if ($link->type === TexyLink_IMAGE) {
+        if ($link->type === TEXY_LINK_IMAGE) {
             // image
             $el->attrs['href'] = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
             $el->attrs['onclick'] = $this->imageOnClick;
@@ -446,9 +446,9 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
 
 
     /** @see $type */
-define('TexyLink_COMMON',  1);
-define('TexyLink_BRACKET', 2);
-define('TexyLink_IMAGE', 3);
+define('TEXY_LINK_COMMON',  1);
+define('TEXY_LINK_BRACKET', 2);
+define('TEXY_LINK_IMAGE', 3);
 
 class TexyLink
 {
@@ -462,7 +462,7 @@ class TexyLink
     var $modifier;
 
     /** @var int  how was link created? */
-    var $type = TexyLink_COMMON;
+    var $type = TEXY_LINK_COMMON;
 
     /** @var string  optional label, used by references */
     var $label;

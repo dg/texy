@@ -54,6 +54,9 @@ class TexyHtml
     /** @var string  element's name */
     var $name;
 
+    /** @var bool  is element empty? */
+    var $isEmpty;
+
     /** @var array  element's attributes */
     var $attrs = array();
 
@@ -63,9 +66,6 @@ class TexyHtml
      *   string - content as string (text-node)
      */
     var $children;
-
-    /** @var bool  is element empty? */
-    var $isEmpty;
 
     /**
      * Static factory
@@ -77,8 +77,9 @@ class TexyHtml
     {
         $el = new TexyHtml;
 
-        if ($name !== NULL)
+        if ($name !== NULL) {
             $el->setName($name);
+        }
 
         if ($attrs !== NULL) {
             if (!is_array($attrs)) {
@@ -141,7 +142,10 @@ class TexyHtml
      */
     function isEmpty($value = NULL)
     {
-        if (is_bool($value)) $this->isEmpty = $value;
+        if (is_bool($value)) {
+            $this->isEmpty = $value;
+        }
+
         return $this->isEmpty;
     }
 
@@ -153,9 +157,9 @@ class TexyHtml
      */
     function setText($text)
     {
-        if ($text === NULL)
+        if ($text === NULL) {
             $text = '';
-        elseif (!is_scalar($text)) {
+        } elseif (!is_scalar($text)) {
             trigger_error('Content must be scalar.', E_USER_WARNING);
             return FALSE;
         }
@@ -172,7 +176,9 @@ class TexyHtml
      */
     function getText()
     {
-        if (is_array($this->children)) return FALSE;
+        if (is_array($this->children)) {
+            return FALSE;
+        }
 
         return $this->children;
     }
@@ -198,8 +204,9 @@ class TexyHtml
      */
     function getChild($index)
     {
-        if (isset($this->children[$index]))
+        if (isset($this->children[$index])) {
             return $this->children[$index];
+        }
 
         return NULL;
     }
@@ -215,7 +222,9 @@ class TexyHtml
     {
         $child = new TexyHtml;
         $child->setName($name);
-        if ($text !== NULL) $child->setText($text);
+        if ($text !== NULL) {
+            $child->setText($text);
+        }
         return $this->children[] = $child;
     }
 
@@ -264,21 +273,24 @@ class TexyHtml
 
 
     /**
-     * Renders element's start tag, content and end tag
+     * Renders element's start tag, content and end tag to internal string representation
+     * @param Texy
      * @return string
      */
-    function export($texy)
+    function toString($texy)
     {
         $ct = $this->getContentType();
         $s = $texy->protect($this->startTag(), $ct);
 
         // empty elements are finished now
-        if ($this->isEmpty) return $s;
+        if ($this->isEmpty) {
+            return $s;
+        }
 
         // add content
         if (is_array($this->children)) {
             foreach ($this->children as $value)
-                $s .= $value->export($texy);
+                $s .= $value->toString($texy);
 
         } else {
             $s .= $this->children;
@@ -290,12 +302,36 @@ class TexyHtml
 
 
     /**
+     * Renders to final HTML
+     * @param Texy
+     * @return string
+     */
+    function toHtml($texy)
+    {
+        return $texy->stringToHtml($this->toString($texy));
+    }
+
+
+    /**
+     * Renders to final text
+     * @param Texy
+     * @return string
+     */
+    function toText($texy)
+    {
+        return $texy->stringToText($this->toString($texy));
+    }
+
+
+    /**
      * Returns element's start tag
      * @return string
      */
     function startTag()
     {
-        if (!$this->name) return '';
+        if (!$this->name) {
+            return '';
+        }
 
         $s = '<' . $this->name;
 

@@ -282,10 +282,11 @@ class TexyHtml
 
 
     /**
-     * Renders element's start tag, content and end tag
+     * Renders element's start tag, content and end tag to internal string representation
+     * @param Texy
      * @return string
      */
-    final public function export($texy)
+    final public function toString(Texy $texy)
     {
         $ct = $this->getContentType();
         $s = $texy->protect($this->startTag(), $ct);
@@ -298,7 +299,7 @@ class TexyHtml
         // add content
         if (is_array($this->children)) {
             foreach ($this->children as $value)
-                $s .= $value->export($texy);
+                $s .= $value->toString($texy);
 
         } else {
             $s .= $this->children;
@@ -306,6 +307,28 @@ class TexyHtml
 
         // add end tag
         return $s . $texy->protect($this->endTag(), $ct);
+    }
+
+
+    /**
+     * Renders to final HTML
+     * @param Texy
+     * @return string
+     */
+    final public function toHtml(Texy $texy)
+    {
+        return $texy->stringToHtml($this->toString($texy));
+    }
+
+
+    /**
+     * Renders to final text
+     * @param Texy
+     * @return string
+     */
+    final public function toText(Texy $texy)
+    {
+        return $texy->stringToText($this->toString($texy));
     }
 
 

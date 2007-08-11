@@ -144,6 +144,8 @@ class Texy
     /** @var bool  use XHTML syntax? */
     public $xhtml = TRUE;
 
+    /** @var bool */
+    static public $noticeShowed = FALSE;
 
     public
         /** @var TexyScriptModule */
@@ -215,11 +217,12 @@ class Texy
     /** @var array of TexyPreBlockInterface for internal parser usage */
     public $_preBlockModules;
 
-    /** @var int internal state (0=new, 1=parsing, 2=parsed) */
-    private $state = 0;
+    /** @var bool */
+    private $processing;
 
     /** @var array of events and registered handlers */
     private $handlers = array();
+
 
 
 
@@ -327,7 +330,6 @@ class Texy
 
     /**
      * Convert Texy! document in (X)HTML code
-     * This is shortcut for parse() & toHtml()
      *
      * @param string   input text
      * @param bool     is block or single line?
@@ -335,8 +337,71 @@ class Texy
      */
     public function process($text, $singleLine = FALSE)
     {
-        $this->parse($text, $singleLine);
-        return $this->toHtml();
+        if ($this->processing) {
+            throw new Exception('Processing is in progress yet.');
+        }
+
+        // initialization
+        $this->marks = array();
+        $this->processing = TRUE;
+
+        // speed-up
+        if (is_array($this->allowedClasses)) $this->_classes = array_flip($this->allowedClasses);
+        else $this->_classes = $this->allowedClasses;
+
+        if (is_array($this->allowedStyles)) $this->_styles = array_flip($this->allowedStyles);
+        else $this->_styles = $this->allowedStyles;
+
+        // convert to UTF-8 (and check source encoding)
+        $text = TexyUtf::toUtf($text, $this->encoding);
+
+        // standardize line endings and spaces
+        $text = self::normalize($text);
+
+        // replace tabs with spaces
+        while (strpos($text, "\t") !== FALSE)
+            $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
+
+        // init modules
+        $this->_preBlockModules = array();
+        foreach ($this->modules as $module) {
+            $module->begin();
+
+            if ($module instanceof TexyPreBlockInterface) $this->_preBlockModules[] = $module;
+        }
+
+        // select patterns
+        $this->_linePatterns = $this->linePatterns;
+        $this->_blockPatterns = $this->blockPatterns;
+        foreach ($this->_linePatterns as $pattern => $foo) {
+            if (empty($this->allowed[$pattern])) unset($this->_linePatterns[$pattern]);
+        }
+        foreach ($this->_blockPatterns as $pattern => $foo) {
+            if (empty($this->allowed[$pattern])) unset($this->_blockPatterns[$pattern]);
+        }
+
+        // parse Texy! document into internal DOM structure
+        $this->DOM = TexyHtml::el();
+        if ($singleLine)
+            $this->DOM->parseLine($this, $text);
+        else
+            $this->DOM->parseBlock($this, $text, TRUE);
+
+        // user after handler
+        $this->invokeAfterHandlers('afterParse', array($this, $this->DOM, $singleLine));
+
+        // converts internal DOM structure to final HTML code
+        $html = $this->DOM->toHtml($this);
+
+        // this notice should remain
+        if (!self::$noticeShowed) {
+            $html .= "\n<!-- by Texy2! -->";
+            self::$noticeShowed = TRUE;
+        }
+
+        $this->processing = FALSE;
+
+        return TexyUtf::utf2html($html, $this->encoding);
     }
 
 
@@ -361,121 +426,27 @@ class Texy
     }
 
 
-    /**
-     * Converts Texy! document into internal DOM structure ($this->DOM)
-     * Before converting it normalize text and call all pre-processing modules
-     *
-     * @param string
-     * @param bool     is block or single line?
-     * @return void
-     */
-    public function parse($text, $singleLine = FALSE)
-    {
-        if ($this->state === 1)
-            throw new Exception('Parsing is in progress yet.');
-
-         // initialization
-        $this->marks = array();
-        $this->state = 1;
-
-        // speed-up
-        if (is_array($this->allowedClasses)) $this->_classes = array_flip($this->allowedClasses);
-        else $this->_classes = $this->allowedClasses;
-
-        if (is_array($this->allowedStyles)) $this->_styles = array_flip($this->allowedStyles);
-        else $this->_styles = $this->allowedStyles;
-
-        // convert to UTF-8 (and check source encoding)
-        $text = TexyUtf::toUtf($text, $this->encoding);
-
-        // standardize line endings and spaces
-        $text = self::normalize($text);
-
-        // replace tabs with spaces
-        while (strpos($text, "\t") !== FALSE)
-            $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
-
-
-        // init modules
-        $this->_preBlockModules = array();
-        foreach ($this->modules as $module) {
-            $module->begin();
-
-            if ($module instanceof TexyPreBlockInterface) $this->_preBlockModules[] = $module;
-        }
-
-        // select patterns
-        $this->_linePatterns = $this->linePatterns;
-        $this->_blockPatterns = $this->blockPatterns;
-        foreach ($this->_linePatterns as $pattern => $foo) {
-            if (empty($this->allowed[$pattern])) unset($this->_linePatterns[$pattern]);
-        }
-        foreach ($this->_blockPatterns as $pattern => $foo) {
-            if (empty($this->allowed[$pattern])) unset($this->_blockPatterns[$pattern]);
-        }
-
-        // parse!
-        $this->DOM = TexyHtml::el();
-        if ($singleLine)
-            $this->DOM->parseLine($this, $text);
-        else
-            $this->DOM->parseBlock($this, $text, TRUE);
-
-        // user handler
-        $this->invokeAfterHandlers('afterParse', array($this, $this->DOM, $singleLine));
-
-        $this->state = 2;
-    }
-
-
-
-
 
     /**
-     * Converts internal DOM structure to final HTML code
-     * @return string
-     */
-    public function toHtml()
-    {
-        if ($this->state !== 2) throw new Exception('Call $texy->parse() first.');
-
-        $html = $this->_toHtml( $this->DOM->export($this) );
-
-        // this notice should remain!
-        if (!defined('TEXY_NOTICE_SHOWED')) {
-            $html .= "\n<!-- by Texy2! -->";
-            define('TEXY_NOTICE_SHOWED', TRUE);
-        }
-
-        $html = TexyUtf::utf2html($html, $this->encoding);
-
-        return $html;
-    }
-
-
-
-    /**
-     * Converts internal DOM structure to pure Text
+     * Converts DOM structure to pure text
      * @return string
      */
     public function toText()
     {
-        if ($this->state !== 2) throw new Exception('Call $texy->parse() first.');
+        if (!$this->DOM) {
+        	throw new Exception('Call $texy->process() first.');
+        }
 
-        $text = $this->_toText( $this->DOM->export($this) );
-
-        $text = TexyUtf::utfTo($text, $this->encoding);
-
-        return $text;
+        return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
     }
 
 
 
     /**
-     * Converts internal DOM structure to final HTML code in UTF-8
+     * Converts internal string representation to final HTML code in UTF-8
      * @return string
      */
-    final public function _toHtml($s)
+    final public function stringToHtml($s)
     {
         // decode HTML entities to UTF-8
         $s = self::unescapeHtml($s);
@@ -510,14 +481,14 @@ class Texy
 
 
     /**
-     * Converts internal DOM structure to final HTML code in UTF-8
+     * Converts internal string representation to final HTML code in UTF-8
      * @return string
      */
-    final public function _toText($s)
+    final public function stringToText($s)
     {
         $save = $this->cleaner->lineWrap;
         $this->cleaner->lineWrap = FALSE;
-        $s = $this->_toHtml( $s );
+        $s = $this->stringToHtml( $s );
         $this->cleaner->lineWrap = $save;
 
         // remove tags
@@ -563,17 +534,8 @@ class Texy
     final public function invokeHandlers($event, $parser, $args)
     {
         if (!isset($this->handlers[$event])) return FALSE;
-        $handlers = $this->handlers[$event];
 
-        // speed-up optimization
-
-        if (count($handlers) === 1) {
-            array_unshift($args, NULL);
-            return call_user_func_array($handlers[0], $args);
-        }
-
-
-        $invocation = new TexyHandlerInvocation($handlers, $parser, $args);
+        $invocation = new TexyHandlerInvocation($this->handlers[$event], $parser, $args);
         return $invocation->proceed();
     }
 

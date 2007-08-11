@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 156
+- nové API metody TexyHtml::toText() & TexyHtml::toHtml() pro export částí DOM
+
 rev. 155
 - nový systém handlerů. Odstraněno `$texy->handler` a konstanta `Texy::PROCEED`. Přidáno `$texy::addHandler()`. Více ve "fóru":http://forum.texy.info/viewtopic.php?pid=1871
 
@@ -291,11 +294,11 @@ Verze 1.0rc5
 - CHG: **pozor:** změny názvů pro callbacky:
    - `$texy->blockModule->codeHandler` namísto `$texy->blockModule->userFunction`
    - `$texy->referenceHandler` namísto `$texy->userReferences`
-- CHG: **pozor:** modifikátor vždy musí předcházet mezera (demo:/cs/try/32wpp)
-- NEW: podpora Texy komentářů &sect;&sect; (demo:/cs/try/61quw)
-- NEW: rychlé odkazy `test :[url]` (demo:/cs/try/anq0p)
-- NEW: dokonalejší přeformátování HTML (demo:/cs/try/icsh4, fórum:http://forum.texy.info/viewtopic.php?id=105)
-- NEW: vkládání externích dat jako `{{ getPrice(produkt) }}` (fórum:http://forum.texy.info/viewtopic.php?id=128) *(sponzorem vývoje této funkce je společnost "Internet Mall":www.MALL.cz, a.s.)*
+- CHG: **pozor:** modifikátor vždy musí předcházet mezera ("demo":/cs/try/32wpp)
+- NEW: podpora Texy komentářů &sect;&sect; ("demo":/cs/try/61quw)
+- NEW: rychlé odkazy `test :[url]` ("demo":/cs/try/anq0p)
+- NEW: dokonalejší přeformátování HTML ("demo":/cs/try/icsh4, "fórum":http://forum.texy.info/viewtopic.php?id=105)
+- NEW: vkládání externích dat jako `{{ getPrice(produkt) }}` ("fórum":http://forum.texy.info/viewtopic.php?id=128) *(sponzorem vývoje této funkce je společnost "Internet Mall":www.MALL.cz, a.s.)*
 
 
 

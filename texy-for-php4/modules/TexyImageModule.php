@@ -137,7 +137,7 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
             if ($mLink === ':') {
                 $link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
                 $link->raw = ':';
-                $link->type = TexyLink_IMAGE;
+                $link->type = TEXY_LINK_IMAGE;
             } else {
                 $link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
             }

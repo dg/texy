@@ -130,7 +130,7 @@ final class TexyBlockModule extends TexyModule implements TexyPreBlockInterface
             $el = TexyHtml::el();
             if ($param === 'line') $el->parseLine($tx, $s);
             else $el->parseBlock($tx, $s);
-            $s = $tx->_toHtml( $el->export($tx) );
+            $s = $el->toHtml($tx);
             $blocktype = 'block/code'; $param = 'html'; // to be continue (as block/code)
         }
 

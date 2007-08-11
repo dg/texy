@@ -328,7 +328,7 @@ class TexyLineParser extends TexyParser
             );
 
             if (is_a($res, 'TexyHtml')) {
-                $res = $res->export($tx);
+                $res = $res->toString($tx);
             } elseif ($res === FALSE) {
                 $arrPos[$minKey] = -2;
                 continue;

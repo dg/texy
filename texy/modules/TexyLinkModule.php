@@ -277,7 +277,7 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
         }
 
         if (strpos($link->URL, '%s') !== FALSE) {
-            $link->URL = str_replace('%s', urlencode($tx->_toText($label)), $link->URL);
+            $link->URL = str_replace('%s', urlencode($tx->stringToText($label)), $link->URL);
         }
         $link->modifier->setProperties($mMod);
         $link->type = $type;
