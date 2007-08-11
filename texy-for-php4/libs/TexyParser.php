@@ -22,7 +22,7 @@ class TexyParser
     var $texy;
 
     /** @var TexyHtml  protected */
-    var $parent;
+    var $parentEl;
 
     /** @var array */
     var $patterns;
@@ -63,8 +63,8 @@ class TexyBlockParser extends TexyParser
     /** @var int */
     var $offset; /* private */
 
-    /** @var bool */
-    var $topLevel = FALSE;
+    /** @var TexyBlockParser */
+    var $parentParser;
 
 
     /**
@@ -74,7 +74,7 @@ class TexyBlockParser extends TexyParser
     function __construct(/*Texy*/ $texy, $element = NULL)
     {
         $this->texy = $texy;
-        $this->parent = $element;
+        $this->parentEl = $element;
         $this->patterns = $texy->getBlockPatterns();
     }
 
@@ -123,9 +123,9 @@ class TexyBlockParser extends TexyParser
         $tx = $this->texy;
 
         // pre-processing
-        foreach ($tx->_preBlockModules as $module)
-            $text = $module->preBlock($text, $this->topLevel);
-
+        foreach ($tx->_preBlockModules as $module) {
+            $text = $module->preBlock($text, $this->parentParser === TRUE);
+        }
 
         // parser initialization
         $this->text = $text;
@@ -179,14 +179,15 @@ class TexyBlockParser extends TexyParser
                 $this->offset = $next;
 
                 if ($tx->paragraphModule->mode)
-                    $parts = preg_split('#(\n{2,})#', $str);
+                    $parts = preg_split('#(\n{2,})#', $str, -1, PREG_SPLIT_NO_EMPTY);
                 else
-                    $parts = preg_split('#(\n(?! )|\n{2,})#', $str);
+                    $parts = preg_split('#(\n(?! )|\n{2,})#', $str, -1, PREG_SPLIT_NO_EMPTY);
 
 
                 foreach ($parts as $str)
                 {
                     $str = trim($str);
+                    if ($str === '') continue;
 
                     // try to find modifier
                     $mod = new TexyModifier;
@@ -200,20 +201,22 @@ class TexyBlockParser extends TexyParser
                     $el = $tx->invokeHandlers('paragraph', $this, array($str, $mod));
                     if ($el) $nodes[] = $el;
                 }
-                continue;
+
+                if ($minKey === NULL) break;
             }
 
             $px = $pb[$minKey];
-            $this->offset = $arrPos[$minKey] + strlen($arrMatches[$minKey][0]) + 1;   // 1 = \n
+            $start = $arrPos[$minKey];
+            $this->offset = $start + strlen($arrMatches[$minKey][0]) + 1;   // 1 = \n
 
             $res = call_user_func_array(
                 $px['handler'],
                 array($this, $arrMatches[$minKey], $minKey)
             );
 
-            if ($res === FALSE || $this->offset <= $arrPos[$minKey]) { // module rejects text
+            if ($res === FALSE || $this->offset <= $start) { // module rejects text
                 // nemelo by se stat, rozdeli generic block
-                $this->offset = $arrPos[$minKey]; // turn offset back
+                $this->offset = $start; // turn offset back
                 $arrPos[$minKey] = -2;
                 continue;
 
@@ -221,15 +224,16 @@ class TexyBlockParser extends TexyParser
                 $nodes[] = $res;
 
             } elseif (is_string($res)) {
-                $nodes[] = TexyHtml::text($res);
+                $res = TexyHtml::text($res);
+                $nodes[] = $res;
             }
 
             $arrPos[$minKey] = -1;
 
         } while (1);
 
-        if ($this->parent)
-            $this->parent->children = $nodes;
+        if ($this->parentEl)
+            $this->parentEl->children = $nodes;
 
         return $nodes;
     }
@@ -260,7 +264,7 @@ class TexyLineParser extends TexyParser
     function __construct(/*Texy*/ $texy, $element = NULL)
     {
         $this->texy = $texy;
-        $this->parent = $element;
+        $this->parentEl = $element;
         $this->patterns = $texy->getLinePatterns();
     }
 
@@ -357,8 +361,8 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        if ($this->parent)
-            $this->parent->setText($text);
+        if ($this->parentEl)
+            $this->parentEl->setText($text);
 
         return $text;
     }

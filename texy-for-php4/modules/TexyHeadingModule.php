@@ -182,7 +182,7 @@ class TexyHeadingModule extends TexyModule
         $el->parseLine($tx, trim($content));
 
         // document title
-        $title = $el->toText($tx);
+        $title = trim($el->toText($tx));
         if ($this->title === NULL) $this->title = $title;
 
         // Table of Contents

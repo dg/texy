@@ -388,10 +388,11 @@ class Texy
 
         // parse Texy! document into internal DOM structure
         $this->DOM = TexyHtml::el();
-        if ($singleLine)
+        if ($singleLine) {
             $this->DOM->parseLine($this, $text);
-        else
+        } else {
             $this->DOM->parseBlock($this, $text, TRUE);
+        }
 
         // user after handler
         $this->invokeAfterHandlers('afterParse', array($this, $this->DOM, $singleLine));
@@ -463,8 +464,9 @@ class Texy
         foreach ($this->modules as $module) {
             if (isset($module->interface['TexyPostLineInterface'])) {
                 foreach ($blocks as $n => $s) {
-                    if ($n % 2 === 0 && $s !== '')
+                    if ($n % 2 === 0 && $s !== '') {
                         $blocks[$n] = $module->postLine($s);
+                    }
                 }
             }
         }
@@ -543,7 +545,9 @@ class Texy
         if (!isset($this->handlers[$event])) return FALSE;
 
         $invocation = new TexyHandlerInvocation($this->handlers[$event], $parser, $args);
-        return $invocation->proceed();
+        $res = $invocation->proceed();
+        $invocation->free();
+        return $res;
     }
 
 
@@ -832,6 +836,9 @@ class Texy
 
 
 
+    /**
+     * PHP garbage collector helper
+     */
     function free()
     {
         foreach (array_keys(get_object_vars($this)) as $key)

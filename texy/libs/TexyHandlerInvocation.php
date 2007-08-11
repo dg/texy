@@ -88,4 +88,13 @@ final class TexyHandlerInvocation
         return $this->parser->getTexy();
     }
 
+
+    /**
+     * PHP garbage collector helper
+     */
+    public function free()
+    {
+        $this->handlers = $this->parser = $this->args = NULL;
+    }
+
 }

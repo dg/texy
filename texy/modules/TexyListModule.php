@@ -118,8 +118,9 @@ final class TexyListModule extends TexyModule
 
         $parser->moveBackward(1);
 
-        while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li'))
+        while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li')) {
             $el->addChild($elItem);
+        }
 
         if (count($el->children) < $min) return FALSE;
 

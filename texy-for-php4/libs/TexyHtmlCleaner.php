@@ -163,7 +163,7 @@ class TexyHtmlCleaner
         if ($mText !== '') {
             $item = reset($this->tagStack);
             // text not allowed?
-            if ($item && !isset($item['content']['%DATA'])) { }
+            if ($item && !isset($item['dtdContent']['%DATA'])) { }
 
             // inside pre & textarea preserve spaces
             elseif (!empty($this->tagUsed['pre']) || !empty($this->tagUsed['textarea']) || !empty($this->tagUsed['script']))
@@ -194,10 +194,8 @@ class TexyHtmlCleaner
             foreach ($this->tagStack as $i => $item)
             {
                 $tag = $item['tag'];
-                if ($item['close']) {
-                    $s .= $item['close'];
-                    if (!isset($GLOBALS['TexyHtml::$inline'][$tag])) $this->space--;
-                }
+                $s .= $item['close'];
+                $this->space -= $item['indent'];
                 $this->tagUsed[$tag]--;
                 $back = $back && isset($GLOBALS['TexyHtml::$inline'][$tag]);
                 unset($this->tagStack[$i]);
@@ -209,14 +207,15 @@ class TexyHtmlCleaner
 
             // allowed-check (nejspis neni ani potreba)
             $item = reset($this->tagStack);
-            if ($item) $content = $item['content'];
-            else $content = $this->baseDTD;
-            if (!isset($content[$tmp[0]['tag']])) return $s;
+            if ($item) $dtdContent = $item['dtdContent'];
+            else $dtdContent = $this->baseDTD;
+            if (!isset($dtdContent[$tmp[0]['tag']])) return $s;
 
             // autoopen tags
             foreach ($tmp as $item)
             {
-                if ($item['close']) $s .= '<'.$item['tag'].$item['attr'].'>';
+                $s .= $item['open'];
+                $this->space += $item['indent'];
                 $this->tagUsed[$item['tag']]++;
                 array_unshift($this->tagStack, $item);
             }
@@ -224,13 +223,13 @@ class TexyHtmlCleaner
 
         } else { // start tag
 
-            $content = $this->baseDTD;
+            $dtdContent = $this->baseDTD;
 
-            if (!isset($this->dtd[$mTag][1])) {
+            if (!isset($this->dtd[$mTag])) {
                 // unknown (non-html) tag
                 $allowed = TRUE;
                 $item = reset($this->tagStack);
-                if ($item) $content = $item['content'];
+                if ($item) $dtdContent = $item['dtdContent'];
 
 
             } else {
@@ -238,8 +237,8 @@ class TexyHtmlCleaner
                 foreach ($this->tagStack as $i => $item)
                 {
                     // is tag allowed here?
-                    $content = $item['content'];
-                    if (isset($content[$mTag])) break;
+                    $dtdContent = $item['dtdContent'];
+                    if (isset($dtdContent[$mTag])) break;
 
                     $tag = $item['tag'];
 
@@ -247,17 +246,15 @@ class TexyHtmlCleaner
                     if ($item['close'] && (!isset($GLOBALS['TexyHtmlCleaner::$optional'][$tag]) && !isset($GLOBALS['TexyHtml::$inline'][$tag]))) break;
 
                     // close it
-                    if ($item['close']) {
-                        $s .= $item['close'];
-                        if (!isset($GLOBALS['TexyHtml::$inline'][$tag])) $this->space--;
-                    }
+                    $s .= $item['close'];
+                    $this->space -= $item['indent'];
                     $this->tagUsed[$tag]--;
                     unset($this->tagStack[$i]);
-                    $content = $this->baseDTD;
+                    $dtdContent = $this->baseDTD;
                 }
 
                 // is tag allowed in this content?
-                $allowed = isset($content[$mTag]);
+                $allowed = isset($dtdContent[$mTag]);
 
                 // check deep element prohibitions
                 if ($allowed && isset($GLOBALS['TexyHtmlCleaner::$prohibits'][$mTag])) {
@@ -284,31 +281,45 @@ class TexyHtmlCleaner
                 return $s . '<' . $mTag . $mAttr . '>';
             }
 
+            $open = NULL;
+            $close = NULL;
+            $indent = 0;
+
+            /*  
+            if (!isset($GLOBALS['TexyHtml::$inline'][$mTag])) {
+                // block tags always decorate with \n
+                $s .= "\n";
+                $close = "\n";
+            }
+            */
 
             if ($allowed) {
+                $open = '<' . $mTag . $mAttr . '>';
+
                 // receive new content (ins & del are special cases)
-                if (!empty($this->dtd[$mTag][1])) $content = $this->dtd[$mTag][1];
+                if (!empty($this->dtd[$mTag][1])) $dtdContent = $this->dtd[$mTag][1];
 
                 // format output
                 if ($this->indent && !isset($GLOBALS['TexyHtml::$inline'][$mTag])) {
                     $close = "\x08" . '</'.$mTag.'>' . "\n" . str_repeat("\t", $this->space);
-                    $s .= "\n" . str_repeat("\t", $this->space++) . '<'.$mTag.$mAttr.'>' . "\x07";
+                    $s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
+                    $indent = 1;
                 } else {
                     $close = '</'.$mTag.'>';
-                    $s .= '<'.$mTag.$mAttr.'>';
+                    $s .= $open;
                 }
 
                 // TODO: problematic formatting of select / options, object / params
-
-            } else $close = '';
+            }
 
 
             // open tag, put to stack, increase counter
             $item = array(
                 'tag' => $mTag,
-                'attr' => $mAttr,
+                'open' => $open,
                 'close' => $close,
-                'content' => $content,
+                'dtdContent' => $dtdContent,
+                'indent' => $indent,
             );
             array_unshift($this->tagStack, $item);
             $tmp = &$this->tagUsed[$mTag]; $tmp++;

@@ -462,13 +462,13 @@ class TexyHtml
      * Parses text as block
      * @param Texy
      * @param string
-     * @param bool
+     * @param TexyBlockParser 
      * @return void
      */
-    final public function parseBlock($texy, $s, $topLevel = FALSE)
+    final public function parseBlock($texy, $s, $parent = NULL)
     {
         $parser = new TexyBlockParser($texy, $this);
-        $parser->topLevel = $topLevel;
+        $parser->parentParser = $parent;
         $parser->parse($s);
     }
 

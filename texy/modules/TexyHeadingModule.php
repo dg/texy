@@ -166,6 +166,7 @@ final class TexyHeadingModule extends TexyModule
     {
         $tx = $this->texy;
         $el = new TexyHeadingElement;
+        $el->setName('h1'); // for correct decorating
         $mod->decorate($tx, $el);
 
         $el->_level = $level;
@@ -183,7 +184,7 @@ final class TexyHeadingModule extends TexyModule
         $el->parseLine($tx, trim($content));
 
         // document title
-        $title = $el->toText($tx);
+        $title = trim($el->toText($tx));
         if ($this->title === NULL) $this->title = $title;
 
         // Table of Contents

@@ -89,6 +89,15 @@ class TexyHandlerInvocation
     }
 
 
+    /**
+     * PHP garbage collector helper
+     */
+    function free()
+    {
+        $this->handlers = $this->parser = $this->args = NULL;
+    }
+
+
     function TexyHandlerInvocation()  /* PHP 4 constructor */
     {
         // generate references (see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4)
