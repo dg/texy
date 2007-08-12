@@ -22,17 +22,17 @@ if (!class_exists('Texy')) die();
 class TexyEmoticonModule extends TexyModule
 {
     /** @var array  supported emoticons and image files */
-    var $icons = array (
-        ':-)'  =>  'smile.gif',
-        ':-('  =>  'sad.gif',
-        ';-)'  =>  'wink.gif',
-        ':-D'  =>  'biggrin.gif',
+    var $icons = array(
+        ':-)' => 'smile.gif',
+        ':-(' => 'sad.gif',
+        ';-)' => 'wink.gif',
+        ':-D' => 'biggrin.gif',
         '8-O' => 'eek.gif',
-        '8-)'  =>  'cool.gif',
-        ':-?'  =>  'confused.gif',
+        '8-)' => 'cool.gif',
+        ':-?' => 'confused.gif',
         ':-x' => 'mad.gif',
         ':-P' => 'razz.gif',
-        ':-|'  =>  'neutral.gif',
+        ':-|' => 'neutral.gif',
     );
 
     /** @var string  CSS class for emoticons */
@@ -48,13 +48,14 @@ class TexyEmoticonModule extends TexyModule
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
         $texy->allowed['emoticon'] = FALSE;
         $texy->addHandler('emoticon', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
     }
 
 
-    function begin()
+    function beforeParse()
     {
         if (empty($this->texy->allowed['emoticon'])) return;
 

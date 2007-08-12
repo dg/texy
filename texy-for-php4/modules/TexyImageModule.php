@@ -19,10 +19,8 @@ if (!class_exists('Texy')) die();
 /**
  * Images module
  */
-class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
+class TexyImageModule extends TexyModule
 {
-    var $interface = array('TexyPreBlockInterface'=>1);
-
     /** @var string  root of relative images (http) */
     var $root = 'images/';
 
@@ -51,7 +49,7 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         if (isset($_SERVER['SCRIPT_FILENAME'])) {
             // physical location on server
@@ -59,8 +57,8 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
         }
 
         $texy->allowed['image/definition'] = TRUE;
-
         $texy->addHandler('image', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
         // [*image*]:LINK
         $texy->registerLinePattern(
@@ -73,22 +71,21 @@ class TexyImageModule extends TexyModule /* implements TexyPreBlockInterface */
 
 
     /**
-     * Single block pre-processing
+     * Text pre-processing
+     * @param Texy
      * @param string
-     * @param bool
-     * @return string
+     * @return void
      */
-    function preBlock($text, $topLevel)
+    function beforeParse($texy, & $text)
     {
-        // [*image*]: urls .(title)[class]{style}
-        if ($topLevel && $this->texy->allowed['image/definition'])
+        if ($texy->allowed['image/definition']) {
+            // [*image*]: urls .(title)[class]{style}
            $text = preg_replace_callback(
                '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
                array($this, 'patternReferenceDef'),
                $text
            );
-
-        return $text;
+        }
     }
 
 

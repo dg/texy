@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Images module
  */
-final class TexyImageModule extends TexyModule implements TexyPreBlockInterface
+final class TexyImageModule extends TexyModule
 {
     /** @var string  root of relative images (http) */
     public $root = 'images/';
@@ -49,7 +49,7 @@ final class TexyImageModule extends TexyModule implements TexyPreBlockInterface
 
     public function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         if (isset($_SERVER['SCRIPT_FILENAME'])) {
             // physical location on server
@@ -57,8 +57,8 @@ final class TexyImageModule extends TexyModule implements TexyPreBlockInterface
         }
 
         $texy->allowed['image/definition'] = TRUE;
-
         $texy->addHandler('image', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
         // [*image*]:LINK
         $texy->registerLinePattern(
@@ -71,22 +71,21 @@ final class TexyImageModule extends TexyModule implements TexyPreBlockInterface
 
 
     /**
-     * Single block pre-processing
+     * Text pre-processing
+     * @param Texy
      * @param string
-     * @param bool
-     * @return string
+     * @return void
      */
-    public function preBlock($text, $topLevel)
+    public function beforeParse($texy, & $text)
     {
-        // [*image*]: urls .(title)[class]{style}
-        if ($topLevel && $this->texy->allowed['image/definition'])
+        if ($texy->allowed['image/definition']) {
+            // [*image*]: urls .(title)[class]{style}
            $text = preg_replace_callback(
                '#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
                array($this, 'patternReferenceDef'),
                $text
            );
-
-        return $text;
+        }
     }
 
 
@@ -97,7 +96,7 @@ final class TexyImageModule extends TexyModule implements TexyPreBlockInterface
      * @param array      regexp matches
      * @return string
      */
-    public function patternReferenceDef($matches)
+    private function patternReferenceDef($matches)
     {
         list(, $mRef, $mURLs, $mMod) = $matches;
         //    [1] => [* (reference) *]

@@ -24,7 +24,7 @@ class TexyHorizLineModule extends TexyModule
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->registerBlockPattern(
             array($this, 'pattern'),

@@ -35,7 +35,7 @@ class TexyScriptModule extends TexyModule
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->addHandler('script', array($this, 'solve'));
 

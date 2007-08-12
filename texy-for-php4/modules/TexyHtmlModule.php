@@ -29,7 +29,7 @@ class TexyHtmlModule extends TexyModule
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->addHandler('htmlComment', array($this, 'solveComment'));
         $texy->addHandler('htmlTag', array($this, 'solveTag'));

@@ -452,8 +452,8 @@ class TexyHtml
         // special escape sequences
         $s = str_replace(array('\)', '\*'), array('&#x29;', '&#x2A;'), $s);
 
-        $parser = new TexyLineParser($texy, $this);
-        $parser->parse($s);
+        $parser = new TexyLineParser($texy);
+        $this->children = $parser->parse($s);
     }
 
 
@@ -462,14 +462,14 @@ class TexyHtml
      * Parses text as block
      * @param Texy
      * @param string
-     * @param TexyBlockParser 
+     * @param TexyBlockParser
      * @return void
      */
     final public function parseBlock($texy, $s, $parent = NULL)
     {
-        $parser = new TexyBlockParser($texy, $this);
+        $parser = new TexyBlockParser($texy);
         $parser->parentParser = $parent;
-        $parser->parse($s);
+        $this->children = $parser->parse($s);
     }
 
 }

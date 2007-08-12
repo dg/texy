@@ -18,11 +18,8 @@ if (!class_exists('Texy')) die();
 
 class TexyParser
 {
-    /** @var Texy  protected */
+    /** @var Texy */
     var $texy;
-
-    /** @var TexyHtml  protected */
-    var $parentEl;
 
     /** @var array */
     var $patterns;
@@ -71,10 +68,9 @@ class TexyBlockParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    function __construct(/*Texy*/ $texy, $element = NULL)
+    function __construct(/*Texy*/ $texy)
     {
         $this->texy = $texy;
-        $this->parentEl = $element;
         $this->patterns = $texy->getBlockPatterns();
     }
 
@@ -114,6 +110,14 @@ class TexyBlockParser extends TexyParser
 
 
 
+    function cmp($a, $b)
+    {
+        if ($a[0] === $b[0]) return $a[3] < $b[3] ? -1 : 1;
+        if ($a[0] < $b[0]) return -1;
+        return 1;
+    }
+
+
     /**
      * @param string
      * @return array
@@ -122,102 +126,68 @@ class TexyBlockParser extends TexyParser
     {
         $tx = $this->texy;
 
-        // pre-processing
-        foreach ($tx->_preBlockModules as $module) {
-            $text = $module->preBlock($text, $this->parentParser === TRUE);
-        }
+        $tx->invokeAfterHandlers('beforeBlockParse', array($this, & $text));
 
         // parser initialization
         $this->text = $text;
         $this->offset = 0;
         $nodes = array();
 
-        $pb = $this->patterns;
-        if (!$pb) return array(); // nothing to do
-
-        $keys = array_keys($pb);
-        $arrMatches = $arrPos = array();
-        foreach ($keys as $key) $arrPos[$key] = -1;
-
-
         // parse loop
-        do {
-            $minKey = NULL;
-            $minPos = strlen($text);
-            if ($this->offset >= $minPos) break;
-
-            foreach ($keys as $index => $key)
-            {
-                if ($arrPos[$key] < $this->offset) {
-                    $delta = ($arrPos[$key] === -2) ? 1 : 0;
-                    if (preg_match(
-                            $pb[$key]['pattern'],
-                            $text,
-                            $arrMatches[$key],
-                            PREG_OFFSET_CAPTURE,
-                            $this->offset + $delta)
-                    ) {
-                        $m = & $arrMatches[$key];
-                        $arrPos[$key] = $m[0][1];
-                        foreach ($m as $keyX => $valueX) $m[$keyX] = $valueX[0];
-
-                    } else {
-                        unset($keys[$index]);
-                        continue;
-                    }
-                }
-
-                if ($arrPos[$key] === $this->offset) { $minKey = $key; break; }
-
-                if ($arrPos[$key] < $minPos) { $minPos = $arrPos[$key]; $minKey = $key; }
-            } // foreach
-
-            $next = ($minKey === NULL) ? strlen($text) : $arrPos[$minKey];
-
-            if ($next > $this->offset) {
-                $str = substr($text, $this->offset, $next - $this->offset);
-                $this->offset = $next;
-
-                if ($tx->paragraphModule->mode)
-                    $parts = preg_split('#(\n{2,})#', $str, -1, PREG_SPLIT_NO_EMPTY);
-                else
-                    $parts = preg_split('#(\n(?! )|\n{2,})#', $str, -1, PREG_SPLIT_NO_EMPTY);
-
-
-                foreach ($parts as $str)
-                {
-                    $str = trim($str);
-                    if ($str === '') continue;
-
-                    // try to find modifier
-                    $mod = new TexyModifier;
-                    $matches = NULL;
-                    if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $str, $matches)) {
-                        list(, $mC1, $mMod, $mC2) = $matches;
-                        $str = trim($mC1 . $mC2);
-                        $mod->setProperties($mMod);
-                    }
-
-                    $el = $tx->invokeHandlers('paragraph', $this, array($str, $mod));
-                    if ($el) $nodes[] = $el;
-                }
-
-                if ($minKey === NULL) break;
-            }
-
-            $px = $pb[$minKey];
-            $start = $arrPos[$minKey];
-            $this->offset = $start + strlen($arrMatches[$minKey][0]) + 1;   // 1 = \n
-
-            $res = call_user_func_array(
-                $px['handler'],
-                array($this, $arrMatches[$minKey], $minKey)
+        $matches = array();
+        $priority = 0;
+        foreach ($this->patterns as $name => $pattern)
+        {
+            preg_match_all(
+                $pattern['pattern'],
+                $text,
+                $ms,
+                PREG_OFFSET_CAPTURE | PREG_SET_ORDER
             );
 
-            if ($res === FALSE || $this->offset <= $start) { // module rejects text
-                // nemelo by se stat, rozdeli generic block
-                $this->offset = $start; // turn offset back
-                $arrPos[$minKey] = -2;
+            foreach ($ms as $m) {
+                $offset = $m[0][1];
+                foreach ($m as $k => $v) $m[$k] = $v[0];
+                $matches[] = array($offset, $name, $m, $priority);
+            }
+            $priority++;
+        }
+        unset($name, $pattern, $ms, $m, $k, $v);
+
+        usort($matches, array(__CLASS__, 'cmp'));
+        $matches[] = array(strlen($text), NULL, NULL); // terminal cap
+
+
+        // process loop
+        $cursor = 0;
+        do {
+            do {
+                list($mOffset, $mName, $mMatches) = $matches[$cursor];
+                $cursor++;
+                if ($mName === NULL) break;
+                if ($mOffset >= $this->offset) break;
+            } while (1);
+
+            // between-matches content
+            if ($mOffset > $this->offset) {
+                $s = trim(substr($text, $this->offset, $mOffset - $this->offset));
+                if ($s !== '') {
+                    $tx->paragraphModule->process($this, $s, $nodes);
+                }
+            }
+
+            if ($mName === NULL) break; // finito
+
+            $this->offset = $mOffset + strlen($mMatches[0]) + 1;   // 1 = \n
+
+            $res = call_user_func_array(
+                $this->patterns[$mName]['handler'],
+                array($this, $mMatches, $mName)
+            );
+
+            if ($res === FALSE || $this->offset <= $mOffset) { // module rejects text
+                // asi by se nemelo stat, rozdeli generic block
+                $this->offset = $mOffset; // turn offset back
                 continue;
 
             } elseif (is_a($res, 'TexyHtml')) {
@@ -228,12 +198,7 @@ class TexyBlockParser extends TexyParser
                 $nodes[] = $res;
             }
 
-            $arrPos[$minKey] = -1;
-
         } while (1);
-
-        if ($this->parentEl)
-            $this->parentEl->children = $nodes;
 
         return $nodes;
     }
@@ -261,10 +226,9 @@ class TexyLineParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    function __construct(/*Texy*/ $texy, $element = NULL)
+    function __construct(/*Texy*/ $texy)
     {
         $this->texy = $texy;
-        $this->parentEl = $element;
         $this->patterns = $texy->getLinePatterns();
     }
 
@@ -282,63 +246,63 @@ class TexyLineParser extends TexyParser
         if (!$pl) return $text; // nothing to do
 
         $offset = 0;
-        $keys = array_keys($pl);
-        $arrMatches = $arrPos = array();
-        foreach ($keys as $key) $arrPos[$key] = -1;
+        $names = array_keys($pl);
+        $arrMatches = $arrOffset = array();
+        foreach ($names as $name) $arrOffset[$name] = -1;
 
 
         // parse loop
         do {
-            $minKey = NULL;
-            $minPos = strlen($text);
+            $min = NULL;
+            $minOffset = strlen($text);
 
-            foreach ($keys as $index => $key)
+            foreach ($names as $index => $name)
             {
-                if ($arrPos[$key] < $offset) {
-                    $delta = ($arrPos[$key] === -2) ? 1 : 0;
+                if ($arrOffset[$name] < $offset) {
+                    $delta = ($arrOffset[$name] === -2) ? 1 : 0;
 
-                    if (preg_match($pl[$key]['pattern'],
+                    if (preg_match($pl[$name]['pattern'],
                             $text,
-                            $arrMatches[$key],
+                            $arrMatches[$name],
                             PREG_OFFSET_CAPTURE,
                             $offset + $delta)
                     ) {
-                        $m = & $arrMatches[$key];
+                        $m = & $arrMatches[$name];
                         if (!strlen($m[0][0])) continue;
-                        $arrPos[$key] = $m[0][1];
+                        $arrOffset[$name] = $m[0][1];
                         foreach ($m as $keyx => $value) $m[$keyx] = $value[0];
 
                     } else {
-                        unset($keys[$index]);
+                        unset($names[$index]);
                         continue;
                     }
                 } // if
 
-                if ($arrPos[$key] < $minPos) {
-                    $minPos = $arrPos[$key];
-                    $minKey = $key;
+                if ($arrOffset[$name] < $minOffset) {
+                    $minOffset = $arrOffset[$name];
+                    $min = $name;
                 }
             } // foreach
 
-            if ($minKey === NULL) break;
+            if ($min === NULL) break;
 
-            $px = $pl[$minKey];
-            $offset = $start = $arrPos[$minKey];
+            $px = $pl[$min];
+            $offset = $start = $arrOffset[$min];
 
             $this->again = FALSE;
             $res = call_user_func_array(
                 $px['handler'],
-                array($this, $arrMatches[$minKey], $minKey)
+                array($this, $arrMatches[$min], $min)
             );
 
             if (is_a($res, 'TexyHtml')) {
                 $res = $res->toString($tx);
             } elseif ($res === FALSE) {
-                $arrPos[$minKey] = -2;
+                $arrOffset[$min] = -2;
                 continue;
             }
 
-            $len = strlen($arrMatches[$minKey][0]);
+            $len = strlen($arrMatches[$min][0]);
             $text = substr_replace(
                 $text,
                 (string) $res,
@@ -347,22 +311,19 @@ class TexyLineParser extends TexyParser
             );
 
             $delta = strlen($res) - $len;
-            foreach ($keys as $key) {
-                if ($arrPos[$key] < $start + $len) $arrPos[$key] = -1;
-                else $arrPos[$key] += $delta;
+            foreach ($names as $name) {
+                if ($arrOffset[$name] < $start + $len) $arrOffset[$name] = -1;
+                else $arrOffset[$name] += $delta;
             }
 
             if ($this->again) {
-                $arrPos[$minKey] = -2;
+                $arrOffset[$min] = -2;
             } else {
-                $arrPos[$minKey] = -1;
+                $arrOffset[$min] = -1;
                 $offset += strlen($res);
             }
 
         } while (1);
-
-        if ($this->parentEl)
-            $this->parentEl->setText($text);
 
         return $text;
     }

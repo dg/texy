@@ -24,24 +24,9 @@ class TexyModule /* abstract  */
     /** @var Texy */
     var $texy; /* protected */
 
-    /** @var string */
-    var $interface;
 
-
-    function __construct($texy)
-    {
-        $this->texy = $texy;
-        $texy->registerModule($this);
-    }
-
-
-    /**
-     * Called by $texy->parse
-     */
-    function begin()
+    function __construct()
     {}
-
-
 
 
     function TexyModule()  /* PHP 4 constructor */

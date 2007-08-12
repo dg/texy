@@ -26,20 +26,6 @@ abstract class TexyModule
 
 
 
-    public function __construct($texy)
-    {
-        $this->texy = $texy;
-        $texy->registerModule($this);
-    }
-
-
-    /**
-     * Called by $texy->parse
-     */
-    public function begin()
-    {}
-
-
     /**#@+
      * Access to undeclared property
      * @throws Exception
@@ -48,30 +34,4 @@ abstract class TexyModule
     final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     /**#@-*/
-
-}
-
-
-
-
-interface TexyPreBlockInterface
-{
-    /**
-     * Single block pre-processing
-     * @param string
-     * @param bool
-     * @return string
-     */
-    public function preBlock($block, $topLevel);
-}
-
-
-interface TexyPostLineInterface
-{
-    /**
-     * Single line post-processing
-     * @param string
-     * @return string
-     */
-    public function postLine($line);
 }

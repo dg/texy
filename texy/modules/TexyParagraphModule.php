@@ -28,14 +28,52 @@ final class TexyParagraphModule extends TexyModule
 
     public function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
         $texy->addHandler('paragraph', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
     }
 
 
-    public function begin()
+    public function beforeParse()
     {
         $this->mode = TRUE;
+    }
+
+
+
+    /**
+     * @param TexyBlockParser
+     * @param string     text
+     * @param array
+     * @return vois
+     */
+    public function process($parser, $content, & $nodes)
+    {
+        $tx = $this->texy;
+
+        if ($this->mode) {
+            $parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
+        } else {
+            $parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        foreach ($parts as $s)
+        {
+            $s = trim($s);
+            if ($s === '') continue;
+
+            // try to find modifier
+            $mod = new TexyModifier;
+            $mx = NULL;
+            if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $s, $mx)) {
+                list(, $mC1, $mMod, $mC2) = $mx;
+                $s = trim($mC1 . $mC2);
+                $mod->setProperties($mMod);
+            }
+
+            $el = $tx->invokeHandlers('paragraph', $this, array($s, $mod));
+            if ($el) $nodes[] = $el;
+        }
     }
 
 

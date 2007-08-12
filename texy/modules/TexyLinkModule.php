@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Links module
  */
-final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
+final class TexyLinkModule extends TexyModule
 {
     /** @var string  root of relative links */
     public $root = '';
@@ -43,14 +43,14 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
 
     public function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->allowed['link/definition'] = TRUE;
-
         $texy->addHandler('newReference', array($this, 'solveNewReference'));
         $texy->addHandler('linkReference', array($this, 'solve'));
         $texy->addHandler('linkEmail', array($this, 'solve'));
         $texy->addHandler('linkURL', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
         // [reference]
         $texy->registerLinePattern(
@@ -74,31 +74,25 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
     }
 
 
-    public function begin()
-    {
-        self::$deadlock = array();
-    }
-
-
-
 
     /**
-     * Single block pre-processing
+     * Text pre-processing
+     * @param Texy
      * @param string
-     * @param bool
-     * @return string
+     * @return void
      */
-    public function preBlock($text, $topLevel)
+    public function beforeParse($texy, & $text)
     {
+        self::$deadlock = array();
+
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-        if ($topLevel && $this->texy->allowed['link/definition'])
+        if ($texy->allowed['link/definition']) {
             $text = preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
                 array($this, 'patternReferenceDef'),
                 $text
             );
-
-        return $text;
+        }
     }
 
 
@@ -193,8 +187,6 @@ final class TexyLinkModule extends TexyModule implements TexyPreBlockInterface
             array($link, $content)
         );
     }
-
-
 
 
 

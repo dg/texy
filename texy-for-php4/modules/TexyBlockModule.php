@@ -19,15 +19,13 @@ if (!class_exists('Texy')) die();
 /**
  * Special blocks module
  */
-class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
+class TexyBlockModule extends TexyModule
 {
-
-    var $interface = array('TexyPreBlockInterface'=>1);
 
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         //$texy->allowed['blocks'] = TRUE;
         $texy->allowed['block/default'] = TRUE;
@@ -40,6 +38,7 @@ class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
         $texy->allowed['block/div'] = TRUE;
 
         $texy->addHandler('block', array($this, 'solve'));
+        $texy->addHandler('beforeBlockParse', array($this, 'beforeBlockParse'));
 
         $texy->registerBlockPattern(
             array($this, 'pattern'),
@@ -51,11 +50,11 @@ class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
 
     /**
      * Single block pre-processing
+     * @param TexyBlockParser
      * @param string
-     * @param bool
-     * @return string
+     * @return void
      */
-    function preBlock($text, $topLevel)
+    function beforeBlockParse($parser, & $text)
     {
         // autoclose exclusive blocks
         $text = preg_replace(
@@ -63,7 +62,6 @@ class TexyBlockModule extends TexyModule /* implements TexyPreBlockInterface */
             "\$1\$2\n\\--",
             $text
         );
-        return $text;
     }
 
 

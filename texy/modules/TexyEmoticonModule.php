@@ -48,13 +48,14 @@ final class TexyEmoticonModule extends TexyModule
 
     public function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
         $texy->allowed['emoticon'] = FALSE;
         $texy->addHandler('emoticon', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
     }
 
 
-    public function begin()
+    public function beforeParse()
     {
         if (empty($this->texy->allowed['emoticon'])) return;
 

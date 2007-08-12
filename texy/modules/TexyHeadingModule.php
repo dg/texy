@@ -69,9 +69,10 @@ final class TexyHeadingModule extends TexyModule
 
     public function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->addHandler('heading', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
         $texy->registerBlockPattern(
             array($this, 'patternUnderline'),
@@ -88,7 +89,7 @@ final class TexyHeadingModule extends TexyModule
     }
 
 
-    public function begin()
+    public function beforeParse()
     {
         $this->title = NULL;
         $this->usedID = array();

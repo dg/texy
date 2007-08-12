@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Long words wrap module
  */
-final class TexyLongWordsModule extends TexyModule implements TexyPostLineInterface
+final class TexyLongWordsModule extends TexyModule
 {
     public $wordLimit = 20;
 
@@ -59,7 +59,7 @@ final class TexyLongWordsModule extends TexyModule implements TexyPostLineInterf
 
     public function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $this->consonants = array_flip($this->consonants);
         $this->vowels = array_flip($this->vowels);
@@ -68,19 +68,18 @@ final class TexyLongWordsModule extends TexyModule implements TexyPostLineInterf
         $this->before_h = array_flip($this->before_h);
         $this->doubleVowels = array_flip($this->doubleVowels);
 
-        $texy->allowed['longwords'] = TRUE;
+        $texy->registerPostLine(array($this, 'postLine'), 'longwords');
     }
 
 
 
     public function postLine($text)
     {
-        if (empty($this->texy->allowed['longwords'])) return $text;
-
         return preg_replace_callback(
             '#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
             array($this, 'pattern'),
-            $text);
+            $text
+        );
     }
 
 

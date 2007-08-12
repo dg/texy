@@ -35,6 +35,7 @@ $texy->addHandler('afterDefinitionList', array('myHandler', 'afterDefinitionList
 $texy->addHandler('afterTable', array('myHandler', 'afterTable'));
 $texy->addHandler('afterBlockquote', array('myHandler', 'afterBlockquote'));
 $texy->addHandler('afterHorizline', array('myHandler', 'afterHorizline'));
+$texy->addHandler('beforeParse', array('myHandler', 'beforeParse'));
 $texy->addHandler('afterParse', array('myHandler', 'afterParse'));
 
 
@@ -263,6 +264,16 @@ class myHandler
 
 
     /** Special */
+
+    /**
+     * @param Texy
+     * @param string
+     * @param bool
+     * @return void
+     */
+    function beforeParse($texy, & $text, $isSingleLine)
+    {
+    }
 
     /**
      * @param Texy

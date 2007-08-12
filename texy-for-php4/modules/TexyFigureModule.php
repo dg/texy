@@ -36,7 +36,7 @@ class TexyFigureModule extends TexyModule
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->addHandler('figure', array($this, 'solve'));
 

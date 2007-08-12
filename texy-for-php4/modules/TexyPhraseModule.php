@@ -50,7 +50,7 @@ class TexyPhraseModule extends TexyModule
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->addHandler('phrase', array($this, 'solve'));
 

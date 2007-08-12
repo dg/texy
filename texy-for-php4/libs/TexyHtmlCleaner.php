@@ -285,7 +285,7 @@ class TexyHtmlCleaner
             $close = NULL;
             $indent = 0;
 
-            /*  
+            /*
             if (!isset($GLOBALS['TexyHtml::$inline'][$mTag])) {
                 // block tags always decorate with \n
                 $s .= "\n";

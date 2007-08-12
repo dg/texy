@@ -48,10 +48,8 @@ $GLOBALS['TexyTypographyModule::$locales'] = array(
 /**
  * Typography replacements module
  */
-class TexyTypographyModule extends TexyModule /* implements TexyPostLineInterface */
+class TexyTypographyModule extends TexyModule
 {
-    var $interface = array('TexyPostLineInterface'=>1);
-
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
     var $locale = 'cs';
@@ -61,12 +59,14 @@ class TexyTypographyModule extends TexyModule /* implements TexyPostLineInterfac
 
     function __construct($texy)
     {
-        parent::__construct($texy);
-        $texy->allowed['typography'] = TRUE;
+        $this->texy = $texy;
+        $texy->registerPostLine(array($this, 'postLine'), 'typography');
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
     }
 
 
-    function begin()
+
+    function beforeParse()
     {
         // CONTENT_MARKUP mark:   \x17-\x1F
         // CONTENT_REPLACED mark: \x16
@@ -129,9 +129,7 @@ class TexyTypographyModule extends TexyModule /* implements TexyPostLineInterfac
 
     function postLine($text)
     {
-        if (empty($this->texy->allowed['typography'])) return $text;
-
         return preg_replace($this->pattern, $this->replace, $text);
     }
 
-} 
+}

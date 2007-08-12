@@ -200,22 +200,18 @@ class Texy
      */
     private $blockPatterns = array();
     private $_blockPatterns;
-
+    
+    /** @var array */
+    private $postHandlers = array();
 
     /** @var TexyDomElement  DOM structure for parsed text */
     private $DOM;
-
-    /** @var TexyModule[]  List of all modules */
-    private $modules;
 
     /** @var array  Texy protect markup table */
     private $marks = array();
 
     /** @var array  for internal usage */
     public $_classes, $_styles;
-
-    /** @var array of TexyPreBlockInterface for internal parser usage */
-    public $_preBlockModules;
 
     /** @var bool */
     private $processing;
@@ -279,23 +275,16 @@ class Texy
         // block parsing - order is not important
         $this->paragraphModule = new TexyParagraphModule($this);
         $this->blockModule = new TexyBlockModule($this);
-        $this->headingModule = new TexyHeadingModule($this);
+        $this->figureModule = new TexyFigureModule($this);
         $this->horizLineModule = new TexyHorizLineModule($this);
         $this->quoteModule = new TexyQuoteModule($this);
-        $this->listModule = new TexyListModule($this);
         $this->tableModule = new TexyTableModule($this);
-        $this->figureModule = new TexyFigureModule($this);
+        $this->headingModule = new TexyHeadingModule($this);
+        $this->listModule = new TexyListModule($this);
 
         // post process - order is not important
         $this->typographyModule = new TexyTypographyModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
-    }
-
-
-
-    final public function registerModule(TexyModule $module)
-    {
-        $this->modules[] = $module;
     }
 
 
@@ -325,6 +314,15 @@ class Texy
         );
     }
 
+
+
+    final public function registerPostLine($handler, $name)
+    {
+        if (!isset($this->allowed[$name])) {
+            $this->allowed[$name] = TRUE;
+        }
+        $this->postHandlers[$name] = $handler;
+    }
 
 
 
@@ -362,22 +360,17 @@ class Texy
         while (strpos($text, "\t") !== FALSE)
             $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
 
-        // init modules
-        $this->_preBlockModules = array();
-        foreach ($this->modules as $module) {
-            $module->begin();
-
-            if ($module instanceof TexyPreBlockInterface) $this->_preBlockModules[] = $module;
-        }
+        // user before handler
+        $this->invokeAfterHandlers('beforeParse', array($this, & $text, $singleLine));
 
         // select patterns
         $this->_linePatterns = $this->linePatterns;
         $this->_blockPatterns = $this->blockPatterns;
-        foreach ($this->_linePatterns as $pattern => $foo) {
-            if (empty($this->allowed[$pattern])) unset($this->_linePatterns[$pattern]);
+        foreach ($this->_linePatterns as $name => $foo) {
+            if (empty($this->allowed[$name])) unset($this->_linePatterns[$name]);
         }
-        foreach ($this->_blockPatterns as $pattern => $foo) {
-            if (empty($this->allowed[$pattern])) unset($this->_blockPatterns[$pattern]);
+        foreach ($this->_blockPatterns as $name => $foo) {
+            if (empty($this->allowed[$name])) unset($this->_blockPatterns[$name]);
         }
 
         // parse Texy! document into internal DOM structure
@@ -454,12 +447,11 @@ class Texy
 
         // line-postprocessing
         $blocks = explode(self::CONTENT_BLOCK, $s);
-        foreach ($this->modules as $module) {
-            if ($module instanceof TexyPostLineInterface) {
-                foreach ($blocks as $n => $s) {
-                    if ($n % 2 === 0 && $s !== '') {
-                        $blocks[$n] = $module->postLine($s);
-                    }
+        foreach ($this->postHandlers as $name => $handler) {
+            if (empty($this->allowed[$name])) continue;
+            foreach ($blocks as $n => $s) {
+                if ($n % 2 === 0 && $s !== '') {
+                    $blocks[$n] = call_user_func($handler, $s);
                 }
             }
         }
@@ -769,7 +761,10 @@ class Texy
 
 
 
-    final public function __clone() { throw new Exception("Clone is not supported."); }
+    final public function __clone()
+    {
+        throw new Exception("Clone is not supported.");
+    }
 
 
     /**#@+

@@ -24,10 +24,8 @@ $GLOBALS['TexyLinkModule::$deadlock'] = NULL; /* class private static property *
 /**
  * Links module
  */
-class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
+class TexyLinkModule extends TexyModule
 {
-    var $interface = array('TexyPreBlockInterface'=>1);
-
     /** @var string  root of relative links */
     var $root = '';
 
@@ -46,14 +44,14 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
         $texy->allowed['link/definition'] = TRUE;
-
         $texy->addHandler('newReference', array($this, 'solveNewReference'));
         $texy->addHandler('linkReference', array($this, 'solve'));
         $texy->addHandler('linkEmail', array($this, 'solve'));
         $texy->addHandler('linkURL', array($this, 'solve'));
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
         // [reference]
         $texy->registerLinePattern(
@@ -77,31 +75,25 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
     }
 
 
-    function begin()
-    {
-        $GLOBALS['TexyLinkModule::$deadlock']= array();
-    }
-
-
-
 
     /**
-     * Single block pre-processing
+     * Text pre-processing
+     * @param Texy
      * @param string
-     * @param bool
-     * @return string
+     * @return void
      */
-    function preBlock($text, $topLevel)
+    function beforeParse($texy, & $text)
     {
+        $GLOBALS['TexyLinkModule::$deadlock']= array();
+
         // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
-        if ($topLevel && $this->texy->allowed['link/definition'])
+        if ($texy->allowed['link/definition']) {
             $text = preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
                 array($this, 'patternReferenceDef'),
                 $text
             );
-
-        return $text;
+        }
     }
 
 
@@ -196,8 +188,6 @@ class TexyLinkModule extends TexyModule /* implements TexyPreBlockInterface */
             array($link, $content)
         );
     }
-
-
 
 
 

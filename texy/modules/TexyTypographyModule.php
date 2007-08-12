@@ -19,7 +19,7 @@ if (!class_exists('Texy', FALSE)) die();
 /**
  * Typography replacements module
  */
-final class TexyTypographyModule extends TexyModule implements TexyPostLineInterface
+final class TexyTypographyModule extends TexyModule
 {
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
@@ -58,13 +58,14 @@ final class TexyTypographyModule extends TexyModule implements TexyPostLineInter
 
     public function __construct($texy)
     {
-        parent::__construct($texy);
-        $texy->allowed['typography'] = TRUE;
+        $this->texy = $texy;
+        $texy->registerPostLine(array($this, 'postLine'), 'typography');
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
     }
 
 
 
-    public function begin()
+    public function beforeParse()
     {
         // CONTENT_MARKUP mark:   \x17-\x1F
         // CONTENT_REPLACED mark: \x16
@@ -127,8 +128,6 @@ final class TexyTypographyModule extends TexyModule implements TexyPostLineInter
 
     public function postLine($text)
     {
-        if (empty($this->texy->allowed['typography'])) return $text;
-
         return preg_replace($this->pattern, $this->replace, $text);
     }
 

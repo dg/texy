@@ -38,14 +38,15 @@ class TexyListModule extends TexyModule
 
     function __construct($texy)
     {
-        parent::__construct($texy);
+        $this->texy = $texy;
 
+        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
         $texy->allowed['list'] = TRUE;
         $texy->allowed['list/definition'] = TRUE;
     }
 
 
-    function begin()
+    function beforeParse()
     {
         $RE = $REul = array();
         foreach ($this->bullets as $desc) {
