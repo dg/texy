@@ -71,6 +71,7 @@ final class TexyModifier
     );
 
 
+
     /**
      * @param string modifier to parse
      */
@@ -78,6 +79,7 @@ final class TexyModifier
     {
         $this->setProperties($mod);
     }
+
 
 
     public function setProperties($mod)

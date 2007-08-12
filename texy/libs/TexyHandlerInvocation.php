@@ -71,6 +71,7 @@ final class TexyHandlerInvocation
     }
 
 
+
     /**
      * @return TexyParser
      */
@@ -80,6 +81,7 @@ final class TexyHandlerInvocation
     }
 
 
+
     /**
      * @return Texy
      */
@@ -87,6 +89,7 @@ final class TexyHandlerInvocation
     {
         return $this->parser->getTexy();
     }
+
 
 
     /**

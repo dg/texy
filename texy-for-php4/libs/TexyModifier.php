@@ -81,6 +81,7 @@ class TexyModifier
     }
 
 
+
     function setProperties($mod)
     {
         if (!$mod) return;

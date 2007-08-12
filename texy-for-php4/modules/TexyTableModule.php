@@ -27,10 +27,17 @@ class TexyTableModule extends TexyModule
     /** @var string  CSS class for even rows */
     var $evenClass;
 
+    /** @var bool */
     var $isHead; /* private */
+
+    /** @var array */
     var $colModifier; /* private */
+
+    /** @var array */
     var $last; /* private */
-    var $row; /* private */
+
+    /** @var int */
+    var $rowCounter; /* private */
 
 
 
@@ -90,7 +97,7 @@ class TexyTableModule extends TexyModule
         $this->isHead = FALSE;
         $this->colModifier = array();
         $this->last = array();
-        $this->row = 0;
+        $this->rowCounter = 0;
 
         while (TRUE) {
             if ($parser->next('#^\|[+-]{3,}$#Um', $matches)) {
@@ -100,7 +107,7 @@ class TexyTableModule extends TexyModule
 
             if ($elRow = $this->patternRow($parser)) {
                 $el->addChild($elRow);
-                $this->row++;
+                $this->rowCounter++;
                 continue;
             }
 
@@ -136,7 +143,7 @@ class TexyTableModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $elRow);
 
-        if ($this->row % 2 === 0) {
+        if ($this->rowCounter % 2 === 0) {
             if ($this->oddClass) $elRow->attrs['class'][] = $this->oddClass;
         } else {
             if ($this->evenClass) $elRow->attrs['class'][] = $this->evenClass;
@@ -208,7 +215,10 @@ class TexyTableModule extends TexyModule
  */
 class TexyTableFieldElement extends TexyHtml
 {
+    /** @var int */
     var $colspan = 1;
+
+    /** @var int */
     var $rowspan = 1;
 
 

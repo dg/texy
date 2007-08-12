@@ -801,6 +801,7 @@ final class TexyHtmlCleaner
     }
 
 
+
     /**#@+
      * Access to undeclared property
      * @throws Exception

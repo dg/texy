@@ -153,41 +153,55 @@ class Texy
     /** @var bool  use XHTML syntax? */
     var $xhtml = TRUE;
 
+    /** @var TexyScriptModule */
+    var $scriptModule;
 
-    var
-        /** @var TexyScriptModule */
-        $scriptModule,
-        /** @var TexyParagraphModule */
-        $paragraphModule,
-        /** @var TexyHtmlModule */
-        $htmlModule,
-        /** @var TexyImageModule */
-        $imageModule,
-        /** @var TexyLinkModule */
-        $linkModule,
-        /** @var TexyPhraseModule */
-        $phraseModule,
-        /** @var TexyEmoticonModule */
-        $emoticonModule,
-        /** @var TexyBlockModule */
-        $blockModule,
-        /** @var TexyHeadingModule */
-        $headingModule,
-        /** @var TexyHorizLineModule */
-        $horizLineModule,
-        /** @var TexyQuoteModule */
-        $quoteModule,
-        /** @var TexyListModule */
-        $listModule,
-        /** @var TexyTableModule */
-        $tableModule,
-        /** @var TexyFigureModule */
-        $figureModule,
-        /** @var TexyTypographyModule */
-        $typographyModule,
-        /** @var TexyLongWordsModule */
-        $longWordsModule;
+    /** @var TexyParagraphModule */
+    var $paragraphModule;
 
+    /** @var TexyHtmlModule */
+    var $htmlModule;
+
+    /** @var TexyImageModule */
+    var $imageModule;
+
+    /** @var TexyLinkModule */
+    var $linkModule;
+
+    /** @var TexyPhraseModule */
+    var $phraseModule;
+
+    /** @var TexyEmoticonModule */
+    var $emoticonModule;
+
+    /** @var TexyBlockModule */
+    var $blockModule;
+
+    /** @var TexyHeadingModule */
+    var $headingModule;
+
+    /** @var TexyHorizLineModule */
+    var $horizLineModule;
+
+    /** @var TexyQuoteModule */
+    var $quoteModule;
+
+    /** @var TexyListModule */
+    var $listModule;
+
+    /** @var TexyTableModule */
+    var $tableModule;
+
+    /** @var TexyFigureModule */
+    var $figureModule;
+
+    /** @var TexyTypographyModule */
+    var $typographyModule;
+
+    /** @var TexyLongWordsModule */
+    var $longWordsModule;
+
+    /** @var TexyHtmlCleaner */
     var $cleaner;
 
 
@@ -207,10 +221,11 @@ class Texy
     var $blockPatterns = array(); /* private */
     var $_blockPatterns; /* private */
 
+    /** @var array */
     var $postHandlers = array();
 
     /** @var TexyDomElement  DOM structure for parsed text */
-    var $DOM;
+    var $DOM; /* private */
 
     /** @var array  Texy protect markup table */
     var $marks = array(); /* private */
@@ -219,10 +234,11 @@ class Texy
     var $_classes, $_styles;
 
     /** @var bool */
-    var $processing;
+    var $processing; /* private */
 
     /** @var array of events and registered handlers */
     var $handlers = array(); /* private */
+
 
 
 
@@ -268,7 +284,7 @@ class Texy
      */
     function loadModules() /* protected */
     {
-        // Line parsing - order is not important
+        // line parsing
         $this->scriptModule = new TexyScriptModule($this);
         $this->htmlModule = new TexyHtmlModule($this);
         $this->imageModule = new TexyImageModule($this);
@@ -276,7 +292,7 @@ class Texy
         $this->linkModule = new TexyLinkModule($this);
         $this->emoticonModule = new TexyEmoticonModule($this);
 
-        // block parsing - order is not important
+        // block parsing
         $this->paragraphModule = new TexyParagraphModule($this);
         $this->blockModule = new TexyBlockModule($this);
         $this->figureModule = new TexyFigureModule($this);
@@ -286,7 +302,7 @@ class Texy
         $this->headingModule = new TexyHeadingModule($this);
         $this->listModule = new TexyListModule($this);
 
-        // post process - order is not important
+        // post process
         $this->typographyModule = new TexyTypographyModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
     }
@@ -295,9 +311,8 @@ class Texy
 
     function registerLinePattern($handler, $pattern, $name)
     {
-        if (!isset($this->allowed[$name])) {
-            $this->allowed[$name] = TRUE;
-        }
+        if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+
         $this->linePatterns[$name] = array(
             'handler'     => $handler,
             'pattern'     => $pattern,
@@ -308,10 +323,10 @@ class Texy
 
     function registerBlockPattern($handler, $pattern, $name)
     {
-        // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
-        if (!isset($this->allowed[$name])) {
-            $this->allowed[$name] = TRUE;
-        }
+        // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
+
+        if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+
         $this->blockPatterns[$name] = array(
             'handler'     => $handler,
             'pattern'     => $pattern  . 'm',  // force multiline
@@ -320,12 +335,10 @@ class Texy
 
 
 
-
     function registerPostLine($handler, $name)
     {
-        if (!isset($this->allowed[$name])) {
-            $this->allowed[$name] = TRUE;
-        }
+        if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+
         $this->postHandlers[$name] = $handler;
     }
 
@@ -524,6 +537,7 @@ class Texy
     }
 
 
+
     /**
      * Invoke registered around-handlers
      *
@@ -541,6 +555,7 @@ class Texy
         $invocation->free();
         return $res;
     }
+
 
 
     /**
@@ -836,6 +851,7 @@ class Texy
         foreach (array_keys(get_object_vars($this)) as $key)
             $this->$key = NULL;
     }
+
 
 
     function __clone()

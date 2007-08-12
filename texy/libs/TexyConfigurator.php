@@ -100,6 +100,7 @@ final class TexyConfigurator
     }
 
 
+
     /**
      * Disable all images
      *
@@ -116,4 +117,5 @@ final class TexyConfigurator
             unset($texy->allowedTags['img'], $texy->allowedTags['object'], $texy->allowedTags['embed'], $texy->allowedTags['applet']);
         } // TODO: else...
     }
+
 }

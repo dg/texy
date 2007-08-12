@@ -42,6 +42,7 @@ final class TexyImageModule extends TexyModule
     /** @var string  images onload handler */
     public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
 
+    /** @var array image references */
     private $references = array();
 
 
@@ -176,6 +177,7 @@ final class TexyImageModule extends TexyModule
     }
 
 
+
     /**
      * Parses image's syntax
      * @param string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
@@ -300,7 +302,6 @@ final class TexyImageModule extends TexyModule
         return $el;
     }
 
-
 }
 
 
@@ -340,11 +341,13 @@ final class TexyImage
     }
 
 
+
     public function __clone()
     {
         if ($this->modifier)
             $this->modifier = clone $this->modifier;
     }
+
 
     /**#@+
      * Access to undeclared property

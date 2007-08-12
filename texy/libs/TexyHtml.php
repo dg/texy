@@ -67,6 +67,7 @@ class TexyHtml
     );
 
 
+
     /**
      * Static factory
      * @param string element name (or NULL)
@@ -93,6 +94,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Static factory for textual element
      * @param string
@@ -104,6 +106,7 @@ class TexyHtml
         $el->setText($text);
         return $el;
     }
+
 
 
     /**
@@ -123,6 +126,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Returns element's name
      * @return string
@@ -131,6 +135,7 @@ class TexyHtml
     {
         return $this->name;
     }
+
 
 
     /**
@@ -146,6 +151,7 @@ class TexyHtml
 
         return $this->isEmpty;
     }
+
 
 
     /**
@@ -194,6 +200,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Returns child node
      * @param mixed index
@@ -207,6 +214,7 @@ class TexyHtml
 
         return NULL;
     }
+
 
 
     /**
@@ -226,6 +234,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Overloaded setter for element's attribute
      * @param string    property name
@@ -238,6 +247,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Overloaded getter for element's attribute
      * @param string    property name
@@ -247,6 +257,7 @@ class TexyHtml
     {
         return $this->attrs[$name];
     }
+
 
 
     /**
@@ -281,6 +292,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Renders element's start tag, content and end tag to internal string representation
      * @param Texy
@@ -310,6 +322,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Renders to final HTML
      * @param Texy
@@ -321,6 +334,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Renders to final text
      * @param Texy
@@ -330,6 +344,7 @@ class TexyHtml
     {
         return $texy->stringToText($this->toString($texy));
     }
+
 
 
     /**
@@ -393,6 +408,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Returns element's end tag
      * @return string
@@ -405,6 +421,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Is element textual node?
      * @return bool
@@ -413,6 +430,7 @@ class TexyHtml
     {
         return !$this->isEmpty && is_scalar($this->children);
     }
+
 
 
     /**
@@ -425,6 +443,7 @@ class TexyHtml
                 $this->children[$key] = clone $value;
         }
     }
+
 
 
     /**

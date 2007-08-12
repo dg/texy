@@ -89,6 +89,7 @@ final class TexyHeadingModule extends TexyModule
     }
 
 
+
     public function beforeParse()
     {
         $this->title = NULL;
@@ -211,7 +212,6 @@ final class TexyHeadingModule extends TexyModule
 
         return $el;
     }
-
 
 }
 

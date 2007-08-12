@@ -47,6 +47,7 @@ final class TexyBlockModule extends TexyModule
     }
 
 
+
     /**
      * Single block pre-processing
      * @param TexyBlockParser
@@ -62,6 +63,7 @@ final class TexyBlockModule extends TexyModule
             $text
         );
     }
+
 
 
     /**
@@ -93,6 +95,7 @@ final class TexyBlockModule extends TexyModule
     }
 
 
+
     public function outdent($s)
     {
         $s = trim($s, "\n");
@@ -100,6 +103,7 @@ final class TexyBlockModule extends TexyModule
         if ($spaces) return preg_replace("#^ {1,$spaces}#m", '', $s);
         return $s;
     }
+
 
 
     /**

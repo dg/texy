@@ -52,9 +52,13 @@ class TexyTypographyModule extends TexyModule
 {
     // @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
+
+    /** @var string */
     var $locale = 'cs';
 
+    /** @var array */
     var $pattern, $replace; /* private */
+
 
 
     function __construct($texy)

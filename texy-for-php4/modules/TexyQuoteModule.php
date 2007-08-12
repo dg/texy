@@ -132,5 +132,4 @@ class TexyQuoteModule extends TexyModule
         return Texy::prependRoot($link, $tx->linkModule->root);
     }
 
-
 }

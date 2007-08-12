@@ -34,6 +34,7 @@ final class TexyHorizLineModule extends TexyModule
     }
 
 
+
     /**
      * Callback for: -------
      *

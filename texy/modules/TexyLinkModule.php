@@ -121,7 +121,6 @@ final class TexyLinkModule extends TexyModule
 
 
 
-
     /**
      * Callback for: [ref]
      *
@@ -421,8 +420,6 @@ final class TexyLinkModule extends TexyModule
         return $URL;
     }
 
-
-
 }
 
 
@@ -468,11 +465,13 @@ final class TexyLink
     }
 
 
+
     public function __clone()
     {
         if ($this->modifier)
             $this->modifier = clone $this->modifier;
     }
+
 
 
     /**#@+

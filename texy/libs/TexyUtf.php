@@ -39,6 +39,7 @@ final class TexyUtf
     }
 
 
+
     /**
      * Converts from UTF-8 to dest encoding
      */
@@ -46,6 +47,7 @@ final class TexyUtf
     {
         return iconv('utf-8', $encoding.'//TRANSLIT', $s);
     }
+
 
 
     /**
@@ -62,6 +64,7 @@ final class TexyUtf
             "abcdefghijklmnopqrstuvwxyz\x9a\x9c\x9d\x9e\x9f\xb3\xb9\xba\xbf\xbe\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf8\xf9\xfa\xfb\xfc\xfd\xfe"
         );
     }
+
 
 
     /**

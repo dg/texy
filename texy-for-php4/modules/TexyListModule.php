@@ -46,6 +46,7 @@ class TexyListModule extends TexyModule
     }
 
 
+
     function beforeParse()
     {
         $RE = $REul = array();

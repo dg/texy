@@ -50,8 +50,10 @@ final class TexyTypographyModule extends TexyModule
         ),
     );
 
+    /** @var string */
     public $locale = 'cs';
 
+    /** @var array */
     private $pattern, $replace;
 
 

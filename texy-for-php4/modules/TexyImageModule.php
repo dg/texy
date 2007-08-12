@@ -42,7 +42,8 @@ class TexyImageModule extends TexyModule
     /** @var string  images onload handler */
     var $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
 
-    var $references = array(); /* private */
+    /** @var array image references */
+    var $references = array();
 
 
 
@@ -176,6 +177,7 @@ class TexyImageModule extends TexyModule
     }
 
 
+
     /**
      * Parses image's syntax
      * @param string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
@@ -299,7 +301,6 @@ class TexyImageModule extends TexyModule
 
         return $el;
     }
-
 
 }
 

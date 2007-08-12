@@ -21,7 +21,6 @@ if (!class_exists('Texy', FALSE)) die();
  */
 final class TexyHtmlModule extends TexyModule
 {
-
     /** @var bool   pass HTML comments to output? */
     public $passComment = TRUE;
 
@@ -62,7 +61,6 @@ final class TexyHtmlModule extends TexyModule
         list(, $mComment) = $matches;
         return $this->texy->invokeHandlers('htmlComment', $parser, array($mComment));
     }
-
 
 
 
@@ -128,7 +126,6 @@ final class TexyHtmlModule extends TexyModule
 
         return $tx->invokeHandlers('htmlTag', $parser, array($el, TRUE, $isEmpty));
     }
-
 
 
 
@@ -273,6 +270,5 @@ final class TexyHtmlModule extends TexyModule
 
         return $this->texy->protect('<!--' . $content . '-->', Texy::CONTENT_MARKUP);
     }
-
 
 }

@@ -25,6 +25,7 @@ class TexyParser
     public $patterns;
 
 
+
     /**
      * @return Texy
      */
@@ -32,6 +33,7 @@ class TexyParser
     {
         return $this->texy;
     }
+
 
 
     /**#@+
@@ -65,6 +67,7 @@ class TexyBlockParser extends TexyParser
     public $parentParser;
 
 
+
     /**
      * @param Texy
      * @param TexyHtml
@@ -74,6 +77,7 @@ class TexyBlockParser extends TexyParser
         $this->texy = $texy;
         $this->patterns = $texy->getBlockPatterns();
     }
+
 
 
     // match current line against RE.
@@ -117,6 +121,7 @@ class TexyBlockParser extends TexyParser
         if ($a[0] < $b[0]) return -1;
         return 1;
     }
+
 
 
     /**
@@ -232,6 +237,7 @@ class TexyLineParser extends TexyParser
         $this->texy = $texy;
         $this->patterns = $texy->getLinePatterns();
     }
+
 
 
     /**

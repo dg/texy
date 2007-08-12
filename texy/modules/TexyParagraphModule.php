@@ -34,6 +34,7 @@ final class TexyParagraphModule extends TexyModule
     }
 
 
+
     public function beforeParse()
     {
         $this->mode = TRUE;
@@ -142,6 +143,5 @@ final class TexyParagraphModule extends TexyModule
 
         return $el;
     }
-
 
 }

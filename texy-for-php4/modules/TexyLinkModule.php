@@ -42,6 +42,7 @@ class TexyLinkModule extends TexyModule
     var $references = array(); /* private */
 
 
+
     function __construct($texy)
     {
         $this->texy = $texy;
@@ -119,7 +120,6 @@ class TexyLinkModule extends TexyModule
         $this->addReference($mRef, $link);
         return '';
     }
-
 
 
 
@@ -421,8 +421,6 @@ class TexyLinkModule extends TexyModule
 
         return $URL;
     }
-
-
 
 }
 

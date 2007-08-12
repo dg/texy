@@ -147,42 +147,57 @@ class Texy
     /** @var bool */
     static public $noticeShowed = FALSE;
 
-    public
-        /** @var TexyScriptModule */
-        $scriptModule,
-        /** @var TexyParagraphModule */
-        $paragraphModule,
-        /** @var TexyHtmlModule */
-        $htmlModule,
-        /** @var TexyImageModule */
-        $imageModule,
-        /** @var TexyLinkModule */
-        $linkModule,
-        /** @var TexyPhraseModule */
-        $phraseModule,
-        /** @var TexyEmoticonModule */
-        $emoticonModule,
-        /** @var TexyBlockModule */
-        $blockModule,
-        /** @var TexyHeadingModule */
-        $headingModule,
-        /** @var TexyHorizLineModule */
-        $horizLineModule,
-        /** @var TexyQuoteModule */
-        $quoteModule,
-        /** @var TexyListModule */
-        $listModule,
-        /** @var TexyTableModule */
-        $tableModule,
-        /** @var TexyFigureModule */
-        $figureModule,
-        /** @var TexyTypographyModule */
-        $typographyModule,
-        /** @var TexyLongWordsModule */
-        $longWordsModule;
+    /** @var TexyScriptModule */
+    public $scriptModule;
 
-    public
-        $cleaner;
+    /** @var TexyParagraphModule */
+    public $paragraphModule;
+
+    /** @var TexyHtmlModule */
+    public $htmlModule;
+
+    /** @var TexyImageModule */
+    public $imageModule;
+
+    /** @var TexyLinkModule */
+    public $linkModule;
+
+    /** @var TexyPhraseModule */
+    public $phraseModule;
+
+    /** @var TexyEmoticonModule */
+    public $emoticonModule;
+
+    /** @var TexyBlockModule */
+    public $blockModule;
+
+    /** @var TexyHeadingModule */
+    public $headingModule;
+
+    /** @var TexyHorizLineModule */
+    public $horizLineModule;
+
+    /** @var TexyQuoteModule */
+    public $quoteModule;
+
+    /** @var TexyListModule */
+    public $listModule;
+
+    /** @var TexyTableModule */
+    public $tableModule;
+
+    /** @var TexyFigureModule */
+    public $figureModule;
+
+    /** @var TexyTypographyModule */
+    public $typographyModule;
+
+    /** @var TexyLongWordsModule */
+    public $longWordsModule;
+
+    /** @var TexyHtmlCleaner */
+    public $cleaner;
+
 
 
     /**
@@ -200,7 +215,7 @@ class Texy
      */
     private $blockPatterns = array();
     private $_blockPatterns;
-    
+
     /** @var array */
     private $postHandlers = array();
 
@@ -264,7 +279,7 @@ class Texy
      */
     protected function loadModules()
     {
-        // Line parsing - order is not important
+        // line parsing
         $this->scriptModule = new TexyScriptModule($this);
         $this->htmlModule = new TexyHtmlModule($this);
         $this->imageModule = new TexyImageModule($this);
@@ -272,7 +287,7 @@ class Texy
         $this->linkModule = new TexyLinkModule($this);
         $this->emoticonModule = new TexyEmoticonModule($this);
 
-        // block parsing - order is not important
+        // block parsing
         $this->paragraphModule = new TexyParagraphModule($this);
         $this->blockModule = new TexyBlockModule($this);
         $this->figureModule = new TexyFigureModule($this);
@@ -282,7 +297,7 @@ class Texy
         $this->headingModule = new TexyHeadingModule($this);
         $this->listModule = new TexyListModule($this);
 
-        // post process - order is not important
+        // post process
         $this->typographyModule = new TexyTypographyModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
     }
@@ -291,9 +306,8 @@ class Texy
 
     final public function registerLinePattern($handler, $pattern, $name)
     {
-        if (!isset($this->allowed[$name])) {
-            $this->allowed[$name] = TRUE;
-        }
+        if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+
         $this->linePatterns[$name] = array(
             'handler'     => $handler,
             'pattern'     => $pattern,
@@ -304,10 +318,10 @@ class Texy
 
     final public function registerBlockPattern($handler, $pattern, $name)
     {
-        // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die('Texy: Not a block pattern. Module '.get_class($module).', pattern '.htmlSpecialChars($pattern));
-        if (!isset($this->allowed[$name])) {
-            $this->allowed[$name] = TRUE;
-        }
+        // if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
+
+        if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+
         $this->blockPatterns[$name] = array(
             'handler'     => $handler,
             'pattern'     => $pattern  . 'm',  // force multiline
@@ -318,9 +332,8 @@ class Texy
 
     final public function registerPostLine($handler, $name)
     {
-        if (!isset($this->allowed[$name])) {
-            $this->allowed[$name] = TRUE;
-        }
+        if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+
         $this->postHandlers[$name] = $handler;
     }
 
@@ -428,7 +441,7 @@ class Texy
     public function toText()
     {
         if (!$this->DOM) {
-        	throw new Exception('Call $texy->process() first.');
+            throw new Exception('Call $texy->process() first.');
         }
 
         return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
@@ -517,6 +530,7 @@ class Texy
     }
 
 
+
     /**
      * Invoke registered around-handlers
      *
@@ -534,6 +548,7 @@ class Texy
         $invocation->free();
         return $res;
     }
+
 
 
     /**
@@ -765,6 +780,7 @@ class Texy
     {
         throw new Exception("Clone is not supported.");
     }
+
 
 
     /**#@+

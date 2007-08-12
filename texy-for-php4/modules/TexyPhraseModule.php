@@ -270,6 +270,20 @@ class TexyPhraseModule extends TexyModule
 
 
     /**
+     * @param TexyLineParser
+     * @param array      regexp matches
+     * @param string     pattern name
+     * @return string
+     */
+    function patternNoTexy($parser, $matches)
+    {
+        list(, $mContent) = $matches;
+        return $this->texy->protect(Texy::escapeHtml($mContent), TEXY_CONTENT_TEXTUAL);
+    }
+
+
+
+    /**
      * Finish invocation
      *
      * @param TexyHandlerInvocation  handler invocation
@@ -309,20 +323,5 @@ class TexyPhraseModule extends TexyModule
 
         return $el;
     }
-
-
-
-    /**
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
-     * @return string
-     */
-    function patternNoTexy($parser, $matches)
-    {
-        list(, $mContent) = $matches;
-        return $this->texy->protect(Texy::escapeHtml($mContent), TEXY_CONTENT_TEXTUAL);
-    }
-
 
 }

@@ -54,6 +54,7 @@ class TexyHtmlCleaner
 
     /** @var int  wrap width, doesn't include indent space */
     var $lineWrap = 80;
+
     /** @var bool  remove optional HTML end tags? */
     var $removeOptional = TRUE;
 

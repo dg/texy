@@ -22,7 +22,6 @@ if (!class_exists('Texy')) die();
 class TexyBlockModule extends TexyModule
 {
 
-
     function __construct($texy)
     {
         $this->texy = $texy;
@@ -48,6 +47,7 @@ class TexyBlockModule extends TexyModule
     }
 
 
+
     /**
      * Single block pre-processing
      * @param TexyBlockParser
@@ -63,6 +63,7 @@ class TexyBlockModule extends TexyModule
             $text
         );
     }
+
 
 
     /**
@@ -94,6 +95,7 @@ class TexyBlockModule extends TexyModule
     }
 
 
+
     function outdent($s)
     {
         $s = trim($s, "\n");
@@ -101,6 +103,7 @@ class TexyBlockModule extends TexyModule
         if ($spaces) return preg_replace("#^ {1,$spaces}#m", '', $s);
         return $s;
     }
+
 
 
     /**

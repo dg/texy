@@ -55,6 +55,7 @@ class TexyEmoticonModule extends TexyModule
     }
 
 
+
     function beforeParse()
     {
         if (empty($this->texy->allowed['emoticon'])) return;
