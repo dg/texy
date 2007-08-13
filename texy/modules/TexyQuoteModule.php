@@ -121,7 +121,7 @@ final class TexyQuoteModule extends TexyModule
         if ($link{0} === '[') { // [ref]
             $link = substr($link, 1, -1);
             $ref = $tx->linkModule->getReference($link);
-            if ($ref) return Texy::prependRoot($ref['URL'], $tx->linkModule->root);
+            if ($ref) return Texy::prependRoot($ref->URL, $tx->linkModule->root);
         }
 
         if (!$tx->checkURL($link, 'c')) return NULL;

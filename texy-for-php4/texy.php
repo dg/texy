@@ -64,6 +64,23 @@ require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
 
 /**
+ * PHP requirements checker
+ */
+if (function_exists('mb_get_info')) {
+    if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
+        mb_internal_encoding('pass');
+        trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
+    }
+}
+
+if (ini_get('zend.ze1_compatibility_mode')) {
+    throw (new Exception("Texy cannot run with zend.ze1_compatibility_mode enabled"));
+}
+
+
+
+
+/**
  * PHP 4 Clone emulation
  *
  * Example: $obj = clone ($dolly)
@@ -265,15 +282,6 @@ class Texy
 
         $link = new TexyLink('http://en.wikipedia.org/wiki/Special:Search?search=%s');
         $this->linkModule->addReference('wikipedia', $link);
-
-        // mbstring.func_overload fix
-        if (function_exists('mb_get_info')) {
-            $mb = mb_get_info('all'); // all for PHP < 4.4.3
-            if ($mb['func_overload'] & 2 && $mb['internal_encoding'][0] === 'U') { // U??
-                mb_internal_encoding('pass');
-                trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
-            }
-        }
     }
 
 
@@ -856,8 +864,9 @@ class Texy
 
     function __clone()
     {
-        trigger_error('Clone is not supported.', E_USER_ERROR);
+        throw (new Exception("Clone is not supported"));
     }
+
 
 
     function Texy()  /* PHP 4 constructor */

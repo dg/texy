@@ -160,7 +160,7 @@ class TexyBlockParser extends TexyParser
         }
         unset($name, $pattern, $ms, $m, $k, $v);
 
-        usort($matches, array(__CLASS__, 'cmp'));
+        usort($matches, array(__CLASS__, 'cmp')); // generates strict error in PHP 5.1.2
         $matches[] = array(strlen($text), NULL, NULL); // terminal cap
 
 

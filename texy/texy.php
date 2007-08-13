@@ -63,7 +63,26 @@ require_once TEXY_DIR.'modules/TexyTypographyModule.php';
 
 
 
-// for PHP 4 backward compatibility
+/**
+ * PHP requirements checker
+ */
+if (function_exists('mb_get_info')) {
+    if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
+        mb_internal_encoding('pass');
+        trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
+    }
+}
+
+if (ini_get('zend.ze1_compatibility_mode')) {
+    throw new Exception("Texy cannot run with zend.ze1_compatibility_mode enabled");
+}
+
+
+
+
+/**
+ * For PHP 4 backward compatibility
+ */
 define('TEXY_ALL',  Texy::ALL);
 define('TEXY_NONE',  Texy::NONE);
 define('TEXY_VERSION',  Texy::VERSION);
@@ -260,15 +279,6 @@ class Texy
 
         $link = new TexyLink('http://en.wikipedia.org/wiki/Special:Search?search=%s');
         $this->linkModule->addReference('wikipedia', $link);
-
-        // mbstring.func_overload fix
-        if (function_exists('mb_get_info')) {
-            $mb = mb_get_info('all'); // all for PHP < 4.4.3
-            if ($mb['func_overload'] & 2 && $mb['internal_encoding'][0] === 'U') { // U??
-                mb_internal_encoding('pass');
-                trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
-            }
-        }
     }
 
 
@@ -778,7 +788,7 @@ class Texy
 
     final public function __clone()
     {
-        throw new Exception("Clone is not supported.");
+        throw new Exception("Clone is not supported");
     }
 
 
