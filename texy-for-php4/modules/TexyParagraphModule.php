@@ -129,7 +129,7 @@ class TexyParagraphModule extends TexyModule
 
         if ($el->getName()) {
             // apply modifier
-            if ($mod) $mod->decorate($tx, $el);
+            $mod->decorate($tx, $el);
 
             // add <br />
             if (strpos($content, "\r") !== FALSE) {
