@@ -21,22 +21,19 @@ if (!class_exists('Texy')) die();
 /** @var bool  use XHTML syntax? */
 $GLOBALS['TexyHtml::$xhtml'] = TRUE;
 
-/** @var array  replaced elements + br */
-$GLOBALS['TexyHtml::$replacedTags'] = array('br'=>1,'button'=>1,'iframe'=>1,'img'=>1,'input'=>1,
-    'object'=>1,'script'=>1,'select'=>1,'textarea'=>1,'applet'=>1,'embed'=>1,'canvas'=>1);
-
 /** @var array  empty elements */
-$GLOBALS['TexyHtml::$emptyTags'] = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
+$GLOBALS['TexyHtml::$emptyEl'] = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
     'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1,'embed'=>1);
 
-/** @var array  %inline; elements */
-$GLOBALS['TexyHtml::$inline'] = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
-    'strong'=>1,'dfn'=>1,'code'=>1,'samp'=>1,'kbd'=>1,'var'=>1,'cite'=>1,'abbr'=>1,'acronym'=>1,
-    'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
-    'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,
-    'u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1, // transitional
-    'embed'=>1,'wbr'=>1,'nobr'=>1,'canvas'=>1, // proprietary
+/** @var array  %inline; elements; replaced elements + br have value '1' */
+$GLOBALS['TexyHtml::$inlineEl'] = array('ins'=>0,'del'=>0,'tt'=>0,'i'=>0,'b'=>0,'big'=>0,'small'=>0,'em'=>0,
+    'strong'=>0,'dfn'=>0,'code'=>0,'samp'=>0,'kbd'=>0,'var'=>0,'cite'=>0,'abbr'=>0,'acronym'=>0,
+    'sub'=>0,'sup'=>0,'q'=>0,'span'=>0,'bdo'=>0,'a'=>0,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
+    'map'=>0,'input'=>1,'select'=>1,'textarea'=>1,'label'=>0,'button'=>1,
+    'u'=>0,'s'=>0,'strike'=>0,'font'=>0,'applet'=>1,'basefont'=>0, // transitional
+    'embed'=>1,'wbr'=>0,'nobr'=>0,'canvas'=>1, // proprietary
 ); /* class static property */
+
 
 /**
  * HTML helper
@@ -121,7 +118,7 @@ class TexyHtml
         }
 
         $this->name = $name;
-        $this->isEmpty = isset($GLOBALS['TexyHtml::$emptyTags'][$name]);
+        $this->isEmpty = isset($GLOBALS['TexyHtml::$emptyEl'][$name]);
         return $this;
     }
 
@@ -439,10 +436,9 @@ class TexyHtml
      */
     function getContentType()
     {
-        if (isset($GLOBALS['TexyHtml::$replacedTags'][$this->name])) return TEXY_CONTENT_REPLACED;
-        if (isset($GLOBALS['TexyHtml::$inline'][$this->name])) return TEXY_CONTENT_MARKUP;
+        if (!isset($GLOBALS['TexyHtml::$inlineEl'][$this->name])) return TEXY_CONTENT_BLOCK;
 
-        return TEXY_CONTENT_BLOCK;
+        return $GLOBALS['TexyHtml::$inlineEl'][$this->name] ? TEXY_CONTENT_REPLACED : TEXY_CONTENT_MARKUP;
     }
 
 

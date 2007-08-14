@@ -180,7 +180,7 @@ class TexyHtmlCleaner
 
 
         // phase #3 - HTML tag
-        $mEmpty = $mEmpty || isset($GLOBALS['TexyHtml::$emptyTags'][$mTag]);
+        $mEmpty = $mEmpty || isset($GLOBALS['TexyHtml::$emptyEl'][$mTag]);
         if ($mEmpty && $mEnd) return $s; // bad tag; /end/
 
 
@@ -198,7 +198,7 @@ class TexyHtmlCleaner
                 $s .= $item['close'];
                 $this->space -= $item['indent'];
                 $this->tagUsed[$tag]--;
-                $back = $back && isset($GLOBALS['TexyHtml::$inline'][$tag]);
+                $back = $back && isset($GLOBALS['TexyHtml::$inlineEl'][$tag]);
                 unset($this->tagStack[$i]);
                 if ($tag === $mTag) break;
                 array_unshift($tmp, $item);
@@ -244,7 +244,7 @@ class TexyHtmlCleaner
                     $tag = $item['tag'];
 
                     // auto-close hidden, optional and inline tags
-                    if ($item['close'] && (!isset($GLOBALS['TexyHtmlCleaner::$optional'][$tag]) && !isset($GLOBALS['TexyHtml::$inline'][$tag]))) break;
+                    if ($item['close'] && (!isset($GLOBALS['TexyHtmlCleaner::$optional'][$tag]) && !isset($GLOBALS['TexyHtml::$inlineEl'][$tag]))) break;
 
                     // close it
                     $s .= $item['close'];
@@ -274,7 +274,7 @@ class TexyHtmlCleaner
                     // formatting exception
                     return rtrim($s) .  '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-                if ($this->indent && !isset($GLOBALS['TexyHtml::$inline'][$mTag])) {
+                if ($this->indent && !isset($GLOBALS['TexyHtml::$inlineEl'][$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
                     return $s . $space . '<' . $mTag . $mAttr . '>' . $space;
                 }
@@ -287,7 +287,7 @@ class TexyHtmlCleaner
             $indent = 0;
 
             /*
-            if (!isset($GLOBALS['TexyHtml::$inline'][$mTag])) {
+            if (!isset($GLOBALS['TexyHtml::$inlineEl'][$mTag])) {
                 // block tags always decorate with \n
                 $s .= "\n";
                 $close = "\n";
@@ -301,7 +301,7 @@ class TexyHtmlCleaner
                 if (!empty($this->dtd[$mTag][1])) $dtdContent = $this->dtd[$mTag][1];
 
                 // format output
-                if ($this->indent && !isset($GLOBALS['TexyHtml::$inline'][$mTag])) {
+                if ($this->indent && !isset($GLOBALS['TexyHtml::$inlineEl'][$mTag])) {
                     $close = "\x08" . '</'.$mTag.'>' . "\n" . str_repeat("\t", $this->space);
                     $s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
                     $indent = 1;

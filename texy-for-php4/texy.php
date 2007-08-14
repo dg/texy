@@ -73,7 +73,7 @@ if (function_exists('mb_get_info')) {
     }
 }
 
-if (preg_match('#on|true|yes|1#iA', ini_get('zend.ze1_compatibility_mode'))) {
+if (preg_match('#on|true|yes|[1-9]#iA', ini_get('zend.ze1_compatibility_mode'))) {
     throw (new Exception("Texy cannot run with zend.ze1_compatibility_mode enabled"));
 }
 
