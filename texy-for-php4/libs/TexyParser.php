@@ -130,7 +130,7 @@ class TexyBlockParser extends TexyParser
     {
         $tx = $this->texy;
 
-        $tx->invokeAfterHandlers('beforeBlockParse', array($this, & $text));
+        $tx->invokeHandlers('beforeBlockParse', array($this, & $text));
 
         // parser initialization
         $this->text = $text;

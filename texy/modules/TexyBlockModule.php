@@ -91,7 +91,7 @@ final class TexyBlockModule extends TexyModule
         $blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
         $param = empty($parts[1]) ? NULL : $parts[1];
 
-        return $this->texy->invokeHandlers('block', $parser, array($blocktype, $mContent, $param, $mod));
+        return $this->texy->invokeAroundHandlers('block', $parser, array($blocktype, $mContent, $param, $mod));
     }
 
 

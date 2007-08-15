@@ -82,7 +82,7 @@ class TexyFigureModule extends TexyModule
             }
         } else $link = NULL;
 
-        return $tx->invokeHandlers('figure', $parser, array($image, $link, $mContent, $mod));
+        return $tx->invokeAroundHandlers('figure', $parser, array($image, $link, $mContent, $mod));
     }
 
 

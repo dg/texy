@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 162
+- TexyHtmlCleaner přejmenován na TexyHtmlOutputModule, dostupný přes `$texy->htmlOutputModule`
+
 rev. 156
 - nové API metody TexyHtml::toText() & TexyHtml::toHtml() pro export částí DOM
 
@@ -30,9 +33,9 @@ rev. 131
 - vráceno zpět $texy->tabWidth
 
 rev. 126
-- vnitřní DTD validátor TexyHtmlCleaner nyní kontroluje i platnost atributů
+- vnitřní DTD validátor $texy->htmlOutputModule nyní kontroluje i platnost atributů
 - opravena chyba zadávání atributů před modifikátor .{attr:value}
-- změna názvu $texy->formatterModule -> $texy->cleaner
+- změna názvu $texy->formatterModule -> $texy->htmlOutputModule
 
 rev. 125
 - přepsána knihovna TexyHtml - k vlastnostem elementu se nyní přistupuje přes `$el['src'] = 'image.gif'` namísto původního `$el->src = 'image.gif'`
@@ -210,7 +213,7 @@ typographyModule
 - vylepšená syntax: `----->` dlouhé šipky
 - zapínání/vypínání syntaxe: `$texy->allowed['typography']`
 
-TexyHtmlCleaner
+htmlOutputModule
 --------------
 - zajišťuje, že výstup z Texy je tzv. well-formed, opravuje neplatné křížení tagů atd.
 - výstup nyní kontroluje mnohem precizněji, zohledňuje `$strictDTD`

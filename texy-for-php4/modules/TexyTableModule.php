@@ -115,7 +115,7 @@ class TexyTableModule extends TexyModule
         }
 
         // event listener
-        $tx->invokeAfterHandlers('afterTable', array($parser, $el, $mod));
+        $tx->invokeHandlers('afterTable', array($parser, $el, $mod));
 
         return $el;
     }

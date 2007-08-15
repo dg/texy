@@ -123,7 +123,7 @@ class TexyHeadingModule extends TexyModule
 
         $mod = new TexyModifier($mMod);
         $level = $this->levels[$mLine[0]];
-        return $this->texy->invokeHandlers('heading', $parser, array($level, $mContent, $mod, FALSE));
+        return $this->texy->invokeAroundHandlers('heading', $parser, array($level, $mContent, $mod, FALSE));
     }
 
 
@@ -148,7 +148,7 @@ class TexyHeadingModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $level = 7 - min(7, max(2, strlen($mLine)));
         $mContent = rtrim($mContent, $mLine[0] . ' ');
-        return $this->texy->invokeHandlers('heading', $parser, array($level, $mContent, $mod, TRUE));
+        return $this->texy->invokeAroundHandlers('heading', $parser, array($level, $mContent, $mod, TRUE));
     }
 
 

@@ -59,7 +59,7 @@ class TexyHtmlModule extends TexyModule
     function patternComment($parser, $matches)
     {
         list(, $mComment) = $matches;
-        return $this->texy->invokeHandlers('htmlComment', $parser, array($mComment));
+        return $this->texy->invokeAroundHandlers('htmlComment', $parser, array($mComment));
     }
 
 
@@ -104,7 +104,7 @@ class TexyHtmlModule extends TexyModule
 
         // end tag? we are finished
         if (!$isStart) {
-            return $tx->invokeHandlers('htmlTag', $parser, array($el, FALSE));
+            return $tx->invokeAroundHandlers('htmlTag', $parser, array($el, FALSE));
         }
 
         // parse attributes
@@ -124,7 +124,7 @@ class TexyHtmlModule extends TexyModule
             else $el->attrs[$key] = Texy::unescapeHtml($value);
         }
 
-        return $tx->invokeHandlers('htmlTag', $parser, array($el, TRUE, $isEmpty));
+        return $tx->invokeAroundHandlers('htmlTag', $parser, array($el, TRUE, $isEmpty));
     }
 
 

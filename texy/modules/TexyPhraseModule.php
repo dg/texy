@@ -246,7 +246,7 @@ final class TexyPhraseModule extends TexyModule
             $link = $tx->linkModule->factoryLink($mLink, NULL, $mContent);
         }
 
-        return $tx->invokeHandlers('phrase', $parser, array($phrase, $mContent, $mod, $link));
+        return $tx->invokeAroundHandlers('phrase', $parser, array($phrase, $mContent, $mod, $link));
     }
 
 
@@ -264,7 +264,7 @@ final class TexyPhraseModule extends TexyModule
         list(, $mContent) = $matches;
         $mod = new TexyModifier();
         $link = NULL;
-        return $this->texy->invokeHandlers('phrase', $parser, array($phrase, $mContent, $mod, $link));
+        return $this->texy->invokeAroundHandlers('phrase', $parser, array($phrase, $mContent, $mod, $link));
     }
 
 

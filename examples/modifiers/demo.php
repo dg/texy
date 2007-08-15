@@ -19,7 +19,7 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 
 $texy = new Texy();
-$texy->cleaner->baseIndent  = 1;
+$texy->htmlOutputModule->baseIndent  = 1;
 
 
 

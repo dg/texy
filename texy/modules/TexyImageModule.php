@@ -141,7 +141,7 @@ final class TexyImageModule extends TexyModule
             }
         } else $link = NULL;
 
-        return $tx->invokeHandlers('image', $parser, array($image, $link));
+        return $tx->invokeAroundHandlers('image', $parser, array($image, $link));
     }
 
 

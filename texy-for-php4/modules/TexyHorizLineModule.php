@@ -54,7 +54,7 @@ class TexyHorizLineModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $el);
 
-        $tx->invokeAfterHandlers('afterHorizline', array($parser, $el, $mod));
+        $tx->invokeHandlers('afterHorizline', array($parser, $el, $mod));
 
         return $el;
     }

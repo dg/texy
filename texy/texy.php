@@ -36,7 +36,6 @@ define('TEXY_DIR',  dirname(__FILE__).'/');
 
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
-require_once TEXY_DIR.'libs/TexyHtmlCleaner.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';
@@ -59,6 +58,7 @@ require_once TEXY_DIR.'modules/TexyScriptModule.php';
 require_once TEXY_DIR.'modules/TexyEmoticonModule.php';
 require_once TEXY_DIR.'modules/TexyTableModule.php';
 require_once TEXY_DIR.'modules/TexyTypographyModule.php';
+require_once TEXY_DIR.'modules/TexyHtmlOutputModule.php';
 
 
 
@@ -214,7 +214,10 @@ class Texy
     /** @var TexyLongWordsModule */
     public $longWordsModule;
 
-    /** @var TexyHtmlCleaner */
+    /** @var TexyHtmlOutputModule */
+    public $htmlOutputModule;
+
+    /** @var TexyHtmlOutputModule deprecated */
     public $cleaner;
 
 
@@ -261,11 +264,10 @@ class Texy
         // load all modules
         $this->loadModules();
 
-        // load routines
-        $this->cleaner = new TexyHtmlCleaner($this);
+        $this->cleaner = & $this->htmlOutputModule;
 
         // accepts all valid HTML tags and attributes by default
-        foreach ($this->cleaner->dtd as $tag => $dtd)
+        foreach ($this->htmlOutputModule->dtd as $tag => $dtd)
             $this->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
 
         // examples of link references ;-)
@@ -310,6 +312,7 @@ class Texy
         // post process
         $this->typographyModule = new TexyTypographyModule($this);
         $this->longWordsModule = new TexyLongWordsModule($this);
+        $this->htmlOutputModule = new TexyHtmlOutputModule($this);
     }
 
 
@@ -384,7 +387,7 @@ class Texy
             $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
 
         // user before handler
-        $this->invokeAfterHandlers('beforeParse', array($this, & $text, $singleLine));
+        $this->invokeHandlers('beforeParse', array($this, & $text, $singleLine));
 
         // select patterns
         $this->_linePatterns = $this->linePatterns;
@@ -405,7 +408,7 @@ class Texy
         }
 
         // user after handler
-        $this->invokeAfterHandlers('afterParse', array($this, $this->DOM, $singleLine));
+        $this->invokeHandlers('afterParse', array($this, $this->DOM, $singleLine));
 
         // converts internal DOM structure to final HTML code
         $html = $this->DOM->toHtml($this);
@@ -487,7 +490,7 @@ class Texy
         $s = $this->unProtect($s);
 
         // wellform and reformat HTML
-        $s = $this->cleaner->process($s);
+        $this->invokeHandlers('postProcess', array($this, & $s));
 
         // unfreeze spaces
         $s = self::unfreezeSpaces($s);
@@ -503,10 +506,10 @@ class Texy
      */
     final public function stringToText($s)
     {
-        $save = $this->cleaner->lineWrap;
-        $this->cleaner->lineWrap = FALSE;
+        $save = $this->htmlOutputModule->lineWrap;
+        $this->htmlOutputModule->lineWrap = FALSE;
         $s = $this->stringToHtml( $s );
-        $this->cleaner->lineWrap = $save;
+        $this->htmlOutputModule->lineWrap = $save;
 
         // remove tags
         $s = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $s);
@@ -549,7 +552,7 @@ class Texy
      * @param array    arguments passed into handler
      * @return mixed
      */
-    final public function invokeHandlers($event, $parser, $args)
+    final public function invokeAroundHandlers($event, $parser, $args)
     {
         if (!isset($this->handlers[$event])) return FALSE;
 
@@ -568,7 +571,7 @@ class Texy
      * @param array    arguments passed into handler
      * @return void
      */
-    final public function invokeAfterHandlers($event, $args)
+    final public function invokeHandlers($event, $args)
     {
         if (!isset($this->handlers[$event])) return FALSE;
 
@@ -581,7 +584,7 @@ class Texy
 
     /**
      * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04
-     * which are ignored by TexyHtmlCleaner routine
+     * which are ignored by TexyHtmlOutputModule routine
      * @param string
      * @return string
      */

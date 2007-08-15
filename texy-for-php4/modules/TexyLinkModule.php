@@ -141,7 +141,7 @@ class TexyLinkModule extends TexyModule
         $link = $this->getReference($name);
 
         if (!$link) {
-            return $tx->invokeHandlers('newReference', $parser, array($name));
+            return $tx->invokeAroundHandlers('newReference', $parser, array($name));
         }
 
         $link->type = TEXY_LINK_BRACKET;
@@ -160,7 +160,7 @@ class TexyLinkModule extends TexyModule
             $content = $this->textualURL($link);
         }
 
-        return $tx->invokeHandlers('linkReference', $parser, array($link, $content));
+        return $tx->invokeAroundHandlers('linkReference', $parser, array($link, $content));
     }
 
 
@@ -182,7 +182,7 @@ class TexyLinkModule extends TexyModule
         $this->checkLink($link);
         $content = $this->textualURL($link);
 
-        return $this->texy->invokeHandlers(
+        return $this->texy->invokeAroundHandlers(
             $name === 'link/email' ? 'linkEmail' : 'linkURL',
             $parser,
             array($link, $content)

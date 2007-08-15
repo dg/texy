@@ -87,7 +87,7 @@ class TexyScriptModule extends TexyModule
         }
 
         // Texy 2 way
-        return $this->texy->invokeHandlers('script', $parser, array($cmd, $args, $raw));
+        return $this->texy->invokeAroundHandlers('script', $parser, array($cmd, $args, $raw));
     }
 
 

@@ -12,80 +12,86 @@
  */
 
 // security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
+if (!class_exists('Texy')) die();
 
 
-final class TexyHtmlCleaner
+
+/** @var array  elements with optional end tag in HTML */
+$GLOBALS['TexyHtmlOutputModule::$optional'] = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
+    'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1); /* class private static property */
+
+/** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
+$GLOBALS['TexyHtmlOutputModule::$prohibits'] = array(
+    'a' => array('a','button'),
+    'img' => array('pre'),
+    'object' => array('pre'),
+    'big' => array('pre'),
+    'small' => array('pre'),
+    'sub' => array('pre'),
+    'sup' => array('pre'),
+    'input' => array('button'),
+    'select' => array('button'),
+    'textarea' => array('button'),
+    'label' => array('button', 'label'),
+    'button' => array('button'),
+    'form' => array('button', 'form'),
+    'fieldset' => array('button'),
+    'iframe' => array('button'),
+    'isindex' => array('button'),
+); /* class private static property */
+
+/** @var array cache */
+$GLOBALS['TexyHtmlOutputModule::$dtdCache'] = array();
+
+
+class TexyHtmlOutputModule extends TexyModule
 {
     /** @var bool  indent HTML code? */
-    public $indent = TRUE;
+    var $indent = TRUE;
 
     /** @var int  base indent level */
-    public $baseIndent = 0;
+    var $baseIndent = 0;
 
     /** @var int  wrap width, doesn't include indent space */
-    public $lineWrap = 80;
+    var $lineWrap = 80;
 
     /** @var bool  remove optional HTML end tags? */
-    public $removeOptional = TRUE;
+    var $removeOptional = TRUE;
 
     /** @var int  indent space counter */
-    private $space;
+    var $space; /* private */
 
     /**
      * DTD descriptor
      *   $dtd[element][0] - allowed attributes (as array keys)
      *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
      * @var array
-     * @see TexyHtmlCleaner::initDTD()
+     * @see TexyHtmlOutputModule::initDTD()
      */
-    public $dtd;
-
-    /** @var array cache */
-    private static $dtdCache;
-
-    /** @var array  elements with optional end tag in HTML */
-    private static $optional = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
-        'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1);
-
-    /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
-    private static $prohibits = array(
-        'a' => array('a','button'),
-        'img' => array('pre'),
-        'object' => array('pre'),
-        'big' => array('pre'),
-        'small' => array('pre'),
-        'sub' => array('pre'),
-        'sup' => array('pre'),
-        'input' => array('button'),
-        'select' => array('button'),
-        'textarea' => array('button'),
-        'label' => array('button', 'label'),
-        'button' => array('button'),
-        'form' => array('button', 'form'),
-        'fieldset' => array('button'),
-        'iframe' => array('button'),
-        'isindex' => array('button'),
-    );
+    var $dtd;
 
     /** @var array */
-    private $tagUsed;
+    var $tagUsed; /* private */
 
     /** @var array */
-    private $tagStack;
-
-    /** @var Texy */
-    private $texy;
+    var $tagStack; /* private */
 
     /** @var array  content DTD used, when context is not defined */
-    private $baseDTD;
+    var $baseDTD; /* private */
 
 
 
-    public function __construct($texy)
+    function __construct($texy)
     {
         $this->texy = $texy;
         $this->initDTD();
+
+        $texy->addHandler('postProcess', array($this, 'postProcess'));
+
+        // accepts all valid HTML tags and attributes by default
+        foreach ($this->dtd as $tag => $dtd) {
+            $texy->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
+        }
     }
 
 
@@ -94,7 +100,7 @@ final class TexyHtmlCleaner
      * Converts <strong><em> ... </strong> ... </em>
      * into <strong><em> ... </em></strong><em> ... </em>
      */
-    public function process($s)
+    function postProcess($texy, & $s)
     {
         $this->space = $this->baseIndent;
         $this->tagStack = array();
@@ -135,8 +141,6 @@ final class TexyHtmlCleaner
         // remove HTML 4.01 optional end tags
         if (!$this->texy->xhtml && $this->removeOptional)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
-
-        return $s;
     }
 
 
@@ -145,7 +149,7 @@ final class TexyHtmlCleaner
      * Callback function: <tag> | </tag> | ....
      * @return string
      */
-    private function cb($matches)
+    function cb($matches) /* private */
     {
         // html tag
         list(, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
@@ -178,7 +182,7 @@ final class TexyHtmlCleaner
 
 
         // phase #3 - HTML tag
-        $mEmpty = $mEmpty || isset(TexyHtml::$emptyEl[$mTag]);
+        $mEmpty = $mEmpty || isset($GLOBALS['TexyHtml::$emptyEl'][$mTag]);
         if ($mEmpty && $mEnd) return $s; // bad tag; /end/
 
 
@@ -196,7 +200,7 @@ final class TexyHtmlCleaner
                 $s .= $item['close'];
                 $this->space -= $item['indent'];
                 $this->tagUsed[$tag]--;
-                $back = $back && isset(TexyHtml::$inlineEl[$tag]);
+                $back = $back && isset($GLOBALS['TexyHtml::$inlineEl'][$tag]);
                 unset($this->tagStack[$i]);
                 if ($tag === $mTag) break;
                 array_unshift($tmp, $item);
@@ -242,7 +246,7 @@ final class TexyHtmlCleaner
                     $tag = $item['tag'];
 
                     // auto-close hidden, optional and inline tags
-                    if ($item['close'] && (!isset(self::$optional[$tag]) && !isset(TexyHtml::$inlineEl[$tag]))) break;
+                    if ($item['close'] && (!isset($GLOBALS['TexyHtmlOutputModule::$optional'][$tag]) && !isset($GLOBALS['TexyHtml::$inlineEl'][$tag]))) break;
 
                     // close it
                     $s .= $item['close'];
@@ -256,8 +260,8 @@ final class TexyHtmlCleaner
                 $allowed = isset($dtdContent[$mTag]);
 
                 // check deep element prohibitions
-                if ($allowed && isset(self::$prohibits[$mTag])) {
-                    foreach (self::$prohibits[$mTag] as $pTag)
+                if ($allowed && isset($GLOBALS['TexyHtmlOutputModule::$prohibits'][$mTag])) {
+                    foreach ($GLOBALS['TexyHtmlOutputModule::$prohibits'][$mTag] as $pTag)
                         if (!empty($this->tagUsed[$pTag])) { $allowed = FALSE; break; }
                 }
             }
@@ -272,7 +276,7 @@ final class TexyHtmlCleaner
                     // formatting exception
                     return rtrim($s) .  '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-                if ($this->indent && !isset(TexyHtml::$inlineEl[$mTag])) {
+                if ($this->indent && !isset($GLOBALS['TexyHtml::$inlineEl'][$mTag])) {
                     $space = "\r" . str_repeat("\t", $this->space);
                     return $s . $space . '<' . $mTag . $mAttr . '>' . $space;
                 }
@@ -285,7 +289,7 @@ final class TexyHtmlCleaner
             $indent = 0;
 
             /*
-            if (!isset(TexyHtml::$inlineEl[$mTag])) {
+            if (!isset($GLOBALS['TexyHtml::$inlineEl'][$mTag])) {
                 // block tags always decorate with \n
                 $s .= "\n";
                 $close = "\n";
@@ -299,7 +303,7 @@ final class TexyHtmlCleaner
                 if (!empty($this->dtd[$mTag][1])) $dtdContent = $this->dtd[$mTag][1];
 
                 // format output
-                if ($this->indent && !isset(TexyHtml::$inlineEl[$mTag])) {
+                if ($this->indent && !isset($GLOBALS['TexyHtml::$inlineEl'][$mTag])) {
                     $close = "\x08" . '</'.$mTag.'>' . "\n" . str_repeat("\t", $this->space);
                     $s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
                     $indent = 1;
@@ -333,7 +337,7 @@ final class TexyHtmlCleaner
      * Callback function: wrap lines
      * @return string
      */
-    private function wrap($m)
+    function wrap($m) /* private */
     {
         list(, $space, $s) = $m;
         return $space . wordwrap($s, $this->lineWrap, "\n" . $space);
@@ -344,11 +348,11 @@ final class TexyHtmlCleaner
     /**
      * Initializes $this->dtd array
      */
-    private function initDTD()
+    function initDTD() /* static */
     {
-        $strict = Texy::$strictDTD;
-        if (isset(self::$dtdCache[$strict])) {
-            $this->dtd = self::$dtdCache[$strict];
+        $strict = $GLOBALS['Texy::$strictDTD'];
+        if (isset($GLOBALS['TexyHtmlOutputModule::$dtdCache'][$strict])) {
+            $this->dtd = $GLOBALS['TexyHtmlOutputModule::$dtdCache'];
             return;
         }
 
@@ -702,7 +706,7 @@ final class TexyHtmlCleaner
 
 
         if ($strict) {
-            self::$dtdCache[$strict] = $this->dtd;
+            $GLOBALS['TexyHtmlOutputModule::$dtdCache'] = $this->dtd;
             return;
         }
 
@@ -761,7 +765,7 @@ final class TexyHtmlCleaner
 
         // proprietary
         'marquee' => array(
-             Texy::ALL,
+             TEXY_ALL,
              $bi,
         ),
         'nobr' => array(
@@ -769,11 +773,11 @@ final class TexyHtmlCleaner
              $i,
         ),
         'canvas' => array(
-             Texy::ALL,
+             TEXY_ALL,
              $i,
         ),
         'embed' => array(
-             Texy::ALL,
+             TEXY_ALL,
              FALSE,
         ),
         'wbr' => array(
@@ -796,19 +800,8 @@ final class TexyHtmlCleaner
         $this->dtd['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
         $this->dtd['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
 
-        self::$dtdCache[$strict] = $this->dtd;
+        $GLOBALS['TexyHtmlOutputModule::$dtdCache'] = $this->dtd;
         // missing: FRAMESET, FRAME, BGSOUND, XMP, ...
     }
-
-
-
-    /**#@+
-     * Access to undeclared property
-     * @throws Exception
-     */
-    final function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    /**#@-*/
 
 }

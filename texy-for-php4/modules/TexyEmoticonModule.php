@@ -94,7 +94,7 @@ class TexyEmoticonModule extends TexyModule
         {
             if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
             {
-                return $tx->invokeHandlers('emoticon', $parser, array($emoticon, $match));
+                return $tx->invokeAroundHandlers('emoticon', $parser, array($emoticon, $match));
             }
         }
 

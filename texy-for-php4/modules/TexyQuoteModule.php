@@ -100,7 +100,7 @@ class TexyQuoteModule extends TexyModule
         if (!count($el->children)) return FALSE;
 
         // event listener
-        $tx->invokeAfterHandlers('afterBlockquote', array($parser, $el, $mod));
+        $tx->invokeHandlers('afterBlockquote', array($parser, $el, $mod));
 
         return $el;
     }

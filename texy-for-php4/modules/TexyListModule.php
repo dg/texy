@@ -127,7 +127,7 @@ class TexyListModule extends TexyModule
         if (count($el->children) < $min) return FALSE;
 
         // event listener
-        $tx->invokeAfterHandlers('afterList', array($parser, $el, $mod));
+        $tx->invokeHandlers('afterList', array($parser, $el, $mod));
 
         return $el;
     }
@@ -196,7 +196,7 @@ class TexyListModule extends TexyModule
         }
 
         // event listener
-        $tx->invokeAfterHandlers('afterDefinitionList', array($parser, $el, $mod));
+        $tx->invokeHandlers('afterDefinitionList', array($parser, $el, $mod));
 
         return $el;
     }
