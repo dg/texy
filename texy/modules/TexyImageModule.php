@@ -353,8 +353,8 @@ final class TexyImage
      * Access to undeclared property
      * @throws Exception
      */
-    final function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    final function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    final function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    private function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    private function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    private function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
     /**#@-*/
 }

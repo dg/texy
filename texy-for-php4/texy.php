@@ -877,4 +877,14 @@ class Texy
         call_user_func_array(array(&$this, '__construct'), $args);
     }
 
+
+
+    /**#@+
+     * Access to undeclared property in PHP 5
+     * @throws Exception
+     */
+    function __get($name) { throw (new Exception("Access to undeclared property: " . get_class($this) . "::$$name")); }
+    function __set($name, $value) { throw (new Exception("Access to undeclared property: " . get_class($this) . "::$$name")); }
+    function __unset($name) { throw (new Exception("Access to undeclared property: " . get_class($this) . "::$$name")); }
+    /**#@-*/
 }
