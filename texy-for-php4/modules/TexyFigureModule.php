@@ -102,13 +102,15 @@ class TexyFigureModule extends TexyModule
         $tx = $this->texy;
 
         $hAlign = $image->modifier->hAlign;
-        $mod->hAlign = $image->modifier->hAlign = NULL;
+        $image->modifier->hAlign = NULL;
 
         $elImg = $tx->imageModule->solve(NULL, $image, $link); // returns TexyHtml or false!
         if (!$elImg) return FALSE;
 
         $el = TexyHtml::el('div');
-        if (!empty($image->width)) $el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
+        if (!empty($image->width) && $this->widthDelta !== FALSE) {
+            $el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
+        }
         $mod->decorate($tx, $el);
 
         $el->children['img'] = $elImg;
@@ -116,19 +118,25 @@ class TexyFigureModule extends TexyModule
         $el->children['caption']->parseLine($tx, ltrim($content));
 
         if ($hAlign === 'left') {
-            if ($this->leftClass != '')
+            if ($this->leftClass != '') {
                 $el->attrs['class'][] = $this->leftClass;
-            else
+            } else {
                 $el->attrs['style']['float'] = 'left';
+                $el->attrs['class'][] = $this->class;
+            }
 
         } elseif ($hAlign === 'right')  {
 
-            if ($this->rightClass != '')
+            if ($this->rightClass != '') {
                 $el->attrs['class'][] = $this->rightClass;
-            else
+            } else {
                 $el->attrs['style']['float'] = 'right';
-        } elseif ($this->class)
+                $el->attrs['class'][] = $this->class;
+            }
+
+        } else {
             $el->attrs['class'][] = $this->class;
+        }
 
         return $el;
     }

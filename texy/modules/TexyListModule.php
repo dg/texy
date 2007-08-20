@@ -159,7 +159,7 @@ final class TexyListModule extends TexyModule
         $tx = $this->texy;
 
         $bullet = NULL;
-        foreach ($this->bullets as $type => $desc)
+        foreach ($this->bullets as $desc)
             if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
                 $bullet = isset($desc[3]) ? $desc[3] : $desc[0];
                 break;

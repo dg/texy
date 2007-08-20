@@ -45,8 +45,8 @@ final class TexyHtmlOutputModule extends TexyModule
     private static $dtdCache;
 
     /** @var array  elements with optional end tag in HTML */
-    private static $optional = array('colgroup'=>1,'dd'=>1,'dt'=>1,'li'=>1,'option'=>1,
-        'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1);
+    private static $optional = array('body'=>1,'head'=>1,'html'=>1,'colgroup'=>1,'dd'=>1,
+        'dt'=>1,'li'=>1,'option'=>1,'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1);
 
     /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
     private static $prohibits = array(
@@ -103,8 +103,9 @@ final class TexyHtmlOutputModule extends TexyModule
         $this->space = $this->baseIndent;
         $this->tagStack = array();
         $this->tagUsed  = array();
+
         // special "base content"
-        $this->baseDTD = $this->dtd['div'][1] + array('html'=>1);
+        $this->baseDTD = $this->dtd['div'][1] + $this->dtd['html'][1] /*+ $this->dtd['head'][1]*/ + $this->dtd['body'][1] + array('html'=>1);
 
         // wellform and reformat
         $s = preg_replace_callback(

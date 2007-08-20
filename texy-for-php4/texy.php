@@ -574,7 +574,7 @@ class Texy
      */
     function invokeHandlers($event, $args)
     {
-        if (!isset($this->handlers[$event])) return FALSE;
+        if (!isset($this->handlers[$event])) return;
 
         foreach ($this->handlers[$event] as $handler) {
             call_user_func_array($handler, $args);
@@ -615,15 +615,15 @@ class Texy
      */
     function normalize($s) /* static */
     {
-        // remove special chars
-        $s = preg_replace('#[\x01-\x04\x14-\x1F]+#', '', $s);
-
         // standardize line endings to unix-like
         $s = str_replace("\r\n", "\n", $s); // DOS
         $s = strtr($s, "\r", "\n"); // Mac
 
+        // remove special chars; leave \t + \n
+        $s = preg_replace('#[\x00-\x08\x0B-\x1F]+#', '', $s);
+
         // right trim
-        $s = preg_replace("#[\t ]+$#m", '', $s); // right trim
+        $s = preg_replace("#[\t ]+$#m", '', $s);
 
         // trailing spaces
         $s = trim($s, "\n");
