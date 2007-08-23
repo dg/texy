@@ -37,7 +37,6 @@ class MyTexy extends Texy
 
 
 
-
     function process($text, $useCache = TRUE)
     {
         $this->time = -microtime(TRUE);

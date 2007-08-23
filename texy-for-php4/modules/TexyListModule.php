@@ -26,7 +26,7 @@ class TexyListModule extends TexyModule
         '*'  => array('\*\ ',               0, ''),
         '-'  => array('[\x{2013}-](?![>-])',0, ''),
         '+'  => array('\+\ ',               0, ''),
-        '1.' => array('1\.\ ', /*\d{1,3}*/  1, '',             '\d{1,3}\.\ '),
+        '1.' => array('1\.\ ',/* not \d !*/ 1, '',             '\d{1,3}\.\ '),
         '1)' => array('\d{1,3}\)\ ',        1, ''),
         'I.' => array('I\.\ ',              1, 'upper-roman',  '[IVX]{1,4}\.\ '),
         'I)' => array('[IVX]+\)\ ',         1, 'upper-roman'), // before A) !

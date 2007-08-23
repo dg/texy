@@ -35,6 +35,7 @@ class TexyParser
     }
 
 
+
     function TexyParser()  /* PHP 4 constructor */
     {
         // generate references (see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4)

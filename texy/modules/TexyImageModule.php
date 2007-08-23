@@ -349,6 +349,7 @@ final class TexyImage
     }
 
 
+
     /**#@+
      * Access to undeclared property
      * @throws Exception

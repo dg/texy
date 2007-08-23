@@ -467,11 +467,13 @@ class TexyLink
     }
 
 
+
     function __clone()
     {
         if ($this->modifier)
             $this->modifier = clone ($this->modifier);
     }
+
 
 
     function TexyLink()  /* PHP 4 constructor */

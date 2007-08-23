@@ -341,11 +341,13 @@ class TexyImage
     }
 
 
+
     function __clone()
     {
         if ($this->modifier)
             $this->modifier = clone ($this->modifier);
     }
+
 
 
     function TexyImage()  /* PHP 4 constructor */

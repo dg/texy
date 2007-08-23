@@ -91,6 +91,7 @@ class TexyHtml
     }
 
 
+
     /**
      * Static factory for textual element
      * @param string
@@ -257,6 +258,7 @@ class TexyHtml
         // works only in PHP5
         return $this->attrs[$name];
     }
+
 
 
     /**

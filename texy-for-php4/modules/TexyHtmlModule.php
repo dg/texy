@@ -252,7 +252,6 @@ class TexyHtmlModule extends TexyModule
 
 
 
-
     /**
      * Finish invocation
      *

@@ -56,6 +56,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyImage
@@ -66,6 +68,8 @@ class myHandler
     {
         return $invocation->proceed();
     }
+
+
 
     /**
      * @param TexyHandlerInvocation  handler invocation
@@ -78,6 +82,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyLink
@@ -89,6 +95,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyLink
@@ -99,6 +107,8 @@ class myHandler
     {
         return $invocation->proceed();
     }
+
+
 
     /**
      * @param TexyHandlerInvocation  handler invocation
@@ -113,6 +123,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param string
@@ -123,6 +135,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param string
@@ -132,6 +146,8 @@ class myHandler
     {
         return $invocation->proceed();
     }
+
+
 
     /**
      * @param TexyHandlerInvocation  handler invocation
@@ -144,6 +160,8 @@ class myHandler
     {
         return $invocation->proceed();
     }
+
+
 
     /**
      * @param TexyHandlerInvocation  handler invocation
@@ -172,6 +190,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyImage
@@ -184,6 +204,8 @@ class myHandler
     {
         return $invocation->proceed();
     }
+
+
 
     /**
      * @param TexyHandlerInvocation  handler invocation
@@ -198,6 +220,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param string
@@ -211,6 +235,8 @@ class myHandler
         return $invocation->proceed();
     }
 
+
+
     /**
      * @param TexyBlockParser
      * @param TexyHtml
@@ -220,6 +246,8 @@ class myHandler
     function afterList($parser, $element, $modifier)
     {
     }
+
+
 
     /**
      * @param TexyBlockParser
@@ -231,6 +259,8 @@ class myHandler
     {
     }
 
+
+
     /**
      * @param TexyBlockParser
      * @param TexyHtml
@@ -241,6 +271,8 @@ class myHandler
     {
     }
 
+
+
     /**
      * @param TexyBlockParser
      * @param TexyHtml
@@ -250,6 +282,8 @@ class myHandler
     function afterBlockquote($parser, $element, $modifier)
     {
     }
+
+
 
     /**
      * @param TexyBlockParser
@@ -274,6 +308,8 @@ class myHandler
     function beforeParse($texy, & $text, $isSingleLine)
     {
     }
+
+
 
     /**
      * @param Texy

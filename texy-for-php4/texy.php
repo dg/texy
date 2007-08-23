@@ -723,6 +723,7 @@ class Texy
     }
 
 
+
     /**
      * Callback for preg_replace_callback() in toText()
      *

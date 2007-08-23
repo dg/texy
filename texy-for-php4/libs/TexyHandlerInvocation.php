@@ -51,6 +51,7 @@ class TexyHandlerInvocation
     }
 
 
+
     /**
      * @param mixed
      * @return mixed
@@ -99,6 +100,7 @@ class TexyHandlerInvocation
     {
         $this->handlers = $this->parser = $this->args = NULL;
     }
+
 
 
     function TexyHandlerInvocation()  /* PHP 4 constructor */
