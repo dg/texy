@@ -41,7 +41,7 @@ final class TexyHandlerInvocation
      * @param TexyParser
      * @param array    arguments
      */
-    public function __construct($handlers, $parser, $args)
+    public function __construct($handlers, TexyParser $parser, $args)
     {
         $this->handlers = $handlers;
         $this->pos = count($handlers);

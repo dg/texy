@@ -72,7 +72,7 @@ class TexyParagraphModule extends TexyModule
                 $mod->setProperties($mMod);
             }
 
-            $el = $tx->invokeAroundHandlers('paragraph', $this, array($s, $mod));
+            $el = $tx->invokeAroundHandlers('paragraph', $parser, array($s, $mod));
             if ($el) $nodes[] = $el;
         }
     }
