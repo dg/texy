@@ -12,11 +12,6 @@
  */
 
 
-// security - include texy.php, not this file
-if (!class_exists('Texy')) die();
-
-
-
 
 /** @var array */
 $GLOBALS['TexyUtf::$xlat'] = NULL; /* class private static property */

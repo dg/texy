@@ -11,10 +11,6 @@
  * @package    Texy
  */
 
-// security - include texy.php, not this file
-if (!class_exists('Texy')) die();
-
-
 
 
 define('TEXY_HEADING_DYNAMIC',  1);  // auto-leveling

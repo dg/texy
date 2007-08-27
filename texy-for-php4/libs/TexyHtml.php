@@ -12,11 +12,6 @@
  */
 
 
-// security - include texy.php, not this file
-if (!class_exists('Texy')) die();
-
-
-
 
 /** @var bool  use XHTML syntax? */
 $GLOBALS['TexyHtml::$xhtml'] = TRUE;

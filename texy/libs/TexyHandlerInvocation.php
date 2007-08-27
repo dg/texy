@@ -12,10 +12,6 @@
  */
 
 
-// security - include texy.php, not this file
-if (!class_exists('Texy', FALSE)) die();
-
-
 
 /**
  * Around advice handlers
