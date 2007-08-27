@@ -27,6 +27,14 @@ final class TexyUtf
 
 
     /**
+     * Static class pattern: forbid "new"
+     */
+    private function __construct()
+    {}
+
+
+
+    /**
      * Converts from source encoding to UTF-8
      */
     public static function toUtf($s, $encoding)

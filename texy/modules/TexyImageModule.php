@@ -307,7 +307,7 @@ final class TexyImageModule extends TexyModule
 
 
 
-final class TexyImage
+final class TexyImage extends TexyBase
 {
     /** @var string  base image URL */
     public $URL;
@@ -341,18 +341,9 @@ final class TexyImage
 
     public function __clone()
     {
-        if ($this->modifier)
+        if ($this->modifier) {
             $this->modifier = clone $this->modifier;
+        }
     }
 
-
-
-    /**#@+
-     * Access to undeclared property
-     * @throws Exception
-     */
-    private function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    private function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    private function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    /**#@-*/
 }

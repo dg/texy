@@ -41,7 +41,7 @@ $GLOBALS['TexyHtml::$inlineEl'] = array('ins'=>0,'del'=>0,'tt'=>0,'i'=>0,'b'=>0,
  *
  * @property mixed element's attributes
  */
-class TexyHtml
+class TexyHtml extends TexyBase
 {
     /** @var string  element's name */
     var $name;
@@ -472,17 +472,4 @@ class TexyHtml
         $this->children = $parser->parse($s);
     }
 
-
-
-    function TexyHtml()  /* PHP 4 constructor */
-    {
-        // generate references (see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4)
-        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call php5 constructor
-        if (method_exists($this, '__construct')) {
-            $args = func_get_args();
-            call_user_func_array(array(&$this, '__construct'), $args);
-        }
-    }
 }

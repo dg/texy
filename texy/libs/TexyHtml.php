@@ -24,7 +24,7 @@
  *
  * @property mixed element's attributes
  */
-class TexyHtml
+class TexyHtml extends TexyBase
 {
     /** @var string  element's name */
     private $name;
@@ -76,7 +76,7 @@ class TexyHtml
 
         if ($attrs !== NULL) {
             if (!is_array($attrs)) {
-                throw new Exception('Attributes must be array');
+                throw new TexyException('Attributes must be array');
             }
 
             $el->attrs = $attrs;
@@ -109,7 +109,7 @@ class TexyHtml
     final public function setName($name)
     {
         if ($name !== NULL && !is_string($name)) {
-            throw new Exception('Name must be string or NULL');
+            throw new TexyException('Name must be string or NULL');
         }
 
         $this->name = $name;
@@ -156,7 +156,7 @@ class TexyHtml
         if ($text === NULL) {
             $text = '';
         } elseif (!is_scalar($text)) {
-            throw new Exception('Content must be scalar');
+            throw new TexyException('Content must be scalar');
         }
 
         $this->children = $text;

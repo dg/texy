@@ -42,6 +42,14 @@ final class TexyConfigurator
 
 
     /**
+     * Static class pattern: forbid "new"
+     */
+    private function __construct()
+    {}
+
+
+
+    /**
      * Configure Texy! for web comments and other usages, where input text may insert attacker
      *
      * @param Texy  object to configure

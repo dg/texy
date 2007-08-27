@@ -16,7 +16,7 @@
 /**
  * Around advice handlers
  */
-class TexyHandlerInvocation
+class TexyHandlerInvocation extends TexyBase
 {
     /** @var array of callbacks */
     var $handlers;
@@ -95,20 +95,6 @@ class TexyHandlerInvocation
     function free()
     {
         $this->handlers = $this->parser = $this->args = NULL;
-    }
-
-
-
-    function TexyHandlerInvocation()  /* PHP 4 constructor */
-    {
-        // generate references (see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4)
-        foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
-
-        // call php5 constructor
-        if (method_exists($this, '__construct')) {
-            $args = func_get_args();
-            call_user_func_array(array(&$this, '__construct'), $args);
-        }
     }
 
 }

@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 168
+- refactoring: přidáno TexyBase & TexyException
+
 rev. 162
 - TexyHtmlCleaner přejmenován na TexyHtmlOutputModule, dostupný přes `$texy->htmlOutputModule`
 

@@ -427,7 +427,7 @@ final class TexyLinkModule extends TexyModule
 
 
 
-final class TexyLink
+final class TexyLink extends TexyBase
 {
     /** @see $type */
     const
@@ -465,18 +465,9 @@ final class TexyLink
 
     public function __clone()
     {
-        if ($this->modifier)
+        if ($this->modifier) {
             $this->modifier = clone $this->modifier;
+        }
     }
 
-
-
-    /**#@+
-     * Access to undeclared property
-     * @throws Exception
-     */
-    private function __get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    private function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    private function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    /**#@-*/
 }

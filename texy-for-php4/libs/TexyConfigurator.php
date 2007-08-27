@@ -40,6 +40,17 @@ $GLOBALS['TexyConfigurator::$safeTags'] = array(
  */
 class TexyConfigurator
 {
+
+    /**
+     * Static class pattern: forbid "new"
+     */
+    function __construct()
+    {
+        trigger_error('Static class.', E_USER_ERROR);
+    }
+
+
+
     /**
      * Configure Texy! for web comments and other usages, where input text may insert attacker
      *
@@ -90,9 +101,9 @@ class TexyConfigurator
         $texy->allowed['link/definition'] = FALSE;
         $texy->phraseModule->linksAllowed = FALSE;
 
-        if (is_array($texy->allowedTags))
+        if (is_array($texy->allowedTags)) {
             unset($texy->allowedTags['a']);
-        // TODO: else...
+        } // TODO: else...
     }
 
 
@@ -109,9 +120,9 @@ class TexyConfigurator
         $texy->allowed['figure'] = FALSE;
         $texy->allowed['image/definition'] = FALSE;
 
-        if (is_array($texy->allowedTags))
+        if (is_array($texy->allowedTags)) {
             unset($texy->allowedTags['img'], $texy->allowedTags['object'], $texy->allowedTags['embed'], $texy->allowedTags['applet']);
-        // TODO: else...
+        } // TODO: else...
     }
 
 }

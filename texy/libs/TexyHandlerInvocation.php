@@ -16,7 +16,7 @@
 /**
  * Around advice handlers
  */
-final class TexyHandlerInvocation
+final class TexyHandlerInvocation extends TexyBase
 {
     /** @var array of callbacks */
     private $handlers;
@@ -55,7 +55,7 @@ final class TexyHandlerInvocation
     public function proceed()
     {
         if ($this->pos === 0) {
-            throw new Exception('No more handlers');
+            throw new TexyException('No more handlers');
         }
 
         if (func_num_args()) {

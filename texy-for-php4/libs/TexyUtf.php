@@ -25,6 +25,17 @@ $GLOBALS['TexyUtf::$xlatCache'] = NULL; /* class private static property */
  */
 class TexyUtf
 {
+
+    /**
+     * Static class pattern: forbid "new"
+     */
+    function __construct()
+    {
+        trigger_error('Static class.', E_USER_ERROR);
+    }
+
+
+
     /**
      * Converts from source encoding to UTF-8
      */
