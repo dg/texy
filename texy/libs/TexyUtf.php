@@ -29,7 +29,7 @@ final class TexyUtf
     /**
      * Static class pattern: forbid "new"
      */
-    private function __construct()
+    final private function __construct()
     {}
 
 

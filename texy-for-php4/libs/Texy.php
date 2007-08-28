@@ -71,12 +71,6 @@ class Texy extends TexyBase
     /** @var string  Generated stylesheet */
     var $styleSheet = '';
 
-    /** @var bool  Paragraph merging mode */
-    var $mergeLines = TRUE;
-
-    /** @var bool  ignore stuff with only markup and spaecs? */
-    var $ignoreEmptyStuff = TRUE;
-
     /** @var bool  use XHTML syntax? */
     var $xhtml = TRUE;
 
@@ -131,8 +125,11 @@ class Texy extends TexyBase
     /** @var TexyHtmlOutputModule */
     var $htmlOutputModule;
 
-    /** @var TexyHtmlOutputModule deprecated */
+    /** @var TexyHtmlOutputModule DEPRECATED */
     var $cleaner;
+
+    /** @var bool DEPRECATED */
+    var $mergeLines = TRUE;
 
 
     /**
@@ -177,7 +174,9 @@ class Texy extends TexyBase
         // load all modules
         $this->loadModules();
 
+        // DEPRECATED
         $this->cleaner = & $this->htmlOutputModule;
+        $this->mergeLines = & $this->paragraphModule->mergeLines;
 
         // examples of link references ;-)
         $link = new TexyLink('http://texy.info/');

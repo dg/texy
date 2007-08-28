@@ -72,7 +72,7 @@ třída Texy
 - Texy na výstupu využije všechny znaky z kódování `$texy->encoding`. Jen ty, co v kódování nejsou, nahradí **číselnou** entitou
 - nová vlastnost `$texy->allowed` - sjednocené povolování a zakazování syntaxe, viz Moduly
 - nový způsob maskování emailů
-- nová vlastnost `$texy->urlSchemeFilters` & `$texy->ignoreEmptyStuff` (popsáno v dokumentaci)
+- nová vlastnost `$texy->urlSchemeFilters` (popsáno v dokumentaci)
 - nový univerzální handler `$texy->handler`. Dřívější handlery odstraněny
 - nová vlastnost `$strictDTD` - lze přepínat mezi striktním a transitional DTD
 - změny názvů modulů:
@@ -272,7 +272,7 @@ Verze 1.0 Final
 Rozšíření funkcí:
 - NEW: "uživatelské atributy":http://forum.texy.info/viewtopic.php?id=250
 - CHG: povolené tagy dostupné přes `$texy->allowedTags`, mělo by v budoucnu nahradit `$texy->htmlModule->allowed`
-- NEW: nový režim "zalamování řádků":http://forum.texy.info/viewtopic.php?pid=893 via `$texy->mergeLines = false`
+- NEW: nový režim "zalamování řádků":http://forum.texy.info/viewtopic.php?pid=893 via `$texy->paragraphModule->mergeLines = false`
 - INT: PHP5-like constructors
 
 

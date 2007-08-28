@@ -18,9 +18,11 @@
  */
 final class TexyParagraphModule extends TexyModule
 {
-    /** @var bool  how split paragraphs (internal usage) */
-    public $mode;
+    /** @var bool  Paragraph merging mode */
+    public $mergeLines = TRUE;
 
+    /** @var bool  how split paragraphs (internal usage) */
+    public $_mode;
 
 
     public function __construct($texy)
@@ -34,7 +36,7 @@ final class TexyParagraphModule extends TexyModule
 
     public function beforeParse()
     {
-        $this->mode = TRUE;
+        $this->_mode = TRUE;
     }
 
 
@@ -49,7 +51,7 @@ final class TexyParagraphModule extends TexyModule
     {
         $tx = $this->texy;
 
-        if ($this->mode) {
+        if ($this->_mode) {
             $parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
         } else {
             $parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
@@ -66,6 +68,7 @@ final class TexyParagraphModule extends TexyModule
             if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $s, $mx)) {
                 list(, $mC1, $mMod, $mC2) = $mx;
                 $s = trim($mC1 . $mC2);
+                if ($s === '') continue;
                 $mod->setProperties($mMod);
             }
 
@@ -89,7 +92,7 @@ final class TexyParagraphModule extends TexyModule
         $tx = $this->texy;
 
         // find hard linebreaks
-        if ($tx->mergeLines) {
+        if ($this->mergeLines) {
             // ....
             //  ...  => \r means break line
             $content = preg_replace('#\n (?=\S)#', "\r", $content);
@@ -120,7 +123,7 @@ final class TexyParagraphModule extends TexyModule
 
         // block contains only markup tags or spaces or nothig
         } else {
-            if ($tx->ignoreEmptyStuff) return FALSE;
+            // if {ignoreEmptyStuff} return FALSE;
             if ($mod->empty) $el->setName(NULL);
         }
 
