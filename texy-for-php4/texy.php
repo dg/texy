@@ -24,14 +24,11 @@
 /**
  * This file is part of the Texy! formatter (http://texy.info/)
  *
- * @version    $Revision$ $Date$
+ * @version    $Revision: 166 $ $Date: 2007-08-23 03:02:24 +0200 (čt, 23 VIII 2007) $
  */
 
 
-
-/**
- * Absolute filesystem path to the Texy package
- */
+define('TEXY_VERSION',  '2.0 FOR PHP4 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
 define('TEXY_DIR',  dirname(__FILE__).'/');
 
 require_once TEXY_DIR.'libs/TexyBase.php';

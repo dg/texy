@@ -18,7 +18,6 @@
  */
 define('TEXY_ALL',  Texy::ALL);
 define('TEXY_NONE',  Texy::NONE);
-define('TEXY_VERSION',  Texy::VERSION);
 define('TEXY_CONTENT_MARKUP', Texy::CONTENT_MARKUP);
 define('TEXY_CONTENT_REPLACED', Texy::CONTENT_REPLACED);
 define('TEXY_CONTENT_TEXTUAL', Texy::CONTENT_TEXTUAL);
@@ -42,7 +41,7 @@ class Texy extends TexyBase
     const NONE = FALSE;
 
     // Texy version
-    const VERSION = '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)';
+    const VERSION = TEXY_VERSION;
 
     // types of protection marks
     const CONTENT_MARKUP = "\x17";
