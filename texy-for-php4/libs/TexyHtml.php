@@ -465,7 +465,7 @@ class TexyHtml extends TexyBase
      * @param int
      * @return void
      */
-    function parseBlock($texy, $s, $level = 0)
+    function parseBlock($texy, $s, $level = TEXY_PARSER_SEPARATE)
     {
         $parser = new TexyBlockParser($texy, $level);
         $this->children = $parser->parse($s);

@@ -43,13 +43,19 @@ class TexyParser extends TexyBase
  */
 class TexyBlockParser extends TexyParser
 {
+    const
+        SEPARATE = 0,
+        INDENT = 1,
+        NORMAL = 2,
+        TOP = 3;
+
     /** @var string */
     private $text;
 
     /** @var int */
     private $offset;
 
-    /** @var int  0-separated, 1-child level indented, 2-child level, 3-top level */
+    /** @var int  SEPARATE, INDENT, NORMAL, TOP */
     private $level;
 
 
@@ -58,7 +64,7 @@ class TexyBlockParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    public function __construct(Texy $texy, $level = 0)
+    public function __construct(Texy $texy, $level = self::SEPARATE)
     {
         $this->texy = $texy;
         $this->level = $level;

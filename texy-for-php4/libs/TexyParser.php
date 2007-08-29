@@ -37,6 +37,11 @@ class TexyParser extends TexyBase
 
 
 
+define('TEXY_PARSER_SEPARATE', 0);
+define('TEXY_PARSER_INDENT', 1);
+define('TEXY_PARSER_NORMAL', 2);
+define('TEXY_PARSER_TOP', 3);
+
 
 /**
  * Parser for block structures
@@ -49,7 +54,7 @@ class TexyBlockParser extends TexyParser
     /** @var int */
     var $offset; /* private */
 
-    /** @var int  0-separated, 1-child level indented, 2-child level, 3-top level */
+    /** @var int  TEXY_PARSER_SEPARATE..TEXY_PARSER_TOP */
     var $level;
 
 
@@ -58,7 +63,7 @@ class TexyBlockParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    function __construct(/*Texy*/ $texy, $level = 0)
+    function __construct(/*Texy*/ $texy, $level = TEXY_PARSER_SEPARATE)
     {
         $this->texy = $texy;
         $this->level = $level;

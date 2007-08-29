@@ -91,7 +91,7 @@ final class TexyQuoteModule extends TexyModule
         } while (TRUE);
 
         $el->attrs['cite'] = $mod->cite;
-        $el->parseBlock($tx, $content, min(2, $parser->getLevel()));
+        $el->parseBlock($tx, $content, min(TexyBlockParser::NORMAL, $parser->getLevel()));
 
         // no content?
         if (!count($el->children)) return FALSE;

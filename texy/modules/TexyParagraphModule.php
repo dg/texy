@@ -41,7 +41,7 @@ final class TexyParagraphModule extends TexyModule
     {
         $tx = $this->texy;
 
-        if ($parser->getLevel() === 1) { // indented
+        if ($parser->getLevel() === TexyBlockParser::INDENT) { // indented
             $parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
         } else {
             $parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);

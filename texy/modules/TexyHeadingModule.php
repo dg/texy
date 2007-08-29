@@ -229,7 +229,7 @@ final class TexyHeadingModule extends TexyModule
             $this->title = $title;
         }
 
-        if ($invocation->getParser()->getLevel() > 0) {
+        if ($invocation->getParser()->getLevel() > TexyBlockParser::SEPARATE) {
             $this->TOC[] = array(
                 'el' => $el,
                 'level' => $level,

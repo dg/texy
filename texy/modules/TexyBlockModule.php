@@ -120,7 +120,7 @@ final class TexyBlockModule extends TexyModule
         if ($blocktype === 'block/texy') {
             $el = TexyHtml::el();
             $parser = $invocation->getParser();
-            $el->parseBlock($tx, $s, min(2, $parser->getLevel()));
+            $el->parseBlock($tx, $s, min(TexyBlockParser::NORMAL, $parser->getLevel()));
             return $el;
         }
 
@@ -218,7 +218,7 @@ final class TexyBlockModule extends TexyModule
             $el = TexyHtml::el('div');
             $mod->decorate($tx, $el);
             $parser = $invocation->getParser();
-            $el->parseBlock($tx, $s, min(2, $parser->getLevel())); // 2 or 1
+            $el->parseBlock($tx, $s, min(TexyBlockParser::NORMAL, $parser->getLevel())); // TODO: INDENT or NORMAL ?
             return $el;
         }
 

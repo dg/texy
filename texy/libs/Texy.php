@@ -330,7 +330,7 @@ class Texy extends TexyBase
         if ($singleLine) {
             $this->DOM->parseLine($this, $text);
         } else {
-            $this->DOM->parseBlock($this, $text, 3);
+            $this->DOM->parseBlock($this, $text, TexyBlockParser::TOP);
         }
 
         // user after handler

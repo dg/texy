@@ -224,7 +224,7 @@ class TexyHeadingModule extends TexyModule
         }
 
         $parser = $invocation->getParser();
-        if ($parser->getLevel() > 0) {
+        if ($parser->getLevel() > TEXY_PARSER_SEPARATE) {
             $this->TOC[] = array(
                 'el' => $el,
                 'level' => $level,
