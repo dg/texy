@@ -49,8 +49,8 @@ class TexyBlockParser extends TexyParser
     /** @var int */
     private $offset;
 
-    /** @var TexyBlockParser */
-    public $parentParser;
+    /** @var int  0-separated, 1-child level indented, 2-child level, 3-top level */
+    private $level;
 
 
 
@@ -58,10 +58,18 @@ class TexyBlockParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    public function __construct(Texy $texy)
+    public function __construct(Texy $texy, $level = 0)
     {
         $this->texy = $texy;
+        $this->level = $level;
         $this->patterns = $texy->getBlockPatterns();
+    }
+
+
+
+    public function getLevel()
+    {
+        return $this->level;
     }
 
 

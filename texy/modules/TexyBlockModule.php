@@ -93,7 +93,7 @@ final class TexyBlockModule extends TexyModule
 
 
 
-    public function outdent($s)
+    public static function outdent($s)
     {
         $s = trim($s, "\n");
         $spaces = strspn($s, ' ');
@@ -119,14 +119,15 @@ final class TexyBlockModule extends TexyModule
 
         if ($blocktype === 'block/texy') {
             $el = TexyHtml::el();
-            $el->parseBlock($tx, $s);
+            $parser = $invocation->getParser();
+            $el->parseBlock($tx, $s, min(2, $parser->getLevel()));
             return $el;
         }
 
         if (empty($tx->allowed[$blocktype])) return FALSE;
 
         if ($blocktype === 'block/texysource') {
-            $s = $this->outdent($s);
+            $s = self::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el();
             if ($param === 'line') $el->parseLine($tx, $s);
@@ -136,7 +137,7 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/code') {
-            $s = $this->outdent($s);
+            $s = self::outdent($s);
             if ($s==='') return "\n";
             $s = Texy::escapeHtml($s);
             $s = $tx->protect($s);
@@ -148,7 +149,7 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/default') {
-            $s = $this->outdent($s);
+            $s = self::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
@@ -160,7 +161,7 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/pre') {
-            $s = $this->outdent($s);
+            $s = self::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
@@ -212,11 +213,12 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/div') {
-            $s = $this->outdent($s);
+            $s = self::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('div');
             $mod->decorate($tx, $el);
-            $el->parseBlock($tx, $s);
+            $parser = $invocation->getParser();
+            $el->parseBlock($tx, $s, min(2, $parser->getLevel())); // 2 or 1
             return $el;
         }
 

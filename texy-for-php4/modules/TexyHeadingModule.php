@@ -50,16 +50,6 @@ class TexyHeadingModule extends TexyModule
     /** @var array  used ID's */
     var $usedID; /* private */
 
-    /** @var array */
-//    var $dynamicMap; /* private */
-
-    /** @var int */
-//    var $dynamicTop; /* private */
-
-    var $PHP4 = array(
-        'dynamicMap' => NULL,
-        'dynamicTop' => NULL,
-    );
 
 
     function __construct($texy)
@@ -68,6 +58,7 @@ class TexyHeadingModule extends TexyModule
 
         $texy->addHandler('heading', array($this, 'solve'));
         $texy->addHandler('beforeParse', array($this, 'beforeParse'));
+        $texy->addHandler('afterParse', array($this, 'afterParse'));
 
         $texy->registerBlockPattern(
             array($this, 'patternUnderline'),
@@ -89,11 +80,54 @@ class TexyHeadingModule extends TexyModule
     {
         $this->title = NULL;
         $this->usedID = array();
-
-        // clear references
         $this->TOC = array();
-        $foo1 = array(); $this->PHP4['dynamicMap'] = & $foo1;
-        $foo2 = -100; $this->PHP4['dynamicTop'] = & $foo2;
+    }
+
+
+
+    /**
+     * @param Texy
+     * @param TexyHtml
+     * @param bool
+     * @return void
+     */
+    function afterParse($texy, $DOM, $isSingleLine)
+    {
+        if ($isSingleLine) return;
+
+        $top = $this->top;
+        $map = array();
+
+        if ($this->balancing === TEXY_HEADING_DYNAMIC)
+        {
+            $min = 100;
+            foreach ($this->TOC as $item)
+            {
+                $level = $item['level'];
+                if ($item['surrounded']) {
+                    $min = min($level, $min);
+                    $top = $this->top - $min;
+                } else {
+                    $map[$level] = $level;
+                }
+            }
+
+           asort($map);
+           $map = array_flip(array_values($map));
+        }
+
+        foreach ($this->TOC as $key => $item)
+        {
+            $level = $item['level'];
+            if ($map && !$item['surrounded']) {
+                $level = $map[$level] + $this->top;
+            } else {
+                $level += $top;
+            }
+
+            $item['el']->setName('h' . min(6, max(1, $level)));
+            $this->TOC[$key]['level'] = $level;
+        }
     }
 
 
@@ -153,7 +187,7 @@ class TexyHeadingModule extends TexyModule
      * Finish invocation
      *
      * @param TexyHandlerInvocation  handler invocation
-     * @param int
+     * @param int  0..5
      * @param string
      * @param TexyModifier
      * @param bool
@@ -162,29 +196,16 @@ class TexyHeadingModule extends TexyModule
     function solve($invocation, $level, $content, $mod, $isSurrounded)
     {
         $tx = $this->texy;
-        $el = new TexyHeadingElement;
+        // approximate: for block/texysource & correct decorating
+        $el = TexyHtml::el('h' . min(6, max(1, $level + $this->top)));
         $mod->decorate($tx, $el);
 
-        $el->_level = $level;
-        $el->PHP4['top'] = $this->top;
-
-        if ($this->balancing === TEXY_HEADING_DYNAMIC) {
-            if ($isSurrounded) {
-                $this->PHP4['dynamicTop'] = max($this->PHP4['dynamicTop'], $this->top - $level);
-                $el->PHP4['top'] = & $this->PHP4['dynamicTop'];
-            } else {
-                $this->PHP4['dynamicMap'][$level] = $level;
-                $el->PHP4['map'] = & $this->PHP4['dynamicMap'];
-            }
-        }
         $el->parseLine($tx, trim($content));
 
-        // document title
-        $title = trim($el->toText($tx));
-        if ($this->title === NULL) $this->title = $title;
-
         // Table of Contents
+        $title = NULL;
         if ($this->generateID && empty($el->attrs['id'])) {
+            $title = trim($el->toText($tx));
             $id = $this->idPrefix . Texy::webalize($title);
             $counter = '';
             if (isset($this->usedID[$id . $counter])) {
@@ -196,51 +217,23 @@ class TexyHeadingModule extends TexyModule
             $el->attrs['id'] = $id;
         }
 
-        $TOC = array(
-            'id' => isset($el->attrs['id']) ? $el->attrs['id'] : NULL,
-            'title' => $title,
-            'level' => 0,
-        );
-        $this->TOC[] = & $TOC;
-        $el->PHP4['TOC'] = & $TOC;
-
-        return $el;
-    }
-
-}
-
-
-
-
-
-
-
-/**
- * HTML ELEMENT H1-6
- */
-class TexyHeadingElement extends TexyHtml
-{
-    var $_level;
-    var $PHP4 = array(
-        'top' => NULL,
-        'map' => NULL,
-        'TOC' => NULL,
-    );
-
-    function startTag()
-    {
-        $level = $this->_level;
-
-        if ($this->PHP4['map']) {
-            asort($this->PHP4['map']);
-            $level = array_search($level, array_values($this->PHP4['map']), TRUE);
+        // document title
+        if ($this->title === NULL) {
+            if ($title === NULL) $title = trim($el->toText($tx));
+            $this->title = $title;
         }
 
-        $level += $this->PHP4['top'];
+        $parser = $invocation->getParser();
+        if ($parser->getLevel() > 0) {
+            $this->TOC[] = array(
+                'el' => $el,
+                'level' => $level,
+                'title' => $title,
+                'surrounded' => $isSurrounded,
+            );
+        }
 
-        $this->setName('h' . min(6, max(1, $level)));
-        $this->PHP4['TOC']['level'] = $level;
-        return parent::startTag();
+        return $el;
     }
 
 }

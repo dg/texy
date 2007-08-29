@@ -5,7 +5,10 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
-rev. 168
+rev. 173
+- pole $texy->headingModule->TOC namísto položky 'id' obsahuje položku 'el' s TexyHtml elementem titulku a 'title' se generuje jen při $generateID
+
+rev. 169
 - refactoring: přidáno TexyBase & TexyException
 
 rev. 162

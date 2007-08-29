@@ -21,22 +21,12 @@ final class TexyParagraphModule extends TexyModule
     /** @var bool  Paragraph merging mode */
     public $mergeLines = TRUE;
 
-    /** @var bool  how split paragraphs (internal usage) */
-    public $_mode;
 
 
     public function __construct($texy)
     {
         $this->texy = $texy;
         $texy->addHandler('paragraph', array($this, 'solve'));
-        $texy->addHandler('beforeParse', array($this, 'beforeParse'));
-    }
-
-
-
-    public function beforeParse()
-    {
-        $this->_mode = TRUE;
     }
 
 
@@ -51,10 +41,10 @@ final class TexyParagraphModule extends TexyModule
     {
         $tx = $this->texy;
 
-        if ($this->_mode) {
-            $parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
-        } else {
+        if ($parser->getLevel() === 1) { // indented
             $parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
+        } else {
+            $parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
         }
 
         foreach ($parts as $s)

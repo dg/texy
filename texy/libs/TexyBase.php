@@ -32,8 +32,19 @@ abstract class TexyBase
      * Access to undeclared property
      * @throws Exception
      */
-    public function &__get($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    public function __set($name, $value) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
-    public function __unset($name) { throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name"); }
+    public function &__get($name)
+    {
+        throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name");
+    }
+
+    public function __set($name, $value)
+    {
+        throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name");
+    }
+
+    public function __unset($name)
+    {
+        throw new Exception("Access to undeclared property: " . get_class($this) . "::$$name");
+    }
     /**#@-*/
 }
