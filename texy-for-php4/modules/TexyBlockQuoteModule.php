@@ -16,10 +16,10 @@
 /**
  * Blockquote module
  */
-final class TexyQuoteModule extends TexyModule
+class TexyBlockQuoteModule extends TexyModule
 {
 
-    public function __construct($texy)
+    function __construct($texy)
     {
         $this->texy = $texy;
 
@@ -48,7 +48,7 @@ final class TexyQuoteModule extends TexyModule
      * @param string     pattern name
      * @return TexyHtml|string|FALSE
      */
-    public function pattern($parser, $matches)
+    function pattern($parser, $matches)
     {
         list(, $mMod, $mPrefix, $mContent) = $matches;
         //    [1] => .(title)[class]{style}<>
@@ -65,7 +65,7 @@ final class TexyQuoteModule extends TexyModule
         $spaces = '';
         do {
             if ($mPrefix === ':') {
-                $mod->cite = $tx->quoteModule->citeLink($mContent);
+                $mod->cite = $tx->blockQuoteModule->citeLink($mContent);
                 $content .= "\n";
             } else {
                 if ($spaces === '') $spaces = max(1, strlen($mPrefix));
@@ -78,7 +78,7 @@ final class TexyQuoteModule extends TexyModule
             if ($mPrefix === '>') {
                 $content .= $mPrefix . $mContent . "\n";
             } elseif ($mPrefix === ':') {
-                $mod->cite = $tx->quoteModule->citeLink($mContent);
+                $mod->cite = $tx->blockQuoteModule->citeLink($mContent);
                 $content .= "\n";
             } else {
                 if ($spaces === '') $spaces = max(1, strlen($mPrefix));
@@ -91,7 +91,7 @@ final class TexyQuoteModule extends TexyModule
         } while (TRUE);
 
         $el->attrs['cite'] = $mod->cite;
-        $el->parseBlock($tx, $content, min(TexyBlockParser::NORMAL, $parser->getLevel()));
+        $el->parseBlock($tx, $content, min(TEXY_PARSER_NORMAL, $parser->getLevel()));
 
         // no content?
         if (!count($el->children)) return FALSE;
@@ -109,7 +109,7 @@ final class TexyQuoteModule extends TexyModule
      * @param string
      * @return string|NULL
      */
-    public function citeLink($link)
+    function citeLink($link)
     {
         $tx = $this->texy;
 

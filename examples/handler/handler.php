@@ -225,6 +225,19 @@ class myHandler
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param string
+     * @param TexyModifier
+     * @return TexyHtml|string|FALSE
+     */
+    function horizline($invocation, $type, $modifier)
+    {
+        return $invocation->proceed();
+    }
+
+
+
+    /**
+     * @param TexyHandlerInvocation  handler invocation
+     * @param string
      * @param string
      * @param string
      * @param TexyModifier
@@ -280,18 +293,6 @@ class myHandler
      * @return void
      */
     function afterBlockquote($parser, $element, $modifier)
-    {
-    }
-
-
-
-    /**
-     * @param TexyBlockParser
-     * @param TexyHtml
-     * @param TexyModifier
-     * @return void
-     */
-    function afterHorizline($parser, $element, $modifier)
     {
     }
 

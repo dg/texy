@@ -83,14 +83,8 @@ class Texy extends TexyBase
     /** @var string  Generated stylesheet */
     public $styleSheet = '';
 
-    /** @var bool  use Strict of Transitional DTD? */
-    public static $strictDTD = FALSE;
-
-    /** @var bool  use XHTML syntax? */
-    public $xhtml = TRUE;
-
-    /** @var bool */
-    static public $noticeShowed = FALSE;
+    /** @var mixed */
+    static public $advertisingNotice = 'once';
 
     /** @var TexyScriptModule */
     public $scriptModule;
@@ -122,8 +116,8 @@ class Texy extends TexyBase
     /** @var TexyHorizLineModule */
     public $horizLineModule;
 
-    /** @var TexyQuoteModule */
-    public $quoteModule;
+    /** @var TexyBlockQuoteModule */
+    public $blockQuoteModule;
 
     /** @var TexyListModule */
     public $listModule;
@@ -142,12 +136,6 @@ class Texy extends TexyBase
 
     /** @var TexyHtmlOutputModule */
     public $htmlOutputModule;
-
-    /** @var TexyHtmlOutputModule DEPRECATED */
-    public $cleaner;
-
-    /** @var bool  DEPRECATED */
-    public $mergeLines;
 
 
     /**
@@ -185,6 +173,11 @@ class Texy extends TexyBase
     private $handlers = array();
 
 
+    /** DEPRECATED */
+    public $cleaner;
+    public $mergeLines;
+    public $xhtml;
+
 
 
     public function __construct()
@@ -195,6 +188,7 @@ class Texy extends TexyBase
         // DEPRECATED
         $this->cleaner = & $this->htmlOutputModule;
         $this->mergeLines = & $this->paragraphModule->mergeLines;
+        $this->xhtml = & $this->htmlOutputModule->xhtml;
 
         // examples of link references ;-)
         $link = new TexyLink('http://texy.info/');
@@ -230,7 +224,7 @@ class Texy extends TexyBase
         $this->blockModule = new TexyBlockModule($this);
         $this->figureModule = new TexyFigureModule($this);
         $this->horizLineModule = new TexyHorizLineModule($this);
-        $this->quoteModule = new TexyQuoteModule($this);
+        $this->blockQuoteModule = new TexyBlockQuoteModule($this);
         $this->tableModule = new TexyTableModule($this);
         $this->headingModule = new TexyHeadingModule($this);
         $this->listModule = new TexyListModule($this);
@@ -340,9 +334,11 @@ class Texy extends TexyBase
         $html = $this->DOM->toHtml($this);
 
         // this notice should remain
-        if (!self::$noticeShowed) {
+        if (self::$advertisingNotice) {
             $html .= "\n<!-- by Texy2! -->";
-            self::$noticeShowed = TRUE;
+            if (self::$advertisingNotice === 'once') {
+                self::$advertisingNotice = FALSE;
+            }
         }
 
         $this->processing = FALSE;

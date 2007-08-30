@@ -23,9 +23,11 @@ class TexyHorizLineModule extends TexyModule
     {
         $this->texy = $texy;
 
+        $texy->addHandler('horizline', array($this, 'solve'));
+
         $texy->registerBlockPattern(
             array($this, 'pattern'),
-            '#^(?:\*{3,}|-{3,})\ *'.TEXY_MODIFIER.'?()$#mU',
+            '#^(\*{3,}|-{3,})\ *'.TEXY_MODIFIER.'?()$#mU',
             'horizline'
         );
     }
@@ -42,17 +44,28 @@ class TexyHorizLineModule extends TexyModule
      */
     function pattern($parser, $matches)
     {
-        list(, $mMod) = $matches;
+        list(, $mType, $mMod) = $matches;
         //    [1] => ---
         //    [2] => .(title)[class]{style}<>
 
-        $tx = $this->texy;
-        $el = TexyHtml::el('hr');
         $mod = new TexyModifier($mMod);
-        $mod->decorate($tx, $el);
+        return $this->texy->invokeAroundHandlers('horizline', $parser, array($mType, $mod));
+    }
 
-        $tx->invokeHandlers('afterHorizline', array($parser, $el, $mod));
 
+
+    /**
+     * Finish invocation
+     *
+     * @param TexyHandlerInvocation  handler invocation
+     * @param string
+     * @param TexyModifier
+     * @return TexyHtml
+     */
+    function solve($invocation, $type, $modifier)
+    {
+        $el = TexyHtml::el('hr');
+        $modifier->decorate($invocation->getTexy(), $el);
         return $el;
     }
 

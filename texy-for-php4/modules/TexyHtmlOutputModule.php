@@ -13,6 +13,9 @@
 
 
 
+/** @var bool  use Strict of Transitional DTD? */
+$GLOBALS['TexyHtmlOutputModule::$strictDTD'] = FALSE; /* class static property */
+
 /** @var array  elements with optional end tag in HTML */
 $GLOBALS['TexyHtmlOutputModule::$optional'] = array('body'=>1,'head'=>1,'html'=>1,'colgroup'=>1,'dd'=>1,
     'dt'=>1,'li'=>1,'option'=>1,'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1);
@@ -43,6 +46,9 @@ $GLOBALS['TexyHtmlOutputModule::$dtdCache'] = array();
 
 class TexyHtmlOutputModule extends TexyModule
 {
+    /** @var bool  use XHTML syntax? */
+    var $xhtml = TRUE;
+
     /** @var bool  indent HTML code? */
     var $indent = TRUE;
 
@@ -137,7 +143,7 @@ class TexyHtmlOutputModule extends TexyModule
             );
 
         // remove HTML 4.01 optional end tags
-        if (!$this->texy->xhtml && $this->removeOptional)
+        if (!$this->xhtml && $this->removeOptional)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
     }
 
@@ -268,7 +274,7 @@ class TexyHtmlOutputModule extends TexyModule
             if ($mEmpty) {
                 if (!$allowed) return $s;
 
-                if ($this->texy->xhtml) $mAttr .= " /";
+                if ($this->xhtml) $mAttr .= " /";
 
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
@@ -348,7 +354,7 @@ class TexyHtmlOutputModule extends TexyModule
      */
     function initDTD() /* static */
     {
-        $strict = $GLOBALS['Texy::$strictDTD'];
+        $strict = $GLOBALS['TexyHtmlOutputModule::$strictDTD'];
         if (isset($GLOBALS['TexyHtmlOutputModule::$dtdCache'][$strict])) {
             $this->dtd = $GLOBALS['TexyHtmlOutputModule::$dtdCache'];
             return;

@@ -52,7 +52,7 @@ require_once TEXY_DIR.'modules/TexyLinkModule.php';
 require_once TEXY_DIR.'modules/TexyListModule.php';
 require_once TEXY_DIR.'modules/TexyLongWordsModule.php';
 require_once TEXY_DIR.'modules/TexyPhraseModule.php';
-require_once TEXY_DIR.'modules/TexyQuoteModule.php';
+require_once TEXY_DIR.'modules/TexyBlockQuoteModule.php';
 require_once TEXY_DIR.'modules/TexyScriptModule.php';
 require_once TEXY_DIR.'modules/TexyEmoticonModule.php';
 require_once TEXY_DIR.'modules/TexyTableModule.php';

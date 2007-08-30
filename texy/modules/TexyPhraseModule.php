@@ -237,7 +237,7 @@ final class TexyPhraseModule extends TexyModule
             $mod->title = trim(Texy::unescapeHtml($mLink));
 
         } elseif ($phrase === 'phrase/quote') {
-            $mod->cite = $tx->quoteModule->citeLink($mLink);
+            $mod->cite = $tx->blockQuoteModule->citeLink($mLink);
 
         } elseif ($mLink != NULL) {
             $link = $tx->linkModule->factoryLink($mLink, NULL, $mContent);

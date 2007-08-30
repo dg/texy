@@ -15,6 +15,12 @@
 
 final class TexyHtmlOutputModule extends TexyModule
 {
+    /** @var bool  use Strict of Transitional DTD? */
+    public static $strictDTD = FALSE;
+
+    /** @var bool  use XHTML syntax? */
+    public $xhtml = TRUE;
+
     /** @var bool  indent HTML code? */
     public $indent = TRUE;
 
@@ -136,7 +142,7 @@ final class TexyHtmlOutputModule extends TexyModule
             );
 
         // remove HTML 4.01 optional end tags
-        if (!$this->texy->xhtml && $this->removeOptional)
+        if (!$this->xhtml && $this->removeOptional)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
     }
 
@@ -267,7 +273,7 @@ final class TexyHtmlOutputModule extends TexyModule
             if ($mEmpty) {
                 if (!$allowed) return $s;
 
-                if ($this->texy->xhtml) $mAttr .= " /";
+                if ($this->xhtml) $mAttr .= " /";
 
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
@@ -347,7 +353,7 @@ final class TexyHtmlOutputModule extends TexyModule
      */
     private function initDTD()
     {
-        $strict = Texy::$strictDTD;
+        $strict = self::$strictDTD;
         if (isset(self::$dtdCache[$strict])) {
             $this->dtd = self::$dtdCache[$strict];
             return;

@@ -93,38 +93,29 @@ class TexyHeadingModule extends TexyModule
      */
     function afterParse($texy, $DOM, $isSingleLine)
     {
-        if ($isSingleLine) return;
+        if ($isSingleLine || $this->balancing === TEXY_HEADING_FIXED) return;
 
         $top = $this->top;
         $map = array();
-
-        if ($this->balancing === TEXY_HEADING_DYNAMIC)
+        $min = 100;
+        foreach ($this->TOC as $item)
         {
-            $min = 100;
-            foreach ($this->TOC as $item)
-            {
-                $level = $item['level'];
-                if ($item['surrounded']) {
-                    $min = min($level, $min);
-                    $top = $this->top - $min;
-                } else {
-                    $map[$level] = $level;
-                }
+            $level = $item['level'];
+            if ($item['surrounded']) {
+                $min = min($level, $min);
+                $top = $this->top - $min;
+            } else {
+                $map[$level] = $level;
             }
-
-           asort($map);
-           $map = array_flip(array_values($map));
         }
+
+        asort($map);
+        $map = array_flip(array_values($map));
 
         foreach ($this->TOC as $key => $item)
         {
             $level = $item['level'];
-            if ($map && !$item['surrounded']) {
-                $level = $map[$level] + $this->top;
-            } else {
-                $level += $top;
-            }
-
+            $level = $item['surrounded'] ? $level + $top : $map[$level] + $this->top;
             $item['el']->setName('h' . min(6, max(1, $level)));
             $this->TOC[$key]['level'] = $level;
         }
@@ -196,7 +187,7 @@ class TexyHeadingModule extends TexyModule
     function solve($invocation, $level, $content, $mod, $isSurrounded)
     {
         $tx = $this->texy;
-        // approximate: for block/texysource & correct decorating
+        // as fixed balancing, for block/texysource & correct decorating
         $el = TexyHtml::el('h' . min(6, max(1, $level + $this->top)));
         $mod->decorate($tx, $el);
 

@@ -5,6 +5,10 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 175
+- `$texy->htmlOutputModule->xhtml` - přepínač XHTML / HTML režimu
+- `TexyHtmlOutputModule::$strictDTD` - lze přepínat mezi striktním a transitional DTD
+
 rev. 173
 - pole $texy->headingModule->TOC namísto položky 'id' obsahuje položku 'el' s TexyHtml elementem titulku a 'title' se generuje jen při $generateID
 
@@ -23,9 +27,6 @@ rev. 155
 rev. 150
 - všechny příklady nyní fungují i v PHP 4. Jen je potřeba "inkludovat" odpovídající verzi Texy.
 - verze pro PHP 5 podporuje kvůli zpětné kompatibilitě i původní konstanty `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC`, `TEXY_HEADING_FIXED`, `TEXY_PROCEED`, `TEXY_CONTENT_*`
-
-rev. 136
-- `$texy->xhtml` - přepínač XHTML / HTML režimu
 
 rev. 133
 - **POZOR: přepsání knihovny TexyHtml stornováno!** K vlastnostem elementu se opět přistupuje přes `$el->src = 'image.gif'` (resp. `$el->attrs['src'] = ...`, vhodné pro PHP 4), nikoliv přes `$el['src'] = 'image.gif'`. Omlouvám se za způsobené komplikace.
@@ -189,7 +190,7 @@ phraseModule
 - nová vlastnost `$linksAllowed` - lze hromadně zakázat odkazy u frází
 - na každou frázi lze napojit vlastní handler `phrase()` (viz příklad 'Links')
 
-quoteModule
+blockQuoteModule
 -----------
 - na hotový objekt lze napojit vlastní handler `afterBlockquote()`
 - zapínání/vypínání syntaxe: `$texy->allowed['blockquote']`
