@@ -29,12 +29,12 @@ $texy->addHandler('script', array('myHandler', 'script'));
 $texy->addHandler('paragraph', array('myHandler', 'paragraph'));
 $texy->addHandler('figure', array('myHandler', 'figure'));
 $texy->addHandler('heading', array('myHandler', 'heading'));
+$texy->addHandler('horizline', array('myHandler', 'horizline'));
 $texy->addHandler('block', array('myHandler', 'block'));
 $texy->addHandler('afterList', array('myHandler', 'afterList'));
 $texy->addHandler('afterDefinitionList', array('myHandler', 'afterDefinitionList'));
 $texy->addHandler('afterTable', array('myHandler', 'afterTable'));
 $texy->addHandler('afterBlockquote', array('myHandler', 'afterBlockquote'));
-$texy->addHandler('afterHorizline', array('myHandler', 'afterHorizline'));
 $texy->addHandler('beforeParse', array('myHandler', 'beforeParse'));
 $texy->addHandler('afterParse', array('myHandler', 'afterParse'));
 
@@ -61,7 +61,7 @@ class myHandler
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyImage
-     * @param TexyLink
+     * @param TexyLink|NULL
      * @return TexyHtml|string|FALSE
      */
     function image($invocation, $image, $link)
@@ -115,7 +115,7 @@ class myHandler
      * @param string
      * @param string
      * @param TexyModifier
-     * @param TexyLink
+     * @param TexyLink|NULL
      * @return TexyHtml|string|FALSE
      */
     function phrase($invocation, $phrase, $content, $modifier, $link)
@@ -195,7 +195,7 @@ class myHandler
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyImage
-     * @param TexyLink
+     * @param TexyLink|NULL
      * @param string
      * @param TexyModifier
      * @return TexyHtml|string|FALSE

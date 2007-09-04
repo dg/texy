@@ -5,6 +5,11 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 176
+- přidáno $texy->headingModule->moreMeansHigher (popsáno na webu http://texy.info/cs/api-heading-module)
+- do tabulek se nově doplňují elementy `<thead>` a `<tbody>`
+- chytřejší dělení tabulky na head & body
+
 rev. 175
 - `$texy->htmlOutputModule->xhtml` - přepínač XHTML / HTML režimu
 - `TexyHtmlOutputModule::$strictDTD` - lze přepínat mezi striktním a transitional DTD

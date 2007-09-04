@@ -95,6 +95,7 @@ final class TexyTableModule extends TexyModule
         $this->colModifier = array();
         $this->last = array();
         $this->rowCounter = 0;
+        $elPart = NULL;
 
         while (TRUE) {
             if ($parser->next('#^\|[+-]{3,}$#Um', $matches)) {
@@ -102,8 +103,21 @@ final class TexyTableModule extends TexyModule
                 continue;
             }
 
-            if ($elRow = $this->patternRow($parser)) {
-                $el->addChild($elRow);
+            if ($parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
+                // smarter head detection
+                if ($this->rowCounter === 0 && !$this->isHead && $parser->next('#^\|[+-]{3,}$#Um', $foo)) {
+                    $this->isHead = TRUE;
+                    $parser->moveBackward();
+                }
+
+                if ($elPart === NULL) {
+                    $elPart = $el->add($this->isHead ? 'thead' : 'tbody');
+
+                } elseif (!$this->isHead && $elPart->getName() === 'thead') {
+                    $elPart = $el->add('tbody');
+                }
+
+                $elPart->addChild($this->patternRow($matches));
                 $this->rowCounter++;
                 continue;
             }
@@ -121,17 +135,12 @@ final class TexyTableModule extends TexyModule
 
     /**
      * Handles single row: | xxx | xxx | xxx | .(..){..}[..]
-     * @param TexyBlockParser
-     * @return TexyHtml|string|FALSE
+     * @param array
+     * @return TexyHtml
      */
-    private function patternRow($parser)
+    private function patternRow($matches)
     {
         $tx = $this->texy;
-
-        $matches = NULL;
-        if (!$parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches))
-            return FALSE;
-
         list(, $mContent, $mMod) = $matches;
         //    [1] => ....
         //    [2] => .(title)[class]{style}<>_

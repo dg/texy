@@ -42,6 +42,9 @@ final class TexyHeadingModule extends TexyModule
     /** @var int  level of top heading, 1..6 */
     public $top = 1;
 
+    /** @var bool  surrounded headings: more #### means higher heading */
+    public $moreMeansHigher = TRUE;
+
     /** @var int  balancing mode */
     public $balancing = TexyHeadingModule::DYNAMIC;
 
@@ -173,7 +176,8 @@ final class TexyHeadingModule extends TexyModule
         //    [3] => .(title)[class]{style}<>
 
         $mod = new TexyModifier($mMod);
-        $level = 7 - min(7, max(2, strlen($mLine)));
+        $level = min(7, max(2, strlen($mLine)));
+        $level = $this->moreMeansHigher ? 7 - $level : $level - 2;
         $mContent = rtrim($mContent, $mLine[0] . ' ');
         return $this->texy->invokeAroundHandlers('heading', $parser, array($level, $mContent, $mod, TRUE));
     }
