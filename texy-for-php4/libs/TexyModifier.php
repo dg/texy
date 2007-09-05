@@ -153,6 +153,7 @@ class TexyModifier extends TexyBase
 
         } elseif ($tmp === TEXY_ALL) {
             $elAttrs = $this->attrs;
+            $el->validateAttrs($texy);
 
         } elseif (is_array($tmp) && isset($tmp[$el->getName()])) {
             $tmp = $tmp[$el->getName()];
@@ -165,6 +166,7 @@ class TexyModifier extends TexyBase
                 foreach ($this->attrs as $key => $value)
                     if (isset($tmp[$key])) $el->attrs[$key] = $value;
             }
+            $el->validateAttrs($texy);
         }
 
         // title
@@ -196,9 +198,23 @@ class TexyModifier extends TexyBase
             }
         }
 
-        // align
-        if ($this->hAlign) $elAttrs['style']['text-align'] = $this->hAlign;
-        if ($this->vAlign) $elAttrs['style']['vertical-align'] = $this->vAlign;
+        // horizontal align
+        if ($this->hAlign) {
+            if (empty($texy->alignClasses[$this->hAlign])) {
+                $elAttrs['style']['text-align'] = $this->hAlign;
+            } else {
+                $elAttrs['class'][] = $texy->alignClasses[$this->hAlign];
+            }
+        }
+
+        // vertical align
+        if ($this->vAlign) {
+            if (empty($texy->alignClasses[$this->vAlign])) {
+                $elAttrs['style']['vertical-align'] = $this->vAlign;
+            } else {
+                $elAttrs['class'][] = $texy->alignClasses[$this->vAlign];
+            }
+        }
 
         return $el;
     }

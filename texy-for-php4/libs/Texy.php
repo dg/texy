@@ -70,6 +70,17 @@ class Texy extends TexyBase
     /** @var string  Generated stylesheet */
     var $styleSheet = '';
 
+    /** @var array  CSS classes for align modifiers */
+    var $alignClasses = array(
+        'left' => NULL,
+        'right' => NULL,
+        'center' => NULL,
+        'justify' => NULL,
+        'top' => NULL,
+        'middle' => NULL,
+        'bottom' => NULL,
+    );
+
     /** @var TexyScriptModule */
     var $scriptModule;
 

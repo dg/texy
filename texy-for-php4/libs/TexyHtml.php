@@ -441,6 +441,23 @@ class TexyHtml extends TexyBase
 
 
     /**
+     * @return void
+     */
+    function validateAttrs($texy)
+    {
+        if (isset($texy->htmlOutputModule->dtd[$this->name])) {
+            $dtd = $texy->htmlOutputModule->dtd[$this->name][0];
+            if (is_array($dtd)) {
+                foreach ($this->attrs as $attr => $foo) {
+                    if (!isset($dtd[$attr])) unset($this->attrs[$attr]);
+                }
+            }
+        }
+    }
+
+
+
+    /**
      * Parses text as single line
      * @param Texy
      * @param string

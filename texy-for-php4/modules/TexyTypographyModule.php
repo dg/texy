@@ -66,7 +66,13 @@ class TexyTypographyModule extends TexyModule
 
 
 
-    function beforeParse()
+    /**
+     * Text pre-processing
+     * @param Texy
+     * @param string
+     * @return void
+     */
+    function beforeParse($texy, & $text)
     {
         // CONTENT_MARKUP mark:   \x17-\x1F
         // CONTENT_REPLACED mark: \x16

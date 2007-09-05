@@ -92,7 +92,7 @@ final class TexyHtmlOutputModule extends TexyModule
 
         // accepts all valid HTML tags and attributes by default
         foreach ($this->dtd as $tag => $dtd) {
-            $texy->allowedTags[$tag] = is_array($dtd[0]) ? array_keys($dtd[0]) : $dtd[0];
+            $texy->allowedTags[$tag] = Texy::ALL;
         }
     }
 

@@ -114,26 +114,20 @@ final class TexyFigureModule extends TexyModule
         $el->children['caption'] = TexyHtml::el('p');
         $el->children['caption']->parseLine($tx, ltrim($content));
 
-        if ($hAlign === 'left') {
-            if ($this->leftClass != '') {
-                $el->attrs['class'][] = $this->leftClass;
+        $class = $this->class;
+        if ($hAlign) {
+            $var = $hAlign . 'Class'; // leftClass, rightClass
+            if (!empty($this->$var)) {
+                $class = $this->$var;
+
+            } elseif (empty($tx->alignClasses[$hAlign])) {
+                $el->attrs['style']['float'] = $hAlign;
+
             } else {
-                $el->attrs['style']['float'] = 'left';
-                $el->attrs['class'][] = $this->class;
+                $class .= '-' . $tx->alignClasses[$hAlign];
             }
-
-        } elseif ($hAlign === 'right')  {
-
-            if ($this->rightClass != '') {
-                $el->attrs['class'][] = $this->rightClass;
-            } else {
-                $el->attrs['style']['float'] = 'right';
-                $el->attrs['class'][] = $this->class;
-            }
-
-        } else {
-            $el->attrs['class'][] = $this->class;
         }
+        $el->attrs['class'][] = $class;
 
         return $el;
     }

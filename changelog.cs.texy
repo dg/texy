@@ -5,8 +5,11 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 177
+- přidáno $texy->alignClasses (viz "fórum":http://forum.texy.info/viewtopic.php?id=532)
+
 rev. 176
-- přidáno $texy->headingModule->moreMeansHigher (popsáno na webu http://texy.info/cs/api-heading-module)
+- přidáno $texy->headingModule->moreMeansHigher (viz "fórum":http://forum.texy.info/viewtopic.php?id=523)
 - do tabulek se nově doplňují elementy `<thead>` a `<tbody>`
 - chytřejší dělení tabulky na head & body
 

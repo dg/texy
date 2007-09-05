@@ -83,6 +83,17 @@ class Texy extends TexyBase
     /** @var string  Generated stylesheet */
     public $styleSheet = '';
 
+    /** @var array  CSS classes for align modifiers */
+    public $alignClasses = array(
+        'left' => NULL,
+        'right' => NULL,
+        'center' => NULL,
+        'justify' => NULL,
+        'top' => NULL,
+        'middle' => NULL,
+        'bottom' => NULL,
+    );
+
     /** @var mixed */
     static public $advertisingNotice = 'once';
 

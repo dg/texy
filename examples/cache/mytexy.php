@@ -31,8 +31,8 @@ class MyTexy extends Texy
         parent::__construct();
 
         // some configurations
-        $this->imageModule->leftClass   = 'left';
-        $this->imageModule->rightClass  = 'right';
+        $this->alignClasses['left'] = 'left';
+        $this->alignClasses['right'] = 'right';
     }
 
 

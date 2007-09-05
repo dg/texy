@@ -251,18 +251,17 @@ final class TexyImageModule extends TexyModule
             else $el->attrs['alt'] = $this->defaultAlt;
         }
 
-        if ($hAlign === 'left') {
-            if ($this->leftClass != '')
-                $el->attrs['class'][] = $this->leftClass;
-            else
-                $el->attrs['style']['float'] = 'left';
+        if ($hAlign) {
+            $var = $hAlign . 'Class'; // leftClass, rightClass
+            if (!empty($this->$var)) {
+                $el->attrs['class'][] = $this->$var;
 
-        } elseif ($hAlign === 'right')  {
+            } elseif (empty($tx->alignClasses[$hAlign])) {
+                $el->attrs['style']['float'] = $hAlign;
 
-            if ($this->rightClass != '')
-                $el->attrs['class'][] = $this->rightClass;
-            else
-                $el->attrs['style']['float'] = 'right';
+            } else {
+                $el->attrs['class'][] = $tx->alignClasses[$hAlign];
+            }
         }
 
         if ($image->width || $image->height) {

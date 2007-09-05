@@ -244,6 +244,8 @@ final class TexyHtmlModule extends TexyModule
             }
         }
 
+        $el->validateAttrs($tx);
+
         return $tx->protect($el->startTag(), $el->getContentType());
     }
 

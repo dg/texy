@@ -125,6 +125,16 @@ class TexyTableModule extends TexyModule
             break;
         }
 
+        if ($elPart === NULL) {
+            // invalid table
+            return FALSE;
+        }
+
+        if ($elPart->getName() === 'thead') {
+            // thead is optional, tbody is required
+            $elPart->setName('tbody');
+        }
+
         // event listener
         $tx->invokeHandlers('afterTable', array($parser, $el, $mod));
 
