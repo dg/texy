@@ -147,8 +147,10 @@ final class TexyLinkModule extends TexyModule
                 $content = $link->label;
             } else {
                 self::$deadlock[$link->name] = TRUE;
-                $lineParser = new TexyLineParser($tx);
-                $content = $lineParser->parse($link->label);
+                $el = TexyHtml::el();
+                $lineParser = new TexyLineParser($tx, $el);
+                $lineParser->parse($link->label);
+                $content = $el->toString($tx);
                 unset(self::$deadlock[$link->name]);
             }
         } else {
@@ -293,11 +295,9 @@ final class TexyLinkModule extends TexyModule
         if (empty($link->modifier)) {
             $nofollow = $popup = FALSE;
         } else {
-            $classes = array_flip($link->modifier->classes);
-            $nofollow = isset($classes['nofollow']);
-            $popup = isset($classes['popup']);
-            unset($classes['nofollow'], $classes['popup']);
-            $link->modifier->classes = array_flip($classes);
+            $nofollow = isset($link->modifier->classes['nofollow']);
+            $popup = isset($link->modifier->classes['popup']);
+            unset($link->modifier->classes['nofollow'], $link->modifier->classes['popup']);
             $el->attrs['href'] = NULL; // trick - move to front
             $link->modifier->decorate($tx, $el);
         }

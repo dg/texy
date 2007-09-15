@@ -242,10 +242,10 @@ class TexyListModule extends TexyModule
         }
 
         // parse content
-        $elItem->parseBlock($tx, $content, min(TEXY_PARSER_INDENT, $parser->getLevel()));
+        $elItem->parseBlock($tx, $content, TRUE);
 
-        if (is_a($elItem->getChild(0), 'TexyHtml')) {
-            $tmp = $elItem->getChild(0); $tmp->setName(NULL);
+        if ($elItem->children && is_a($elItem->children[0], 'TexyHtml')) {
+            $elItem->children[0]->setName(NULL);
         }
 
         return $elItem;

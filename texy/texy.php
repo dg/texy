@@ -35,6 +35,7 @@ require_once TEXY_DIR.'libs/TexyBase.php';
 require_once TEXY_DIR.'libs/Texy.php';
 require_once TEXY_DIR.'libs/RegExp.Patterns.php';
 require_once TEXY_DIR.'libs/TexyHtml.php';
+require_once TEXY_DIR.'libs/TexyHtml.DTD.php';
 require_once TEXY_DIR.'libs/TexyModifier.php';
 require_once TEXY_DIR.'libs/TexyModule.php';
 require_once TEXY_DIR.'libs/TexyParser.php';

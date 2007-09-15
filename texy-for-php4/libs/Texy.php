@@ -21,6 +21,9 @@ define('TEXY_CONTENT_TEXTUAL',  "\x15");
 define('TEXY_CONTENT_BLOCK',  "\x14");
 
 
+/** @var bool  use Strict of Transitional DTD? */
+$GLOBALS['Texy::$strictDTD'] = FALSE; /* class static property */
+
 /** @var mixed */
 $GLOBALS['Texy::$advertisingNotice'] = 'once'; /* class static property */
 
@@ -59,6 +62,9 @@ class Texy extends TexyBase
 
     /** @var array  regexps to check URL schemes */
     var $urlSchemeFilters = NULL; // disable URL scheme filter
+
+    /** @var bool  Paragraph merging mode */
+    var $mergeLines = TRUE;
 
     /** @var array  Parsing summary */
     var $summary = array(
@@ -170,19 +176,26 @@ class Texy extends TexyBase
 
     /** DEPRECATED */
     var $cleaner;
-    var $mergeLines;
     var $xhtml;
 
 
 
     function __construct()
     {
+        if (!$GLOBALS['TexyHtml::$dtd']) {
+            TexyHtml::initDTD($GLOBALS['Texy::$strictDTD']);
+        }
+
+        // accepts all valid HTML tags and attributes by default
+        foreach ($GLOBALS['TexyHtml::$dtd'] as $tag => $dtd) {
+            $this->allowedTags[$tag] = TEXY_ALL;
+        }
+
         // load all modules
         $this->loadModules();
 
         // DEPRECATED
         $this->cleaner = & $this->htmlOutputModule;
-        $this->mergeLines = & $this->paragraphModule->mergeLines;
         $this->xhtml = & $this->htmlOutputModule->xhtml;
 
         // examples of link references ;-)
@@ -320,7 +333,7 @@ class Texy extends TexyBase
         if ($singleLine) {
             $this->DOM->parseLine($this, $text);
         } else {
-            $this->DOM->parseBlock($this, $text, TEXY_PARSER_TOP);
+            $this->DOM->parseBlock($this, $text);
         }
 
         // user after handler

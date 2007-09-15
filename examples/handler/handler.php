@@ -182,7 +182,7 @@ class myHandler
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param string
-     * @param TexyModifier
+     * @param TexyModifier|NULL
      * @return TexyHtml|string|FALSE
      */
     function paragraph($invocation, $content, $modifier)

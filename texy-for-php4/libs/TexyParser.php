@@ -18,6 +18,9 @@ class TexyParser extends TexyBase
     /** @var Texy */
     var $texy;
 
+    /** @var TexyHtml  */
+    var $element;
+
     /** @var array */
     var $patterns;
 
@@ -37,11 +40,6 @@ class TexyParser extends TexyBase
 
 
 
-define('TEXY_PARSER_SEPARATE', 0);
-define('TEXY_PARSER_INDENT', 1);
-define('TEXY_PARSER_NORMAL', 2);
-define('TEXY_PARSER_TOP', 3);
-
 
 /**
  * Parser for block structures
@@ -54,8 +52,8 @@ class TexyBlockParser extends TexyParser
     /** @var int */
     var $offset; /* private */
 
-    /** @var int  TEXY_PARSER_SEPARATE..TEXY_PARSER_TOP */
-    var $level;
+    /** @var bool */
+    var $indented; /* private */
 
 
 
@@ -63,18 +61,19 @@ class TexyBlockParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    function __construct(/*Texy*/ $texy, $level = TEXY_PARSER_SEPARATE)
+    function __construct(/*Texy*/ $texy, /*TexyHtml*/ $element, $indented)
     {
         $this->texy = $texy;
-        $this->level = $level;
+        $this->element = $element;
+        $this->indented = (bool) $indented;
         $this->patterns = $texy->getBlockPatterns();
     }
 
 
 
-    function getLevel()
+    function isIndented()
     {
-        return $this->level;
+        return $this->indented;
     }
 
 
@@ -125,7 +124,7 @@ class TexyBlockParser extends TexyParser
 
     /**
      * @param string
-     * @return array
+     * @return void
      */
     function parse($text)
     {
@@ -136,7 +135,6 @@ class TexyBlockParser extends TexyParser
         // parser initialization
         $this->text = $text;
         $this->offset = 0;
-        $nodes = array();
 
         // parse loop
         $matches = array();
@@ -164,6 +162,7 @@ class TexyBlockParser extends TexyParser
 
 
         // process loop
+        $el = $this->element;
         $cursor = 0;
         do {
             do {
@@ -177,7 +176,7 @@ class TexyBlockParser extends TexyParser
             if ($mOffset > $this->offset) {
                 $s = trim(substr($text, $this->offset, $mOffset - $this->offset));
                 if ($s !== '') {
-                    $tx->paragraphModule->process($this, $s, $nodes);
+                    $tx->paragraphModule->process($this, $s, $el);
                 }
             }
 
@@ -196,16 +195,13 @@ class TexyBlockParser extends TexyParser
                 continue;
 
             } elseif (is_a($res, 'TexyHtml')) {
-                $nodes[] = $res;
+                $el->children[] = $res;
 
             } elseif (is_string($res)) {
-                $res = TexyHtml::text($res);
-                $nodes[] = $res;
+                $el->children[] = $res;
             }
 
         } while (1);
-
-        return $nodes;
     }
 
 }
@@ -231,9 +227,10 @@ class TexyLineParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    function __construct(/*Texy*/ $texy)
+    function __construct(/*Texy*/ $texy, /*TexyHtml*/ $element)
     {
         $this->texy = $texy;
+        $this->element = $element;
         $this->patterns = $texy->getLinePatterns();
     }
 
@@ -241,7 +238,7 @@ class TexyLineParser extends TexyParser
 
     /**
      * @param string
-     * @return string
+     * @return void
      */
     function parse($text)
     {
@@ -249,7 +246,11 @@ class TexyLineParser extends TexyParser
 
         // initialization
         $pl = $this->patterns;
-        if (!$pl) return $text; // nothing to do
+        if (!$pl) {
+            // nothing to do
+            $this->element->children[] = $text;
+            return;
+        }
 
         $offset = 0;
         $names = array_keys($pl);
@@ -331,7 +332,7 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        return $text;
+        $this->element->children[] = $text;
     }
 
 }

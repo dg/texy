@@ -18,6 +18,9 @@ class TexyParser extends TexyBase
     /** @var Texy */
     protected $texy;
 
+    /** @var TexyHtml  */
+    protected $element;
+
     /** @var array */
     public $patterns;
 
@@ -43,20 +46,14 @@ class TexyParser extends TexyBase
  */
 class TexyBlockParser extends TexyParser
 {
-    const
-        SEPARATE = 0,
-        INDENT = 1,
-        NORMAL = 2,
-        TOP = 3;
-
     /** @var string */
     private $text;
 
     /** @var int */
     private $offset;
 
-    /** @var int  SEPARATE, INDENT, NORMAL, TOP */
-    private $level;
+    /** @var bool */
+    private $indented;
 
 
 
@@ -64,25 +61,26 @@ class TexyBlockParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    public function __construct(Texy $texy, $level = self::SEPARATE)
+    public function __construct(Texy $texy, TexyHtml $element, $indented)
     {
         $this->texy = $texy;
-        $this->level = $level;
+        $this->element = $element;
+        $this->indented = (bool) $indented;
         $this->patterns = $texy->getBlockPatterns();
     }
 
 
 
-    public function getLevel()
+    public function isIndented()
     {
-        return $this->level;
+        return $this->indented;
     }
 
 
 
     // match current line against RE.
     // if succesfull, increments current position and returns TRUE
-    final public function next($pattern, &$matches)
+    public function next($pattern, &$matches)
     {
         $matches = NULL;
         $ok = preg_match(
@@ -102,7 +100,7 @@ class TexyBlockParser extends TexyParser
 
 
 
-    final public function moveBackward($linesCount = 1)
+    public function moveBackward($linesCount = 1)
     {
         while (--$this->offset > 0)
             if ($this->text{ $this->offset-1 } === "\n") {
@@ -126,7 +124,7 @@ class TexyBlockParser extends TexyParser
 
     /**
      * @param string
-     * @return array
+     * @return void
      */
     public function parse($text)
     {
@@ -137,7 +135,6 @@ class TexyBlockParser extends TexyParser
         // parser initialization
         $this->text = $text;
         $this->offset = 0;
-        $nodes = array();
 
         // parse loop
         $matches = array();
@@ -165,6 +162,7 @@ class TexyBlockParser extends TexyParser
 
 
         // process loop
+        $el = $this->element;
         $cursor = 0;
         do {
             do {
@@ -178,7 +176,7 @@ class TexyBlockParser extends TexyParser
             if ($mOffset > $this->offset) {
                 $s = trim(substr($text, $this->offset, $mOffset - $this->offset));
                 if ($s !== '') {
-                    $tx->paragraphModule->process($this, $s, $nodes);
+                    $tx->paragraphModule->process($this, $s, $el);
                 }
             }
 
@@ -197,16 +195,13 @@ class TexyBlockParser extends TexyParser
                 continue;
 
             } elseif ($res instanceof TexyHtml) {
-                $nodes[] = $res;
+                $el->children[] = $res;
 
             } elseif (is_string($res)) {
-                $res = TexyHtml::text($res);
-                $nodes[] = $res;
+                $el->children[] = $res;
             }
 
         } while (1);
-
-        return $nodes;
     }
 
 }
@@ -232,9 +227,10 @@ class TexyLineParser extends TexyParser
      * @param Texy
      * @param TexyHtml
      */
-    public function __construct(Texy $texy)
+    public function __construct(Texy $texy, TexyHtml $element)
     {
         $this->texy = $texy;
+        $this->element = $element;
         $this->patterns = $texy->getLinePatterns();
     }
 
@@ -242,7 +238,7 @@ class TexyLineParser extends TexyParser
 
     /**
      * @param string
-     * @return string
+     * @return void
      */
     public function parse($text)
     {
@@ -250,7 +246,11 @@ class TexyLineParser extends TexyParser
 
         // initialization
         $pl = $this->patterns;
-        if (!$pl) return $text; // nothing to do
+        if (!$pl) {
+            // nothing to do
+            $this->element->children[] = $text;
+            return;
+        }
 
         $offset = 0;
         $names = array_keys($pl);
@@ -332,7 +332,7 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        return $text;
+        $this->element->children[] = $text;
     }
 
 }

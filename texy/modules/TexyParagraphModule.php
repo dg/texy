@@ -18,9 +18,6 @@
  */
 final class TexyParagraphModule extends TexyModule
 {
-    /** @var bool  Paragraph merging mode */
-    public $mergeLines = TRUE;
-
 
 
     public function __construct($texy)
@@ -35,13 +32,14 @@ final class TexyParagraphModule extends TexyModule
      * @param TexyBlockParser
      * @param string     text
      * @param array
+     * @param TexyHtml
      * @return vois
      */
-    public function process($parser, $content, & $nodes)
+    public function process($parser, $content, $el)
     {
         $tx = $this->texy;
 
-        if ($parser->getLevel() === TexyBlockParser::INDENT) { // indented
+        if ($parser->isIndented()) {
             $parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
         } else {
             $parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
@@ -53,17 +51,17 @@ final class TexyParagraphModule extends TexyModule
             if ($s === '') continue;
 
             // try to find modifier
-            $mod = new TexyModifier;
-            $mx = NULL;
+            $mx = $mod = NULL;
             if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $s, $mx)) {
                 list(, $mC1, $mMod, $mC2) = $mx;
                 $s = trim($mC1 . $mC2);
                 if ($s === '') continue;
+                $mod = new TexyModifier;
                 $mod->setProperties($mMod);
             }
 
-            $el = $tx->invokeAroundHandlers('paragraph', $parser, array($s, $mod));
-            if ($el) $nodes[] = $el;
+            $res = $tx->invokeAroundHandlers('paragraph', $parser, array($s, $mod));
+            if ($res) $el->children[] = $res;
         }
     }
 
@@ -74,7 +72,7 @@ final class TexyParagraphModule extends TexyModule
      *
      * @param TexyHandlerInvocation  handler invocation
      * @param string
-     * @param TexyModifier
+     * @param TexyModifier|NULL
      * @return TexyHtml|FALSE
      */
     public function solve($invocation, $content, $mod)
@@ -82,7 +80,7 @@ final class TexyParagraphModule extends TexyModule
         $tx = $this->texy;
 
         // find hard linebreaks
-        if ($this->mergeLines) {
+        if ($tx->mergeLines) {
             // ....
             //  ...  => \r means break line
             $content = preg_replace('#\n (?=\S)#', "\r", $content);
@@ -114,12 +112,12 @@ final class TexyParagraphModule extends TexyModule
         // block contains only markup tags or spaces or nothig
         } else {
             // if {ignoreEmptyStuff} return FALSE;
-            if ($mod->empty) $el->setName(NULL);
+            if (!$mod) $el->setName(NULL);
         }
 
         if ($el->getName()) {
             // apply modifier
-            $mod->decorate($tx, $el);
+            if ($mod) $mod->decorate($tx, $el);
 
             // add <br />
             if (strpos($content, "\r") !== FALSE) {

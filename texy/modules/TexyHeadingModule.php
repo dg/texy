@@ -224,14 +224,12 @@ final class TexyHeadingModule extends TexyModule
             $this->title = $title;
         }
 
-        if ($invocation->getParser()->getLevel() > TexyBlockParser::SEPARATE) {
-            $this->TOC[] = array(
-                'el' => $el,
-                'level' => $level,
-                'title' => $title,
-                'surrounded' => $isSurrounded,
-            );
-        }
+        $this->TOC[] = array(
+            'el' => $el,
+            'level' => $level,
+            'title' => $title,
+            'surrounded' => $isSurrounded,
+        );
 
         return $el;
     }

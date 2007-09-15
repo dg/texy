@@ -218,15 +218,12 @@ class TexyHeadingModule extends TexyModule
             $this->title = $title;
         }
 
-        $parser = $invocation->getParser();
-        if ($parser->getLevel() > TEXY_PARSER_SEPARATE) {
-            $this->TOC[] = array(
-                'el' => $el,
-                'level' => $level,
-                'title' => $title,
-                'surrounded' => $isSurrounded,
-            );
-        }
+        $this->TOC[] = array(
+            'el' => $el,
+            'level' => $level,
+            'title' => $title,
+            'surrounded' => $isSurrounded,
+        );
 
         return $el;
     }

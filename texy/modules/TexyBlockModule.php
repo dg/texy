@@ -116,11 +116,11 @@ final class TexyBlockModule extends TexyModule
     public function solve($invocation, $blocktype, $s, $param, $mod)
     {
         $tx = $this->texy;
+        $parser = $invocation->getParser();
 
         if ($blocktype === 'block/texy') {
             $el = TexyHtml::el();
-            $parser = $invocation->getParser();
-            $el->parseBlock($tx, $s, min(TexyBlockParser::NORMAL, $parser->getLevel()));
+            $el->parseBlock($tx, $s, $parser->isIndented());
             return $el;
         }
 
@@ -165,7 +165,7 @@ final class TexyBlockModule extends TexyModule
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
-            $lineParser = new TexyLineParser($tx);
+            $lineParser = new TexyLineParser($tx, $el);
             // special mode - parse only html tags
             $tmp = $lineParser->patterns;
             $lineParser->patterns = array();
@@ -173,7 +173,8 @@ final class TexyBlockModule extends TexyModule
             if (isset($tmp['html/comment'])) $lineParser->patterns['html/comment'] = $tmp['html/comment'];
             unset($tmp);
 
-            $s = $lineParser->parse($s);
+            $lineParser->parse($s);
+            $s = $el->getText();
             $s = Texy::unescapeHtml($s);
             $s = Texy::escapeHtml($s);
             $s = $tx->unprotect($s);
@@ -185,7 +186,8 @@ final class TexyBlockModule extends TexyModule
         if ($blocktype === 'block/html') {
             $s = trim($s, "\n");
             if ($s==='') return "\n";
-            $lineParser = new TexyLineParser($tx);
+            $el = TexyHtml::el();
+            $lineParser = new TexyLineParser($tx, $el);
             // special mode - parse only html tags
             $tmp = $lineParser->patterns;
             $lineParser->patterns = array();
@@ -193,7 +195,8 @@ final class TexyBlockModule extends TexyModule
             if (isset($tmp['html/comment'])) $lineParser->patterns['html/comment'] = $tmp['html/comment'];
             unset($tmp);
 
-            $s = $lineParser->parse($s);
+            $lineParser->parse($s);
+            $s = $el->getText();
             $s = Texy::unescapeHtml($s);
             $s = Texy::escapeHtml($s);
             $s = $tx->unprotect($s);
@@ -217,8 +220,7 @@ final class TexyBlockModule extends TexyModule
             if ($s==='') return "\n";
             $el = TexyHtml::el('div');
             $mod->decorate($tx, $el);
-            $parser = $invocation->getParser();
-            $el->parseBlock($tx, $s, min(TexyBlockParser::NORMAL, $parser->getLevel())); // TODO: INDENT or NORMAL ?
+            $el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
             return $el;
         }
 

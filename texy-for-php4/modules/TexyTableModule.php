@@ -159,10 +159,9 @@ class TexyTableModule extends TexyModule
         $mod = new TexyModifier($mMod);
         $mod->decorate($tx, $elRow);
 
-        if ($this->rowCounter % 2 === 0) {
-            if ($this->oddClass) $elRow->attrs['class'][] = $this->oddClass;
-        } else {
-            if ($this->evenClass) $elRow->attrs['class'][] = $this->evenClass;
+        $rowClass = $this->rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
+        if ($rowClass && !isset($mod->classes[$this->oddClass]) && !isset($mod->classes[$this->evenClass])) {
+            $elRow->attrs['class'][] = $rowClass;
         }
 
         $col = 0;
@@ -210,8 +209,8 @@ class TexyTableModule extends TexyModule
             $elField->setName($this->isHead || ($mHead === '*') ? 'th' : 'td');
             $mod->decorate($tx, $elField);
 
-            $elField->parseLine($tx, $mContent);
-            if ($elField->children === '') $elField->children  = "\xC2\xA0"; // &nbsp;
+            $elField->parseLine($tx, trim($mContent));
+            if ($elField->getText() === '') $elField->setText("\xC2\xA0"); // &nbsp;
 
             $elRow->addChild($elField);
             $this->last[$col] = $elField;

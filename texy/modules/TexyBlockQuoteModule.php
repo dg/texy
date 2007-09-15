@@ -91,7 +91,7 @@ final class TexyBlockQuoteModule extends TexyModule
         } while (TRUE);
 
         $el->attrs['cite'] = $mod->cite;
-        $el->parseBlock($tx, $content, min(TexyBlockParser::NORMAL, $parser->getLevel()));
+        $el->parseBlock($tx, $content, $parser->isIndented());
 
         // no content?
         if (!count($el->children)) return FALSE;

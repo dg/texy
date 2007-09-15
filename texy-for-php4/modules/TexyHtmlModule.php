@@ -99,29 +99,32 @@ class TexyHtmlModule extends TexyModule
 
         $el = TexyHtml::el($mTag);
 
-        // end tag? we are finished
-        if (!$isStart) {
-            return $tx->invokeAroundHandlers('htmlTag', $parser, array($el, FALSE));
+        if ($isStart) {
+            // parse attributes
+            $matches2 = NULL;
+            preg_match_all(
+                '#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
+                $mAttr,
+                $matches2,
+                PREG_SET_ORDER
+            );
+
+            foreach ($matches2 as $m) {
+                $key = strtolower($m[1]);
+                $value = $m[2];
+                if ($value == NULL) $el->attrs[$key] = TRUE;
+                elseif ($value{0} === '\'' || $value{0} === '"') $el->attrs[$key] = Texy::unescapeHtml(substr($value, 1, -1));
+                else $el->attrs[$key] = Texy::unescapeHtml($value);
+            }
         }
 
-        // parse attributes
-        $matches2 = NULL;
-        preg_match_all(
-            '#([a-z0-9:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
-            $mAttr,
-            $matches2,
-            PREG_SET_ORDER
-        );
+        $res = $tx->invokeAroundHandlers('htmlTag', $parser, array($el, $isStart, $isEmpty));
 
-        foreach ($matches2 as $m) {
-            $key = strtolower($m[1]);
-            $value = $m[2];
-            if ($value == NULL) $el->attrs[$key] = TRUE;
-            elseif ($value{0} === '\'' || $value{0} === '"') $el->attrs[$key] = Texy::unescapeHtml(substr($value, 1, -1));
-            else $el->attrs[$key] = Texy::unescapeHtml($value);
+        if (is_a($res, 'TexyHtml')) {
+            return $tx->protect($isStart ? $res->startTag() : $res->endTag(), $res->getContentType());
         }
 
-        return $tx->invokeAroundHandlers('htmlTag', $parser, array($el, TRUE, $isEmpty));
+        return $res;
     }
 
 
@@ -133,7 +136,7 @@ class TexyHtmlModule extends TexyModule
      * @param TexyHtml  element
      * @param bool      is start tag?
      * @param bool      is empty?
-     * @return string|FALSE
+     * @return TexyHtml|string|FALSE
      */
     function solveTag($invocation, /*TexyHtml*/ $el, $isStart, $forceEmpty = NULL)
     {
@@ -144,30 +147,28 @@ class TexyHtmlModule extends TexyModule
         if (!$allowedTags)
             return FALSE;  // all tags are disabled
 
+        // convert case
         $name = $el->getName();
+        $lower = strtolower($name);
+        if (isset($GLOBALS['TexyHtml::$dtd'][$lower]) || $name === strtoupper($name)) {
+            // complete UPPER convert to lower
+            $name = $lower;
+            $el->setName($name);
+        }
+
         if (is_array($allowedTags)) {
-            if (!isset($allowedTags[$name])) {
-                $name = strtolower($name);
-                if (!isset($allowedTags[$name])) return FALSE; // this element not allowed
-                $el->setName($name);
-            }
+            if (!isset($allowedTags[$name])) return FALSE;
             $allowedAttrs = $allowedTags[$name]; // allowed attrs
 
-        } else { // allowedTags === TEXY_ALL
-            // complete UPPER convert to lower
-            if ($name === strtoupper($name)) {
-                $name = strtolower($name);
-                $el->setName($name);
-            }
-
+        } else {
+            // allowedTags === Texy::ALL
             if ($forceEmpty) $el->isEmpty(TRUE);
-
             $allowedAttrs = TEXY_ALL; // all attrs are allowed
         }
 
         // end tag? we are finished
         if (!$isStart) {
-            return $tx->protect($el->endTag(), $el->getContentType());
+            return $el;
         }
 
         $elAttrs = & $el->attrs;
@@ -244,9 +245,9 @@ class TexyHtmlModule extends TexyModule
             }
         }
 
-        $el->validateAttrs($tx);
+        $el->validateAttrs();
 
-        return $tx->protect($el->startTag(), $el->getContentType());
+        return $el;
     }
 
 

@@ -5,6 +5,12 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 178
+- TexyTableModule - úprava chování odd & evenClass (viz "fórum":http://forum.texy.info/viewtopic.php?id=538)
+- výchozí handler 'htmlTag' vrací místo řetězce objekt TexyHtml
+- handler 'paragraph' může být volán s parametrem NULL jako modifikátorem (pozor, tento handler bude v další revizi výrazně změněn)
+- interní změny v TexyHtml a TexyModifier (v $classes nyní tvoří položky klíče pole)
+
 rev. 177
 - přidáno $texy->alignClasses (viz "fórum":http://forum.texy.info/viewtopic.php?id=532)
 
@@ -15,7 +21,6 @@ rev. 176
 
 rev. 175
 - `$texy->htmlOutputModule->xhtml` - přepínač XHTML / HTML režimu
-- `TexyHtmlOutputModule::$strictDTD` - lze přepínat mezi striktním a transitional DTD
 
 rev. 173
 - pole $texy->headingModule->TOC namísto položky 'id' obsahuje položku 'el' s TexyHtml elementem titulku a 'title' se generuje jen při $generateID
@@ -284,7 +289,7 @@ Verze 1.0 Final
 Rozšíření funkcí:
 - NEW: "uživatelské atributy":http://forum.texy.info/viewtopic.php?id=250
 - CHG: povolené tagy dostupné přes `$texy->allowedTags`, mělo by v budoucnu nahradit `$texy->htmlModule->allowed`
-- NEW: nový režim "zalamování řádků":http://forum.texy.info/viewtopic.php?pid=893 via `$texy->paragraphModule->mergeLines = false`
+- NEW: nový režim "zalamování řádků":http://forum.texy.info/viewtopic.php?pid=893 via `$texy->mergeLines = false`
 - INT: PHP5-like constructors
 
 

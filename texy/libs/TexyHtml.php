@@ -29,33 +29,68 @@ class TexyHtml extends TexyBase
     /** @var string  element's name */
     private $name;
 
+    /** @var TexyHtml parent element */
+    private $parent;
+
     /** @var bool  is element empty? */
     private $isEmpty;
 
     /** @var array  element's attributes */
     public $attrs = array();
 
-    /**
-     * @var mixed  element's content
-     *   array of TexyHtml - child nodes
-     *   string - content as string (text-node)
-     */
-    public $children;
+    /** @var array  of TexyHtml | string nodes */
+    public $children = array();
 
     /** @var bool  use XHTML syntax? */
     public static $xhtml = TRUE;
 
     /** @var array  empty elements */
-    public static $emptyEl = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
+    public static $emptyElements = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
         'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1,'embed'=>1);
 
     /** @var array  %inline; elements; replaced elements + br have value '1' */
-    public static $inlineEl = array('ins'=>0,'del'=>0,'tt'=>0,'i'=>0,'b'=>0,'big'=>0,'small'=>0,'em'=>0,
+    public static $inlineElements = array('ins'=>0,'del'=>0,'tt'=>0,'i'=>0,'b'=>0,'big'=>0,'small'=>0,'em'=>0,
         'strong'=>0,'dfn'=>0,'code'=>0,'samp'=>0,'kbd'=>0,'var'=>0,'cite'=>0,'abbr'=>0,'acronym'=>0,
         'sub'=>0,'sup'=>0,'q'=>0,'span'=>0,'bdo'=>0,'a'=>0,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
         'map'=>0,'input'=>1,'select'=>1,'textarea'=>1,'label'=>0,'button'=>1,
         'u'=>0,'s'=>0,'strike'=>0,'font'=>0,'applet'=>1,'basefont'=>0, // transitional
         'embed'=>1,'wbr'=>0,'nobr'=>0,'canvas'=>1, // proprietary
+    );
+
+    /**
+     * DTD descriptor
+     *   $dtd[element][0] - allowed attributes (as array keys)
+     *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
+     *                        - array of allowed elements (as keys)
+     *                        - FALSE - empty element
+     *                        - 0 - special case for ins & del
+     * @var array
+     * @see TexyHtmlOutputModule::initDTD()
+     */
+    public static $dtd;
+
+    /** @var array  elements with optional end tag in HTML */
+    public static $optionalEnds = array('body'=>1,'head'=>1,'html'=>1,'colgroup'=>1,'dd'=>1,
+        'dt'=>1,'li'=>1,'option'=>1,'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1);
+
+    /** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
+    public static $prohibits = array(
+        'a' => array('a','button'),
+        'img' => array('pre'),
+        'object' => array('pre'),
+        'big' => array('pre'),
+        'small' => array('pre'),
+        'sub' => array('pre'),
+        'sup' => array('pre'),
+        'input' => array('button'),
+        'select' => array('button'),
+        'textarea' => array('button'),
+        'label' => array('button', 'label'),
+        'button' => array('button'),
+        'form' => array('button', 'form'),
+        'fieldset' => array('button'),
+        'iframe' => array('button'),
+        'isindex' => array('button'),
     );
 
 
@@ -88,20 +123,6 @@ class TexyHtml extends TexyBase
 
 
     /**
-     * Static factory for textual element
-     * @param string
-     * @return TexyHtml
-     */
-    public static function text($text)
-    {
-        $el = new self;
-        $el->setText($text);
-        return $el;
-    }
-
-
-
-    /**
      * Changes element's name
      * @param string
      * @return TexyHtml  itself
@@ -113,7 +134,7 @@ class TexyHtml extends TexyBase
         }
 
         $this->name = $name;
-        $this->isEmpty = isset(self::$emptyEl[$name]);
+        $this->isEmpty = isset(self::$emptyElements[$name]);
         return $this;
     }
 
@@ -153,13 +174,11 @@ class TexyHtml extends TexyBase
      */
     final public function setText($text)
     {
-        if ($text === NULL) {
-            $text = '';
-        } elseif (!is_scalar($text)) {
+        if (is_scalar($text)) {
+            $this->children = array($text);
+        } elseif ($text !== NULL) {
             throw new TexyException('Content must be scalar');
         }
-
-        $this->children = $text;
         return $this;
     }
 
@@ -171,40 +190,12 @@ class TexyHtml extends TexyBase
      */
     final public function getText()
     {
-        if (is_array($this->children)) {
-            return FALSE;
+        $s = '';
+        foreach ($this->children as $child) {
+            if (is_object($child)) return FALSE;
+            $s .= $child;
         }
-
-        return $this->children;
-    }
-
-
-
-    /**
-     * Adds new element's child
-     * @param TexyHtml object
-     * @return TexyHtml  itself
-     */
-    final public function addChild(TexyHtml $child)
-    {
-        $this->children[] = $child;
-        return $this;
-    }
-
-
-
-    /**
-     * Returns child node
-     * @param mixed index
-     * @return TexyHtml
-     */
-    final public function getChild($index)
-    {
-        if (isset($this->children[$index])) {
-            return $this->children[$index];
-        }
-
-        return NULL;
+        return $s;
     }
 
 
@@ -222,7 +213,40 @@ class TexyHtml extends TexyBase
         if ($text !== NULL) {
             $child->setText($text);
         }
-        return $this->children[] = $child;
+        $this->addChild($child);
+        return $child;
+    }
+
+
+
+    /**
+     * Adds new element's child
+     * @param TexyHtml|string child node
+     * @param mixed index
+     * @return TexyHtml  itself
+     */
+    final public function addChild($child)
+    {
+        if ($child instanceof TexyHtml) {
+            //$child->parent = $this;
+        } elseif (!is_string($child)) {
+            throw new TexyException('Child node must be scalar or TexyHtml object');
+        }
+
+        $this->children[] = $child;
+        return $this;
+    }
+
+
+
+    /**
+     * Returns child node
+     * @param mixed index
+     * @return TexyHtml
+     */
+    final public function getChild($index)
+    {
+        return $this->children[$index];
     }
 
 
@@ -301,12 +325,12 @@ class TexyHtml extends TexyBase
         }
 
         // add content
-        if (is_array($this->children)) {
-            foreach ($this->children as $value)
-                $s .= $value->toString($texy);
-
-        } else {
-            $s .= $this->children;
+        foreach ($this->children as $child) {
+            if (is_object($child)) {
+                $s .= $child->toString($texy);
+            } else {
+                $s .= $child;
+            }
         }
 
         // add end tag
@@ -407,20 +431,10 @@ class TexyHtml extends TexyBase
      */
     public function endTag()
     {
-        if ($this->name && !$this->isEmpty)
+        if ($this->name && !$this->isEmpty) {
             return '</' . $this->name . '>';
+        }
         return '';
-    }
-
-
-
-    /**
-     * Is element textual node?
-     * @return bool
-     */
-    final public function isTextual()
-    {
-        return !$this->isEmpty && is_scalar($this->children);
     }
 
 
@@ -430,9 +444,10 @@ class TexyHtml extends TexyBase
      */
     final public function __clone()
     {
-        if (is_array($this->children)) {
-            foreach ($this->children as $key => $value)
+        foreach ($this->children as $key => $value) {
+            if (is_object($value)) {
                 $this->children[$key] = clone $value;
+            }
         }
     }
 
@@ -443,9 +458,9 @@ class TexyHtml extends TexyBase
      */
     final public function getContentType()
     {
-        if (!isset(self::$inlineEl[$this->name])) return Texy::CONTENT_BLOCK;
+        if (!isset(self::$inlineElements[$this->name])) return Texy::CONTENT_BLOCK;
 
-        return self::$inlineEl[$this->name] ? Texy::CONTENT_REPLACED : Texy::CONTENT_MARKUP;
+        return self::$inlineElements[$this->name] ? Texy::CONTENT_REPLACED : Texy::CONTENT_MARKUP;
     }
 
 
@@ -453,10 +468,10 @@ class TexyHtml extends TexyBase
     /**
      * @return void
      */
-    final public function validateAttrs($texy)
+    final public function validateAttrs()
     {
-        if (isset($texy->htmlOutputModule->dtd[$this->name])) {
-            $dtd = $texy->htmlOutputModule->dtd[$this->name][0];
+        if (isset(self::$dtd[$this->name])) {
+            $dtd = self::$dtd[$this->name][0];
             if (is_array($dtd)) {
                 foreach ($this->attrs as $attr => $foo) {
                     if (!isset($dtd[$attr])) unset($this->attrs[$attr]);
@@ -464,6 +479,19 @@ class TexyHtml extends TexyBase
             }
         }
     }
+
+
+
+    public function validateChild($child)
+    {
+        if (isset(self::$dtd[$this->name])) {
+            if ($child instanceof TexyHtml) $child = $child->name;
+            return isset(self::$dtd[$this->name][1][$child]);
+        } else {
+            return TRUE; // unknown element
+        }
+    }
+
 
 
 
@@ -479,8 +507,8 @@ class TexyHtml extends TexyBase
         // special escape sequences
         $s = str_replace(array('\)', '\*'), array('&#x29;', '&#x2A;'), $s);
 
-        $parser = new TexyLineParser($texy);
-        $this->children = $parser->parse($s);
+        $parser = new TexyLineParser($texy, $this);
+        $parser->parse($s);
     }
 
 
@@ -489,13 +517,25 @@ class TexyHtml extends TexyBase
      * Parses text as block
      * @param Texy
      * @param string
-     * @param int
+     * @param bool
      * @return void
      */
-    final public function parseBlock($texy, $s, $level = TexyBlockParser::SEPARATE)
+    final public function parseBlock($texy, $s, $indented = FALSE)
     {
-        $parser = new TexyBlockParser($texy, $level);
-        $this->children = $parser->parse($s);
+        $parser = new TexyBlockParser($texy, $this, $indented);
+        $parser->parse($s);
+    }
+
+
+
+    /**
+     * Initializes TexyHtml::$dtd array
+     * @param bool
+     * @return void
+     */
+    public static function initDTD($strict)
+    {
+        TexyHtml_initDTD($strict);
     }
 
 }

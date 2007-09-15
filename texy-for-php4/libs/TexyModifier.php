@@ -40,20 +40,16 @@ $GLOBALS['TexyModifier::$elAttrs'] = array(
  */
 class TexyModifier extends TexyBase
 {
-    // TODO!
-    /** @var var */
-    var $empty = TRUE;
-
     /** @var string */
     var $id;
 
-    /** @var array */
+    /** @var array of classes (as keys) */
     var $classes = array();
 
-    /** @var array */
+    /** @var array of CSS styles */
     var $styles = array();
 
-    /** @var array */
+    /** @var array of HTML element attributes */
     var $attrs = array();
 
     /** @var string */
@@ -81,7 +77,6 @@ class TexyModifier extends TexyBase
     function setProperties($mod)
     {
         if (!$mod) return;
-        $this->empty = FALSE;
 
         $p = 0;
         $len = strlen($mod);
@@ -119,7 +114,7 @@ class TexyModifier extends TexyBase
                     if ($value{0} === '#')
                         $this->id = substr($value, 1);
                     else
-                        $this->classes[] = $value;
+                        $this->classes[$value] = TRUE;
                 }
                 $p = $a;
             }
@@ -153,7 +148,7 @@ class TexyModifier extends TexyBase
 
         } elseif ($tmp === TEXY_ALL) {
             $elAttrs = $this->attrs;
-            $el->validateAttrs($texy);
+            $el->validateAttrs();
 
         } elseif (is_array($tmp) && isset($tmp[$el->getName()])) {
             $tmp = $tmp[$el->getName()];
@@ -166,7 +161,7 @@ class TexyModifier extends TexyBase
                 foreach ($this->attrs as $key => $value)
                     if (isset($tmp[$key])) $el->attrs[$key] = $value;
             }
-            $el->validateAttrs($texy);
+            $el->validateAttrs();
         }
 
         // title
@@ -177,10 +172,10 @@ class TexyModifier extends TexyBase
         if ($this->classes || $this->id !== NULL) {
             $tmp = $texy->_classes; // speed-up
             if ($tmp === TEXY_ALL) {
-                foreach ($this->classes as $value) $elAttrs['class'][] = $value;
+                foreach ($this->classes as $value => $foo) $elAttrs['class'][] = $value;
                 $elAttrs['id'] = $this->id;
             } elseif (is_array($tmp)) {
-                foreach ($this->classes as $value)
+                foreach ($this->classes as $value => $foo)
                     if (isset($tmp[$value])) $elAttrs['class'][] = $value;
 
                 if (isset($tmp['#' . $this->id])) $elAttrs['id'] = $this->id;

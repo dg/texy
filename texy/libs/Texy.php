@@ -73,6 +73,9 @@ class Texy extends TexyBase
     /** @var array  regexps to check URL schemes */
     public $urlSchemeFilters = NULL; // disable URL scheme filter
 
+    /** @var bool  Paragraph merging mode */
+    public $mergeLines = TRUE;
+
     /** @var array  Parsing summary */
     public $summary = array(
         'images' => array(),
@@ -94,8 +97,11 @@ class Texy extends TexyBase
         'bottom' => NULL,
     );
 
+    /** @var bool  use Strict of Transitional DTD? */
+    public static $strictDTD = FALSE;
+
     /** @var mixed */
-    static public $advertisingNotice = 'once';
+    public static $advertisingNotice = 'once';
 
     /** @var TexyScriptModule */
     public $scriptModule;
@@ -168,7 +174,7 @@ class Texy extends TexyBase
     /** @var array */
     private $postHandlers = array();
 
-    /** @var TexyDomElement  DOM structure for parsed text */
+    /** @var TexyHtml  DOM structure for parsed text */
     private $DOM;
 
     /** @var array  Texy protect markup table */
@@ -186,19 +192,26 @@ class Texy extends TexyBase
 
     /** DEPRECATED */
     public $cleaner;
-    public $mergeLines;
     public $xhtml;
 
 
 
     public function __construct()
     {
+        if (!TexyHtml::$dtd) {
+            TexyHtml::initDTD(self::$strictDTD);
+        }
+
+        // accepts all valid HTML tags and attributes by default
+        foreach (TexyHtml::$dtd as $tag => $dtd) {
+            $this->allowedTags[$tag] = Texy::ALL;
+        }
+
         // load all modules
         $this->loadModules();
 
         // DEPRECATED
         $this->cleaner = & $this->htmlOutputModule;
-        $this->mergeLines = & $this->paragraphModule->mergeLines;
         $this->xhtml = & $this->htmlOutputModule->xhtml;
 
         // examples of link references ;-)
@@ -335,7 +348,7 @@ class Texy extends TexyBase
         if ($singleLine) {
             $this->DOM->parseLine($this, $text);
         } else {
-            $this->DOM->parseBlock($this, $text, TexyBlockParser::TOP);
+            $this->DOM->parseBlock($this, $text);
         }
 
         // user after handler
