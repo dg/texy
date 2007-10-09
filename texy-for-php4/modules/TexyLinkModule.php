@@ -19,6 +19,7 @@ $GLOBALS['TexyLinkModule::$deadlock'] = NULL; /* class private static property *
 
 /**
  * Links module
+ * @package Texy
  */
 class TexyLinkModule extends TexyModule
 {
@@ -60,13 +61,13 @@ class TexyLinkModule extends TexyModule
         // direct url and email
         $texy->registerLinePattern(
             array($this, 'patternUrlEmail'),
-            '#(?<=^|[\s(\[<:])(?:https?://|www\.|ftp://)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
+            '#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
             'link/url'
         );
 
         $texy->registerLinePattern(
             array($this, 'patternUrlEmail'),
-            '#(?<=^|[\s(\[\<:])'.TEXY_EMAIL.'#iu',
+            '#(?<=^|[\s([<:\x17])'.TEXY_EMAIL.'#iu',
             'link/email'
         );
     }
@@ -319,12 +320,7 @@ class TexyLinkModule extends TexyModule
         // popup on click
         if ($popup) $el->attrs['onclick'] = $this->popupOnClick;
 
-        if ($content !== NULL) {
-            if (is_a($content, 'TexyHtml'))
-                $el->addChild($content);
-            else
-                $el->setText($content);
-        }
+        if ($content !== NULL) $el->add($content);
 
         $tx->summary['links'][] = $el->attrs['href'];
 
@@ -428,12 +424,14 @@ class TexyLinkModule extends TexyModule
 
 
 
-
-    /** @see $type */
+/** @see TexyLink::$type */
 define('TEXY_LINK_COMMON',  1);
 define('TEXY_LINK_BRACKET', 2);
 define('TEXY_LINK_IMAGE', 3);
 
+/**
+ * @package Texy
+ */
 class TexyLink extends TexyBase
 {
     /** @var string  URL in resolved form */

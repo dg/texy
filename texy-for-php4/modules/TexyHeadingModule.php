@@ -18,6 +18,7 @@ define('TEXY_HEADING_FIXED', 2);
 
 /**
  * Heading module
+ * @package Texy
  */
 class TexyHeadingModule extends TexyModule
 {

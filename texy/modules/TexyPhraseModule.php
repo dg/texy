@@ -15,6 +15,7 @@
 
 /**
  * Phrases module
+ * @package Texy
  */
 final class TexyPhraseModule extends TexyModule
 {
@@ -304,7 +305,7 @@ final class TexyPhraseModule extends TexyModule
 
         if ($phrase === 'phrase/strong+em') {
             $el = TexyHtml::el($this->tags['phrase/strong']);
-            $el->add($this->tags['phrase/em'], $content);
+            $el->create($this->tags['phrase/em'], $content);
             $mod->decorate($tx, $el);
 
         } elseif ($tag) {

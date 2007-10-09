@@ -15,6 +15,7 @@
 
 /**
  * Emoticon module
+ * @package Texy
  */
 class TexyEmoticonModule extends TexyModule
 {

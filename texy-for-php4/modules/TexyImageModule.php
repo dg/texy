@@ -15,6 +15,7 @@
 
 /**
  * Images module
+ * @package Texy
  */
 class TexyImageModule extends TexyModule
 {
@@ -306,6 +307,9 @@ class TexyImageModule extends TexyModule
 
 
 
+/**
+ * @package Texy
+ */
 class TexyImage extends TexyBase
 {
     /** @var string  base image URL */

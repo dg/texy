@@ -15,6 +15,7 @@
 
 /**
  * Paragraph module
+ * @package Texy
  */
 class TexyParagraphModule extends TexyModule
 {
@@ -107,7 +108,7 @@ class TexyParagraphModule extends TexyModule
 
         // block contains only replaced element
         } elseif (strpos($content, TEXY_CONTENT_REPLACED) !== FALSE) {
-            $el->setName('div');
+            $el->setName($tx->nontextParagraph);
 
         // block contains only markup tags or spaces or nothig
         } else {

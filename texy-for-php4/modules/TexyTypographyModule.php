@@ -43,6 +43,7 @@ $GLOBALS['TexyTypographyModule::$locales'] = array(
 
 /**
  * Typography replacements module
+ * @package Texy
  */
 class TexyTypographyModule extends TexyModule
 {

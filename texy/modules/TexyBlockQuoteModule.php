@@ -15,6 +15,7 @@
 
 /**
  * Blockquote module
+ * @package Texy
  */
 final class TexyBlockQuoteModule extends TexyModule
 {

@@ -15,6 +15,7 @@
 
 /**
  * Ordered / unordered nested list module
+ * @package Texy
  */
 final class TexyListModule extends TexyModule
 {
@@ -118,7 +119,7 @@ final class TexyListModule extends TexyModule
         $parser->moveBackward(1);
 
         while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li')) {
-            $el->addChild($elItem);
+            $el->add($elItem);
         }
 
         if (count($el->children) < $min) return FALSE;
@@ -171,7 +172,7 @@ final class TexyListModule extends TexyModule
 
         while (TRUE) {
             if ($elItem = $this->patternItem($parser, $bullet, TRUE, 'dd')) {
-                $el->addChild($elItem);
+                $el->add($elItem);
                 continue;
             }
 
@@ -185,7 +186,7 @@ final class TexyListModule extends TexyModule
                 $mod->decorate($tx, $elItem);
 
                 $elItem->parseLine($tx, $mContent);
-                $el->addChild($elItem);
+                $el->add($elItem);
                 continue;
             }
 

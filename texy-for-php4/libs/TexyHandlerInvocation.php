@@ -15,6 +15,7 @@
 
 /**
  * Around advice handlers
+ * @package Texy
  */
 class TexyHandlerInvocation extends TexyBase
 {
@@ -55,7 +56,7 @@ class TexyHandlerInvocation extends TexyBase
     function proceed()
     {
         if ($this->pos === 0) {
-            trigger_error('No more handlers', E_USER_ERROR);
+            return throw (new TexyException('No more handlers'));
         }
 
         if (func_num_args()) {

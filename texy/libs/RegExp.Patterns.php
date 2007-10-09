@@ -13,7 +13,9 @@
 
 
 
-// Regular expression patterns
+/**#@+
+ * Regular expression patterns
+ */
 
 // Unicode character classes
 define('TEXY_CHAR',        'A-Za-z\x{C0}-\x{2FF}\x{370}-\x{1EFF}');
@@ -48,3 +50,4 @@ define('TEXY_LINK',        '(?::('.TEXY_LINK_URL.'))');       // any link
 define('TEXY_LINK_N',      '(?::('.TEXY_LINK_URL.'|:))');     // any link (also unstated)
 define('TEXY_EMAIL',       '[a-z0-9.+_-]{1,64}@[a-z0-9.+_-]{1,252}\.[a-z]{2,6}');    // name@exaple.com
 define('TEXY_URLSCHEME',   '[a-z][a-z0-9+.-]*:');    // http:  |  mailto:
+/**#@-*/

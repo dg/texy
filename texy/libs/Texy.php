@@ -33,6 +33,7 @@ define('TEXY_CONTENT_BLOCK', Texy::CONTENT_BLOCK);
  *     $texy = new Texy();
  *     $html = $texy->process($text);
  * </code>
+ * @package Texy
  */
 class Texy extends TexyBase
 {
@@ -102,6 +103,9 @@ class Texy extends TexyBase
 
     /** @var mixed */
     public static $advertisingNotice = 'once';
+
+    /** @var string */
+    public $nontextParagraph = 'div';
 
     /** @var TexyScriptModule */
     public $scriptModule;
@@ -198,9 +202,7 @@ class Texy extends TexyBase
 
     public function __construct()
     {
-        if (!TexyHtml::$dtd) {
-            TexyHtml::initDTD(self::$strictDTD);
-        }
+        TexyHtml::initDTD(self::$strictDTD);
 
         // accepts all valid HTML tags and attributes by default
         foreach (TexyHtml::$dtd as $tag => $dtd) {
@@ -385,10 +387,10 @@ class Texy extends TexyBase
         // standardize line endings and spaces
         $text = self::normalize($text);
 
-        $this->typographyModule->begin();
+        $this->typographyModule->beforeParse($this, $text);
         $text = $this->typographyModule->postLine($text);
 
-        return $text;
+        return TexyUtf::utf2html($text, $this->encoding);
     }
 
 
@@ -632,7 +634,7 @@ class Texy extends TexyBase
      * @param int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
-    final public function protect($child, $contentType = self::CONTENT_BLOCK)
+    final public function protect($child, $contentType)
     {
         if ($child==='') return '';
 

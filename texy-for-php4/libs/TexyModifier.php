@@ -37,6 +37,7 @@ $GLOBALS['TexyModifier::$elAttrs'] = array(
  *   {...}     inner style modifier
  *   < > <> =  horizontal align modifier
  *   ^ - _     vertical align modifier
+ * @package Texy
  */
 class TexyModifier extends TexyBase
 {

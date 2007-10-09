@@ -15,6 +15,7 @@
 
 /**
  * Around advice handlers
+ * @package Texy
  */
 final class TexyHandlerInvocation extends TexyBase
 {

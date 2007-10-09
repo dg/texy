@@ -15,6 +15,7 @@
 
 /**
  * Table module
+ * @package Texy
  */
 class TexyTableModule extends TexyModule
 {
@@ -85,7 +86,7 @@ class TexyTableModule extends TexyModule
             //    [2] => ....
             //    [3] => .(title)[class]{style}<>
 
-            $caption = $el->add('caption');
+            $caption = $el->create('caption');
             $mod = new TexyModifier($mMod);
             $mod->decorate($tx, $caption);
             $caption->parseLine($tx, $mContent);
@@ -111,13 +112,13 @@ class TexyTableModule extends TexyModule
                 }
 
                 if ($elPart === NULL) {
-                    $elPart = $el->add($this->isHead ? 'thead' : 'tbody');
+                    $elPart = $el->create($this->isHead ? 'thead' : 'tbody');
 
                 } elseif (!$this->isHead && $elPart->getName() === 'thead') {
-                    $elPart = $el->add('tbody');
+                    $elPart = $el->create('tbody');
                 }
 
-                $elPart->addChild($this->patternRow($matches));
+                $elPart->add($this->patternRow($matches));
                 $this->rowCounter++;
                 continue;
             }
@@ -212,7 +213,7 @@ class TexyTableModule extends TexyModule
             $elField->parseLine($tx, trim($mContent));
             if ($elField->getText() === '') $elField->setText("\xC2\xA0"); // &nbsp;
 
-            $elRow->addChild($elField);
+            $elRow->add($elField);
             $this->last[$col] = $elField;
             $col++;
         }
@@ -227,6 +228,7 @@ class TexyTableModule extends TexyModule
 
 /**
  * Table field TD / TH
+ * @package Texy
  */
 class TexyTableFieldElement extends TexyHtml
 {

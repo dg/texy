@@ -15,6 +15,7 @@
 
 /**
  * UTF-8 helper
+ * @package Texy
  */
 final class TexyUtf
 {

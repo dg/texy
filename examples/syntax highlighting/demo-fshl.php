@@ -55,13 +55,13 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 
     $content = $texy->blockModule->outdent($content);
     $content = $parser->highlightString($lang, $content);
-    $content = $texy->protect($content);
+    $content = $texy->protect($content, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
 
     $elPre = TexyHtml::el('pre');
     if ($modifier) $modifier->decorate($texy, $elPre);
     $elPre->attrs['class'] = strtolower($lang);
 
-    $elCode = $elPre->add('code', $content);
+    $elCode = $elPre->create('code', $content);
 
     return $elPre;
 }

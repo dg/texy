@@ -13,6 +13,18 @@
 
 
 
+/**
+ * DTD descriptor
+ *   $dtd[element][0] - allowed attributes (as array keys)
+ *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
+ *                        - array of allowed elements (as keys)
+ *                        - FALSE - empty element
+ *                        - 0 - special case for ins & del
+ * @var array
+ * @see TexyHtmlOutputModule::initDTD()
+ */
+$GLOBALS['TexyHtml::$dtd'] = NULL;
+
 /** @var bool  use XHTML syntax? */
 $GLOBALS['TexyHtml::$xhtml'] = TRUE;
 
@@ -28,18 +40,6 @@ $GLOBALS['TexyHtml::$inlineElements'] = array('ins'=>0,'del'=>0,'tt'=>0,'i'=>0,'
     'u'=>0,'s'=>0,'strike'=>0,'font'=>0,'applet'=>1,'basefont'=>0, // transitional
     'embed'=>1,'wbr'=>0,'nobr'=>0,'canvas'=>1, // proprietary
 ); /* class static property */
-
-/**
- * DTD descriptor
- *   $dtd[element][0] - allowed attributes (as array keys)
- *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
- *                        - array of allowed elements (as keys)
- *                        - FALSE - empty element
- *                        - 0 - special case for ins & del
- * @var array
- * @see TexyHtmlOutputModule::initDTD()
- */
-$GLOBALS['TexyHtml::$dtd'] = NULL;
 
 /** @var array  elements with optional end tag in HTML */
 $GLOBALS['TexyHtml::$optionalEnds'] = array('body'=>1,'head'=>1,'html'=>1,'colgroup'=>1,'dd'=>1,
@@ -77,6 +77,7 @@ $GLOBALS['TexyHtml::$prohibits'] = array(
  *       echo $el->startTag(), $el->endTag();
  *
  * @property mixed element's attributes
+ * @package Texy
  */
 class TexyHtml extends TexyBase
 {
@@ -111,8 +112,7 @@ class TexyHtml extends TexyBase
 
         if ($attrs !== NULL) {
             if (!is_array($attrs)) {
-                trigger_error('Attributes must be array.', E_USER_WARNING);
-                return FALSE;
+                return throw (new TexyException('Attributes must be array'));
             }
 
             $el->attrs = $attrs;
@@ -126,13 +126,12 @@ class TexyHtml extends TexyBase
     /**
      * Changes element's name
      * @param string
-     * @return TexyHtml  itself
+     * @return TexyHtml  provides a fluent interface
      */
     function setName($name)
     {
         if ($name !== NULL && !is_string($name)) {
-            trigger_error('Name must be string or NULL.', E_USER_WARNING);
-            return FALSE;
+            return throw (new TexyException('Name must be string or NULL'));
         }
 
         $this->name = $name;
@@ -172,15 +171,14 @@ class TexyHtml extends TexyBase
     /**
      * Sets element's textual content
      * @param string
-     * @return TexyHtml  itself
+     * @return TexyHtml  provides a fluent interface
      */
     function setText($text)
     {
         if (is_scalar($text)) {
             $this->children = array($text);
         } elseif ($text !== NULL) {
-            trigger_error('Content must be scalar.', E_USER_WARNING);
-            return FALSE;
+            throw (new TexyException('Content must be scalar'));
         }
         return $this;
     }
@@ -204,41 +202,17 @@ class TexyHtml extends TexyBase
 
 
     /**
-     * Adds and creates new TexyHtml child
-     * @param string  elements's name
-     * @param string optional textual content
-     * @return TexyHtml
-     */
-    function add($name, $text = NULL)
-    {
-        $child = new TexyHtml;
-        $child->setName($name);
-        if ($text !== NULL) {
-            $child->setText($text);
-        }
-        $this->addChild($child);
-        return $child;
-    }
-
-
-
-    /**
      * Adds new element's child
      * @param TexyHtml|string child node
-     * @param mixed index
-     * @return TexyHtml  itself
+     * @return TexyHtml  provides a fluent interface
      */
-    function addChild($child)
+    function add($child)
     {
-        if (is_a($child, 'TexyHtml')) {
-            //$child->parent = $this;
-        } elseif (!is_string($child)) {
-            trigger_error('Child node must be scalar or TexyHtml object.', E_USER_WARNING);
-            return FALSE;
+        if (is_a($child, 'TexyHtml') || is_string($child)) {
+            $this->children[] = $child;
+            return $this;
         }
-
-        $this->children[] = $child;
-        return $this;
+        throw (new TexyException('Child node must be scalar or TexyHtml object'));
     }
 
 
@@ -248,9 +222,27 @@ class TexyHtml extends TexyBase
      * @param mixed index
      * @return TexyHtml
      */
-    function getChild($index)
+    function get($index)
     {
         return $this->children[$index];
+    }
+
+
+
+    /**
+     * Creates and adds a new TexyHtml child
+     * @param string  elements's name
+     * @param string optional textual content
+     * @return TexyHtml  created element
+     */
+    function create($name, $text = NULL)
+    {
+        $child = new TexyHtml;
+        $child->setName($name);
+        if ($text !== NULL) {
+            $child->setText($text);
+        }
+        return $this->children[] = $child;
     }
 
 
@@ -286,7 +278,7 @@ class TexyHtml extends TexyBase
      * Special setter for element's attribute
      * @param string path
      * @param array query
-     * @return TexyHtml  itself
+     * @return TexyHtml  provides a fluent interface
      */
     function href($path, $params = NULL)
     {
@@ -395,23 +387,16 @@ class TexyHtml extends TexyBase
 
                     if (!$tmp) continue;
                     $value = implode($key === 'style' ? ';' : ' ', $tmp);
-
-                } elseif ($key === 'href' && substr($value, 0, 7) === 'mailto:') {
-                    // email-obfuscate hack
-                    $tmp = '';
-                    for ($i = 0; $i<strlen($value); $i++) $tmp .= '&#' . ord($value[$i]) . ';'; // WARNING: no utf support
-                    $s .= ' href="' . $tmp . '"';
-                    continue;
                 }
 
                 // add new attribute
-                $value = str_replace(array('&', '"', '<', '>'), array('&amp;', '&quot;', '&lt;', '&gt;'), $value);
+                $value = str_replace(array('&', '"', '<', '>', '@'), array('&amp;', '&quot;', '&lt;', '&gt;', '&#64;'), $value);
                 $s .= ' ' . $key . '="' . Texy::freezeSpaces($value) . '"';
             }
         }
 
         // finish start tag
-        if ($GLOBALS['TexyHtml::$xhtml']&& $this->isEmpty) return $s . ' />';
+        if ($GLOBALS['TexyHtml::$xhtml'] && $this->isEmpty) return $s . ' />';
         return $s . '>';
     }
 
@@ -501,6 +486,7 @@ class TexyHtml extends TexyBase
 
         $parser = new TexyLineParser($texy, $this);
         $parser->parse($s);
+        return $parser;
     }
 
 
@@ -521,13 +507,17 @@ class TexyHtml extends TexyBase
 
 
     /**
-     * Initializes TexyHtml::$dtd array
+     * Initializes self::$dtd array
      * @param bool
      * @return void
      */
     function initDTD($strict)
     {
-        TexyHtml_initDTD($strict);
+        static $last;
+        if ($last === $strict) return;
+        $last = $strict;
+
+        require_once TEXY_DIR.'libs/TexyHtml.DTD.php';
     }
 
 }

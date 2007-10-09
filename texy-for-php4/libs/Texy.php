@@ -36,6 +36,7 @@ $GLOBALS['Texy::$advertisingNotice'] = 'once'; /* class static property */
  *     $texy = new Texy();
  *     $html = $texy->process($text);
  * </code>
+ * @package Texy
  */
 class Texy extends TexyBase
 {
@@ -86,6 +87,9 @@ class Texy extends TexyBase
         'middle' => NULL,
         'bottom' => NULL,
     );
+
+    /** @var string */
+    var $nontextParagraph = 'div';
 
     /** @var TexyScriptModule */
     var $scriptModule;
@@ -158,7 +162,7 @@ class Texy extends TexyBase
     /** @var array */
     var $postHandlers = array();
 
-    /** @var TexyDomElement  DOM structure for parsed text */
+    /** @var TexyHtml  DOM structure for parsed text */
     var $DOM; /* private */
 
     /** @var array  Texy protect markup table */
@@ -182,9 +186,7 @@ class Texy extends TexyBase
 
     function __construct()
     {
-        if (!$GLOBALS['TexyHtml::$dtd']) {
-            TexyHtml::initDTD($GLOBALS['Texy::$strictDTD']);
-        }
+        TexyHtml::initDTD($GLOBALS['Texy::$strictDTD']);
 
         // accepts all valid HTML tags and attributes by default
         foreach ($GLOBALS['TexyHtml::$dtd'] as $tag => $dtd) {
@@ -290,8 +292,7 @@ class Texy extends TexyBase
     function process($text, $singleLine = FALSE)
     {
         if ($this->processing) {
-            trigger_error('Parsing is in progress yet.', E_USER_ERROR);
-            return FALSE;
+            return throw (new TexyException('Processing is in progress yet.'));
         }
 
         // initialization
@@ -370,10 +371,10 @@ class Texy extends TexyBase
         // standardize line endings and spaces
         $text = Texy::normalize($text);
 
-        $this->typographyModule->begin();
+        $this->typographyModule->beforeParse($this, $text);
         $text = $this->typographyModule->postLine($text);
 
-        return $text;
+        return TexyUtf::utf2html($text, $this->encoding);
     }
 
 
@@ -385,8 +386,7 @@ class Texy extends TexyBase
     function toText()
     {
         if (!$this->DOM) {
-            trigger_error('Call $texy->process() first.', E_USER_ERROR);
-            return FALSE;
+            return throw (new TexyException('Call $texy->process() first.'));
         }
 
         return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
@@ -472,8 +472,7 @@ class Texy extends TexyBase
     function addHandler($event, $callback)
     {
         if (!is_callable($callback)) {
-            trigger_error('Invalid callback', E_USER_ERROR);
-            return FALSE;
+            return throw (new TexyException("Invalid callback"));
         }
 
         $this->handlers[$event][] = $callback;
@@ -691,7 +690,7 @@ class Texy extends TexyBase
      * @param int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
-    function protect($child, $contentType = TEXY_CONTENT_BLOCK)
+    function protect($child, $contentType)
     {
         if ($child==='') return '';
 

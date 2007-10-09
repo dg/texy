@@ -15,6 +15,7 @@
 
 /**
  * Scripts module
+ * @package Texy
  */
 final class TexyScriptModule extends TexyModule
 {

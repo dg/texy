@@ -15,6 +15,7 @@
 
 /**
  * The captioned figures
+ * @package Texy
  */
 final class TexyFigureModule extends TexyModule
 {

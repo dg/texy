@@ -15,6 +15,7 @@
 
 /**
  * Long words wrap module
+ * @package Texy
  */
 final class TexyLongWordsModule extends TexyModule
 {

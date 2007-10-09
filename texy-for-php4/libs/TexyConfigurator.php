@@ -37,6 +37,7 @@ $GLOBALS['TexyConfigurator::$safeTags'] = array(
  *     $texy = new Texy();
  *     TexyConfigurator::safeMode($texy);
  * </code>
+ * @package Texy
  */
 class TexyConfigurator
 {
@@ -46,7 +47,7 @@ class TexyConfigurator
      */
     function __construct()
     {
-        trigger_error('Static class.', E_USER_ERROR);
+        throw (new TexyException('Static class'));
     }
 
 
@@ -69,20 +70,6 @@ class TexyConfigurator
         $texy->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $texy->allowed['html/comment'] = FALSE;             // disable HTML comments
         $texy->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
-    }
-
-
-
-    /**
-     * Switch Texy! configuration to the (default) trust mode
-     *
-     * @param Texy  object to configure
-     * @return void
-     * @deprecated
-     */
-    function trustMode(/*Texy*/ $texy) /* static */
-    {
-        trigger_error('trustMode() is deprecated. This is default configuration.', E_USER_WARNING);
     }
 
 

@@ -13,6 +13,9 @@
 
 
 
+/**
+ * @package Texy
+ */
 final class TexyHtmlOutputModule extends TexyModule
 {
     /** @var bool  use XHTML syntax? */

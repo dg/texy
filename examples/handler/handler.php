@@ -26,7 +26,7 @@ $texy->addHandler('newReference', array('myHandler', 'newReference'));
 $texy->addHandler('htmlComment', array('myHandler', 'htmlComment'));
 $texy->addHandler('htmlTag', array('myHandler', 'htmlTag'));
 $texy->addHandler('script', array('myHandler', 'script'));
-$texy->addHandler('paragraph', array('myHandler', 'paragraph'));
+//$texy->addHandler('paragraph', array('myHandler', 'paragraph'));
 $texy->addHandler('figure', array('myHandler', 'figure'));
 $texy->addHandler('heading', array('myHandler', 'heading'));
 $texy->addHandler('horizline', array('myHandler', 'horizline'));
@@ -185,11 +185,12 @@ class myHandler
      * @param TexyModifier|NULL
      * @return TexyHtml|string|FALSE
      */
+/*
     function paragraph($invocation, $content, $modifier)
     {
         return $invocation->proceed();
     }
-
+*/
 
 
     /**

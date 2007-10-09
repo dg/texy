@@ -23,6 +23,7 @@
  *   {...}     inner style modifier
  *   < > <> =  horizontal align modifier
  *   ^ - _     vertical align modifier
+ * @package Texy
  */
 final class TexyModifier extends TexyBase
 {

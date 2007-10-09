@@ -15,6 +15,7 @@
 
 /**
  * Exception base class
+ * @package Texy
  */
 class TexyException extends Exception
 {
@@ -24,6 +25,7 @@ class TexyException extends Exception
 
 /**
  * Texy base class for all classes except static helpers TexyConfigurator & TexyUtf
+ * @package Texy
  */
 abstract class TexyBase
 {

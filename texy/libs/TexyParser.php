@@ -13,6 +13,9 @@
 
 
 
+/**
+ * @package Texy
+ */
 class TexyParser extends TexyBase
 {
     /** @var Texy */
@@ -213,6 +216,10 @@ class TexyBlockParser extends TexyParser
 
 
 
+
+
+
+
 /**
  * Parser for single line structures
  */
@@ -280,7 +287,7 @@ class TexyLineParser extends TexyParser
                         foreach ($m as $keyx => $value) $m[$keyx] = $value[0];
 
                     } else {
-                        unset($names[$index]);
+                        // try next time
                         continue;
                     }
                 } // if

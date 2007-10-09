@@ -20,6 +20,7 @@
  *     $texy = new Texy();
  *     TexyConfigurator::safeMode($texy);
  * </code>
+ * @package Texy
  */
 final class TexyConfigurator
 {
@@ -67,20 +68,6 @@ final class TexyConfigurator
         $texy->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
         $texy->allowed['html/comment'] = FALSE;             // disable HTML comments
         $texy->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
-    }
-
-
-
-    /**
-     * Switch Texy! configuration to the (default) trust mode
-     *
-     * @param Texy  object to configure
-     * @return void
-     * @deprecated
-     */
-    public static function trustMode(Texy $texy)
-    {
-        trigger_error('trustMode() is deprecated. This is default configuration.', E_USER_WARNING);
     }
 
 

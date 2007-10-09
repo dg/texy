@@ -15,6 +15,7 @@
 
 /**
  * Typography replacements module
+ * @package Texy
  */
 final class TexyTypographyModule extends TexyModule
 {

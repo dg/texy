@@ -15,6 +15,7 @@
 
 /**
  * Html tags module
+ * @package Texy
  */
 class TexyHtmlModule extends TexyModule
 {

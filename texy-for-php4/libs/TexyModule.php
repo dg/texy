@@ -15,6 +15,7 @@
 
 /**
  * Texy! modules base class
+ * @package Texy
  */
 class TexyModule extends TexyBase /* abstract  */
 {

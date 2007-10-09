@@ -15,6 +15,7 @@
 
 /**
  * Horizontal line module
+ * @package Texy
  */
 class TexyHorizLineModule extends TexyModule
 {

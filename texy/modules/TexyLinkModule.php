@@ -15,6 +15,7 @@
 
 /**
  * Links module
+ * @package Texy
  */
 final class TexyLinkModule extends TexyModule
 {
@@ -59,13 +60,13 @@ final class TexyLinkModule extends TexyModule
         // direct url and email
         $texy->registerLinePattern(
             array($this, 'patternUrlEmail'),
-            '#(?<=^|[\s(\[<:])(?:https?://|www\.|ftp://)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
+            '#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
             'link/url'
         );
 
         $texy->registerLinePattern(
             array($this, 'patternUrlEmail'),
-            '#(?<=^|[\s(\[\<:])'.TEXY_EMAIL.'#iu',
+            '#(?<=^|[\s([<:\x17])'.TEXY_EMAIL.'#iu',
             'link/email'
         );
     }
@@ -318,12 +319,7 @@ final class TexyLinkModule extends TexyModule
         // popup on click
         if ($popup) $el->attrs['onclick'] = $this->popupOnClick;
 
-        if ($content !== NULL) {
-            if ($content instanceof TexyHtml)
-                $el->addChild($content);
-            else
-                $el->setText($content);
-        }
+        if ($content !== NULL) $el->add($content);
 
         $tx->summary['links'][] = $el->attrs['href'];
 
@@ -427,6 +423,9 @@ final class TexyLinkModule extends TexyModule
 
 
 
+/**
+ * @package Texy
+ */
 final class TexyLink extends TexyBase
 {
     /** @see $type */

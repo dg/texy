@@ -33,16 +33,42 @@ if (PHP_VERSION < 5) {
 
         return $obj;
     }
-    ');
 
-} else {
-    class TexyException extends Exception
-    {}
+    function throw($e)
+    {
+        trigger_error($e->message, E_USER_ERROR);
+    }
+
+    class Exception
+    {
+        var $message;
+        var $code;
+        var $trace;
+
+        function Exception($message = NULL, $code=0)
+        {
+            $this->message = $message;
+            $this->code = $code;
+            $this->trace = debug_backtrace();
+        }
+    }
+    ');
 }
 
 
 /**
+ * Exception base class
+ * @package Texy
+ */
+class TexyException extends Exception
+{
+}
+
+
+
+/**
  * Texy base class for all classes except static helpers TexyConfigurator & TexyUtf
+ * @package Texy
  */
 class TexyBase /* abstract  */
 {

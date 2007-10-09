@@ -38,7 +38,7 @@ function figureHandler($invocation, $image, $link, $content, $modifier)
 
     // wrap img into dt
     $dt = TexyHtml::el('dt');
-    $dt->addChild($el->children['img']);
+    $dt->add($el->children['img']);
     $el->children['img'] = $dt;
 
     return $el;

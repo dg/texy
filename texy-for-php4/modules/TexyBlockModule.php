@@ -15,6 +15,7 @@
 
 /**
  * Special blocks module
+ * @package Texy
  */
 class TexyBlockModule extends TexyModule
 {
@@ -140,11 +141,11 @@ class TexyBlockModule extends TexyModule
             $s = TexyBlockModule::outdent($s);
             if ($s==='') return "\n";
             $s = Texy::escapeHtml($s);
-            $s = $tx->protect($s);
+            $s = $tx->protect($s, TEXY_CONTENT_BLOCK);
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
             $el->attrs['class'][] = $param; // lang
-            $el->add('code', $s);
+            $el->create('code', $s);
             return $el;
         }
 
@@ -155,7 +156,7 @@ class TexyBlockModule extends TexyModule
             $mod->decorate($tx, $el);
             $el->attrs['class'][] = $param; // lang
             $s = Texy::escapeHtml($s);
-            $s = $tx->protect($s);
+            $s = $tx->protect($s, TEXY_CONTENT_BLOCK);
             $el->setText($s);
             return $el;
         }
@@ -178,7 +179,7 @@ class TexyBlockModule extends TexyModule
             $s = Texy::unescapeHtml($s);
             $s = Texy::escapeHtml($s);
             $s = $tx->unprotect($s);
-            $s = $tx->protect($s);
+            $s = $tx->protect($s, TEXY_CONTENT_BLOCK);
             $el->setText($s);
             return $el;
         }
@@ -200,7 +201,7 @@ class TexyBlockModule extends TexyModule
             $s = Texy::unescapeHtml($s);
             $s = Texy::escapeHtml($s);
             $s = $tx->unprotect($s);
-            return $tx->protect($s) . "\n";
+            return $tx->protect($s, TEXY_CONTENT_BLOCK) . "\n";
         }
 
         if ($blocktype === 'block/text') {
@@ -209,7 +210,7 @@ class TexyBlockModule extends TexyModule
             $s = Texy::escapeHtml($s);
             $tmp = TexyHtml::el('br');
             $s = str_replace("\n", $tmp->startTag() , $s); // nl2br
-            return $tx->protect($s) . "\n";
+            return $tx->protect($s, TEXY_CONTENT_BLOCK) . "\n";
         }
 
         if ($blocktype === 'block/comment') {

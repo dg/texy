@@ -22,6 +22,7 @@ $GLOBALS['TexyUtf::$xlatCache'] = NULL; /* class private static property */
 
 /**
  * UTF-8 helper
+ * @package Texy
  */
 class TexyUtf
 {
@@ -31,7 +32,7 @@ class TexyUtf
      */
     function __construct()
     {
-        trigger_error('Static class.', E_USER_ERROR);
+        throw (new TexyException('Static class'));
     }
 
 

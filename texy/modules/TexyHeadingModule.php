@@ -20,6 +20,7 @@ define('TEXY_HEADING_DYNAMIC',  TexyHeadingModule::DYNAMIC);
 
 /**
  * Heading module
+ * @package Texy
  */
 final class TexyHeadingModule extends TexyModule
 {

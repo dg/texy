@@ -5,6 +5,11 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 179
+- POZOR: přejmenováno TexyHtml::add() -> create(), TexyHtml::addChild() -> add()
+- verze pro PHP4: emulace třídy Exception a throw
+- chytřejší detekce emailů a URL v textu
+
 rev. 178
 - TexyTableModule - úprava chování odd & evenClass (viz "fórum":http://forum.texy.info/viewtopic.php?id=538)
 - výchozí handler 'htmlTag' vrací místo řetězce objekt TexyHtml
