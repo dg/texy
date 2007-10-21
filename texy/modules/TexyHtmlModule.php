@@ -163,7 +163,7 @@ final class TexyHtmlModule extends TexyModule
 
         } else {
             // allowedTags === Texy::ALL
-            if ($forceEmpty) $el->isEmpty(TRUE);
+            if ($forceEmpty) $el->setName($name, TRUE);
             $allowedAttrs = Texy::ALL; // all attrs are allowed
         }
 

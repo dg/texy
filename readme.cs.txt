@@ -67,4 +67,4 @@ HTML kód najdete v adresáři /icons/
 
 -----
 Chcete-li další informace, navštivte autorův weblog:
-http://www.dgx.cz/trine/
+http://latrine.dgx.cz/

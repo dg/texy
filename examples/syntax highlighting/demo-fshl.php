@@ -40,19 +40,15 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
         return $invocation->proceed();
     }
 
-    $texy = $invocation->getTexy();
-
     $lang = strtoupper($lang);
     if ($lang == 'JAVASCRIPT') $lang = 'JS';
-    if (!in_array(
-            $lang,
-            array('CPP', 'CSS', 'HTML', 'JAVA', 'PHP', 'JS', 'SQL'))
-       ) {
+
+    $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
+    if (!$parser->isLanguage($lang)) {
         return $invocation->proceed();
     }
 
-    $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
-
+    $texy = $invocation->getTexy();
     $content = $texy->blockModule->outdent($content);
     $content = $parser->highlightString($lang, $content);
     $content = $texy->protect($content, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5

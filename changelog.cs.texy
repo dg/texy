@@ -245,7 +245,7 @@ htmlOutputModule
 
 TexyDOM a zděděné třídy
 -----------------------
-- odstraněno, náhradou je TexyHtml (obdoba NHtml, viz http://www.dgx.cz/trine/item/nhtml-pomocnik-php-programatora)
+- odstraněno, náhradou je TexyHtml (obdoba NHtml, viz http://latrine.dgx.cz/nhtml-pomocnik-php-programatora)
 - vlastnost TexyHtml::$xhtml - přepínač mezi XHTML a HTML výstupem
 - ve všech handlerech se nyní operuje s elementy reprezentovanými tímto objektem, manipulace je tedy extrémně snadná
 

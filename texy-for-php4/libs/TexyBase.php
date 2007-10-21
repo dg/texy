@@ -80,7 +80,7 @@ class TexyBase /* abstract  */
 
     function TexyBase()  /* PHP 4 constructor */
     {
-        // generate references (see http://www.dgx.cz/trine/item/how-to-emulate-php5-object-model-in-php4)
+        // generate references (see http://latrine.dgx.cz/how-to-emulate-php5-object-model-in-php4)
         foreach ($this as $key => $foo) $GLOBALS['$$HIDDEN$$'][] = & $this->$key;
 
         $args = func_get_args();

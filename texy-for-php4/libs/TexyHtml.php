@@ -99,25 +99,18 @@ class TexyHtml extends TexyBase
     /**
      * Static factory
      * @param string element name (or NULL)
-     * @param array element's attributes
+     * @param array|string element's attributes (or textual content)
      * @return TexyHtml
      */
     function el($name = NULL, $attrs = NULL) /* static */
     {
         $el = new TexyHtml;
-
-        if ($name !== NULL) {
-            $el->setName($name);
-        }
-
-        if ($attrs !== NULL) {
-            if (!is_array($attrs)) {
-                return throw (new TexyException('Attributes must be array'));
-            }
-
+        $el->setName($name);
+        if (is_array($attrs)) {
             $el->attrs = $attrs;
+        } elseif ($attrs !== NULL) {
+            $el->setText($attrs);
         }
-
         return $el;
     }
 
@@ -126,16 +119,18 @@ class TexyHtml extends TexyBase
     /**
      * Changes element's name
      * @param string
+     * @param bool  Is element empty?
+     * @throws TexyException
      * @return TexyHtml  provides a fluent interface
      */
-    function setName($name)
+    function setName($name, $empty = NULL)
     {
         if ($name !== NULL && !is_string($name)) {
             return throw (new TexyException('Name must be string or NULL'));
         }
 
         $this->name = $name;
-        $this->isEmpty = isset($GLOBALS['TexyHtml::$emptyElements'][$name]);
+        $this->isEmpty = $empty === NULL ? isset($GLOBALS['TexyHtml::$emptyElements'][$name]) : (bool) $empty;
         return $this;
     }
 
@@ -154,15 +149,10 @@ class TexyHtml extends TexyBase
 
     /**
      * Is element empty?
-     * @param optional setter
      * @return bool
      */
-    function isEmpty($value = NULL)
+    function isEmpty()
     {
-        if (is_bool($value)) {
-            $this->isEmpty = $value;
-        }
-
         return $this->isEmpty;
     }
 
@@ -230,19 +220,14 @@ class TexyHtml extends TexyBase
 
 
     /**
-     * Creates and adds a new TexyHtml child
+     * Adds and creates new TexyHtml child
      * @param string  elements's name
-     * @param string optional textual content
+     * @param array|string element's attributes (or textual content)
      * @return TexyHtml  created element
      */
-    function create($name, $text = NULL)
+    function create($name, $attrs = NULL)
     {
-        $child = new TexyHtml;
-        $child->setName($name);
-        if ($text !== NULL) {
-            $child->setText($text);
-        }
-        return $this->children[] = $child;
+        return $this->children[] = TexyHtml::el($name, $attrs);
     }
 
 

@@ -72,4 +72,4 @@ Choose buttons and look at exemplary HTML code in directory /icons/
 
 -----
 For more information, visit the author's weblog (in czech language):
-http://www.dgx.cz/trine/
+http://latrine.dgx.cz/

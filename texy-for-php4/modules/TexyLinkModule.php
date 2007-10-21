@@ -47,8 +47,8 @@ class TexyLinkModule extends TexyModule
         $texy->allowed['link/definition'] = TRUE;
         $texy->addHandler('newReference', array($this, 'solveNewReference'));
         $texy->addHandler('linkReference', array($this, 'solve'));
-        $texy->addHandler('linkEmail', array($this, 'solve'));
-        $texy->addHandler('linkURL', array($this, 'solve'));
+        $texy->addHandler('linkEmail', array($this, 'solveUrlEmail'));
+        $texy->addHandler('linkURL', array($this, 'solveUrlEmail'));
         $texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
         // [reference]
@@ -84,7 +84,7 @@ class TexyLinkModule extends TexyModule
     {
         $GLOBALS['TexyLinkModule::$deadlock']= array();
 
-        // [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
+        // [la trine]: http://latrine.dgx.cz/ text odkazu .(title)[class]{style}
         if ($texy->allowed['link/definition']) {
             $text = preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
@@ -97,7 +97,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Callback for: [la trine]: http://www.dgx.cz/trine/ text odkazu .(title)[class]{style}
+     * Callback for: [la trine]: http://latrine.dgx.cz/ text odkazu .(title)[class]{style}
      *
      * @param array      regexp matches
      * @return string
@@ -156,7 +156,8 @@ class TexyLinkModule extends TexyModule
                 unset($GLOBALS['TexyLinkModule::$deadlock'][$link->name]);
             }
         } else {
-            $content = $this->textualURL($link);
+            $content = $this->textualUrl($link);
+            $content = $this->texy->protect($content, TEXY_CONTENT_TEXTUAL);
         }
 
         return $tx->invokeAroundHandlers('linkReference', $parser, array($link, $content));
@@ -179,12 +180,11 @@ class TexyLinkModule extends TexyModule
 
         $link = new TexyLink($mURL);
         $this->checkLink($link);
-        $content = $this->textualURL($link);
 
         return $this->texy->invokeAroundHandlers(
             $name === 'link/email' ? 'linkEmail' : 'linkURL',
             $parser,
-            array($link, $content)
+            array($link)
         );
     }
 
@@ -333,6 +333,22 @@ class TexyLinkModule extends TexyModule
      * Finish invocation
      *
      * @param TexyHandlerInvocation  handler invocation
+     * @param TexyLink
+     * @return TexyHtml|string
+     */
+    function solveUrlEmail($invocation, $link)
+    {
+        $content = $this->textualUrl($link);
+        $content = $this->texy->protect($content, TEXY_CONTENT_TEXTUAL);
+        return $this->solve(NULL, $link, $content);
+    }
+
+
+
+    /**
+     * Finish invocation
+     *
+     * @param TexyHandlerInvocation  handler invocation
      * @param string
      * @return FALSE
      */
@@ -376,13 +392,13 @@ class TexyLinkModule extends TexyModule
      * @param TexyLink
      * @return string
      */
-    function textualURL($link) /* private */
+    function textualUrl($link) /* private */
     {
         $URL = $link->raw === NULL ? $link->URL : $link->raw;
 
         if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) { // email
             return $this->texy->obfuscateEmail
-                   ? str_replace('@', $this->texy->protect("&#64;<!---->", TEXY_CONTENT_MARKUP), $URL)
+                   ? str_replace('@', "&#64;<!---->", $URL)
                    : $URL;
         }
 
@@ -401,12 +417,12 @@ class TexyLinkModule extends TexyModule
                 $res .= $parts['host'];
 
             if (isset($parts['path']))
-                $res .=  (strlen($parts['path']) > 16 ? ('/...' . preg_replace('#^.*(.{0,12})$#U', '$1', $parts['path'])) : $parts['path']);
+                $res .=  (strlen($parts['path']) > 16 ? ("/\xe2\x80\xa6" . preg_replace('#^.*(.{0,12})$#U', '$1', $parts['path'])) : $parts['path']);
 
             if (isset($parts['query'])) {
-                $res .= strlen($parts['query']) > 4 ? '?...' : ('?'.$parts['query']);
+                $res .= strlen($parts['query']) > 4 ? "?\xe2\x80\xa6" : ('?'.$parts['query']);
             } elseif (isset($parts['fragment'])) {
-                $res .= strlen($parts['fragment']) > 4 ? '#...' : ('#'.$parts['fragment']);
+                $res .= strlen($parts['fragment']) > 4 ? "#\xe2\x80\xa6" : ('#'.$parts['fragment']);
             }
             return $res;
         }

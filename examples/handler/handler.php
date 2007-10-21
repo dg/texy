@@ -87,10 +87,9 @@ class myHandler
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyLink
-     * @param string
      * @return TexyHtml|string|FALSE
      */
-    function linkEmail($invocation, $link, $content)
+    function linkEmail($invocation, $link)
     {
         return $invocation->proceed();
     }
@@ -100,10 +99,9 @@ class myHandler
     /**
      * @param TexyHandlerInvocation  handler invocation
      * @param TexyLink
-     * @param string
      * @return TexyHtml|string|FALSE
      */
-    function linkURL($invocation, $link, $content)
+    function linkURL($invocation, $link)
     {
         return $invocation->proceed();
     }
