@@ -111,9 +111,9 @@ final class TexyFigureModule extends TexyModule
         }
         $mod->decorate($tx, $el);
 
-        $el->children['img'] = $elImg;
-        $el->children['caption'] = TexyHtml::el('p');
-        $el->children['caption']->parseLine($tx, ltrim($content));
+        $el[0] = $elImg;
+        $el[1] = TexyHtml::el('p');
+        $el[1]->parseLine($tx, ltrim($content));
 
         $class = $this->class;
         if ($hAlign) {

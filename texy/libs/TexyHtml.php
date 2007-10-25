@@ -25,13 +25,10 @@
  * @property mixed element's attributes
  * @package Texy
  */
-class TexyHtml extends TexyBase
+class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
 {
     /** @var string  element's name */
     private $name;
-
-    /** @var TexyHtml parent element (for future usage) */
-    private $parent;
 
     /** @var bool  is element empty? */
     private $isEmpty;
@@ -40,7 +37,10 @@ class TexyHtml extends TexyBase
     public $attrs = array();
 
     /** @var array  of TexyHtml | string nodes */
-    public $children = array();
+    private $children = array();
+
+    /** @var TexyHtml parent element */
+    private $parent;
 
     /** @var bool  use XHTML syntax? */
     public static $xhtml = TRUE;
@@ -159,80 +159,6 @@ class TexyHtml extends TexyBase
 
 
     /**
-     * Sets element's textual content
-     * @param string
-     * @return TexyHtml  provides a fluent interface
-     */
-    final public function setText($text)
-    {
-        if (is_scalar($text)) {
-            $this->children = array($text);
-        } elseif ($text !== NULL) {
-            throw new TexyException('Content must be scalar');
-        }
-        return $this;
-    }
-
-
-
-    /**
-     * Gets element's textual content
-     * @return string
-     */
-    final public function getText()
-    {
-        $s = '';
-        foreach ($this->children as $child) {
-            if (is_object($child)) return FALSE;
-            $s .= $child;
-        }
-        return $s;
-    }
-
-
-
-    /**
-     * Adds new element's child
-     * @param TexyHtml|string child node
-     * @return TexyHtml  provides a fluent interface
-     */
-    final public function add($child)
-    {
-        if ($child instanceof TexyHtml || is_string($child)) {
-            $this->children[] = $child;
-            return $this;
-        }
-        throw new TexyException('Child node must be scalar or TexyHtml object');
-    }
-
-
-
-    /**
-     * Returns child node
-     * @param mixed index
-     * @return TexyHtml
-     */
-    final public function get($index)
-    {
-        return $this->children[$index];
-    }
-
-
-
-    /**
-     * Adds and creates new TexyHtml child
-     * @param string  elements's name
-     * @param array|string element's attributes (or textual content)
-     * @return TexyHtml  created element
-     */
-    final public function create($name, $attrs = NULL)
-    {
-        return $this->children[] = self::el($name, $attrs);
-    }
-
-
-
-    /**
      * Overloaded setter for element's attribute
      * @param string    property name
      * @param mixed     property value
@@ -286,6 +212,181 @@ class TexyHtml extends TexyBase
         }
         $this->attrs['href'] = $path;
         return $this;
+    }
+
+
+
+    /**
+     * Sets element's textual content
+     * @param string
+     * @return TexyHtml  provides a fluent interface
+     */
+    final public function setText($text)
+    {
+        if (is_scalar($text)) {
+            $this->children = array($text);
+        } elseif ($text !== NULL) {
+            throw new TexyException('Content must be scalar');
+        }
+        return $this;
+    }
+
+
+
+    /**
+     * Gets element's textual content
+     * @return string
+     */
+    final public function getText()
+    {
+        $s = '';
+        foreach ($this->children as $child) {
+            if (is_object($child)) return FALSE;
+            $s .= $child;
+        }
+        return $s;
+    }
+
+
+
+    /**
+     * Adds new element's child
+     * @param TexyHtml|string child node
+     * @return TexyHtml  provides a fluent interface
+     */
+    final public function add($child)
+    {
+        $this->insert(NULL, $child);
+        return $this;
+    }
+
+
+
+    /**
+     * Creates and adds a new TexyHtml child
+     * @param string  elements's name
+     * @param array|string element's attributes (or textual content)
+     * @return TexyHtml  created element
+     */
+    final public function create($name, $attrs = NULL)
+    {
+        $this->insert(NULL, $child = self::el($name, $attrs));
+        return $child;
+    }
+
+
+
+    /**
+     * Inserts child node
+     * @param int
+     * @param TexyHtml node
+     * @param bool
+     * @return TexyHtml  provides a fluent interface
+     * @throws TexyException
+     */
+    public function insert($index, $child, $replace = FALSE)
+    {
+        if ($child instanceof TexyHtml) {
+            if ($child->parent !== NULL) {
+                throw new TexyException('Child node already has parent');
+            }
+            $child->parent = $this;
+
+        } elseif (!is_string($child)) {
+            throw new TexyException('Child node must be scalar or TexyHtml object');
+        }
+
+        if ($index === NULL)  { // append
+            $this->children[] = $child;
+
+        } else { // insert or replace
+            array_splice($this->children, (int) $index, $replace ? 1 : 0, array($child));
+        }
+
+        return $this;
+    }
+
+
+
+    /**
+     * Inserts (replaces) child node (ArrayAccess implementation)
+     * @param int
+     * @param TexyHtml node
+     * @return void
+     */
+    public function offsetSet($index, $child)
+    {
+        $this->insert($index, $child, TRUE);
+    }
+
+
+
+    /**
+     * Returns child node (ArrayAccess implementation)
+     * @param int
+     * @return mixed
+     */
+    public function offsetGet($index)
+    {
+        return $this->children[$index];
+    }
+
+
+
+    /**
+     * Exists child node? (ArrayAccess implementation)
+     * @param int
+     * @return bool
+     */
+    public function offsetExists($index)
+    {
+        return isset($this->children[$index]);
+    }
+
+
+
+    /**
+     * Removes child node (ArrayAccess implementation)
+     * @param int
+     * @return void
+     */
+    public function offsetUnset($index)
+    {
+        if (isset($this->children[$index])) {
+            $child = $this->children[$index];
+            array_splice($this->children, (int) $index, 1);
+            $child->parent = NULL;
+        }
+    }
+
+
+
+    /** Countable implementation */
+    public function count()
+    {
+        return count($this->children);
+    }
+
+
+
+    /**
+     * Returns all of children
+     * return array
+     */
+    function getChildren()
+    {
+        return $this->children;
+    }
+
+
+
+    /**
+     * Returns parent node
+     * @return TexyHtml
+     */
+    final public function getParent()
+    {
+        return $this->parent;
     }
 
 
@@ -418,6 +519,7 @@ class TexyHtml extends TexyBase
      */
     final public function __clone()
     {
+        $this->parent = NULL;
         foreach ($this->children as $key => $value) {
             if (is_object($value)) {
                 $this->children[$key] = clone $value;

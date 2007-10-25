@@ -95,7 +95,7 @@ final class TexyBlockQuoteModule extends TexyModule
         $el->parseBlock($tx, $content, $parser->isIndented());
 
         // no content?
-        if (!count($el->children)) return FALSE;
+        if (!$el->count()) return FALSE;
 
         // event listener
         $tx->invokeHandlers('afterBlockquote', array($parser, $el, $mod));

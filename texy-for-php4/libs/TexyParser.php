@@ -198,10 +198,10 @@ class TexyBlockParser extends TexyParser
                 continue;
 
             } elseif (is_a($res, 'TexyHtml')) {
-                $el->children[] = $res;
+                $el->insert(NULL, $res);
 
             } elseif (is_string($res)) {
-                $el->children[] = $res;
+                $el->insert(NULL, $res);
             }
 
         } while (1);
@@ -255,7 +255,7 @@ class TexyLineParser extends TexyParser
         $pl = $this->patterns;
         if (!$pl) {
             // nothing to do
-            $this->element->children[] = $text;
+            $this->element->insert(NULL, $text);
             return;
         }
 
@@ -339,7 +339,7 @@ class TexyLineParser extends TexyParser
 
         } while (1);
 
-        $this->element->children[] = $text;
+        $this->element->insert(NULL, $text);
     }
 
 }

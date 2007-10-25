@@ -5,8 +5,14 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 181
+- TexyHtml::$children je nyní private. K potomkům se přistupuje přes ArrayAcces interface ("viz":http://latrine.dgx.cz/nhtml-pomocnik-php-programatora#comment-12140)
+
+rev. 180
+- nevkládá `&shy;` do URL
+
 rev. 179
-- POZOR: přejmenováno TexyHtml::add() -> create(), TexyHtml::addChild() -> add()
+- POZOR: přejmenováno TexyHtml::add() -> create(), TexyHtml::addChild() -> add() ("důvody":http://latrine.dgx.cz/nhtml-pomocnik-php-programatora#comment-12100)
 - verze pro PHP4: emulace třídy Exception a throw
 - chytřejší detekce emailů a URL v textu
 
@@ -33,9 +39,6 @@ rev. 173
 rev. 169
 - refactoring: přidáno TexyBase & TexyException
 
-rev. 162
-- TexyHtmlCleaner přejmenován na TexyHtmlOutputModule, dostupný přes `$texy->htmlOutputModule`
-
 rev. 156
 - nové API metody TexyHtml::toText() & TexyHtml::toHtml() pro export částí DOM
 
@@ -45,9 +48,6 @@ rev. 155
 rev. 150
 - všechny příklady nyní fungují i v PHP 4. Jen je potřeba "inkludovat" odpovídající verzi Texy.
 - verze pro PHP 5 podporuje kvůli zpětné kompatibilitě i původní konstanty `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC`, `TEXY_HEADING_FIXED`, `TEXY_PROCEED`, `TEXY_CONTENT_*`
-
-rev. 133
-- **POZOR: přepsání knihovny TexyHtml stornováno!** K vlastnostem elementu se opět přistupuje přes `$el->src = 'image.gif'` (resp. `$el->attrs['src'] = ...`, vhodné pro PHP 4), nikoliv přes `$el['src'] = 'image.gif'`. Omlouvám se za způsobené komplikace.
 
 rev. 131
 - balík nyní obsahuje verzi pro PHP4
@@ -61,19 +61,6 @@ rev. 126
 - vnitřní DTD validátor $texy->htmlOutputModule nyní kontroluje i platnost atributů
 - opravena chyba zadávání atributů před modifikátor .{attr:value}
 - změna názvu $texy->formatterModule -> $texy->htmlOutputModule
-
-rev. 125
-- přepsána knihovna TexyHtml - k vlastnostem elementu se nyní přistupuje přes `$el['src'] = 'image.gif'` namísto původního `$el->src = 'image.gif'`
-- zrušena konstanta TEXY, přidána konstanta Texy::VERSION
-
-rev. 122
-- $texy->safeMode() a trustMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy) nebo trustMode($texy)
-- klonování třídy Texy není podporováno
-
-rev. 119
-- Texy2 by mělo být připraveno na ostrý provoz
-- kompaktní knihovna přejmenována `texy-compact.php` -> `texy.compact.php`
-- TexyDefinitionListModule začleněn do TexyListModule
 
 rev. 113
 - vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/viewtopic.php?id=399
@@ -95,7 +82,8 @@ třída Texy
 - nová vlastnost `$texy->allowed` - sjednocené povolování a zakazování syntaxe, viz Moduly
 - nový způsob maskování emailů
 - nová vlastnost `$texy->urlSchemeFilters` (popsáno v dokumentaci)
-- nový univerzální handler `$texy->handler`. Dřívější handlery odstraněny
+- $texy->safeMode() vyčleněno do nové statické třídy TexyConfigurator. Používejte TexyConfigurator::safeMode($texy).
+- zrušeno trustMode() - jde totiž o výchozí nastavení Texy
 - nová vlastnost `$strictDTD` - lze přepínat mezi striktním a transitional DTD
 - změny názvů modulů:
    - $texy->imageDescModule -> $texy->figureModule
@@ -111,6 +99,11 @@ třída Texy
    - další escapovaný znak viz tableModule
 - Texy::summary je nyní pole
 - konstany `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC` a `TEXY_HEADING_FIXED` jsou nyní: `Texy::ALL`, `Texy:NONE`, `TexyHeadingModule::DYNAMIC` a `TexyHeadingModule::FIXED`
+- kvůli zpětné kompatibilitě fungují i původní konstanty `TEXY_ALL`, `TEXY_NONE`, `TEXY_HEADING_DYNAMIC`, `TEXY_HEADING_FIXED`
+- přidána konstanta Texy::VERSION
+- aktivovány typografické úpravy v atributech title
+- kompaktní knihovna přejmenována `texy-compact.php` -> `texy.compact.php`
+
 
 
 moduly obecně
@@ -118,12 +111,12 @@ moduly obecně
 - ve všech modulech odstraněna vlastnost `$allowed`
 - každá syntax má svůj identifikátor (např. `table`, `html/tag`, `heading/surrounded` ...)
 - jednotlivé syntaxe se povolují přes (např.) `$texy->allowed['table']` = TRUE nebo FALSE
-- odstraněny všechny handlery (s výjimkou scriptModule->handler) - místo toho společný `$texy->handler`
+- odstraněny všechny handlery (s výjimkou scriptModule->handler) - místo toho centrální správa přes `$texy->addHandler`
 
 blockModule
 -----------
 - podpora pro vnořené bloky (div)
-- na každý blok lze napojit vlastní handler `block()` (viz příklady 'Syntax highlighting')
+- na každý blok lze napojit vlastní handler `block` (viz příklady 'Syntax highlighting')
 - zapínání/vypínání syntaxe: `$texy->allowed['blocks']` (hromadně)
 - jednotlivé přes: `block/default`, `block/pre`, `block/code`, `block/html`, `block/text`, `block/texysource`, `block/comment`, `block/div`
 - popis jednotlivých druhů bloků v dokumentaci
@@ -132,7 +125,7 @@ emoticonModule
 --------------
 - náhrada za smiliesModule
 - nová vlastnost `$fileRoot` (viz imageModule)
-- na každý emotikon lze napojit vlastní handler `emoticon()`
+- na každý emotikon lze napojit vlastní handler `emoticon`
 - zapínání/vypínání syntaxe: `$texy->allowed['emoticon']`
 
 figureModule
@@ -140,7 +133,7 @@ figureModule
 - náhrada za imageDescModule
 - vlastnost `$boxClass` přejmenována na `$class`
 - nová vlastnost `$widthDelta` - u plovoucích divů nastaví jejich šířku. Vypočítá ji jako šířku obrázku + `$widthDelta`
-- na každý obrázek s popisknou lze napojit vlastní handler `figure()` (viz příklad 'Figure as Definition List')
+- na každý obrázek s popisknou lze napojit vlastní handler `figure` (viz příklad 'Figure as Definition List')
 - zapínání/vypínání syntaxe: `$texy->allowed['figure']`
 
 headingModule
@@ -149,21 +142,21 @@ headingModule
 - nová vlastnost `$generateID` - zapne automatické generování ID pro titulky
 - nová vlastnost `$idPrefix` - textový prefix pro automaticky generovaná ID
 - nová vlastnost `$TOC` - zde se vytvoří seznam všech titulků, jejich úrovní a ID
-- na každý titulek lze napojit vlastní handler `heading()`
+- na každý titulek lze napojit vlastní handler `heading`
 - zapínání/vypínání syntaxe: `$texy->allowed['heading/surrounded']` & `$texy->allowed['heading/underlined']`
 
 horizLineModule
 ---------------
 - nyní akceptuje pouze zápis `-------` a `*******`
-- na horizontální linku lze napojit vlastní handler `afterHorizline()`
+- na horizontální linku lze napojit vlastní handler `afterHorizline`
 - zapínání/vypínání syntaxe: `$texy->allowed['horizline']`
 
 htmlModule
 ----------
 - nová vlastnost `$passComment` - zda HTML komentáře propouštět nebo požírat
 - zrušeno `$allowedComments` (ve prospěch `$texy->allowed`)
-- na každou HTML značku lze napojit vlastní handler `htmlTag()`
-- na každý HTML komentář lze napojit vlastní handler `htmlComment()`
+- na každou HTML značku lze napojit vlastní handler `htmlTag`
+- na každý HTML komentář lze napojit vlastní handler `htmlComment`
 - zapínání/vypínání syntaxe: `$texy->allowed['html/tag']` & `$texy->allowed['html/comment']`
 
 imageModule
@@ -172,7 +165,7 @@ imageModule
 - `$rootPrefix` přejmenováno na `$fileRoot` - výchozí hodnota je získávána chytřejším způsobem
 - nová třída `TexyImage`, což je popisovač obrázku (viz zdrojový kód), používán dalšími metodami a handlery
 - nové metody `addReference()` & `getReference()` - programátorské přidání a zjištění obrázkové reference
-- na každý obrázek lze napojit vlastní handler `image()` (viz příklad 'Images')
+- na každý obrázek lze napojit vlastní handler `image` (viz příklad 'Images')
 - zapínání/vypínání syntaxe: `$texy->allowed['image']` & `$texy->allowed['image/definition']`
 
 linkModule
@@ -182,15 +175,17 @@ linkModule
 - vylepšená podpora pro `$forceNoFollow`
 - nová třída `TexyLink`, což je popisovač odkazu (viz zdrojový kód), používán dalšími metodami a handlery
 - nové metody `addReference()` & `getReference()` - programátorské přidání a zjištění reference
-- na každou referenci lze napojit vlastní handler `linkReference()` (viz příklad 'References')
-- na každé nalezené URL a email lze napojit vlastní handler `linkURL()` resp. `linkEmail()`
+- na každou referenci lze napojit vlastní handler `linkReference` (viz příklad 'References')
+- na každé nalezené URL a email lze napojit vlastní handler `linkURL` resp. `linkEmail`
 - zapínání/vypínání syntaxe: `link/reference`, `link/email`, `link/url`, `link/definition`
 
-listModule a definitionListModule
----------------------------------
+listModule
+----------
 - nyní akceptuje i typografickou odrážku
-- na hotový seznam lze napojit vlastní handler `afterList()` resp. `afterDefinitionList()`
+- na hotový seznam lze napojit vlastní handler `afterList` resp. `afterDefinitionList`
 - zapínání/vypínání syntaxe: `$texy->allowed['list']` resp. `$texy->allowed['list/definition']`
+- vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/viewtopic.php?id=399
+- TexyDefinitionListModule začleněn do TexyListModule
 
 longWordsModule
 ---------------
@@ -206,11 +201,11 @@ phraseModule
 - nový syntax ''notexy''
 - syntaxe `++inserted++ --deleted--` `^^superscript^^ __subscript__` `~~cite~~` ve výchozím nastavení vypnuté
 - nová vlastnost `$linksAllowed` - lze hromadně zakázat odkazy u frází
-- na každou frázi lze napojit vlastní handler `phrase()` (viz příklad 'Links')
+- na každou frázi lze napojit vlastní handler `phrase` (viz příklad 'Links')
 
 blockQuoteModule
 -----------
-- na hotový objekt lze napojit vlastní handler `afterBlockquote()`
+- na hotový objekt lze napojit vlastní handler `afterBlockquote`
 - zapínání/vypínání syntaxe: `$texy->allowed['blockquote']`
 
 scriptModule
@@ -223,7 +218,7 @@ scriptModule
 tableModule
 -----------
 - podpora pro escapovaní znaku `|`
-- na tabulku lze napojit vlastní handler `afterTable()`
+- na tabulku lze napojit vlastní handler `afterTable`
 - zapínání/vypínání syntaxe: `$texy->allowed['table']`
 
 typographyModule
@@ -242,12 +237,19 @@ htmlOutputModule
 --------------
 - zajišťuje, že výstup z Texy je tzv. well-formed, opravuje neplatné křížení tagů atd.
 - výstup nyní kontroluje mnohem precizněji, zohledňuje `$strictDTD`
+- přepínač XHTML / HTML režimu `$texy->htmlOutputModule->xhtml`
 
 TexyDOM a zděděné třídy
 -----------------------
 - odstraněno, náhradou je TexyHtml (obdoba NHtml, viz http://latrine.dgx.cz/nhtml-pomocnik-php-programatora)
 - vlastnost TexyHtml::$xhtml - přepínač mezi XHTML a HTML výstupem
 - ve všech handlerech se nyní operuje s elementy reprezentovanými tímto objektem, manipulace je tedy extrémně snadná
+
+TexyConfigurator
+----------------
+- konfiguruje existující Texy objekt
+- funkce TexyConfigurator::safeMode, TexyConfigurator::disableLinks & TexyConfigurator::disableImages
+
 
 
 

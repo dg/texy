@@ -34,12 +34,30 @@ function figureHandler($invocation, $image, $link, $content, $modifier)
     $el->setName('dl');
 
     // change p -> dd
-    $el->children['caption']->setName('dd');
+    $el[1]->setName('dd');
 
     // wrap img into dt
+    $img = $el[0];
+    unset($el[0]);
+
     $dt = TexyHtml::el('dt');
-    $dt->add($el->children['img']);
-    $el->children['img'] = $dt;
+    $dt->add($img);
+    $el->insert(0, $dt);
+
+
+    /* for PHP 4:
+    // change p -> dd
+    $caption = $el->offsetGet(1);
+    $caption->setName('dd');
+
+    // wrap img into dt
+    $img = $el->offsetGet(0);
+    $el->offsetUnset(0);
+
+    $dt = TexyHtml::el('dt');
+    $dt->add($img);
+    $el->insert(0, $dt);
+    */
 
     return $el;
 }

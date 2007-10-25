@@ -62,7 +62,7 @@ class TexyParagraphModule extends TexyModule
             }
 
             $res = $tx->invokeAroundHandlers('paragraph', $parser, array($s, $mod));
-            if ($res) $el->children[] = $res;
+            if ($res) $el->insert(NULL, $res);
         }
     }
 

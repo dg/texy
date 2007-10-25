@@ -122,7 +122,7 @@ class TexyListModule extends TexyModule
             $el->add($elItem);
         }
 
-        if (count($el->children) < $min) return FALSE;
+        if (count($el->getChildren()) < $min) return FALSE;
 
         // event listener
         $tx->invokeHandlers('afterList', array($parser, $el, $mod));
@@ -245,8 +245,9 @@ class TexyListModule extends TexyModule
         // parse content
         $elItem->parseBlock($tx, $content, TRUE);
 
-        if ($elItem->children && is_a($elItem->children[0], 'TexyHtml')) {
-            $elItem->children[0]->setName(NULL);
+        if ($elItem->offsetExists(0) && is_a($elItem->offsetGet(0), 'TexyHtml')) {
+            $tmp = $elItem->offsetGet(0);
+            $tmp->setName(NULL);
         }
 
         return $elItem;
