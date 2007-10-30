@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Texy! - plain text to html converter
- * ------------------------------------
+ * Texy! - web text markup-language (for PHP 4)
+ * --------------------------------------------
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ * Copyright (c) 2004, 2007 David Grudl aka -dgx- (http://www.dgx.cz)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
  *
- * for PHP 4.3.3 and newer
+ * For more information please see http://texy.info/
  *
  * @author     David Grudl
- * @copyright  Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ * @copyright  Copyright (c) 2004, 2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
  * @version    2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
  * @category   Text
@@ -21,44 +21,45 @@
  */
 
 
-/** @version    $Revision$ $Date$ */
+
+/** @version $Revision$ $Date$ */
 
 
 define('TEXY_VERSION',  '2.0 FOR PHP4 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
-define('TEXY_DIR',  dirname(__FILE__).'/');
+define('TEXY_DIR',  dirname(__FILE__) . '/');
 
-// suppress E_STRICT
+// suppress E_STRICT in PHP 5
 if (PHP_VERSION >= 5) {
     error_reporting(error_reporting() & ~E_STRICT);
 }
 
-require_once TEXY_DIR.'libs/TexyBase.php';
-require_once TEXY_DIR.'libs/Texy.php';
-require_once TEXY_DIR.'libs/RegExp.Patterns.php';
-require_once TEXY_DIR.'libs/TexyHtml.php';
-require_once TEXY_DIR.'libs/TexyModifier.php';
-require_once TEXY_DIR.'libs/TexyModule.php';
-require_once TEXY_DIR.'libs/TexyParser.php';
-require_once TEXY_DIR.'libs/TexyUtf.php';
-require_once TEXY_DIR.'libs/TexyConfigurator.php';
-require_once TEXY_DIR.'libs/TexyHandlerInvocation.php';
-require_once TEXY_DIR.'modules/TexyParagraphModule.php';
-require_once TEXY_DIR.'modules/TexyBlockModule.php';
-require_once TEXY_DIR.'modules/TexyHeadingModule.php';
-require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
-require_once TEXY_DIR.'modules/TexyHtmlModule.php';
-require_once TEXY_DIR.'modules/TexyFigureModule.php';
-require_once TEXY_DIR.'modules/TexyImageModule.php';
-require_once TEXY_DIR.'modules/TexyLinkModule.php';
-require_once TEXY_DIR.'modules/TexyListModule.php';
-require_once TEXY_DIR.'modules/TexyLongWordsModule.php';
-require_once TEXY_DIR.'modules/TexyPhraseModule.php';
-require_once TEXY_DIR.'modules/TexyBlockQuoteModule.php';
-require_once TEXY_DIR.'modules/TexyScriptModule.php';
-require_once TEXY_DIR.'modules/TexyEmoticonModule.php';
-require_once TEXY_DIR.'modules/TexyTableModule.php';
-require_once TEXY_DIR.'modules/TexyTypographyModule.php';
-require_once TEXY_DIR.'modules/TexyHtmlOutputModule.php';
+require_once TEXY_DIR . 'libs/TexyBase.php';
+require_once TEXY_DIR . 'libs/Texy.php';
+require_once TEXY_DIR . 'libs/RegExp.Patterns.php';
+require_once TEXY_DIR . 'libs/TexyHtml.php';
+require_once TEXY_DIR . 'libs/TexyModifier.php';
+require_once TEXY_DIR . 'libs/TexyModule.php';
+require_once TEXY_DIR . 'libs/TexyParser.php';
+require_once TEXY_DIR . 'libs/TexyUtf.php';
+require_once TEXY_DIR . 'libs/TexyConfigurator.php';
+require_once TEXY_DIR . 'libs/TexyHandlerInvocation.php';
+require_once TEXY_DIR . 'modules/TexyParagraphModule.php';
+require_once TEXY_DIR . 'modules/TexyBlockModule.php';
+require_once TEXY_DIR . 'modules/TexyHeadingModule.php';
+require_once TEXY_DIR . 'modules/TexyHorizLineModule.php';
+require_once TEXY_DIR . 'modules/TexyHtmlModule.php';
+require_once TEXY_DIR . 'modules/TexyFigureModule.php';
+require_once TEXY_DIR . 'modules/TexyImageModule.php';
+require_once TEXY_DIR . 'modules/TexyLinkModule.php';
+require_once TEXY_DIR . 'modules/TexyListModule.php';
+require_once TEXY_DIR . 'modules/TexyLongWordsModule.php';
+require_once TEXY_DIR . 'modules/TexyPhraseModule.php';
+require_once TEXY_DIR . 'modules/TexyBlockQuoteModule.php';
+require_once TEXY_DIR . 'modules/TexyScriptModule.php';
+require_once TEXY_DIR . 'modules/TexyEmoticonModule.php';
+require_once TEXY_DIR . 'modules/TexyTableModule.php';
+require_once TEXY_DIR . 'modules/TexyTypographyModule.php';
+require_once TEXY_DIR . 'modules/TexyHtmlOutputModule.php';
 
 
 
@@ -66,6 +67,10 @@ require_once TEXY_DIR.'modules/TexyHtmlOutputModule.php';
 /**
  * PHP requirements checker
  */
+if (version_compare(PHP_VERSION , '4.3.3', '<')) {
+    die('Texy needs PHP 4.3.3 or newer.');
+}
+
 if (function_exists('mb_get_info')) {
     if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
         mb_internal_encoding('pass');

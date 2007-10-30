@@ -9,7 +9,7 @@
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
  *
- * For more information please see http://php7.org/dibi/
+ * For more information please see http://texy.info/
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2007 David Grudl
@@ -26,35 +26,35 @@
 
 
 define('TEXY_VERSION',  '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
-define('TEXY_DIR',  dirname(__FILE__).'/');
+define('TEXY_DIR',  dirname(__FILE__) . '/');
 
-require_once TEXY_DIR.'libs/TexyBase.php';
-require_once TEXY_DIR.'libs/Texy.php';
-require_once TEXY_DIR.'libs/RegExp.Patterns.php';
-require_once TEXY_DIR.'libs/TexyHtml.php';
-require_once TEXY_DIR.'libs/TexyModifier.php';
-require_once TEXY_DIR.'libs/TexyModule.php';
-require_once TEXY_DIR.'libs/TexyParser.php';
-require_once TEXY_DIR.'libs/TexyUtf.php';
-require_once TEXY_DIR.'libs/TexyConfigurator.php';
-require_once TEXY_DIR.'libs/TexyHandlerInvocation.php';
-require_once TEXY_DIR.'modules/TexyParagraphModule.php';
-require_once TEXY_DIR.'modules/TexyBlockModule.php';
-require_once TEXY_DIR.'modules/TexyHeadingModule.php';
-require_once TEXY_DIR.'modules/TexyHorizLineModule.php';
-require_once TEXY_DIR.'modules/TexyHtmlModule.php';
-require_once TEXY_DIR.'modules/TexyFigureModule.php';
-require_once TEXY_DIR.'modules/TexyImageModule.php';
-require_once TEXY_DIR.'modules/TexyLinkModule.php';
-require_once TEXY_DIR.'modules/TexyListModule.php';
-require_once TEXY_DIR.'modules/TexyLongWordsModule.php';
-require_once TEXY_DIR.'modules/TexyPhraseModule.php';
-require_once TEXY_DIR.'modules/TexyBlockQuoteModule.php';
-require_once TEXY_DIR.'modules/TexyScriptModule.php';
-require_once TEXY_DIR.'modules/TexyEmoticonModule.php';
-require_once TEXY_DIR.'modules/TexyTableModule.php';
-require_once TEXY_DIR.'modules/TexyTypographyModule.php';
-require_once TEXY_DIR.'modules/TexyHtmlOutputModule.php';
+require_once TEXY_DIR . 'libs/TexyBase.php';
+require_once TEXY_DIR . 'libs/Texy.php';
+require_once TEXY_DIR . 'libs/RegExp.Patterns.php';
+require_once TEXY_DIR . 'libs/TexyHtml.php';
+require_once TEXY_DIR . 'libs/TexyModifier.php';
+require_once TEXY_DIR . 'libs/TexyModule.php';
+require_once TEXY_DIR . 'libs/TexyParser.php';
+require_once TEXY_DIR . 'libs/TexyUtf.php';
+require_once TEXY_DIR . 'libs/TexyConfigurator.php';
+require_once TEXY_DIR . 'libs/TexyHandlerInvocation.php';
+require_once TEXY_DIR . 'modules/TexyParagraphModule.php';
+require_once TEXY_DIR . 'modules/TexyBlockModule.php';
+require_once TEXY_DIR . 'modules/TexyHeadingModule.php';
+require_once TEXY_DIR . 'modules/TexyHorizLineModule.php';
+require_once TEXY_DIR . 'modules/TexyHtmlModule.php';
+require_once TEXY_DIR . 'modules/TexyFigureModule.php';
+require_once TEXY_DIR . 'modules/TexyImageModule.php';
+require_once TEXY_DIR . 'modules/TexyLinkModule.php';
+require_once TEXY_DIR . 'modules/TexyListModule.php';
+require_once TEXY_DIR . 'modules/TexyLongWordsModule.php';
+require_once TEXY_DIR . 'modules/TexyPhraseModule.php';
+require_once TEXY_DIR . 'modules/TexyBlockQuoteModule.php';
+require_once TEXY_DIR . 'modules/TexyScriptModule.php';
+require_once TEXY_DIR . 'modules/TexyEmoticonModule.php';
+require_once TEXY_DIR . 'modules/TexyTableModule.php';
+require_once TEXY_DIR . 'modules/TexyTypographyModule.php';
+require_once TEXY_DIR . 'modules/TexyHtmlOutputModule.php';
 
 
 
