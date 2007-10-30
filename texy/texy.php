@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Texy! - plain text to html converter
- * ------------------------------------
+ * Texy! - web text markup-language
+ * --------------------------------
  *
- * Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ * Copyright (c) 2004, 2007 David Grudl aka -dgx- (http://www.dgx.cz)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
  *
- * for PHP 5.0.0 and newer
+ * For more information please see http://php7.org/dibi/
  *
  * @author     David Grudl
- * @copyright  Copyright (c) 2004-2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ * @copyright  Copyright (c) 2004, 2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
  * @version    2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
  * @category   Text
@@ -21,11 +21,8 @@
  */
 
 
-/**
- * This file is part of the Texy! formatter (http://texy.info/)
- *
- * @version    $Revision: 165 $ $Date: 2007-08-21 00:27:15 +0200 (út, 21 VIII 2007) $
- */
+
+/** @version $Revision$ $Date$ */
 
 
 define('TEXY_VERSION',  '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');

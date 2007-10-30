@@ -21,11 +21,7 @@
  */
 
 
-/**
- * This file is part of the Texy! formatter (http://texy.info/)
- *
- * @version    $Revision: 166 $ $Date: 2007-08-23 03:02:24 +0200 (čt, 23 VIII 2007) $
- */
+/** @version    $Revision$ $Date$ */
 
 
 define('TEXY_VERSION',  '2.0 FOR PHP4 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
