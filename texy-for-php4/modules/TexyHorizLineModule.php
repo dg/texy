@@ -28,6 +28,13 @@
  */
 class TexyHorizLineModule extends TexyModule
 {
+    /** @var array  default CSS class */
+    var $classes = array(
+        '-' => NULL,
+        '*' => NULL,
+    );
+
+
 
     function __construct($texy)
     {
@@ -76,6 +83,12 @@ class TexyHorizLineModule extends TexyModule
     {
         $el = TexyHtml::el('hr');
         $modifier->decorate($invocation->getTexy(), $el);
+
+        $class = $this->classes[ $type[0] ];
+        if ($class && !isset($modifier->classes[$class])) {
+            $el->attrs['class'][] = $class;
+        }
+
         return $el;
     }
 
