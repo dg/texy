@@ -122,7 +122,7 @@ class TexyPhraseModule extends TexyModule
         // m^2 alternative superscript
         $texy->registerLinePattern(
             array($this, 'patternSupSub'),
-            '#(?<=[a-z0-9])\^(-?[0-9]{1,4})(?![a-z0-9])#Uui',
+            '#(?<=[a-z0-9])\^([-\x{2212}]?[0-9]{1,4})(?![a-z0-9])#Uui',
             'phrase/sup-alt'
         );
 
@@ -271,6 +271,7 @@ class TexyPhraseModule extends TexyModule
         list(, $mContent) = $matches;
         $mod = new TexyModifier();
         $link = NULL;
+        $mContent = str_replace('-', "\xE2\x88\x92", $mContent); // &minus;
         return $this->texy->invokeAroundHandlers('phrase', $parser, array($phrase, $mContent, $mod, $link));
     }
 

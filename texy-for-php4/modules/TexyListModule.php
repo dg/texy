@@ -131,7 +131,7 @@ class TexyListModule extends TexyModule
             $el->add($elItem);
         }
 
-        if (count($el->getChildren()) < $min) return FALSE;
+        if ($el->count() < $min) return FALSE;
 
         // event listener
         $tx->invokeHandlers('afterList', array($parser, $el, $mod));
