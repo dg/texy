@@ -22,8 +22,8 @@
 
 
 // for PHP 4 backward compatibility
-define('TEXY_HEADING_FIXED',  TexyHeadingModule::FIXED);
-define('TEXY_HEADING_DYNAMIC',  TexyHeadingModule::DYNAMIC);
+define('TEXY_HEADING_DYNAMIC', 1);
+define('TEXY_HEADING_FIXED', 2);
 
 
 /**

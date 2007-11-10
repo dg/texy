@@ -21,7 +21,7 @@
 
 
 
-define('TEXY_HEADING_DYNAMIC',  1);  // auto-leveling
+define('TEXY_HEADING_DYNAMIC', 1);
 define('TEXY_HEADING_FIXED', 2);
 
 /**

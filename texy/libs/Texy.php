@@ -24,12 +24,12 @@
 /**
  * For PHP 4 backward compatibility
  */
-define('TEXY_ALL',  Texy::ALL);
-define('TEXY_NONE',  Texy::NONE);
-define('TEXY_CONTENT_MARKUP', Texy::CONTENT_MARKUP);
-define('TEXY_CONTENT_REPLACED', Texy::CONTENT_REPLACED);
-define('TEXY_CONTENT_TEXTUAL', Texy::CONTENT_TEXTUAL);
-define('TEXY_CONTENT_BLOCK', Texy::CONTENT_BLOCK);
+define('TEXY_ALL',  TRUE);
+define('TEXY_NONE',  FALSE);
+define('TEXY_CONTENT_MARKUP',  "\x17");
+define('TEXY_CONTENT_REPLACED',  "\x16");
+define('TEXY_CONTENT_TEXTUAL',  "\x15");
+define('TEXY_CONTENT_BLOCK',  "\x14");
 
 
 
