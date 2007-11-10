@@ -26,40 +26,39 @@
 
 
 define('TEXY_VERSION',  '2.0 FOR PHP4 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
-define('TEXY_DIR',  dirname(__FILE__) . '/');
 
 // suppress E_STRICT in PHP 5
 if (PHP_VERSION >= 5) {
     error_reporting(error_reporting() & ~E_STRICT);
 }
 
-require_once TEXY_DIR . 'libs/TexyBase.php';
-require_once TEXY_DIR . 'libs/Texy.php';
-require_once TEXY_DIR . 'libs/RegExp.Patterns.php';
-require_once TEXY_DIR . 'libs/TexyHtml.php';
-require_once TEXY_DIR . 'libs/TexyModifier.php';
-require_once TEXY_DIR . 'libs/TexyModule.php';
-require_once TEXY_DIR . 'libs/TexyParser.php';
-require_once TEXY_DIR . 'libs/TexyUtf.php';
-require_once TEXY_DIR . 'libs/TexyConfigurator.php';
-require_once TEXY_DIR . 'libs/TexyHandlerInvocation.php';
-require_once TEXY_DIR . 'modules/TexyParagraphModule.php';
-require_once TEXY_DIR . 'modules/TexyBlockModule.php';
-require_once TEXY_DIR . 'modules/TexyHeadingModule.php';
-require_once TEXY_DIR . 'modules/TexyHorizLineModule.php';
-require_once TEXY_DIR . 'modules/TexyHtmlModule.php';
-require_once TEXY_DIR . 'modules/TexyFigureModule.php';
-require_once TEXY_DIR . 'modules/TexyImageModule.php';
-require_once TEXY_DIR . 'modules/TexyLinkModule.php';
-require_once TEXY_DIR . 'modules/TexyListModule.php';
-require_once TEXY_DIR . 'modules/TexyLongWordsModule.php';
-require_once TEXY_DIR . 'modules/TexyPhraseModule.php';
-require_once TEXY_DIR . 'modules/TexyBlockQuoteModule.php';
-require_once TEXY_DIR . 'modules/TexyScriptModule.php';
-require_once TEXY_DIR . 'modules/TexyEmoticonModule.php';
-require_once TEXY_DIR . 'modules/TexyTableModule.php';
-require_once TEXY_DIR . 'modules/TexyTypographyModule.php';
-require_once TEXY_DIR . 'modules/TexyHtmlOutputModule.php';
+require_once __FILE__ . '/../libs/NObject4.php';
+require_once __FILE__ . '/../libs/Texy.php';
+require_once __FILE__ . '/../libs/RegExp.Patterns.php';
+require_once __FILE__ . '/../libs/TexyHtml.php';
+require_once __FILE__ . '/../libs/TexyModifier.php';
+require_once __FILE__ . '/../libs/TexyModule.php';
+require_once __FILE__ . '/../libs/TexyParser.php';
+require_once __FILE__ . '/../libs/TexyUtf.php';
+require_once __FILE__ . '/../libs/TexyConfigurator.php';
+require_once __FILE__ . '/../libs/TexyHandlerInvocation.php';
+require_once __FILE__ . '/../modules/TexyParagraphModule.php';
+require_once __FILE__ . '/../modules/TexyBlockModule.php';
+require_once __FILE__ . '/../modules/TexyHeadingModule.php';
+require_once __FILE__ . '/../modules/TexyHorizLineModule.php';
+require_once __FILE__ . '/../modules/TexyHtmlModule.php';
+require_once __FILE__ . '/../modules/TexyFigureModule.php';
+require_once __FILE__ . '/../modules/TexyImageModule.php';
+require_once __FILE__ . '/../modules/TexyLinkModule.php';
+require_once __FILE__ . '/../modules/TexyListModule.php';
+require_once __FILE__ . '/../modules/TexyLongWordsModule.php';
+require_once __FILE__ . '/../modules/TexyPhraseModule.php';
+require_once __FILE__ . '/../modules/TexyBlockQuoteModule.php';
+require_once __FILE__ . '/../modules/TexyScriptModule.php';
+require_once __FILE__ . '/../modules/TexyEmoticonModule.php';
+require_once __FILE__ . '/../modules/TexyTableModule.php';
+require_once __FILE__ . '/../modules/TexyTypographyModule.php';
+require_once __FILE__ . '/../modules/TexyHtmlOutputModule.php';
 
 
 
@@ -76,8 +75,4 @@ if (function_exists('mb_get_info')) {
         mb_internal_encoding('pass');
         trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
     }
-}
-
-if (preg_match('#on|true|yes|[1-9]#iA', ini_get('zend.ze1_compatibility_mode'))) {
-    throw (new TexyException("Texy cannot run with zend.ze1_compatibility_mode enabled"));
 }

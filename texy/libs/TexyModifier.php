@@ -34,7 +34,7 @@
  * @package Texy
  * @version $Revision$ $Date$
  */
-final class TexyModifier extends TexyBase
+final class TexyModifier extends NObject
 {
     /** @var string */
     public $id;

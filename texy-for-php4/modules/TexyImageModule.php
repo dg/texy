@@ -319,7 +319,7 @@ class TexyImageModule extends TexyModule
 /**
  * @package Texy
  */
-class TexyImage extends TexyBase
+class TexyImage extends NObject4
 {
     /** @var string  base image URL */
     var $URL;

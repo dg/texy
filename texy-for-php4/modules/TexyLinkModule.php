@@ -457,7 +457,7 @@ define('TEXY_LINK_IMAGE', 3);
 /**
  * @package Texy
  */
-class TexyLink extends TexyBase
+class TexyLink extends NObject4
 {
     /** @var string  URL in resolved form */
     var $URL;

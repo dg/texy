@@ -29,6 +29,16 @@ define('TEXY_CONTENT_TEXTUAL',  "\x15");
 define('TEXY_CONTENT_BLOCK',  "\x14");
 
 
+/**
+ * Exception base class
+ * @package Texy
+ */
+class TexyException extends Exception
+{
+}
+
+
+
 /** @var bool  use Strict of Transitional DTD? */
 $GLOBALS['Texy::$strictDTD'] = FALSE; /* class static property */
 
@@ -47,7 +57,7 @@ $GLOBALS['Texy::$advertisingNotice'] = 'once'; /* class static property */
  * @package Texy
  * @version $Revision$ $Date$
  */
-class Texy extends TexyBase
+class Texy extends NObject4
 {
     /** @var string  input & output text encoding */
     var $encoding = 'utf-8';
@@ -301,7 +311,7 @@ class Texy extends TexyBase
     function process($text, $singleLine = FALSE)
     {
         if ($this->processing) {
-            return throw (new TexyException('Processing is in progress yet.'));
+            throw (new TexyException('Processing is in progress yet.'));
         }
 
         // initialization
@@ -395,7 +405,7 @@ class Texy extends TexyBase
     function toText()
     {
         if (!$this->DOM) {
-            return throw (new TexyException('Call $texy->process() first.'));
+            throw (new TexyException('Call $texy->process() first.'));
         }
 
         return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
@@ -481,7 +491,7 @@ class Texy extends TexyBase
     function addHandler($event, $callback)
     {
         if (!is_callable($callback)) {
-            return throw (new TexyException("Invalid callback"));
+            throw (new TexyException("Invalid callback"));
         }
 
         $this->handlers[$event][] = $callback;
@@ -808,7 +818,7 @@ class Texy extends TexyBase
 
     function __clone()
     {
-        throw (new TexyException("Clone is not supported"));
+        // with NObject4 is clonning allowed
     }
 
 }

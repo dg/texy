@@ -451,7 +451,7 @@ final class TexyLinkModule extends TexyModule
 /**
  * @package Texy
  */
-final class TexyLink extends TexyBase
+final class TexyLink extends NObject
 {
     /** @see $type */
     const

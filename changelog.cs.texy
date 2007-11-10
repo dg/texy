@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 185
+- implementován NObject z Nette Frameworku. Nahradil TexyBase
+
 rev. 181
 - TexyHtml::$children je nyní private. K potomkům se přistupuje přes ArrayAcces interface ("viz":http://latrine.dgx.cz/nhtml-pomocnik-php-programatora#comment-12140)
 

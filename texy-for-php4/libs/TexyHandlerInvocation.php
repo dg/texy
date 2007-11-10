@@ -26,7 +26,7 @@
  * @package Texy
  * @version $Revision$ $Date$
  */
-class TexyHandlerInvocation extends TexyBase
+class TexyHandlerInvocation extends NObject4
 {
     /** @var array of callbacks */
     var $handlers;
@@ -65,7 +65,7 @@ class TexyHandlerInvocation extends TexyBase
     function proceed()
     {
         if ($this->pos === 0) {
-            return throw (new TexyException('No more handlers'));
+            throw (new TexyException('No more handlers'));
         }
 
         if (func_num_args()) {

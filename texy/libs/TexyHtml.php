@@ -34,7 +34,7 @@
  * @package Texy
  * @version $Revision$ $Date$
  */
-class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
+class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ IteratorAggregate
 {
     /** @var string  element's name */
     private $name;
@@ -292,7 +292,7 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
      * @return TexyHtml  provides a fluent interface
      * @throws TexyException
      */
-    public function insert($index, $child, $replace = FALSE)
+    final public function insert($index, $child, $replace = FALSE)
     {
         if ($child instanceof TexyHtml) {
             if ($child->parent !== NULL) {
@@ -322,7 +322,7 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
      * @param TexyHtml node
      * @return void
      */
-    public function offsetSet($index, $child)
+    final public function offsetSet($index, $child)
     {
         $this->insert($index, $child, TRUE);
     }
@@ -331,10 +331,10 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
 
     /**
      * Returns child node (ArrayAccess implementation)
-     * @param int
+     * @param int index
      * @return mixed
      */
-    public function offsetGet($index)
+    final public function offsetGet($index)
     {
         return $this->children[$index];
     }
@@ -343,10 +343,10 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
 
     /**
      * Exists child node? (ArrayAccess implementation)
-     * @param int
+     * @param int index
      * @return bool
      */
-    public function offsetExists($index)
+    final public function offsetExists($index)
     {
         return isset($this->children[$index]);
     }
@@ -355,10 +355,10 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
 
     /**
      * Removes child node (ArrayAccess implementation)
-     * @param int
+     * @param int index
      * @return void
      */
-    public function offsetUnset($index)
+    final public function offsetUnset($index)
     {
         if (isset($this->children[$index])) {
             $child = $this->children[$index];
@@ -369,10 +369,24 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
 
 
 
-    /** Countable implementation */
-    public function count()
+    /**
+     * Required by the Countable interface
+     * @return int
+     */
+    final public function count()
     {
         return count($this->children);
+    }
+
+
+
+    /**
+     * Required by the IteratorAggregate interface
+     * @return ArrayIterator
+     */
+    final public function getIterator()
+    {
+        return new ArrayIterator($this->children);
     }
 
 
@@ -381,7 +395,7 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
      * Returns all of children
      * return array
      */
-    function getChildren()
+    final public function getChildren()
     {
         return $this->children;
     }
@@ -502,7 +516,9 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
         }
 
         // finish start tag
-        if (self::$xhtml && $this->isEmpty) return $s . ' />';
+        if (self::$xhtml && $this->isEmpty) {
+            return $s . ' />';
+        }
         return $s . '>';
     }
 
@@ -585,7 +601,7 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
      * @param string
      * @return void
      */
-    final public function parseLine($texy, $s)
+    final public function parseLine(Texy $texy, $s)
     {
         // TODO!
         // special escape sequences
@@ -605,7 +621,7 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
      * @param bool
      * @return void
      */
-    final public function parseBlock($texy, $s, $indented = FALSE)
+    final public function parseBlock(Texy $texy, $s, $indented = FALSE)
     {
         $parser = new TexyBlockParser($texy, $this, $indented);
         $parser->parse($s);
@@ -624,7 +640,7 @@ class TexyHtml extends TexyBase implements ArrayAccess /*, Countable*/
         if ($last === $strict) return;
         $last = $strict;
 
-        require_once TEXY_DIR.'libs/TexyHtml.DTD.php';
+        require_once __FILE__ . '/../TexyHtml.DTD.php';
     }
 
 }

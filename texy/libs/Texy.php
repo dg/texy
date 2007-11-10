@@ -35,6 +35,17 @@ define('TEXY_CONTENT_BLOCK', Texy::CONTENT_BLOCK);
 
 
 /**
+ * Exception base class
+ * @package Texy
+ * @version $Revision$ $Date$
+ */
+class TexyException extends Exception
+{
+}
+
+
+
+/**
  * Texy! - Convert plain text to XHTML format using {@link process()}
  *
  * <code>
@@ -44,7 +55,7 @@ define('TEXY_CONTENT_BLOCK', Texy::CONTENT_BLOCK);
  * @package Texy
  * @version $Revision$ $Date$
  */
-class Texy extends TexyBase
+class Texy extends NObject
 {
     // configuration directives
     const ALL = TRUE;

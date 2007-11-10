@@ -25,7 +25,7 @@
  * @package Texy
  * @version $Revision$ $Date$
  */
-class TexyParser extends TexyBase
+class TexyParser extends NObject
 {
     /** @var Texy */
     protected $texy;

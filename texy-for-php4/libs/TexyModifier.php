@@ -48,7 +48,7 @@ $GLOBALS['TexyModifier::$elAttrs'] = array(
  * @package Texy
  * @version $Revision$ $Date$
  */
-class TexyModifier extends TexyBase
+class TexyModifier extends NObject4
 {
     /** @var string */
     var $id;

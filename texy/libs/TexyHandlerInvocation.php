@@ -26,7 +26,7 @@
  * @package Texy
  * @version $Revision$ $Date$
  */
-final class TexyHandlerInvocation extends TexyBase
+final class TexyHandlerInvocation extends NObject
 {
     /** @var array of callbacks */
     private $handlers;

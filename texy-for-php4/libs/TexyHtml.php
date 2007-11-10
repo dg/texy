@@ -88,7 +88,7 @@ $GLOBALS['TexyHtml::$prohibits'] = array(
  * @property mixed element's attributes
  * @package Texy
  */
-class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
+class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 {
     /** @var string  element's name */
     var $name;
@@ -136,7 +136,7 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
     function setName($name, $empty = NULL)
     {
         if ($name !== NULL && !is_string($name)) {
-            return throw (new TexyException('Name must be string or NULL'));
+            throw (new TexyException('Name must be string or NULL'));
         }
 
         $this->name = $name;
@@ -285,12 +285,12 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
     {
         if (is_a($child, 'TexyHtml')) {
             if ($child->parent !== NULL) {
-                return throw (new TexyException('Child node already has parent'));
+                throw (new TexyException('Child node already has parent'));
             }
             $child->parent = $this;
 
         } elseif (!is_string($child)) {
-            return throw (new TexyException('Child node must be scalar or TexyHtml object'));
+            throw (new TexyException('Child node must be scalar or TexyHtml object'));
         }
 
         if ($index === NULL)  { // append
@@ -320,7 +320,7 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
 
     /**
      * Returns child node (ArrayAccess implementation)
-     * @param int
+     * @param int index
      * @return mixed
      */
     function offsetGet($index)
@@ -332,7 +332,7 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
 
     /**
      * Exists child node? (ArrayAccess implementation)
-     * @param int
+     * @param int index
      * @return bool
      */
     function offsetExists($index)
@@ -344,7 +344,7 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
 
     /**
      * Removes child node (ArrayAccess implementation)
-     * @param int
+     * @param int index
      * @return void
      */
     function offsetUnset($index)
@@ -358,10 +358,24 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
 
 
 
-    /** Countable implementation */
+    /**
+     * Required by the Countable interface
+     * @return int
+     */
     function count()
     {
         return count($this->children);
+    }
+
+
+
+    /**
+     * Required by the IteratorAggregate interface
+     * @return ArrayIterator
+     */
+    function getIterator()
+    {
+        return new ArrayIterator($this->children);
     }
 
 
@@ -491,7 +505,9 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
         }
 
         // finish start tag
-        if ($GLOBALS['TexyHtml::$xhtml'] && $this->isEmpty) return $s . ' />';
+        if ($GLOBALS['TexyHtml::$xhtml'] && $this->isEmpty) {
+            return $s . ' />';
+        }
         return $s . '>';
     }
 
@@ -613,7 +629,7 @@ class TexyHtml extends TexyBase /*implements ArrayAccess, Countable*/
         if ($last === $strict) return;
         $last = $strict;
 
-        require_once TEXY_DIR.'libs/TexyHtml.DTD.php';
+        require_once __FILE__ . '/../TexyHtml.DTD.php';
     }
 
 }
