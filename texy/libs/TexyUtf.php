@@ -26,21 +26,13 @@
  * @package Texy
  * @version $Revision$ $Date$
  */
-final class TexyUtf
+class TexyUtf extends NClass
 {
     /** @var array */
     private static $xlat;
 
     /** @var array */
     private static $xlatCache;
-
-
-
-    /**
-     * Static class pattern: forbid "new"
-     */
-    final private function __construct()
-    {}
 
 
 

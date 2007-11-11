@@ -31,7 +31,7 @@
  * @package Texy
  * @version $Revision$ $Date$
  */
-final class TexyConfigurator
+class TexyConfigurator extends NClass
 {
     public static $safeTags = array(
         'a'         => array('href', 'title'),
@@ -48,14 +48,6 @@ final class TexyConfigurator
         'q'         => array(),
         'small'     => array(),
     );
-
-
-
-    /**
-     * Static class pattern: forbid "new"
-     */
-    final private function __construct()
-    {}
 
 
 

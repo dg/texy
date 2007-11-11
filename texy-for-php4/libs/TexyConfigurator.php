@@ -48,18 +48,8 @@ $GLOBALS['TexyConfigurator::$safeTags'] = array(
  * @package Texy
  * @version $Revision$ $Date$
  */
-class TexyConfigurator
+class TexyConfigurator extends NClass4
 {
-
-    /**
-     * Static class pattern: forbid "new"
-     */
-    function __construct()
-    {
-        throw (new TexyException('Static class'));
-    }
-
-
 
     /**
      * Configure Texy! for web comments and other usages, where input text may insert attacker

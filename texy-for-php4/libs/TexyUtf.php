@@ -33,18 +33,8 @@ $GLOBALS['TexyUtf::$xlatCache'] = NULL; /* class private static property */
  * @package Texy
  * @version $Revision$ $Date$
  */
-class TexyUtf
+class TexyUtf extends NClass4
 {
-
-    /**
-     * Static class pattern: forbid "new"
-     */
-    function __construct()
-    {
-        throw (new TexyException('Static class'));
-    }
-
-
 
     /**
      * Converts from source encoding to UTF-8

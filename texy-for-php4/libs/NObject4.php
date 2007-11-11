@@ -85,7 +85,7 @@ if (!class_exists('NObject4')) {
 
 
 /**
- * NObject is the ultimate ancestor of all instantiable classes.
+ * NObject (for PHP4) is the ultimate ancestor of all instantiable classes.
  *
  * It defines some handful methods and enhances object core of PHP:
  *   - access to undeclared members throws exceptions
@@ -149,23 +149,11 @@ class NObject4 /* abstract  */
     /**
      * Access to reflection
      *
-     * @return ReflectionClass
+     * @return ReflectionObject
      */
     function getReflection()
     {
-        return new ReflectionClass(get_class($this));
-    }
-
-
-
-    /**
-     * Return hash id for given object
-     *
-     * @return string  32 hexa chars
-     */
-    function getHashId()
-    {
-        return spl_object_hash($this);
+        return new ReflectionObject($this);
     }
 
 
@@ -290,7 +278,7 @@ class NObject4 /* abstract  */
 
 
     /**
-	 * Is method defined? Case sensitive, filters protected & private, doesn't recognize static methods (works good since 5.0.4)
+	 * Does method exist? Case sensitive, filters protected & private, doesn't recognize static methods (works good since 5.0.4)
      *
 	 * @param string  class name
      * @param string  method name
@@ -307,6 +295,20 @@ class NObject4 /* abstract  */
 
 }
 
+
+
+/**
+ * NClass (for PHP4) is the ultimate ancestor of all uninstantiable classes.
+ */
+class NClass4
+{
+
+    function __construct()
+    {
+        throw (new LogicException("Cannot instantiate static class " . get_class($this)));
+    }
+
+}
 
 
 }
