@@ -11,12 +11,10 @@
  *
  * For more information please see http://texy.info/
  *
- * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
- * @category   Text
- * @package    Texy
  * @link       http://texy.info/
+ * @package    Texy
  */
 
 
@@ -54,8 +52,11 @@ $GLOBALS['Texy::$advertisingNotice'] = 'once'; /* class static property */
  *     $texy = new Texy();
  *     $html = $texy->process($text);
  * </code>
- * @package Texy
- * @version $Revision$ $Date$
+ *
+ * @author     David Grudl
+ * @copyright  Copyright (c) 2004, 2007 David Grudl
+ * @package    Texy
+ * @version    $Revision$ $Date$
  */
 class Texy extends NObject4
 {

@@ -11,25 +11,22 @@
  *
  * For more information please see http://texy.info/
  *
- * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
- * @category   Text
- * @package    Texy
  * @link       http://texy.info/
+ * @package    Texy
  */
 
 
 
 /**
- * PHP 4 Clone emulation
+ * Compatibility with PHP < 5
  *
  * Example: $obj = clone ($dolly)
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2007 David Grudl
- * @license    http://php7.org/nette/license  (Nette license)
- * @link       http://php7.org/nette/
+ * @link       http://latrine.dgx.cz/how-to-emulate-php5-object-model-in-php4
  */
 if (PHP_VERSION < 5) {
     eval('
@@ -52,6 +49,7 @@ if (PHP_VERSION < 5) {
         trigger_error($e->message, E_USER_ERROR);
         die();
     }
+    ');
 
     class Exception
     {
@@ -66,7 +64,6 @@ if (PHP_VERSION < 5) {
             $this->trace = debug_backtrace();
         }
     }
-    ');
 }
 
 
@@ -112,8 +109,9 @@ if (!class_exists('NObject4')) {
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2007 David Grudl
- * @license    http://php7.org/nette/license  (Nette license)
+ * @license    http://php7.org/nette/license  Nette license
  * @link       http://php7.org/nette/
+ * @package    Nette
  */
 class NObject4 /* abstract  */
 {
@@ -299,6 +297,12 @@ class NObject4 /* abstract  */
 
 /**
  * NClass (for PHP4) is the ultimate ancestor of all uninstantiable classes.
+ *
+ * @author     David Grudl
+ * @copyright  Copyright (c) 2004, 2007 David Grudl
+ * @license    http://php7.org/nette/license  Nette license
+ * @link       http://php7.org/nette/
+ * @package    Nette
  */
 class NClass4
 {

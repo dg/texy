@@ -15,7 +15,6 @@
  * @copyright  Copyright (c) 2004, 2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
  * @version    2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
- * @category   Text
  * @package    Texy
  * @link       http://texy.info/
  */

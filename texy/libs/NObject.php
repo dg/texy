@@ -11,12 +11,10 @@
  *
  * For more information please see http://texy.info/
  *
- * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2007 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
- * @category   Text
- * @package    Texy
  * @link       http://texy.info/
+ * @package    Texy
  */
 
 
@@ -63,8 +61,9 @@ if (!class_exists('NObject', FALSE)) {
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2007 David Grudl
- * @license    http://php7.org/nette/license  (Nette license)
+ * @license    http://php7.org/nette/license  Nette license
  * @link       http://php7.org/nette/
+ * @package    Nette
  */
 abstract class NObject
 {
@@ -234,6 +233,12 @@ abstract class NObject
 
 /**
  * NClass is the ultimate ancestor of all uninstantiable classes.
+ *
+ * @author     David Grudl
+ * @copyright  Copyright (c) 2004, 2007 David Grudl
+ * @license    http://php7.org/nette/license  Nette license
+ * @link       http://php7.org/nette/
+ * @package    Nette
  */
 abstract class NClass
 {
