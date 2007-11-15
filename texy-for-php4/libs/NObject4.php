@@ -68,20 +68,6 @@ if (PHP_VERSION < 5) {
 
 
 /**
- * Compatibility with PHP < 5.1
- */
-if (!class_exists('LogicException')) {
-    class LogicException extends Exception {}
-}
-
-if (!class_exists('BadMethodCallException')) {
-    class BadMethodCallException extends LogicException {}
-}
-
-if (!class_exists('NObject4')) {
-
-
-/**
  * NObject (for PHP4) is the ultimate ancestor of all instantiable classes.
  *
  * It defines some handful methods and enhances object core of PHP:
@@ -311,8 +297,5 @@ class NClass4
     {
         throw (new LogicException("Cannot instantiate static class " . get_class($this)));
     }
-
-}
-
 
 }

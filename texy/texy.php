@@ -26,7 +26,10 @@
 
 define('TEXY_VERSION',  '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
 
-require_once __FILE__ . '/../libs/NObject.php';
+// nette libraries
+if (!class_exists('NObject', FALSE)) { require_once __FILE__ . '/../libs/NObject.php'; }
+
+// Texy! libraries
 require_once __FILE__ . '/../libs/Texy.php';
 require_once __FILE__ . '/../libs/RegExp.Patterns.php';
 require_once __FILE__ . '/../libs/TexyHtml.php';
@@ -54,6 +57,19 @@ require_once __FILE__ . '/../modules/TexyTableModule.php';
 require_once __FILE__ . '/../modules/TexyTypographyModule.php';
 require_once __FILE__ . '/../modules/TexyHtmlOutputModule.php';
 
+
+
+
+/**
+ * Compatibility with PHP < 5.1
+ */
+if (!class_exists('LogicException', FALSE)) {
+    class LogicException extends Exception {}
+}
+
+if (!class_exists('BadMethodCallException', FALSE)) {
+    class BadMethodCallException extends LogicException {}
+}
 
 
 

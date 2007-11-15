@@ -31,7 +31,10 @@ if (PHP_VERSION >= 5) {
     error_reporting(error_reporting() & ~E_STRICT);
 }
 
-require_once __FILE__ . '/../libs/NObject4.php';
+// nette libraries
+if (!class_exists('NObject4')) { require_once __FILE__ . '/../libs/NObject4.php'; }
+
+// Texy! libraries
 require_once __FILE__ . '/../libs/Texy.php';
 require_once __FILE__ . '/../libs/RegExp.Patterns.php';
 require_once __FILE__ . '/../libs/TexyHtml.php';
@@ -59,6 +62,19 @@ require_once __FILE__ . '/../modules/TexyTableModule.php';
 require_once __FILE__ . '/../modules/TexyTypographyModule.php';
 require_once __FILE__ . '/../modules/TexyHtmlOutputModule.php';
 
+
+
+
+/**
+ * Compatibility with PHP < 5.1
+ */
+if (!class_exists('LogicException')) {
+    class LogicException extends Exception {}
+}
+
+if (!class_exists('BadMethodCallException')) {
+    class BadMethodCallException extends LogicException {}
+}
 
 
 
