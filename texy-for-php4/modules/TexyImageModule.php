@@ -36,7 +36,7 @@ class TexyImageModule extends TexyModule
     var $linkedRoot = 'images/';
 
     /** @var string  physical location of images on server */
-    var $fileRoot = 'images/';
+    var $fileRoot = NULL;
 
     /** @var string  left-floated images CSS class */
     var $leftClass;
@@ -59,11 +59,6 @@ class TexyImageModule extends TexyModule
     function __construct($texy)
     {
         $this->texy = $texy;
-
-        if (isset($_SERVER['SCRIPT_FILENAME'])) {
-            // physical location on server
-            $this->fileRoot = dirname($_SERVER['SCRIPT_FILENAME']) . '/' . $this->root;
-        }
 
         $texy->allowed['image/definition'] = TRUE;
         $texy->addHandler('image', array($this, 'solve'));
@@ -204,10 +199,11 @@ class TexyImageModule extends TexyModule
 
             // dimensions
             $matches = NULL;
-            if (preg_match('#^(.*) (?:(\d+)|\?) *x *(?:(\d+)|\?) *()$#U', $content[0], $matches)) {
+            if (preg_match('#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U', $content[0], $matches)) {
                 $image->URL = trim($matches[1]);
-                $image->width = (int) $matches[2];
-                $image->height = (int) $matches[3];
+                $image->asMax = $matches[3] === 'X';
+                $image->width = $matches[2] === '?' ? NULL : (int) $matches[2];
+                $image->height = $matches[4] === '?' ? NULL : (int) $matches[4];
             } else {
                 $image->URL = trim($content[0]);
             }
@@ -275,23 +271,44 @@ class TexyImageModule extends TexyModule
             }
         }
 
-        if ($image->width || $image->height) {
-            $el->attrs['width'] = $image->width;
-            $el->attrs['height'] = $image->height;
+        if (!is_int($image->width) || !is_int($image->height) || $image->asMax) {
+            // autodetect fileRoot
+            if ($this->fileRoot === NULL && isset($_SERVER['SCRIPT_FILENAME'])) {
+                $this->fileRoot = dirname($_SERVER['SCRIPT_FILENAME']) . '/' . $this->root;
+            }
 
-        } else {
+            // detect dimensions
             // absolute URL & security check for double dot
             if (Texy::isRelative($image->URL) && strpos($image->URL, '..') === FALSE) {
                 $file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
                 if (is_file($file)) {
                     $size = getImageSize($file);
                     if (is_array($size)) {
-                        $image->width = $el->attrs['width'] = $size[0];
-                        $image->height = $el->attrs['height'] = $size[1];
+                        if ($image->asMax) {
+                            $ratio = 1;
+                            if (is_int($image->width)) $ratio = min($ratio, $image->width / $size[0]);
+                            if (is_int($image->height)) $ratio = min($ratio, $image->height / $size[1]);
+                            $image->width = round($ratio * $size[0]);
+                            $image->height = round($ratio * $size[1]);
+
+                        } elseif (is_int($image->width)) {
+                            $ratio = round($size[1] / $size[0] * $image->width);
+                            $image->height = round($size[1] / $size[0] * $image->width);
+
+                        } elseif (is_int($image->height)) {
+                            $image->width = round($size[0] / $size[1] * $image->height);
+
+                        } else {
+                            $image->width = $size[0];
+                            $image->height = $size[1];
+                        }
                     }
                 }
             }
         }
+
+        $el->attrs['width'] = $image->width;
+        $el->attrs['height'] = $image->height;
 
         // onmouseover actions generate
         if ($image->overURL !== NULL) {
@@ -336,6 +353,9 @@ class TexyImage extends NObject4
 
     /** @var int  optional image height */
     var $height;
+
+    /** @var bool  image width and height are maximal */
+    var $asMax;
 
     /** @var TexyModifier */
     var $modifier;
