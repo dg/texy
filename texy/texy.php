@@ -28,6 +28,7 @@ define('TEXY_VERSION',  '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
 
 // nette libraries
 if (!class_exists('NObject', FALSE)) { require_once __FILE__ . '/../libs/NObject.php'; }
+if (!class_exists('NClass', FALSE)) { require_once __FILE__ . '/../libs/NClass.php'; }
 
 // Texy! libraries
 require_once __FILE__ . '/../libs/Texy.php';

@@ -33,6 +33,7 @@ if (PHP_VERSION >= 5) {
 
 // nette libraries
 if (!class_exists('NObject4')) { require_once __FILE__ . '/../libs/NObject4.php'; }
+if (!class_exists('NClass4')) { require_once __FILE__ . '/../libs/NClass4.php'; }
 
 // Texy! libraries
 require_once __FILE__ . '/../libs/Texy.php';

@@ -167,33 +167,6 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
 
     /**
-     * Overloaded setter for element's attribute
-     * @param string    property name
-     * @param mixed     property value
-     * @return void
-     */
-    function __set($name, $value)
-    {
-        // works only in PHP5
-        $this->attrs[$name] = $value;
-    }
-
-
-
-    /**
-     * Overloaded getter for element's attribute
-     * @param string    property name
-     * @return mixed    property value
-     */
-    function &__get($name)
-    {
-        // works only in PHP5
-        return $this->attrs[$name];
-    }
-
-
-
-    /**
      * Special setter for element's attribute
      * @param string path
      * @param array query

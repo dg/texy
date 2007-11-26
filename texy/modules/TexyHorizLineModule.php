@@ -83,7 +83,7 @@ final class TexyHorizLineModule extends TexyModule
     public function solve($invocation, $type, $modifier)
     {
         $el = TexyHtml::el('hr');
-        $modifier->decorate($invocation->getTexy(), $el);
+        $modifier->decorate($invocation->texy, $el);
 
         $class = $this->classes[ $type[0] ];
         if ($class && !isset($modifier->classes[$class])) {

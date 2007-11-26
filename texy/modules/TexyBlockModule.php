@@ -127,7 +127,7 @@ final class TexyBlockModule extends TexyModule
     public function solve($invocation, $blocktype, $s, $param, $mod)
     {
         $tx = $this->texy;
-        $parser = $invocation->getParser();
+        $parser = $invocation->parser;
 
         if ($blocktype === 'block/texy') {
             $el = TexyHtml::el();
