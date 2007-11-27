@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 192
+- u obrázků je možné volit mezi požadovaným rozměrem `[* image 10x20 *]` a maximálním `[* image 10X20 *]` pomocí malého nebo velkého `X`
+
 rev. 185
 - implementován NObject z Nette Frameworku. Nahradil TexyBase
 

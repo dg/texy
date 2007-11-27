@@ -75,7 +75,11 @@ final class TexyHandlerInvocation extends NObject
         }
 
         $this->pos--;
-        return call_user_func_array($this->handlers[$this->pos], $this->args);
+        $res = call_user_func_array($this->handlers[$this->pos], $this->args);
+        if ($res === NULL) {
+            throw new TexyException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], TRUE) . "'");
+        }
+        return $res;
     }
 
 

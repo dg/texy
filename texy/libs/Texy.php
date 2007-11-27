@@ -353,8 +353,10 @@ class Texy extends NObject
         $text = self::normalize($text);
 
         // replace tabs with spaces
-        while (strpos($text, "\t") !== FALSE)
+        $this->tabWidth = max(1, (int) $this->tabWidth);
+        while (strpos($text, "\t") !== FALSE) {
             $text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
+        }
 
         // user before handler
         $this->invokeHandlers('beforeParse', array($this, & $text, $singleLine));
