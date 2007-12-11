@@ -107,8 +107,8 @@ class TexyBlockModule extends TexyModule
     // for backward compatibility
     function outdent($s)
     {
-        trigger_error('Use Texy::indent()', E_USER_WARNING);
-        return Texy::indent($s);
+        trigger_error('Use Texy::outdent()', E_USER_WARNING);
+        return Texy::outdent($s);
     }
 
 

@@ -640,7 +640,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
         if ($last === $strict) return;
         $last = $strict;
 
-        require_once __FILE__ . '/../TexyHtml.DTD.php';
+        require __FILE__ . '/../TexyHtml.DTD.php';
     }
 
 }
