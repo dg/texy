@@ -125,7 +125,6 @@ class TexyTableModule extends TexyModule
                 //    [1] => ....
                 //    [2] => .(title)[class]{style}<>_
 
-
                 $elRow = TexyHtml::el('tr');
                 $mod = new TexyModifier($mMod);
                 $mod->decorate($tx, $elRow);
@@ -143,7 +142,7 @@ class TexyTableModule extends TexyModule
 
                 foreach (explode('|', $mContent) as $cell) {
                     // colSpan
-                    if (($cell == '') && $elCell) {
+                    if ($cell === '' && $elCell) {
                         $elCell->colSpan++;
                         unset($prevRow[$col]);
                         $col++;
@@ -156,6 +155,7 @@ class TexyTableModule extends TexyModule
                         $matches[] = '';
                         $prevRow[$col]->text .= "\n" . $matches[1];
                         $col += $prevRow[$col]->colSpan;
+                        $elCell = NULL;
                         continue;
                     }
 
