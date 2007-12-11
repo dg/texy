@@ -194,7 +194,7 @@ class TexyTableModule extends TexyModule
                     $elCell = new TexyTableCellElement;
                     $elCell->setName($isHead ? 'th' : 'td');
                     if (isset($colModifier[$col])) {
-                        $colModifier[$col]->decorate($elCell);
+                        $colModifier[$col]->decorate($tx, $elCell);
                     }
                     $elRow->add($elCell);
                     $prevRow[$col] = $elCell;
