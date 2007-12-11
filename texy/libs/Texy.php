@@ -655,6 +655,21 @@ class Texy extends NObject
 
 
     /**
+     * Outdents text block
+     * @param string
+     * @return string
+     */
+    final public static function outdent($s)
+    {
+        $s = trim($s, "\n");
+        $spaces = strspn($s, ' ');
+        if ($spaces) return preg_replace("#^ {1,$spaces}#m", '', $s);
+        return $s;
+    }
+
+
+
+    /**
      * Generate unique mark - useful for freezing (folding) some substrings
      * @param string   any string to froze
      * @param int      Texy::CONTENT_* constant

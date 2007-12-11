@@ -32,7 +32,7 @@
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-class TexyConfigurator extends NClass
+class TexyConfigurator
 {
     public static $safeTags = array(
         'a'         => array('href', 'title'),
@@ -49,6 +49,16 @@ class TexyConfigurator extends NClass
         'q'         => array(),
         'small'     => array(),
     );
+
+
+
+    /**
+     * static class
+     */
+    final public function __construct()
+    {
+        throw new LogicException("Cannot instantiate static class " . get_class($this));
+    }
 
 
 

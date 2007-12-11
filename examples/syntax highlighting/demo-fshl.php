@@ -49,7 +49,7 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
     }
 
     $texy = $invocation->getTexy();
-    $content = $texy->blockModule->outdent($content);
+    $content = Texy::outdent($content);
     $content = $parser->highlightString($lang, $content);
     $content = $texy->protect($content, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
 

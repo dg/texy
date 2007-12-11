@@ -41,6 +41,9 @@ final class TexyLinkModule extends TexyModule
     /** @var bool  always use rel="nofollow" for absolute links? */
     public $forceNoFollow = FALSE;
 
+    /** @var bool  shorten URLs to more readable form? */
+    public $shorten = TRUE;
+
     /** @var array link references */
     private $references = array();
 
@@ -376,8 +379,6 @@ final class TexyLinkModule extends TexyModule
      */
     private function checkLink($link)
     {
-        $link->raw = $link->URL;
-
         if (strncasecmp($link->URL, 'www.', 4) === 0) {
             // special supported case
             $link->URL = 'http://' . $link->URL;
@@ -403,20 +404,16 @@ final class TexyLinkModule extends TexyModule
      */
     private function textualUrl($link)
     {
-        $URL = $link->raw === NULL ? $link->URL : $link->raw;
-
-        if (preg_match('#^'.TEXY_EMAIL.'$#i', $URL)) { // email
-            return $this->texy->obfuscateEmail
-                   ? str_replace('@', "&#64;<!---->", $URL)
-                   : $URL;
+        if ($this->texy->obfuscateEmail && preg_match('#^'.TEXY_EMAIL.'$#i', $link->raw)) { // email
+            return str_replace('@', "&#64;<!---->", $link->raw);
         }
 
-        if (preg_match('#^(https?://|ftp://|www\.|/)#i', $URL)) {
+        if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#i', $link->raw)) {
 
-            if (strncasecmp($URL, 'www.', 4) === 0) $parts = @parse_url('none://'.$URL);
-            else $parts = @parse_url($URL);
+            if (strncasecmp($link->raw, 'www.', 4) === 0) $parts = @parse_url('none://' . $link->raw);
+            else $parts = @parse_url($link->raw);
 
-            if ($parts === FALSE) return $URL;
+            if ($parts === FALSE) return $link->raw;
 
             $res = '';
             if (isset($parts['scheme']) && $parts['scheme'] !== 'none')
@@ -429,14 +426,14 @@ final class TexyLinkModule extends TexyModule
                 $res .=  (strlen($parts['path']) > 16 ? ("/\xe2\x80\xa6" . preg_replace('#^.*(.{0,12})$#U', '$1', $parts['path'])) : $parts['path']);
 
             if (isset($parts['query'])) {
-                $res .= strlen($parts['query']) > 4 ? "?\xe2\x80\xa6" : ('?'.$parts['query']);
+                $res .= strlen($parts['query']) > 4 ? "?\xe2\x80\xa6" : ('?' . $parts['query']);
             } elseif (isset($parts['fragment'])) {
-                $res .= strlen($parts['fragment']) > 4 ? "#\xe2\x80\xa6" : ('#'.$parts['fragment']);
+                $res .= strlen($parts['fragment']) > 4 ? "#\xe2\x80\xa6" : ('#' . $parts['fragment']);
             }
             return $res;
         }
 
-        return $URL;
+        return $link->raw;
     }
 
 }
@@ -483,6 +480,7 @@ final class TexyLink extends NObject
     public function __construct($URL)
     {
         $this->URL = $URL;
+        $this->raw = $URL;
         $this->modifier = new TexyModifier;
     }
 

@@ -682,6 +682,21 @@ class Texy extends NObject4
 
 
     /**
+     * Outdents text block
+     * @param string
+     * @return string
+     */
+    function outdent($s)
+    {
+        $s = trim($s, "\n");
+        $spaces = strspn($s, ' ');
+        if ($spaces) return preg_replace("#^ {1,$spaces}#m", '', $s);
+        return $s;
+    }
+
+
+
+    /**
      * Callback for preg_replace_callback() in toText()
      *
      * @param array    matched entity

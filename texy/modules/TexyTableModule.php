@@ -35,18 +35,6 @@ final class TexyTableModule extends TexyModule
     /** @var string  CSS class for even rows */
     public $evenClass;
 
-    /** @var bool */
-    private $isHead;
-
-    /** @var array */
-    private $colModifier;
-
-    /** @var array */
-    private $last;
-
-    /** @var int */
-    private $rowCounter;
-
 
 
     public function __construct($texy)
@@ -102,34 +90,127 @@ final class TexyTableModule extends TexyModule
             $caption->parseLine($tx, $mContent);
         }
 
-        $this->isHead = FALSE;
-        $this->colModifier = array();
-        $this->last = array();
-        $this->rowCounter = 0;
+        $isHead = FALSE;
+        $colModifier = array();
+        $prevRow = array(); // rowSpan building helper
+        $rowCounter = 0;
+        $colCounter = 0;
         $elPart = NULL;
 
         while (TRUE) {
             if ($parser->next('#^\|[+-]{3,}$#Um', $matches)) {
-                $this->isHead = !$this->isHead;
+                $isHead = !$isHead;
+                $prevRow = array();
                 continue;
             }
 
             if ($parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
                 // smarter head detection
-                if ($this->rowCounter === 0 && !$this->isHead && $parser->next('#^\|[+-]{3,}$#Um', $foo)) {
-                    $this->isHead = TRUE;
+                if ($rowCounter === 0 && !$isHead && $parser->next('#^\|[+-]{3,}$#Um', $foo)) {
+                    $isHead = TRUE;
                     $parser->moveBackward();
                 }
 
                 if ($elPart === NULL) {
-                    $elPart = $el->create($this->isHead ? 'thead' : 'tbody');
+                    $elPart = $el->create($isHead ? 'thead' : 'tbody');
 
-                } elseif (!$this->isHead && $elPart->getName() === 'thead') {
+                } elseif (!$isHead && $elPart->getName() === 'thead') {
+                    $this->finishPart($elPart);
                     $elPart = $el->create('tbody');
                 }
 
-                $elPart->add($this->patternRow($matches));
-                $this->rowCounter++;
+
+                // PARSE ROW
+                list(, $mContent, $mMod) = $matches;
+                //    [1] => ....
+                //    [2] => .(title)[class]{style}<>_
+
+
+                $elRow = TexyHtml::el('tr');
+                $mod = new TexyModifier($mMod);
+                $mod->decorate($tx, $elRow);
+
+                $rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
+                if ($rowClass && !isset($mod->classes[$this->oddClass]) && !isset($mod->classes[$this->evenClass])) {
+                    $elRow->attrs['class'][] = $rowClass;
+                }
+
+                $col = 0;
+                $elCell = NULL;
+
+                // special escape sequence \|
+                $mContent = str_replace('\\|', '&#x7C;', $mContent);
+
+                foreach (explode('|', $mContent) as $cell) {
+                    // colSpan
+                    if (($cell == '') && $elCell) {
+                        $elCell->colSpan++;
+                        unset($prevRow[$col]);
+                        $col++;
+                        continue;
+                    }
+
+                    // rowSpan
+                    if (isset($prevRow[$col]) && preg_match('#\^\ *$|\*??(.*)\ +\^$#AU', $cell, $matches)) {
+                        $prevRow[$col]->rowSpan++;
+                        $matches[] = '';
+                        $prevRow[$col]->text .= "\n" . $matches[1];
+                        $col += $prevRow[$col]->colSpan;
+                        continue;
+                    }
+
+                    // common cell
+                    if (!preg_match('#(\*??)\ *'.TEXY_MODIFIER_HV.'??(.*)'.TEXY_MODIFIER_HV.'?\ *()$#AU', $cell, $matches)) continue;
+                    list(, $mHead, $mModCol, $mContent, $mMod) = $matches;
+                    //    [1] => * ^
+                    //    [2] => .(title)[class]{style}<>_
+                    //    [3] => ....
+                    //    [4] => .(title)[class]{style}<>_
+
+                    if ($mModCol) {
+                        $colModifier[$col] = new TexyModifier($mModCol);
+                    }
+
+                    if (isset($colModifier[$col]))
+                        $mod = clone $colModifier[$col];
+                    else
+                        $mod = new TexyModifier;
+
+                    $mod->setProperties($mMod);
+
+                    $elCell = new TexyTableCellElement;
+                    $elCell->setName($isHead || ($mHead === '*') ? 'th' : 'td');
+                    $mod->decorate($tx, $elCell);
+                    $elCell->text = $mContent;
+
+                    $elRow->add($elCell);
+                    $prevRow[$col] = $elCell;
+                    $col++;
+                }
+
+
+                // even up with empty cells
+                while ($col < $colCounter) {
+                    $elCell = new TexyTableCellElement;
+                    $elCell->setName($isHead ? 'th' : 'td');
+                    if (isset($colModifier[$col])) {
+                        $colModifier[$col]->decorate($elCell);
+                    }
+                    $elRow->add($elCell);
+                    $prevRow[$col] = $elCell;
+                    $col++;
+                }
+                $colCounter = $col;
+
+
+                if ($elRow->count()) {
+                    $elPart->add($elRow);
+                    $rowCounter++;
+                } else {
+                    // redundant row
+                    foreach ($prevRow as $elCell) $elCell->rowSpan--;
+                }
+
                 continue;
             }
 
@@ -146,6 +227,9 @@ final class TexyTableModule extends TexyModule
             $elPart->setName('tbody');
         }
 
+        $this->finishPart($elPart);
+
+
         // event listener
         $tx->invokeHandlers('afterTable', array($parser, $el, $mod));
 
@@ -155,80 +239,34 @@ final class TexyTableModule extends TexyModule
 
 
     /**
-     * Handles single row: | xxx | xxx | xxx | .(..){..}[..]
-     * @param array
-     * @return TexyHtml
+     * Parse text in all cells
+     * @param TexyHtml
+     * @return void
      */
-    private function patternRow($matches)
+    private function finishPart($elPart)
     {
         $tx = $this->texy;
-        list(, $mContent, $mMod) = $matches;
-        //    [1] => ....
-        //    [2] => .(title)[class]{style}<>_
 
-        $elRow = TexyHtml::el('tr');
-        $mod = new TexyModifier($mMod);
-        $mod->decorate($tx, $elRow);
+        foreach ($elPart->getChildren() as $elRow)
+        {
+            foreach ($elRow->getChildren() as $elCell)
+            {
+                if ($elCell->colSpan > 1) $elCell->attrs['colspan'] = $elCell->colSpan;
 
-        $rowClass = $this->rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
-        if ($rowClass && !isset($mod->classes[$this->oddClass]) && !isset($mod->classes[$this->evenClass])) {
-            $elRow->attrs['class'][] = $rowClass;
-        }
-
-        $col = 0;
-        $elField = NULL;
-
-        // special escape sequence \|
-        $mContent = str_replace('\\|', '&#x7C;', $mContent);
-
-        foreach (explode('|', $mContent) as $field) {
-            if (($field == '') && $elField) { // colspan
-                $elField->colspan++;
-                unset($this->last[$col]);
-                $col++;
-                continue;
-            }
-
-            $field = rtrim($field);
-            if ($field === '^') { // rowspan
-                if (isset($this->last[$col])) {
-                    $this->last[$col]->rowspan++;
-                    $col += $this->last[$col]->colspan;
-                    continue;
+                if ($elCell->rowSpan > 1) {
+                    $elCell->attrs['rowspan'] = $elCell->rowSpan;
+                    $text = Texy::outdent($elCell->text);
+                    if (strpos($text, "\n") !== FALSE) {
+                        // multiline parse as block
+                        $elCell->parseBlock($tx, $text);
+                        continue;
+                    }
                 }
+
+                $elCell->parseLine($tx, trim($elCell->text));
+                if ($elCell->getText() === '') $elCell->setText("\xC2\xA0"); // &nbsp;
             }
-
-            if (!preg_match('#(\*??)\ *'.TEXY_MODIFIER_HV.'??(.*)'.TEXY_MODIFIER_HV.'?()$#AU', $field, $matches)) continue;
-            list(, $mHead, $mModCol, $mContent, $mMod) = $matches;
-            //    [1] => * ^
-            //    [2] => .(title)[class]{style}<>_
-            //    [3] => ....
-            //    [4] => .(title)[class]{style}<>_
-
-            if ($mModCol) {
-                $this->colModifier[$col] = new TexyModifier($mModCol);
-            }
-
-            if (isset($this->colModifier[$col]))
-                $mod = clone $this->colModifier[$col];
-            else
-                $mod = new TexyModifier;
-
-            $mod->setProperties($mMod);
-
-            $elField = new TexyTableFieldElement;
-            $elField->setName($this->isHead || ($mHead === '*') ? 'th' : 'td');
-            $mod->decorate($tx, $elField);
-
-            $elField->parseLine($tx, trim($mContent));
-            if ($elField->getText() === '') $elField->setText("\xC2\xA0"); // &nbsp;
-
-            $elRow->add($elField);
-            $this->last[$col] = $elField;
-            $col++;
         }
-
-        return $elRow;
     }
 
 }
@@ -237,23 +275,18 @@ final class TexyTableModule extends TexyModule
 
 
 /**
- * Table field TD / TH
+ * Table cell TD / TH
  * @package Texy
  */
-class TexyTableFieldElement extends TexyHtml
+class TexyTableCellElement extends TexyHtml
 {
     /** @var int */
-    public $colspan = 1;
+    public $colSpan = 1;
 
     /** @var int */
-    public $rowspan = 1;
+    public $rowSpan = 1;
 
-
-    public function startTag()
-    {
-        $this->attrs['colspan'] = $this->colspan < 2 ? NULL : $this->colspan;
-        $this->attrs['rowspan'] = $this->rowspan < 2 ? NULL : $this->rowspan;
-        return parent::startTag();
-    }
+    /** @var string */
+    public $text;
 
 }

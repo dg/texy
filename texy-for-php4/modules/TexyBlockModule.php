@@ -104,12 +104,11 @@ class TexyBlockModule extends TexyModule
 
 
 
+    // for backward compatibility
     function outdent($s)
     {
-        $s = trim($s, "\n");
-        $spaces = strspn($s, ' ');
-        if ($spaces) return preg_replace("#^ {1,$spaces}#m", '', $s);
-        return $s;
+        trigger_error('Use Texy::indent()', E_USER_WARNING);
+        return Texy::indent($s);
     }
 
 
@@ -138,7 +137,7 @@ class TexyBlockModule extends TexyModule
         if (empty($tx->allowed[$blocktype])) return FALSE;
 
         if ($blocktype === 'block/texysource') {
-            $s = TexyBlockModule::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el();
             if ($param === 'line') $el->parseLine($tx, $s);
@@ -148,7 +147,7 @@ class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/code') {
-            $s = TexyBlockModule::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $s = Texy::escapeHtml($s);
             $s = $tx->protect($s, TEXY_CONTENT_BLOCK);
@@ -160,7 +159,7 @@ class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/default') {
-            $s = TexyBlockModule::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
@@ -172,7 +171,7 @@ class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/pre') {
-            $s = TexyBlockModule::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
@@ -228,7 +227,7 @@ class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/div') {
-            $s = TexyBlockModule::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('div');
             $mod->decorate($tx, $el);

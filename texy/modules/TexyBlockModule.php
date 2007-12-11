@@ -104,12 +104,11 @@ final class TexyBlockModule extends TexyModule
 
 
 
-    public static function outdent($s)
+    // for backward compatibility
+    function outdent($s)
     {
-        $s = trim($s, "\n");
-        $spaces = strspn($s, ' ');
-        if ($spaces) return preg_replace("#^ {1,$spaces}#m", '', $s);
-        return $s;
+        trigger_error('Use Texy::indent()', E_USER_WARNING);
+        return Texy::indent($s);
     }
 
 
@@ -138,7 +137,7 @@ final class TexyBlockModule extends TexyModule
         if (empty($tx->allowed[$blocktype])) return FALSE;
 
         if ($blocktype === 'block/texysource') {
-            $s = self::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el();
             if ($param === 'line') $el->parseLine($tx, $s);
@@ -148,7 +147,7 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/code') {
-            $s = self::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $s = Texy::escapeHtml($s);
             $s = $tx->protect($s, Texy::CONTENT_BLOCK);
@@ -160,7 +159,7 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/default') {
-            $s = self::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
@@ -172,7 +171,7 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/pre') {
-            $s = self::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('pre');
             $mod->decorate($tx, $el);
@@ -227,7 +226,7 @@ final class TexyBlockModule extends TexyModule
         }
 
         if ($blocktype === 'block/div') {
-            $s = self::outdent($s);
+            $s = Texy::outdent($s);
             if ($s==='') return "\n";
             $el = TexyHtml::el('div');
             $mod->decorate($tx, $el);

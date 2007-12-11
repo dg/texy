@@ -27,13 +27,23 @@
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-class TexyUtf extends NClass
+class TexyUtf
 {
     /** @var array */
     private static $xlat;
 
     /** @var array */
     private static $xlatCache;
+
+
+
+    /**
+     * static class
+     */
+    final public function __construct()
+    {
+        throw new LogicException("Cannot instantiate static class " . get_class($this));
+    }
 
 
 

@@ -94,7 +94,7 @@ final class TexyParagraphModule extends TexyModule
         if ($tx->mergeLines) {
             // ....
             //  ...  => \r means break line
-            $content = preg_replace('#\n (?=\S)#', "\r", $content);
+            $content = preg_replace('#\n +(?=\S)#', "\r", $content);
         } else {
             $content = preg_replace('#\n#', "\r", $content);
         }

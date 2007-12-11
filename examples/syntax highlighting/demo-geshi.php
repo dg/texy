@@ -48,7 +48,7 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
     global $geshiPath;
 
     if ($lang == 'html') $lang = 'html4strict';
-    $content = $texy->blockModule->outdent($content);
+    $content = Texy::outdent($content);
     $geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
     // GeSHi could not find the language

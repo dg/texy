@@ -49,8 +49,18 @@ $GLOBALS['TexyConfigurator::$safeTags'] = array(
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-class TexyConfigurator extends NClass4
+class TexyConfigurator
 {
+
+    /**
+     * static class
+     */
+    function __construct()
+    {
+        throw (new LogicException("Cannot instantiate static class " . get_class($this)));
+    }
+
+
 
     /**
      * Configure Texy! for web comments and other usages, where input text may insert attacker
