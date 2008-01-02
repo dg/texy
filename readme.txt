@@ -1,4 +1,4 @@
-Texy2 (c) David Grudl, 2004-2007 (http://www.dgx.cz)
+Texy2 (c) David Grudl, 2004-2008 (http://www.dgx.cz)
 
 
 

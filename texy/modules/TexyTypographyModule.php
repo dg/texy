@@ -4,14 +4,14 @@
  * Texy! - web text markup-language
  * --------------------------------
  *
- * Copyright (c) 2004, 2007 David Grudl aka -dgx- (http://www.dgx.cz)
+ * Copyright (c) 2004, 2008 David Grudl aka -dgx- (http://www.dgx.cz)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
  *
  * For more information please see http://texy.info/
  *
- * @copyright  Copyright (c) 2004, 2007 David Grudl
+ * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
  * @link       http://texy.info/
  * @package    Texy
@@ -23,7 +23,7 @@
  * Typography replacements module
  *
  * @author     David Grudl
- * @copyright  Copyright (c) 2004, 2007 David Grudl
+ * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
  * @version    $Revision$ $Date$
  */
@@ -120,7 +120,7 @@ final class TexyTypographyModule extends TexyModule
             '#(?<=.{50})\s+(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
 
             // nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-            '#(?<=^| |\.|,|-|\+|\x16)([\x17-\x1F]*\d+\.?[\x17-\x1F]*)\s+(?=[\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+            '#(?<=^| |\.|,|-|\+|\x16|\()([\x17-\x1F]*\d+\.?[\x17-\x1F]*)\s+(?=[\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
                                                       => "\$1\xc2\xa0",
 
             // space between preposition and word
