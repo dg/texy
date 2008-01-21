@@ -305,8 +305,8 @@ class Texy extends NObject4
     /**
      * Convert Texy! document in (X)HTML code
      *
-     * @param string   input text
-     * @param bool     is block or single line?
+     * @param  string   input text
+     * @param  bool     is block or single line?
      * @return string  output html code
      */
     function process($text, $singleLine = FALSE)
@@ -382,7 +382,7 @@ class Texy extends NObject4
 
     /**
      * Makes only typographic corrections
-     * @param string   input text
+     * @param  string   input text
      * @return string  output code (in UTF!)
      */
     function processTypo($text)
@@ -487,8 +487,8 @@ class Texy extends NObject4
     /**
      * Add new event handler
      *
-     * @param string   event name
-     * @param callback
+     * @param  string   event name
+     * @param  callback
      * @return void
      */
     function addHandler($event, $callback)
@@ -505,9 +505,9 @@ class Texy extends NObject4
     /**
      * Invoke registered around-handlers
      *
-     * @param string   event name
-     * @param TexyParser  actual parser object
-     * @param array    arguments passed into handler
+     * @param  string   event name
+     * @param  TexyParser  actual parser object
+     * @param  array    arguments passed into handler
      * @return mixed
      */
     function invokeAroundHandlers($event, $parser, $args)
@@ -525,8 +525,8 @@ class Texy extends NObject4
     /**
      * Invoke registered after-handlers
      *
-     * @param string   event name
-     * @param array    arguments passed into handler
+     * @param  string   event name
+     * @param  array    arguments passed into handler
      * @return void
      */
     function invokeHandlers($event, $args)
@@ -543,7 +543,7 @@ class Texy extends NObject4
     /**
      * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04
      * which are ignored by TexyHtmlOutputModule routine
-     * @param string
+     * @param  string
      * @return string
      */
     function freezeSpaces($s) /* static */
@@ -555,7 +555,7 @@ class Texy extends NObject4
 
     /**
      * Reverts meta-spaces back to normal spaces
-     * @param string
+     * @param  string
      * @return string
      */
     function unfreezeSpaces($s) /* static */
@@ -567,7 +567,7 @@ class Texy extends NObject4
 
     /**
      * Removes special controls characters and normalizes line endings and spaces
-     * @param string
+     * @param  string
      * @return string
      */
     function normalize($s) /* static */
@@ -592,8 +592,8 @@ class Texy extends NObject4
 
     /**
      * Converts to web safe characters [a-z0-9-] text
-     * @param string
-     * @param string
+     * @param  string
+     * @param  string
      * @return string
      */
     function webalize($s, $charlist = NULL) /* static */
@@ -611,7 +611,7 @@ class Texy extends NObject4
     /**
      * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!)
      * note: &quot; is not encoded!
-     * @param string
+     * @param  string
      * @return string
      */
     function escapeHtml($s) /* static */
@@ -623,7 +623,7 @@ class Texy extends NObject4
 
     /**
      * Texy! version of html_entity_decode (always UTF-8, much faster than original!)
-     * @param string
+     * @param  string
      * @return string
      */
     function unescapeHtml($s) /* static */
@@ -683,7 +683,7 @@ class Texy extends NObject4
 
     /**
      * Outdents text block
-     * @param string
+     * @param  string
      * @return string
      */
     function outdent($s)
@@ -699,7 +699,7 @@ class Texy extends NObject4
     /**
      * Callback for preg_replace_callback() in toText()
      *
-     * @param array    matched entity
+     * @param  array    matched entity
      * @return string  decoded entity
      */
     function _entityCb($matches)
@@ -723,8 +723,8 @@ class Texy extends NObject4
 
     /**
      * Generate unique mark - useful for freezing (folding) some substrings
-     * @param string   any string to froze
-     * @param int      Texy::CONTENT_* constant
+     * @param  string   any string to froze
+     * @param  int      Texy::CONTENT_* constant
      * @return string  internal mark
      */
     function protect($child, $contentType)
@@ -751,8 +751,8 @@ class Texy extends NObject4
 
     /**
      * Filters bad URLs
-     * @param string   user URL
-     * @param string   type: a-anchor, i-image, c-cite
+     * @param  string   user URL
+     * @param  string   type: a-anchor, i-image, c-cite
      * @return bool
      */
     function checkURL($URL, $type)
@@ -770,7 +770,7 @@ class Texy extends NObject4
 
     /**
      * Is given URL relative?
-     * @param string  URL
+     * @param  string  URL
      * @return bool
      */
     function isRelative($URL) /* static */
@@ -783,8 +783,8 @@ class Texy extends NObject4
 
     /**
      * Prepends root to URL, if possible
-     * @param string  URL
-     * @param string  root
+     * @param  string  URL
+     * @param  string  root
      * @return string
      */
     function prependRoot($URL, $root) /* static */

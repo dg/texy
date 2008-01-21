@@ -90,9 +90,9 @@ final class TexyListModule extends TexyModule
      *                + ...
      *            3) ....
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|FALSE
      */
     public function patternList($parser, $matches)
@@ -150,9 +150,9 @@ final class TexyListModule extends TexyModule
      *    - description 2
      *    - description 3
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml
      */
     public function patternDefList($parser, $matches)
@@ -214,10 +214,10 @@ final class TexyListModule extends TexyModule
     /**
      * Callback for single list item
      *
-     * @param TexyBlockParser
-     * @param string  bullet type
-     * @param string  left space
-     * @param string  html tag
+     * @param  TexyBlockParser
+     * @param  string  bullet type
+     * @param  string  left space
+     * @param  string  html tag
      * @return TexyHtml|FALSE
      */
     public function patternItem($parser, $bullet, $indented, $tag)

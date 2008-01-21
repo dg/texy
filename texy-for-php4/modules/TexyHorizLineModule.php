@@ -55,9 +55,9 @@ class TexyHorizLineModule extends TexyModule
     /**
      * Callback for: -------
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml
      */
     function pattern($parser, $matches)
@@ -75,9 +75,9 @@ class TexyHorizLineModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param TexyModifier
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  TexyModifier
      * @return TexyHtml
      */
     function solve($invocation, $type, $modifier)

@@ -60,9 +60,9 @@ final class TexyTableModule extends TexyModule
      *  |------------------
      *  | aa  | bb  | cc  |
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     public function patternTable($parser, $matches)
@@ -240,7 +240,7 @@ final class TexyTableModule extends TexyModule
 
     /**
      * Parse text in all cells
-     * @param TexyHtml
+     * @param  TexyHtml
      * @return void
      */
     private function finishPart($elPart)

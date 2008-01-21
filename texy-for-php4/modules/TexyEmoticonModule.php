@@ -86,9 +86,9 @@ class TexyEmoticonModule extends TexyModule
     /**
      * Callback for: :-)))
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function pattern($parser, $matches)
@@ -114,9 +114,9 @@ class TexyEmoticonModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  string
      * @return TexyHtml|FALSE
      */
     function solve($invocation, $emoticon, $raw)

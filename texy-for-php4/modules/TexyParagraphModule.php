@@ -40,10 +40,10 @@ class TexyParagraphModule extends TexyModule
 
 
     /**
-     * @param TexyBlockParser
-     * @param string     text
-     * @param array
-     * @param TexyHtml
+     * @param  TexyBlockParser
+     * @param  string     text
+     * @param  array
+     * @param  TexyHtml
      * @return vois
      */
     function process($parser, $content, $el)
@@ -81,9 +81,9 @@ class TexyParagraphModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param TexyModifier|NULL
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  TexyModifier|NULL
      * @return TexyHtml|FALSE
      */
     function solve($invocation, $content, $mod)

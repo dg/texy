@@ -218,9 +218,9 @@ class TexyPhraseModule extends TexyModule
     /**
      * Callback for: **.... .(title)[class]{style}**:LINK
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function patternPhrase($parser, $matches, $phrase)
@@ -262,9 +262,9 @@ class TexyPhraseModule extends TexyModule
     /**
      * Callback for: any^2  any_2
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function patternSupSub($parser, $matches, $phrase)
@@ -279,9 +279,9 @@ class TexyPhraseModule extends TexyModule
 
 
     /**
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return string
      */
     function patternNoTexy($parser, $matches)
@@ -295,11 +295,11 @@ class TexyPhraseModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param TexyLink
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  string
+     * @param  TexyModifier
+     * @param  TexyLink
      * @return TexyHtml
      */
     function solve($invocation, $phrase, $content, $mod, $link)

@@ -60,9 +60,9 @@ class TexyFigureModule extends TexyModule
     /**
      * Callback for [*image*]:link *** .... .(title)[class]{style}>
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function pattern($parser, $matches)
@@ -98,11 +98,11 @@ class TexyFigureModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyImage
-     * @param TexyLink
-     * @param string
-     * @param TexyModifier
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyImage
+     * @param  TexyLink
+     * @param  string
+     * @param  TexyModifier
      * @return TexyHtml|FALSE
      */
     function solve($invocation, /*TexyImage*/ $image, $link, $content, $mod)

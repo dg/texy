@@ -77,8 +77,8 @@ final class TexyTypographyModule extends TexyModule
 
     /**
      * Text pre-processing
-     * @param Texy
-     * @param string
+     * @param  Texy
+     * @param  string
      * @return void
      */
     public function beforeParse($texy, & $text)

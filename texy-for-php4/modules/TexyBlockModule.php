@@ -58,8 +58,8 @@ class TexyBlockModule extends TexyModule
 
     /**
      * Single block pre-processing
-     * @param TexyBlockParser
-     * @param string
+     * @param  TexyBlockParser
+     * @param  string
      * @return void
      */
     function beforeBlockParse($parser, & $text)
@@ -81,9 +81,9 @@ class TexyBlockModule extends TexyModule
      *     ....
      *   \----
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function pattern($parser, $matches)
@@ -116,11 +116,11 @@ class TexyBlockModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string   blocktype
-     * @param string   content
-     * @param string   additional parameter
-     * @param TexyModifier
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string   blocktype
+     * @param  string   content
+     * @param  string   additional parameter
+     * @param  TexyModifier
      * @return TexyHtml|string|FALSE
      */
     function solve($invocation, $blocktype, $s, $param, $mod)

@@ -106,8 +106,8 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Static factory
-     * @param string element name (or NULL)
-     * @param array|string element's attributes (or textual content)
+     * @param  string element name (or NULL)
+     * @param  array|string element's attributes (or textual content)
      * @return TexyHtml
      */
     function el($name = NULL, $attrs = NULL) /* static */
@@ -126,8 +126,8 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Changes element's name
-     * @param string
-     * @param bool  Is element empty?
+     * @param  string
+     * @param  bool  Is element empty?
      * @throws TexyException
      * @return TexyHtml  provides a fluent interface
      */
@@ -168,8 +168,8 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Special setter for element's attribute
-     * @param string path
-     * @param array query
+     * @param  string path
+     * @param  array query
      * @return TexyHtml  provides a fluent interface
      */
     function href($path, $params = NULL)
@@ -187,7 +187,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Sets element's textual content
-     * @param string
+     * @param  string
      * @return TexyHtml  provides a fluent interface
      */
     function setText($text)
@@ -220,7 +220,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Adds new element's child
-     * @param TexyHtml|string child node
+     * @param  TexyHtml|string child node
      * @return TexyHtml  provides a fluent interface
      */
     function add($child)
@@ -232,8 +232,8 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Creates and adds a new TexyHtml child
-     * @param string  elements's name
-     * @param array|string element's attributes (or textual content)
+     * @param  string  elements's name
+     * @param  array|string element's attributes (or textual content)
      * @return TexyHtml  created element
      */
     function create($name, $attrs = NULL)
@@ -246,9 +246,9 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Inserts child node
-     * @param int
-     * @param TexyHtml node
-     * @param bool
+     * @param  int
+     * @param  TexyHtml node
+     * @param  bool
      * @return TexyHtml  provides a fluent interface
      * @throws TexyException
      */
@@ -278,8 +278,8 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Inserts (replaces) child node (ArrayAccess implementation)
-     * @param int
-     * @param TexyHtml node
+     * @param  int
+     * @param  TexyHtml node
      * @return void
      */
     function offsetSet($index, $child)
@@ -291,7 +291,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Returns child node (ArrayAccess implementation)
-     * @param int index
+     * @param  int index
      * @return mixed
      */
     function offsetGet($index)
@@ -303,7 +303,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Exists child node? (ArrayAccess implementation)
-     * @param int index
+     * @param  int index
      * @return bool
      */
     function offsetExists($index)
@@ -315,7 +315,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Removes child node (ArrayAccess implementation)
-     * @param int index
+     * @param  int index
      * @return void
      */
     function offsetUnset($index)
@@ -375,7 +375,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Renders element's start tag, content and end tag to internal string representation
-     * @param Texy
+     * @param  Texy
      * @return string
      */
     function toString($texy)
@@ -405,7 +405,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Renders to final HTML
-     * @param Texy
+     * @param  Texy
      * @return string
      */
     function toHtml($texy)
@@ -417,7 +417,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Renders to final text
-     * @param Texy
+     * @param  Texy
      * @return string
      */
     function toText($texy)
@@ -554,11 +554,10 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
 
 
-
     /**
      * Parses text as single line
-     * @param Texy
-     * @param string
+     * @param  Texy
+     * @param  string
      * @return void
      */
     function parseLine($texy, $s)
@@ -576,9 +575,9 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Parses text as block
-     * @param Texy
-     * @param string
-     * @param bool
+     * @param  Texy
+     * @param  string
+     * @param  bool
      * @return void
      */
     function parseBlock($texy, $s, $indented = FALSE)
@@ -591,7 +590,7 @@ class TexyHtml extends NObject4 /*implements ArrayAccess, Countable*/
 
     /**
      * Initializes self::$dtd array
-     * @param bool
+     * @param  bool
      * @return void
      */
     function initDTD($strict)

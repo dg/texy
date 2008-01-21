@@ -88,7 +88,7 @@ class TexyLongWordsModule extends TexyModule
     /**
      * Callback for long words
      * (c) David Grudl
-     * @param array
+     * @param  array
      * @return string
      */
     function pattern($matches) /* private */

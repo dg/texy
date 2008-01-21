@@ -59,9 +59,9 @@ final class TexyHtmlModule extends TexyModule
     /**
      * Callback for: <!-- comment -->
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     public function patternComment($parser, $matches)
@@ -75,9 +75,9 @@ final class TexyHtmlModule extends TexyModule
     /**
      * Callback for: <tag attr="..">
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     public function patternTag($parser, $matches)
@@ -143,10 +143,10 @@ final class TexyHtmlModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyHtml  element
-     * @param bool      is start tag?
-     * @param bool      is empty?
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyHtml  element
+     * @param  bool      is start tag?
+     * @param  bool      is empty?
      * @return TexyHtml|string|FALSE
      */
     public function solveTag($invocation, TexyHtml $el, $isStart, $forceEmpty = NULL)
@@ -266,8 +266,8 @@ final class TexyHtmlModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
      * @return string
      */
     public function solveComment($invocation, $content)

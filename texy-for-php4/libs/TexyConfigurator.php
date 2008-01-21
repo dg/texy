@@ -65,7 +65,7 @@ class TexyConfigurator
     /**
      * Configure Texy! for web comments and other usages, where input text may insert attacker
      *
-     * @param Texy  object to configure
+     * @param  Texy  object to configure
      * @return void
      */
     function safeMode(/*Texy*/ $texy) /* static */
@@ -87,7 +87,7 @@ class TexyConfigurator
     /**
      * Disable all links
      *
-     * @param Texy  object to configure
+     * @param  Texy  object to configure
      * @return void
      */
     function disableLinks($texy)
@@ -108,7 +108,7 @@ class TexyConfigurator
     /**
      * Disable all images
      *
-     * @param Texy  object to configure
+     * @param  Texy  object to configure
      * @return void
      */
     function disableImages($texy)

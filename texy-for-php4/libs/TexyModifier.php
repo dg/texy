@@ -76,7 +76,7 @@ class TexyModifier extends NObject4
     var $cite;
 
     /**
-     * @param string modifier to parse
+     * @param  string modifier to parse
      */
     function __construct($mod = NULL)
     {
@@ -145,8 +145,8 @@ class TexyModifier extends NObject4
 
     /**
      * Decorates TexyHtml element
-     * @param Texy   base Texy object
-     * @param TexyHtml  element to decorate
+     * @param  Texy   base Texy object
+     * @param  TexyHtml  element to decorate
      * @return void
      */
     function decorate($texy, $el)

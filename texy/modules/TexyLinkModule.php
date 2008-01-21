@@ -88,8 +88,8 @@ final class TexyLinkModule extends TexyModule
 
     /**
      * Text pre-processing
-     * @param Texy
-     * @param string
+     * @param  Texy
+     * @param  string
      * @return void
      */
     public function beforeParse($texy, & $text)
@@ -111,7 +111,7 @@ final class TexyLinkModule extends TexyModule
     /**
      * Callback for: [la trine]: http://latrine.dgx.cz/ text odkazu .(title)[class]{style}
      *
-     * @param array      regexp matches
+     * @param  array      regexp matches
      * @return string
      */
     private function patternReferenceDef($matches)
@@ -135,9 +135,9 @@ final class TexyLinkModule extends TexyModule
     /**
      * Callback for: [ref]
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     public function patternReference($parser, $matches)
@@ -180,9 +180,9 @@ final class TexyLinkModule extends TexyModule
     /**
      * Callback for: http://www.dgx.cz   dave@dgx.cz
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     public function patternUrlEmail($parser, $matches, $name)
@@ -205,8 +205,8 @@ final class TexyLinkModule extends TexyModule
     /**
      * Adds new named reference
      *
-     * @param string  reference name
-     * @param TexyLink
+     * @param  string  reference name
+     * @param  TexyLink
      * @return void
      */
     public function addReference($name, TexyLink $link)
@@ -220,7 +220,7 @@ final class TexyLinkModule extends TexyModule
     /**
      * Returns named reference
      *
-     * @param string  reference name
+     * @param  string  reference name
      * @return TexyLink reference descriptor (or FALSE)
      */
     public function getReference($name)
@@ -248,9 +248,9 @@ final class TexyLinkModule extends TexyModule
 
 
     /**
-     * @param string
-     * @param string
-     * @param string
+     * @param  string
+     * @param  string
+     * @param  string
      * @return TexyLink
      */
     public function factoryLink($dest, $mMod, $label)
@@ -293,9 +293,9 @@ final class TexyLinkModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyLink
-     * @param TexyHtml|string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyLink
+     * @param  TexyHtml|string
      * @return TexyHtml|string
      */
     public function solve($invocation, $link, $content = NULL)
@@ -344,8 +344,8 @@ final class TexyLinkModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyLink
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyLink
      * @return TexyHtml|string
      */
     public function solveUrlEmail($invocation, $link)
@@ -360,8 +360,8 @@ final class TexyLinkModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
      * @return FALSE
      */
     public function solveNewReference($invocation, $name)
@@ -374,7 +374,7 @@ final class TexyLinkModule extends TexyModule
 
     /**
      * Checks and corrects $URL
-     * @param TexyLink
+     * @param  TexyLink
      * @return void
      */
     private function checkLink($link)
@@ -399,7 +399,7 @@ final class TexyLinkModule extends TexyModule
 
     /**
      * Returns textual representation of URL
-     * @param TexyLink
+     * @param  TexyLink
      * @return string
      */
     private function textualUrl($link)

@@ -44,9 +44,9 @@ final class TexyHandlerInvocation extends NObject
 
 
     /**
-     * @param array    array of callbacks
-     * @param TexyParser
-     * @param array    arguments
+     * @param  array    array of callbacks
+     * @param  TexyParser
+     * @param  array    arguments
      */
     public function __construct($handlers, TexyParser $parser, $args)
     {
@@ -60,7 +60,7 @@ final class TexyHandlerInvocation extends NObject
 
 
     /**
-     * @param mixed
+     * @param  mixed
      * @return mixed
      */
     public function proceed()

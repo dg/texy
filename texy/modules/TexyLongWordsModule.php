@@ -95,7 +95,7 @@ final class TexyLongWordsModule extends TexyModule
     /**
      * Callback for long words
      * (c) David Grudl
-     * @param array
+     * @param  array
      * @return string
      */
     private function pattern($matches)

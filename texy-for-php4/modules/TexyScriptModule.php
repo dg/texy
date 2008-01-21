@@ -59,9 +59,9 @@ class TexyScriptModule extends TexyModule
     /**
      * Callback for: {{...}}
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function pattern($parser, $matches)
@@ -103,10 +103,10 @@ class TexyScriptModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string  command
-     * @param array   arguments
-     * @param string  arguments in raw format
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string  command
+     * @param  array   arguments
+     * @param  string  arguments in raw format
      * @return TexyHtml|string|FALSE
      */
     function solve($invocation, $cmd, $args, $raw)

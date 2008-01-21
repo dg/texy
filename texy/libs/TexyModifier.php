@@ -77,7 +77,7 @@ final class TexyModifier extends NObject
 
 
     /**
-     * @param string modifier to parse
+     * @param  string modifier to parse
      */
     public function __construct($mod = NULL)
     {
@@ -146,8 +146,8 @@ final class TexyModifier extends NObject
 
     /**
      * Decorates TexyHtml element
-     * @param Texy   base Texy object
-     * @param TexyHtml  element to decorate
+     * @param  Texy   base Texy object
+     * @param  TexyHtml  element to decorate
      * @return void
      */
     public function decorate($texy, $el)

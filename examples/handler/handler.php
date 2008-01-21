@@ -46,9 +46,9 @@ class myHandler
     /** Line parsing */
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  string
      * @return TexyHtml|string|FALSE
      */
     function emoticon($invocation, $emoticon, $rawEmoticon)
@@ -59,9 +59,9 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyImage
-     * @param TexyLink|NULL
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyImage
+     * @param  TexyLink|NULL
      * @return TexyHtml|string|FALSE
      */
     function image($invocation, $image, $link)
@@ -72,9 +72,9 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyLink
-     * @param string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyLink
+     * @param  string
      * @return TexyHtml|string|FALSE
      */
     function linkReference($invocation, $link, $content)
@@ -85,8 +85,8 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyLink
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyLink
      * @return TexyHtml|string|FALSE
      */
     function linkEmail($invocation, $link)
@@ -97,8 +97,8 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyLink
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyLink
      * @return TexyHtml|string|FALSE
      */
     function linkURL($invocation, $link)
@@ -109,11 +109,11 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param string
-     * @param TexyModifier
-     * @param TexyLink|NULL
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  string
+     * @param  TexyModifier
+     * @param  TexyLink|NULL
      * @return TexyHtml|string|FALSE
      */
     function phrase($invocation, $phrase, $content, $modifier, $link)
@@ -124,8 +124,8 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
      * @return TexyHtml|string|FALSE
      */
     function newReference($invocation, $name)
@@ -136,8 +136,8 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
      * @return TexyHtml|string|FALSE
      */
     function htmlComment($invocation, $content)
@@ -148,10 +148,10 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyHtml
-     * @param bool
-     * @param bool
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyHtml
+     * @param  bool
+     * @param  bool
      * @return TexyHtml|string|FALSE
      */
     function htmlTag($invocation, $el, $isStart, $forceEmpty=NULL)
@@ -162,10 +162,10 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string  command
-     * @param array   arguments
-     * @param string  arguments in raw format
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string  command
+     * @param  array   arguments
+     * @param  string  arguments in raw format
      * @return TexyHtml|string|FALSE
      */
     function script($invocation, $cmd, $args, $raw)
@@ -178,9 +178,9 @@ class myHandler
     /** Blocks */
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param TexyModifier|NULL
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  TexyModifier|NULL
      * @return TexyHtml|string|FALSE
      */
 /*
@@ -192,11 +192,11 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyImage
-     * @param TexyLink|NULL
-     * @param string
-     * @param TexyModifier
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyImage
+     * @param  TexyLink|NULL
+     * @param  string
+     * @param  TexyModifier
      * @return TexyHtml|string|FALSE
      */
     function figure($invocation, $image, $link, $content, $modifier)
@@ -207,11 +207,11 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param int
-     * @param string
-     * @param TexyModifier
-     * @param bool
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  int
+     * @param  string
+     * @param  TexyModifier
+     * @param  bool
      * @return TexyHtml|string|FALSE
      */
     function heading($invocation, $level, $content, $modifier, $isSurrounded)
@@ -222,9 +222,9 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param TexyModifier
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  TexyModifier
      * @return TexyHtml|string|FALSE
      */
     function horizline($invocation, $type, $modifier)
@@ -235,11 +235,11 @@ class myHandler
 
 
     /**
-     * @param TexyHandlerInvocation  handler invocation
-     * @param string
-     * @param string
-     * @param string
-     * @param TexyModifier
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  string
+     * @param  string
+     * @param  string
+     * @param  TexyModifier
      * @return TexyHtml|string
      */
     function block($invocation, $blocktype, $content, $param, $modifier)
@@ -250,9 +250,9 @@ class myHandler
 
 
     /**
-     * @param TexyBlockParser
-     * @param TexyHtml
-     * @param TexyModifier
+     * @param  TexyBlockParser
+     * @param  TexyHtml
+     * @param  TexyModifier
      * @return void
      */
     function afterList($parser, $element, $modifier)
@@ -262,9 +262,9 @@ class myHandler
 
 
     /**
-     * @param TexyBlockParser
-     * @param TexyHtml
-     * @param TexyModifier
+     * @param  TexyBlockParser
+     * @param  TexyHtml
+     * @param  TexyModifier
      * @return void
      */
     function afterDefinitionList($parser, $element, $modifier)
@@ -274,9 +274,9 @@ class myHandler
 
 
     /**
-     * @param TexyBlockParser
-     * @param TexyHtml
-     * @param TexyModifier
+     * @param  TexyBlockParser
+     * @param  TexyHtml
+     * @param  TexyModifier
      * @return void
      */
     function afterTable($parser, $element, $modifier)
@@ -286,9 +286,9 @@ class myHandler
 
 
     /**
-     * @param TexyBlockParser
-     * @param TexyHtml
-     * @param TexyModifier
+     * @param  TexyBlockParser
+     * @param  TexyHtml
+     * @param  TexyModifier
      * @return void
      */
     function afterBlockquote($parser, $element, $modifier)
@@ -300,9 +300,9 @@ class myHandler
     /** Special */
 
     /**
-     * @param Texy
-     * @param string
-     * @param bool
+     * @param  Texy
+     * @param  string
+     * @param  bool
      * @return void
      */
     function beforeParse($texy, & $text, $isSingleLine)
@@ -312,9 +312,9 @@ class myHandler
 
 
     /**
-     * @param Texy
-     * @param TexyHtml
-     * @param bool
+     * @param  Texy
+     * @param  TexyHtml
+     * @param  bool
      * @return void
      */
     function afterParse($texy, $DOM, $isSingleLine)

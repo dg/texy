@@ -100,9 +100,9 @@ class TexyHeadingModule extends TexyModule
 
 
     /**
-     * @param Texy
-     * @param TexyHtml
-     * @param bool
+     * @param  Texy
+     * @param  TexyHtml
+     * @param  bool
      * @return void
      */
     function afterParse($texy, $DOM, $isSingleLine)
@@ -143,9 +143,9 @@ class TexyHeadingModule extends TexyModule
      *  Heading .(title)[class]{style}>
      *  -------------------------------
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function patternUnderline($parser, $matches)
@@ -168,9 +168,9 @@ class TexyHeadingModule extends TexyModule
      *
      *   ### Heading .(title)[class]{style}>
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function patternSurround($parser, $matches)
@@ -192,11 +192,11 @@ class TexyHeadingModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param int  0..5
-     * @param string
-     * @param TexyModifier
-     * @param bool
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  int  0..5
+     * @param  string
+     * @param  TexyModifier
+     * @param  bool
      * @return TexyHtml
      */
     function solve($invocation, $level, $content, $mod, $isSurrounded)

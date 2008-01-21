@@ -54,9 +54,9 @@ final class TexyBlockQuoteModule extends TexyModule
      *   of Rohan had been bruised and blackened as they passed.
      *   >:http://www.mycom.com/tolkien/twotowers.html
      *
-     * @param TexyBlockParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyBlockParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     public function pattern($parser, $matches)
@@ -117,7 +117,7 @@ final class TexyBlockQuoteModule extends TexyModule
 
     /**
      * Converts cite source to URL
-     * @param string
+     * @param  string
      * @return string|NULL
      */
     public function citeLink($link)

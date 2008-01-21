@@ -72,8 +72,8 @@ class TexyBlockParser extends TexyParser
 
 
     /**
-     * @param Texy
-     * @param TexyHtml
+     * @param  Texy
+     * @param  TexyHtml
      */
     function __construct(/*Texy*/ $texy, /*TexyHtml*/ $element, $indented)
     {
@@ -137,7 +137,7 @@ class TexyBlockParser extends TexyParser
 
 
     /**
-     * @param string
+     * @param  string
      * @return void
      */
     function parse($text)
@@ -242,8 +242,8 @@ class TexyLineParser extends TexyParser
 
 
     /**
-     * @param Texy
-     * @param TexyHtml
+     * @param  Texy
+     * @param  TexyHtml
      */
     function __construct(/*Texy*/ $texy, /*TexyHtml*/ $element)
     {
@@ -255,7 +255,7 @@ class TexyLineParser extends TexyParser
 
 
     /**
-     * @param string
+     * @param  string
      * @return void
      */
     function parse($text)

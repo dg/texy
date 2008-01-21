@@ -76,8 +76,8 @@ class TexyImageModule extends TexyModule
 
     /**
      * Text pre-processing
-     * @param Texy
-     * @param string
+     * @param  Texy
+     * @param  string
      * @return void
      */
     function beforeParse($texy, & $text)
@@ -97,7 +97,7 @@ class TexyImageModule extends TexyModule
     /**
      * Callback for: [*image*]: urls .(title)[class]{style}
      *
-     * @param array      regexp matches
+     * @param  array      regexp matches
      * @return string
      */
     function patternReferenceDef($matches)
@@ -117,9 +117,9 @@ class TexyImageModule extends TexyModule
     /**
      * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
      *
-     * @param TexyLineParser
-     * @param array      regexp matches
-     * @param string     pattern name
+     * @param  TexyLineParser
+     * @param  array      regexp matches
+     * @param  string     pattern name
      * @return TexyHtml|string|FALSE
      */
     function patternImage($parser, $matches)
@@ -152,8 +152,8 @@ class TexyImageModule extends TexyModule
     /**
      * Adds new named reference to image
      *
-     * @param string  reference name
-     * @param TexyImage
+     * @param  string  reference name
+     * @param  TexyImage
      * @return void
      */
     function addReference($name, /*TexyImage*/ $image)
@@ -167,7 +167,7 @@ class TexyImageModule extends TexyModule
     /**
      * Returns named reference
      *
-     * @param string  reference name
+     * @param  string  reference name
      * @return TexyImage  reference descriptor (or FALSE)
      */
     function getReference($name)
@@ -183,9 +183,9 @@ class TexyImageModule extends TexyModule
 
     /**
      * Parses image's syntax
-     * @param string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
-     * @param string
-     * @param bool
+     * @param  string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
+     * @param  string
+     * @param  bool
      * @return TexyImage
      */
     function factoryImage($content, $mod, $tryRef = TRUE)
@@ -232,9 +232,9 @@ class TexyImageModule extends TexyModule
     /**
      * Finish invocation
      *
-     * @param TexyHandlerInvocation  handler invocation
-     * @param TexyImage
-     * @param TexyLink
+     * @param  TexyHandlerInvocation  handler invocation
+     * @param  TexyImage
+     * @param  TexyLink
      * @return TexyHtml|FALSE
      */
     function solve($invocation, /*TexyImage*/ $image, $link)

@@ -44,6 +44,8 @@ if (PHP_VERSION < 5) {
         return $obj;
     }
 
+
+
     function throw($e)
     {
         trigger_error($e->message, E_USER_ERROR);
