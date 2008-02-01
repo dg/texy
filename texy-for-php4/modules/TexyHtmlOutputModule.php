@@ -66,7 +66,7 @@ class TexyHtmlOutputModule extends TexyModule
 
 
     /**
-     * Converts <strong><em> ... </strong> ... </em>
+     * Converts <strong><em> ... </strong> ... </em>.
      * into <strong><em> ... </em></strong><em> ... </em>
      */
     function postProcess($texy, & $s)
@@ -306,7 +306,7 @@ class TexyHtmlOutputModule extends TexyModule
 
 
     /**
-     * Callback function: wrap lines
+     * Callback function: wrap lines.
      * @return string
      */
     function wrap($m) /* private */

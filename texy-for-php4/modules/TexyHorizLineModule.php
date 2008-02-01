@@ -20,7 +20,7 @@
 
 
 /**
- * Horizontal line module
+ * Horizontal line module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -53,7 +53,7 @@ class TexyHorizLineModule extends TexyModule
 
 
     /**
-     * Callback for: -------
+     * Callback for: -------.
      *
      * @param  TexyBlockParser
      * @param  array      regexp matches
@@ -73,7 +73,7 @@ class TexyHorizLineModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  string

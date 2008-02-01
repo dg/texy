@@ -20,7 +20,7 @@
 
 
 /**
- * Texy parser base class
+ * Texy parser base class.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -56,7 +56,7 @@ class TexyParser extends NObject
 
 
 /**
- * Parser for block structures
+ * Parser for block structures.
  */
 class TexyBlockParser extends TexyParser
 {
@@ -232,7 +232,7 @@ class TexyBlockParser extends TexyParser
 
 
 /**
- * Parser for single line structures
+ * Parser for single line structures.
  */
 class TexyLineParser extends TexyParser
 {

@@ -20,7 +20,7 @@
 
 
 /**
- * Emoticon module
+ * Emoticon module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -84,7 +84,7 @@ final class TexyEmoticonModule extends TexyModule
 
 
     /**
-     * Callback for: :-)))
+     * Callback for: :-))).
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -112,7 +112,7 @@ final class TexyEmoticonModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  string

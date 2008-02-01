@@ -48,7 +48,7 @@ $GLOBALS['TexyTypographyModule::$locales'] = array(
 
 
 /**
- * Typography replacements module
+ * Typography replacements module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -78,7 +78,7 @@ class TexyTypographyModule extends TexyModule
 
 
     /**
-     * Text pre-processing
+     * Text pre-processing.
      * @param  Texy
      * @param  string
      * @return void

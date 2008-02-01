@@ -20,7 +20,7 @@
 
 
 /**
- * UTF-8 helper
+ * UTF-8 helper.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -38,7 +38,7 @@ class TexyUtf
 
 
     /**
-     * static class
+     * static class.
      */
     final public function __construct()
     {
@@ -48,7 +48,7 @@ class TexyUtf
 
 
     /**
-     * Converts from source encoding to UTF-8
+     * Converts from source encoding to UTF-8.
      */
     public static function toUtf($s, $encoding)
     {
@@ -58,7 +58,7 @@ class TexyUtf
 
 
     /**
-     * Converts from UTF-8 to dest encoding
+     * Converts from UTF-8 to dest encoding.
      */
     public static function utfTo($s, $encoding)
     {
@@ -68,7 +68,7 @@ class TexyUtf
 
 
     /**
-     * StrToLower in UTF-8
+     * StrToLower in UTF-8.
      */
     public static function strtolower($s)
     {
@@ -85,7 +85,7 @@ class TexyUtf
 
 
     /**
-     * Converts UTF-8 to ASCII
+     * Converts UTF-8 to ASCII.
      * iconv('UTF-8', 'ASCII//TRANSLIT', ...) has problem with glibc!
      */
     public static function utf2ascii($s)
@@ -98,7 +98,7 @@ class TexyUtf
 
 
     /**
-     * Converts UTF-8 to dest encoding + html entities
+     * Converts UTF-8 to dest encoding + html entities.
      */
     public static function utf2html($s, $encoding)
     {
@@ -121,7 +121,7 @@ class TexyUtf
 
 
     /**
-     * Callback; converts UTF-8 to HTML entity OR character in dest encoding
+     * Callback; converts UTF-8 to HTML entity OR character in dest encoding.
      */
     private static function cb($m)
     {

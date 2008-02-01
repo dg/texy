@@ -24,7 +24,7 @@ $GLOBALS['TexyLinkModule::$deadlock'] = NULL; /* class private static property *
 
 
 /**
- * Links module
+ * Links module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -88,7 +88,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Text pre-processing
+     * Text pre-processing.
      * @param  Texy
      * @param  string
      * @return void
@@ -110,7 +110,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Callback for: [la trine]: http://latrine.dgx.cz/ text odkazu .(title)[class]{style}
+     * Callback for: [la trine]: http://latrine.dgx.cz/ text odkazu .(title)[class]{style}.
      *
      * @param  array      regexp matches
      * @return string
@@ -134,7 +134,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Callback for: [ref]
+     * Callback for: [ref].
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -179,7 +179,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Callback for: http://www.dgx.cz   dave@dgx.cz
+     * Callback for: http://www.dgx.cz   dave@dgx.cz.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -204,7 +204,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Adds new named reference
+     * Adds new named reference.
      *
      * @param  string  reference name
      * @param  TexyLink
@@ -219,7 +219,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Returns named reference
+     * Returns named reference.
      *
      * @param  string  reference name
      * @return TexyLink reference descriptor (or FALSE)
@@ -292,7 +292,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  TexyLink
@@ -343,7 +343,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  TexyLink
@@ -359,7 +359,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  string
@@ -374,7 +374,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Checks and corrects $URL
+     * Checks and corrects $URL.
      * @param  TexyLink
      * @return void
      */
@@ -399,7 +399,7 @@ class TexyLinkModule extends TexyModule
 
 
     /**
-     * Returns textual representation of URL
+     * Returns textual representation of URL.
      * @param  TexyLink
      * @return string
      */

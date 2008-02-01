@@ -20,7 +20,7 @@
 
 
 /**
- * Paragraph module
+ * Paragraph module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -79,7 +79,7 @@ final class TexyParagraphModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  string

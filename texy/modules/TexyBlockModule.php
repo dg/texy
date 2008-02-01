@@ -20,7 +20,7 @@
 
 
 /**
- * Special blocks module
+ * Special blocks module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -57,7 +57,7 @@ final class TexyBlockModule extends TexyModule
 
 
     /**
-     * Single block pre-processing
+     * Single block pre-processing.
      * @param  TexyBlockParser
      * @param  string
      * @return void
@@ -75,7 +75,7 @@ final class TexyBlockModule extends TexyModule
 
 
     /**
-     * Callback for:
+     * Callback for:.
      *   /-----code html .(title)[class]{style}
      *     ....
      *     ....
@@ -114,7 +114,7 @@ final class TexyBlockModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  string   blocktype

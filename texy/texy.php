@@ -27,7 +27,7 @@
 define('TEXY_VERSION',  '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
 
 // nette libraries
-if (!class_exists('NObject', FALSE)) { require_once dirname(__FILE__) . '/libs/NObject.php'; }
+if (!class_exists('NObject', FALSE)) { require_once dirname(__FILE__) . '/Nette/NObject.php'; }
 
 // Texy! libraries
 require_once dirname(__FILE__) . '/libs/Texy.php';
@@ -61,20 +61,45 @@ require_once dirname(__FILE__) . '/modules/TexyHtmlOutputModule.php';
 
 
 /**
- * Compatibility with PHP < 5.1
+ * Compatibility with PHP < 5.1.
  */
 if (!class_exists('LogicException', FALSE)) {
     class LogicException extends Exception {}
 }
 
-if (!class_exists('BadMethodCallException', FALSE)) {
-    class BadMethodCallException extends LogicException {}
+if (!class_exists('InvalidArgumentException', FALSE)) {
+    class InvalidArgumentException extends LogicException {}
+}
+
+if (!class_exists('RuntimeException', FALSE)) {
+    class RuntimeException extends Exception {}
+}
+
+if (!class_exists('UnexpectedValueException', FALSE)) {
+    class UnexpectedValueException extends RuntimeException {}
 }
 
 
 
 /**
- * PHP requirements checker
+ * Compatibility with Nette
+ */
+if (!class_exists('NotSupportedException', FALSE)) {
+    class NotSupportedException extends LogicException {}
+}
+
+if (!class_exists('MemberAccessException', FALSE)) {
+    class MemberAccessException extends LogicException {}
+}
+
+if (!class_exists('InvalidStateException', FALSE)) {
+    class InvalidStateException extends RuntimeException {}
+}
+
+
+
+/**
+ * PHP requirements checker.
  */
 if (function_exists('mb_get_info')) {
     if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
@@ -85,5 +110,5 @@ if (function_exists('mb_get_info')) {
 
 if (ini_get('zend.ze1_compatibility_mode') % 256 ||
     preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))) {
-    throw new TexyException("Texy cannot run with zend.ze1_compatibility_mode enabled");
+    throw new RuntimeException("Texy cannot run with zend.ze1_compatibility_mode enabled.");
 }

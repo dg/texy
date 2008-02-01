@@ -20,7 +20,7 @@
 
 
 /**
- * Modifier processor
+ * Modifier processor.
  *
  * Modifiers are texts like .(title)[class1 class2 #id]{color: red}>^
  *   .         starts with dot
@@ -145,7 +145,7 @@ final class TexyModifier extends NObject
 
 
     /**
-     * Decorates TexyHtml element
+     * Decorates TexyHtml element.
      * @param  Texy   base Texy object
      * @param  TexyHtml  element to decorate
      * @return void

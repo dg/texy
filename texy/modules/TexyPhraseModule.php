@@ -20,7 +20,7 @@
 
 
 /**
- * Phrases module
+ * Phrases module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -216,7 +216,7 @@ final class TexyPhraseModule extends TexyModule
 
 
     /**
-     * Callback for: **.... .(title)[class]{style}**:LINK
+     * Callback for: **.... .(title)[class]{style}**:LINK.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -260,7 +260,7 @@ final class TexyPhraseModule extends TexyModule
 
 
     /**
-     * Callback for: any^2  any_2
+     * Callback for: any^2  any_2.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -293,7 +293,7 @@ final class TexyPhraseModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  string

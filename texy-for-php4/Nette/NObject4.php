@@ -20,7 +20,7 @@
 
 
 /**
- * Compatibility with PHP < 5
+ * Compatibility with PHP < 5.
  *
  * Example: $obj = clone ($dolly)
  *
@@ -100,7 +100,7 @@ class NObject4 /* abstract  */
 
 
     /**
-     * Returns the name of the class of this object
+     * Returns the name of the class of this object.
      *
      * @return string
      */
@@ -112,7 +112,7 @@ class NObject4 /* abstract  */
 
 
     /**
-     * Access to reflection
+     * Access to reflection.
      *
      * @return ReflectionObject
      */

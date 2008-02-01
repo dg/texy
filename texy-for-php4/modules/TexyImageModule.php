@@ -20,7 +20,7 @@
 
 
 /**
- * Images module
+ * Images module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -75,7 +75,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Text pre-processing
+     * Text pre-processing.
      * @param  Texy
      * @param  string
      * @return void
@@ -95,7 +95,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Callback for: [*image*]: urls .(title)[class]{style}
+     * Callback for: [*image*]: urls .(title)[class]{style}.
      *
      * @param  array      regexp matches
      * @return string
@@ -115,7 +115,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK
+     * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -150,7 +150,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Adds new named reference to image
+     * Adds new named reference to image.
      *
      * @param  string  reference name
      * @param  TexyImage
@@ -165,7 +165,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Returns named reference
+     * Returns named reference.
      *
      * @param  string  reference name
      * @return TexyImage  reference descriptor (or FALSE)
@@ -182,7 +182,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Parses image's syntax
+     * Parses image's syntax.
      * @param  string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
      * @param  string
      * @param  bool
@@ -230,7 +230,7 @@ class TexyImageModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  TexyImage

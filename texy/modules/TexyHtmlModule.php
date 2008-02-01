@@ -20,7 +20,7 @@
 
 
 /**
- * Html tags module
+ * Html tags module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -57,7 +57,7 @@ final class TexyHtmlModule extends TexyModule
 
 
     /**
-     * Callback for: <!-- comment -->
+     * Callback for: <!-- comment -->.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -73,7 +73,7 @@ final class TexyHtmlModule extends TexyModule
 
 
     /**
-     * Callback for: <tag attr="..">
+     * Callback for: <tag attr="...">.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -141,7 +141,7 @@ final class TexyHtmlModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  TexyHtml  element
@@ -264,7 +264,7 @@ final class TexyHtmlModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  string

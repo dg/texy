@@ -32,7 +32,7 @@ if (PHP_VERSION >= 5) {
 }
 
 // nette libraries
-if (!class_exists('NObject4')) { require_once dirname(__FILE__) . '/libs/NObject4.php'; }
+if (!class_exists('NObject4')) { require_once dirname(__FILE__) . '/Nette/NObject4.php'; }
 
 // Texy! libraries
 require_once dirname(__FILE__) . '/libs/Texy.php';
@@ -66,20 +66,41 @@ require_once dirname(__FILE__) . '/modules/TexyHtmlOutputModule.php';
 
 
 /**
- * Compatibility with PHP < 5.1
+ * Compatibility with PHP < 5.1.
  */
 if (!class_exists('LogicException')) {
     class LogicException extends Exception {}
 }
 
-if (!class_exists('BadMethodCallException')) {
-    class BadMethodCallException extends LogicException {}
+if (!class_exists('InvalidArgumentException')) {
+    class InvalidArgumentException extends LogicException {}
+}
+
+if (!class_exists('RuntimeException')) {
+    class RuntimeException extends Exception {}
+}
+
+if (!class_exists('UnexpectedValueException')) {
+    class UnexpectedValueException extends RuntimeException {}
 }
 
 
 
 /**
- * PHP requirements checker
+ * Compatibility with Nette
+ */
+if (!class_exists('NotSupportedException')) {
+    class NotSupportedException extends LogicException {}
+}
+
+if (!class_exists('InvalidStateException')) {
+    class InvalidStateException extends RuntimeException {}
+}
+
+
+
+/**
+ * PHP requirements checker.
  */
 if (version_compare(PHP_VERSION , '4.3.3', '<')) {
     die('Texy needs PHP 4.3.3 or newer.');

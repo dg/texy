@@ -27,7 +27,7 @@ $GLOBALS['TexyUtf::$xlatCache'] = NULL; /* class private static property */
 
 
 /**
- * UTF-8 helper
+ * UTF-8 helper.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -38,7 +38,7 @@ class TexyUtf
 {
 
     /**
-     * static class
+     * static class.
      */
     function __construct()
     {
@@ -48,7 +48,7 @@ class TexyUtf
 
 
     /**
-     * Converts from source encoding to UTF-8
+     * Converts from source encoding to UTF-8.
      */
     function toUtf($s, $encoding) /* static */
     {
@@ -59,7 +59,7 @@ class TexyUtf
 
 
     /**
-     * Converts from UTF-8 to dest encoding
+     * Converts from UTF-8 to dest encoding.
      */
     function utfTo($s, $encoding) /* static */
     {
@@ -70,7 +70,7 @@ class TexyUtf
 
 
     /**
-     * StrToLower in UTF-8
+     * StrToLower in UTF-8.
      */
     function strtolower($s) /* static */
     {
@@ -87,7 +87,7 @@ class TexyUtf
 
 
     /**
-     * Converts UTF-8 to ASCII
+     * Converts UTF-8 to ASCII.
      * iconv('UTF-8', 'ASCII//TRANSLIT', ...) has problem with glibc!
      */
     function utf2ascii($s) /* static */
@@ -100,7 +100,7 @@ class TexyUtf
 
 
     /**
-     * Converts UTF-8 to dest encoding + html entities
+     * Converts UTF-8 to dest encoding + html entities.
      */
     function utf2html($s, $encoding) /* static */
     {
@@ -123,7 +123,7 @@ class TexyUtf
 
 
     /**
-     * Callback; converts UTF-8 to HTML entity OR character in dest encoding
+     * Callback; converts UTF-8 to HTML entity OR character in dest encoding.
      */
     function cb($m) /* private static */
     {

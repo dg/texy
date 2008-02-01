@@ -20,7 +20,7 @@
 
 
 /**
- * For PHP 4 backward compatibility
+ * For PHP 4 backward compatibility.
  */
 define('TEXY_ALL',  TRUE);
 define('TEXY_NONE',  FALSE);
@@ -33,21 +33,7 @@ define('TEXY_CONTENT_BLOCK',  "\x14");
 
 
 /**
- * Exception base class
- *
- * @author     David Grudl
- * @copyright  Copyright (c) 2004, 2008 David Grudl
- * @package    Texy
- * @version    $Revision$ $Date$
- */
-class TexyException extends Exception
-{
-}
-
-
-
-/**
- * Texy! - Convert plain text to XHTML format using {@link process()}
+ * Texy! - Convert plain text to XHTML format using {@link process()}.
  *
  * <code>
  *     $texy = new Texy();
@@ -184,7 +170,7 @@ class Texy extends NObject
 
 
     /**
-     * Registered regexps and associated handlers for inline parsing
+     * Registered regexps and associated handlers for inline parsing.
      * @var array of ('handler' => callback
      *                'pattern' => regular expression)
      */
@@ -192,7 +178,7 @@ class Texy extends NObject
     private $_linePatterns;
 
     /**
-     * Registered regexps and associated handlers for block parsing
+     * Registered regexps and associated handlers for block parsing.
      * @var array of ('handler' => callback
      *                'pattern' => regular expression)
      */
@@ -256,7 +242,7 @@ class Texy extends NObject
 
 
     /**
-     * Create array of all used modules ($this->modules)
+     * Create array of all used modules ($this->modules).
      * This array can be changed by overriding this method (by subclasses)
      */
     protected function loadModules()
@@ -323,7 +309,7 @@ class Texy extends NObject
 
 
     /**
-     * Convert Texy! document in (X)HTML code
+     * Convert Texy! document in (X)HTML code.
      *
      * @param  string   input text
      * @param  bool     is block or single line?
@@ -332,7 +318,7 @@ class Texy extends NObject
     public function process($text, $singleLine = FALSE)
     {
         if ($this->processing) {
-            throw new TexyException('Processing is in progress yet.');
+            throw new InvalidStateException('Processing is in progress yet.');
         }
 
         // initialization
@@ -401,7 +387,7 @@ class Texy extends NObject
 
 
     /**
-     * Makes only typographic corrections
+     * Makes only typographic corrections.
      * @param  string   input text
      * @return string  output code (in UTF!)
      */
@@ -422,13 +408,13 @@ class Texy extends NObject
 
 
     /**
-     * Converts DOM structure to pure text
+     * Converts DOM structure to pure text.
      * @return string
      */
     public function toText()
     {
         if (!$this->DOM) {
-            throw new TexyException('Call $texy->process() first.');
+            throw new InvalidStateException('Call $texy->process() first.');
         }
 
         return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
@@ -437,7 +423,7 @@ class Texy extends NObject
 
 
     /**
-     * Converts internal string representation to final HTML code in UTF-8
+     * Converts internal string representation to final HTML code in UTF-8.
      * @return string
      */
     final public function stringToHtml($s)
@@ -475,7 +461,7 @@ class Texy extends NObject
 
 
     /**
-     * Converts internal string representation to final HTML code in UTF-8
+     * Converts internal string representation to final HTML code in UTF-8.
      * @return string
      */
     final public function stringToText($s)
@@ -505,7 +491,7 @@ class Texy extends NObject
 
 
     /**
-     * Add new event handler
+     * Add new event handler.
      *
      * @param  string   event name
      * @param  callback
@@ -514,7 +500,7 @@ class Texy extends NObject
     final public function addHandler($event, $callback)
     {
         if (!is_callable($callback)) {
-            throw new TexyException("Invalid callback");
+            throw new InvalidArgumentException("Invalid callback.");
         }
 
         $this->handlers[$event][] = $callback;
@@ -523,7 +509,7 @@ class Texy extends NObject
 
 
     /**
-     * Invoke registered around-handlers
+     * Invoke registered around-handlers.
      *
      * @param  string   event name
      * @param  TexyParser  actual parser object
@@ -543,7 +529,7 @@ class Texy extends NObject
 
 
     /**
-     * Invoke registered after-handlers
+     * Invoke registered after-handlers.
      *
      * @param  string   event name
      * @param  array    arguments passed into handler
@@ -561,7 +547,7 @@ class Texy extends NObject
 
 
     /**
-     * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04
+     * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
      * which are ignored by TexyHtmlOutputModule routine
      * @param  string
      * @return string
@@ -574,7 +560,7 @@ class Texy extends NObject
 
 
     /**
-     * Reverts meta-spaces back to normal spaces
+     * Reverts meta-spaces back to normal spaces.
      * @param  string
      * @return string
      */
@@ -586,7 +572,7 @@ class Texy extends NObject
 
 
     /**
-     * Removes special controls characters and normalizes line endings and spaces
+     * Removes special controls characters and normalizes line endings and spaces.
      * @param  string
      * @return string
      */
@@ -611,7 +597,7 @@ class Texy extends NObject
 
 
     /**
-     * Converts to web safe characters [a-z0-9-] text
+     * Converts to web safe characters [a-z0-9-] text.
      * @param  string
      * @param  string
      * @return string
@@ -629,7 +615,7 @@ class Texy extends NObject
 
 
     /**
-     * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!)
+     * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!).
      * note: &quot; is not encoded!
      * @param  string
      * @return string
@@ -642,7 +628,7 @@ class Texy extends NObject
 
 
     /**
-     * Texy! version of html_entity_decode (always UTF-8, much faster than original!)
+     * Texy! version of html_entity_decode (always UTF-8, much faster than original!).
      * @param  string
      * @return string
      */
@@ -655,7 +641,7 @@ class Texy extends NObject
 
 
     /**
-     * Outdents text block
+     * Outdents text block.
      * @param  string
      * @return string
      */
@@ -670,7 +656,7 @@ class Texy extends NObject
 
 
     /**
-     * Generate unique mark - useful for freezing (folding) some substrings
+     * Generate unique mark - useful for freezing (folding) some substrings.
      * @param  string   any string to froze
      * @param  int      Texy::CONTENT_* constant
      * @return string  internal mark
@@ -698,7 +684,7 @@ class Texy extends NObject
 
 
     /**
-     * Filters bad URLs
+     * Filters bad URLs.
      * @param  string   user URL
      * @param  string   type: a-anchor, i-image, c-cite
      * @return bool
@@ -730,7 +716,7 @@ class Texy extends NObject
 
 
     /**
-     * Prepends root to URL, if possible
+     * Prepends root to URL, if possible.
      * @param  string  URL
      * @param  string  root
      * @return string
@@ -772,7 +758,7 @@ class Texy extends NObject
 
 
     /**
-     * PHP garbage collector helper
+     * PHP garbage collector helper.
      */
     final public function free()
     {
@@ -784,7 +770,7 @@ class Texy extends NObject
 
     final public function __clone()
     {
-        throw new TexyException("Clone is not supported");
+        throw new NotSupportedException('Clone is not supported.');
     }
 
 }

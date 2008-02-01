@@ -20,7 +20,7 @@
 
 
 /**
- * Texy! modules base class
+ * Texy! modules base class.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl

@@ -20,7 +20,7 @@
 
 
 /**
- * Long words wrap module
+ * Long words wrap module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -86,7 +86,7 @@ class TexyLongWordsModule extends TexyModule
 
 
     /**
-     * Callback for long words
+     * Callback for long words.
      * (c) David Grudl
      * @param  array
      * @return string

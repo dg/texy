@@ -20,7 +20,7 @@
 
 
 /**
- * Table module
+ * Table module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -52,7 +52,7 @@ class TexyTableModule extends TexyModule
 
 
     /**
-     * Callback for:
+     * Callback for:.
      *
      *  .(title)[class]{style}>
      *  |------------------
@@ -239,7 +239,7 @@ class TexyTableModule extends TexyModule
 
 
     /**
-     * Parse text in all cells
+     * Parse text in all cells.
      * @param  TexyHtml
      * @return void
      */
@@ -275,7 +275,7 @@ class TexyTableModule extends TexyModule
 
 
 /**
- * Table cell TD / TH
+ * Table cell TD / TH.
  * @package Texy
  */
 class TexyTableCellElement extends TexyHtml

@@ -20,7 +20,7 @@
 
 
 /**
- * Around advice handlers
+ * Around advice handlers.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -66,7 +66,7 @@ class TexyHandlerInvocation extends NObject4
     function proceed()
     {
         if ($this->pos === 0) {
-            throw (new TexyException('No more handlers'));
+            throw (new InvalidStateException('No more handlers'));
         }
 
         if (func_num_args()) {
@@ -77,7 +77,7 @@ class TexyHandlerInvocation extends NObject4
         $this->pos--;
         $res = call_user_func_array($this->handlers[$this->pos], $this->args);
         if ($res === NULL) {
-            throw (new TexyException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], TRUE) . "'"));
+            throw (new UnexpectedValueException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], TRUE) . "'"));
         }
         return $res;
     }
@@ -105,7 +105,7 @@ class TexyHandlerInvocation extends NObject4
 
 
     /**
-     * PHP garbage collector helper
+     * PHP garbage collector helper.
      */
     function free()
     {

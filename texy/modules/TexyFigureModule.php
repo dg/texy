@@ -20,7 +20,7 @@
 
 
 /**
- * The captioned figures
+ * The captioned figures.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -58,7 +58,7 @@ final class TexyFigureModule extends TexyModule
 
 
     /**
-     * Callback for [*image*]:link *** .... .(title)[class]{style}>
+     * Callback for [*image*]:link *** .... .(title)[class]{style}>.
      *
      * @param  TexyBlockParser
      * @param  array      regexp matches
@@ -96,7 +96,7 @@ final class TexyFigureModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  TexyImage

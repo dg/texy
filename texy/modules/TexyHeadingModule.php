@@ -25,7 +25,7 @@ define('TEXY_HEADING_FIXED', 2);
 
 
 /**
- * Heading module
+ * Heading module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -144,7 +144,7 @@ final class TexyHeadingModule extends TexyModule
 
 
     /**
-     * Callback for underlined heading
+     * Callback for underlined heading.
      *
      *  Heading .(title)[class]{style}>
      *  -------------------------------
@@ -170,7 +170,7 @@ final class TexyHeadingModule extends TexyModule
 
 
     /**
-     * Callback for surrounded heading
+     * Callback for surrounded heading.
      *
      *   ### Heading .(title)[class]{style}>
      *
@@ -196,7 +196,7 @@ final class TexyHeadingModule extends TexyModule
 
 
     /**
-     * Finish invocation
+     * Finish invocation.
      *
      * @param  TexyHandlerInvocation  handler invocation
      * @param  int  0..5

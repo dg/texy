@@ -20,7 +20,7 @@
 
 
 /**
- * Ordered / unordered nested list module
+ * Ordered / unordered nested list module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -82,7 +82,7 @@ final class TexyListModule extends TexyModule
 
 
     /**
-     * Callback for:
+     * Callback for:.
      *
      *            1) .... .(title)[class]{style}>
      *            2) ....
@@ -143,7 +143,7 @@ final class TexyListModule extends TexyModule
 
 
     /**
-     * Callback for:
+     * Callback for:.
      *
      *  Term: .(title)[class]{style}>
      *    - description 1
@@ -212,7 +212,7 @@ final class TexyListModule extends TexyModule
 
 
     /**
-     * Callback for single list item
+     * Callback for single list item.
      *
      * @param  TexyBlockParser
      * @param  string  bullet type

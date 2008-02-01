@@ -20,7 +20,7 @@
 
 
 /**
- * HTML helper
+ * HTML helper.
  *
  * usage:
  *       $anchor = TexyHtml::el('a')->href($link)->setText('Texy');
@@ -55,7 +55,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
     public static $xhtml = TRUE;
 
     /**
-     * DTD descriptor
+     * DTD descriptor.
      *   $dtd[element][0] - allowed attributes (as array keys)
      *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
      *                        - array of allowed elements (as keys)
@@ -106,7 +106,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Static factory
+     * Static factory.
      * @param  string element name (or NULL)
      * @param  array|string element's attributes (or textual content)
      * @return TexyHtml
@@ -126,16 +126,16 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Changes element's name
+     * Changes element's name.
      * @param  string
      * @param  bool  Is element empty?
-     * @throws TexyException
+     * @throws InvalidArgumentException
      * @return TexyHtml  provides a fluent interface
      */
     final public function setName($name, $empty = NULL)
     {
         if ($name !== NULL && !is_string($name)) {
-            throw new TexyException('Name must be string or NULL');
+            throw new InvalidArgumentException("Name must be string or NULL.");
         }
 
         $this->name = $name;
@@ -146,7 +146,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Returns element's name
+     * Returns element's name.
      * @return string
      */
     final public function getName()
@@ -168,7 +168,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Overloaded setter for element's attribute
+     * Overloaded setter for element's attribute.
      * @param  string    property name
      * @param  mixed     property value
      * @return void
@@ -181,7 +181,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Overloaded getter for element's attribute
+     * Overloaded getter for element's attribute.
      * @param  string    property name
      * @return mixed    property value
      */
@@ -193,7 +193,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Overloaded setter for element's attribute
+     * Overloaded setter for element's attribute.
      * @param  string attribute name
      * @param  array value
      * @return TexyHtml  provides a fluent interface
@@ -208,15 +208,15 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Special setter for element's attribute
+     * Special setter for element's attribute.
      * @param  string path
      * @param  array query
      * @return TexyHtml  provides a fluent interface
      */
-    final public function href($path, $params = NULL)
+    final public function href($path, $query = NULL)
     {
-        if ($params) {
-            $query = http_build_query($params, NULL, '&');
+        if ($query) {
+            $query = http_build_query($query, NULL, '&');
             if ($query !== '') $path .= '?' . $query;
         }
         $this->attrs['href'] = $path;
@@ -226,7 +226,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Sets element's textual content
+     * Sets element's textual content.
      * @param  string
      * @return TexyHtml  provides a fluent interface
      */
@@ -235,7 +235,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
         if (is_scalar($text)) {
             $this->children = array($text);
         } elseif ($text !== NULL) {
-            throw new TexyException('Content must be scalar');
+            throw new InvalidArgumentException('Content must be scalar.');
         }
         return $this;
     }
@@ -243,7 +243,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Gets element's textual content
+     * Gets element's textual content.
      * @return string
      */
     final public function getText()
@@ -259,7 +259,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Adds new element's child
+     * Adds new element's child.
      * @param  TexyHtml|string child node
      * @return TexyHtml  provides a fluent interface
      */
@@ -271,7 +271,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Creates and adds a new TexyHtml child
+     * Creates and adds a new TexyHtml child.
      * @param  string  elements's name
      * @param  array|string element's attributes (or textual content)
      * @return TexyHtml  created element
@@ -285,23 +285,23 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Inserts child node
+     * Inserts child node.
      * @param  int
      * @param  TexyHtml node
      * @param  bool
      * @return TexyHtml  provides a fluent interface
-     * @throws TexyException
+     * @throws Exception
      */
     final public function insert($index, $child, $replace = FALSE)
     {
         if ($child instanceof TexyHtml) {
             if ($child->parent !== NULL) {
-                throw new TexyException('Child node already has parent');
+                throw new InvalidStateException('Child node already has parent.');
             }
             $child->parent = $this;
 
         } elseif (!is_string($child)) {
-            throw new TexyException('Child node must be scalar or TexyHtml object');
+            throw new InvalidArgumentException('Child node must be scalar or TexyHtml object.');
         }
 
         if ($index === NULL)  { // append
@@ -317,7 +317,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Inserts (replaces) child node (ArrayAccess implementation)
+     * Inserts (replaces) child node (ArrayAccess implementation).
      * @param  int
      * @param  TexyHtml node
      * @return void
@@ -330,7 +330,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Returns child node (ArrayAccess implementation)
+     * Returns child node (ArrayAccess implementation).
      * @param  int index
      * @return mixed
      */
@@ -342,7 +342,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Exists child node? (ArrayAccess implementation)
+     * Exists child node? (ArrayAccess implementation).
      * @param  int index
      * @return bool
      */
@@ -354,7 +354,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Removes child node (ArrayAccess implementation)
+     * Removes child node (ArrayAccess implementation).
      * @param  int index
      * @return void
      */
@@ -370,7 +370,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Required by the Countable interface
+     * Required by the Countable interface.
      * @return int
      */
     final public function count()
@@ -381,7 +381,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Required by the IteratorAggregate interface
+     * Required by the IteratorAggregate interface.
      * @return ArrayIterator
      */
     final public function getIterator()
@@ -392,7 +392,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Returns all of children
+     * Returns all of children.
      * return array
      */
     final public function getChildren()
@@ -403,7 +403,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Returns parent node
+     * Returns parent node.
      * @return TexyHtml
      */
     final public function getParent()
@@ -414,7 +414,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Renders element's start tag, content and end tag to internal string representation
+     * Renders element's start tag, content and end tag to internal string representation.
      * @param  Texy
      * @return string
      */
@@ -444,7 +444,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Renders to final HTML
+     * Renders to final HTML.
      * @param  Texy
      * @return string
      */
@@ -456,7 +456,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Renders to final text
+     * Renders to final text.
      * @param  Texy
      * @return string
      */
@@ -468,7 +468,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Returns element's start tag
+     * Returns element's start tag.
      * @return string
      */
     public function startTag()
@@ -525,7 +525,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Returns element's end tag
+     * Returns element's end tag.
      * @return string
      */
     public function endTag()
@@ -539,7 +539,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Clones all children too
+     * Clones all children too.
      */
     final public function __clone()
     {
@@ -595,7 +595,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Parses text as single line
+     * Parses text as single line.
      * @param  Texy
      * @param  string
      * @return void
@@ -614,7 +614,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Parses text as block
+     * Parses text as block.
      * @param  Texy
      * @param  string
      * @param  bool
@@ -629,7 +629,7 @@ class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ Iterator
 
 
     /**
-     * Initializes self::$dtd array
+     * Initializes self::$dtd array.
      * @param  bool
      * @return void
      */

@@ -20,7 +20,7 @@
 
 
 /**
- * Blockquote module
+ * Blockquote module.
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
@@ -46,7 +46,7 @@ class TexyBlockQuoteModule extends TexyModule
 
 
     /**
-     * Callback for:
+     * Callback for:.
      *
      *   > They went in single file, running like hounds on a strong scent,
      *   and an eager light was in their eyes. Nearly due west the broad
@@ -116,7 +116,7 @@ class TexyBlockQuoteModule extends TexyModule
 
 
     /**
-     * Converts cite source to URL
+     * Converts cite source to URL.
      * @param  string
      * @return string|NULL
      */

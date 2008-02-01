@@ -20,7 +20,7 @@
 
 
 /**
- * Texy basic configurators
+ * Texy basic configurators.
  *
  * <code>
  *     $texy = new Texy();
@@ -53,7 +53,7 @@ class TexyConfigurator
 
 
     /**
-     * static class
+     * static class.
      */
     final public function __construct()
     {
@@ -63,7 +63,7 @@ class TexyConfigurator
 
 
     /**
-     * Configure Texy! for web comments and other usages, where input text may insert attacker
+     * Configure Texy! for web comments and other usages, where input text may insert attacker.
      *
      * @param  Texy  object to configure
      * @return void
@@ -85,7 +85,7 @@ class TexyConfigurator
 
 
     /**
-     * Disable all links
+     * Disable all links.
      *
      * @param  Texy  object to configure
      * @return void
@@ -106,7 +106,7 @@ class TexyConfigurator
 
 
     /**
-     * Disable all images
+     * Disable all images.
      *
      * @param  Texy  object to configure
      * @return void
