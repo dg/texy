@@ -37,7 +37,7 @@ function imageHandler($invocation, $image, $link)
             . '<embed src="http://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
 
         $texy = $invocation->getTexy();
-        return $texy->protect($code, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
+        return $texy->protect($code, Texy::CONTENT_BLOCK);
     }
 
     return $invocation->proceed();

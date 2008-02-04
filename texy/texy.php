@@ -26,6 +26,27 @@
 
 define('TEXY_VERSION',  '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
 
+
+/**
+ * Check PHP configuration.
+ */
+if (version_compare(PHP_VERSION, '5.1.0', '<')) {
+    throw new Exception('Texy needs PHP 5.1.0 or newer. Older PHP versions are supported by older Texy releases only.');
+}
+
+if (function_exists('mb_get_info')) {
+    if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
+        mb_internal_encoding('pass');
+        trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
+    }
+}
+
+if (ini_get('zend.ze1_compatibility_mode') % 256 ||
+    preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))) {
+    throw new RuntimeException("Texy cannot run with zend.ze1_compatibility_mode enabled.");
+}
+
+
 // nette libraries
 if (!class_exists('NObject', FALSE)) { require_once dirname(__FILE__) . '/Nette/NObject.php'; }
 
@@ -58,29 +79,6 @@ require_once dirname(__FILE__) . '/modules/TexyTypographyModule.php';
 require_once dirname(__FILE__) . '/modules/TexyHtmlOutputModule.php';
 
 
-
-
-/**
- * Compatibility with PHP < 5.1.
- */
-if (!class_exists('LogicException', FALSE)) {
-    class LogicException extends Exception {}
-}
-
-if (!class_exists('InvalidArgumentException', FALSE)) {
-    class InvalidArgumentException extends LogicException {}
-}
-
-if (!class_exists('RuntimeException', FALSE)) {
-    class RuntimeException extends Exception {}
-}
-
-if (!class_exists('UnexpectedValueException', FALSE)) {
-    class UnexpectedValueException extends RuntimeException {}
-}
-
-
-
 /**
  * Compatibility with Nette
  */
@@ -97,18 +95,3 @@ if (!class_exists('InvalidStateException', FALSE)) {
 }
 
 
-
-/**
- * PHP requirements checker.
- */
-if (function_exists('mb_get_info')) {
-    if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
-        mb_internal_encoding('pass');
-        trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
-    }
-}
-
-if (ini_get('zend.ze1_compatibility_mode') % 256 ||
-    preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))) {
-    throw new RuntimeException("Texy cannot run with zend.ze1_compatibility_mode enabled.");
-}

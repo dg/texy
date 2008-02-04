@@ -20,7 +20,7 @@
 
 
 /**
- * For PHP 4 backward compatibility.
+ * For Texy 1 backward compatibility.
  */
 define('TEXY_ALL',  TRUE);
 define('TEXY_NONE',  FALSE);

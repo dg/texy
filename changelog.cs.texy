@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 202
+- removed support for PHP 4 & PHP 5.0.x
+
 rev. 195
 - podpora pro víceřádkové texty a bloky v buňkách tabulek
 - zkracování URL lze ovládat přes `$texy->linkModule->shorten`

@@ -75,7 +75,7 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
     $content = iconv('UTF-8', 'UTF-8//IGNORE', $content);
 
     // protect output is in HTML
-    $content = $texy->protect($content, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
+    $content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
     $el = TexyHtml::el();
     $el->setText($content);

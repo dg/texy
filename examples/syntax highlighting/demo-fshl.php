@@ -51,7 +51,7 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
     $texy = $invocation->getTexy();
     $content = Texy::outdent($content);
     $content = $parser->highlightString($lang, $content);
-    $content = $texy->protect($content, TEXY_CONTENT_BLOCK); // or Texy::CONTENT_BLOCK in PHP 5
+    $content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
     $elPre = TexyHtml::el('pre');
     if ($modifier) $modifier->decorate($texy, $elPre);
