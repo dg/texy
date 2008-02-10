@@ -251,20 +251,25 @@ final class TexyTableModule extends TexyModule
         {
             foreach ($elRow->getChildren() as $elCell)
             {
-                if ($elCell->colSpan > 1) $elCell->attrs['colspan'] = $elCell->colSpan;
+                if ($elCell->colSpan > 1) {
+                    $elCell->attrs['colspan'] = $elCell->colSpan;
+                }
 
                 if ($elCell->rowSpan > 1) {
                     $elCell->attrs['rowspan'] = $elCell->rowSpan;
-                    $text = Texy::outdent($elCell->text);
-                    if (strpos($text, "\n") !== FALSE) {
-                        // multiline parse as block
-                        $elCell->parseBlock($tx, $text);
-                        continue;
-                    }
                 }
 
-                $elCell->parseLine($tx, trim($elCell->text));
-                if ($elCell->getText() === '') $elCell->setText("\xC2\xA0"); // &nbsp;
+                $text = rtrim($elCell->text);
+                if (strpos($text, "\n") !== FALSE) {
+                    // multiline parse as block
+                    $elCell->parseBlock($tx, Texy::outdent($text));
+                } else {
+                    $elCell->parseLine($tx, ltrim($text));
+                }
+
+                if ($elCell->getText() === '') {
+                    $elCell->setText("\xC2\xA0"); // &nbsp;
+                }
             }
         }
     }

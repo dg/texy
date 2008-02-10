@@ -93,5 +93,3 @@ if (!class_exists('MemberAccessException', FALSE)) {
 if (!class_exists('InvalidStateException', FALSE)) {
     class InvalidStateException extends RuntimeException {}
 }
-
-
