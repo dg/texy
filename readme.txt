@@ -1,4 +1,4 @@
-Texy2 (c) David Grudl, 2004-2008 (http://www.dgx.cz)
+Texy2 (c) David Grudl, 2004-2008 (http://www.davidgrudl.com)
 
 
 
@@ -37,7 +37,7 @@ for a copy of the license.
 
 Author of Texy David Grudl offers a commercial license for organizations that
 do not want to release the source code for their application. Pricing can be found
-at website http://texy.info, or contact author directly on dave@dgx.cz.
+at website http://texy.info, or contact author directly on david@grudl.com.
 
 
 
@@ -72,4 +72,4 @@ Choose buttons and look at exemplary HTML code in directory /icons/
 
 -----
 For more information, visit the author's weblog (in czech language):
-http://latrine.dgx.cz/
+http://www.latrine.cz/

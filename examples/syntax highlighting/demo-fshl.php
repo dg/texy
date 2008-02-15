@@ -7,7 +7,7 @@
  * This demo shows how combine Texy! with syntax highlighter FSHL
  *       - define user callback (for /--code elements)
  *
- * @author   David Grudl aka -dgx- (http://www.dgx.cz)
+ * @author   David Grudl (http://www.davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

@@ -7,7 +7,7 @@
  * This demo shows how cache Texy! output and
  * demonstrates advantages of inheriting from base Texy object
  *
- * @author   David Grudl aka -dgx- (http://www.dgx.cz)
+ * @author   David Grudl (http://www.davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

@@ -9,7 +9,7 @@
  *     - rel="nofollow"
  *     - used links checking (antispam)
  *
- * @author   David Grudl aka -dgx- (http://www.dgx.cz)
+ * @author   David Grudl (http://www.davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

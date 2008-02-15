@@ -4,7 +4,7 @@
  * TEXY! 1-2-3 START DEMO
  * --------------------------------------
  *
- * @author   David Grudl aka -dgx- (http://www.dgx.cz)
+ * @author   David Grudl (http://www.davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

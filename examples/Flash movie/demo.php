@@ -4,7 +4,7 @@
  * TEXY! SUPPORT FOR FLASH
  * --------------------------------------
  *
- * @author   David Grudl aka -dgx- (http://www.dgx.cz)
+ * @author   David Grudl (http://www.davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 
@@ -38,7 +38,7 @@ function imageHandler($invocation, $image, $link)
         $movie = htmlSpecialChars($movie);
         $altContent = htmlSpecialChars($image->modifier->title);
 
-        // @see http://latrine.dgx.cz/how-to-correctly-insert-a-flash-into-xhtml
+        // @see http://www.latrine.cz/how-to-correctly-insert-a-flash-into-xhtml
         $code = '
 <!--[if !IE]> -->
 <object type="application/x-shockwave-flash" data="'.$movie.'" '.$dimensions.'>

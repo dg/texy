@@ -1,4 +1,4 @@
-Texy2 (c) David Grudl, 2004-2008 (http://www.dgx.cz)
+Texy2 (c) David Grudl, 2004-2008 (http://www.davidgrudl.com)
 
 
 
@@ -32,7 +32,7 @@ Přečtěte si pozorně licenční podmínky v souboru license.txt.
 
 Autor Texy David Grudl nabízí možnost licencovat knihovnu pod komerční licencí
 pro organizace, které nechtějí zveřejňovat zdrojové kódy svých aplikací. Cenu a podmínky
-najdete na stránkách http://texy.info, nebo kontaktujte přímo autora na dave@dgx.cz.
+najdete na stránkách http://texy.info, nebo kontaktujte přímo autora na david@grudl.com.
 
 
 
@@ -67,4 +67,4 @@ HTML kód najdete v adresáři /icons/
 
 -----
 Chcete-li další informace, navštivte autorův weblog:
-http://latrine.dgx.cz/
+http://www.latrine.cz/

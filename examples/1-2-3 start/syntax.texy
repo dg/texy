@@ -114,7 +114,7 @@ Typography
 ==========
 
 - very long words division (with respect for language rules). Example: antidisestablishmentarianism
-- clickable emails and URL www.dgx.cz, dave@dgx.cz (emails are obfuscated against spambots)
+- clickable emails and URL www.davidgrudl.com, david@grudl.com (emails are obfuscated against spambots)
 - "national" 'typographic' quotes
 - divider vs. dash: 10-15 vs. north-west
 - en-dash: one -- two
@@ -147,4 +147,4 @@ Tables
 Copyright
 =========
 
-Texy! (C) "David Grudl (dgx)":http://www.dgx.cz, 2003-2004
+Texy! (C) "David Grudl (dgx)":http://www.davidgrudl.com, 2003-2004

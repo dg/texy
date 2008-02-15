@@ -19,13 +19,13 @@ rev. 185
 - implementován NObject z Nette Frameworku. Nahradil TexyBase
 
 rev. 181
-- TexyHtml::$children je nyní private. K potomkům se přistupuje přes ArrayAcces interface ("viz":http://latrine.dgx.cz/nhtml-pomocnik-php-programatora#comment-12140)
+- TexyHtml::$children je nyní private. K potomkům se přistupuje přes ArrayAcces interface ("viz":http://www.latrine.cz/nhtml-pomocnik-php-programatora#comment-12140)
 
 rev. 180
 - nevkládá `&shy;` do URL
 
 rev. 179
-- POZOR: přejmenováno TexyHtml::add() -> create(), TexyHtml::addChild() -> add() ("důvody":http://latrine.dgx.cz/nhtml-pomocnik-php-programatora#comment-12100)
+- POZOR: přejmenováno TexyHtml::add() -> create(), TexyHtml::addChild() -> add() ("důvody":http://www.latrine.cz/nhtml-pomocnik-php-programatora#comment-12100)
 - verze pro PHP4: emulace třídy Exception a throw
 - chytřejší detekce emailů a URL v textu
 
@@ -254,7 +254,7 @@ htmlOutputModule
 
 TexyDOM a zděděné třídy
 -----------------------
-- odstraněno, náhradou je TexyHtml (obdoba NHtml, viz http://latrine.dgx.cz/nhtml-pomocnik-php-programatora)
+- odstraněno, náhradou je TexyHtml (obdoba NHtml, viz http://www.latrine.cz/nhtml-pomocnik-php-programatora)
 - vlastnost TexyHtml::$xhtml - přepínač mezi XHTML a HTML výstupem
 - ve všech handlerech se nyní operuje s elementy reprezentovanými tímto objektem, manipulace je tedy extrémně snadná
 

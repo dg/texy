@@ -6,7 +6,7 @@
  *
  * This demo shows how control links in Texy!
  *
- * @author   David Grudl aka -dgx- (http://www.dgx.cz)
+ * @author   David Grudl (http://www.davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

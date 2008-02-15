@@ -4,7 +4,7 @@
  * Texy! - web text markup-language
  * --------------------------------
  *
- * Copyright (c) 2004, 2008 David Grudl aka -dgx- (http://www.dgx.cz)
+ * Copyright (c) 2004, 2008 David Grudl (http://www.davidgrudl.com)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
@@ -96,7 +96,7 @@ final class TexyLinkModule extends TexyModule
     {
         self::$deadlock = array();
 
-        // [la trine]: http://latrine.dgx.cz/ text odkazu .(title)[class]{style}
+        // [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
         if ($texy->allowed['link/definition']) {
             $text = preg_replace_callback(
                 '#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
@@ -109,7 +109,7 @@ final class TexyLinkModule extends TexyModule
 
 
     /**
-     * Callback for: [la trine]: http://latrine.dgx.cz/ text odkazu .(title)[class]{style}.
+     * Callback for: [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}.
      *
      * @param  array      regexp matches
      * @return string
@@ -178,7 +178,7 @@ final class TexyLinkModule extends TexyModule
 
 
     /**
-     * Callback for: http://www.dgx.cz   dave@dgx.cz.
+     * Callback for: http://www.davidgrudl.com   david@grudl.com.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
