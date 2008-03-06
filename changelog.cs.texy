@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 206
+- new constants `Texy::FILTER_ANCHOR` & `Texy::FILTER_IMAGE`
+
 rev. 202
 - removed support for PHP 4 & PHP 5.0.x
 

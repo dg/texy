@@ -48,7 +48,7 @@ if (ini_get('zend.ze1_compatibility_mode') % 256 ||
 
 
 // nette libraries
-if (!class_exists('NObject', FALSE)) { require_once dirname(__FILE__) . '/Nette/NObject.php'; }
+if (!class_exists('NObject', FALSE)) { require_once dirname(__FILE__) . '/Nette/Object.php'; }
 
 // Texy! libraries
 require_once dirname(__FILE__) . '/libs/Texy.php';

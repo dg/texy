@@ -60,6 +60,10 @@ class Texy extends NObject
     const CONTENT_TEXTUAL = "\x15";
     const CONTENT_BLOCK = "\x14";
 
+    // url filters
+    const FILTER_ANCHOR = 'anchor';
+    const FILTER_IMAGE = 'image';
+
     /** @var string  input & output text encoding */
     public $encoding = 'utf-8';
 

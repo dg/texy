@@ -387,7 +387,7 @@ final class TexyLinkModule extends TexyModule
             // email
             $link->URL = 'mailto:' . $link->URL;
 
-        } elseif (!$this->texy->checkURL($link->URL, 'a')) {
+        } elseif (!$this->texy->checkURL($link->URL, Texy::FILTER_ANCHOR)) {
             $link->URL = NULL;
 
         } else {

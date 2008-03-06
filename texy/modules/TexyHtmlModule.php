@@ -238,7 +238,7 @@ final class TexyHtmlModule extends TexyModule
         if ($name === 'img') {
             if (!isset($elAttrs['src'])) return FALSE;
 
-            if (!$tx->checkURL($elAttrs['src'], 'i')) return FALSE;
+            if (!$tx->checkURL($elAttrs['src'], Texy::FILTER_IMAGE)) return FALSE;
 
             $tx->summary['images'][] = $elAttrs['src'];
 
@@ -250,7 +250,7 @@ final class TexyHtmlModule extends TexyModule
                     $elAttrs['rel'][] = 'nofollow';
                 }
 
-                if (!$tx->checkURL($elAttrs['href'], 'a')) return FALSE;
+                if (!$tx->checkURL($elAttrs['href'], Texy::FILTER_ANCHOR)) return FALSE;
 
                 $tx->summary['links'][] = $elAttrs['href'];
             }

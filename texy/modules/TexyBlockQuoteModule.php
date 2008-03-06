@@ -132,8 +132,6 @@ final class TexyBlockQuoteModule extends TexyModule
             if ($ref) return Texy::prependRoot($ref->URL, $tx->linkModule->root);
         }
 
-        if (!$tx->checkURL($link, 'c')) return NULL;
-
         // special supported case
         if (strncasecmp($link, 'www.', 4) === 0) return 'http://' . $link;
 
