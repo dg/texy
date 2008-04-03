@@ -27,7 +27,7 @@
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-class TexyParser extends NObject
+class TexyParser extends Nette_Object
 {
     /** @var Texy */
     protected $texy;

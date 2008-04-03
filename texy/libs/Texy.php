@@ -45,7 +45,7 @@ define('TEXY_CONTENT_BLOCK',  "\x14");
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-class Texy extends NObject
+class Texy extends Nette_Object
 {
     // configuration directives
     const ALL = TRUE;

@@ -48,7 +48,7 @@ final class TexyLinkModule extends TexyModule
     private $references = array();
 
     /** @var array */
-    private static $deadlock;
+    private static $infiniteLock;
 
 
 
@@ -94,7 +94,7 @@ final class TexyLinkModule extends TexyModule
      */
     public function beforeParse($texy, & $text)
     {
-        self::$deadlock = array();
+        self::$infiniteLock = array();
 
         // [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
         if ($texy->allowed['link/definition']) {
@@ -156,16 +156,16 @@ final class TexyLinkModule extends TexyModule
         $link->type = TexyLink::BRACKET;
 
         if ($link->label != '') {  // NULL or ''
-            // prevent deadlock
-            if (isset(self::$deadlock[$link->name])) {
+            // prevent infinite loop
+            if (isset(self::$infiniteLock[$link->name])) {
                 $content = $link->label;
             } else {
-                self::$deadlock[$link->name] = TRUE;
+                self::$infiniteLock[$link->name] = TRUE;
                 $el = TexyHtml::el();
                 $lineParser = new TexyLineParser($tx, $el);
                 $lineParser->parse($link->label);
                 $content = $el->toString($tx);
-                unset(self::$deadlock[$link->name]);
+                unset(self::$infiniteLock[$link->name]);
             }
         } else {
             $content = $this->textualUrl($link);
@@ -449,7 +449,7 @@ final class TexyLinkModule extends TexyModule
 /**
  * @package Texy
  */
-final class TexyLink extends NObject
+final class TexyLink extends Nette_Object
 {
     /** @see $type */
     const

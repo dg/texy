@@ -19,7 +19,7 @@ rev. 192
 - u obrázků je možné volit mezi požadovaným rozměrem `[* image 10x20 *]` a maximálním `[* image 10X20 *]` pomocí malého nebo velkého `X`
 
 rev. 185
-- implementován NObject z Nette Frameworku. Nahradil TexyBase
+- implementován Nette_Object z Nette Frameworku. Nahradil TexyBase
 
 rev. 181
 - TexyHtml::$children je nyní private. K potomkům se přistupuje přes ArrayAcces interface ("viz":http://www.latrine.cz/nhtml-pomocnik-php-programatora#comment-12140)

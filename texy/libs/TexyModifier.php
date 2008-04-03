@@ -35,7 +35,7 @@
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-final class TexyModifier extends NObject
+final class TexyModifier extends Nette_Object
 {
     /** @var string */
     public $id;

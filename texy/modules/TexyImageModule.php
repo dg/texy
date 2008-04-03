@@ -337,7 +337,7 @@ final class TexyImageModule extends TexyModule
 /**
  * @package Texy
  */
-final class TexyImage extends NObject
+final class TexyImage extends Nette_Object
 {
     /** @var string  base image URL */
     public $URL;

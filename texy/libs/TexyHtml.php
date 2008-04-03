@@ -34,7 +34,7 @@
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-class TexyHtml extends NObject implements ArrayAccess, /* Countable, */ IteratorAggregate
+class TexyHtml extends Nette_Object implements ArrayAccess, /* Countable, */ IteratorAggregate
 {
     /** @var string  element's name */
     private $name;
