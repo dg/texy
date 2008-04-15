@@ -21,7 +21,9 @@
 /** @version $Revision$ $Date$ */
 
 // included by TexyHtml::initDTD
-// @param $strict
+// @param $mode
+
+$strict = (bool) ($mode & Texy::STRICT);
 
 
 // attributes
@@ -58,7 +60,7 @@ if (!$strict) $i += array(
 $bi = $b + $i;
 
 // build DTD
-self::$dtd = array(
+TexyHtml::$dtd[$mode] = array(
 'html' => array(
     $strict ? $i18n + array('xmlns'=>1) : $i18n + array('version'=>1,'xmlns'=>1), // extra: xmlns
     array('head'=>1,'body'=>1),
@@ -313,11 +315,11 @@ self::$dtd = array(
 ),
 'label' => array(
     $attrs + array('for'=>1,'accesskey'=>1,'onfocus'=>1,'onblur'=>1),
-    $i, // - label by self::$prohibits
+    $i, // - label by TexyHtml::$prohibits
 ),
 'button' => array(
     $attrs + array('name'=>1,'value'=>1,'type'=>1,'disabled'=>1,'tabindex'=>1,'accesskey'=>1,'onfocus'=>1,'onblur'=>1),
-    $bi, // - a input select textarea label button form fieldset, by self::$prohibits
+    $bi, // - a input select textarea label button form fieldset, by TexyHtml::$prohibits
 ),
 'ins' => array(
     $attrs + array('cite'=>1,'datetime'=>1),
@@ -383,7 +385,7 @@ if ($strict) return;
 
 
 // LOOSE DTD
-self::$dtd += array(
+TexyHtml::$dtd[$mode] += array(
 // transitional
 'dir' => array(
     $attrs + array('compact'=>1),
@@ -458,17 +460,17 @@ self::$dtd += array(
 );
 
 // transitional modified
-self::$dtd['a'][0] += array('target'=>1);
-self::$dtd['area'][0] += array('target'=>1);
-self::$dtd['body'][0] += array('background'=>1,'bgcolor'=>1,'text'=>1,'link'=>1,'vlink'=>1,'alink'=>1);
-self::$dtd['form'][0] += array('target'=>1);
-self::$dtd['img'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
-self::$dtd['input'][0] += array('align'=>1);
-self::$dtd['link'][0] += array('target'=>1);
-self::$dtd['object'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
-self::$dtd['script'][0] += array('language'=>1);
-self::$dtd['table'][0] += array('align'=>1,'bgcolor'=>1);
-self::$dtd['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
-self::$dtd['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
+TexyHtml::$dtd[$mode]['a'][0] += array('target'=>1);
+TexyHtml::$dtd[$mode]['area'][0] += array('target'=>1);
+TexyHtml::$dtd[$mode]['body'][0] += array('background'=>1,'bgcolor'=>1,'text'=>1,'link'=>1,'vlink'=>1,'alink'=>1);
+TexyHtml::$dtd[$mode]['form'][0] += array('target'=>1);
+TexyHtml::$dtd[$mode]['img'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
+TexyHtml::$dtd[$mode]['input'][0] += array('align'=>1);
+TexyHtml::$dtd[$mode]['link'][0] += array('target'=>1);
+TexyHtml::$dtd[$mode]['object'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
+TexyHtml::$dtd[$mode]['script'][0] += array('language'=>1);
+TexyHtml::$dtd[$mode]['table'][0] += array('align'=>1,'bgcolor'=>1);
+TexyHtml::$dtd[$mode]['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
+TexyHtml::$dtd[$mode]['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
 
 // missing: FRAMESET, FRAME, BGSOUND, XMP, ...

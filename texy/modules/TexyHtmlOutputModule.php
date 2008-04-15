@@ -28,9 +28,6 @@
  */
 final class TexyHtmlOutputModule extends TexyModule
 {
-    /** @var bool  use XHTML syntax? */
-    public $xhtml = TRUE;
-
     /** @var bool  indent HTML code? */
     public $indent = TRUE;
 
@@ -55,6 +52,9 @@ final class TexyHtmlOutputModule extends TexyModule
     /** @var array  content DTD used, when context is not defined */
     private $baseDTD;
 
+    /** @var bool */
+    private $xml;
+
 
 
     public function __construct($texy)
@@ -74,9 +74,10 @@ final class TexyHtmlOutputModule extends TexyModule
         $this->space = $this->baseIndent;
         $this->tagStack = array();
         $this->tagUsed  = array();
+        $this->xml = $texy->getOutputMode() & Texy::XML;
 
         // special "base content"
-        $this->baseDTD = TexyHtml::$dtd['div'][1] + TexyHtml::$dtd['html'][1] /*+ TexyHtml::$dtd['head'][1]*/ + TexyHtml::$dtd['body'][1] + array('html'=>1);
+        $this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + array('html'=>1);
 
         // wellform and reformat
         $s = preg_replace_callback(
@@ -109,7 +110,7 @@ final class TexyHtmlOutputModule extends TexyModule
             );
 
         // remove HTML 4.01 optional end tags
-        if (!$this->xhtml && $this->removeOptional)
+        if (!$this->xml && $this->removeOptional)
             $s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
     }
 
@@ -198,7 +199,7 @@ final class TexyHtmlOutputModule extends TexyModule
 
             $dtdContent = $this->baseDTD;
 
-            if (!isset(TexyHtml::$dtd[$mTag])) {
+            if (!isset($this->texy->dtd[$mTag])) {
                 // unknown (non-html) tag
                 $allowed = TRUE;
                 $item = reset($this->tagStack);
@@ -240,7 +241,7 @@ final class TexyHtmlOutputModule extends TexyModule
             if ($mEmpty) {
                 if (!$allowed) return $s;
 
-                if ($this->xhtml) $mAttr .= " /";
+                if ($this->xml) $mAttr .= " /";
 
                 if ($this->indent && $mTag === 'br')
                     // formatting exception
@@ -270,7 +271,7 @@ final class TexyHtmlOutputModule extends TexyModule
                 $open = '<' . $mTag . $mAttr . '>';
 
                 // receive new content (ins & del are special cases)
-                if (!empty(TexyHtml::$dtd[$mTag][1])) $dtdContent = TexyHtml::$dtd[$mTag][1];
+                if (!empty($this->texy->dtd[$mTag][1])) $dtdContent = $this->texy->dtd[$mTag][1];
 
                 // format output
                 if ($this->indent && !isset(TexyHtml::$inlineElements[$mTag])) {

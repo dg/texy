@@ -160,7 +160,7 @@ final class TexyModifier extends Nette_Object
 
         } elseif ($tmp === Texy::ALL) {
             $elAttrs = $this->attrs;
-            $el->validateAttrs();
+            $el->validateAttrs($texy->dtd);
 
         } elseif (is_array($tmp) && isset($tmp[$el->getName()])) {
             $tmp = $tmp[$el->getName()];
@@ -173,7 +173,7 @@ final class TexyModifier extends Nette_Object
                 foreach ($this->attrs as $key => $value)
                     if (isset($tmp[$key])) $el->attrs[$key] = $value;
             }
-            $el->validateAttrs();
+            $el->validateAttrs($texy->dtd);
         }
 
         // title

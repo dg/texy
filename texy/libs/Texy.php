@@ -64,6 +64,18 @@ class Texy extends Nette_Object
     const FILTER_ANCHOR = 'anchor';
     const FILTER_IMAGE = 'image';
 
+    // HTML minor-modes
+    const STRICT = 1;
+    const XML = 2;
+
+    // HTML modes
+    const HTML4_TRANSITIONAL = 0;
+    const HTML4_STRICT = Texy::STRICT;
+    const HTML5 = 4;
+    const XHTML1_TRANSITIONAL = Texy::XML;
+    const XHTML1_STRICT = 3; // Texy::STRICT | Texy::XML;
+    const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
+
     /** @var string  input & output text encoding */
     public $encoding = 'utf-8';
 
@@ -111,9 +123,6 @@ class Texy extends Nette_Object
         'middle' => NULL,
         'bottom' => NULL,
     );
-
-    /** @var bool  use Strict of Transitional DTD? */
-    public static $strictDTD = FALSE;
 
     /** @var mixed */
     public static $advertisingNotice = 'once';
@@ -207,8 +216,15 @@ class Texy extends Nette_Object
     /** @var array of events and registered handlers */
     private $handlers = array();
 
+    /** @var array */
+    public $dtd;
+
+    /** @var int  HTML mode */
+    private $mode;
+
 
     /** DEPRECATED */
+    public static $strictDTD;
     public $cleaner;
     public $xhtml;
 
@@ -216,19 +232,18 @@ class Texy extends Nette_Object
 
     public function __construct()
     {
-        TexyHtml::initDTD(self::$strictDTD);
-
-        // accepts all valid HTML tags and attributes by default
-        foreach (TexyHtml::$dtd as $tag => $dtd) {
-            $this->allowedTags[$tag] = Texy::ALL;
-        }
-
         // load all modules
         $this->loadModules();
 
         // DEPRECATED
+        if (self::$strictDTD !== NULL) {
+            $this->setOutputMode(self::$strictDTD ? self::XHTML1_STRICT : self::XHTML1_TRANSITIONAL);
+        } else {
+            $this->setOutputMode(self::XHTML1_TRANSITIONAL);
+        }
+
+        // DEPRECATED
         $this->cleaner = & $this->htmlOutputModule;
-        $this->xhtml = & $this->htmlOutputModule->xhtml;
 
         // examples of link references ;-)
         $link = new TexyLink('http://texy.info/');
@@ -241,6 +256,46 @@ class Texy extends Nette_Object
 
         $link = new TexyLink('http://en.wikipedia.org/wiki/Special:Search?search=%s');
         $this->linkModule->addReference('wikipedia', $link);
+    }
+
+
+
+    /**
+     * Set HTML/XHTML output mode (overwrites self::$allowedTags)
+     * @param  int
+     * @return void
+     */
+    public function setOutputMode($mode)
+    {
+        if (!in_array($mode, array(self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
+            self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5), TRUE)) {
+            throw new InvalidArgumentException("Invalid mode.");
+        }
+
+        if (!isset(TexyHtml::$dtd[$mode])) {
+            require dirname(__FILE__) . '/TexyHtml.DTD.php';
+        }
+
+        $this->mode = $mode;
+        $this->dtd = TexyHtml::$dtd[$mode];
+        TexyHtml::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
+
+        // accept all valid HTML tags and attributes by default
+        $this->allowedTags = array();
+        foreach ($this->dtd as $tag => $dtd) {
+            $this->allowedTags[$tag] = self::ALL;
+        }
+    }
+
+
+
+    /**
+     * Get HTML/XHTML output mode
+     * @return int
+     */
+    public function getOutputMode()
+    {
+        return $this->mode;
     }
 
 
@@ -481,7 +536,7 @@ class Texy extends Nette_Object
         $s = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $s);
 
         // entities -> chars
-        $s = Texy::unescapeHtml($s);
+        $s = self::unescapeHtml($s);
 
         // convert nbsp to normal space and remove shy
         $s = strtr($s, array(

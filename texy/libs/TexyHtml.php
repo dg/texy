@@ -56,13 +56,12 @@ class TexyHtml extends Nette_Object implements ArrayAccess, /* Countable, */ Ite
 
     /**
      * DTD descriptor.
-     *   $dtd[element][0] - allowed attributes (as array keys)
-     *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
-     *                        - array of allowed elements (as keys)
-     *                        - FALSE - empty element
-     *                        - 0 - special case for ins & del
+     *   $dtd[$mode][element][0] - allowed attributes (as array keys)
+     *   $dtd[$mode][element][1] - allowed content for an element (content model) (as array keys)
+     *                           - array of allowed elements (as keys)
+     *                           - FALSE - empty element
+     *                           - 0 - special case for ins & del
      * @var array
-     * @see TexyHtmlOutputModule::initDTD()
      */
     public static $dtd;
 
@@ -566,15 +565,16 @@ class TexyHtml extends Nette_Object implements ArrayAccess, /* Countable, */ Ite
 
 
     /**
+     * @param  array
      * @return void
      */
-    final public function validateAttrs()
+    final public function validateAttrs($dtd)
     {
-        if (isset(self::$dtd[$this->name])) {
-            $dtd = self::$dtd[$this->name][0];
-            if (is_array($dtd)) {
+        if (isset($dtd[$this->name])) {
+            $allowed = $dtd[$this->name][0];
+            if (is_array($allowed)) {
                 foreach ($this->attrs as $attr => $foo) {
-                    if (!isset($dtd[$attr])) unset($this->attrs[$attr]);
+                    if (!isset($allowed[$attr])) unset($this->attrs[$attr]);
                 }
             }
         }
@@ -582,11 +582,11 @@ class TexyHtml extends Nette_Object implements ArrayAccess, /* Countable, */ Ite
 
 
 
-    public function validateChild($child)
+    public function validateChild($child, $dtd)
     {
-        if (isset(self::$dtd[$this->name])) {
+        if (isset($dtd[$this->name])) {
             if ($child instanceof TexyHtml) $child = $child->name;
-            return isset(self::$dtd[$this->name][1][$child]);
+            return isset($dtd[$this->name][1][$child]);
         } else {
             return TRUE; // unknown element
         }
@@ -624,22 +624,6 @@ class TexyHtml extends Nette_Object implements ArrayAccess, /* Countable, */ Ite
     {
         $parser = new TexyBlockParser($texy, $this, $indented);
         $parser->parse($s);
-    }
-
-
-
-    /**
-     * Initializes self::$dtd array.
-     * @param  bool
-     * @return void
-     */
-    public static function initDTD($strict)
-    {
-        static $last;
-        if ($last === $strict) return;
-        $last = $strict;
-
-        require __FILE__ . '/../TexyHtml.DTD.php';
     }
 
 }

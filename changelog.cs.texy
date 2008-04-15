@@ -5,6 +5,10 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 208
+- use `$texy->setOutputMode(...)` to switch between HTML/XHTML, strict/loose modes. Parameter is one of these constants: `Texy::HTML4_TRANSITIONAL`, `Texy::HTML4_STRICT`, `Texy::XHTML1_TRANSITIONAL`, `Texy::XHTML1_STRICT`
+- `Texy::$strictDTD` & `$texy->htmlOutputModule->xhtml` are deprecated
+
 rev. 206
 - new constants `Texy::FILTER_ANCHOR` & `Texy::FILTER_IMAGE`
 

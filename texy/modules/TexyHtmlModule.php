@@ -161,7 +161,7 @@ final class TexyHtmlModule extends TexyModule
         // convert case
         $name = $el->getName();
         $lower = strtolower($name);
-        if (isset(TexyHtml::$dtd[$lower]) || $name === strtoupper($name)) {
+        if (isset($tx->dtd[$lower]) || $name === strtoupper($name)) {
             // complete UPPER convert to lower
             $name = $lower;
             $el->setName($name);
@@ -202,7 +202,7 @@ final class TexyHtmlModule extends TexyModule
             if (is_array($tmp)) {
                 $elAttrs['class'] = explode(' ', $elAttrs['class']);
                 foreach ($elAttrs['class'] as $key => $value)
-                    if (!isset($tmp[$value])) unset($elAttrs['class'][$key]); // id & class are case-sensitive in XHTML
+                    if (!isset($tmp[$value])) unset($elAttrs['class'][$key]); // id & class are case-sensitive
 
             } elseif ($tmp !== Texy::ALL) {
                 $elAttrs['class'] = NULL;
@@ -256,7 +256,7 @@ final class TexyHtmlModule extends TexyModule
             }
         }
 
-        $el->validateAttrs();
+        $el->validateAttrs($tx->dtd);
 
         return $el;
     }
