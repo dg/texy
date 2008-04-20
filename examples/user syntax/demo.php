@@ -4,7 +4,7 @@
  * TEXY! USER SYNTAX DEMO
  * --------------------------------------
  *
- * @author   David Grudl (http://www.davidgrudl.com)
+ * @author   David Grudl (http://davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

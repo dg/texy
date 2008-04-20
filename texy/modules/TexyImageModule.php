@@ -4,7 +4,7 @@
  * Texy! - web text markup-language
  * --------------------------------
  *
- * Copyright (c) 2004, 2008 David Grudl (http://www.davidgrudl.com)
+ * Copyright (c) 2004, 2008 David Grudl (http://davidgrudl.com)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
@@ -337,7 +337,7 @@ final class TexyImageModule extends TexyModule
 /**
  * @package Texy
  */
-final class TexyImage extends Nette_Object
+final class TexyImage extends /*Nette::*/Object
 {
     /** @var string  base image URL */
     public $URL;

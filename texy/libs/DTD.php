@@ -4,7 +4,7 @@
  * Texy! - web text markup-language
  * --------------------------------
  *
- * Copyright (c) 2004, 2008 David Grudl (http://www.davidgrudl.com)
+ * Copyright (c) 2004, 2008 David Grudl (http://davidgrudl.com)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
@@ -20,10 +20,10 @@
 
 /** @version $Revision$ $Date$ */
 
-// included by TexyHtml::initDTD
 // @param $mode
+// @return array
 
-$strict = (bool) ($mode & Texy::STRICT);
+$strict = $mode === Texy::HTML4_STRICT || $mode === Texy::XHTML1_STRICT;
 
 
 // attributes
@@ -60,7 +60,7 @@ if (!$strict) $i += array(
 $bi = $b + $i;
 
 // build DTD
-TexyHtml::$dtd[$mode] = array(
+$dtd = array(
 'html' => array(
     $strict ? $i18n + array('xmlns'=>1) : $i18n + array('version'=>1,'xmlns'=>1), // extra: xmlns
     array('head'=>1,'body'=>1),
@@ -381,11 +381,11 @@ TexyHtml::$dtd[$mode] = array(
 
 
 
-if ($strict) return;
+if ($strict) return $dtd;
 
 
 // LOOSE DTD
-TexyHtml::$dtd[$mode] += array(
+$dtd += array(
 // transitional
 'dir' => array(
     $attrs + array('compact'=>1),
@@ -460,17 +460,19 @@ TexyHtml::$dtd[$mode] += array(
 );
 
 // transitional modified
-TexyHtml::$dtd[$mode]['a'][0] += array('target'=>1);
-TexyHtml::$dtd[$mode]['area'][0] += array('target'=>1);
-TexyHtml::$dtd[$mode]['body'][0] += array('background'=>1,'bgcolor'=>1,'text'=>1,'link'=>1,'vlink'=>1,'alink'=>1);
-TexyHtml::$dtd[$mode]['form'][0] += array('target'=>1);
-TexyHtml::$dtd[$mode]['img'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
-TexyHtml::$dtd[$mode]['input'][0] += array('align'=>1);
-TexyHtml::$dtd[$mode]['link'][0] += array('target'=>1);
-TexyHtml::$dtd[$mode]['object'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
-TexyHtml::$dtd[$mode]['script'][0] += array('language'=>1);
-TexyHtml::$dtd[$mode]['table'][0] += array('align'=>1,'bgcolor'=>1);
-TexyHtml::$dtd[$mode]['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
-TexyHtml::$dtd[$mode]['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
+$dtd['a'][0] += array('target'=>1);
+$dtd['area'][0] += array('target'=>1);
+$dtd['body'][0] += array('background'=>1,'bgcolor'=>1,'text'=>1,'link'=>1,'vlink'=>1,'alink'=>1);
+$dtd['form'][0] += array('target'=>1);
+$dtd['img'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
+$dtd['input'][0] += array('align'=>1);
+$dtd['link'][0] += array('target'=>1);
+$dtd['object'][0] += array('align'=>1,'border'=>1,'hspace'=>1,'vspace'=>1);
+$dtd['script'][0] += array('language'=>1);
+$dtd['table'][0] += array('align'=>1,'bgcolor'=>1);
+$dtd['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
+$dtd['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
 
 // missing: FRAMESET, FRAME, BGSOUND, XMP, ...
+
+return $dtd;

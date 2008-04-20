@@ -8,7 +8,7 @@
  *       - define user callback (for /--code elements)
  *       - load language, highlight and return stylesheet + html output
  *
- * @author   David Grudl (http://www.davidgrudl.com)
+ * @author   David Grudl (http://davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

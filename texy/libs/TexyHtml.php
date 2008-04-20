@@ -4,7 +4,7 @@
  * Texy! - web text markup-language
  * --------------------------------
  *
- * Copyright (c) 2004, 2008 David Grudl (http://www.davidgrudl.com)
+ * Copyright (c) 2004, 2008 David Grudl (http://davidgrudl.com)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
@@ -34,7 +34,7 @@
  * @package    Texy
  * @version    $Revision$ $Date$
  */
-class TexyHtml extends Nette_Object implements ArrayAccess, /* Countable, */ IteratorAggregate
+class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, */ IteratorAggregate
 {
     /** @var string  element's name */
     private $name;
@@ -53,17 +53,6 @@ class TexyHtml extends Nette_Object implements ArrayAccess, /* Countable, */ Ite
 
     /** @var bool  use XHTML syntax? */
     public static $xhtml = TRUE;
-
-    /**
-     * DTD descriptor.
-     *   $dtd[$mode][element][0] - allowed attributes (as array keys)
-     *   $dtd[$mode][element][1] - allowed content for an element (content model) (as array keys)
-     *                           - array of allowed elements (as keys)
-     *                           - FALSE - empty element
-     *                           - 0 - special case for ins & del
-     * @var array
-     */
-    public static $dtd;
 
     /** @var array  empty elements */
     public static $emptyElements = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,

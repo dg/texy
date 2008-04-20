@@ -9,7 +9,7 @@
  *     - rel="nofollow"
  *     - used links checking (antispam)
  *
- * @author   David Grudl (http://www.davidgrudl.com)
+ * @author   David Grudl (http://davidgrudl.com)
  * @version  $Revision$ $Date$
  */
 

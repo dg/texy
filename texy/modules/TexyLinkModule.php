@@ -4,7 +4,7 @@
  * Texy! - web text markup-language
  * --------------------------------
  *
- * Copyright (c) 2004, 2008 David Grudl (http://www.davidgrudl.com)
+ * Copyright (c) 2004, 2008 David Grudl (http://davidgrudl.com)
  *
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
@@ -178,7 +178,7 @@ final class TexyLinkModule extends TexyModule
 
 
     /**
-     * Callback for: http://www.davidgrudl.com   david@grudl.com.
+     * Callback for: http://davidgrudl.com   david@grudl.com.
      *
      * @param  TexyLineParser
      * @param  array      regexp matches
@@ -449,7 +449,7 @@ final class TexyLinkModule extends TexyModule
 /**
  * @package Texy
  */
-final class TexyLink extends Nette_Object
+final class TexyLink extends /*Nette::*/Object
 {
     /** @see $type */
     const
