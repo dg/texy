@@ -21,7 +21,7 @@
 /** @version $Revision$ $Date$ */
 
 // @param $mode
-// @return array
+// @return $dtd
 
 $strict = $mode === Texy::HTML4_STRICT || $mode === Texy::XHTML1_STRICT;
 
@@ -474,5 +474,3 @@ $dtd['td'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
 $dtd['th'][0] += array('nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1);
 
 // missing: FRAMESET, FRAME, BGSOUND, XMP, ...
-
-return $dtd;

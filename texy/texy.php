@@ -377,7 +377,8 @@ class Texy extends /*Nette::*/Object
         }
 
         if (!isset(self::$dtdCache[$mode])) {
-            self::$dtdCache[$mode] = require dirname(__FILE__) . '/libs/DTD.php';
+            require dirname(__FILE__) . '/libs/DTD.php';
+            self::$dtdCache[$mode] = $dtd;
         }
 
         $this->mode = $mode;
