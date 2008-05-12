@@ -27,24 +27,24 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
  */
 function figureHandler($invocation, $image, $link, $content, $modifier)
 {
-    // finish invocation by default way
-    $el = $invocation->proceed();
+	// finish invocation by default way
+	$el = $invocation->proceed();
 
-    // change div -> dl
-    $el->setName('dl');
+	// change div -> dl
+	$el->setName('dl');
 
-    // change p -> dd
-    $el[1]->setName('dd');
+	// change p -> dd
+	$el[1]->setName('dd');
 
-    // wrap img into dt
-    $img = $el[0];
-    unset($el[0]);
+	// wrap img into dt
+	$img = $el[0];
+	unset($el[0]);
 
-    $dt = TexyHtml::el('dt');
-    $dt->add($img);
-    $el->insert(0, $dt);
+	$dt = TexyHtml::el('dt');
+	$dt->add($img);
+	$el->insert(0, $dt);
 
-    return $el;
+	return $el;
 }
 
 

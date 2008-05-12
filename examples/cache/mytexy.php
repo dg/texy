@@ -22,47 +22,47 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 
 class MyTexy extends Texy
 {
-    var $cachePath = './cache/';
-    var $time;
+	var $cachePath = './cache/';
+	var $time;
 
 
-    function __construct()
-    {
-        parent::__construct();
+	function __construct()
+	{
+		parent::__construct();
 
-        // some configurations
-        $this->alignClasses['left'] = 'left';
-        $this->alignClasses['right'] = 'right';
-    }
+		// some configurations
+		$this->alignClasses['left'] = 'left';
+		$this->alignClasses['right'] = 'right';
+	}
 
 
 
-    function process($text, $useCache = TRUE)
-    {
-        $this->time = -microtime(TRUE);
+	function process($text, $useCache = TRUE)
+	{
+		$this->time = -microtime(TRUE);
 
-        if ($useCache) {
-            $md5 = md5($text); // md5 is key for caching
+		if ($useCache) {
+			$md5 = md5($text); // md5 is key for caching
 
-            // check, if cached file exists
-            $cacheFile = $this->cachePath . $md5 . '.html';
-            $content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : NULL;
-            if ($content) {         // read from cache
-                list($html, $this->styleSheet, $this->headingModule->title) = $content;
+			// check, if cached file exists
+			$cacheFile = $this->cachePath . $md5 . '.html';
+			$content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : NULL;
+			if ($content) {         // read from cache
+				list($html, $this->styleSheet, $this->headingModule->title) = $content;
 
-            } else {                           // doesn't exists
-                $html = parent::process($text);
-                file_put_contents($cacheFile,
-                    serialize( array($html, $this->styleSheet, $this->headingModule->title) )
-                );
-            }
+			} else {                           // doesn't exists
+				$html = parent::process($text);
+				file_put_contents($cacheFile,
+					serialize( array($html, $this->styleSheet, $this->headingModule->title) )
+				);
+			}
 
-        } else { // if caching is disabled
-            $html = parent::process($text);
-        }
+		} else { // if caching is disabled
+			$html = parent::process($text);
+		}
 
-        $this->time += microtime(TRUE);
-        return $html;
-    }
+		$this->time += microtime(TRUE);
+		return $html;
+	}
 
 }

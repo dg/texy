@@ -30,15 +30,15 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
  */
 function imageHandler($invocation, $image, $link)
 {
-    if ($image->URL == 'user')  // accepts only [* user *]
-    {
-        $image->URL = 'image.gif'; // image URL
-        $image->overURL = 'image-over.gif'; // onmouseover image
-        $image->modifier->title = 'Texy! logo';
-        if ($link) $link->URL = 'big.gif'; // linked image
-    }
+	if ($image->URL == 'user')  // accepts only [* user *]
+	{
+		$image->URL = 'image.gif'; // image URL
+		$image->overURL = 'image-over.gif'; // onmouseover image
+		$image->modifier->title = 'Texy! logo';
+		if ($link) $link->URL = 'big.gif'; // linked image
+	}
 
-    return $invocation->proceed($image, $link);
+	return $invocation->proceed($image, $link);
 }
 
 

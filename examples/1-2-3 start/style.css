@@ -1,26 +1,26 @@
 /************************************************** PISMO A VELIKOST */
 
 body, input, select, textarea, th, td {
-  font-family: "Trebuchet MS", "Geneva CE", lucida, sans-serif; /* Trebuchet MS (elegantní bezpatkové písmo) */
+	font-family: "Trebuchet MS", "Geneva CE", lucida, sans-serif; /* Trebuchet MS (elegantní bezpatkové písmo) */
 }
 
 input, select, textarea {
-  font-size: 100%;
+	font-size: 100%;
 }
 
 body, th, td {
-  font-size: 80%;
-  line-height: 1.4;
+	font-size: 80%;
+	line-height: 1.4;
 }
 
 th, td {
-  font-\size: 100%;
+	font-\size: 100%;
 }
 
 
 body {
-  background: #F1F1F1;
-  color: #111111;
+	background: #F1F1F1;
+	color: #111111;
 }
 
 
@@ -30,37 +30,37 @@ h3 { font-size: 115%;  }
 
 
 hr {
-  color: #3B7CD0;
-  background-color: #3B7CD0;
-  border: 0;
-  height: 1px;
+	color: #3B7CD0;
+	background-color: #3B7CD0;
+	border: 0;
+	height: 1px;
 }
 
 i, em { margin-right: 0.1em; }
 
 
 ul {
-  margin: 0 0 20px 20px;
-  padding: 0;
+	margin: 0 0 20px 20px;
+	padding: 0;
 }
 ul li {
-  margin-left: 20px;
+	margin-left: 20px;
 }
 
 
 table {
-  background-color: #ffffff;
-  border-spacing: 0px;
-  border-collapse: collapse;
+	background-color: #ffffff;
+	border-spacing: 0px;
+	border-collapse: collapse;
 }
 
 th {
-  border: 1px solid #8cacbb;
-  background-color: #dee7ec;
-  padding: 3px;
+	border: 1px solid #8cacbb;
+	background-color: #dee7ec;
+	padding: 3px;
 }
 
 td {
-  border: 1px solid #8cacbb;
-  padding: 3px;
+	border: 1px solid #8cacbb;
+	padding: 3px;
 }

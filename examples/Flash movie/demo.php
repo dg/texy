@@ -25,21 +25,21 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
  */
 function imageHandler($invocation, $image, $link)
 {
-    $texy = $invocation->getTexy();
+	$texy = $invocation->getTexy();
 
-    if (substr($image->URL, -4) === '.swf')  // accepts only *.swf
-    {
-        $movie = Texy::prependRoot($image->URL, $texy->imageModule->root);
+	if (substr($image->URL, -4) === '.swf')  // accepts only *.swf
+	{
+		$movie = Texy::prependRoot($image->URL, $texy->imageModule->root);
 
-        $dimensions =
-               ($image->width ? 'width="'.$image->width.'" ' : '')
-            . ($image->height ? 'width="'.$image->height.'" ' : '');
+		$dimensions =
+			   ($image->width ? 'width="'.$image->width.'" ' : '')
+			. ($image->height ? 'width="'.$image->height.'" ' : '');
 
-        $movie = htmlSpecialChars($movie);
-        $altContent = htmlSpecialChars($image->modifier->title);
+		$movie = htmlSpecialChars($movie);
+		$altContent = htmlSpecialChars($image->modifier->title);
 
-        // @see http://www.latrine.cz/how-to-correctly-insert-a-flash-into-xhtml
-        $code = '
+		// @see http://www.latrine.cz/how-to-correctly-insert-a-flash-into-xhtml
+		$code = '
 <!--[if !IE]> -->
 <object type="application/x-shockwave-flash" data="'.$movie.'" '.$dimensions.'>
 <!-- <![endif]-->
@@ -50,14 +50,14 @@ codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#ve
 <param name="movie" value="'.$movie.'" />
 <!--><!--dgx-->
 
-    <p>'.$altContent.'</p>
+	<p>'.$altContent.'</p>
 </object>
 <!-- <![endif]-->
 ';
-        return $texy->protect($code, Texy::CONTENT_BLOCK);
-    }
+		return $texy->protect($code, Texy::CONTENT_BLOCK);
+	}
 
-    return $invocation->proceed();
+	return $invocation->proceed();
 }
 
 

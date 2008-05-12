@@ -25,18 +25,18 @@ $texy->htmlOutputModule->baseIndent  = 1;
 
 function doIt($texy)
 {
-    // processing
-    $text = file_get_contents('sample.texy');
-    $html = $texy->process($text);  // that's all folks!
+	// processing
+	$text = file_get_contents('sample.texy');
+	$html = $texy->process($text);  // that's all folks!
 
-    // echo formated output
-    echo $html;
+	// echo formated output
+	echo $html;
 
-    // and echo generated HTML code
-    echo '<pre>';
-    echo htmlSpecialChars($html);
-    echo '</pre>';
-    echo '<hr />';
+	// and echo generated HTML code
+	echo '<pre>';
+	echo htmlSpecialChars($html);
+	echo '</pre>';
+	echo '<hr />';
 }
 
 

@@ -31,18 +31,18 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
  */
 function newReferenceHandler($parser, $refName)
 {
-    $names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
+	$names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 
-    if (!isset($names[$refName])) return FALSE; // it's not my job
+	if (!isset($names[$refName])) return FALSE; // it's not my job
 
-    $name = $names[$refName];
+	$name = $names[$refName];
 
-    $el = TexyHtml::el('a');
-    $el->attrs['href'] = '#comm-' . $refName; // set link destination
-    $el->attrs['class'][] = 'comment';        // set class name
-    $el->attrs['rel'] = 'nofollow';           // enable rel="nofollow"
-    $el->setText("[$refName] $name:"); // set link label (with Texy formatting)
-    return $el;
+	$el = TexyHtml::el('a');
+	$el->attrs['href'] = '#comm-' . $refName; // set link destination
+	$el->attrs['class'][] = 'comment';        // set class name
+	$el->attrs['rel'] = 'nofollow';           // enable rel="nofollow"
+	$el->setText("[$refName] $name:"); // set link label (with Texy formatting)
+	return $el;
 }
 
 
@@ -78,10 +78,10 @@ echo $html;
 // do some antispam filtering - this is just very simple example ;-)
 $spam = FALSE;
 foreach ($texy->summary['links'] as $link)
-    if (strpos($link, 'casino')) {
-        $spam = TRUE;
-        break;
-    }
+	if (strpos($link, 'casino')) {
+		$spam = TRUE;
+		break;
+	}
 
 
 // and echo generated HTML code

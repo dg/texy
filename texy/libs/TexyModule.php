@@ -29,7 +29,7 @@
  */
 abstract class TexyModule extends /*Nette::*/Object
 {
-    /** @var Texy */
-    protected $texy;
+	/** @var Texy */
+	protected $texy;
 
 }

@@ -29,19 +29,19 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
  */
 function phraseHandler($invocation, $phrase, $content, $modifier, $link)
 {
-    // is there link?
-    if (!$link) return $invocation->proceed();
+	// is there link?
+	if (!$link) return $invocation->proceed();
 
-    if (Texy::isRelative($link->URL)) {
-        // modifiy link
-        $link->URL = 'index?page=' . urlencode($link->URL);
+	if (Texy::isRelative($link->URL)) {
+		// modifiy link
+		$link->URL = 'index?page=' . urlencode($link->URL);
 
-    } elseif (substr($link->URL, 0, 5) === 'wiki:') {
-        // modifiy link
-        $link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
-    }
+	} elseif (substr($link->URL, 0, 5) === 'wiki:') {
+		// modifiy link
+		$link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
+	}
 
-    return $invocation->proceed();
+	return $invocation->proceed();
 }
 
 

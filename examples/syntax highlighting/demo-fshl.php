@@ -20,7 +20,7 @@ $fshlPath = dirname(__FILE__).'/fshl/';
 
 
 if (!class_exists('fshlParser'))
-    die('DOWNLOAD <a href="http://hvge.sk/scripts/fshl/">FSHL</a> AND UNPACK TO FSHL FOLDER FIRST!');
+	die('DOWNLOAD <a href="http://hvge.sk/scripts/fshl/">FSHL</a> AND UNPACK TO FSHL FOLDER FIRST!');
 
 
 
@@ -36,30 +36,30 @@ if (!class_exists('fshlParser'))
  */
 function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 {
-    if ($blocktype !== 'block/code') {
-        return $invocation->proceed();
-    }
+	if ($blocktype !== 'block/code') {
+		return $invocation->proceed();
+	}
 
-    $lang = strtoupper($lang);
-    if ($lang == 'JAVASCRIPT') $lang = 'JS';
+	$lang = strtoupper($lang);
+	if ($lang == 'JAVASCRIPT') $lang = 'JS';
 
-    $parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
-    if (!$parser->isLanguage($lang)) {
-        return $invocation->proceed();
-    }
+	$parser = new fshlParser('HTML_UTF8', P_TAB_INDENT);
+	if (!$parser->isLanguage($lang)) {
+		return $invocation->proceed();
+	}
 
-    $texy = $invocation->getTexy();
-    $content = Texy::outdent($content);
-    $content = $parser->highlightString($lang, $content);
-    $content = $texy->protect($content, Texy::CONTENT_BLOCK);
+	$texy = $invocation->getTexy();
+	$content = Texy::outdent($content);
+	$content = $parser->highlightString($lang, $content);
+	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
-    $elPre = TexyHtml::el('pre');
-    if ($modifier) $modifier->decorate($texy, $elPre);
-    $elPre->attrs['class'] = strtolower($lang);
+	$elPre = TexyHtml::el('pre');
+	if ($modifier) $modifier->decorate($texy, $elPre);
+	$elPre->attrs['class'] = strtolower($lang);
 
-    $elCode = $elPre->create('code', $content);
+	$elCode = $elPre->create('code', $content);
 
-    return $elPre;
+	return $elPre;
 }
 
 

@@ -27,24 +27,24 @@ $texy->allowed['phraseEm'] = FALSE;
 
 // add new syntax: *bold*
 $texy->registerLinePattern(
-    'userInlineHandler',  // callback function or method
-    '#(?<!\*)\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U', // regular expression
-    'myInlineSyntax1' // any syntax name
+	'userInlineHandler',  // callback function or method
+	'#(?<!\*)\*(?!\ |\*)(.+)'.TEXY_MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U', // regular expression
+	'myInlineSyntax1' // any syntax name
 );
 
 // add new syntax: _italic_
 $texy->registerLinePattern(
-    'userInlineHandler',
-    '#(?<!_)_(?!\ |_)(.+)'.TEXY_MODIFIER.'?(?<!\ |_)_(?!_)()#U',
-    'myInlineSyntax2'
+	'userInlineHandler',
+	'#(?<!_)_(?!\ |_)(.+)'.TEXY_MODIFIER.'?(?<!\ |_)_(?!_)()#U',
+	'myInlineSyntax2'
 );
 
 
 // add new syntax: .h1 ...
 $texy->registerBlockPattern(
-    'userBlockHandler',
-    '#^\.([a-z0-9]+)\n(.+)$#m', // block patterns must be multiline and line-anchored
-    'myBlockSyntax1'
+	'userBlockHandler',
+	'#^\.([a-z0-9]+)\n(.+)$#m', // block patterns must be multiline and line-anchored
+	'myBlockSyntax1'
 );
 
 
@@ -60,25 +60,25 @@ $texy->registerBlockPattern(
  */
 function userInlineHandler($parser, $matches, $name)
 {
-    list(, $mContent, $mMod) = $matches;
+	list(, $mContent, $mMod) = $matches;
 
-    $texy = $parser->getTexy();
+	$texy = $parser->getTexy();
 
-    // create element
-    $tag = $name === 'myInlineSyntax1' ? 'b' : 'i';
-    $el = TexyHtml::el($tag);
+	// create element
+	$tag = $name === 'myInlineSyntax1' ? 'b' : 'i';
+	$el = TexyHtml::el($tag);
 
-    // apply modifier
-    $mod = new TexyModifier($mMod);
-    $mod->decorate($texy, $el);
+	// apply modifier
+	$mod = new TexyModifier($mMod);
+	$mod->decorate($texy, $el);
 
-    $el->attrs['class'] = 'myclass';
-    $el->setText($mContent);
+	$el->attrs['class'] = 'myclass';
+	$el->setText($mContent);
 
-    // parse inner content of this element
-    $parser->again = TRUE;
+	// parse inner content of this element
+	$parser->again = TRUE;
 
-    return $el;
+	return $el;
 }
 
 
@@ -94,23 +94,23 @@ function userInlineHandler($parser, $matches, $name)
  */
 function userBlockHandler($parser, $matches, $name)
 {
-    list(, $mTag, $mText) = $matches;
+	list(, $mTag, $mText) = $matches;
 
-    $texy = $parser->getTexy();
+	$texy = $parser->getTexy();
 
-    // create element
-    if ($mTag === 'perex') {
-        $el = TexyHtml::el('div');
-        $el->attrs['class'][] = 'perex';
+	// create element
+	if ($mTag === 'perex') {
+		$el = TexyHtml::el('div');
+		$el->attrs['class'][] = 'perex';
 
-    } else {
-        $el = TexyHtml::el($mTag);
-    }
+	} else {
+		$el = TexyHtml::el($mTag);
+	}
 
-    // create content
-    $el->parseLine($texy, $mText);
+	// create content
+	$el->parseLine($texy, $mText);
 
-    return $el;
+	return $el;
 }
 
 
