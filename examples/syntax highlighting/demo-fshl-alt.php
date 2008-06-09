@@ -65,11 +65,53 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 
 
 
+/**
+ * Pattern handler for PHP & JavaScript block syntaxes
+ *
+ * @param TexyBlockParser
+ * @param array      regexp matches
+ * @param string     pattern name
+ * @return TexyHtml|string|FALSE
+ */
+function codeBlockHandler($parser, $matches, $name)
+{
+	list($content) = $matches;
+	$lang = $name === 'phpBlockSyntax' ? 'PHP' : 'HTML';
+
+	$fshl = new fshlParser('HTML_UTF8', P_TAB_INDENT);
+	$texy = $parser->getTexy();
+	$content = $fshl->highlightString($lang, $content);
+	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
+
+	$elPre = TexyHtml::el('pre');
+	$elPre->attrs['class'] = strtolower($lang);
+
+	$elCode = $elPre->create('code', $content);
+
+	return $elPre;
+}
+
+
+
 $texy = new Texy();
 $texy->addHandler('block', 'blockHandler');
 
+// add new syntax: <?php ... ? >
+$texy->registerBlockPattern(
+	'codeBlockHandler',
+	'#^<\\?php\n.+\n\\?>$#ms', // block patterns must be multiline and line-anchored
+	'phpBlockSyntax'
+);
+
+// add new syntax: <script ...> ... </script>
+$texy->registerBlockPattern(
+	'codeBlockHandler',
+	'#^<script(?: type=.?text/javascript.?)?>\n.+\n</script>$#ms', // block patterns must be multiline and line-anchored
+	'scriptBlockSyntax'
+);
+
 // processing
-$text = file_get_contents('sample.texy');
+$text = file_get_contents('sample2.texy');
 $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet

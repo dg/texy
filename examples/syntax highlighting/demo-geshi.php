@@ -22,8 +22,9 @@ $geshiPath = dirname(__FILE__).'/geshi/';
 @include_once $geshiPath . 'geshi.php';
 
 
-if (!class_exists('Geshi'))
+if (!class_exists('Geshi')) {
 	die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
+}
 
 
 
