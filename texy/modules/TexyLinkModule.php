@@ -73,13 +73,13 @@ final class TexyLinkModule extends TexyModule
 		// direct url and email
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
-			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[a-z0-9.-][/a-z\d+\.~%&?@=_:;\#,-]+[/\w\d+~%?@=_\#]#iu',
+			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TEXY_CHAR.'-][/\d'.TEXY_CHAR.'+\.~%&?@=_:;\#,\x{ad}-]+[/\d'.TEXY_CHAR.'+~%?@=_\#]#u',
 			'link/url'
 		);
 
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
-			'#(?<=^|[\s([<:\x17])'.TEXY_EMAIL.'#iu',
+			'#(?<=^|[\s([<:\x17])'.TEXY_EMAIL.'#u',
 			'link/email'
 		);
 	}
@@ -379,11 +379,14 @@ final class TexyLinkModule extends TexyModule
 	 */
 	private function checkLink($link)
 	{
+		// remove soft hyphens; if not removed by Texy::process()
+		$link->URL = str_replace("\xC2\xAD", '', $link->URL);
+
 		if (strncasecmp($link->URL, 'www.', 4) === 0) {
 			// special supported case
 			$link->URL = 'http://' . $link->URL;
 
-		} elseif (preg_match('#'.TEXY_EMAIL.'$#iA', $link->URL)) {
+		} elseif (preg_match('#'.TEXY_EMAIL.'$#Au', $link->URL)) {
 			// email
 			$link->URL = 'mailto:' . $link->URL;
 
@@ -404,7 +407,7 @@ final class TexyLinkModule extends TexyModule
 	 */
 	private function textualUrl($link)
 	{
-		if ($this->texy->obfuscateEmail && preg_match('#^'.TEXY_EMAIL.'$#i', $link->raw)) { // email
+		if ($this->texy->obfuscateEmail && preg_match('#^'.TEXY_EMAIL.'$#u', $link->raw)) { // email
 			return str_replace('@', "&#64;<!---->", $link->raw);
 		}
 
@@ -423,12 +426,12 @@ final class TexyLinkModule extends TexyModule
 				$res .= $parts['host'];
 
 			if (isset($parts['path']))
-				$res .=  (strlen($parts['path']) > 16 ? ("/\xe2\x80\xa6" . preg_replace('#^.*(.{0,12})$#U', '$1', $parts['path'])) : $parts['path']);
+				$res .=  (iconv_strlen($parts['path'], 'UTF-8') > 16 ? ("/\xe2\x80\xa6" . iconv_substr($parts['path'], -12, 12, 'UTF-8')) : $parts['path']);
 
 			if (isset($parts['query'])) {
-				$res .= strlen($parts['query']) > 4 ? "?\xe2\x80\xa6" : ('?' . $parts['query']);
+				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4 ? "?\xe2\x80\xa6" : ('?' . $parts['query']);
 			} elseif (isset($parts['fragment'])) {
-				$res .= strlen($parts['fragment']) > 4 ? "#\xe2\x80\xa6" : ('#' . $parts['fragment']);
+				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4 ? "#\xe2\x80\xa6" : ('#' . $parts['fragment']);
 			}
 			return $res;
 		}

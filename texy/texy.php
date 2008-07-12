@@ -175,7 +175,7 @@ class Texy extends /*Nette::*/Object
 	/** @var array  Texy! syntax configuration */
 	public $allowed = array();
 
-	 /** @var TRUE|FALSE|array  Allowed HTML tags */
+	/** @var TRUE|FALSE|array  Allowed HTML tags */
 	public $allowedTags;
 
 	/** @var TRUE|FALSE|array  Allowed classes */
@@ -216,6 +216,9 @@ class Texy extends /*Nette::*/Object
 		'middle' => NULL,
 		'bottom' => NULL,
 	);
+
+	/** @var bool  remove soft hyphens (SHY)? */
+	public $removeSoftHyphens = TRUE;
 
 	/** @var mixed */
 	public static $advertisingNotice = 'once';
@@ -498,6 +501,10 @@ class Texy extends /*Nette::*/Object
 
 		// convert to UTF-8 (and check source encoding)
 		$text = TexyUtf::toUtf($text, $this->encoding);
+
+		if ($this->removeSoftHyphens) {
+			$text = str_replace("\xC2\xAD", '', $text);
+		}
 
 		// standardize line endings and spaces
 		$text = self::normalize($text);
@@ -857,7 +864,7 @@ class Texy extends /*Nette::*/Object
 	{
 		// absolute URL with scheme? check scheme!
 		if (!empty($this->urlSchemeFilters[$type])
-			&& preg_match('#'.TEXY_URLSCHEME.'#iA', $URL)
+			&& preg_match('#'.TEXY_URLSCHEME.'#A', $URL)
 			&& !preg_match($this->urlSchemeFilters[$type], $URL))
 			return FALSE;
 
@@ -874,7 +881,7 @@ class Texy extends /*Nette::*/Object
 	final public static function isRelative($URL)
 	{
 		// check for scheme, or absolute path, or absolute URL
-		return !preg_match('#'.TEXY_URLSCHEME.'|[\#/?]#iA', $URL);
+		return !preg_match('#'.TEXY_URLSCHEME.'|[\#/?]#A', $URL);
 	}
 
 
