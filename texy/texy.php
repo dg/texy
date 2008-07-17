@@ -9,22 +9,17 @@
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
  *
- * For more information please see http://texy.info/
+ * For more information please see http://texy.info
  *
- * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
- * @version    2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)
+ * @link       http://texy.info
  * @package    Texy
- * @link       http://texy.info/
+ * @version    $Id$
  */
 
 
-
-/** @version $Revision$ $Date$ */
-
-
-define('TEXY_VERSION',  '2.0 BETA 2 (Revision: $WCREV$, Date: $WCDATE$)');
+define('TEXY_VERSION',  '2.0-beta');
 
 
 /**
@@ -137,7 +132,6 @@ define('TEXY_CONTENT_BLOCK',  "\x14");
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
- * @version    $Revision$ $Date$
  */
 class Texy extends /*Nette::*/Object
 {
@@ -147,6 +141,7 @@ class Texy extends /*Nette::*/Object
 
 	// Texy version
 	const VERSION = TEXY_VERSION;
+	const REVISION = '$WCREV$ released on $WCDATE$';
 
 	// types of protection marks
 	const CONTENT_MARKUP = "\x17";

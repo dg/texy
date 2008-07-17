@@ -1,4 +1,4 @@
-Texy2 (c) David Grudl, 2004-2008 (http://davidgrudl.com)
+Texy! 2.0 (c) David Grudl, 2004-2008 (http://davidgrudl.com)
 
 
 
@@ -47,7 +47,7 @@ Documentation and Examples
 Refer to the 'examples' directory for examples. Texy documentation is
 available on the homepage:
 
-http://texy.info/
+http://texy.info
 
 
 

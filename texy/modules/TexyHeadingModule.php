@@ -9,12 +9,13 @@
  * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
  *
- * For more information please see http://texy.info/
+ * For more information please see http://texy.info
  *
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
- * @link       http://texy.info/
+ * @link       http://texy.info
  * @package    Texy
+ * @version    $Id$
  */
 
 
@@ -30,7 +31,6 @@ define('TEXY_HEADING_FIXED', 2);
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
- * @version    $Revision$ $Date$
  */
 final class TexyHeadingModule extends TexyModule
 {

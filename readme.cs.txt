@@ -1,4 +1,4 @@
-Texy2 (c) David Grudl, 2004-2008 (http://davidgrudl.com)
+Texy! 2.0 (c) David Grudl, 2004-2008 (http://davidgrudl.com)
 
 
 
@@ -41,7 +41,7 @@ Dokumentace a příklady
 
 Příklady najdete v adresáři 'examples'. Dokumentace je k dispozici na webových stránkách:
 
-http://texy.info/
+http://texy.info
 
 
 
