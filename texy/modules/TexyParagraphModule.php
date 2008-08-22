@@ -120,7 +120,7 @@ final class TexyParagraphModule extends TexyModule
 		} elseif (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) {
 			$el->setName($tx->nontextParagraph);
 
-		// block contains only markup tags or spaces or nothig
+		// block contains only markup tags or spaces or nothing
 		} else {
 			// if {ignoreEmptyStuff} return FALSE;
 			if (!$mod) $el->setName(NULL);

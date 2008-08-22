@@ -113,31 +113,68 @@ final class TexyHeadingModule extends TexyModule
 	 */
 	public function afterParse($texy, $DOM, $isSingleLine)
 	{
-		if ($isSingleLine || $this->balancing === self::FIXED) return;
+		if ($isSingleLine) return;
 
-		$top = $this->top;
-		$map = array();
-		$min = 100;
-		foreach ($this->TOC as $item)
-		{
-			$level = $item['level'];
-			if ($item['surrounded']) {
-				$min = min($level, $min);
-				$top = $this->top - $min;
-			} else {
-				$map[$level] = $level;
+		if ($this->balancing === self::DYNAMIC) {
+			$top = $this->top;
+			$map = array();
+			$min = 100;
+			foreach ($this->TOC as $item)
+			{
+				$level = $item['level'];
+				if ($item['type'] === 'surrounded') {
+					$min = min($level, $min);
+					$top = $this->top - $min;
+
+				} elseif ($item['type'] === 'underlined') {
+					$map[$level] = $level;
+				}
 			}
-		}
 
-		asort($map);
-		$map = array_flip(array_values($map));
+			asort($map);
+			$map = array_flip(array_values($map));
+		}
 
 		foreach ($this->TOC as $key => $item)
 		{
-			$level = $item['level'];
-			$level = $item['surrounded'] ? $level + $top : $map[$level] + $this->top;
-			$item['el']->setName('h' . min(6, max(1, $level)));
-			$this->TOC[$key]['level'] = $level;
+			if ($this->balancing === self::DYNAMIC) {
+				if ($item['type'] === 'surrounded') {
+					$level = $item['level'] + $top;
+
+				} elseif ($item['type'] === 'underlined') {
+					$level = $map[$item['level']] + $this->top;
+
+				} else {
+					$level = $item['level'];
+				}
+
+				$item['el']->setName('h' . min(6, max(1, $level)));
+				$this->TOC[$key]['level'] = $level;
+			}
+
+			if ($this->generateID && empty($item['el']->attrs['id'])) {
+				$title = trim($item['el']->toText($this->texy));
+				if ($title !== '') {
+					$this->TOC[$key]['title'] = $title;
+					$id = $this->idPrefix . Texy::webalize($title);
+					$counter = '';
+					if (isset($this->usedID[$id . $counter])) {
+						$counter = 2;
+						while (isset($this->usedID[$id . '-' . $counter])) $counter++;
+						$id .= '-' . $counter;
+					}
+					$this->usedID[$id] = TRUE;
+					$item['el']->attrs['id'] = $id;
+				}
+			}
+		}
+
+		// document title
+		if ($this->title === NULL && count($this->TOC)) {
+			$item = reset($this->TOC);
+			if (isset($item['title'])) {
+				$this->title = $item['title'] === NULL ? trim($item['el']->toText($this->texy)) : $item['title'];
+			}
 		}
 	}
 
@@ -207,39 +244,16 @@ final class TexyHeadingModule extends TexyModule
 	 */
 	public function solve($invocation, $level, $content, $mod, $isSurrounded)
 	{
-		$tx = $this->texy;
 		// as fixed balancing, for block/texysource & correct decorating
 		$el = TexyHtml::el('h' . min(6, max(1, $level + $this->top)));
-		$mod->decorate($tx, $el);
+		$mod->decorate($this->texy, $el);
 
-		$el->parseLine($tx, trim($content));
-
-		// Table of Contents
-		$title = NULL;
-		if ($this->generateID && empty($el->attrs['id'])) {
-			$title = trim($el->toText($tx));
-			$id = $this->idPrefix . Texy::webalize($title);
-			$counter = '';
-			if (isset($this->usedID[$id . $counter])) {
-				$counter = 2;
-				while (isset($this->usedID[$id . '-' . $counter])) $counter++;
-				$id .= '-' . $counter;
-			}
-			$this->usedID[$id] = TRUE;
-			$el->attrs['id'] = $id;
-		}
-
-		// document title
-		if ($this->title === NULL) {
-			if ($title === NULL) $title = trim($el->toText($tx));
-			$this->title = $title;
-		}
+		$el->parseLine($this->texy, trim($content));
 
 		$this->TOC[] = array(
 			'el' => $el,
 			'level' => $level,
-			'title' => $title,
-			'surrounded' => $isSurrounded,
+			'type' => $isSurrounded ? 'surrounded' : 'underlined',
 		);
 
 		return $el;

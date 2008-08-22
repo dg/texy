@@ -46,10 +46,7 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	public $attrs = array();
 
 	/** @var array  of TexyHtml | string nodes */
-	private $children = array();
-
-	/** @var TexyHtml parent element */
-	private $parent;
+	protected $children = array();
 
 	/** @var bool  use XHTML syntax? */
 	public static $xhtml = TRUE;
@@ -117,8 +114,8 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	 * Changes element's name.
 	 * @param  string
 	 * @param  bool  Is element empty?
-	 * @throws InvalidArgumentException
 	 * @return TexyHtml  provides a fluent interface
+	 * @throws InvalidArgumentException
 	 */
 	final public function setName($name, $empty = NULL)
 	{
@@ -189,6 +186,9 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 /*
 	final public function __call($m, $args)
 	{
+		if (count($args) !== 1) {
+			throw new InvalidArgumentException("Just one argument is required.");
+		}
 		$this->attrs[$m] = $args[0];
 		return $this;
 	}
@@ -221,6 +221,7 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	final public function setText($text)
 	{
 		if (is_scalar($text)) {
+			$this->removeChildren();
 			$this->children = array($text);
 		} elseif ($text !== NULL) {
 			throw new InvalidArgumentException('Content must be scalar.');
@@ -280,23 +281,18 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	 * @return TexyHtml  provides a fluent interface
 	 * @throws Exception
 	 */
-	final public function insert($index, $child, $replace = FALSE)
+	public function insert($index, $child, $replace = FALSE)
 	{
-		if ($child instanceof TexyHtml) {
-			if ($child->parent !== NULL) {
-				throw new InvalidStateException('Child node already has parent.');
+		if ($child instanceof TexyHtml || is_string($child)) {
+			if ($index === NULL)  { // append
+				$this->children[] = $child;
+
+			} else { // insert or replace
+				array_splice($this->children, (int) $index, $replace ? 1 : 0, array($child));
 			}
-			$child->parent = $this;
 
-		} elseif (!is_string($child)) {
-			throw new InvalidArgumentException('Child node must be scalar or TexyHtml object.');
-		}
-
-		if ($index === NULL)  { // append
-			$this->children[] = $child;
-
-		} else { // insert or replace
-			array_splice($this->children, (int) $index, $replace ? 1 : 0, array($child));
+		} else {
+			throw new /*::*/InvalidArgumentException('Child node must be scalar or TexyHtml object.');
 		}
 
 		return $this;
@@ -346,12 +342,10 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	 * @param  int index
 	 * @return void
 	 */
-	final public function offsetUnset($index)
+	public function offsetUnset($index)
 	{
 		if (isset($this->children[$index])) {
-			$child = $this->children[$index];
 			array_splice($this->children, (int) $index, 1);
-			$child->parent = NULL;
 		}
 	}
 
@@ -364,6 +358,17 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	final public function count()
 	{
 		return count($this->children);
+	}
+
+
+
+	/**
+	 * Removed all children.
+	 * @return void
+	 */
+	public function removeChildren()
+	{
+		$this->children = array();
 	}
 
 
@@ -386,17 +391,6 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	final public function getChildren()
 	{
 		return $this->children;
-	}
-
-
-
-	/**
-	 * Returns parent node.
-	 * @return TexyHtml
-	 */
-	final public function getParent()
-	{
-		return $this->parent;
 	}
 
 
@@ -495,6 +489,9 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 
 					if (!$tmp) continue;
 					$value = implode($key === 'style' ? ';' : ' ', $tmp);
+
+				} else {
+					$value = (string) $value;
 				}
 
 				// add new attribute
@@ -529,9 +526,8 @@ class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, *
 	/**
 	 * Clones all children too.
 	 */
-	final public function __clone()
+	public function __clone()
 	{
-		$this->parent = NULL;
 		foreach ($this->children as $key => $value) {
 			if (is_object($value)) {
 				$this->children[$key] = clone $value;

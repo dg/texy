@@ -97,7 +97,7 @@ final class TexyLinkModule extends TexyModule
 		self::$livelock = array();
 
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
-		if ($texy->allowed['link/definition']) {
+		if (!empty($texy->allowed['link/definition'])) {
 			$text = preg_replace_callback(
 				'#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
 				array($this, 'patternReferenceDef'),

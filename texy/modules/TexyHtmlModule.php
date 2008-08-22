@@ -254,6 +254,13 @@ final class TexyHtmlModule extends TexyModule
 
 				$tx->summary['links'][] = $elAttrs['href'];
 			}
+
+		} elseif (preg_match('#^h[1-6]#i', $name)) {
+			$tx->headingModule->TOC[] = array(
+				'el' => $el,
+				'level' => (int) substr($name, 1),
+				'type' => 'html',
+			);
 		}
 
 		$el->validateAttrs($tx->dtd);

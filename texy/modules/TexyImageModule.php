@@ -82,7 +82,7 @@ final class TexyImageModule extends TexyModule
 	 */
 	public function beforeParse($texy, & $text)
 	{
-		if ($texy->allowed['image/definition']) {
+		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
 			$text = preg_replace_callback(
 				'#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
