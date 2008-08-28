@@ -928,8 +928,11 @@ class Texy extends /*Nette::*/Object
 	 */
 	final public function free()
 	{
-		foreach (array_keys(get_object_vars($this)) as $key)
-			$this->$key = NULL;
+		if (version_compare(PHP_VERSION , '5.3', '<')) {
+			foreach (array_keys(get_object_vars($this)) as $key) {
+				$this->$key = NULL;
+			}
+		}
 	}
 
 

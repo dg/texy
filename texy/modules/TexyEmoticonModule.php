@@ -130,7 +130,7 @@ final class TexyEmoticonModule extends TexyModule
 
 		// file path
 		$file = rtrim($this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
-		if (is_file($file)) {
+		if (@is_file($file)) {
 			$size = getImageSize($file);
 			if (is_array($size)) {
 				$el->attrs['width'] = $size[0];

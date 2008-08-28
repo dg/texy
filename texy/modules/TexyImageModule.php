@@ -281,7 +281,7 @@ final class TexyImageModule extends TexyModule
 			// absolute URL & security check for double dot
 			if (Texy::isRelative($image->URL) && strpos($image->URL, '..') === FALSE) {
 				$file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
-				if (is_file($file)) {
+				if (@is_file($file)) {
 					$size = getImageSize($file);
 					if (is_array($size)) {
 						if ($image->asMax) {
