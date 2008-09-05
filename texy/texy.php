@@ -38,11 +38,9 @@ if (ini_get('zend.ze1_compatibility_mode') % 256 ||
 }
 
 
-// nette libraries
-if (!class_exists(/*Nette::*/'Object', FALSE)) { require_once dirname(__FILE__) . '/Nette/Object.php'; }
-
 // Texy! libraries
 require_once dirname(__FILE__) . '/libs/RegExp.Patterns.php';
+require_once dirname(__FILE__) . '/libs/TexyObject.php';
 require_once dirname(__FILE__) . '/libs/TexyHtml.php';
 require_once dirname(__FILE__) . '/libs/TexyModifier.php';
 require_once dirname(__FILE__) . '/libs/TexyModule.php';
@@ -133,7 +131,7 @@ define('TEXY_CONTENT_BLOCK',  "\x14");
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
  */
-class Texy extends /*Nette::*/Object
+class Texy extends TexyObject
 {
 	// configuration directives
 	const ALL = TRUE;

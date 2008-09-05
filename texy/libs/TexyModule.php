@@ -27,7 +27,7 @@
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
  */
-abstract class TexyModule extends /*Nette::*/Object
+abstract class TexyModule extends TexyObject
 {
 	/** @var Texy */
 	protected $texy;

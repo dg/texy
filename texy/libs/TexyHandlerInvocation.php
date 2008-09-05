@@ -27,7 +27,7 @@
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
  */
-final class TexyHandlerInvocation extends /*Nette::*/Object
+final class TexyHandlerInvocation extends TexyObject
 {
 	/** @var array of callbacks */
 	private $handlers;

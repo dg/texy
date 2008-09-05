@@ -27,7 +27,7 @@
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
  */
-class TexyParser extends /*Nette::*/Object
+class TexyParser extends TexyObject
 {
 	/** @var Texy */
 	protected $texy;

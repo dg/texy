@@ -35,7 +35,7 @@
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
  */
-final class TexyModifier extends /*Nette::*/Object
+final class TexyModifier extends TexyObject
 {
 	/** @var string */
 	public $id;

@@ -1,27 +1,29 @@
 <?php
 
 /**
- * Nette Framework
+ * Texy! - web text markup-language
+ * --------------------------------
  *
  * Copyright (c) 2004, 2008 David Grudl (http://davidgrudl.com)
  *
- * This source file is subject to the "Nette license" that is bundled
+ * This source file is subject to the GNU GPL license that is bundled
  * with this package in the file license.txt.
  *
- * For more information please see http://nettephp.com
+ * For more information please see http://texy.info
  *
  * @copyright  Copyright (c) 2004, 2008 David Grudl
- * @license    http://nettephp.com/license  Nette license
- * @link       http://nettephp.com
- * @category   Nette
- * @package    Nette
+ * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
+ * @link       http://texy.info
+ * @package    Texy
+ * @version    $Id$
  */
 
-/*namespace Nette;*/
 
 
 /**
- * Nette::Object is the ultimate ancestor of all instantiable classes.
+ * TexyObject is the ultimate ancestor of all instantiable classes.
+ *
+ * TexyObject is copy of Nette::Object from Nette Framework (http://nettephp.com).
  *
  * It defines some handful methods and enhances object core of PHP:
  *   - access to undeclared members throws exceptions
@@ -58,9 +60,9 @@
  *
  * @author     David Grudl
  * @copyright  Copyright (c) 2004, 2008 David Grudl
- * @package    Nette
+ * @package    Texy
  */
-abstract class Object
+abstract class TexyObject
 {
 	/** @var array (method => array(type => callback)) */
 	private static $extMethods;

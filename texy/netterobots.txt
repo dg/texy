@@ -1,2 +1,1 @@
-Disallow: /Nette
 Disallow: /modules

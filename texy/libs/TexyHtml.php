@@ -34,7 +34,7 @@
  * @copyright  Copyright (c) 2004, 2008 David Grudl
  * @package    Texy
  */
-class TexyHtml extends /*Nette::*/Object implements ArrayAccess, /* Countable, */ IteratorAggregate
+class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ IteratorAggregate
 {
 	/** @var string  element's name */
 	private $name;

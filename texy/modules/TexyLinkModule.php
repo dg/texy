@@ -452,7 +452,7 @@ final class TexyLinkModule extends TexyModule
 /**
  * @package Texy
  */
-final class TexyLink extends /*Nette::*/Object
+final class TexyLink extends TexyObject
 {
 	/** @see $type */
 	const
