@@ -234,7 +234,7 @@ abstract class TexyObject
 			// - doesn't call &$this->$m because user could bypass property setter by: $x = & $obj->property; $x = 'new value';
 			$val = $this->$m();
 			return $val;
-		}	
+		}
 
 		$m = 'is' . $name;
 		if (self::hasAccessor($class, $m)) {

@@ -5,6 +5,9 @@ Changelog
 Verze 2.0 Beta 2
 =========
 
+rev. 219
+- TexyTableModule - extended table syntax (see "forum":http://forum.texy.info/cs/viewtopic.php?id=707)
+
 rev. 208
 - use `$texy->setOutputMode(...)` to switch between HTML/XHTML, strict/loose modes. Parameter is one of these constants: `Texy::HTML4_TRANSITIONAL`, `Texy::HTML4_STRICT`, `Texy::XHTML1_TRANSITIONAL`, `Texy::XHTML1_STRICT`
 - `Texy::$strictDTD` & `$texy->htmlOutputModule->xhtml` are deprecated
@@ -37,16 +40,16 @@ rev. 179
 - chytřejší detekce emailů a URL v textu
 
 rev. 178
-- TexyTableModule - úprava chování odd & evenClass (viz "fórum":http://forum.texy.info/viewtopic.php?id=538)
+- TexyTableModule - úprava chování odd & evenClass (viz "fórum":http://forum.texy.info/cs/viewtopic.php?id=538)
 - výchozí handler 'htmlTag' vrací místo řetězce objekt TexyHtml
 - handler 'paragraph' může být volán s parametrem NULL jako modifikátorem (pozor, tento handler bude v další revizi výrazně změněn)
 - interní změny v TexyHtml a TexyModifier (v $classes nyní tvoří položky klíče pole)
 
 rev. 177
-- přidáno $texy->alignClasses (viz "fórum":http://forum.texy.info/viewtopic.php?id=532)
+- přidáno $texy->alignClasses (viz "fórum":http://forum.texy.info/cs/viewtopic.php?id=532)
 
 rev. 176
-- přidáno $texy->headingModule->moreMeansHigher (viz "fórum":http://forum.texy.info/viewtopic.php?id=523)
+- přidáno $texy->headingModule->moreMeansHigher (viz "fórum":http://forum.texy.info/cs/viewtopic.php?id=523)
 - do tabulek se nově doplňují elementy `<thead>` a `<tbody>`
 - chytřejší dělení tabulky na head & body
 
@@ -63,7 +66,7 @@ rev. 156
 - nové API metody TexyHtml::toText() & TexyHtml::toHtml() pro export částí DOM
 
 rev. 155
-- nový systém handlerů. Odstraněno `$texy->handler` a konstanta `Texy::PROCEED`. Přidáno `$texy::addHandler()`. Více ve "fóru":http://forum.texy.info/viewtopic.php?pid=1871
+- nový systém handlerů. Odstraněno `$texy->handler` a konstanta `Texy::PROCEED`. Přidáno `$texy::addHandler()`. Více ve "fóru":http://forum.texy.info/cs/viewtopic.php?pid=1871
 
 rev. 150
 - všechny příklady nyní fungují i v PHP 4. Jen je potřeba "inkludovat" odpovídající verzi Texy.
@@ -83,7 +86,7 @@ rev. 126
 - změna názvu $texy->formatterModule -> $texy->htmlOutputModule
 
 rev. 113
-- vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/viewtopic.php?id=399
+- vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/cs/viewtopic.php?id=399
 - aktivovány typografické úpravy v atributech title
 
 
@@ -204,7 +207,7 @@ listModule
 - nyní akceptuje i typografickou odrážku
 - na hotový seznam lze napojit vlastní handler `afterList` resp. `afterDefinitionList`
 - zapínání/vypínání syntaxe: `$texy->allowed['list']` resp. `$texy->allowed['list/definition']`
-- vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/viewtopic.php?id=399
+- vylepšená syntax seznamů, viz "fórum":http://forum.texy.info/cs/viewtopic.php?id=399
 - TexyDefinitionListModule začleněn do TexyListModule
 
 longWordsModule
@@ -279,7 +282,7 @@ Verze 1.1b
 
 1. 2. 2007 .[date]
 
-- NEW: podporuje "proměnné v odkazech":http://forum.texy.info/viewtopic.php?id=316
+- NEW: podporuje "proměnné v odkazech":http://forum.texy.info/cs/viewtopic.php?id=316
 - FIX: opraveny tabulky v TexyLongWordsModule & TexyQuickCorrectModule
 - FIX: oprava TexyFormatterModule (chybějící mezery v HTML blocks)
 - CHG: zobrazují se HTML komentáře
@@ -304,19 +307,19 @@ Verze 1.0 Final
 
 18. 4. 2006 .[date]
 
-- FIX: "toText() odstraní křížek":http://forum.texy.info/viewtopic.php?id=221
-- FIX: "odkaz bez uvozovek v code tagu":http://forum.texy.info/viewtopic.php?id=244
-- FIX: "klikatelný obrázek s popiskem":http://forum.texy.info/viewtopic.php?id=108 (a "také":http://forum.texy.info/viewtopic.php?id=182)
-- FIX: "kompatibilita s novými verzemi PHP":http://forum.texy.info/viewtopic.php?id=171
+- FIX: "toText() odstraní křížek":http://forum.texy.info/cs/viewtopic.php?id=221
+- FIX: "odkaz bez uvozovek v code tagu":http://forum.texy.info/cs/viewtopic.php?id=244
+- FIX: "klikatelný obrázek s popiskem":http://forum.texy.info/cs/viewtopic.php?id=108 (a "také":http://forum.texy.info/cs/viewtopic.php?id=182)
+- FIX: "kompatibilita s novými verzemi PHP":http://forum.texy.info/cs/viewtopic.php?id=171
 - FIX: nevypouští prázdné attributy ("demo":/cs/try/fvogb)
 - CHG: znak pro trademark změněn z `&#153;` na `&#8482;`
 - CHG: výchozí `alt` pro obrázky je nyní prázdný řetězec
 
 
 Rozšíření funkcí:
-- NEW: "uživatelské atributy":http://forum.texy.info/viewtopic.php?id=250
+- NEW: "uživatelské atributy":http://forum.texy.info/cs/viewtopic.php?id=250
 - CHG: povolené tagy dostupné přes `$texy->allowedTags`, mělo by v budoucnu nahradit `$texy->htmlModule->allowed`
-- NEW: nový režim "zalamování řádků":http://forum.texy.info/viewtopic.php?pid=893 via `$texy->mergeLines = false`
+- NEW: nový režim "zalamování řádků":http://forum.texy.info/cs/viewtopic.php?pid=893 via `$texy->mergeLines = false`
 - INT: PHP5-like constructors
 
 
@@ -325,7 +328,7 @@ Fix pro 1.0rc5
 
 22. 7. 2005 .[date]
 
-- FIX: kompatibilita s *divnou* verzí PHP 4.3.11 a 4.4.0 ("viz fórum":http://forum.texy.info/viewtopic.php?pid=534)
+- FIX: kompatibilita s *divnou* verzí PHP 4.3.11 a 4.4.0 ("viz fórum":http://forum.texy.info/cs/viewtopic.php?pid=534)
 
 
 Fix pro 1.0rc5
@@ -347,8 +350,8 @@ Verze 1.0rc5
 - CHG: **pozor:** modifikátor vždy musí předcházet mezera ("demo":/cs/try/32wpp)
 - NEW: podpora Texy komentářů &sect;&sect; ("demo":/cs/try/61quw)
 - NEW: rychlé odkazy `test :[url]` ("demo":/cs/try/anq0p)
-- NEW: dokonalejší přeformátování HTML ("demo":/cs/try/icsh4, "fórum":http://forum.texy.info/viewtopic.php?id=105)
-- NEW: vkládání externích dat jako `{{ getPrice(produkt) }}` ("fórum":http://forum.texy.info/viewtopic.php?id=128) *(sponzorem vývoje této funkce je společnost "Internet Mall":www.MALL.cz, a.s.)*
+- NEW: dokonalejší přeformátování HTML ("demo":/cs/try/icsh4, "fórum":http://forum.texy.info/cs/viewtopic.php?id=105)
+- NEW: vkládání externích dat jako `{{ getPrice(produkt) }}` ("fórum":http://forum.texy.info/cs/viewtopic.php?id=128) *(sponzorem vývoje této funkce je společnost "Internet Mall":www.MALL.cz, a.s.)*
 
 
 

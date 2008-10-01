@@ -78,7 +78,7 @@ final class TexyTableModule extends TexyModule
 
 		$parser->moveBackward();
 
-		if ($parser->next('#^\|(\#|\=){2,}(?!\\1)(.*)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
+		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
 			list(, , $mContent, $mMod) = $matches;
 			//    [1] => # / =
 			//    [2] => ....
@@ -96,17 +96,23 @@ final class TexyTableModule extends TexyModule
 		$rowCounter = 0;
 		$colCounter = 0;
 		$elPart = NULL;
+		$lineMode = FALSE; // rows must be separated by lines
 
 		while (TRUE) {
-			if ($parser->next('#^\|[+-]{3,}$#Um', $matches)) {
-				$isHead = !$isHead;
+			if ($parser->next('#^\|([=-])[+|=-]{2,}$#Um', $matches)) { // line
+				if ($lineMode) {
+					if ($matches[1] === '=') $isHead = !$isHead;
+				} else {
+					$isHead = !$isHead;
+					$lineMode = $matches[1] === '=';
+				}
 				$prevRow = array();
 				continue;
 			}
 
 			if ($parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
 				// smarter head detection
-				if ($rowCounter === 0 && !$isHead && $parser->next('#^\|[+-]{3,}$#Um', $foo)) {
+				if ($rowCounter === 0 && !$isHead && $parser->next('#^\|[=-][+|=-]{2,}$#Um', $foo)) {
 					$isHead = TRUE;
 					$parser->moveBackward();
 				}
@@ -141,21 +147,23 @@ final class TexyTableModule extends TexyModule
 				$mContent = str_replace('\\|', '&#x7C;', $mContent);
 
 				foreach (explode('|', $mContent) as $cell) {
+					// rowSpan
+					if (isset($prevRow[$col]) && ($lineMode || preg_match('#\^\ *$|\*??(.*)\ +\^$#AU', $cell, $matches))) {
+						$prevRow[$col]->rowSpan++;
+						if (!$lineMode) {
+							$cell = isset($matches[1]) ? $matches[1] : '';
+						}
+						$prevRow[$col]->text .= "\n" . $cell;
+						$col += $prevRow[$col]->colSpan;
+						$elCell = NULL;
+						continue;
+					}
+
 					// colSpan
 					if ($cell === '' && $elCell) {
 						$elCell->colSpan++;
 						unset($prevRow[$col]);
 						$col++;
-						continue;
-					}
-
-					// rowSpan
-					if (isset($prevRow[$col]) && preg_match('#\^\ *$|\*??(.*)\ +\^$#AU', $cell, $matches)) {
-						$prevRow[$col]->rowSpan++;
-						$matches[] = '';
-						$prevRow[$col]->text .= "\n" . $matches[1];
-						$col += $prevRow[$col]->colSpan;
-						$elCell = NULL;
 						continue;
 					}
 
@@ -191,13 +199,19 @@ final class TexyTableModule extends TexyModule
 
 				// even up with empty cells
 				while ($col < $colCounter) {
-					$elCell = new TexyTableCellElement;
-					$elCell->setName($isHead ? 'th' : 'td');
-					if (isset($colModifier[$col])) {
-						$colModifier[$col]->decorate($tx, $elCell);
+					if (isset($prevRow[$col]) && $lineMode) {
+						$prevRow[$col]->rowSpan++;
+						$prevRow[$col]->text .= "\n";
+
+					} else {
+						$elCell = new TexyTableCellElement;
+						$elCell->setName($isHead ? 'th' : 'td');
+						if (isset($colModifier[$col])) {
+							$colModifier[$col]->decorate($tx, $elCell);
+						}
+						$elRow->add($elCell);
+						$prevRow[$col] = $elCell;
 					}
-					$elRow->add($elCell);
-					$prevRow[$col] = $elCell;
 					$col++;
 				}
 				$colCounter = $col;
