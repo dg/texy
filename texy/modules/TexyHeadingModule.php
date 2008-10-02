@@ -172,9 +172,7 @@ final class TexyHeadingModule extends TexyModule
 		// document title
 		if ($this->title === NULL && count($this->TOC)) {
 			$item = reset($this->TOC);
-			if (isset($item['title'])) {
-				$this->title = $item['title'] === NULL ? trim($item['el']->toText($this->texy)) : $item['title'];
-			}
+			$this->title = isset($item['title']) ? $item['title'] : trim($item['el']->toText($this->texy));
 		}
 	}
 
