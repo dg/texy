@@ -106,6 +106,7 @@ final class TexyTypographyModule extends TexyModule
 			'#-{1,}> #'                               => " \xe2\x86\x92 ",                 // right arrow -->
 			'# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
 			'#={1,}> #'                               => " \xe2\x87\x92 ",                 // right arrow ==>
+			'#\\+-#'                                  => "\xc2\xb1",                       // +-
 			'#(\d+)( ?)x\\2(?=\d)#'                   => "\$1\xc3\x97",                    // dimension sign 123 x 123...
 			'#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // dimension sign 123x
 			'#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark (TM)
