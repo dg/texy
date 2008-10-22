@@ -770,8 +770,7 @@ class Texy extends TexyObject
 	{
 		$s = TexyUtf::utf2ascii($s);
 		$s = strtolower($s);
-		if ($charlist) $charlist = preg_quote($charlist, '#');
-		$s = preg_replace('#[^a-z0-9'.$charlist.']+#', '-', $s);
+		$s = preg_replace('#[^a-z0-9'.preg_quote($charlist, '#').']+#', '-', $s);
 		$s = trim($s, '-');
 		return $s;
 	}
