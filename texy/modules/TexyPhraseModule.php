@@ -34,6 +34,7 @@ final class TexyPhraseModule extends TexyModule
 		'phrase/strong' => 'strong', // or 'b'
 		'phrase/em' => 'em', // or 'i'
 		'phrase/em-alt' => 'em',
+		'phrase/em-alt2' => 'em',
 		'phrase/ins' => 'ins',
 		'phrase/del' => 'del',
 		'phrase/sup' => 'sup',
@@ -95,8 +96,15 @@ final class TexyPhraseModule extends TexyModule
 		// *emphasisAlt*
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\*)\*(?![\s*])(.+)'.TEXY_MODIFIER.'?(?<![\s*])\*(?!\*)'.TEXY_LINK.'??()#Uus',
+			'#(?<!\*)\*(?![\s*])(\S+)'.TEXY_MODIFIER.'?(?<![\s*])\*(?!\*)'.TEXY_LINK.'??()#Uus',
 			'phrase/em-alt'
+		);
+
+		// *emphasisAlt2*
+		$texy->registerLinePattern(
+			array($this, 'patternPhrase'),
+			'#(?<![^\s.,;:<>()"\''.TEXY_MARK.'-])\*(?![\s*])(.+)'.TEXY_MODIFIER.'?(?<![\s*])\*(?![^\s.,;:<>()"?!\'-])'.TEXY_LINK.'??()#Uus',
+			'phrase/em-alt2'
 		);
 
 		// ++inserted++

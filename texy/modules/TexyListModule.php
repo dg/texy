@@ -66,15 +66,15 @@ final class TexyListModule extends TexyModule
 		$this->texy->registerBlockPattern(
 			array($this, 'patternList'),
 			'#^(?:'.TEXY_MODIFIER_H.'\n)?'          // .{color: red}
-		  . '('.implode('|', $RE).')\ *\S.*$#mUu',  // item (unmatched)
+			. '('.implode('|', $RE).')\ *\S.*$#mUu',  // item (unmatched)
 			'list'
 		);
 
 		$this->texy->registerBlockPattern(
 			array($this, 'patternDefList'),
 			'#^(?:'.TEXY_MODIFIER_H.'\n)?'               // .{color:red}
-		  . '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'          // Term:
-		  . '(\ ++)('.implode('|', $REul).')\ *\S.*$#mUu',  // - description
+			. '(\S.*)\:\ *'.TEXY_MODIFIER_H.'?\n'          // Term:
+			. '(\ ++)('.implode('|', $REul).')\ *\S.*$#mUu',  // - description
 			'list/definition'
 		);
 	}

@@ -83,7 +83,7 @@ final class TexyHeadingModule extends TexyModule
 		$texy->registerBlockPattern(
 			array($this, 'patternUnderline'),
 			'#^(\S.*)'.TEXY_MODIFIER_H.'?\n'
-		  . '(\#{3,}|\*{3,}|={3,}|-{3,})$#mU',
+			. '(\#{3,}|\*{3,}|={3,}|-{3,})$#mU',
 			'heading/underlined'
 		);
 

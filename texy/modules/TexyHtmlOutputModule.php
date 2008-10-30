@@ -38,7 +38,7 @@ final class TexyHtmlOutputModule extends TexyModule
 	public $lineWrap = 80;
 
 	/** @var bool  remove optional HTML end tags? */
-	public $removeOptional = TRUE;
+	public $removeOptional = FALSE;
 
 	/** @var int  indent space counter */
 	private $space;

@@ -44,7 +44,7 @@ final class TexyTableModule extends TexyModule
 		$texy->registerBlockPattern(
 			array($this, 'patternTable'),
 			'#^(?:'.TEXY_MODIFIER_HV.'\n)?'   // .{color: red}
-		  . '\|.*()$#mU',                     // | ....
+			. '\|.*()$#mU',                     // | ....
 			'table'
 		);
 	}
