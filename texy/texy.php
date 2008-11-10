@@ -566,6 +566,10 @@ class Texy extends TexyObject
 		$this->typographyModule->beforeParse($this, $text);
 		$text = $this->typographyModule->postLine($text);
 
+		if (!empty($this->allowed['longwords'])) {
+			$text = $this->longWordsModule->postLine($text);
+		}
+
 		return TexyUtf::utf2html($text, $this->encoding);
 	}
 
