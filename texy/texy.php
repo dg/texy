@@ -469,11 +469,11 @@ class Texy extends TexyObject
 
 
 	/**
-	 * Convert Texy! document in (X)HTML code.
+	 * Converts document in Texy! to (X)HTML code.
 	 *
 	 * @param  string   input text
-	 * @param  bool     is block or single line?
-	 * @return string  output html code
+	 * @param  bool     is single line?
+	 * @return string   output HTML code
 	 */
 	public function process($text, $singleLine = FALSE)
 	{
@@ -551,9 +551,22 @@ class Texy extends TexyObject
 
 
 	/**
-	 * Makes only typographic corrections.
+	 * Converts single line in Texy! to (X)HTML code.
+	 *
 	 * @param  string   input text
-	 * @return string  output code (in UTF!)
+	 * @return string   output HTML code
+	 */
+	public function processLine($text)
+	{
+		return $this->process($text, TRUE);
+	}
+
+
+
+	/**
+	 * Makes only typographic corrections.
+	 * @param  string   input text (in encoding defined by Texy::$encoding)
+	 * @return string   output text (in UTF-8)
 	 */
 	public function processTypo($text)
 	{

@@ -108,12 +108,12 @@ final class TexyHtmlOutputModule extends TexyModule
 				array($this, 'wrap'),
 				$s
 			);
-		}	
+		}
 
 		// remove HTML 4.01 optional end tags
 		if (!$this->xml && $this->removeOptional) {
 			$s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
-		}	
+		}
 	}
 
 
