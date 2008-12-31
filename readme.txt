@@ -1,4 +1,4 @@
-Texy! 2.0 (c) David Grudl, 2004-2008 (http://davidgrudl.com)
+Texy! 2.0 (c) David Grudl, 2004-2009 (http://davidgrudl.com)
 
 
 
