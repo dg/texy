@@ -413,24 +413,26 @@ final class TexyLinkModule extends TexyModule
 
 		if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#i', $link->raw)) {
 
-			if (strncasecmp($link->raw, 'www.', 4) === 0) $parts = @parse_url('none://' . $link->raw);
-			else $parts = @parse_url($link->raw);
+			$raw = strncasecmp($link->raw, 'www.', 4) === 0 ? 'none://' . $link->raw : $link->raw;
 
-			if ($parts === FALSE) return $link->raw;
+			// parse_url() in PHP damages UTF-8 - use regular expression
+			if (!preg_match('~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~', $raw, $parts)) {
+				return $link->raw;
+			}
 
 			$res = '';
-			if (isset($parts['scheme']) && $parts['scheme'] !== 'none')
+			if ($parts['scheme'] !== '' && $parts['scheme'] !== 'none')
 				$res .= $parts['scheme'] . '://';
 
-			if (isset($parts['host']))
+			if ($parts['host']  !== '')
 				$res .= $parts['host'];
 
-			if (isset($parts['path']))
+			if ($parts['path']  !== '')
 				$res .=  (iconv_strlen($parts['path'], 'UTF-8') > 16 ? ("/\xe2\x80\xa6" . iconv_substr($parts['path'], -12, 12, 'UTF-8')) : $parts['path']);
 
-			if (isset($parts['query'])) {
+			if ($parts['query']  !== '') {
 				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4 ? "?\xe2\x80\xa6" : ('?' . $parts['query']);
-			} elseif (isset($parts['fragment'])) {
+			} elseif ($parts['fragment']  !== '') {
 				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4 ? "#\xe2\x80\xa6" : ('#' . $parts['fragment']);
 			}
 			return $res;

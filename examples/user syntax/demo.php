@@ -17,9 +17,10 @@ require_once dirname(__FILE__).'/../../texy/texy.php';
 $texy = new Texy();
 
 // disable *** and ** and * phrases
-$texy->allowed['phraseStrongEm'] = FALSE;
-$texy->allowed['phraseStrong'] = FALSE;
-$texy->allowed['phraseEm'] = FALSE;
+$texy->allowed['phrase/strong+em'] = FALSE;
+$texy->allowed['phrase/strong'] = FALSE;
+$texy->allowed['phrase/em-alt'] = FALSE;
+$texy->allowed['phrase/em-alt2'] = FALSE;
 
 
 // register my syntaxes:

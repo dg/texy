@@ -25,7 +25,7 @@ define('TEXY_VERSION',  '2.0-beta');
 /**
  * Check PHP configuration.
  */
-if (function_exists('mb_get_info')) {
+if (extension_loaded('mbstring')) {
 	if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
 		mb_internal_encoding('pass');
 		trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
@@ -435,6 +435,11 @@ class Texy extends TexyObject
 
 	final public function registerLinePattern($handler, $pattern, $name)
 	{
+		if (!is_callable($handler)) {
+			$able = is_callable($handler, TRUE, $textual);
+			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+		}
+
 		if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
 
 		$this->linePatterns[$name] = array(
@@ -447,8 +452,12 @@ class Texy extends TexyObject
 
 	final public function registerBlockPattern($handler, $pattern, $name)
 	{
-		// if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
+		if (!is_callable($handler)) {
+			$able = is_callable($handler, TRUE, $textual);
+			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+		}
 
+		// if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
 
 		$this->blockPatterns[$name] = array(
@@ -461,6 +470,11 @@ class Texy extends TexyObject
 
 	final public function registerPostLine($handler, $name)
 	{
+		if (!is_callable($handler)) {
+			$able = is_callable($handler, TRUE, $textual);
+			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+		}
+
 		if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
 
 		$this->postHandlers[$name] = $handler;
@@ -681,7 +695,8 @@ class Texy extends TexyObject
 	final public function addHandler($event, $callback)
 	{
 		if (!is_callable($callback)) {
-			throw new InvalidArgumentException("Invalid callback.");
+			$able = is_callable($callback, TRUE, $textual);
+			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		$this->handlers[$event][] = $callback;

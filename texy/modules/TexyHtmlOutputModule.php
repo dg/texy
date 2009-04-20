@@ -245,11 +245,13 @@ final class TexyHtmlOutputModule extends TexyModule
 
 				if ($this->xml) $mAttr .= " /";
 
-				if ($this->indent && $mTag === 'br')
+				$indent = $this->indent && empty($this->tagUsed['pre']) && empty($this->tagUsed['textarea']);
+
+				if ($indent && $mTag === 'br')
 					// formatting exception
 					return rtrim($s) .  '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-				if ($this->indent && !isset(TexyHtml::$inlineElements[$mTag])) {
+				if ($indent && !isset(TexyHtml::$inlineElements[$mTag])) {
 					$space = "\r" . str_repeat("\t", $this->space);
 					return $s . $space . '<' . $mTag . $mAttr . '>' . $space;
 				}
