@@ -51,8 +51,8 @@ http://texy.info
 
 
 
-Texy.compact.php
-----------------
+Texy.minified
+-------------
 
 This is shrinked single-file version of whole Texy, useful when you don't
 want to modify library, but just use it.

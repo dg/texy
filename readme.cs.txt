@@ -45,8 +45,8 @@ http://texy.info
 
 
 
-Texy.compact.php
-----------------
+Texy.minified
+-------------
 
 Jde o zhuštěnou jednosouborovou verzi Texy. Je totožná s normální verzí,
 redukováno bylo pouze bílé místo a komentáře.
