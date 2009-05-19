@@ -1,7 +1,5 @@
-/************************************************** PISMO A VELIKOST */
-
 body, input, select, textarea, th, td {
-	font-family: "Trebuchet MS", "Geneva CE", lucida, sans-serif; /* Trebuchet MS (elegantní bezpatkové písmo) */
+	font-family: "Trebuchet MS", "Geneva CE", lucida, sans-serif;
 }
 
 input, select, textarea {

@@ -143,7 +143,7 @@ final class TexyLongWordsModule extends TexyModule
 
 				if ($s[$a] === '.') { $hyphen = self::HERE; break; }
 
-				if (isset($consonants[$s[$a]])) {  // souhlásky
+				if (isset($consonants[$s[$a]])) {  // consonants
 
 					if (isset($vowels[$s[$a+1]])) {
 						if (isset($vowels[$s[$a-1]])) $hyphen = self::HERE;
@@ -173,7 +173,7 @@ final class TexyLongWordsModule extends TexyModule
 					}
 
 					break;
-				}   // konec souhlasky
+				}   // end of consonants
 
 				if (($s[$a] === 'u') && isset($doubleVowels[$s[$a-1]])) { $hyphen = self::AFTER; break; }
 				if (isset($vowels[$s[$a]]) && isset($vowels[$s[$a-1]])) { $hyphen = self::HERE; break; }
