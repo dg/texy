@@ -8,7 +8,7 @@
  * demonstrates advantages of inheriting from base Texy object
  *
  * @author   David Grudl (http://davidgrudl.com)
- * @version  $Revision$ $Date$
+ * @version  $Id$
  */
 
 

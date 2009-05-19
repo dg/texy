@@ -7,7 +7,7 @@
  * This demo shows how control modifiers usage
  *
  * @author   David Grudl (http://davidgrudl.com)
- * @version  $Revision$ $Date$
+ * @version  $Id$
  */
 
 

@@ -9,7 +9,7 @@
  *       - load language, highlight and return stylesheet + html output
  *
  * @author   David Grudl (http://davidgrudl.com)
- * @version  $Revision$ $Date$
+ * @version  $Id$
  */
 
 

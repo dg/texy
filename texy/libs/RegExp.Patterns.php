@@ -22,7 +22,6 @@
 
 /**#@+
  * Regular expression patterns
- * @version $Revision$ $Date$
  */
 
 // Unicode character classes

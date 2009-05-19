@@ -19,8 +19,6 @@
  */
 
 
-/** @version $Revision$ $Date$ */
-
 // @param $mode
 // @return $dtd
 

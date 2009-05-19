@@ -7,7 +7,7 @@
  * This demo shows how enable emoticons in Texy!
  *
  * @author   David Grudl (http://davidgrudl.com)
- * @version  $Revision$ $Date$
+ * @version  $Id$
  */
 
 
