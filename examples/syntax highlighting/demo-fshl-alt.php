@@ -8,7 +8,6 @@
  *       - define user callback (for /--code elements)
  *
  * @author   David Grudl (http://davidgrudl.com)
- * @version  $Id$
  */
 
 

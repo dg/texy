@@ -10,7 +10,6 @@
  *     - support for preloading
  *
  * @author   David Grudl (http://davidgrudl.com)
- * @version  $Id$
  */
 
 

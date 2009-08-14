@@ -11,7 +11,6 @@
  *     - well formed output
  *
  * @author   David Grudl (http://davidgrudl.com)
- * @version  $Id$
  */
 
 

@@ -15,7 +15,6 @@
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
  * @link       http://texy.info
  * @package    Texy
- * @version    $Id$
  */
 
 
