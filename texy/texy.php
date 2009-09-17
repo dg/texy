@@ -18,7 +18,7 @@
  */
 
 
-define('TEXY_VERSION',  '2.0-beta');
+define('TEXY_VERSION',  '2.0');
 
 
 /**
