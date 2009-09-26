@@ -34,6 +34,8 @@ final class TexyTableModule extends TexyModule
 	/** @var string  CSS class for even rows */
 	public $evenClass;
 
+	private $disableTables;
+
 
 
 	public function __construct($texy)
@@ -66,6 +68,7 @@ final class TexyTableModule extends TexyModule
 	 */
 	public function patternTable($parser, $matches)
 	{
+		if ($this->disableTables) return FALSE;
 		list(, $mMod) = $matches;
 		//    [1] => .(title)[class]{style}<>_
 
@@ -143,9 +146,11 @@ final class TexyTableModule extends TexyModule
 				$elCell = NULL;
 
 				// special escape sequence \|
-				$mContent = str_replace('\\|', '&#x7C;', $mContent);
+				$mContent = str_replace('\\|', "\x13", $mContent);
+				$mContent = preg_replace('#(\[[^\]]*)\|#', "$1\x13", $mContent); // HACK: support for [..|..]
 
 				foreach (explode('|', $mContent) as $cell) {
+					$cell = strtr($cell, "\x13", '|');
 					// rowSpan
 					if (isset($prevRow[$col]) && ($lineMode || preg_match('#\^\ *$|\*??(.*)\ +\^$#AU', $cell, $matches))) {
 						$prevRow[$col]->rowSpan++;
@@ -275,7 +280,10 @@ final class TexyTableModule extends TexyModule
 				$text = rtrim($elCell->text);
 				if (strpos($text, "\n") !== FALSE) {
 					// multiline parse as block
+					// HACK: disable tables
+					$this->disableTables = TRUE;
 					$elCell->parseBlock($tx, Texy::outdent($text));
+					$this->disableTables = FALSE;
 				} else {
 					$elCell->parseLine($tx, ltrim($text));
 				}
