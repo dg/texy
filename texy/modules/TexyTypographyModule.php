@@ -103,7 +103,7 @@ final class TexyTypographyModule extends TexyModule
 			'#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
 			'#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright (C)
 			'#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro (EUR)
-			'#(\d{1,3}) (?=\d{3})#'                   => "\$1\xc2\xa0",                    // (phone) number 1 123 123 123...
+			'#(\d) (?=\d{3})#'                        => "\$1\xc2\xa0",                    // (phone) number 1 123 123 123...
 
 			'#(?<=[^\s\x17])\s+([\x17-\x1F]+)(?=\s)#u'=> "\$1",                            // remove intermarkup space phase 1
 			'#(?<=\s)([\x17-\x1F]+)\s+#u'             => "\$1",                            // remove intermarkup space phase 2
@@ -111,7 +111,7 @@ final class TexyTypographyModule extends TexyModule
 			'#(?<=.{50})\s+(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
 
 			// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-			'#(?<=^| |\.|,|-|\+|\x16|\()([\x17-\x1F]*\d+\.?[\x17-\x1F]*)\s+(?=[\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+			'#(?<=^| |\.|,|-|\+|\x16|\(|\d\x{A0})([\x17-\x1F]*\d+\.?[\x17-\x1F]*)\s+(?=[\x17-\x1F]*[%'.TEXY_CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
 													=> "\$1\xc2\xa0",
 
 			// space between preposition and word
