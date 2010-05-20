@@ -121,7 +121,7 @@ final class TexyPhraseModule extends TexyModule
 		// m^2 alternative superscript
 		$texy->registerLinePattern(
 			array($this, 'patternSupSub'),
-			'#(?<=[a-z0-9])\^([0-9+-]{1,4}?)(?![a-z0-9])#Uui',
+			'#(?<=[a-z0-9])\^([n0-9+-]{1,4}?)(?![a-z0-9])#Uui',
 			'phrase/sup-alt'
 		);
 
@@ -135,7 +135,7 @@ final class TexyPhraseModule extends TexyModule
 		// m_2 alternative subscript
 		$texy->registerLinePattern(
 			array($this, 'patternSupSub'),
-			'#(?<=[a-z])\_([0-9]{1,3})(?![a-z0-9])#Uui',
+			'#(?<=[a-z])\_([n0-9]{1,3})(?![a-z0-9])#Uui',
 			'phrase/sub-alt'
 		);
 
