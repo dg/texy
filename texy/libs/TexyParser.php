@@ -288,7 +288,10 @@ class TexyLineParser extends TexyParser
 						foreach ($m as $keyx => $value) $m[$keyx] = $value[0];
 
 					} else {
-						// try next time
+						// try next time?
+						if (!$pl[$name]['again'] || !preg_match($pl[$name]['again'], $text, $foo, NULL, $offset + $delta)) {
+							unset($names[$index]);
+						}
 						continue;
 					}
 				} // if

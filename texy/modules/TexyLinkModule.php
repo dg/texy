@@ -64,13 +64,15 @@ final class TexyLinkModule extends TexyModule
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
 			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TEXY_CHAR.'-][/\d'.TEXY_CHAR.'+\.~%&?@=_:;\#,\x{ad}-]+[/\d'.TEXY_CHAR.'+~%?@=_\#]#u',
-			'link/url'
+			'link/url',
+			'#(?:https?://|www\.|ftp://)#u'
 		);
 
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
 			'#(?<=^|[\s([<:\x17])'.TEXY_EMAIL.'#u',
-			'link/email'
+			'link/email',
+			'#'.TEXY_EMAIL.'#u'
 		);
 	}
 

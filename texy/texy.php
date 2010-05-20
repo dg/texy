@@ -423,7 +423,7 @@ class Texy extends TexyObject
 
 
 
-	final public function registerLinePattern($handler, $pattern, $name)
+	final public function registerLinePattern($handler, $pattern, $name, $againTest = NULL)
 	{
 		if (!is_callable($handler)) {
 			$able = is_callable($handler, TRUE, $textual);
@@ -435,6 +435,7 @@ class Texy extends TexyObject
 		$this->linePatterns[$name] = array(
 			'handler'     => $handler,
 			'pattern'     => $pattern,
+			'again'       => $againTest,
 		);
 	}
 
