@@ -61,6 +61,9 @@ final class TexyBlockModule extends TexyModule
 			"\$1\$2\n\\--",
 			$text
 		);
+		if (preg_last_error()) {
+			throw new TexyPcreException;
+		}
 	}
 
 

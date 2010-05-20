@@ -76,6 +76,9 @@ final class TexyHtmlOutputModule extends TexyModule
 			array($this, 'cb'),
 			$s . '</end/>'
 		);
+		if (preg_last_error()) {
+			throw new TexyPcreException;
+		}
 
 		// empty out stack
 		foreach ($this->tagStack as $item) $s .= $item['close'];

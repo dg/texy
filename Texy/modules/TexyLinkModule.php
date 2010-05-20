@@ -96,6 +96,9 @@ final class TexyLinkModule extends TexyModule
 				array($this, 'patternReferenceDef'),
 				$text
 			);
+			if (preg_last_error()) {
+				throw new TexyPcreException;
+			}
 		}
 	}
 

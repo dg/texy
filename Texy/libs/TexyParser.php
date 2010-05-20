@@ -102,6 +102,9 @@ class TexyBlockParser extends TexyParser
 		if ($ok) {
 			$this->offset += strlen($matches[0][0]) + 1;  // 1 = "\n"
 			foreach ($matches as $key => $value) $matches[$key] = $value[0];
+
+		} elseif (preg_last_error()) {
+			throw new TexyPcreException("%msg; pattern: {$pattern}Am");
 		}
 		return $ok;
 	}
@@ -155,6 +158,9 @@ class TexyBlockParser extends TexyParser
 				$ms,
 				PREG_OFFSET_CAPTURE | PREG_SET_ORDER
 			);
+			if (preg_last_error()) {
+				throw new TexyPcreException("%msg; pattern: $pattern[pattern]");
+			}
 
 			foreach ($ms as $m) {
 				$offset = $m[0][1];
@@ -294,6 +300,9 @@ class TexyLineParser extends TexyParser
 						if (!strlen($m[0][0])) continue;
 						$arrOffset[$name] = $m[0][1];
 						foreach ($m as $keyx => $value) $m[$keyx] = $value[0];
+
+					} elseif (preg_last_error()) {
+						throw new TexyPcreException("%msg; pattern: {$pl[$name]['pattern']}");
 
 					} else {
 						// try next time?

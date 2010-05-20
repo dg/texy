@@ -66,6 +66,27 @@ require_once dirname(__FILE__) . '/modules/TexyHtmlOutputModule.php';
 
 
 /**
+ * Checking preg_last_error()
+ */
+class TexyPcreException extends Exception
+{
+	public function __construct($message = '%msg.')
+	{
+		static $messages = array(
+			PREG_INTERNAL_ERROR => 'Internal error',
+			PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit was exhausted',
+			PREG_RECURSION_LIMIT_ERROR => 'Recursion limit was exhausted',
+			PREG_BAD_UTF8_ERROR => 'Malformed UTF-8 data',
+			5 => 'Offset didn\'t correspond to the begin of a valid UTF-8 code point', // PREG_BAD_UTF8_OFFSET_ERROR
+		);
+		$code = preg_last_error();
+		parent::__construct(str_replace('%msg', isset($messages[$code]) ? $messages[$code] : 'Unknown error', $message), $code);
+	}
+}
+
+
+
+/**
  * For Texy 1 backward compatibility.
  */
 define('TEXY_ALL',  TRUE);
@@ -478,6 +499,9 @@ class Texy extends TexyObject
 		$this->tabWidth = max(1, (int) $this->tabWidth);
 		while (strpos($text, "\t") !== FALSE) {
 			$text = preg_replace_callback('#^([^\t\n]*+)\t#mU', array($this, 'tabCb'), $text);
+			if (preg_last_error()) {
+				throw new TexyPcreException;
+			}
 		}
 
 		// user before handler
@@ -626,6 +650,9 @@ class Texy extends TexyObject
 
 		// remove tags
 		$s = preg_replace('#<(script|style)(.*)</\\1>#Uis', '', $s);
+		if (preg_last_error()) {
+			throw new TexyPcreException;
+		}
 		$s = strip_tags($s);
 		$s = preg_replace('#\n\s*\n\s*\n[\n\s]*\n#', "\n\n", $s);
 

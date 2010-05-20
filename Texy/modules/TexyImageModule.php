@@ -80,6 +80,9 @@ final class TexyImageModule extends TexyModule
 				array($this, 'patternReferenceDef'),
 				$text
 			);
+			if (preg_last_error()) {
+				throw new TexyPcreException;
+			}
 		}
 	}
 
