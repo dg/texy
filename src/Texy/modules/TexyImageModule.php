@@ -66,10 +66,10 @@ final class TexyImageModule extends TexyModule
 	{
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
-			$text = preg_replace_callback(
+			$text = TexyRegexp::replace(
+				$text,
 				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *'.TexyPatterns::MODIFIER.'?\s*()$#mUu',
-				array($this, 'patternReferenceDef'),
-				$text
+				array($this, 'patternReferenceDef')
 			);
 		}
 	}
@@ -80,8 +80,9 @@ final class TexyImageModule extends TexyModule
 	 *
 	 * @param  array      regexp matches
 	 * @return string
+	 * @internal
 	 */
-	private function patternReferenceDef($matches)
+	public function patternReferenceDef($matches)
 	{
 		list(, $mRef, $mURLs, $mMod) = $matches;
 		// [1] => [* (reference) *]
@@ -179,7 +180,7 @@ final class TexyImageModule extends TexyModule
 
 			// dimensions
 			$matches = NULL;
-			if (preg_match('#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U', $content[0], $matches)) {
+			if ($matches = TexyRegexp::match($content[0], '#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U')) {
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';
 				$image->width = $matches[2] === '?' ? NULL : (int) $matches[2];

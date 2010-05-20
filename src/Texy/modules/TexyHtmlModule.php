@@ -287,7 +287,7 @@ final class TexyHtmlModule extends TexyModule
 		}
 
 		// sanitize comment
-		$content = preg_replace('#-{2,}#', ' - ', $content);
+		$content = TexyRegexp::replace($content, '#-{2,}#', ' - ');
 		$content = trim($content, '-');
 
 		return $this->texy->protect('<!--' . $content . '-->', Texy::CONTENT_MARKUP);

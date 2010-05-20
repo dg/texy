@@ -64,10 +64,10 @@ final class TexyLongWordsModule extends TexyModule
 
 	public function postLine($text)
 	{
-		return preg_replace_callback(
+		return TexyRegexp::replace(
+			$text,
 			'#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
-			array($this, 'pattern'),
-			$text
+			array($this, 'pattern')
 		);
 	}
 
@@ -77,8 +77,9 @@ final class TexyLongWordsModule extends TexyModule
 	 * (c) David Grudl
 	 * @param  array
 	 * @return string
+	 * @internal
 	 */
-	private function pattern($matches)
+	public function pattern($matches)
 	{
 		list($mWord) = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd

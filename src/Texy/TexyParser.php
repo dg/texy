@@ -75,22 +75,20 @@ class TexyBlockParser extends TexyParser
 		if ($this->offset > strlen($this->text)) {
 			return FALSE;
 		}
-		$matches = NULL;
-		$ok = preg_match(
-			$pattern . 'Am', // anchored & multiline
+		$matches = TexyRegexp::match(
 			$this->text,
-			$matches,
-			PREG_OFFSET_CAPTURE,
+			$pattern . 'Am', // anchored & multiline
+			TexyRegexp::OFFSET_CAPTURE,
 			$this->offset
 		);
 
-		if ($ok) {
+		if ($matches) {
 			$this->offset += strlen($matches[0][0]) + 1; // 1 = "\n"
 			foreach ($matches as $key => $value) {
 				$matches[$key] = $value[0];
 			}
+			return TRUE;
 		}
-		return $ok;
 	}
 
 
@@ -139,14 +137,13 @@ class TexyBlockParser extends TexyParser
 		$matches = array();
 		$priority = 0;
 		foreach ($this->patterns as $name => $pattern) {
-			preg_match_all(
-				$pattern['pattern'],
+			$ms = TexyRegexp::match(
 				$text,
-				$ms,
-				PREG_OFFSET_CAPTURE | PREG_SET_ORDER
+				$pattern['pattern'],
+				TexyRegexp::OFFSET_CAPTURE | TexyRegexp::ALL
 			);
 
-			foreach ($ms as $m) {
+			foreach ((array) $ms as $m) {
 				$offset = $m[0][1];
 				foreach ($m as $k => $v) {
 					$m[$k] = $v[0];
@@ -268,10 +265,10 @@ class TexyLineParser extends TexyParser
 						unset($names[$index]);
 						continue;
 
-					} elseif (preg_match($pl[$name]['pattern'],
+					} elseif ($arrMatches[$name] = TexyRegexp::match(
 							$text,
-							$arrMatches[$name],
-							PREG_OFFSET_CAPTURE,
+							$pl[$name]['pattern'],
+							TexyRegexp::OFFSET_CAPTURE,
 							$offset + $delta)
 					) {
 						$m = & $arrMatches[$name];
@@ -285,7 +282,7 @@ class TexyLineParser extends TexyParser
 
 					} else {
 						// try next time?
-						if (!$pl[$name]['again'] || !preg_match($pl[$name]['again'], $text, $foo, NULL, $offset + $delta)) {
+						if (!$pl[$name]['again'] || !TexyRegexp::match($text, $pl[$name]['again'], NULL, $offset + $delta)) {
 							unset($names[$index]);
 						}
 						continue;

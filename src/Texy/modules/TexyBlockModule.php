@@ -48,10 +48,10 @@ final class TexyBlockModule extends TexyModule
 	public function beforeBlockParse($parser, & $text)
 	{
 		// autoclose exclusive blocks
-		$text = preg_replace(
+		$text = TexyRegexp::replace(
+			$text,
 			'#^(/--++ *+(?!div|texysource).*)$((?:\n.*+)*?)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mi',
-			"\$1\$2\n\\--",
-			$text
+			"\$1\$2\n\\--"
 		);
 	}
 

@@ -134,12 +134,12 @@ final class TexyTableModule extends TexyModule
 
 				// special escape sequence \|
 				$mContent = str_replace('\\|', "\x13", $mContent);
-				$mContent = preg_replace('#(\[[^\]]*)\|#', "$1\x13", $mContent); // HACK: support for [..|..]
+				$mContent = TexyRegexp::replace($mContent, '#(\[[^\]]*)\|#', "$1\x13"); // HACK: support for [..|..]
 
 				foreach (explode('|', $mContent) as $cell) {
 					$cell = strtr($cell, "\x13", '|');
 					// rowSpan
-					if (isset($prevRow[$col]) && ($lineMode || preg_match('#\^\ *$|\*??(.*)\ +\^$#AU', $cell, $matches))) {
+					if (isset($prevRow[$col]) && ($lineMode || ($matches = TexyRegexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU')))) {
 						$prevRow[$col]->rowSpan++;
 						if (!$lineMode) {
 							$cell = isset($matches[1]) ? $matches[1] : '';
@@ -159,7 +159,8 @@ final class TexyTableModule extends TexyModule
 					}
 
 					// common cell
-					if (!preg_match('#(\*??)\ *'.TexyPatterns::MODIFIER_HV.'??(.*)'.TexyPatterns::MODIFIER_HV.'?\ *()$#AU', $cell, $matches)) {
+					$matches = TexyRegexp::match($cell, '#(\*??)\ *'.TexyPatterns::MODIFIER_HV.'??(.*)'.TexyPatterns::MODIFIER_HV.'?\ *()$#AU');
+					if (!$matches) {
 						continue;
 					}
 					list(, $mHead, $mModCol, $mContent, $mMod) = $matches;

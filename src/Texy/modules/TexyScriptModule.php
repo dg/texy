@@ -58,7 +58,7 @@ final class TexyScriptModule extends TexyModule
 
 		$args = $raw = NULL;
 		// function(arg, arg, ...) or function: arg, arg
-		if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu', $cmd, $matches)) {
+		if ($matches = TexyRegexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
 			$cmd = $matches[1];
 			$raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
 			if ($raw === '') {

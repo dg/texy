@@ -36,6 +36,7 @@ require_once dirname(__FILE__) . '/Texy/TexyParser.php';
 require_once dirname(__FILE__) . '/Texy/TexyUtf.php';
 require_once dirname(__FILE__) . '/Texy/TexyConfigurator.php';
 require_once dirname(__FILE__) . '/Texy/TexyHandlerInvocation.php';
+require_once dirname(__FILE__) . '/Texy/TexyRegexp.php';
 require_once dirname(__FILE__) . '/Texy/Texy.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyParagraphModule.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyBlockModule.php';

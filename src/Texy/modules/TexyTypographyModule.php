@@ -46,7 +46,7 @@ final class TexyTypographyModule extends TexyModule
 	public $locale = 'cs';
 
 	/** @var array */
-	private $pattern, $replace;
+	private $pattern;
 
 
 	public function __construct($texy)
@@ -76,7 +76,7 @@ final class TexyTypographyModule extends TexyModule
 			$locale = self::$locales['en'];
 		}
 
-		$pairs = array(
+		$this->pattern = array(
 			'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
 			'#(?<=[\d ]|^)-(?=[\d ]|$)#'              => "\xe2\x80\x93",                   // en dash 123-123
 			'#(?<=[^!*+,/:;<=>@\\\\_|-])--(?=[^!*+,/:;<=>@\\\\_|-])#' => "\xe2\x80\x93",   // en dash alphanum--alphanum
@@ -114,18 +114,15 @@ final class TexyTypographyModule extends TexyModule
 			'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["'.TexyPatterns::CHAR.'])()#Uu' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
 			'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\''.TexyPatterns::CHAR.'])()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
 		);
-
-		$this->pattern = array_keys($pairs);
-		$this->replace = array_values($pairs);
 	}
 
 
 	public function postLine($text, $preserveSpaces = FALSE)
 	{
 		if (!$preserveSpaces) {
-			$text = preg_replace('# {2,}#', ' ', $text);
+			$text = TexyRegexp::replace($text, '# {2,}#', ' ');
 		}
-		return preg_replace($this->pattern, $this->replace, $text);
+		return TexyRegexp::replace($text, $this->pattern);
 	}
 
 }

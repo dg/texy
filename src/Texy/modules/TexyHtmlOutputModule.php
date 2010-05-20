@@ -62,10 +62,10 @@ final class TexyHtmlOutputModule extends TexyModule
 		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + array('html'=>1);
 
 		// wellform and reformat
-		$s = preg_replace_callback(
+		$s = TexyRegexp::replace(
+			$s . '</end/>',
 			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
-			array($this, 'cb'),
-			$s . '</end/>'
+			array($this, 'cb')
 		);
 
 		// empty out stack
@@ -74,29 +74,29 @@ final class TexyHtmlOutputModule extends TexyModule
 		}
 
 		// right trim
-		$s = preg_replace("#[\t ]+(\n|\r|$)#", '$1', $s); // right trim
+		$s = TexyRegexp::replace($s, "#[\t ]+(\n|\r|$)#", '$1'); // right trim
 
 		// join double \r to single \n
 		$s = str_replace("\r\r", "\n", $s);
 		$s = strtr($s, "\r", "\n");
 
 		// greedy chars
-		$s = preg_replace("#\\x07 *#", '', $s);
+		$s = TexyRegexp::replace($s, "#\\x07 *#", '');
 		// back-tabs
-		$s = preg_replace("#\\t? *\\x08#", '', $s);
+		$s = TexyRegexp::replace($s, "#\\t? *\\x08#", '');
 
 		// line wrap
 		if ($this->lineWrap > 0) {
-			$s = preg_replace_callback(
+			$s = TexyRegexp::replace(
+				$s,
 				'#^(\t*)(.*)$#m',
-				array($this, 'wrap'),
-				$s
+				array($this, 'wrap')
 			);
 		}
 
 		// remove HTML 4.01 optional end tags
 		if (!$this->xml && $this->removeOptional) {
-			$s = preg_replace('#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '', $s);
+			$s = TexyRegexp::replace($s, '#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '');
 		}
 	}
 
@@ -104,8 +104,9 @@ final class TexyHtmlOutputModule extends TexyModule
 	/**
 	 * Callback function: <tag> | </tag> | ....
 	 * @return string
+	 * @internal
 	 */
-	private function cb($matches)
+	public function cb($matches)
 	{
 		// html tag
 		list(, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
@@ -127,7 +128,7 @@ final class TexyHtmlOutputModule extends TexyModule
 				$s = Texy::freezeSpaces($mText);
 
 			} else {
-				$s = preg_replace('#[ \n]+#', ' ', $mText); // otherwise shrink multiple spaces
+				$s = TexyRegexp::replace($mText, '#[ \n]+#', ' '); // otherwise shrink multiple spaces
 			}
 		}
 
@@ -315,8 +316,9 @@ final class TexyHtmlOutputModule extends TexyModule
 	/**
 	 * Callback function: wrap lines.
 	 * @return string
+	 * @internal
 	 */
-	private function wrap($m)
+	public function wrap($m)
 	{
 		list(, $space, $s) = $m;
 		return $space . wordwrap($s, $this->lineWrap, "\n" . $space);

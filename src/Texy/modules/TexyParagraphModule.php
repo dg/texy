@@ -46,8 +46,8 @@ final class TexyParagraphModule extends TexyModule
 			}
 
 			// try to find modifier
-			$mx = $mod = NULL;
-			if (preg_match('#'.TexyPatterns::MODIFIER_H.'(?=\n|\z)#sUm', $s, $mx, PREG_OFFSET_CAPTURE)) {
+			$mod = NULL;
+			if ($mx = TexyRegexp::match($s, '#'.TexyPatterns::MODIFIER_H.'(?=\n|\z)#sUm', TexyRegexp::OFFSET_CAPTURE)) {
 				list($mMod) = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
 				if ($s === '') {
@@ -81,9 +81,9 @@ final class TexyParagraphModule extends TexyModule
 		if ($tx->mergeLines) {
 			// ....
 			// ... => \r means break line
-			$content = preg_replace('#\n +(?=\S)#', "\r", $content);
+			$content = TexyRegexp::replace($content, '#\n +(?=\S)#', "\r");
 		} else {
-			$content = preg_replace('#\n#', "\r", $content);
+			$content = TexyRegexp::replace($content, '#\n#', "\r");
 		}
 
 		$el = TexyHtml::el('p');

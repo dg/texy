@@ -86,10 +86,10 @@ final class TexyLinkModule extends TexyModule
 
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 		if (!empty($texy->allowed['link/definition'])) {
-			$text = preg_replace_callback(
+			$text = TexyRegexp::replace(
+				$text,
 				'#^\[([^\[\]\#\?\*\n]{1,100})\]: ++(\S{1,1000})(\ .{1,1000})?'.TexyPatterns::MODIFIER.'?\s*()$#mUu',
-				array($this, 'patternReferenceDef'),
-				$text
+				array($this, 'patternReferenceDef')
 			);
 		}
 	}
@@ -100,8 +100,9 @@ final class TexyLinkModule extends TexyModule
 	 *
 	 * @param  array      regexp matches
 	 * @return string
+	 * @internal
 	 */
-	private function patternReferenceDef($matches)
+	public function patternReferenceDef($matches)
 	{
 		list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
 		// [1] => [ (reference) ]
