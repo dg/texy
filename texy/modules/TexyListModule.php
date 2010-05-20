@@ -182,8 +182,8 @@ final class TexyListModule extends TexyModule
 				//    [2] => .(title)[class]{style}<>
 
 				$elItem = TexyHtml::el('dt');
-				$mod = new TexyModifier($mMod);
-				$mod->decorate($tx, $elItem);
+				$modItem = new TexyModifier($mMod);
+				$modItem->decorate($tx, $elItem);
 
 				$elItem->parseLine($tx, $mContent);
 				$el->add($elItem);
