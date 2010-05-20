@@ -21,12 +21,12 @@ final class TexyLongWordsModule extends TexyModule
 {
 	public $wordLimit = 20;
 
-
 	const
 		DONT = 0,   // don't hyphenate
 		HERE = 1,   // hyphenate here
 		AFTER = 2;  // hyphenate after
 
+	const SAFE_LIMIT = 1000;
 
 	private $consonants = array(
 		'b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','z',
@@ -92,6 +92,8 @@ final class TexyLongWordsModule extends TexyModule
 	{
 		list($mWord) = $matches;
 		//    [0] => lllloooonnnnggggwwwoorrdddd
+
+		if (iconv_strlen($mWord) > self::SAFE_LIMIT) return $mWord;
 
 		$chars = array();
 		preg_match_all(
