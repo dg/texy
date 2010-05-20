@@ -79,7 +79,7 @@ final class TexyPhraseModule extends TexyModule
 		// //emphasis//
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<![/:])\/\/(?![\s/])(.+)'.TEXY_MODIFIER.'?(?<![\s/])\/\/(?!\/)'.TEXY_LINK.'??()#Uus',
+			'#(?<![/:])\/\/(?![\s/])(.+)'.TEXY_MODIFIER.'?(?<![\s/:])\/\/(?!\/)'.TEXY_LINK.'??()#Uus',
 			'phrase/em'
 		);
 
