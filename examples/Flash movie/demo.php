@@ -2,9 +2,6 @@
 
 /**
  * TEXY! SUPPORT FOR FLASH
- * --------------------------------------
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 
@@ -31,7 +28,7 @@ function imageHandler($invocation, $image, $link)
 		$movie = Texy::prependRoot($image->URL, $texy->imageModule->root);
 
 		$dimensions =
-			   ($image->width ? 'width="'.$image->width.'" ' : '')
+			($image->width ? 'width="'.$image->width.'" ' : '')
 			. ($image->height ? 'width="'.$image->height.'" ' : '');
 
 		$movie = htmlSpecialChars($movie);

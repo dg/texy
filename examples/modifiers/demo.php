@@ -1,12 +1,7 @@
 <?php
 
 /**
- * TEXY! MODIFIERS DEMO
- * --------------------------------------
- *
  * This demo shows how control modifiers usage
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

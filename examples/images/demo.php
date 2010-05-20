@@ -1,15 +1,10 @@
 <?php
 
 /**
- * TEXY! USER IMAGES DEMO
- * --------------------------------------
- *
  * This demo shows how Texy! control images (useful for CMS)
  *     - programmable images controlling
  *     - onMouseOver state
  *     - support for preloading
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

@@ -1,12 +1,7 @@
 <?php
 
 /**
- * TEXY! FIGURE DEMO
- * -----------------
- *
  * This demo shows how change default figures behaviour
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

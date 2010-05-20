@@ -1,17 +1,9 @@
 <?php
 
 /**
- * Texy! - web text markup-language
- * --------------------------------
+ * Texy! - human-readable text to HTML converter.
  *
- * Copyright (c) 2004, 2009 David Grudl (http://davidgrudl.com)
- *
- * This source file is subject to the GNU GPL license that is bundled
- * with this package in the file license.txt.
- *
- * For more information please see http://texy.info
- *
- * @copyright  Copyright (c) 2004, 2009 David Grudl
+ * @copyright  Copyright (c) 2004, 2010 David Grudl
  * @license    GNU GENERAL PUBLIC LICENSE version 2 or 3
  * @link       http://texy.info
  * @package    Texy
@@ -22,8 +14,7 @@
 /**
  * Phrases module.
  *
- * @author     David Grudl
- * @copyright  Copyright (c) 2004, 2009 David Grudl
+ * @copyright  Copyright (c) 2004, 2010 David Grudl
  * @package    Texy
  */
 final class TexyPhraseModule extends TexyModule

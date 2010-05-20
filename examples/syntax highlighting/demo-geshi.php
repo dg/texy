@@ -1,14 +1,9 @@
 <?php
 
 /**
- * TEXY! THIRD PARTY SYNTAX HIGHLIGHTING
- * --------------------------------------
- *
  * This demo shows how combine Texy! with syntax highlighter GESHI
  *       - define user callback (for /--code elements)
  *       - load language, highlight and return stylesheet + html output
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

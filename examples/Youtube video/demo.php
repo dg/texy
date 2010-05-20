@@ -2,9 +2,6 @@
 
 /**
  * TEXY! SUPPORT FOR FLASH
- * --------------------------------------
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

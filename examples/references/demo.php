@@ -1,15 +1,10 @@
 <?php
 
 /**
- * TEXY! REFERENCES DEMO
- * --------------------------------------
- *
  * This demo shows how implement Texy! as comment formatter
  *     - relative links to other comment
  *     - rel="nofollow"
  *     - used links checking (antispam)
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

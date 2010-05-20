@@ -2,9 +2,6 @@
 
 /**
  * TEXY! HEADINGS DEMO
- * --------------------------------------
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

@@ -1,16 +1,11 @@
 <?php
 
 /**
- * TEXY! HTML TAGS DEMO
- * --------------------------------------
- *
  * This demo shows how Texy! control inline html tags
  *     - three safe levels
  *     - full control over all tags and attributes
  *     - (X)HTML reformatting
  *     - well formed output
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

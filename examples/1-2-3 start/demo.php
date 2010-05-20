@@ -2,9 +2,6 @@
 
 /**
  * TEXY! 1-2-3 START DEMO
- * --------------------------------------
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 

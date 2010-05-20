@@ -2,9 +2,6 @@
 
 /**
  * TEXY! USER SYNTAX DEMO
- * --------------------------------------
- *
- * @author   David Grudl (http://davidgrudl.com)
  */
 
 
