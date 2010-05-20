@@ -128,8 +128,11 @@ final class TexyTypographyModule extends TexyModule
 
 
 
-	public function postLine($text)
+	public function postLine($text, $preserveSpaces = FALSE)
 	{
+		if (!$preserveSpaces) {
+			$text = preg_replace('# {2,}#', ' ', $text);
+		}
 		return preg_replace($this->pattern, $this->replace, $text);
 	}
 

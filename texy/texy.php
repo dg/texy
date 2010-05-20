@@ -582,7 +582,7 @@ class Texy extends TexyObject
 		$text = self::normalize($text);
 
 		$this->typographyModule->beforeParse($this, $text);
-		$text = $this->typographyModule->postLine($text);
+		$text = $this->typographyModule->postLine($text, TRUE);
 
 		if (!empty($this->allowed['longwords'])) {
 			$text = $this->longWordsModule->postLine($text);
