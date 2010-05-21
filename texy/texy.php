@@ -510,7 +510,7 @@ class Texy extends TexyObject
 		// replace tabs with spaces
 		$this->tabWidth = max(1, (int) $this->tabWidth);
 		while (strpos($text, "\t") !== FALSE) {
-			$text = preg_replace_callback('#^(.*)\t#mU', array($this, 'tabCb'), $text);
+			$text = preg_replace_callback('#^([^\t\n]*+)\t#mU', array($this, 'tabCb'), $text);
 		}
 
 		// user before handler

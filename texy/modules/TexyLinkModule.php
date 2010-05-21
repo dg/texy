@@ -56,7 +56,7 @@ final class TexyLinkModule extends TexyModule
 		// [reference]
 		$texy->registerLinePattern(
 			array($this, 'patternReference'),
-			'#(\[[^\[\]\*\n'.TEXY_MARK.']+\])#U',
+			'#(\[[^\[\]\*\n'.TEXY_MARK.']++\])#U',
 			'link/reference'
 		);
 
@@ -91,7 +91,7 @@ final class TexyLinkModule extends TexyModule
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = preg_replace_callback(
-				'#^\[([^\[\]\#\?\*\n]+)\]: +(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
+				'#^\[([^\[\]\#\?\*\n]+)\]: ++(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
 				array($this, 'patternReferenceDef'),
 				$text
 			);

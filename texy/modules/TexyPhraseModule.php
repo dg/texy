@@ -199,7 +199,7 @@ final class TexyPhraseModule extends TexyModule
 		// ....:LINK
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(['.TEXY_CHAR.'0-9@\#$%&.,_-]+)()(?=:\[)'.TEXY_LINK.'()#Uu',
+			'#(['.TEXY_CHAR.'0-9@\#$%&.,_-]++)()(?=:\[)'.TEXY_LINK.'()#Uu',
 			'phrase/quicklink'
 		);
 

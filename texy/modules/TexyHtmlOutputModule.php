@@ -71,7 +71,7 @@ final class TexyHtmlOutputModule extends TexyModule
 
 		// wellform and reformat
 		$s = preg_replace_callback(
-			'#(.*)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
+			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
 			array($this, 'cb'),
 			$s . '</end/>'
 		);

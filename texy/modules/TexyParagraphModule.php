@@ -53,7 +53,7 @@ final class TexyParagraphModule extends TexyModule
 
 			// try to find modifier
 			$mx = $mod = NULL;
-			if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*)?()\z#sUm', $s, $mx)) {
+			if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*+)?()\z#sUm', $s, $mx)) {
 				list(, $mC1, $mMod, $mC2) = $mx;
 				$s = trim($mC1 . $mC2);
 				if ($s === '') continue;
