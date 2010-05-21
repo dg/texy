@@ -41,13 +41,13 @@ define('TEXY_MODIFIER_HV', '(?: *+(?<= |^)\\.((?:\\([^)\\n]++\\)|\\[[^\\]\\n]++\
 
 
 // images   [* urls .(title)[class]{style} >]
-define('TEXY_IMAGE',       '\[\* *+([^\n'.TEXY_MARK.']+)'.TEXY_MODIFIER.'? *+(\*|(?<!<)>|<)\]');
+define('TEXY_IMAGE',       '\[\* *+([^\n'.TEXY_MARK.']{1,1000})'.TEXY_MODIFIER.'? *+(\*|(?<!<)>|<)\]');
 
 
 // links
-define('TEXY_LINK_URL',    '(?:\[[^\]\n]++\]|(?!\[)[^\s'.TEXY_MARK.']*?[^:);,.!?\s'.TEXY_MARK.'])'); // any url - doesn't end by :).,!?
+define('TEXY_LINK_URL',    '(?:\[[^\]\n]++\]|(?!\[)[^\s'.TEXY_MARK.']{0,1000}?[^:);,.!?\s'.TEXY_MARK.'])'); // any url - doesn't end by :).,!?
 define('TEXY_LINK',        '(?::('.TEXY_LINK_URL.'))');       // any link
 define('TEXY_LINK_N',      '(?::('.TEXY_LINK_URL.'|:))');     // any link (also unstated)
 define('TEXY_EMAIL',       '['.TEXY_CHAR.'][0-9.+_'.TEXY_CHAR.'-]{0,63}@[0-9.+_'.TEXY_CHAR.'\x{ad}-]{1,252}\.['.TEXY_CHAR.'\x{ad}]{2,19}'); // name@exaple.com
-define('TEXY_URLSCHEME',   '[a-z][a-z0-9+.-]*:');    // http:  |  mailto:
+define('TEXY_URLSCHEME',   '[a-z][a-z0-9+.-]{0,20}:');    // http:  |  mailto:
 /**#@-*/

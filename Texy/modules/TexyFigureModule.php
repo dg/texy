@@ -41,7 +41,7 @@ final class TexyFigureModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'pattern'),
-			'#^'.TEXY_IMAGE.TEXY_LINK_N.'?? ++\*\*\* ++(.*)'.TEXY_MODIFIER_H.'?()$#mUu',
+			'#^'.TEXY_IMAGE.TEXY_LINK_N.'?? ++\*\*\* ++(.{0,2000})'.TEXY_MODIFIER_H.'?()$#mUu',
 			'figure'
 		);
 	}

@@ -34,7 +34,7 @@ final class TexyHtmlModule extends TexyModule
 
 		$texy->registerLinePattern(
 			array($this, 'patternTag'),
-			'#<(/?)([a-z][a-z0-9_:-]*)((?:\s++[a-z0-9:-]++|=\s*+"[^"'.TEXY_MARK.']*+"|=\s*+\'[^\''.TEXY_MARK.']*+\'|=[^\s>'.TEXY_MARK.']++)*)\s*+(/?)>#isu',
+			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9:-]++|=\s*+"[^"'.TEXY_MARK.']*+"|=\s*+\'[^\''.TEXY_MARK.']*+\'|=[^\s>'.TEXY_MARK.']++)*)\s*+(/?)>#isu',
 			'html/tag'
 		);
 

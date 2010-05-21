@@ -64,7 +64,7 @@ final class TexyLinkModule extends TexyModule
 		// direct url and email
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
-			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TEXY_CHAR.'-][/\d'.TEXY_CHAR.'+\.~%&?@=_:;\#,\x{ad}-]+[/\d'.TEXY_CHAR.'+~%?@=_\#]#u',
+			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TEXY_CHAR.'-][/\d'.TEXY_CHAR.'+\.~%&?@=_:;\#,\x{ad}-]{1,1000}[/\d'.TEXY_CHAR.'+~%?@=_\#]#u',
 			'link/url',
 			'#(?:https?://|www\.|ftp://)#u'
 		);
@@ -92,7 +92,7 @@ final class TexyLinkModule extends TexyModule
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = preg_replace_callback(
-				'#^\[([^\[\]\#\?\*\n]+)\]: ++(\S+)(\ .+)?'.TEXY_MODIFIER.'?\s*()$#mUu',
+				'#^\[([^\[\]\#\?\*\n]{1,100})\]: ++(\S{1,1000})(\ .{1,1000})?'.TEXY_MODIFIER.'?\s*()$#mUu',
 				array($this, 'patternReferenceDef'),
 				$text
 			);

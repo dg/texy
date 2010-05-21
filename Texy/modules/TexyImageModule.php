@@ -76,7 +76,7 @@ final class TexyImageModule extends TexyModule
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
 			$text = preg_replace_callback(
-				'#^\[\*([^\n]+)\*\]:\ +(.+)\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
+				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
 				array($this, 'patternReferenceDef'),
 				$text
 			);
