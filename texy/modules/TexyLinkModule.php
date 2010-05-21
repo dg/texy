@@ -70,7 +70,7 @@ final class TexyLinkModule extends TexyModule
 
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
-			'#(?<=^|[\s([<:\x17])'.TEXY_EMAIL.'#u',
+			'#(?<=^|[\s([<\x17])'.TEXY_EMAIL.'#u',
 			'link/email',
 			'#'.TEXY_EMAIL.'#u'
 		);
