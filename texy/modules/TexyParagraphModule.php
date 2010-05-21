@@ -53,9 +53,9 @@ final class TexyParagraphModule extends TexyModule
 
 			// try to find modifier
 			$mx = $mod = NULL;
-			if (preg_match('#\A(.*)(?<=\A|\S)'.TEXY_MODIFIER_H.'(\n.*+)?()\z#sUm', $s, $mx)) {
-				list(, $mC1, $mMod, $mC2) = $mx;
-				$s = trim($mC1 . $mC2);
+			if (preg_match('#'.TEXY_MODIFIER_H.'(?=\n|\z)#sUm', $s, $mx, PREG_OFFSET_CAPTURE)) {
+				list($mMod) = $mx[1];
+				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
 				if ($s === '') continue;
 				$mod = new TexyModifier;
 				$mod->setProperties($mMod);

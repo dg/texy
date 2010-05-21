@@ -39,7 +39,7 @@ final class TexyScriptModule extends TexyModule
 
 		$texy->registerLinePattern(
 			array($this, 'pattern'),
-			'#\{\{([^'.TEXY_MARK.']+)\}\}()#U',
+			'#\{\{((?:[^'.TEXY_MARK.'}]++|[}])+)\}\}()#U',
 			'script'
 		);
 	}
