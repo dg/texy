@@ -118,8 +118,8 @@ final class TexyTypographyModule extends TexyModule
 			'#(?<=^|[^0-9'.TEXY_CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9'.TEXY_CHAR.'])#mus'
 													=> "\$1\xc2\xa0",
 
-			'#(?<!"|\w)"(?!\ |")([^"]++)(?<!\ |")"(?!")()#U' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
-			'#(?<!\'|\w)\'(?!\ |\')([^\']++)(?<!\ |\')\'(?!\')()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
+			'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["'.TEXY_CHAR.'])()#Uu' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
+			'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\''.TEXY_CHAR.'])()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
 		);
 
 		$this->pattern = array_keys($pairs);
