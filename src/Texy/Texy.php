@@ -97,9 +97,6 @@ class Texy
 	/** @var bool  remove soft hyphens (SHY)? */
 	public $removeSoftHyphens = TRUE;
 
-	/** @deprecated */
-	public static $advertisingNotice = FALSE;
-
 	/** @var string */
 	public $nontextParagraph = 'div';
 
@@ -205,12 +202,6 @@ class Texy
 	private $mode;
 
 
-	/** DEPRECATED */
-	public static $strictDTD;
-	public $cleaner;
-	public $xhtml;
-
-
 	public function __construct()
 	{
 		if (defined('PCRE_VERSION') && PCRE_VERSION == 8.34 && PHP_VERSION_ID < 50513) {
@@ -222,18 +213,9 @@ class Texy
 			trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
 		}
 
-		// load all modules
 		$this->loadModules();
 
-		// DEPRECATED
-		if (self::$strictDTD !== NULL) {
-			$this->setOutputMode(self::$strictDTD ? self::XHTML1_STRICT : self::XHTML1_TRANSITIONAL);
-		} else {
-			$this->setOutputMode(self::XHTML1_TRANSITIONAL);
-		}
-
-		// DEPRECATED
-		$this->cleaner = & $this->htmlOutputModule;
+		$this->setOutputMode(self::XHTML1_TRANSITIONAL);
 
 		// examples of link references ;-)
 		$link = new Link('https://texy.info/');
@@ -748,12 +730,6 @@ class Texy
 	final public static function prependRoot($URL, $root)
 	{
 		return Helpers::prependRoot($URL, $root);
-	}
-
-
-	/** @deprecated */
-	final public function free()
-	{
 	}
 
 }
