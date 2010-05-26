@@ -16,9 +16,6 @@ final class TexyImage
 	/** @var string  base image URL */
 	public $URL;
 
-	/** @var string  on-mouse-over image URL */
-	public $overURL;
-
 	/** @var string  anchored image URL */
 	public $linkedURL;
 
