@@ -11,10 +11,7 @@
  * @package    Texy
  */
 
-
-define('TEXY_VERSION',  '3.0-dev');
-
-
+ 
 /**
  * Check PHP configuration.
  */
@@ -86,18 +83,6 @@ class TexyPcreException extends Exception
 
 
 
-/**
- * For Texy 1 backward compatibility.
- */
-define('TEXY_ALL',  TRUE);
-define('TEXY_NONE',  FALSE);
-define('TEXY_CONTENT_MARKUP',  "\x17");
-define('TEXY_CONTENT_REPLACED',  "\x16");
-define('TEXY_CONTENT_TEXTUAL',  "\x15");
-define('TEXY_CONTENT_BLOCK',  "\x14");
-
-
-
 
 /**
  * Texy! - Convert plain text to XHTML format using {@link process()}.
@@ -116,7 +101,7 @@ class Texy extends TexyObject
 	const NONE = FALSE;
 
 	// Texy version
-	const VERSION = TEXY_VERSION;
+	const VERSION = '3.0-dev';
 	const REVISION = '$WCREV$ released on $WCDATE$';
 
 	// types of protection marks
