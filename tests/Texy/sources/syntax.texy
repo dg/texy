@@ -167,12 +167,6 @@ in paragraph
 [* image.gif >] Right-aligned image. Curabitur quam justo, hendrerit a, mattis ut, ultrices at, dui. In mollis. Ut pellentesque erat vehicula nunc. Ut ultricies. Nulla nunc velit, consequat vel, laoreet in, blandit et, eros.
 
 
-with on-mouse-over event
-------------------------
-
-[* image.gif | image-over.gif *]
-
-
 with description
 ----------------
 

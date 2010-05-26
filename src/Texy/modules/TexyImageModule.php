@@ -31,9 +31,6 @@ final class TexyImageModule extends TexyModule
 	/** @var string  default alternative text */
 	public $defaultAlt = '';
 
-	/** @var string  images onload handler */
-	public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
-
 	/** @var array image references */
 	private $references = array();
 
@@ -43,7 +40,6 @@ final class TexyImageModule extends TexyModule
 		$this->texy = $texy;
 
 		$texy->allowed['image/definition'] = TRUE;
-		$texy->allowed['image/hover'] = TRUE;
 		$texy->addHandler('image', array($this, 'solve'));
 		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
@@ -97,7 +93,7 @@ final class TexyImageModule extends TexyModule
 
 
 	/**
-	 * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK.
+	 * Callback for [* small.jpg 80x13 | big.jpg .(alternative text)[class]{style}>]:LINK.
 	 *
 	 * @param  TexyLineParser
 	 * @param  array      regexp matches
@@ -165,7 +161,7 @@ final class TexyImageModule extends TexyModule
 
 	/**
 	 * Parses image's syntax.
-	 * @param  string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
+	 * @param  string  input: small.jpg 80x13 | linked.jpg
 	 * @param  string
 	 * @param  bool
 	 * @return TexyImage
@@ -194,22 +190,11 @@ final class TexyImageModule extends TexyModule
 				$image->URL = NULL;
 			}
 
-			// onmouseover image
+			// linked image
 			if (isset($content[1])) {
 				$tmp = trim($content[1]);
-				if ($tmp !== '' && $tx->checkURL($tmp, Texy::FILTER_IMAGE)) {
-					$image->overURL = $tmp;
 				}
 			}
-
-			// linked image
-			if (isset($content[2])) {
-				$tmp = trim($content[2]);
-				if ($tmp !== '' && $tx->checkURL($tmp, Texy::FILTER_ANCHOR)) {
-					$image->linkedURL = $tmp;
-				}
-			}
-		}
 
 		$image->modifier->setProperties($mod);
 		return $image;
@@ -301,16 +286,6 @@ final class TexyImageModule extends TexyModule
 
 		$el->attrs['width'] = $image->width;
 		$el->attrs['height'] = $image->height;
-
-		// onmouseover actions generate
-		if (!empty($tx->allowed['image/hover']) && $image->overURL !== NULL) {
-			$overSrc = Texy::prependRoot($image->overURL, $this->root);
-			$el->attrs['onmouseover'] = 'this.src=\'' . addSlashes($overSrc) . '\'';
-			$el->attrs['onmouseout'] = 'this.src=\'' . addSlashes($el->attrs['src']) . '\'';
-			$el->attrs['onload'] = str_replace('%i', addSlashes($overSrc), $this->onLoad);
-			$tx->summary['preload'][] = $overSrc;
-		}
-
 		$tx->summary['images'][] = $el->attrs['src'];
 
 		if ($link) {
@@ -327,9 +302,6 @@ final class TexyImage extends TexyObject
 {
 	/** @var string  base image URL */
 	public $URL;
-
-	/** @var string  on-mouse-over image URL */
-	public $overURL;
 
 	/** @var string  anchored image URL */
 	public $linkedURL;
