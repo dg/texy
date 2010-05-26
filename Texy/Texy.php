@@ -172,9 +172,6 @@ class Texy extends TexyObject
 		'bottom' => NULL,
 	);
 
-	/** @var bool  remove soft hyphens (SHY)? */
-	public $removeSoftHyphens = TRUE;
-
 	/** @var mixed */
 	public static $advertisingNotice = 'once';
 
@@ -285,27 +282,13 @@ class Texy extends TexyObject
 	private $mode;
 
 
-	/** DEPRECATED */
-	public static $strictDTD;
-	public $cleaner;
-	public $xhtml;
-
-
 
 	public function __construct()
 	{
 		// load all modules
 		$this->loadModules();
 
-		// DEPRECATED
-		if (self::$strictDTD !== NULL) {
-			$this->setOutputMode(self::$strictDTD ? self::XHTML1_STRICT : self::XHTML1_TRANSITIONAL);
-		} else {
-			$this->setOutputMode(self::XHTML1_TRANSITIONAL);
-		}
-
-		// DEPRECATED
-		$this->cleaner = & $this->htmlOutputModule;
+		$this->setOutputMode(self::XHTML1_TRANSITIONAL);
 
 		// examples of link references ;-)
 		$link = new TexyLink('http://texy.info/');
@@ -472,9 +455,8 @@ class Texy extends TexyObject
 		// convert to UTF-8 (and check source encoding)
 		$text = TexyUtf::toUtf($text, $this->encoding);
 
-		if ($this->removeSoftHyphens) {
-			$text = str_replace("\xC2\xAD", '', $text);
-		}
+		// remove soft hyphens
+		$text = str_replace("\xC2\xAD", '', $text);
 
 		// standardize line endings and spaces
 		$text = self::normalize($text);
