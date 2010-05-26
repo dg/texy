@@ -85,14 +85,6 @@ final class TexyBlockModule extends TexyModule
 	}
 
 
-	// for backward compatibility
-	function outdent($s)
-	{
-		trigger_error('Use Texy::outdent()', E_USER_WARNING);
-		return Texy::outdent($s);
-	}
-
-
 	/**
 	 * Finish invocation.
 	 *
