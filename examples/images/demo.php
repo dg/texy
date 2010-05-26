@@ -3,8 +3,6 @@
 /**
  * This demo shows how Texy! control images (useful for CMS)
  *     - programmable images controlling
- *     - onMouseOver state
- *     - support for preloading
  */
 
 
@@ -25,7 +23,6 @@ function imageHandler($invocation, $image, $link)
 	if ($image->URL == 'user')  // accepts only [* user *]
 	{
 		$image->URL = 'image.gif'; // image URL
-		$image->overURL = 'image-over.gif'; // onmouseover image
 		$image->modifier->title = 'Texy! logo';
 		if ($link) $link->URL = 'big.gif'; // linked image
 	}
@@ -65,6 +62,4 @@ echo '<hr />';
 echo '<pre>';
 echo 'used images:';
 print_r($texy->summary['images']);
-echo 'onmouseover images:';
-print_r($texy->summary['preload']);
 echo '</pre>';
