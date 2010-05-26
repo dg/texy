@@ -836,12 +836,6 @@ class Texy
 	}
 
 
-	/** @deprecated */
-	final public function free()
-	{
-	}
-
-
 	final public function __clone()
 	{
 		throw new Exception('Clone is not supported.');
