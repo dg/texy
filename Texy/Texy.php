@@ -156,7 +156,6 @@ class Texy extends TexyObject
 	public $summary = array(
 		'images' => array(),
 		'links' => array(),
-		'preload' => array(),
 	);
 
 	/** @var string  Generated stylesheet */
