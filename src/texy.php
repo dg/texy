@@ -73,5 +73,3 @@ array_map('class_exists', [
 	'TexyImage',
 	'TexyLink',
 ]);
-
-require_once __DIR__ . '/compatibility.php';

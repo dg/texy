@@ -160,24 +160,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
-	 * Overloaded setter for element's attribute.
-	 * @param  string attribute name
-	 * @param  array value
-	 * @return self
-	 */
-/*
-	final public function __call($m, $args)
-	{
-		if (count($args) !== 1) {
-			throw new \InvalidArgumentException("Just one argument is required.");
-		}
-		$this->attrs[$m] = $args[0];
-		return $this;
-	}
-*/
-
-
-	/**
 	 * Special setter for element's attribute.
 	 * @param  string path
 	 * @param  array query

@@ -78,10 +78,4 @@ final class HandlerInvocation
 	{
 		return $this->parser->getTexy();
 	}
-
-
-	/** @deprecated */
-	public function free()
-	{
-	}
 }
