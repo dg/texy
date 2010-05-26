@@ -288,7 +288,7 @@ class Texy extends TexyObject
 		// load all modules
 		$this->loadModules();
 
-		$this->setOutputMode(self::XHTML1_TRANSITIONAL);
+		$this->setOutputMode(self::HTML4_TRANSITIONAL);
 
 		// examples of link references ;-)
 		$link = new TexyLink('http://texy.info/');
