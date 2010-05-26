@@ -248,7 +248,7 @@ final class LinkModule extends Texy\Module
 			$dest = trim(substr($dest, 2, -2));
 			$image = $texy->imageModule->getReference($dest);
 			if ($image) {
-				$link = new Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
+				$link = new Link($image->URL);
 				$link->modifier = $image->modifier;
 			}
 		}

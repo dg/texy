@@ -36,7 +36,6 @@ Obrázkové odkazy:
 
 - Klasický odkaz "obrazek":[* texy-big.jpg *]
 - Klasický odkaz "obrazek":[* texy-big.jpg >]
-- Klasický odkaz "obrazek":[*texy-big.jpg | 2 |3*]
 
 - Referenční odkaz "obrazek":[neobrazek1]
 - Referenční odkaz "obrazek":[*obrazek1*]
@@ -52,7 +51,7 @@ Odkazující obrázky:
 -------------------
 
 - Klasický odkaz [*texy.jpg*]:http://phpfashion.com/?
-- Klasický odkaz [*texy.jpg | texy-over.jpg .(title)[class] <]:[dave@example.com]x
+- Klasický odkaz [*texy.jpg .(title)[class] <]:[dave@example.com]x
 
 - Referenční odkaz [neobrazek1]:[php Fashion1]
 - Referenční odkaz "php Fashion":[*obrazek2*]
@@ -134,12 +133,12 @@ Pure
 [php Fashion3]: ./trine/
 [email]: dave@example.com .(title)
 
-[neobrazek1]: [*texy-big.jpg | texy-big2.jpg*] text .(title)
+[neobrazek1]: [*texy-big.jpg *] text .(title)
 [neobrazek2]: [* texy-big.jpg *] text
 [neobrazek3]: [*texy-big.jpg*]
 [neobrazek4]: [*obrazek3*] [*obrazek1*] .(test)
 
-[*obrazek1*]: texy.jpg | texy-over.jpg .(altX)
-[*obrazek2*]: texy.jpg 10x13 | texy-over.jpg
+[*obrazek1*]: texy.jpg .(altX)
+[*obrazek2*]: texy.jpg 10x13
 [*obrazek3*]: texy.jpg
 [*obrazek4*]: texy-big.jpg

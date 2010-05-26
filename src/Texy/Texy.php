@@ -77,7 +77,6 @@ class Texy
 	public $summary = [
 		'images' => [],
 		'links' => [],
-		'preload' => [],
 	];
 
 	/** @var string  Generated stylesheet */

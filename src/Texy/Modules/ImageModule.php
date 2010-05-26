@@ -36,9 +36,6 @@ final class ImageModule extends Texy\Module
 	/** @var string  default alternative text */
 	public $defaultAlt = '';
 
-	/** @var string  images onload handler */
-	public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
-
 	/** @var array image references */
 	private $references = [];
 
@@ -48,7 +45,6 @@ final class ImageModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->allowed['image/definition'] = TRUE;
-		$texy->allowed['image/hover'] = TRUE;
 		$texy->addHandler('image', [$this, 'solve']);
 		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
 
@@ -99,7 +95,7 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK.
+	 * Callback for [* small.jpg 80x13 .(alternative text)[class]{style}>]:LINK.
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function patternImage(Texy\LineParser $parser, array $matches)
@@ -114,7 +110,7 @@ final class ImageModule extends Texy\Module
 
 		if ($mLink) {
 			if ($mLink === ':') {
-				$link = new Texy\Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
+				$link = new Texy\Link($image->URL);
 				$link->raw = ':';
 				$link->type = $link::IMAGE;
 			} else {
@@ -157,7 +153,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Parses image's syntax.
-	 * @param  string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
+	 * @param  string  input: small.jpg 80x13
 	 * @param  string
 	 * @param  bool
 	 * @return Image
@@ -168,38 +164,26 @@ final class ImageModule extends Texy\Module
 
 		if (!$image) {
 			$texy = $this->texy;
-			$content = explode('|', $content);
+			$parts = explode('|', $content);
+			if (count($parts) > 1) { // linked or over image
+				trigger_error("Syntax [* image | over | linked *] is deprecated, [* $content *] is partially ignored.", E_USER_WARNING);
+			}
+
 			$image = new Image;
 
 			// dimensions
 			$matches = NULL;
-			if ($matches = Texy\Regexp::match($content[0], '#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U')) {
+			if ($matches = Texy\Regexp::match($parts[0], '#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U')) {
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';
 				$image->width = $matches[2] === '?' ? NULL : (int) $matches[2];
 				$image->height = $matches[4] === '?' ? NULL : (int) $matches[4];
 			} else {
-				$image->URL = trim($content[0]);
+				$image->URL = trim($parts[0]);
 			}
 
 			if (!$texy->checkURL($image->URL, $texy::FILTER_IMAGE)) {
 				$image->URL = NULL;
-			}
-
-			// onmouseover image
-			if (isset($content[1])) {
-				$tmp = trim($content[1]);
-				if ($tmp !== '' && $texy->checkURL($tmp, $texy::FILTER_IMAGE)) {
-					$image->overURL = $tmp;
-				}
-			}
-
-			// linked image
-			if (isset($content[2])) {
-				$tmp = trim($content[2]);
-				if ($tmp !== '' && $texy->checkURL($tmp, $texy::FILTER_ANCHOR)) {
-					$image->linkedURL = $tmp;
-				}
 			}
 		}
 
@@ -288,16 +272,6 @@ final class ImageModule extends Texy\Module
 
 		$el->attrs['width'] = $image->width;
 		$el->attrs['height'] = $image->height;
-
-		// onmouseover actions generate
-		if (!empty($texy->allowed['image/hover']) && $image->overURL !== NULL) {
-			$overSrc = Helpers::prependRoot($image->overURL, $this->root);
-			$el->attrs['onmouseover'] = 'this.src=\'' . addSlashes($overSrc) . '\'';
-			$el->attrs['onmouseout'] = 'this.src=\'' . addSlashes($el->attrs['src']) . '\'';
-			$el->attrs['onload'] = str_replace('%i', addSlashes($overSrc), $this->onLoad);
-			$texy->summary['preload'][] = $overSrc;
-		}
-
 		$texy->summary['images'][] = $el->attrs['src'];
 
 		if ($link) {

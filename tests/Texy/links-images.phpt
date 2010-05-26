@@ -41,3 +41,8 @@ Assert::matchFile(
 	__DIR__ . '/expected/links-images3.html',
 	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy'))
 );
+
+Assert::error(function () {
+	$texy = createTexy();
+	$texy->process('[* texy.jpg | texy-over.jpg *]');
+}, E_USER_WARNING, 'Syntax [* image | over | linked *] is deprecated, [* texy.jpg | texy-over.jpg *] is partially ignored.');
