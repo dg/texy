@@ -12,7 +12,7 @@
  */
 
 
-define('TEXY_VERSION',  '2.2-dev');
+define('TEXY_VERSION',  '3.0-dev');
 
 
 /**
