@@ -83,23 +83,6 @@ if (!class_exists('UnexpectedValueException', FALSE)) {
 
 
 /**
- * Compatibility with Nette
- */
-if (!class_exists('NotSupportedException', FALSE)) {
-	class NotSupportedException extends LogicException {}
-}
-
-if (!class_exists('MemberAccessException', FALSE)) {
-	class MemberAccessException extends LogicException {}
-}
-
-if (!class_exists('InvalidStateException', FALSE)) {
-	class InvalidStateException extends RuntimeException {}
-}
-
-
-
-/**
  * For Texy 1 backward compatibility.
  */
 define('TEXY_ALL',  TRUE);
@@ -484,7 +467,7 @@ class Texy extends TexyObject
 	public function process($text, $singleLine = FALSE)
 	{
 		if ($this->processing) {
-			throw new InvalidStateException('Processing is in progress yet.');
+			throw new RuntimeException('Processing is in progress yet.');
 		}
 
 		// initialization
@@ -601,7 +584,7 @@ class Texy extends TexyObject
 	public function toText()
 	{
 		if (!$this->DOM) {
-			throw new InvalidStateException('Call $texy->process() first.');
+			throw new RuntimeException('Call $texy->process() first.');
 		}
 
 		return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
@@ -960,7 +943,7 @@ class Texy extends TexyObject
 
 	final public function __clone()
 	{
-		throw new NotSupportedException('Clone is not supported.');
+		throw new Exception('Clone is not supported.');
 	}
 
 }

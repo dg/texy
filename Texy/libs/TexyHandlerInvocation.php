@@ -57,7 +57,7 @@ final class TexyHandlerInvocation extends TexyObject
 	public function proceed()
 	{
 		if ($this->pos === 0) {
-			throw new InvalidStateException('No more handlers.');
+			throw new RuntimeException('No more handlers.');
 		}
 
 		if (func_num_args()) {
