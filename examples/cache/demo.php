@@ -33,5 +33,3 @@ echo '<hr />';
 echo '<pre>';
 echo htmlspecialchars($html);
 echo '</pre>';
-
-?>

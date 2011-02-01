@@ -7,7 +7,7 @@
 
 
 // include Texy!
-require_once dirname(__FILE__).'/../../texy/texy.php';
+require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
 
@@ -80,5 +80,3 @@ echo '<h2>Table of contents</h2>';
 echo '<pre>';
 print_r($texy->headingModule->TOC);
 echo '</pre>';
-
-?>

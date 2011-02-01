@@ -9,7 +9,7 @@
 
 
 // include libs
-require_once dirname(__FILE__).'/../../texy/texy.php';
+require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
 $geshiPath = dirname(__FILE__).'/geshi/';
@@ -102,5 +102,3 @@ echo '<hr />';
 echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
-
-?>

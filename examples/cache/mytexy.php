@@ -12,7 +12,7 @@
 
 
 // include libs
-require_once dirname(__FILE__).'/../../texy/texy.php';
+require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
 
