@@ -1,7 +1,3 @@
-Texy! 2.2-dev (c) David Grudl, 2004-2010 (http://davidgrudl.com)
-
-
-
 Introduction
 ------------
 
@@ -24,20 +20,6 @@ Code is written in object PHP. Library is well-advised designed, so any
 enhancements or specific requirements adaptations are as easy as possible.
 
 Texy is sexy!
-
-
-
-License
--------
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU GENERAL PUBLIC LICENSE version 2 or 3 as published by
-the Free Software Foundation. See license.txt in this directory
-for a copy of the license.
-
-Author of Texy David Grudl offers a commercial license for organizations that
-do not want to release the source code for their application. Pricing can be found
-at website http://texy.info, or contact author directly on david@grudl.com.
 
 
 
