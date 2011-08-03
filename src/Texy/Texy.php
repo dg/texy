@@ -255,7 +255,7 @@ class Texy extends TexyObject
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
-			require dirname(__FILE__) . '/DTD.php';
+			require __DIR__ . '/DTD.php';
 			self::$dtdCache[$mode] = $dtd;
 		}
 
