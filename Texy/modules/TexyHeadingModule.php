@@ -143,15 +143,15 @@ final class TexyHeadingModule extends TexyModule
 				$this->TOC[$key]['level'] = $level;
 			}
 
-			if ($this->generateID && empty($item['el']->attrs['id'])) {
+			if ($this->generateID) {
 				if (!empty($item['el']->style['toc']) && is_array($item['el']->style)) {
 					$title = $item['el']->style['toc'];
 					unset($item['el']->style['toc']);
 				} else {
 					$title = trim($item['el']->toText($this->texy));
 				}
-				if ($title !== '') {
 					$this->TOC[$key]['title'] = $title;
+				if (empty($item['el']->attrs['id'])) {
 					$id = $this->idPrefix . Texy::webalize($title);
 					$counter = '';
 					if (isset($this->usedID[$id . $counter])) {
