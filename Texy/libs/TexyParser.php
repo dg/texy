@@ -87,6 +87,9 @@ class TexyBlockParser extends TexyParser
 	// if succesfull, increments current position and returns TRUE
 	public function next($pattern, &$matches)
 	{
+		if ($this->offset > strlen($this->text)) {
+			return FALSE;
+		}
 		$matches = NULL;
 		$ok = preg_match(
 			$pattern . 'Am', // anchored & multiline
@@ -277,7 +280,11 @@ class TexyLineParser extends TexyParser
 				if ($arrOffset[$name] < $offset) {
 					$delta = ($arrOffset[$name] === -2) ? 1 : 0;
 
-					if (preg_match($pl[$name]['pattern'],
+					if ($offset + $delta > strlen($text)) {
+						unset($names[$index]);
+						continue;
+
+					} elseif (preg_match($pl[$name]['pattern'],
 							$text,
 							$arrMatches[$name],
 							PREG_OFFSET_CAPTURE,
