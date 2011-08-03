@@ -7,13 +7,8 @@
  */
 
 
-// Check PHP configuration
-if (version_compare(PHP_VERSION, '5.2.0') < 0) {
-	throw new Exception('Texy requires PHP 5.2.0 or newer.');
-} elseif (ini_get('zend.ze1_compatibility_mode') % 256 ||
-	preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))
-) {
-	throw new Exception('Texy cannot run with zend.ze1_compatibility_mode enabled.');
+if (PHP_VERSION_ID < 50404) {
+	throw new Exception('Texy requires PHP 5.4.4 or newer.');
 }
 
 
