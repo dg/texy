@@ -50,7 +50,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 		'strong'=>0,'dfn'=>0,'code'=>0,'samp'=>0,'kbd'=>0,'var'=>0,'cite'=>0,'abbr'=>0,'acronym'=>0,
 		'sub'=>0,'sup'=>0,'q'=>0,'span'=>0,'bdo'=>0,'a'=>0,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
 		'map'=>0,'input'=>1,'select'=>1,'textarea'=>1,'label'=>0,'button'=>1,
-		'mark'=>0,'time'=>0,'audio'=>1,'video'=>1, // html5
+		'mark'=>0,'time'=>0,'audio'=>1,'video'=>1,'source'=>0, // html5
 		'u'=>0,'s'=>0,'strike'=>0,'font'=>0,'applet'=>1,'basefont'=>0, // transitional
 		'embed'=>1,'wbr'=>0,'nobr'=>0,'canvas'=>1, // proprietary
 	);
