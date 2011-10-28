@@ -232,6 +232,13 @@ final class TexyPhraseModule extends TexyModule
 		$tx = $this->texy;
 		$mod = new TexyModifier($mMod);
 		$link = NULL;
+		
+		$html5 = ($tx->getOutputMode() === Texy::HTML5) || ($tx->getOutputMode() === Texy::HTML5 + Texy::XML);
+		
+		if ($html5) {
+			$this->tags['phrase/acronym'] = 'abbr';
+			$this->tags['phrase/acronym-alt'] = 'abbr';
+		}
 
 		$parser->again = $phrase !== 'phrase/code' && $phrase !== 'phrase/quicklink';
 

@@ -104,15 +104,17 @@ final class TexyFigureModule extends TexyModule
 
 		$elImg = $tx->imageModule->solve(NULL, $image, $link); // returns TexyHtml or false!
 		if (!$elImg) return FALSE;
+		
+		$html5 = ($tx->getOutputMode() === Texy::HTML5) || ($tx->getOutputMode() === Texy::HTML5 + Texy::XML);
 
-		$el = TexyHtml::el('div');
+		$el = $html5 ? TexyHtml::el('figure') : TexyHtml::el('div');
 		if (!empty($image->width) && $this->widthDelta !== FALSE) {
 			$el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
 		}
 		$mod->decorate($tx, $el);
 
 		$el[0] = $elImg;
-		$el[1] = TexyHtml::el('p');
+		$el[1] = $html5 ? TexyHtml::el('figcaption') : TexyHtml::el('p');
 		$el[1]->parseLine($tx, ltrim($content));
 
 		$class = $this->class;

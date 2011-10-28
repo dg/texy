@@ -15,12 +15,18 @@
 
 $strict = $mode === Texy::HTML4_STRICT || $mode === Texy::XHTML1_STRICT;
 
+$html5 = $mode === Texy::HTML5 || $mode === Texy::HTML5 + Texy::XML;
+
 
 // attributes
 $coreattrs = array('id'=>1,'class'=>1,'style'=>1,'title'=>1,'xml:id'=>1); // extra: xml:id
-$i18n = array('lang'=>1,'dir'=>1,'xml:lang'=>1); // extra: xml:lang
+$i18n = array('lang'=>1,'dir'=>1,'xml:lang'=>1); // extra: xml:lang 
 $attrs = $coreattrs + $i18n + array('onclick'=>1,'ondblclick'=>1,'onmousedown'=>1,'onmouseup'=>1,
 	'onmouseover'=>1, 'onmousemove'=>1,'onmouseout'=>1,'onkeypress'=>1,'onkeydown'=>1,'onkeyup'=>1);
+if ($html5) {
+	$attrs += array('contenteditable'=>1,'contextmenu'=>1,'draggable'=>1,'dropzone'=>1,'hidden'=>1,'spellcheck'=>1, // html5 global attributes
+		'itemscope'=>1,'itemtype'=>1,'itemid'=>1,'itemprop'=>1,'itemref'=>1); // html5 microdata
+}
 $cellalign = $attrs + array('align'=>1,'char'=>1,'charoff'=>1,'valign'=>1);
 
 // content elements
@@ -29,6 +35,10 @@ $cellalign = $attrs + array('align'=>1,'char'=>1,'charoff'=>1,'valign'=>1);
 $b = array('ins'=>1,'del'=>1,'p'=>1,'h1'=>1,'h2'=>1,'h3'=>1,'h4'=>1,
 	'h5'=>1,'h6'=>1,'ul'=>1,'ol'=>1,'dl'=>1,'pre'=>1,'div'=>1,'blockquote'=>1,'noscript'=>1,
 	'noframes'=>1,'form'=>1,'hr'=>1,'table'=>1,'address'=>1,'fieldset'=>1);
+
+if ($html5) $b += array(
+	'section'=>1,'article'=>1,'aside'=>1,'header'=>1,'footer'=>1,'nav'=>1
+);
 
 if (!$strict) $b += array(
 	'dir'=>1,'menu'=>1,'center'=>1,'iframe'=>1,'isindex'=>1, // transitional
@@ -40,6 +50,10 @@ $i = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
 	'strong'=>1,'dfn'=>1,'code'=>1,'samp'=>1,'kbd'=>1,'var'=>1,'cite'=>1,'abbr'=>1,'acronym'=>1,
 	'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
 	'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,'%DATA'=>1);
+
+if (!$html5) $b += array(
+	'audio'=>1,'video'=>1,'source'=>1,'mark'=>1,'time'=>1
+);
 
 if (!$strict) $i += array(
 	'u'=>1,'s'=>1,'strike'=>1,'font'=>1,'applet'=>1,'basefont'=>1, // transitional
@@ -371,6 +385,65 @@ $dtd = array(
 
 
 
+if ($html5) {
+
+
+	$dtd += array(
+	'section' => array(
+		$strict ? $attrs : $attrs + array('align'=>1),
+		$bi,
+	),
+	'article' => array(
+		$strict ? $attrs : $attrs + array('align'=>1),
+		$bi,
+	),
+	'aside' => array(
+		$strict ? $attrs : $attrs + array('align'=>1),
+		$bi,
+	),
+	'header' => array(
+		$strict ? $attrs : $attrs + array('align'=>1),
+		$bi,
+	),
+	'footer' => array(
+		$strict ? $attrs : $attrs + array('align'=>1),
+		$bi,
+	),
+	'nav' => array(
+		$strict ? $attrs : $attrs + array('align'=>1),
+		$bi,
+	),
+	'audio' => array(
+		$attrs + array('autoplay'=>1,'controls'=>1,'loop'=>1,'src'=>1,'preload'=>1),
+		array('iframe'=>1,'embed'=>1,'source'=>1),
+	),
+	'video' => array(
+		$attrs + array('autoplay'=>1,'controls'=>1,'loop'=>1,'width'=>1,'height'=>1,'src'=>1,'preload'=>1,'poster'=>1,'muted'=>1),
+		array('iframe'=>1,'embed'=>1,'source'=>1),
+	),
+	'mark' => array(
+		$attrs,
+		$i,
+	),
+	'time' => array(
+		$attrs + array('datetime'=>1,'pubdate'=>1),
+		$i,
+	),
+	'source' => array(
+		$attrs + array('media'=>1,'src'=>1,'type'=>1),
+		FALSE,
+	),
+	);
+	
+	$dtd['input'][0] += array('autofocus'=>1,'required'=>1,'placeholder'=>1,'form'=>1);
+	$dtd['textarea'][0] += array('autofocus'=>1,'required'=>1,'placeholder'=>1,'form'=>1);
+	$dtd['select'][0] += array('autofocus'=>1,'required'=>1,'placeholder'=>1,'form'=>1);
+
+
+}
+
+
+
 if ($strict) return $dtd;
 
 
@@ -390,7 +463,7 @@ $dtd += array(
 	$bi,
 ),
 'iframe' => array(
-	$coreattrs + array('longdesc'=>1,'name'=>1,'src'=>1,'frameborder'=>1,'marginwidth'=>1,'marginheight'=>1,'scrolling'=>1,'align'=>1,'height'=>1,'width'=>1),
+	$coreattrs + array('longdesc'=>1,'name'=>1,'src'=>1,'frameborder'=>1,'allowfullscreen'=>1,'marginwidth'=>1,'marginheight'=>1,'scrolling'=>1,'align'=>1,'height'=>1,'width'=>1),
 	$bi,
 ),
 'noframes' => array(

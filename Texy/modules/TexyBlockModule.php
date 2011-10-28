@@ -33,6 +33,12 @@ final class TexyBlockModule extends TexyModule
 		$texy->allowed['block/texysource'] = TRUE;
 		$texy->allowed['block/comment'] = TRUE;
 		$texy->allowed['block/div'] = TRUE;
+		$texy->allowed['block/section'] = TRUE;
+		$texy->allowed['block/article'] = TRUE;
+		$texy->allowed['block/aside'] = TRUE;
+		$texy->allowed['block/header'] = TRUE;
+		$texy->allowed['block/footer'] = TRUE;
+		$texy->allowed['block/nav'] = TRUE;
 
 		$texy->addHandler('block', array($this, 'solve'));
 		$texy->addHandler('beforeBlockParse', array($this, 'beforeBlockParse'));
@@ -213,6 +219,60 @@ final class TexyBlockModule extends TexyModule
 			$s = Texy::outdent($s);
 			if ($s==='') return "\n";
 			$el = TexyHtml::el('div');
+			$mod->decorate($tx, $el);
+			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+			return $el;
+		}
+		
+		if ($blocktype === 'block/section') {
+			$s = Texy::outdent($s);
+			if ($s==='') return "\n";
+			$el = TexyHtml::el('section');
+			$mod->decorate($tx, $el);
+			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+			return $el;
+		}
+		
+		if ($blocktype === 'block/article') {
+			$s = Texy::outdent($s);
+			if ($s==='') return "\n";
+			$el = TexyHtml::el('article');
+			$mod->decorate($tx, $el);
+			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+			return $el;
+		}
+		
+		if ($blocktype === 'block/aside') {
+			$s = Texy::outdent($s);
+			if ($s==='') return "\n";
+			$el = TexyHtml::el('aside');
+			$mod->decorate($tx, $el);
+			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+			return $el;
+		}
+		
+		if ($blocktype === 'block/header') {
+			$s = Texy::outdent($s);
+			if ($s==='') return "\n";
+			$el = TexyHtml::el('header');
+			$mod->decorate($tx, $el);
+			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+			return $el;
+		}
+		
+		if ($blocktype === 'block/footer') {
+			$s = Texy::outdent($s);
+			if ($s==='') return "\n";
+			$el = TexyHtml::el('footer');
+			$mod->decorate($tx, $el);
+			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+			return $el;
+		}
+		
+		if ($blocktype === 'block/nav') {
+			$s = Texy::outdent($s);
+			if ($s==='') return "\n";
+			$el = TexyHtml::el('nav');
 			$mod->decorate($tx, $el);
 			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
 			return $el;

@@ -50,13 +50,15 @@ final class TexyBlockQuoteModule extends TexyModule
 	 * @return TexyHtml|string|FALSE
 	 */
 	public function pattern($parser, $matches)
-	{
+	{	
 		list(, $mMod, $mPrefix, $mContent) = $matches;
 		//    [1] => .(title)[class]{style}<>
 		//    [2] => spaces |
 		//    [3] => ... / LINK
 
 		$tx = $this->texy;
+		
+		$html5 = ($tx->getOutputMode() === Texy::HTML5) || ($tx->getOutputMode() === Texy::HTML5 + Texy::XML);
 
 		$el = TexyHtml::el('blockquote');
 		$mod = new TexyModifier($mMod);
@@ -66,7 +68,11 @@ final class TexyBlockQuoteModule extends TexyModule
 		$spaces = '';
 		do {
 			if ($mPrefix === ':') {
-				$mod->cite = $tx->blockQuoteModule->citeLink($mContent);
+				if ($html5) {
+					$footer = TexyHtml::el('footer', $mContent);
+				} else {
+					$mod->cite = $tx->blockQuoteModule->citeLink($mContent);
+				}
 				$content .= "\n";
 			} else {
 				if ($spaces === '') $spaces = max(1, strlen($mPrefix));
@@ -91,8 +97,13 @@ final class TexyBlockQuoteModule extends TexyModule
 			list(, $mPrefix, $mContent) = $matches;
 		} while (TRUE);
 
-		$el->attrs['cite'] = $mod->cite;
+		if (!$html5) {
+			$el->attrs['cite'] = $mod->cite;
+		}
 		$el->parseBlock($tx, $content, $parser->isIndented());
+		if ($html5) {
+			$el->add($footer);
+		}
 
 		// no content?
 		if (!$el->count()) return FALSE;

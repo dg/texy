@@ -43,13 +43,14 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 
 	/** @var array  empty elements */
 	public static $emptyElements = array('img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
-		'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1,'embed'=>1);
+		'base'=>1,'col'=>1,'link'=>1,'param'=>1,'source'=>0,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1,'embed'=>1);
 
 	/** @var array  %inline; elements; replaced elements + br have value '1' */
 	public static $inlineElements = array('ins'=>0,'del'=>0,'tt'=>0,'i'=>0,'b'=>0,'big'=>0,'small'=>0,'em'=>0,
 		'strong'=>0,'dfn'=>0,'code'=>0,'samp'=>0,'kbd'=>0,'var'=>0,'cite'=>0,'abbr'=>0,'acronym'=>0,
 		'sub'=>0,'sup'=>0,'q'=>0,'span'=>0,'bdo'=>0,'a'=>0,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
 		'map'=>0,'input'=>1,'select'=>1,'textarea'=>1,'label'=>0,'button'=>1,
+		'mark'=>0,'time'=>0,'audio'=>1,'video'=>1, // html5
 		'u'=>0,'s'=>0,'strike'=>0,'font'=>0,'applet'=>1,'basefont'=>0, // transitional
 		'embed'=>1,'wbr'=>0,'nobr'=>0,'canvas'=>1, // proprietary
 	);
