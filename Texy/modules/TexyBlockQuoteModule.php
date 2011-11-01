@@ -101,7 +101,7 @@ final class TexyBlockQuoteModule extends TexyModule
 			$el->attrs['cite'] = $mod->cite;
 		}
 		$el->parseBlock($tx, $content, $parser->isIndented());
-		if ($html5) {
+		if ($html5 && isset($footer)) {
 			$el->add($footer);
 		}
 

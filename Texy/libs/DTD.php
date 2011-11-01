@@ -51,7 +51,7 @@ $i = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
 	'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
 	'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,'%DATA'=>1);
 
-if (!$html5) $b += array(
+if ($html5) $b += array(
 	'audio'=>1,'video'=>1,'source'=>1,'mark'=>1,'time'=>1
 );
 
