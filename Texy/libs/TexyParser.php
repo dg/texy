@@ -274,18 +274,7 @@ class TexyLineParser extends TexyParser
 		$names = array_keys($pl);
 		$arrMatches = $arrOffset = array();
 		foreach ($names as $name) $arrOffset[$name] = -1;
-
-
-		if (!$tx->mergeLines) {
-			$text = preg_replace('#\n#', "\r", $text);
-			
-			if (strpos($text, "\r") !== FALSE) {
-				$key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
-				$text = str_replace("\r", $key, $text);
-			}
-		}
-
-
+		
 		// parse loop
 		do {
 			$min = NULL;
@@ -369,6 +358,15 @@ class TexyLineParser extends TexyParser
 			}
 
 		} while (1);
+		
+		if (!$tx->mergeLines) {
+			$text = preg_replace('#\n#', "\r", $text);
+			
+			if (strpos($text, "\r") !== FALSE) {
+				$key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
+				$text = str_replace("\r", $key, $text);
+			}
+		}
 
 		$this->element->insert(NULL, $text);
 	}
