@@ -69,7 +69,8 @@ final class TexyBlockQuoteModule extends TexyModule
 		do {
 			if ($mPrefix === ':') {
 				if ($html5) {
-					$footer = TexyHtml::el('footer', $mContent);
+					$footer = TexyHtml::el('footer');
+					$footer->parseLine($tx, $mContent);
 				} else {
 					$mod->cite = $tx->blockQuoteModule->citeLink($mContent);
 				}
