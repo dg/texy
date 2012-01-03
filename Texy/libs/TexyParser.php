@@ -3,12 +3,10 @@
 /**
  * Texy! is human-readable text to HTML converter (http://texy.info)
  *
- * Copyright (c) 2004, 2011 David Grudl (http://davidgrudl.com)
+ * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  *
  * For the full copyright and license information, please view
  * the file license.txt that was distributed with this source code.
- *
- * @package    Texy
  */
 
 
@@ -17,6 +15,7 @@
  * Texy parser base class.
  *
  * @author     David Grudl
+ * @package    Texy
  */
 class TexyParser extends TexyObject
 {
