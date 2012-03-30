@@ -1,1 +1,1 @@
-Texy! 2.2-dev (revision $WCREV$ released on $WCDATE$)
+Texy! 2.2 (revision $WCREV$ released on $WCDATE$)
