@@ -359,11 +359,6 @@ class TexyLineParser extends TexyParser
 
 		} while (1);
 
-		if (!$tx->mergeLines) {
-			$text = strtr($text, "\n", "\r");
-			$text = strtr($text, "\r", $tx->protect('<br />', Texy::CONTENT_REPLACED));
-		}
-
 		$this->element->insert(NULL, $text);
 	}
 
