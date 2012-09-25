@@ -99,9 +99,9 @@ final class TexyTypographyModule extends TexyModule
 			'#\\+-#'                                  => "\xc2\xb1",                       // +-
 			'#(\d++)( ?)x\\2(?=\d)#'                  => "\$1\xc3\x97",                    // dimension sign 123 x 123...
 			'#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // dimension sign 123x
-			'#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark (TM)
-			'#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
-			'#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright (C)
+			'#(\S ?)\(TM\)#'                          => "\$1\xe2\x84\xa2",                // trademark (TM)
+			'#(\S ?)\(R\)#'                           => "\$1\xc2\xae",                    // registered (R)
+			'#\(C\)( ?\S)#'                           => "\xc2\xa9\$1",                    // copyright (C)
 			'#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro (EUR)
 			'#(\d) (?=\d{3})#'                        => "\$1\xc2\xa0",                    // (phone) number 1 123 123 123...
 
