@@ -15,12 +15,12 @@
 
 $strict = $mode === Texy::HTML4_STRICT || $mode === Texy::XHTML1_STRICT;
 
-$html5 = $mode === Texy::HTML5 || $mode === Texy::HTML5 + Texy::XML;
+$html5 = $mode === Texy::HTML5 || $mode === Texy::HTML5 | Texy::XML;
 
 
 // attributes
 $coreattrs = array('id'=>1,'class'=>1,'style'=>1,'title'=>1,'xml:id'=>1); // extra: xml:id
-$i18n = array('lang'=>1,'dir'=>1,'xml:lang'=>1); // extra: xml:lang 
+$i18n = array('lang'=>1,'dir'=>1,'xml:lang'=>1); // extra: xml:lang
 $attrs = $coreattrs + $i18n + array('onclick'=>1,'ondblclick'=>1,'onmousedown'=>1,'onmouseup'=>1,
 	'onmouseover'=>1, 'onmousemove'=>1,'onmouseout'=>1,'onkeypress'=>1,'onkeydown'=>1,'onkeyup'=>1);
 if ($html5) {
@@ -51,8 +51,8 @@ $i = array('ins'=>1,'del'=>1,'tt'=>1,'i'=>1,'b'=>1,'big'=>1,'small'=>1,'em'=>1,
 	'sub'=>1,'sup'=>1,'q'=>1,'span'=>1,'bdo'=>1,'a'=>1,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
 	'map'=>1,'input'=>1,'select'=>1,'textarea'=>1,'label'=>1,'button'=>1,'%DATA'=>1);
 
-if ($html5) $b += array(
-	'audio'=>1,'video'=>1,'source'=>1,'mark'=>1,'time'=>1
+if ($html5) $i += array(
+	'audio'=>1,'video'=>1,'source'=>1,'mark'=>1,'time'=>1,'source'=>1
 );
 
 if (!$strict) $i += array(
