@@ -5,16 +5,12 @@
  */
 
 
-
-
 // include Texy!
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
-
 $texy = new Texy();
 $texy->htmlOutputModule->baseIndent  = 1;
-
 
 
 function doIt($texy)
@@ -32,8 +28,6 @@ function doIt($texy)
 	echo '</pre>';
 	echo '<hr />';
 }
-
-
 
 
 header('Content-type: text/html; charset=utf-8');

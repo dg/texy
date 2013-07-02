@@ -7,7 +7,6 @@
  */
 
 
-
 // include libs
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
@@ -19,7 +18,6 @@ $geshiPath = dirname(__FILE__).'/geshi/';
 if (!class_exists('Geshi')) {
 	die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
 }
-
 
 
 /**
@@ -76,8 +74,6 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 	$el->setText($content);
 	return $el;
 }
-
-
 
 
 $texy = new Texy();

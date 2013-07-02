@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Scripts module.
  *
@@ -30,7 +29,6 @@ final class TexyScriptModule extends TexyModule
 	public $separator = ',';
 
 
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
@@ -45,7 +43,6 @@ final class TexyScriptModule extends TexyModule
 	}
 
 
-
 	/**
 	 * Callback for: {{...}}.
 	 *
@@ -57,20 +54,23 @@ final class TexyScriptModule extends TexyModule
 	public function pattern($parser, $matches)
 	{
 		list(, $mContent) = $matches;
-		//    [1] => ...
+		// [1] => ...
 
 		$cmd = trim($mContent);
-		if ($cmd === '') return FALSE;
+		if ($cmd === '') {
+			return FALSE;
+		}
 
 		$args = $raw = NULL;
-		// function(arg, arg, ...)  or  function: arg, arg
+		// function(arg, arg, ...) or function: arg, arg
 		if (preg_match('#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu', $cmd, $matches)) {
 			$cmd = $matches[1];
 			$raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
-			if ($raw === '')
+			if ($raw === '') {
 				$args = array();
-			else
+			} else {
 				$args = preg_split('#\s*' . preg_quote($this->separator, '#') . '\s*#u', $raw);
+			}
 		}
 
 		// Texy 1.x way
@@ -80,14 +80,14 @@ final class TexyScriptModule extends TexyModule
 				return call_user_func_array(array($this->handler, $cmd), $args);
 			}
 
-			if (is_callable($this->handler))
+			if (is_callable($this->handler)) {
 				return call_user_func_array($this->handler, array($parser, $cmd, $args, $raw));
+			}
 		}
 
 		// Texy 2 way
 		return $this->texy->invokeAroundHandlers('script', $parser, array($cmd, $args, $raw));
 	}
-
 
 
 	/**
@@ -102,12 +102,14 @@ final class TexyScriptModule extends TexyModule
 	public function solve($invocation, $cmd, $args, $raw)
 	{
 		if ($cmd === 'texy') {
-			if (!$args) return FALSE;
+			if (!$args) {
+				return FALSE;
+			}
 
 			switch ($args[0]) {
-			case 'nofollow':
-				$this->texy->linkModule->forceNoFollow = TRUE;
-				break;
+				case 'nofollow':
+					$this->texy->linkModule->forceNoFollow = TRUE;
+					break;
 			}
 			return '';
 

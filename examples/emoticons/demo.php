@@ -9,7 +9,6 @@
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
-
 $texy = new Texy();
 
 
@@ -19,7 +18,6 @@ $texy->allowed['emoticon'] = TRUE;
 // configure it
 $texy->emoticonModule->class = 'smilie';
 $texy->emoticonModule->icons[':oops:'] = 'redface.gif';  // user-defined emoticon
-
 
 
 // processing

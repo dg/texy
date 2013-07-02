@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Texy parser base class.
  *
@@ -22,12 +21,11 @@ class TexyParser extends TexyObject
 	/** @var Texy */
 	protected $texy;
 
-	/** @var TexyHtml  */
+	/** @var TexyHtml */
 	protected $element;
 
 	/** @var array */
 	public $patterns;
-
 
 
 	/**
@@ -39,10 +37,6 @@ class TexyParser extends TexyObject
 	}
 
 }
-
-
-
-
 
 
 /**
@@ -60,7 +54,6 @@ class TexyBlockParser extends TexyParser
 	private $indented;
 
 
-
 	/**
 	 * @param  Texy
 	 * @param  TexyHtml
@@ -74,17 +67,15 @@ class TexyBlockParser extends TexyParser
 	}
 
 
-
 	public function isIndented()
 	{
 		return $this->indented;
 	}
 
 
-
 	// match current line against RE.
 	// if succesfull, increments current position and returns TRUE
-	public function next($pattern, &$matches)
+	public function next($pattern, & $matches)
 	{
 		if ($this->offset > strlen($this->text)) {
 			return FALSE;
@@ -99,34 +90,40 @@ class TexyBlockParser extends TexyParser
 		);
 
 		if ($ok) {
-			$this->offset += strlen($matches[0][0]) + 1;  // 1 = "\n"
-			foreach ($matches as $key => $value) $matches[$key] = $value[0];
+			$this->offset += strlen($matches[0][0]) + 1; // 1 = "\n"
+			foreach ($matches as $key => $value) {
+				$matches[$key] = $value[0];
+			}
 		}
 		return $ok;
 	}
 
 
-
 	public function moveBackward($linesCount = 1)
 	{
-		while (--$this->offset > 0)
+		while (--$this->offset > 0) {
 			if ($this->text{ $this->offset-1 } === "\n") {
 				$linesCount--;
-				if ($linesCount < 1) break;
+				if ($linesCount < 1) {
+					break;
+				}
 			}
+		}
 
 		$this->offset = max($this->offset, 0);
 	}
 
 
-
 	public static function cmp($a, $b)
 	{
-		if ($a[0] === $b[0]) return $a[3] < $b[3] ? -1 : 1;
-		if ($a[0] < $b[0]) return -1;
+		if ($a[0] === $b[0]) {
+			return $a[3] < $b[3] ? -1 : 1;
+		}
+		if ($a[0] < $b[0]) {
+			return -1;
+		}
 		return 1;
 	}
-
 
 
 	/**
@@ -146,8 +143,7 @@ class TexyBlockParser extends TexyParser
 		// parse loop
 		$matches = array();
 		$priority = 0;
-		foreach ($this->patterns as $name => $pattern)
-		{
+		foreach ($this->patterns as $name => $pattern) {
 			preg_match_all(
 				$pattern['pattern'],
 				$text,
@@ -157,7 +153,9 @@ class TexyBlockParser extends TexyParser
 
 			foreach ($ms as $m) {
 				$offset = $m[0][1];
-				foreach ($m as $k => $v) $m[$k] = $v[0];
+				foreach ($m as $k => $v) {
+					$m[$k] = $v[0];
+				}
 				$matches[] = array($offset, $name, $m, $priority);
 			}
 			$priority++;
@@ -175,8 +173,9 @@ class TexyBlockParser extends TexyParser
 			do {
 				list($mOffset, $mName, $mMatches) = $matches[$cursor];
 				$cursor++;
-				if ($mName === NULL) break;
-				if ($mOffset >= $this->offset) break;
+				if ($mName === NULL || $mOffset >= $this->offset) {
+					break;
+				}
 			} while (1);
 
 			// between-matches content
@@ -187,9 +186,11 @@ class TexyBlockParser extends TexyParser
 				}
 			}
 
-			if ($mName === NULL) break; // finito
+			if ($mName === NULL) {
+				break; // finito
+			}
 
-			$this->offset = $mOffset + strlen($mMatches[0]) + 1;   // 1 = \n
+			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
 
 			$res = call_user_func_array(
 				$this->patterns[$mName]['handler'],
@@ -214,16 +215,6 @@ class TexyBlockParser extends TexyParser
 }
 
 
-
-
-
-
-
-
-
-
-
-
 /**
  * Parser for single line structures.
  */
@@ -231,7 +222,6 @@ class TexyLineParser extends TexyParser
 {
 	/** @var bool */
 	public $again;
-
 
 
 	/**
@@ -244,7 +234,6 @@ class TexyLineParser extends TexyParser
 		$this->element = $element;
 		$this->patterns = $texy->getLinePatterns();
 	}
-
 
 
 	/**
@@ -266,7 +255,9 @@ class TexyLineParser extends TexyParser
 		$offset = 0;
 		$names = array_keys($pl);
 		$arrMatches = $arrOffset = array();
-		foreach ($names as $name) $arrOffset[$name] = -1;
+		foreach ($names as $name) {
+			$arrOffset[$name] = -1;
+		}
 
 
 		// parse loop
@@ -274,8 +265,7 @@ class TexyLineParser extends TexyParser
 			$min = NULL;
 			$minOffset = strlen($text);
 
-			foreach ($names as $index => $name)
-			{
+			foreach ($names as $index => $name) {
 				if ($arrOffset[$name] < $offset) {
 					$delta = ($arrOffset[$name] === -2) ? 1 : 0;
 
@@ -290,9 +280,13 @@ class TexyLineParser extends TexyParser
 							$offset + $delta)
 					) {
 						$m = & $arrMatches[$name];
-						if (!strlen($m[0][0])) continue;
+						if (!strlen($m[0][0])) {
+							continue;
+						}
 						$arrOffset[$name] = $m[0][1];
-						foreach ($m as $keyx => $value) $m[$keyx] = $value[0];
+						foreach ($m as $keyx => $value) {
+							$m[$keyx] = $value[0];
+						}
 
 					} else {
 						// try next time?
@@ -309,7 +303,9 @@ class TexyLineParser extends TexyParser
 				}
 			} // foreach
 
-			if ($min === NULL) break;
+			if ($min === NULL) {
+				break;
+			}
 
 			$px = $pl[$min];
 			$offset = $start = $arrOffset[$min];
@@ -337,8 +333,11 @@ class TexyLineParser extends TexyParser
 
 			$delta = strlen($res) - $len;
 			foreach ($names as $name) {
-				if ($arrOffset[$name] < $start + $len) $arrOffset[$name] = -1;
-				else $arrOffset[$name] += $delta;
+				if ($arrOffset[$name] < $start + $len) {
+					$arrOffset[$name] = -1;
+				} else {
+					$arrOffset[$name] += $delta;
+				}
 			}
 
 			if ($this->again) {

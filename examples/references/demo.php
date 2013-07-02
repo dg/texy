@@ -8,12 +8,8 @@
  */
 
 
-
 // include Texy!
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
-
-
-
 
 
 /**
@@ -38,11 +34,6 @@ function newReferenceHandler($parser, $refName)
 	$el->setText("[$refName] $name:"); // set link label (with Texy formatting)
 	return $el;
 }
-
-
-
-
-
 
 
 $texy = new Texy();
@@ -71,11 +62,12 @@ echo $html;
 
 // do some antispam filtering - this is just very simple example ;-)
 $spam = FALSE;
-foreach ($texy->summary['links'] as $link)
+foreach ($texy->summary['links'] as $link) {
 	if (strpos($link, 'casino')) {
 		$spam = TRUE;
 		break;
 	}
+}
 
 
 // and echo generated HTML code

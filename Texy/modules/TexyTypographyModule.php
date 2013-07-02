@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Typography replacements module.
  *
@@ -55,14 +54,12 @@ final class TexyTypographyModule extends TexyModule
 	private $pattern, $replace;
 
 
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
 		$texy->registerPostLine(array($this, 'postLine'), 'typography');
 		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
 	}
-
 
 
 	/**
@@ -73,15 +70,16 @@ final class TexyTypographyModule extends TexyModule
 	 */
 	public function beforeParse($texy, & $text)
 	{
-		// CONTENT_MARKUP mark:   \x17-\x1F
+		// CONTENT_MARKUP mark: \x17-\x1F
 		// CONTENT_REPLACED mark: \x16
-		// CONTENT_TEXTUAL mark:  \x17
+		// CONTENT_TEXTUAL mark: \x17
 		// CONTENT_BLOCK: not used in postLine
 
-		if (isset(self::$locales[$this->locale]))
+		if (isset(self::$locales[$this->locale])) {
 			$locale = self::$locales[$this->locale];
-		else // fall back
+		} else { // fall back
 			$locale = self::$locales['en'];
+		}
 
 		$pairs = array(
 			'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
@@ -125,7 +123,6 @@ final class TexyTypographyModule extends TexyModule
 		$this->pattern = array_keys($pairs);
 		$this->replace = array_values($pairs);
 	}
-
 
 
 	public function postLine($text, $preserveSpaces = FALSE)

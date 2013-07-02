@@ -10,24 +10,23 @@
  */
 
 
-
 /**
  * TexyObject is the ultimate ancestor of all instantiable classes.
  *
  * TexyObject is copy of Nette\Object from Nette Framework (http://nette.org).
  *
  * It defines some handful methods and enhances object core of PHP:
- *   - access to undeclared members throws exceptions
- *   - support for conventional properties with getters and setters
- *   - support for event raising functionality
- *   - ability to add new methods to class (extension methods)
+ * - access to undeclared members throws exceptions
+ * - support for conventional properties with getters and setters
+ * - support for event raising functionality
+ * - ability to add new methods to class (extension methods)
  *
  * Properties is a syntactic sugar which allows access public getter and setter
  * methods as normal object variables. A property is defined by a getter method
  * and optional setter method (no setter method means read-only property).
  * <code>
- * $val = $obj->label;     // equivalent to $val = $obj->getLabel();
- * $obj->label = 'Nette';  // equivalent to $obj->setLabel('Nette');
+ * $val = $obj->label; // equivalent to $val = $obj->getLabel();
+ * $obj->label = 'Nette'; // equivalent to $obj->setLabel('Nette');
  * </code>
  * Property names are case-sensitive, and they are written in the camelCaps
  * or PascalCaps.
@@ -35,10 +34,10 @@
  * Event functionality is provided by declaration of property named 'on{Something}'
  * Multiple handlers are allowed.
  * <code>
- * public $onClick;                // declaration in class
- * $this->onClick[] = 'callback';  // attaching event handler
+ * public $onClick; // declaration in class
+ * $this->onClick[] = 'callback'; // attaching event handler
  * if (!empty($this->onClick)) ... // are there any handlers?
- * $this->onClick($sender, $arg);  // raises the event with arguments
+ * $this->onClick($sender, $arg); // raises the event with arguments
  * </code>
  *
  * Adding method to class (i.e. to all instances) works similar to JavaScript
@@ -58,7 +57,6 @@ abstract class TexyObject
 	private static $extMethods;
 
 
-
 	/**
 	 * Returns the name of the class of this object.
 	 *
@@ -70,7 +68,6 @@ abstract class TexyObject
 	}
 
 
-
 	/**
 	 * Access to reflection.
 	 *
@@ -80,7 +77,6 @@ abstract class TexyObject
 	{
 		return new ReflectionObject($this);
 	}
-
 
 
 	/**
@@ -128,7 +124,6 @@ abstract class TexyObject
 	}
 
 
-
 	/**
 	 * Call to undefined static method.
 	 *
@@ -142,7 +137,6 @@ abstract class TexyObject
 		$class = get_called_class();
 		throw new LogicException("Call to undefined static method $class::$name().");
 	}
-
 
 
 	/**
@@ -163,7 +157,9 @@ abstract class TexyObject
 					self::$extMethods[$pair[1]][''] = NULL;
 				}
 			}
-			if ($name === NULL) return NULL;
+			if ($name === NULL) {
+				return NULL;
+			}
 		}
 
 		$name = strtolower($name);
@@ -207,7 +203,6 @@ abstract class TexyObject
 	}
 
 
-
 	/**
 	 * Returns property value. Do not call directly.
 	 *
@@ -215,7 +210,7 @@ abstract class TexyObject
 	 * @return mixed   property value
 	 * @throws LogicException if the property is not defined.
 	 */
-	public function &__get($name)
+	public function & __get($name)
 	{
 		$class = get_class($this);
 
@@ -228,8 +223,8 @@ abstract class TexyObject
 		$m = 'get' . $name;
 		if (self::hasAccessor($class, $m)) {
 			// ampersands:
-			// - uses &__get() because declaration should be forward compatible (e.g. with Nette\Web\Html)
-			// - doesn't call &$this->$m because user could bypass property setter by: $x = & $obj->property; $x = 'new value';
+			// - uses & __get() because declaration should be forward compatible (e.g. with Nette\Web\Html)
+			// - doesn't call & $this->$m because user could bypass property setter by: $x = & $obj->property; $x = 'new value';
 			$val = $this->$m();
 			return $val;
 		}
@@ -243,7 +238,6 @@ abstract class TexyObject
 		$name = func_get_arg(0);
 		throw new LogicException("Cannot read an undeclared property $class::\$$name.");
 	}
-
 
 
 	/**
@@ -281,7 +275,6 @@ abstract class TexyObject
 	}
 
 
-
 	/**
 	 * Is property defined?
 	 *
@@ -293,7 +286,6 @@ abstract class TexyObject
 		$name[0] = $name[0] & "\xDF";
 		return $name !== '' && self::hasAccessor(get_class($this), 'get' . $name);
 	}
-
 
 
 	/**
@@ -308,7 +300,6 @@ abstract class TexyObject
 		$class = get_class($this);
 		throw new LogicException("Cannot unset the property $class::\$$name.");
 	}
-
 
 
 	/**

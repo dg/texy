@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Paragraph module.
  *
@@ -26,7 +25,6 @@ final class TexyParagraphModule extends TexyModule
 		$this->texy = $texy;
 		$texy->addHandler('paragraph', array($this, 'solve'));
 	}
-
 
 
 	/**
@@ -46,26 +44,30 @@ final class TexyParagraphModule extends TexyModule
 			$parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
 		}
 
-		foreach ($parts as $s)
-		{
+		foreach ($parts as $s) {
 			$s = trim($s);
-			if ($s === '') continue;
+			if ($s === '') {
+				continue;
+			}
 
 			// try to find modifier
 			$mx = $mod = NULL;
 			if (preg_match('#'.TEXY_MODIFIER_H.'(?=\n|\z)#sUm', $s, $mx, PREG_OFFSET_CAPTURE)) {
 				list($mMod) = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
-				if ($s === '') continue;
+				if ($s === '') {
+					continue;
+				}
 				$mod = new TexyModifier;
 				$mod->setProperties($mMod);
 			}
 
 			$res = $tx->invokeAroundHandlers('paragraph', $parser, array($s, $mod));
-			if ($res) $el->insert(NULL, $res);
+			if ($res) {
+				$el->insert(NULL, $res);
+			}
 		}
 	}
-
 
 
 	/**
@@ -83,7 +85,7 @@ final class TexyParagraphModule extends TexyModule
 		// find hard linebreaks
 		if ($tx->mergeLines) {
 			// ....
-			//  ...  => \r means break line
+			// ... => \r means break line
 			$content = preg_replace('#\n +(?=\S)#', "\r", $content);
 		} else {
 			$content = preg_replace('#\n#', "\r", $content);
@@ -96,7 +98,7 @@ final class TexyParagraphModule extends TexyModule
 		// check content type
 		// block contains block tag
 		if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
-			$el->setName(NULL);  // ignores modifier!
+			$el->setName(NULL); // ignores modifier!
 
 		// block contains text (protected)
 		} elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
@@ -113,12 +115,16 @@ final class TexyParagraphModule extends TexyModule
 		// block contains only markup tags or spaces or nothing
 		} else {
 			// if {ignoreEmptyStuff} return FALSE;
-			if (!$mod) $el->setName(NULL);
+			if (!$mod) {
+				$el->setName(NULL);
+			}
 		}
 
 		if ($el->getName()) {
 			// apply modifier
-			if ($mod) $mod->decorate($tx, $el);
+			if ($mod) {
+				$mod->decorate($tx, $el);
+			}
 
 			// add <br />
 			if (strpos($content, "\r") !== FALSE) {

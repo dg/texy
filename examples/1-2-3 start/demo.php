@@ -9,7 +9,6 @@
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
-
 $texy = new Texy();
 
 // other OPTIONAL configuration

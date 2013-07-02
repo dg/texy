@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Phrases module.
  *
@@ -36,7 +35,7 @@ final class TexyPhraseModule extends TexyModule
 		'phrase/cite' => 'cite',
 		'phrase/acronym' => 'acronym',
 		'phrase/acronym-alt' => 'acronym',
-		'phrase/code'  => 'code',
+		'phrase/code' => 'code',
 		'phrase/quote' => 'q',
 		'phrase/quicklink' => 'a',
 	);
@@ -44,7 +43,6 @@ final class TexyPhraseModule extends TexyModule
 
 	/** @var bool  are links allowed? */
 	public $linksAllowed = TRUE;
-
 
 
 	public function __construct($texy)
@@ -212,7 +210,6 @@ final class TexyPhraseModule extends TexyModule
 	}
 
 
-
 	/**
 	 * Callback for: **.... .(title)[class]{style}**:LINK.
 	 *
@@ -224,10 +221,10 @@ final class TexyPhraseModule extends TexyModule
 	public function patternPhrase($parser, $matches, $phrase)
 	{
 		list(, $mContent, $mMod, $mLink) = $matches;
-		//    [1] => **
-		//    [2] => ...
-		//    [3] => .(title)[class]{style}
-		//    [4] => LINK
+		// [1] => **
+		// [2] => ...
+		// [3] => .(title)[class]{style}
+		// [4] => LINK
 
 		$tx = $this->texy;
 		$mod = new TexyModifier($mMod);
@@ -237,7 +234,9 @@ final class TexyPhraseModule extends TexyModule
 
 		if ($phrase === 'phrase/span' || $phrase === 'phrase/span-alt') {
 			if ($mLink == NULL) {
-				if (!$mMod) return FALSE; // means "..."
+				if (!$mMod) {
+					return FALSE; // means "..."
+				}
 			} else {
 				$link = $tx->linkModule->factoryLink($mLink, $mMod, $mContent);
 			}
@@ -256,9 +255,8 @@ final class TexyPhraseModule extends TexyModule
 	}
 
 
-
 	/**
-	 * Callback for: any^2  any_2.
+	 * Callback for: any^2 any_2.
 	 *
 	 * @param  TexyLineParser
 	 * @param  array      regexp matches
@@ -275,7 +273,6 @@ final class TexyPhraseModule extends TexyModule
 	}
 
 
-
 	/**
 	 * @param  TexyLineParser
 	 * @param  array      regexp matches
@@ -287,7 +284,6 @@ final class TexyPhraseModule extends TexyModule
 		list(, $mContent) = $matches;
 		return $this->texy->protect(Texy::escapeHtml($mContent), Texy::CONTENT_TEXTUAL);
 	}
-
 
 
 	/**
@@ -306,11 +302,13 @@ final class TexyPhraseModule extends TexyModule
 
 		$tag = isset($this->tags[$phrase]) ? $this->tags[$phrase] : NULL;
 
-		if ($tag === 'a')
+		if ($tag === 'a') {
 			$tag = $link && $this->linksAllowed ? NULL : 'span';
+		}
 
-		if ($phrase === 'phrase/code')
+		if ($phrase === 'phrase/code') {
 			$content = $tx->protect(Texy::escapeHtml($content), Texy::CONTENT_TEXTUAL);
+		}
 
 		if ($phrase === 'phrase/strong+em') {
 			$el = TexyHtml::el($this->tags['phrase/strong']);
@@ -321,12 +319,16 @@ final class TexyPhraseModule extends TexyModule
 			$el = TexyHtml::el($tag)->setText($content);
 			$mod->decorate($tx, $el);
 
-			if ($tag === 'q') $el->attrs['cite'] = $mod->cite;
+			if ($tag === 'q') {
+				$el->attrs['cite'] = $mod->cite;
+			}
 		} else {
 			$el = $content; // trick
 		}
 
-		if ($link && $this->linksAllowed) return $tx->linkModule->solve(NULL, $link, $el);
+		if ($link && $this->linksAllowed) {
+			return $tx->linkModule->solve(NULL, $link, $el);
+		}
 
 		return $el;
 	}

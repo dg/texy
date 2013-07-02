@@ -10,7 +10,6 @@
  */
 
 
-
 /**#@+
  * Regular expression patterns
  */
@@ -35,7 +34,6 @@ define('TEXY_MODIFIER_H',  '(?: *+(?<= |^)\\.((?:\\([^)\\n]++\\)|\\[[^\\]\\n]++\
 
 // modifier .(title)[class]{style}<>^
 define('TEXY_MODIFIER_HV', '(?: *+(?<= |^)\\.((?:\\([^)\\n]++\\)|\\[[^\\]\\n]++\\]|\\{[^}\\n]++\\}|<>|>|=|<|\\^|\\-|\\_){1,5}?))');
-
 
 
 // images   [* urls .(title)[class]{style} >]

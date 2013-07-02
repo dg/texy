@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * The captioned figures.
  *
@@ -46,7 +45,6 @@ final class TexyFigureModule extends TexyModule
 	}
 
 
-
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
 	 *
@@ -58,12 +56,12 @@ final class TexyFigureModule extends TexyModule
 	public function pattern($parser, $matches)
 	{
 		list(, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod) = $matches;
-		//    [1] => URLs
-		//    [2] => .(title)[class]{style}<>
-		//    [3] => * < >
-		//    [4] => url | [ref] | [*image*]
-		//    [5] => ...
-		//    [6] => .(title)[class]{style}<>
+		// [1] => URLs
+		// [2] => .(title)[class]{style}<>
+		// [3] => * < >
+		// [4] => url | [ref] | [*image*]
+		// [5] => ...
+		// [6] => .(title)[class]{style}<>
 
 		$tx = $this->texy;
 		$image = $tx->imageModule->factoryImage($mURLs, $mImgMod.$mAlign);
@@ -78,11 +76,12 @@ final class TexyFigureModule extends TexyModule
 			} else {
 				$link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
 			}
-		} else $link = NULL;
+		} else {
+			$link = NULL;
+		}
 
 		return $tx->invokeAroundHandlers('figure', $parser, array($image, $link, $mContent, $mod));
 	}
-
 
 
 	/**
@@ -103,7 +102,9 @@ final class TexyFigureModule extends TexyModule
 		$image->modifier->hAlign = NULL;
 
 		$elImg = $tx->imageModule->solve(NULL, $image, $link); // returns TexyHtml or false!
-		if (!$elImg) return FALSE;
+		if (!$elImg) {
+			return FALSE;
+		}
 
 		$el = TexyHtml::el('div');
 		if (!empty($image->width) && $this->widthDelta !== FALSE) {

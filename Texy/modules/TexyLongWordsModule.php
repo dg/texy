@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Long words wrap module.
  *
@@ -22,9 +21,9 @@ final class TexyLongWordsModule extends TexyModule
 	public $wordLimit = 20;
 
 	const
-		DONT = 0,   // don't hyphenate
-		HERE = 1,   // hyphenate here
-		AFTER = 2;  // hyphenate after
+		DONT = 0, // don't hyphenate
+		HERE = 1, // hyphenate here
+		AFTER = 2; // hyphenate after
 
 	const SAFE_LIMIT = 1000;
 
@@ -53,8 +52,6 @@ final class TexyLongWordsModule extends TexyModule
 	private $doubleVowels = array('a','A','o','O');
 
 
-
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
@@ -70,7 +67,6 @@ final class TexyLongWordsModule extends TexyModule
 	}
 
 
-
 	public function postLine($text)
 	{
 		return preg_replace_callback(
@@ -79,7 +75,6 @@ final class TexyLongWordsModule extends TexyModule
 			$text
 		);
 	}
-
 
 
 	/**
@@ -91,9 +86,11 @@ final class TexyLongWordsModule extends TexyModule
 	private function pattern($matches)
 	{
 		list($mWord) = $matches;
-		//    [0] => lllloooonnnnggggwwwoorrdddd
+		// [0] => lllloooonnnnggggwwwoorrdddd
 
-		if (iconv_strlen($mWord) > self::SAFE_LIMIT) return $mWord;
+		if (iconv_strlen($mWord) > self::SAFE_LIMIT) {
+			return $mWord;
+		}
 
 		$chars = array();
 		preg_match_all(
@@ -103,7 +100,9 @@ final class TexyLongWordsModule extends TexyModule
 		);
 
 		$chars = $chars[0];
-		if (count($chars) < $this->wordLimit) return $mWord;
+		if (count($chars) < $this->wordLimit) {
+			return $mWord;
+		}
 
 		$consonants = $this->consonants;
 		$vowels = $this->vowels;
@@ -118,7 +117,9 @@ final class TexyLongWordsModule extends TexyModule
 		$s[] = '';
 		$trans[] = -1;
 		foreach ($chars as $key => $char) {
-			if (ord($char{0}) < 32) continue;
+			if (ord($char{0}) < 32) {
+				continue;
+			}
 			$s[] = $char;
 			$trans[] = $key;
 		}
@@ -131,18 +132,26 @@ final class TexyLongWordsModule extends TexyModule
 		while (++$a < $len) {
 			$hyphen = self::DONT; // Do not hyphenate
 			do {
-				if ($s[$a] === "\xC2\xA0") { $a++; continue 2; } // here and after never
+				if ($s[$a] === "\xC2\xA0") {
+					$a++; continue 2;  // here and after never
+				}
 
-				if ($s[$a] === '.') { $hyphen = self::HERE; break; }
+				if ($s[$a] === '.') {
+					$hyphen = self::HERE; break;
+				}
 
-				if (isset($consonants[$s[$a]])) {  // consonants
+				if (isset($consonants[$s[$a]])) { // consonants
 
 					if (isset($vowels[$s[$a+1]])) {
-						if (isset($vowels[$s[$a-1]])) $hyphen = self::HERE;
+						if (isset($vowels[$s[$a-1]])) {
+							$hyphen = self::HERE;
+						}
 						break;
 					}
 
-					if (($s[$a] === 's') && ($s[$a-1] === 'n') && isset($consonants[$s[$a+1]])) { $hyphen = self::AFTER; break; }
+					if (($s[$a] === 's') && ($s[$a-1] === 'n') && isset($consonants[$s[$a+1]])) {
+						$hyphen = self::AFTER; break;
+					}
 
 					if (isset($consonants[$s[$a+1]]) && isset($vowels[$s[$a-1]])) {
 						if ($s[$a+1] === 'r') {
@@ -165,24 +174,34 @@ final class TexyLongWordsModule extends TexyModule
 					}
 
 					break;
-				}   // end of consonants
+				} // end of consonants
 
-				if (($s[$a] === 'u') && isset($doubleVowels[$s[$a-1]])) { $hyphen = self::AFTER; break; }
-				if (isset($vowels[$s[$a]]) && isset($vowels[$s[$a-1]])) { $hyphen = self::HERE; break; }
+				if (($s[$a] === 'u') && isset($doubleVowels[$s[$a-1]])) {
+					$hyphen = self::AFTER; break;
+				}
+				if (isset($vowels[$s[$a]]) && isset($vowels[$s[$a-1]])) {
+					$hyphen = self::HERE; break;
+				}
 
 			} while(0);
 
-			if ($hyphen === self::DONT && ($a - $last > $this->wordLimit*0.6)) $positions[] = $last = $a-1; // Hyphenate here
-			if ($hyphen === self::HERE) $positions[] = $last = $a-1; // Hyphenate here
-			if ($hyphen === self::AFTER) { $positions[] = $last = $a; $a++; } // Hyphenate after
+			if ($hyphen === self::DONT && ($a - $last > $this->wordLimit*0.6)) {
+				$positions[] = $last = $a-1; // Hyphenate here
+			}
+			if ($hyphen === self::HERE) {
+				$positions[] = $last = $a-1; // Hyphenate here
+			}
+			if ($hyphen === self::AFTER) {
+				$positions[] = $last = $a; $a++; // Hyphenate after
+			}
 
 		} // while
 
 
 		$a = end($positions);
-		if (($a === $len-1) && isset($consonants[$s[$len]]))
+		if (($a === $len-1) && isset($consonants[$s[$len]])) {
 			array_pop($positions);
-
+		}
 
 		$syllables = array();
 		$last = 0;

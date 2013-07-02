@@ -9,7 +9,6 @@
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
-
 $texy = new Texy();
 
 // disable *** and ** and * phrases
@@ -45,8 +44,6 @@ $texy->registerBlockPattern(
 );
 
 
-
-
 /**
  * Pattern handler for inline syntaxes
  *
@@ -79,8 +76,6 @@ function userInlineHandler($parser, $matches, $name)
 }
 
 
-
-
 /**
  * Pattern handler for block syntaxes
  *
@@ -109,10 +104,6 @@ function userBlockHandler($parser, $matches, $name)
 
 	return $el;
 }
-
-
-
-
 
 
 // processing

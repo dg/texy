@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Emoticon module.
  *
@@ -43,7 +42,6 @@ final class TexyEmoticonModule extends TexyModule
 	public $fileRoot;
 
 
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
@@ -53,16 +51,18 @@ final class TexyEmoticonModule extends TexyModule
 	}
 
 
-
 	public function beforeParse()
 	{
-		if (empty($this->texy->allowed['emoticon'])) return;
+		if (empty($this->texy->allowed['emoticon'])) {
+			return;
+		}
 
 		krsort($this->icons);
 
 		$pattern = array();
-		foreach ($this->icons as $key => $foo)
+		foreach ($this->icons as $key => $foo) {
 			$pattern[] = preg_quote($key, '#') . '+'; // last char can be repeated
+		}
 
 		$this->texy->registerLinePattern(
 			array($this, 'pattern'),
@@ -71,7 +71,6 @@ final class TexyEmoticonModule extends TexyModule
 			'#' . implode('|', $pattern) . '#'
 		);
 	}
-
 
 
 	/**
@@ -85,21 +84,17 @@ final class TexyEmoticonModule extends TexyModule
 	public function pattern($parser, $matches)
 	{
 		$match = $matches[0];
-
 		$tx = $this->texy;
 
 		// find the closest match
-		foreach ($this->icons as $emoticon => $foo)
-		{
-			if (strncmp($match, $emoticon, strlen($emoticon)) === 0)
-			{
+		foreach ($this->icons as $emoticon => $foo) {
+			if (strncmp($match, $emoticon, strlen($emoticon)) === 0) {
 				return $tx->invokeAroundHandlers('emoticon', $parser, array($emoticon, $match));
 			}
 		}
 
 		return FALSE; // tohle se nestane
 	}
-
 
 
 	/**
@@ -115,12 +110,12 @@ final class TexyEmoticonModule extends TexyModule
 		$tx = $this->texy;
 		$file = $this->icons[$emoticon];
 		$el = TexyHtml::el('img');
-		$el->attrs['src'] = Texy::prependRoot($file, $this->root === NULL ?  $tx->imageModule->root : $this->root);
+		$el->attrs['src'] = Texy::prependRoot($file, $this->root === NULL ? $tx->imageModule->root : $this->root);
 		$el->attrs['alt'] = $raw;
 		$el->attrs['class'][] = $this->class;
 
 		// file path
-		$file = rtrim($this->fileRoot === NULL ?  $tx->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
+		$file = rtrim($this->fileRoot === NULL ? $tx->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
 		if (@is_file($file)) { // intentionally @
 			$size = @getImageSize($file); // intentionally @
 			if (is_array($size)) {

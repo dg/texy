@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Table module.
  *
@@ -28,29 +27,27 @@ final class TexyTableModule extends TexyModule
 	private $disableTables;
 
 
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
 
 		$texy->registerBlockPattern(
 			array($this, 'patternTable'),
-			'#^(?:'.TEXY_MODIFIER_HV.'\n)?'   // .{color: red}
-			. '\|.*()$#mU',                     // | ....
+			'#^(?:'.TEXY_MODIFIER_HV.'\n)?' // .{color: red}
+			. '\|.*()$#mU', // | ....
 			'table'
 		);
 	}
 
 
-
 	/**
 	 * Callback for:.
 	 *
-	 *  .(title)[class]{style}>
-	 *  |------------------
-	 *  | xxx | xxx | xxx | .(..){..}[..]
-	 *  |------------------
-	 *  | aa  | bb  | cc  |
+	 * .(title)[class]{style}>
+	 * |------------------
+	 * | xxx | xxx | xxx | .(..){..}[..]
+	 * |------------------
+	 * | aa | bb | cc |
 	 *
 	 * @param  TexyBlockParser
 	 * @param  array      regexp matches
@@ -59,9 +56,11 @@ final class TexyTableModule extends TexyModule
 	 */
 	public function patternTable($parser, $matches)
 	{
-		if ($this->disableTables) return FALSE;
+		if ($this->disableTables) {
+			return FALSE;
+		}
 		list(, $mMod) = $matches;
-		//    [1] => .(title)[class]{style}<>_
+		// [1] => .(title)[class]{style}<>_
 
 		$tx = $this->texy;
 
@@ -73,9 +72,9 @@ final class TexyTableModule extends TexyModule
 
 		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
 			list(, , $mContent, $mMod) = $matches;
-			//    [1] => # / =
-			//    [2] => ....
-			//    [3] => .(title)[class]{style}<>
+			// [1] => # / =
+			// [2] => ....
+			// [3] => .(title)[class]{style}<>
 
 			$caption = $el->create('caption');
 			$mod = new TexyModifier($mMod);
@@ -94,7 +93,9 @@ final class TexyTableModule extends TexyModule
 		while (TRUE) {
 			if ($parser->next('#^\|([=-])[+|=-]{2,}$#Um', $matches)) { // line
 				if ($lineMode) {
-					if ($matches[1] === '=') $isHead = !$isHead;
+					if ($matches[1] === '=') {
+						$isHead = !$isHead;
+					}
 				} else {
 					$isHead = !$isHead;
 					$lineMode = $matches[1] === '=';
@@ -121,8 +122,8 @@ final class TexyTableModule extends TexyModule
 
 				// PARSE ROW
 				list(, $mContent, $mMod) = $matches;
-				//    [1] => ....
-				//    [2] => .(title)[class]{style}<>_
+				// [1] => ....
+				// [2] => .(title)[class]{style}<>_
 
 				$elRow = TexyHtml::el('tr');
 				$mod = new TexyModifier($mMod);
@@ -163,21 +164,24 @@ final class TexyTableModule extends TexyModule
 					}
 
 					// common cell
-					if (!preg_match('#(\*??)\ *'.TEXY_MODIFIER_HV.'??(.*)'.TEXY_MODIFIER_HV.'?\ *()$#AU', $cell, $matches)) continue;
+					if (!preg_match('#(\*??)\ *'.TEXY_MODIFIER_HV.'??(.*)'.TEXY_MODIFIER_HV.'?\ *()$#AU', $cell, $matches)) {
+						continue;
+					}
 					list(, $mHead, $mModCol, $mContent, $mMod) = $matches;
-					//    [1] => * ^
-					//    [2] => .(title)[class]{style}<>_
-					//    [3] => ....
-					//    [4] => .(title)[class]{style}<>_
+					// [1] => * ^
+					// [2] => .(title)[class]{style}<>_
+					// [3] => ....
+					// [4] => .(title)[class]{style}<>_
 
 					if ($mModCol) {
 						$colModifier[$col] = new TexyModifier($mModCol);
 					}
 
-					if (isset($colModifier[$col]))
+					if (isset($colModifier[$col])) {
 						$mod = clone $colModifier[$col];
-					else
+					} else {
 						$mod = new TexyModifier;
+					}
 
 					$mod->setProperties($mMod);
 
@@ -217,7 +221,9 @@ final class TexyTableModule extends TexyModule
 					$rowCounter++;
 				} else {
 					// redundant row
-					foreach ($prevRow as $elCell) $elCell->rowSpan--;
+					foreach ($prevRow as $elCell) {
+						$elCell->rowSpan--;
+					}
 				}
 
 				continue;
@@ -246,7 +252,6 @@ final class TexyTableModule extends TexyModule
 	}
 
 
-
 	/**
 	 * Parse text in all cells.
 	 * @param  TexyHtml
@@ -256,10 +261,8 @@ final class TexyTableModule extends TexyModule
 	{
 		$tx = $this->texy;
 
-		foreach ($elPart->getChildren() as $elRow)
-		{
-			foreach ($elRow->getChildren() as $elCell)
-			{
+		foreach ($elPart->getChildren() as $elRow) {
+			foreach ($elRow->getChildren() as $elCell) {
 				if ($elCell->colSpan > 1) {
 					$elCell->attrs['colspan'] = $elCell->colSpan;
 				}
@@ -287,8 +290,6 @@ final class TexyTableModule extends TexyModule
 	}
 
 }
-
-
 
 
 /**

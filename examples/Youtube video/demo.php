@@ -5,10 +5,8 @@
  */
 
 
-
 // include Texy!
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
-
 
 
 /**
@@ -52,7 +50,6 @@ $html = $texy->process($text);  // that's all folks!
 // echo formated output
 header('Content-type: text/html; charset=utf-8');
 echo $html;
-
 
 
 // echo generated HTML code

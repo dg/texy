@@ -18,7 +18,6 @@ if (!class_exists('fshlParser')) {
 }
 
 
-
 /**
  * User handler for code block
  *
@@ -58,7 +57,6 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 }
 
 
-
 /**
  * Pattern handler for PHP & JavaScript block syntaxes
  *
@@ -84,7 +82,6 @@ function codeBlockHandler($parser, $matches, $name)
 
 	return $elPre;
 }
-
 
 
 $texy = new Texy();

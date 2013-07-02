@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Around advice handlers.
  *
@@ -32,7 +31,6 @@ final class TexyHandlerInvocation extends TexyObject
 	private $parser;
 
 
-
 	/**
 	 * @param  array    array of callbacks
 	 * @param  TexyParser
@@ -46,7 +44,6 @@ final class TexyHandlerInvocation extends TexyObject
 		array_unshift($args, $this);
 		$this->args = $args;
 	}
-
 
 
 	/**
@@ -73,7 +70,6 @@ final class TexyHandlerInvocation extends TexyObject
 	}
 
 
-
 	/**
 	 * @return TexyParser
 	 */
@@ -83,7 +79,6 @@ final class TexyHandlerInvocation extends TexyObject
 	}
 
 
-
 	/**
 	 * @return Texy
 	 */
@@ -91,7 +86,6 @@ final class TexyHandlerInvocation extends TexyObject
 	{
 		return $this->parser->getTexy();
 	}
-
 
 
 	/**

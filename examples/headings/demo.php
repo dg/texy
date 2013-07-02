@@ -5,10 +5,8 @@
  */
 
 
-
 // include Texy!
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
-
 
 
 $texy = new Texy();
@@ -38,8 +36,6 @@ echo '</pre>';
 echo '<hr />';
 
 
-
-
 // 2) Fixed method
 
 $texy->headingModule->top       = 1;   // set headings top limit
@@ -53,8 +49,6 @@ echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
 echo '<hr />';
-
-
 
 
 // 3) User-defined fixed method

@@ -8,10 +8,8 @@
  */
 
 
-
 // include Texy!
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
-
 
 
 /**
@@ -55,13 +53,11 @@ header('Content-type: text/html; charset=utf-8');
 echo $html;
 
 
-
 // echo generated HTML code
 echo '<hr />';
 echo '<pre>';
 echo htmlSpecialChars($html);
 echo '</pre>';
-
 
 
 // echo all used images

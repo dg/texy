@@ -8,13 +8,8 @@
  */
 
 
-
-
-
 // include libs
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
-
-
 
 
 // MY OWN TEXY! OBJECT
@@ -33,7 +28,6 @@ class MyTexy extends Texy
 		$this->alignClasses['left'] = 'left';
 		$this->alignClasses['right'] = 'right';
 	}
-
 
 
 	function process($text, $useCache = TRUE)

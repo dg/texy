@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Horizontal line module.
  *
@@ -24,7 +23,6 @@ final class TexyHorizLineModule extends TexyModule
 		'-' => NULL,
 		'*' => NULL,
 	);
-
 
 
 	public function __construct($texy)
@@ -41,7 +39,6 @@ final class TexyHorizLineModule extends TexyModule
 	}
 
 
-
 	/**
 	 * Callback for: -------.
 	 *
@@ -53,13 +50,12 @@ final class TexyHorizLineModule extends TexyModule
 	public function pattern($parser, $matches)
 	{
 		list(, $mType, $mMod) = $matches;
-		//    [1] => ---
-		//    [2] => .(title)[class]{style}<>
+		// [1] => ---
+		// [2] => .(title)[class]{style}<>
 
 		$mod = new TexyModifier($mMod);
 		return $this->texy->invokeAroundHandlers('horizline', $parser, array($mType, $mod));
 	}
-
 
 
 	/**

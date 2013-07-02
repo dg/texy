@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Blockquote module.
  *
@@ -27,22 +26,21 @@ final class TexyBlockQuoteModule extends TexyModule
 		$texy->registerBlockPattern(
 			array($this, 'pattern'),
 			'#^(?:'.TEXY_MODIFIER_H.'\n)?\>(\ ++|:)(\S.*+)$#mU', // original
-//            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU',  // >>>>
-//            '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU',       // only >
+			// '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU', // >>>>
+			// '#^(?:'.TEXY_MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU', // only >
 			'blockquote'
 		);
 	}
 
 
-
 	/**
 	 * Callback for:.
 	 *
-	 *   > They went in single file, running like hounds on a strong scent,
-	 *   and an eager light was in their eyes. Nearly due west the broad
-	 *   swath of the marching Orcs tramped its ugly slot; the sweet grass
-	 *   of Rohan had been bruised and blackened as they passed.
-	 *   >:http://www.mycom.com/tolkien/twotowers.html
+	 * > They went in single file, running like hounds on a strong scent,
+	 * and an eager light was in their eyes. Nearly due west the broad
+	 * swath of the marching Orcs tramped its ugly slot; the sweet grass
+	 * of Rohan had been bruised and blackened as they passed.
+	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 *
 	 * @param  TexyBlockParser
 	 * @param  array      regexp matches
@@ -52,9 +50,9 @@ final class TexyBlockQuoteModule extends TexyModule
 	public function pattern($parser, $matches)
 	{
 		list(, $mMod, $mPrefix, $mContent) = $matches;
-		//    [1] => .(title)[class]{style}<>
-		//    [2] => spaces |
-		//    [3] => ... / LINK
+		// [1] => .(title)[class]{style}<>
+		// [2] => spaces |
+		// [3] => ... / LINK
 
 		$tx = $this->texy;
 
@@ -69,11 +67,15 @@ final class TexyBlockQuoteModule extends TexyModule
 				$mod->cite = $tx->blockQuoteModule->citeLink($mContent);
 				$content .= "\n";
 			} else {
-				if ($spaces === '') $spaces = max(1, strlen($mPrefix));
+				if ($spaces === '') {
+					$spaces = max(1, strlen($mPrefix));
+				}
 				$content .= $mContent . "\n";
 			}
 
-			if (!$parser->next("#^>(?:|(\\ {1,$spaces}|:)(.*))()$#mA", $matches)) break;
+			if (!$parser->next("#^>(?:|(\\ {1,$spaces}|:)(.*))()$#mA", $matches)) {
+				break;
+			}
 
 /*
 			if ($mPrefix === '>') {
@@ -95,14 +97,15 @@ final class TexyBlockQuoteModule extends TexyModule
 		$el->parseBlock($tx, $content, $parser->isIndented());
 
 		// no content?
-		if (!$el->count()) return FALSE;
+		if (!$el->count()) {
+			return FALSE;
+		}
 
 		// event listener
 		$tx->invokeHandlers('afterBlockquote', array($parser, $el, $mod));
 
 		return $el;
 	}
-
 
 
 	/**
@@ -114,16 +117,22 @@ final class TexyBlockQuoteModule extends TexyModule
 	{
 		$tx = $this->texy;
 
-		if ($link == NULL) return NULL;
+		if ($link == NULL) {
+			return NULL;
+		}
 
 		if ($link{0} === '[') { // [ref]
 			$link = substr($link, 1, -1);
 			$ref = $tx->linkModule->getReference($link);
-			if ($ref) return Texy::prependRoot($ref->URL, $tx->linkModule->root);
+			if ($ref) {
+				return Texy::prependRoot($ref->URL, $tx->linkModule->root);
+			}
 		}
 
 		// special supported case
-		if (strncasecmp($link, 'www.', 4) === 0) return 'http://' . $link;
+		if (strncasecmp($link, 'www.', 4) === 0) {
+			return 'http://' . $link;
+		}
 
 		return Texy::prependRoot($link, $tx->linkModule->root);
 	}

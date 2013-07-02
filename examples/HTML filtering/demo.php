@@ -9,15 +9,12 @@
  */
 
 
-
 // include Texy!
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
 
 
-
 $texy = new Texy();
 $texy->htmlOutputModule->baseIndent  = 1;
-
 
 
 function doIt($texy)

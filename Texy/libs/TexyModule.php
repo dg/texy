@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Texy! modules base class.
  *

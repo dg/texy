@@ -10,13 +10,12 @@
  */
 
 
-
 /**
  * Texy basic configurators.
  *
  * <code>
- *     $texy = new Texy();
- *     TexyConfigurator::safeMode($texy);
+ * $texy = new Texy();
+ * TexyConfigurator::safeMode($texy);
  * </code>
  *
  * @author     David Grudl
@@ -25,21 +24,20 @@
 class TexyConfigurator
 {
 	public static $safeTags = array(
-		'a'         => array('href', 'title'),
-		'acronym'   => array('title'),
-		'b'         => array(),
-		'br'        => array(),
-		'cite'      => array(),
-		'code'      => array(),
-		'em'        => array(),
-		'i'         => array(),
-		'strong'    => array(),
-		'sub'       => array(),
-		'sup'       => array(),
-		'q'         => array(),
-		'small'     => array(),
+		'a' => array('href', 'title'),
+		'acronym' => array('title'),
+		'b' => array(),
+		'br' => array(),
+		'cite' => array(),
+		'code' => array(),
+		'em' => array(),
+		'i' => array(),
+		'strong' => array(),
+		'sub' => array(),
+		'sup' => array(),
+		'q' => array(),
+		'small' => array(),
 	);
-
 
 
 	/**
@@ -51,7 +49,6 @@ class TexyConfigurator
 	}
 
 
-
 	/**
 	 * Configure Texy! for web comments and other usages, where input text may insert attacker.
 	 *
@@ -60,17 +57,16 @@ class TexyConfigurator
 	 */
 	public static function safeMode(Texy $texy)
 	{
-		$texy->allowedClasses = Texy::NONE;                 // no class or ID are allowed
-		$texy->allowedStyles  = Texy::NONE;                 // style modifiers are disabled
-		$texy->allowedTags = self::$safeTags;               // only some "safe" HTML tags and attributes are allowed
+		$texy->allowedClasses = Texy::NONE; // no class or ID are allowed
+		$texy->allowedStyles = Texy::NONE; // style modifiers are disabled
+		$texy->allowedTags = self::$safeTags; // only some "safe" HTML tags and attributes are allowed
 		$texy->urlSchemeFilters[Texy::FILTER_ANCHOR] = '#https?:|ftp:|mailto:#A';
 		$texy->urlSchemeFilters[Texy::FILTER_IMAGE] = '#https?:#A';
-		$texy->allowed['image'] = FALSE;                    // disable images
-		$texy->allowed['link/definition'] = FALSE;          // disable [ref]: URL  reference definitions
-		$texy->allowed['html/comment'] = FALSE;             // disable HTML comments
-		$texy->linkModule->forceNoFollow = TRUE;            // force rel="nofollow"
+		$texy->allowed['image'] = FALSE; // disable images
+		$texy->allowed['link/definition'] = FALSE; // disable [ref]: URL reference definitions
+		$texy->allowed['html/comment'] = FALSE; // disable HTML comments
+		$texy->linkModule->forceNoFollow = TRUE; // force rel="nofollow"
 	}
-
 
 
 	/**
@@ -91,7 +87,6 @@ class TexyConfigurator
 			unset($texy->allowedTags['a']);
 		} // TODO: else...
 	}
-
 
 
 	/**

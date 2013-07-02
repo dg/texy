@@ -5,10 +5,8 @@
  */
 
 
-
 // include Texy!
 require_once dirname(__FILE__).'/../../Texy/Texy.php';
-
 
 
 $texy = new Texy();
@@ -53,7 +51,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  TexyImage
@@ -64,7 +61,6 @@ class myHandler
 	{
 		return $invocation->proceed();
 	}
-
 
 
 	/**
@@ -79,7 +75,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  TexyLink
@@ -91,7 +86,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  TexyLink
@@ -101,7 +95,6 @@ class myHandler
 	{
 		return $invocation->proceed();
 	}
-
 
 
 	/**
@@ -118,7 +111,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  string
@@ -130,7 +122,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  string
@@ -140,7 +131,6 @@ class myHandler
 	{
 		return $invocation->proceed();
 	}
-
 
 
 	/**
@@ -156,7 +146,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  string  command
@@ -168,7 +157,6 @@ class myHandler
 	{
 		return $invocation->proceed();
 	}
-
 
 
 	/** Blocks */
@@ -201,7 +189,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  int
@@ -216,7 +203,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyHandlerInvocation  handler invocation
 	 * @param  string
@@ -227,7 +213,6 @@ class myHandler
 	{
 		return $invocation->proceed();
 	}
-
 
 
 	/**
@@ -244,7 +229,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyBlockParser
 	 * @param  TexyHtml
@@ -254,7 +238,6 @@ class myHandler
 	function afterList($parser, $element, $modifier)
 	{
 	}
-
 
 
 	/**
@@ -268,7 +251,6 @@ class myHandler
 	}
 
 
-
 	/**
 	 * @param  TexyBlockParser
 	 * @param  TexyHtml
@@ -278,7 +260,6 @@ class myHandler
 	function afterTable($parser, $element, $modifier)
 	{
 	}
-
 
 
 	/**
@@ -292,7 +273,6 @@ class myHandler
 	}
 
 
-
 	/** Special */
 
 	/**
@@ -304,7 +284,6 @@ class myHandler
 	function beforeParse($texy, & $text, $isSingleLine)
 	{
 	}
-
 
 
 	/**

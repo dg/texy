@@ -10,7 +10,6 @@
  */
 
 
-
 /**
  * Modifier processor.
  *
@@ -65,7 +64,6 @@ final class TexyModifier extends TexyObject
 	);
 
 
-
 	/**
 	 * @param  string modifier to parse
 	 */
@@ -75,16 +73,16 @@ final class TexyModifier extends TexyObject
 	}
 
 
-
 	public function setProperties($mod)
 	{
-		if (!$mod) return;
+		if (!$mod) {
+			return;
+		}
 
 		$p = 0;
 		$len = strlen($mod);
 
-		while ($p < $len)
-		{
+		while ($p < $len) {
 			$ch = $mod[$p];
 
 			if ($ch === '(') { // title
@@ -97,13 +95,16 @@ final class TexyModifier extends TexyObject
 				foreach (explode(';', substr($mod, $p + 1, $a - $p - 2)) as $value) {
 					$pair = explode(':', $value, 2);
 					$prop = strtolower(trim($pair[0]));
-					if ($prop === '' || !isset($pair[1])) continue;
+					if ($prop === '' || !isset($pair[1])) {
+						continue;
+					}
 					$value = trim($pair[1]);
 
-					if (isset(self::$elAttrs[$prop])) // attribute
+					if (isset(self::$elAttrs[$prop])) { // attribute
 						$this->attrs[$prop] = $value;
-					elseif ($value !== '')  // style
+					} elseif ($value !== '') { // style
 						$this->styles[$prop] = $value;
+					}
 				}
 				$p = $a;
 
@@ -111,27 +112,35 @@ final class TexyModifier extends TexyObject
 				$a = strpos($mod, ']', $p) + 1;
 				$s = str_replace('#', ' #', substr($mod, $p + 1, $a - $p - 2));
 				foreach (explode(' ', $s) as $value) {
-					if ($value === '') continue;
-
-					if ($value{0} === '#')
+					if ($value === '') {
+						continue;
+					} elseif ($value{0} === '#') {
 						$this->id = substr($value, 1);
-					else
+					} else {
 						$this->classes[$value] = TRUE;
+					}
 				}
 				$p = $a;
+
+			} elseif ($ch === '^') { // alignment
+				$this->vAlign = 'top'; $p++;
+			} elseif ($ch === '-') {
+				$this->vAlign = 'middle'; $p++;
+			} elseif ($ch === '_') {
+				$this->vAlign = 'bottom'; $p++;
+			} elseif ($ch === '=') {
+				$this->hAlign = 'justify'; $p++;
+			} elseif ($ch === '>') {
+				$this->hAlign = 'right'; $p++;
+			} elseif (substr($mod, $p, 2) === '<>') {
+				$this->hAlign = 'center'; $p+=2;
+			} elseif ($ch === '<') {
+				$this->hAlign = 'left'; $p++;
+			} else {
+				break;
 			}
-			// alignment
-			elseif ($ch === '^') { $this->vAlign = 'top'; $p++; }
-			elseif ($ch === '-') { $this->vAlign = 'middle'; $p++; }
-			elseif ($ch === '_') { $this->vAlign = 'bottom'; $p++; }
-			elseif ($ch === '=') { $this->hAlign = 'justify'; $p++; }
-			elseif ($ch === '>') { $this->hAlign = 'right'; $p++; }
-			elseif (substr($mod, $p, 2) === '<>') { $this->hAlign = 'center'; $p+=2; }
-			elseif ($ch === '<') { $this->hAlign = 'left'; $p++; }
-			else { break; }
 		}
 	}
-
 
 
 	/**
@@ -160,38 +169,54 @@ final class TexyModifier extends TexyObject
 
 			} elseif (is_array($tmp) && count($tmp)) {
 				$tmp = array_flip($tmp);
-				foreach ($this->attrs as $key => $value)
-					if (isset($tmp[$key])) $el->attrs[$key] = $value;
+				foreach ($this->attrs as $key => $value) {
+					if (isset($tmp[$key])) {
+						$el->attrs[$key] = $value;
+					}
+				}
 			}
 			$el->validateAttrs($texy->dtd);
 		}
 
 		// title
-		if ($this->title !== NULL)
+		if ($this->title !== NULL) {
 			$elAttrs['title'] = $texy->typographyModule->postLine($this->title);
+		}
 
 		// classes & ID
 		if ($this->classes || $this->id !== NULL) {
 			$tmp = $texy->_classes; // speed-up
 			if ($tmp === Texy::ALL) {
-				foreach ($this->classes as $value => $foo) $elAttrs['class'][] = $value;
+				foreach ($this->classes as $value => $foo) {
+					$elAttrs['class'][] = $value;
+				}
 				$elAttrs['id'] = $this->id;
 			} elseif (is_array($tmp)) {
-				foreach ($this->classes as $value => $foo)
-					if (isset($tmp[$value])) $elAttrs['class'][] = $value;
+				foreach ($this->classes as $value => $foo) {
+					if (isset($tmp[$value])) {
+						$elAttrs['class'][] = $value;
+					}
+				}
 
-				if (isset($tmp['#' . $this->id])) $elAttrs['id'] = $this->id;
+				if (isset($tmp['#' . $this->id])) {
+					$elAttrs['id'] = $this->id;
+				}
 			}
 		}
 
 		// styles
 		if ($this->styles) {
-			$tmp = $texy->_styles;  // speed-up
+			$tmp = $texy->_styles; // speed-up
 			if ($tmp === Texy::ALL) {
-				foreach ($this->styles as $prop => $value) $elAttrs['style'][$prop] = $value;
+				foreach ($this->styles as $prop => $value) {
+					$elAttrs['style'][$prop] = $value;
+				}
 			} elseif (is_array($tmp)) {
-				foreach ($this->styles as $prop => $value)
-					if (isset($tmp[$prop])) $elAttrs['style'][$prop] = $value;
+				foreach ($this->styles as $prop => $value) {
+					if (isset($tmp[$prop])) {
+						$elAttrs['style'][$prop] = $value;
+					}
+				}
 			}
 		}
 

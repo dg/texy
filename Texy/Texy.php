@@ -10,7 +10,7 @@
  */
 
 
-define('TEXY_VERSION',  '2.2');
+define('TEXY_VERSION', '2.2');
 
 
 /**
@@ -24,7 +24,8 @@ if (extension_loaded('mbstring')) {
 }
 
 if (ini_get('zend.ze1_compatibility_mode') % 256 ||
-	preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))) {
+	preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))
+) {
 	throw new RuntimeException("Texy cannot run with zend.ze1_compatibility_mode enabled.");
 }
 
@@ -58,7 +59,6 @@ require_once dirname(__FILE__) . '/modules/TexyTypographyModule.php';
 require_once dirname(__FILE__) . '/modules/TexyHtmlOutputModule.php';
 
 
-
 /**
  * Compatibility with PHP < 5.1.
  */
@@ -79,26 +79,23 @@ if (!class_exists('UnexpectedValueException', FALSE)) {
 }
 
 
-
 /**
  * For Texy 1 backward compatibility.
  */
-define('TEXY_ALL',  TRUE);
-define('TEXY_NONE',  FALSE);
-define('TEXY_CONTENT_MARKUP',  "\x17");
-define('TEXY_CONTENT_REPLACED',  "\x16");
-define('TEXY_CONTENT_TEXTUAL',  "\x15");
-define('TEXY_CONTENT_BLOCK',  "\x14");
-
-
+define('TEXY_ALL', TRUE);
+define('TEXY_NONE', FALSE);
+define('TEXY_CONTENT_MARKUP', "\x17");
+define('TEXY_CONTENT_REPLACED', "\x16");
+define('TEXY_CONTENT_TEXTUAL', "\x15");
+define('TEXY_CONTENT_BLOCK', "\x14");
 
 
 /**
  * Texy! - Convert plain text to XHTML format using {@link process()}.
  *
  * <code>
- *     $texy = new Texy();
- *     $html = $texy->process($text);
+ * $texy = new Texy();
+ * $html = $texy->process($text);
  * </code>
  *
  * @author     David Grudl
@@ -246,16 +243,14 @@ class Texy extends TexyObject
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array of ('handler' => callback
-	 *                'pattern' => regular expression)
+	 * @var array of ('handler' => callback, 'pattern' => regular expression)
 	 */
 	private $linePatterns = array();
 	private $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array of ('handler' => callback
-	 *                'pattern' => regular expression)
+	 * @var array of ('handler' => callback, 'pattern' => regular expression)
 	 */
 	private $blockPatterns = array();
 	private $_blockPatterns;
@@ -302,7 +297,6 @@ class Texy extends TexyObject
 	public $xhtml;
 
 
-
 	public function __construct()
 	{
 		// load all modules
@@ -332,7 +326,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Set HTML/XHTML output mode (overwrites self::$allowedTags)
 	 * @param  int
@@ -341,7 +334,8 @@ class Texy extends TexyObject
 	public function setOutputMode($mode)
 	{
 		if (!in_array($mode, array(self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
-			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5), TRUE)) {
+			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5), TRUE)
+		) {
 			throw new InvalidArgumentException("Invalid mode.");
 		}
 
@@ -362,7 +356,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Get HTML/XHTML output mode
 	 * @return int
@@ -371,7 +364,6 @@ class Texy extends TexyObject
 	{
 		return $this->mode;
 	}
-
 
 
 	/**
@@ -405,7 +397,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	final public function registerLinePattern($handler, $pattern, $name, $againTest = NULL)
 	{
 		if (!is_callable($handler)) {
@@ -413,15 +404,16 @@ class Texy extends TexyObject
 			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
-		if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+		if (!isset($this->allowed[$name])) {
+			$this->allowed[$name] = TRUE;
+		}
 
 		$this->linePatterns[$name] = array(
-			'handler'     => $handler,
-			'pattern'     => $pattern,
-			'again'       => $againTest,
+			'handler' => $handler,
+			'pattern' => $pattern,
+			'again' => $againTest,
 		);
 	}
-
 
 
 	final public function registerBlockPattern($handler, $pattern, $name)
@@ -432,14 +424,15 @@ class Texy extends TexyObject
 		}
 
 		// if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
-		if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+		if (!isset($this->allowed[$name])) {
+			$this->allowed[$name] = TRUE;
+		}
 
 		$this->blockPatterns[$name] = array(
-			'handler'     => $handler,
-			'pattern'     => $pattern  . 'm',  // force multiline
+			'handler' => $handler,
+			'pattern' => $pattern . 'm', // force multiline
 		);
 	}
-
 
 
 	final public function registerPostLine($handler, $name)
@@ -449,11 +442,12 @@ class Texy extends TexyObject
 			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
-		if (!isset($this->allowed[$name])) $this->allowed[$name] = TRUE;
+		if (!isset($this->allowed[$name])) {
+			$this->allowed[$name] = TRUE;
+		}
 
 		$this->postHandlers[$name] = $handler;
 	}
-
 
 
 	/**
@@ -474,11 +468,16 @@ class Texy extends TexyObject
 		$this->processing = TRUE;
 
 		// speed-up
-		if (is_array($this->allowedClasses)) $this->_classes = array_flip($this->allowedClasses);
-		else $this->_classes = $this->allowedClasses;
-
-		if (is_array($this->allowedStyles)) $this->_styles = array_flip($this->allowedStyles);
-		else $this->_styles = $this->allowedStyles;
+		if (is_array($this->allowedClasses)) {
+			$this->_classes = array_flip($this->allowedClasses);
+		} else {
+			$this->_classes = $this->allowedClasses;
+		}
+		if (is_array($this->allowedStyles)) {
+			$this->_styles = array_flip($this->allowedStyles);
+		} else {
+			$this->_styles = $this->allowedStyles;
+		}
 
 		// convert to UTF-8 (and check source encoding)
 		$text = TexyUtf::toUtf($text, $this->encoding);
@@ -503,10 +502,14 @@ class Texy extends TexyObject
 		$this->_linePatterns = $this->linePatterns;
 		$this->_blockPatterns = $this->blockPatterns;
 		foreach ($this->_linePatterns as $name => $foo) {
-			if (empty($this->allowed[$name])) unset($this->_linePatterns[$name]);
+			if (empty($this->allowed[$name])) {
+				unset($this->_linePatterns[$name]);
+			}
 		}
 		foreach ($this->_blockPatterns as $name => $foo) {
-			if (empty($this->allowed[$name])) unset($this->_blockPatterns[$name]);
+			if (empty($this->allowed[$name])) {
+				unset($this->_blockPatterns[$name]);
+			}
 		}
 
 		// parse Texy! document into internal DOM structure
@@ -537,7 +540,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Converts single line in Texy! to (X)HTML code.
 	 *
@@ -548,7 +550,6 @@ class Texy extends TexyObject
 	{
 		return $this->process($text, TRUE);
 	}
-
 
 
 	/**
@@ -575,7 +576,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Converts DOM structure to pure text.
 	 * @return string
@@ -590,7 +590,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Converts internal string representation to final HTML code in UTF-8.
 	 * @return string
@@ -603,7 +602,9 @@ class Texy extends TexyObject
 		// line-postprocessing
 		$blocks = explode(self::CONTENT_BLOCK, $s);
 		foreach ($this->postHandlers as $name => $handler) {
-			if (empty($this->allowed[$name])) continue;
+			if (empty($this->allowed[$name])) {
+				continue;
+			}
 			foreach ($blocks as $n => $s) {
 				if ($n % 2 === 0 && $s !== '') {
 					$blocks[$n] = call_user_func($handler, $s);
@@ -628,7 +629,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Converts internal string representation to final HTML code in UTF-8.
 	 * @return string
@@ -650,13 +650,12 @@ class Texy extends TexyObject
 
 		// convert nbsp to normal space and remove shy
 		$s = strtr($s, array(
-			"\xC2\xAD" => '',  // shy
+			"\xC2\xAD" => '', // shy
 			"\xC2\xA0" => ' ', // nbsp
 		));
 
 		return $s;
 	}
-
 
 
 	/**
@@ -677,7 +676,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Invoke registered around-handlers.
 	 *
@@ -688,14 +686,15 @@ class Texy extends TexyObject
 	 */
 	final public function invokeAroundHandlers($event, $parser, $args)
 	{
-		if (!isset($this->handlers[$event])) return FALSE;
+		if (!isset($this->handlers[$event])) {
+			return FALSE;
+		}
 
 		$invocation = new TexyHandlerInvocation($this->handlers[$event], $parser, $args);
 		$res = $invocation->proceed();
 		$invocation->free();
 		return $res;
 	}
-
 
 
 	/**
@@ -707,13 +706,14 @@ class Texy extends TexyObject
 	 */
 	final public function invokeHandlers($event, $args)
 	{
-		if (!isset($this->handlers[$event])) return;
+		if (!isset($this->handlers[$event])) {
+			return;
+		}
 
 		foreach ($this->handlers[$event] as $handler) {
 			call_user_func_array($handler, $args);
 		}
 	}
-
 
 
 	/**
@@ -728,7 +728,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Reverts meta-spaces back to normal spaces.
 	 * @param  string
@@ -738,7 +737,6 @@ class Texy extends TexyObject
 	{
 		return strtr($s, "\x01\x02\x03\x04", " \t\r\n");
 	}
-
 
 
 	/**
@@ -765,7 +763,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Converts to web safe characters [a-z0-9-] text.
 	 * @param  string
@@ -782,7 +779,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!).
 	 * note: &quot; is not encoded!
@@ -795,7 +791,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Texy! version of html_entity_decode (always UTF-8, much faster than original!).
 	 * @param  string
@@ -803,10 +798,11 @@ class Texy extends TexyObject
 	 */
 	final public static function unescapeHtml($s)
 	{
-		if (strpos($s, '&') === FALSE) return $s;
+		if (strpos($s, '&') === FALSE) {
+			return $s;
+		}
 		return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 	}
-
 
 
 	/**
@@ -818,10 +814,11 @@ class Texy extends TexyObject
 	{
 		$s = trim($s, "\n");
 		$spaces = strspn($s, ' ');
-		if ($spaces) return preg_replace("#^ {1,$spaces}#m", '', $s);
+		if ($spaces) {
+			return preg_replace("#^ {1,$spaces}#m", '', $s);
+		}
 		return $s;
 	}
-
 
 
 	/**
@@ -832,7 +829,9 @@ class Texy extends TexyObject
 	 */
 	final public function protect($child, $contentType)
 	{
-		if ($child==='') return '';
+		if ($child === '') {
+			return '';
+		}
 
 		$key = $contentType
 			. strtr(base_convert(count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
@@ -844,12 +843,10 @@ class Texy extends TexyObject
 	}
 
 
-
 	final public function unProtect($html)
 	{
 		return strtr($html, $this->marks);
 	}
-
 
 
 	/**
@@ -861,14 +858,10 @@ class Texy extends TexyObject
 	final public function checkURL($URL, $type)
 	{
 		// absolute URL with scheme? check scheme!
-		if (!empty($this->urlSchemeFilters[$type])
-			&& preg_match('#'.TEXY_URLSCHEME.'#A', $URL)
-			&& !preg_match($this->urlSchemeFilters[$type], $URL))
-			return FALSE;
-
-		return TRUE;
+		return empty($this->urlSchemeFilters[$type])
+			|| !preg_match('#'.TEXY_URLSCHEME.'#A', $URL)
+			|| preg_match($this->urlSchemeFilters[$type], $URL);
 	}
-
 
 
 	/**
@@ -883,7 +876,6 @@ class Texy extends TexyObject
 	}
 
 
-
 	/**
 	 * Prepends root to URL, if possible.
 	 * @param  string  URL
@@ -892,10 +884,11 @@ class Texy extends TexyObject
 	 */
 	final public static function prependRoot($URL, $root)
 	{
-		if ($root == NULL || !self::isRelative($URL)) return $URL;
+		if ($root == NULL || !self::isRelative($URL)) {
+			return $URL;
+		}
 		return rtrim($root, '/\\') . '/' . $URL;
 	}
-
 
 
 	final public function getLinePatterns()
@@ -904,12 +897,10 @@ class Texy extends TexyObject
 	}
 
 
-
 	final public function getBlockPatterns()
 	{
 		return $this->_blockPatterns;
 	}
-
 
 
 	final public function getDOM()
@@ -918,12 +909,10 @@ class Texy extends TexyObject
 	}
 
 
-
 	private function tabCb($m)
 	{
 		return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
 	}
-
 
 
 	/**
@@ -937,7 +926,6 @@ class Texy extends TexyObject
 			}
 		}
 	}
-
 
 
 	final public function __clone()

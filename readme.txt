@@ -1,7 +1,5 @@
-Introduction
-------------
-
-Thank you for downloading Texy!
+Texy!
+====
 
 Texy is text-to-HTML formatter and converter library. It allows you to write
 structured documents without knowledge or using of HTML language. You write
@@ -22,15 +20,11 @@ enhancements or specific requirements adaptations are as easy as possible.
 Texy is sexy!
 
 
-
 Documentation and Examples
 --------------------------
 
 Refer to the 'examples' directory for examples. Texy documentation is
-available on the homepage:
-
-http://texy.info
-
+available on the homepage http://texy.info.
 
 
 Texy.minified
@@ -41,17 +35,3 @@ want to modify library, but just use it.
 
 This is exactly the same as normal version, just only comments and
 whitespaces are removed.
-
-
-
-Support Texy!
--------------
-
-If you like or use Texy, support it by placing small button to your website.
-Choose buttons and look at exemplary HTML code in directory /icons/
-
-
-
------
-For more information, visit the author's weblog (in czech language):
-http://phpfashion.com
