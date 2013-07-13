@@ -1,0 +1,442 @@
+Texy! is sexy!
+**************
+
+Texy! is text-to-HTML formatter and converter library. It allows you to write
+structured documents without knowledge or using of HTML language. You write
+documents in humane easy-to-read plain text format and Texy! converts it to
+structurally and valid (X)HTML code.
+
+Texy! is one of the **most complex** formatters. Its possibilities covers images,
+links (anchors), nested lists, tables and has full support for CSS((Cascade Style Sheet)).
+
+
+
+Headers
+=======
+
+=== Low Level Header ====
+
+
+
+
+Paragraphs
+==========
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim, placerat tincidunt, tincidunt ac, fringilla et, mauris.
+still the same paragraph
+ still the same paragraph, but wrapped with element `<br>`
+ and second wrapped line
+
+Centered by modifier  .<>
+
+Colored by modifier .{color:blue}
+
+
+
+
+
+Horizontal lines
+================
+
+four horizontal lines, written in four ways:
+
+---
+
+***
+
+
+
+
+
+Code
+====
+
+/---code php
+  function reImage($matches) {
+    $content = $matches[1];
+    $align = $matches[5];
+    $href = $matches[6];
+  }
+\---
+
+Syntax can be highlighted by third party module
+
+
+
+
+Disable Texy
+============
+
+
+/---html
+  example: **this is not strong**
+\---
+
+
+
+
+Div
+===
+
+/---div .[header]
+
+  content of div
+
+\---
+
+
+
+
+
+nested
+------
+
+/---div .[header]
+
+  ## This is a header.
+
+  /---div
+    nested div
+  \---
+
+  Texy! is sexy!
+
+\---
+
+
+
+
+
+
+
+BlockQuote
+==========
+
+> This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
+> consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus.
+> Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+>
+> 640 K should be enough for everyone
+>:http://www.microsoft.com
+
+
+nested
+------
+
+> ## This is a header.
+>
+> > This is nested blockquote.
+>
+> Back to the first level.
+
+
+
+
+Links
+=====
+
+- Look at "homepage":http://texy.info.
+- Do you know "php Fashion":[http://phpfashion.com/]?
+- This picture [* image.gif *]:www.texy.info is clickable
+
+
+using references
+----------------
+
+[homepage]:  http://texy.info/ Texy! .(this is homepage)
+[email]:     me@example.com
+
+
+- Look at [homepage]
+- My address is [email]
+- What about "this":[homepage] site?
+
+
+
+
+Images
+======
+
+[* image.gif *]
+
+in paragraph
+------------
+
+[* image.gif <] Left-aligned image. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim, placerat tincidunt, tincidunt ac, fringilla et, mauris.
+
+[* image.gif >] Right-aligned image. Curabitur quam justo, hendrerit a, mattis ut, ultrices at, dui. In mollis. Ut pellentesque erat vehicula nunc. Ut ultricies. Nulla nunc velit, consequat vel, laoreet in, blandit et, eros.
+
+
+with on-mouse-over event
+------------------------
+
+[* image.gif | image-over.gif *]
+
+
+with description
+----------------
+
+[* image.gif *] *** This is description under image (or photo)
+
+
+using references
+----------------
+
+What a beautiful logo [*picture*] :-)
+
+[*picture*]: image.gif .(alternative text)
+
+
+with modifiers
+--------------
+
+[* image.gif .{width:100px} *]
+
+
+
+
+
+
+Phrases
+=======
+
+Formatting: *emphasis*, **strong emphasis** and ***stronger emphasis .{color:green}***
+
+Quotes: >>Lorem Ipsum Dolores<<:www.lipsum.com
+
+Cite: As ~~Frank Borland~~ said, ...
+
+And other: ^^superscript^^ vs. __subscript__
+
+superscript m^2 vs. subscript O_2
+
+         ++inserted text++ vs. --deleted text--
+
+Code: `<br />`
+
+
+with modifiers
+--------------
+
+**strong and green .{color:green}** like Hulk
+
+
+
+
+
+Direct HTML tags
+================
+
+This <strong>is strong</strong> text.
+
+
+
+
+
+List
+====
+
+
+*   Red
+*   Green
+*   Blue
+
+or
+
++   Red
++   Green
++   Blue
+
+or
+
+-   Red
+-   Green
+-   Blue
+
+
+
+ordered
+-------
+
+1.  Bird
+2.  McHale
+3.  Parish
+
+1)  Bird
+2)  McHale
+3)  Parish
+
+a)  Bird
+b)  McHale
+c)  Parish
+
+A)  Bird
+B)  McHale
+C)  Parish
+
+I.  Bird
+II.  McHale
+III.  Parish
+
+
+
+nested
+------
+
+
+a)  Bird
+  I.  Bird
+    -   Red
+    -   Green
+    -   Blue
+  II.  McHale
+  III.  Parish
+b)  McHale
+c)  Parish
+      1)  Bird
+      2)  McHale
+      3)  Parish
+
+
+
+
+definition list
+---------------
+
+Concert Divoky Bill:
+    - term: 9. 12. 2004
+    - place: Hala Vodova, Brno
+    - price: 260 CZK
+
+and with modifiers:
+
+
+.{color:red}
+PHP:   .{color:blue}
+    - PHP: Hypertext Preprocessor .{color:green}
+    - A scripting language
+    - Personal Home Pages
+
+
+
+
+Modifiers
+=========
+
+These types of modifiers are available:
+
+- (title) descriptive, used as attribute title or alt (for images)
+- [class1 class2 #id] determine class and/or ID
+- {class:blue} direct CSS style
+- horizontal alignment:
+  - left <
+  - right >
+  - center <>
+  - justify =
+
+- vertical alignment: (for tables)
+  - top ^
+  - middle -
+  - bottom _
+
+
+
+
+
+Typography
+==============
+
+- very long words division (with respect for language rules). Example: antidisestablishmentarianism
+- clickable emails and URL www.davidgrudl.com, františek@šlaušek.укр (emails are obfuscated against spambots)
+- "national" 'typographic' quotes
+- divider vs. dash: 10-15 vs. north-west
+- en-dash: one -- two
+- dimension sign 10 x 20
+- nonbreakable spaces in phone numbers +420 776 552 046
+- acronym NATO((North Atlantic Treaty Organisation))
+- abbr "et al."((and others))
+- quickCorrects like this(TM) this(R) or (C)this
+- arrows <- and -> and <-> ;
+- ellipsis...
+- preserve HTML entities
+- and many others :-)
+
+
+
+
+
+Tables
+======
+
+| first col | second col | third col
+| Adam      | Eva        | Franta
+
+
+with header
+-----------
+
+|-----------------------------
+| First Name | Last Name | Age
+|----------------------------
+| Jesus      | Christ    | 33
+| Cecilie    | Svobodova | 74
+
+
+or using *
+
+
+|* First Name | Jesus    | Cecilie
+|* Last Name  | Christ   | Svobodova
+|* Age        | 33       | 74
+
+
+colspans
+--------
+
+notice the double ||
+
+|-----------------------------
+| Name                  || Age
+|----------------------------
+| Jesus      | Christ    | 33
+| Cecilie    | Svobodova | 74
+
+
+rowspans
+--------
+
+|-----------------------------
+| First Name | Last Name | Age
+|----------------------------
+| Bill       | Gates     | 50
+|^           | Clinton   | 52
+|^           | Beam      | 70
+
+
+colspan & rowspans
+------------------
+
+|-----------------------------
+| First Name | Last Name | Age
+|----------------------------
+| Bill                  || 50
+|^                      || 52
+|^           | Beam      | 70
+
+
+modifiers
+---------
+
+.{color:red}
+| first col | second col      .>| third col | .{font-style:italic}
+| Adam      | Eva .{color: blue}| Franta    |
+
+
+
+
+
+
+Copyright
+=========
+
+Texy! (C) "David Grudl":http://davidgrudl.com, 2004-2009

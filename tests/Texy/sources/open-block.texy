@@ -1,0 +1,5 @@
+/--code php
+<?php
+if (strpos($_SERVER['REQUEST_URI'], 'controller.php')) $_SERVER['REQUEST_URI'] = '/cs/try/';
+
+[syntax]: syntax Syntaxe .{font-weight:bold}

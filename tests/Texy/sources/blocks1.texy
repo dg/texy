@@ -1,0 +1,58 @@
+/---div  .[#menu-okolo]
+auto
+/---div  .[#menu]
+  - Úvod  .[aktivny]
+  - demo
+ \---
+/---div  .[#menu2]
+aa
+\---
+\---
+---------------- .[noscreen]
+
+/---div  .[#sidebar]
+
+  	/---div  .[#menu]
+
+
+  		- "co je Texy!":[about]  				.[#submenu-about]
+  				- "využití":[about-usage]
+  				- "v čem je lepší":[about-why-texy]
+  				- "Texy! vs. WYSIWIG":[about-wysiwig]
+
+
+  		- "syntax":[syntax]
+  		- "demo":[try]
+  		- "implementace":[implementation]
+  		- "download":[download]
+  		- "licence":[license]
+  		- "aktuality":[news]
+  		- "kontakt":[contact]
+
+\---
+
+	/---div
+
+		Sponzor hostingu:
+
+		"[* [7] .(Webhosting poskytuje Český hosting)*]":[6]
+
+\---
+
+	Texy! forma "stránky":[syntax.texy] <small>("menu":[menu.texy], "patička":[footer.texy], "odkazy":[../links.texy])</small>
+
+\---
+
+/---div  .[#footer]
+
+	**Texy!** (C) "David Grudl":[8] 2003-2005
+
+\---
+
+
+/---div  .[#menu-okolo]
+/---div  .[#menu]
+  - Úvod  .[aktivny]
+  - demo
+\---
+\---

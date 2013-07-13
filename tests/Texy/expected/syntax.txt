@@ -1,0 +1,448 @@
+
+Texy! is sexy!
+
+Texy! is text-to-HTML formatter and converter library. It allows you to write structured documents without knowledge or using of HTML language. You write documents in humane easy-to-read plain text format and Texy! converts it to structurally and valid (X)HTML code.
+
+Texy! is one of the most complex formatters. Its possibilities covers images, links (anchors), nested lists, tables and has full support for CSS.
+
+Headers
+
+Low Level Header
+
+Paragraphs
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim, placerat tincidunt, tincidunt ac, fringilla et, mauris. still the same paragraph
+still the same paragraph, but wrapped with element <br>
+and second wrapped line
+
+Centered by modifier
+
+Colored by modifier
+
+Horizontal lines
+
+four horizontal lines, written in four ways:
+
+Code
+
+function reImage($matches) {
+  $content = $matches[1];
+  $align = $matches[5];
+  $href = $matches[6];
+}
+
+Syntax can be highlighted by third party module
+
+Disable Texy
+ example: **this is not strong**
+Div
+
+
+	content of div
+
+
+nested
+
+
+	This is a header.
+
+
+		nested div
+
+
+	Texy! is sexy!
+
+
+BlockQuote
+
+
+	This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.
+
+	640 K should be enough for everyone
+
+
+nested
+
+
+	This is a header.
+
+
+		This is nested blockquote.
+
+
+	Back to the first level.
+
+
+Links
+
+
+	Look at homepage.
+
+	Do you know php Fashion?
+
+	This picture  is clickable
+
+
+using references
+
+
+	Look at Texy!
+
+	My address is me@example.com
+
+	What about this site?
+
+
+Images
+
+in paragraph
+
+ Left-aligned image. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim, placerat tincidunt, tincidunt ac, fringilla et, mauris.
+
+ Right-aligned image. Curabitur quam justo, hendrerit a, mattis ut, ultrices at, dui. In mollis. Ut pellentesque erat vehicula nunc. Ut ultricies. Nulla nunc velit, consequat vel, laoreet in, blandit et, eros.
+
+with on-mouse-over event
+
+with description
+
+
+	This is description under image (or photo)
+
+
+using references
+
+What a beautiful logo  :-)
+
+with modifiers
+
+Phrases
+
+Formatting: emphasis, strong emphasis and stronger emphasis
+
+Quotes: Lorem Ipsum Dolores
+
+Cite: As Frank Borland said, …
+
+And other: superscript vs. subscript
+
+superscript m2 vs. subscript O2
+
+inserted text vs. deleted text
+
+Code: <br />
+
+with modifiers
+
+strong and green like Hulk
+
+Direct HTML tags
+
+This is strong text.
+
+List
+
+
+	Red
+
+	Green
+
+	Blue
+
+
+or
+
+
+	Red
+
+	Green
+
+	Blue
+
+
+or
+
+
+	Red
+
+	Green
+
+	Blue
+
+
+ordered
+
+
+	Bird
+
+	McHale
+
+	Parish
+
+	Bird
+
+	McHale
+
+	Parish
+
+	Bird
+
+	McHale
+
+	Parish
+
+	Bird
+
+	McHale
+
+	Parish
+
+	Bird
+
+	McHale
+
+	Parish
+
+
+nested
+
+
+	Bird
+
+			Bird
+
+					Red
+
+					Green
+
+					Blue
+
+			McHale
+
+			Parish
+
+	McHale
+
+	Parish
+
+			Bird
+
+			McHale
+
+			Parish
+
+definition list
+
+
+	Concert Divoky Bill
+
+	term: 9. 12. 2004
+
+	place: Hala Vodova, Brno
+
+	price: 260 CZK
+
+	and with modifiers
+
+	PHP
+
+	PHP: Hypertext Preprocessor
+
+	A scripting language
+
+	Personal Home Pages
+
+
+Modifiers
+
+These types of modifiers are available:
+
+
+	(title) descriptive, used as attribute title or alt (for images)
+
+	[class1 class2 #id] determine class and/or ID
+
+	{class:blue} direct CSS style
+
+	horizontal alignment:
+
+			left <
+
+			right >
+
+			center <>
+
+			justify =
+
+	vertical alignment: (for tables)
+
+			top ^
+
+			middle –
+
+			bottom _
+
+Typography
+
+
+	very long words division (with respect for language rules). Example: antidisestablishmentarianism
+
+	clickable emails and URL www.davidgrudl.com, františek@šlaušek.укр (emails are obfuscated against spambots)
+
+	“national” ‘typographic’ quotes
+
+	divider vs. dash: 10–15 vs. north-west
+
+	en-dash: one – two
+
+	dimension sign 10×20
+
+	nonbreakable spaces in phone numbers +420 776 552 046
+
+	acronym NATO
+
+	abbr et al.
+
+	quickCorrects like this™ this® or ©this
+
+	arrows ← and → and ↔ ;
+
+	ellipsis…
+
+	preserve HTML entities
+
+	and many others :-)
+
+
+Tables
+
+			first col
+
+			second col
+
+			third col
+
+			Adam
+
+			Eva
+
+			Franta
+
+with header
+
+			First Name
+
+			Last Name
+
+			Age
+
+			Jesus
+
+			Christ
+
+			33
+
+			Cecilie
+
+			Svobodova
+
+			74
+
+or using *
+
+			First Name
+
+			Jesus
+
+			Cecilie
+
+			Last Name
+
+			Christ
+
+			Svobodova
+
+			Age
+
+			33
+
+			74
+
+colspans
+
+notice the double ||
+
+			Name
+
+			Age
+
+			Jesus
+
+			Christ
+
+			33
+
+			Cecilie
+
+			Svobodova
+
+			74
+
+rowspans
+
+			First Name
+
+			Last Name
+
+			Age
+
+			Bill
+
+			Gates
+
+			50
+
+			Clinton
+
+			52
+
+			Beam
+
+			70
+
+colspan & rowspans
+
+			First Name
+
+			Last Name
+
+			Age
+
+			Bill
+
+			50
+
+
+
+			52
+
+			Beam
+
+			70
+
+modifiers
+
+			first col
+
+			second col
+
+			third col
+
+			Adam
+
+			Eva
+
+			Franta
+
+Copyright
+
+Texy! © David Grudl, 2004–2009

@@ -1,0 +1,586 @@
+
+<h1>Texy! is sexy!</h1>
+
+<p>Texy! is text-to-HTML formatter and converter library. It allows you to write
+structured documents without knowledge or using of HTML language. You write
+documents in humane easy-to-read plain text format and Texy! converts it to
+structurally and valid (X)HTML code.</p>
+
+<p>Texy! is one of the <strong>most complex</strong> formatters. Its
+possibilities covers images, links (anchors), nested lists, tables and has full
+support for <acronym title="Cascade Style Sheet">CSS</acronym>.</p>
+
+<h2>Headers</h2>
+
+<h1>Low Level Header</h1>
+
+<h2>Paragraphs</h2>
+
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis
+enim, placerat tincidunt, tincidunt ac, fringilla et, mauris. still the same
+paragraph<br />
+still the same paragraph, but wrapped with element <code>&lt;br&gt;</code><br />
+and second wrapped line</p>
+
+<p style="text-align:center">Centered by modifier</p>
+
+<p style="color:blue">Colored by modifier</p>
+
+<h2>Horizontal lines</h2>
+
+<p>four horizontal lines, written in four ways:</p>
+
+<hr />
+<hr class="hidden" />
+
+<h2>Code</h2>
+
+<pre
+class="php"><code>function reImage($matches) {
+  $content = $matches[1];
+  $align = $matches[5];
+  $href = $matches[6];
+}</code></pre>
+
+<p>Syntax can be highlighted by third party module</p>
+
+<h2>Disable Texy</h2>
+ example: **this is not strong**
+<h2>Div</h2>
+
+<div class="header">
+	<p>content of div</p>
+</div>
+
+<h3>nested</h3>
+
+<div class="header">
+	<h2>This is a header.</h2>
+
+	<div>
+		<p>nested div</p>
+	</div>
+
+	<p>Texy! is sexy!</p>
+</div>
+
+<h2>BlockQuote</h2>
+
+<blockquote cite="http://www.microsoft.com">
+	<p>This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
+	consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum
+	enim wisi, viverra nec, fringilla in, laoreet vitae, risus.</p>
+
+	<p>640 K should be enough for everyone</p>
+</blockquote>
+
+<h3>nested</h3>
+
+<blockquote>
+	<h2>This is a header.</h2>
+
+	<blockquote>
+		<p>This is nested blockquote.</p>
+	</blockquote>
+
+	<p>Back to the first level.</p>
+</blockquote>
+
+<h2>Links</h2>
+
+<ul>
+	<li>Look at <a href="http://texy.info">homepage</a>.</li>
+
+	<li>Do you know <a href="http://phpfashion.com/">php Fashion</a>?</li>
+
+	<li>This picture <a href="http://www.texy.info"><img src="../images/image.gif"
+	alt="" /></a> is clickable</li>
+</ul>
+
+<h3>using references</h3>
+
+<ul>
+	<li>Look at <a href="http://texy.info/" title="this is homepage">Texy!</a></li>
+
+	<li>My address is <a
+	href="mailto:me&#64;example.com">me&#64;<!---->example.com</a></li>
+
+	<li>What about <a href="http://texy.info/" title="this is homepage">this</a>
+	site?</li>
+</ul>
+
+<h2>Images</h2>
+
+<div><img src="../images/image.gif" alt="" /></div>
+
+<h3>in paragraph</h3>
+
+<p><img src="../images/image.gif" alt="" class="left" /> Left-aligned image.
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim,
+placerat tincidunt, tincidunt ac, fringilla et, mauris.</p>
+
+<p><img src="../images/image.gif" alt="" style="float:right" /> Right-aligned
+image. Curabitur quam justo, hendrerit a, mattis ut, ultrices at, dui. In
+mollis. Ut pellentesque erat vehicula nunc. Ut ultricies. Nulla nunc velit,
+consequat vel, laoreet in, blandit et, eros.</p>
+
+<h3>with on-mouse-over event</h3>
+
+<div><img src="../images/image.gif" alt=""
+onmouseover="this.src='../images/image-over.gif'"
+onmouseout="this.src='../images/image.gif'"
+onload="var i=new Image();i.src='../images/image-over.gif';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''"
+/></div>
+
+<h3>with description</h3>
+
+<div class="figure"><img src="../images/image.gif" alt="" />
+	<p>This is description under image (or photo)</p>
+</div>
+
+<h3>using references</h3>
+
+<p>What a beautiful logo <img src="../images/image.gif" alt="alternative text"
+/> :-)</p>
+
+<h3>with modifiers</h3>
+
+<div><img src="../images/image.gif" style="width:100px" alt="" /></div>
+
+<h2>Phrases</h2>
+
+<p>Formatting: <em>emphasis</em>, <strong>strong emphasis</strong> and <strong
+style="color:green"><em>stronger emphasis</em></strong></p>
+
+<p>Quotes: <q cite="http://www.lipsum.com">Lorem Ipsum Dolores</q></p>
+
+<p>Cite: As <cite>Frank Borland</cite> said, …</p>
+
+<p>And other: <sup>superscript</sup> vs. <sub>subscript</sub></p>
+
+<p>superscript m<sup>2</sup> vs. subscript O<sub>2</sub></p>
+
+<p><ins>inserted text</ins> vs. <del>deleted text</del></p>
+
+<p>Code: <code>&lt;br /&gt;</code></p>
+
+<h3>with modifiers</h3>
+
+<p><strong style="color:green">strong and green</strong> like Hulk</p>
+
+<h2>Direct HTML tags</h2>
+
+<p>This <strong>is strong</strong> text.</p>
+
+<h2>List</h2>
+
+<ul>
+	<li>Red</li>
+
+	<li>Green</li>
+
+	<li>Blue</li>
+</ul>
+
+<p>or</p>
+
+<ul>
+	<li>Red</li>
+
+	<li>Green</li>
+
+	<li>Blue</li>
+</ul>
+
+<p>or</p>
+
+<ul>
+	<li>Red</li>
+
+	<li>Green</li>
+
+	<li>Blue</li>
+</ul>
+
+<h3>ordered</h3>
+
+<ol>
+	<li>Bird</li>
+
+	<li>McHale</li>
+
+	<li>Parish</li>
+</ol>
+
+<ol>
+	<li>Bird</li>
+
+	<li>McHale</li>
+
+	<li>Parish</li>
+</ol>
+
+<ol style="list-style-type:lower-alpha">
+	<li>Bird</li>
+
+	<li>McHale</li>
+
+	<li>Parish</li>
+</ol>
+
+<ol style="list-style-type:upper-alpha">
+	<li>Bird</li>
+
+	<li>McHale</li>
+
+	<li>Parish</li>
+</ol>
+
+<ol style="list-style-type:upper-roman">
+	<li>Bird</li>
+
+	<li>McHale</li>
+
+	<li>Parish</li>
+</ol>
+
+<h3>nested</h3>
+
+<ol style="list-style-type:lower-alpha">
+	<li>Bird
+		<ol style="list-style-type:upper-roman">
+			<li>Bird
+				<ul>
+					<li>Red</li>
+
+					<li>Green</li>
+
+					<li>Blue</li>
+				</ul>
+			</li>
+
+			<li>McHale</li>
+
+			<li>Parish</li>
+		</ol>
+	</li>
+
+	<li>McHale</li>
+
+	<li>Parish
+		<ol>
+			<li>Bird</li>
+
+			<li>McHale</li>
+
+			<li>Parish</li>
+		</ol>
+	</li>
+</ol>
+
+<h3>definition list</h3>
+
+<dl>
+	<dt>Concert Divoky Bill</dt>
+
+	<dd>term: 9. 12. 2004</dd>
+
+	<dd>place: Hala Vodova, Brno</dd>
+
+	<dd>price: 260 CZK</dd>
+
+	<dt>and with modifiers</dt>
+</dl>
+
+<dl style="color:red">
+	<dt style="color:blue">PHP</dt>
+
+	<dd style="color:green">PHP: Hypertext Preprocessor</dd>
+
+	<dd>A scripting language</dd>
+
+	<dd>Personal Home Pages</dd>
+</dl>
+
+<h2>Modifiers</h2>
+
+<p>These types of modifiers are available:</p>
+
+<ul>
+	<li>(title) descriptive, used as attribute title or alt (for images)</li>
+
+	<li>[class1 class2 #id] determine class and/or ID</li>
+
+	<li>{class:blue} direct CSS style</li>
+
+	<li>horizontal alignment:
+		<ul>
+			<li>left &lt;</li>
+
+			<li>right &gt;</li>
+
+			<li>center &lt;&gt;</li>
+
+			<li>justify =</li>
+		</ul>
+	</li>
+
+	<li>vertical alignment: (for tables)
+		<ul>
+			<li>top ^</li>
+
+			<li>middle –</li>
+
+			<li>bottom _</li>
+		</ul>
+	</li>
+</ul>
+
+<h2>Typography</h2>
+
+<ul>
+	<li>very long words division (with respect for language rules). Example:
+	antidisestablishmen­tarianism</li>
+
+	<li>clickable emails and URL <a
+	href="http://www.davidgrudl.com">www.davidgrudl.com</a>, <a
+	href="mailto:františek&#64;šlaušek.укр">františek&#64;<!---->šlaušek.укр</a>
+	(emails are obfuscated against spambots)</li>
+
+	<li>“national” ‘typographic’ quotes</li>
+
+	<li>divider vs. dash: 10–15 vs. north-west</li>
+
+	<li>en-dash: one – two</li>
+
+	<li>dimension sign 10×20</li>
+
+	<li>nonbreakable spaces in phone numbers +420 776 552 046</li>
+
+	<li>acronym <acronym
+	title="North Atlantic Treaty Organisation">NATO</acronym></li>
+
+	<li>abbr <acronym title="and others">et al.</acronym></li>
+
+	<li>quickCorrects like this™ this® or ©this</li>
+
+	<li>arrows ← and → and ↔ ;</li>
+
+	<li>ellipsis…</li>
+
+	<li>preserve HTML entities</li>
+
+	<li>and many others :-)</li>
+</ul>
+
+<h2>Tables</h2>
+
+<table>
+	<tbody>
+		<tr>
+			<td>first col</td>
+
+			<td>second col</td>
+
+			<td>third col</td>
+		</tr>
+
+		<tr>
+			<td>Adam</td>
+
+			<td>Eva</td>
+
+			<td>Franta</td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>with header</h3>
+
+<table>
+	<thead>
+		<tr>
+			<th>First Name</th>
+
+			<th>Last Name</th>
+
+			<th>Age</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td>Jesus</td>
+
+			<td>Christ</td>
+
+			<td>33</td>
+		</tr>
+
+		<tr>
+			<td>Cecilie</td>
+
+			<td>Svobodova</td>
+
+			<td>74</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>or using *</p>
+
+<table>
+	<tbody>
+		<tr>
+			<th>First Name</th>
+
+			<td>Jesus</td>
+
+			<td>Cecilie</td>
+		</tr>
+
+		<tr>
+			<th>Last Name</th>
+
+			<td>Christ</td>
+
+			<td>Svobodova</td>
+		</tr>
+
+		<tr>
+			<th>Age</th>
+
+			<td>33</td>
+
+			<td>74</td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>colspans</h3>
+
+<p>notice the double ||</p>
+
+<table>
+	<thead>
+		<tr>
+			<th colspan="2">Name</th>
+
+			<th>Age</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td>Jesus</td>
+
+			<td>Christ</td>
+
+			<td>33</td>
+		</tr>
+
+		<tr>
+			<td>Cecilie</td>
+
+			<td>Svobodova</td>
+
+			<td>74</td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>rowspans</h3>
+
+<table>
+	<thead>
+		<tr>
+			<th>First Name</th>
+
+			<th>Last Name</th>
+
+			<th>Age</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td rowspan="3">Bill</td>
+
+			<td>Gates</td>
+
+			<td>50</td>
+		</tr>
+
+		<tr>
+			<td>Clinton</td>
+
+			<td>52</td>
+		</tr>
+
+		<tr>
+			<td>Beam</td>
+
+			<td>70</td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>colspan &amp; rowspans</h3>
+
+<table>
+	<thead>
+		<tr>
+			<th>First Name</th>
+
+			<th>Last Name</th>
+
+			<th>Age</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td colspan="2" rowspan="3">Bill</td>
+
+			<td>50</td>
+		</tr>
+
+		<tr>
+			<td> </td>
+
+			<td>52</td>
+		</tr>
+
+		<tr>
+			<td>Beam</td>
+
+			<td>70</td>
+		</tr>
+	</tbody>
+</table>
+
+<h3>modifiers</h3>
+
+<table style="color:red">
+	<tbody>
+		<tr style="font-style:italic">
+			<td>first col</td>
+
+			<td style="text-align:right">second col</td>
+
+			<td>third col</td>
+		</tr>
+
+		<tr>
+			<td>Adam</td>
+
+			<td style="color:blue">Eva</td>
+
+			<td>Franta</td>
+		</tr>
+	</tbody>
+</table>
+
+<h2>Copyright</h2>
+
+<p>Texy! © <a href="http://davidgrudl.com">David Grudl</a>, 2004–2009</p>

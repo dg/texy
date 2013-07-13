@@ -1,0 +1,37 @@
+
+/-- html
+
+<TABLE><TR><TD VALIGN=TOP>Deal 15.<BR><IMG SRC=x.gif WIDTH=100 ALT="">
+<TD><IMG SRC=s.gif ALT=S> A 7 6<BR><IMG SRC=h.gif ALT=H> 10 6<BR>
+<IMG SRC=d.gif ALT=D> J 5 4 2<BR><IMG SRC=c.gif ALT=C> A 10 7 3
+
+<TR><TD><IMG SRC=s.gif ALT=S> Q J 8 4<BR><IMG SRC=h.gif ALT=H> K Q 3<BR>
+<IMG SRC=d.gif ALT=D> A Q 9 8<BR><IMG SRC=c.gif ALT=C> J 8
+<TD><IMG SRC=t.gif ALT="[W - E]">
+<TD><IMG SRC=s.gif ALT=S> 2<BR><IMG SRC=h.gif ALT=H> J 8 4 2<BR>
+<IMG SRC=d.gif ALT=D> K 10 7 6<BR><IMG SRC=c.gif ALT=C> 9 6 5 4
+
+<TR><TD VALIGN=BOTTOM>
+<TD><IMG SRC=s.gif ALT=S> K 10 9 5 3<BR><IMG SRC=h.gif ALT=H> A 9 7 5<BR>
+
+<IMG SRC=d.gif ALT=D> 3<BR><IMG SRC=c.gif ALT=C> K Q 2</TABLE><P>
+
+\-- html
+
+
+
+
+<TABLE><TR><TD VALIGN=TOP>Deal 15.<BR><IMG SRC=x.gif WIDTH=100 ALT="">
+<TD><IMG SRC=s.gif ALT=S> A 7 6<BR><IMG SRC=h.gif ALT=H> 10 6<BR>
+<IMG SRC=d.gif ALT=D> J 5 4 2<BR><IMG SRC=c.gif ALT=C> A 10 7 3
+
+<TR><TD><IMG SRC=s.gif ALT=S> Q J 8 4<BR><IMG SRC=h.gif ALT=H> K Q 3<BR>
+<IMG SRC=d.gif ALT=D> A Q 9 8<BR><IMG SRC=c.gif ALT=C> J 8
+<TD><IMG SRC=t.gif ALT="[W - E]">
+<TD><IMG SRC=s.gif ALT=S> 2<BR><IMG SRC=h.gif ALT=H> J 8 4 2<BR>
+<IMG SRC=d.gif ALT=D> K 10 7 6<BR><IMG SRC=c.gif ALT=C> 9 6 5 4
+
+<TR><TD VALIGN=BOTTOM>
+<TD><IMG SRC=s.gif ALT=S> K 10 9 5 3<BR><IMG SRC=h.gif ALT=H> A 9 7 5<BR>
+
+<IMG SRC=d.gif ALT=D> 3<BR><IMG SRC=c.gif ALT=C> K Q 2</TABLE><P>

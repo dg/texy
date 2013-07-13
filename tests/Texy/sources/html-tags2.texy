@@ -1,0 +1,68 @@
+/--html
+<div>
+  <!--[if !IE]> -->
+  <object type="application/x-shockwave-flash" data="/trine/media/flash/trineplayer.swf?videofile=tricko%2Eswf&amp;fps=15" width="320" height="260">
+  <!-- <![endif]-->
+
+  <!--[if IE]>
+  <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="320" height="260"
+      codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,0,0">
+      <param name="movie" value="/trine/media/flash/trineplayer.swf?videofile=tricko%2Eswf&amp;fps=15" />
+  <!--><!-- -->
+      <param name="loop" value="false" />
+      <param name="menu" value="false" />
+      <param name="scale" value="exactfit" />
+
+      <p>Pro přehrání je třeba mít nainstalovaný FLASH Player</p>
+  </object>
+  <!-- <![endif]-->
+</div>
+\---
+
+
+<form method=post action="zpravy.php" id=blabla>
+ <FIELDSET><legend>Kontaktní formulář</legend>
+  <p><label for="jmeno">jméno:</label> <input size="25" name="jmeno" id="jmeno" type="text" onfocus="if(this.value=='jméno')this.value=''" value="jméno" /></p>
+  <p><label for="mail">e-mail:</label> <input size="25" name=xmail id="mail" type="text" onfocus="if(this.value=='e-mail')this.value=''" value="e-mail" /></p>
+  <p><label>text: </label><textarea name="text" id="text" rows="1" cols="1" style="vertical-align:top" onfocus="if(this.value=='text')this.value=''">text</textarea></p>
+  <p><input type="submit" name="odeslat" value="Odeslat"/></p>
+ </fieldset>
+</form>
+
+tohle je <form method="post" action="odeslani-zpravy.php"
+id="kontform" onsubmit="return checkme()"> konec </form>
+
+
+<embed test></embed><wbr><marquee><bgsound><canvas><nobr>
+
+<script type="text/javascript">
+// tady se ve výsledku sem tam zdroj zalomí a pak to dělá zbytečné chyby tady se ve výsledku sem tam zdroj zalomí a pak to dělá zbytečné chyby tady se ve výsledku sem tam zdroj zalomí a pak to dělá zbytečné chyby
+	<!--
+	document.write ('<img src="http://toplist.cz/count.asp?id=107053&amp;logo=mc&amp;start=4500&amp;http='+escape(document.referrer)+'&amp;wi='+escape(window.screen.width)+'&he='+escape(window.screen.height)+'&amp;cd='+escape(window.screen.colorDepth)+'&amp;t='+escape(document.title)+'" width="88" height="60" style="border:0;" alt="TOPlist" />');
+	//-->
+</script>
+<noscript>
+	<p><img src="http://toplist.cz/count.asp?id=107053&amp;logo=mc&amp;start=4500" style="border:0;"
+	alt="TOPlist" width="88" height="60" /></p>
+</noscript>
+
+
+<iframe src="stranka.html">
+"alternativa":stranka.html
+</iframe>
+
+
+
+
+<pre>
+speciální
+test
+</pre>
+
+
+<pre>
+
+speciální
+test
+
+</pre>

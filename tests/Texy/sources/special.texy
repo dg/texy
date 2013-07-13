@@ -1,0 +1,156 @@
+[* obrazek.jpg .(alternativni text){float: left; title: atribut title; lang: en} *]
+
+10 % a 20 %
+
+m^2 a m_2 a r_1^3
+
+  {{test:test}}
+{{aa}} {{bbb}}
+
+
+>>>>>
+
+> test1
+>> test2
+>>>> test3
+> test4
+>>
+>>>>>
+>
+
+> test
+>>>> test
+> test
+
+*my+ **strong*** konec** jo?*
+
+*a*
+
+**nested .(** asterix)**
+
+escape \**asterix**
+
+"hello .(test (vnorene\) zavorky)"
+
+{{ script }}
+
+texyscript {{ texy }}
+texyscript2 {{ texy (test) }}
+
+obrazek [* obr.jpg *]:[* popup.php?img=obr-big.jpg *]
+
+[* obr.jpg .{alt:alternative; title:title text }*]:[* popup.php?img=obr-big.jpg *] *** Nějaký popisek pod obrázkem
+
+absolutní obr [* http://www.texy.info/images/buttons/texy-powered.png *] test
+
+[* 0 *] nebo **0**
+
+`slovo:[url]` a sl0ovo:[url] a slovo_:[url] a sl-aovo:[url]
+
+Neexistujici &entita;
+
+Specialní &amp;image;
+
+a --> b <--> c <-- d ===> e
+
+
+
+Šlitr-Suchý Šlitr--Suchý
+
+123-456
+
+456--456
+
+456 --456
+
+7869-- 4646
+
+Šlitr-- Suchý
+
+Šlitr --Suchý
+
+Šlitr -- Suchý
+
+Šlitr - Suchý
+
+
+321-654-987
+
+- (phone) number 1 123 123 123
+- (phone) number 1 123 123
+- number 1 123
+
+**email@email.cz**
+
+**www.example.com**
+
+"www.example.com/adresa/dlouha/moc.php":www.example.cz
+
+m^-2
+
+m^2+
+
+m^2n
+
+m_2n
+
+
+- http://cs.wikipedia.org/wiki/Prechodnik
+- http://cs.wiki­pedia.org/wiki/Přechod­ník
+
+10+-3
++-25
+
+
+[**]
+
+[* *]
+
+[* <>]
+
+[* image <>]
+
+[* ><]
+
+[* >]
+
+[* <]
+
+
+
+//V zahradě rozkoší zachmuřen
+ "Hieronymus Bosch":[http://en.wikipedia.org/wiki/Hieronymus_Bosch]
+ v přístěnku Bestiář Aristotelův//
+
+
+200 Kč | 3 990 Kč | 5 000 000 Kč
+
+
+Hokus  -- pokus
+
+- ftp://example.com
+- ftps://example.com
+- ftps://user:pass@example.com
+
+'This guy's really nice.'
+
+
+
+1. test
+
+
+1. test
+2. test
+
+
+
+2. test
+
+
+
+1.test
+
+
+
+1. test
+2.test

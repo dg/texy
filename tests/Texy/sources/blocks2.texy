@@ -1,0 +1,72 @@
+/---html
+
+space
+
+\---
+
+/---text
+
+
+space
+
+
+\---
+
+/--.[texy]
+te
+st
+\--
+
+/-- .[texy]
+te
+st
+\--
+
+/--
+0
+\--
+
+/--code .(0)
+0
+\--
+
+/--code html .(0)
+te
+st
+\--
+
+/-- code html
+te
+st
+\--
+
+
+
+/--text any.text*123(a)4[5]679čřýřžáý
+Text mezi @notexy ..... a @ nebude Texy *formátovat*
+\--any.text*123(a)4[5]679čřýřžáý
+
+
+/--texysource
+Text mezi @notexy ..... a @ nebude Texy *formátovat*
+\--
+
+/--code
+  function reImage($matches) {
+    $content = $matches[1];
+    $align = $matches[5];
+    $href = $matches[6];
+  }
+  &nbsp; <br />
+  &amp;amp;
+\-- xxx
+
+/--html
+Text mezi @notexy ..... a @ nebude Texy *formátovat*
+  &nbsp; <br />
+\--
+
+/--text
+Text mezi @notexy ..... a @ nebude Texy *formátovat*
+  &nbsp; <br />
+\--

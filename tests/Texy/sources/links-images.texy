@@ -1,0 +1,122 @@
+Odkazy
+------
+
+- 1. odkaz <a href="http://creativecommons.org/license/">pokus</a>
+- 2. odkaz <a href=[*obrazek3*] title="ahoj" >pokus</a>
+- 3. odkaz <a href='aa'></a> prázdný
+- 4. odkaz <a>test</a> prázdný
+
+- 5. Klasický odkaz "php Fashion":http://phpfashion.com/?
+- 6. Klasický odkaz "php Fashion":[/trine/]x
+- 7. Klasický odkaz "php Fashion .{color:blue}":[./trine/]x
+- 8. Klasický odkaz "php Fashion":[dave@example.com]x
+- 9. Klasický odkaz "php Fashion":dave@example.com
+
+- 10. Referenční odkaz "php Fashion":[php Fashion1]
+- 11. Referenční odkaz "php Fashion":[php Fashion2]
+- 12. Referenční odkaz "php Fashion":[php Fashion3]
+- 13. Referenční odkaz "php Fashion":[email]
+- 14. Referenční odkaz "php Fashion .(title2)[bb]":[php Fashion1]?
+- 15. Referenční odkaz "php Fashion .(title2)":[php Fashion2]?
+- 16. Referenční odkaz "php Fashion":[php Fashion1#12]?
+- 17. Referenční odkaz "php Fashion":[php Fashion2?a=45]?
+
+- 18. Čistě referenční odkaz [php Fashion1]
+- 19. Čistě referenční odkaz [php Fashion2]
+- 20. Čistě referenční odkaz [php Fashion3]
+- 21. Čistě referenční odkaz [email]
+
+Obrázkové odkazy:
+-----------------
+
+- 22. Klasický odkaz "obrazek":[* texy-big.jpg *]
+- 23. Klasický odkaz "obrazek":[* texy-big.jpg >]
+- 24. Klasický odkaz "obrazek":[*texy-big.jpg | 2 |3*]
+
+- 25. Referenční odkaz "obrazek":[xobrazek1]
+- 26. Referenční odkaz "obrazek":[*obrazek1*]
+- 27. Referenční odkaz "obrazek":[*obrazek3*]
+
+- 28. Čistě referenční odkaz [xobrazek1]
+- 29. Čistě referenční odkaz [xobrazek2]
+- 30. Čistě referenční odkaz [xobrazek3]
+- 31. Čistě referenční odkaz [xobrazek4]
+
+
+Odkazující obrázky:
+-------------------
+
+- 32. Klasický odkaz [*texy.jpg*]:http://phpfashion.com/?
+- 34. Klasický odkaz [*texy.jpg | texy-big.jpg .(title)[class] <]:[dave@example.com]x
+
+- 35. Referenční odkaz [xobrazek1]:[php Fashion1]
+- 36. Referenční odkaz "php Fashion":[*obrazek2*]
+- 37. Referenční odkaz "php Fashion":[*obrazek3*]
+- 38. Referenční odkaz [*obrazek2*]:[email]
+- 39. Referenční odkaz "php Fashion .(title2)[bb]":[*obrazek2*]?
+- 40. Referenční odkaz "php Fashion .(title2)":[*obrazek3*]?
+
+- 41. Referenční odkaz [*obrazek1*]:[php Fashion2]
+- 42. Referenční odkaz [*obrazek2*]:[/trine/]x
+- 43. Referenční odkaz [*obrazek3<]::
+- 44. Referenční odkaz [*obrazek2>]::
+- 45. Referenční odkaz [*obrazek4*]:[*obrazek1*]
+
+- 46. Čistě referenční obrázek [*obrazek1*]
+- 47. Čistě referenční obrázek [*obrazek2*]
+- 48. Čistě referenční obrázek [*obrazek3*]
+- 49. Čistě referenční obrázek [*obrazek4*]
+
+
+Obrázek s popiskou
+------------------
+
+[* texy.gif *]:[home] * popiska s plným formátováním
+
+
+Rel nofollow
+------------
+
+- 50. relnofollow odkaz "php Fashion .[nofollow]":http://phpfashion.com/?
+- 51. relnofollow odkaz "php Fashion .[noFollow]":[/trine/]x
+- 52. relnofollow odkaz "php Fashion .{color:blue}":[./trine/]x
+- 53. relnofollow odkaz "php Fashion .[nofollow test]":[dave@example.com]x
+- 54. relnofollow odkaz "php Fashion .[#nofollow]":dave@example.com
+- 55. relnofollow odkaz <a href="/test">test1</a>
+- 56. relnofollow odkaz <a href="mailto:test@text.cz">test2</a>
+- 57. relnofollow odkaz <a href="//server/path">test3</a>
+- 58. relnofollow odkaz <a href="http://server/path">test4</a>
+- 59. relnofollow odkaz <a href="http://server/path" rel="my">test5</a>
+
+
+Specialni
+---------
+
+- 60. "text1":www.text.cz
+- 60. "text1":www.text.cz)
+- 60. "text1":www.text.cz()
+- 60. "text1":www.text.cz(x)
+- 61. "text2":hxxp://test/
+- 62. "text3":javascript:alert('')
+- 63. "text4":mailto:dave@example.com
+- 63. "text4":mailTO:dave@example.com
+- 64. <a href="www.text.cz">test5</a>
+- 65. <a href="hxxp://test/">test6</a>
+- 66. <a href="javascript:alert('')">test7</a>
+- 67. <a href="mailto:dave@example.com">test8</a>
+
+
+[php Fashion1]: http://phpfashion.com/ text *o*dkazu .(title)[aa]
+[php Fashion2]: /trine/ .(title)
+[php Fashion3]: ./trine/
+[email]: dave@example.com .(title)
+
+[xobrazek1]: [*texy-big.jpg | texy-big2.jpg*] text .(title)
+[xobrazek2]: [* texy-big.jpg *] text
+[xobrazek3]: [*texy-big.jpg*]
+[*obrazek1*]: texy.jpg | texy-big.jpg .(altX)
+[*obrazek2*]: texy.jpg 10x13 | texy-big.jpg
+[*obrazek3*]: texy.jpg
+[*obrazek4*]: texy-big.jpg
+
+[xobrazek4]: [*obrazek3*] [*obrazek1*] .(test)

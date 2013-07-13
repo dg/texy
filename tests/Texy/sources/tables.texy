@@ -1,0 +1,69 @@
+| Table 1       | Age Group
+|---------------+------+
+| Street        | Junior
+|^  City        | Senior
+| Another place | Junior
+
+
+
+
+| Table 2       | Age Group
+|----------------------
+|^              | Senior
+|^ | Junior
+
+
+
+
+| Table 3       | Age Group
+|----------------------
+| Street          | Junior
+|  row           ^|
+| - City         ^| Senior
+| - Another place ^ | Junior
+
+
+|* Table 4        | Age Group
+|^|
+|* test ^| item
+|*^| item2
+
+
+
+| Table 5       | Age Group
+|----------------------
+| Street          | A
+| - City         ^| B
+| - Place        ^| C ^
+| - Village       | D ^
+
+
+
+
+| Table 6      || Group
+|----------------------
+| empty | col&row span || Senior
+| empty |              ^| Junior
+| empty |              ^|| Junior
+| empty |              ^||| Junior
+
+
+| Table in table |
+|------------------
+|  \| inner A \| inner B  | outer 1
+|  \| inner C \| inner D ^| outer 2
+
+
+List block collapses:
+
+|* Column 1 |* Column 2  |* Column 3 |
+|           | 1) one     |           |
+|          ^| 2) two    ^|          ^|
+|          ^| 3) three  ^|          ^|
+
+List block correct, but extra table cell (bottom-right):
+
+|* Column 1 |* Column 2  |* Column 3 |
+|           | 1) one     |           |
+|          ^| 2) two    ^|          ^|
+|          ^| 3) three  ^|           |

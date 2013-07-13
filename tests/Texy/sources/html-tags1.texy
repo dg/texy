@@ -1,0 +1,25 @@
+This <strong>example</strong> shows how <a href=http://www.texy.info title='Texy! excellent text-to-html converter & formatter'>Texy!</a> handle HTML tags.
+
+Dangerous <span onmouseover="alert('onmouseover')">span</span>
+
+<div id="page">
+  Hello!
+</div>
+
+<my />..</my>
+
+<span />..</span>
+
+<span title="pokus">...</span title="pokus">
+
+<form>
+test1
+
+  <form>test2</form>
+
+test3
+</form>
+
+<a href="one">text1<span><a href="two">test2</a>test3</a></span>
+
+<a href="one">text1<span><a href="two">test2</span></a>test3</a></span>

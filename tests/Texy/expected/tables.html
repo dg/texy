@@ -1,0 +1,285 @@
+
+<table>
+	<thead>
+		<tr>
+			<th>Table 1</th>
+
+			<th>Age Group</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td>Street</td>
+
+			<td>Junior</td>
+		</tr>
+
+		<tr>
+			<td>^ City</td>
+
+			<td>Senior</td>
+		</tr>
+
+		<tr>
+			<td>Another place</td>
+
+			<td>Junior</td>
+		</tr>
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<tr>
+			<th>Table 2</th>
+
+			<th>Age Group</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td rowspan="2">^</td>
+
+			<td>Senior</td>
+		</tr>
+
+		<tr>
+			<td>Junior</td>
+		</tr>
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<tr>
+			<th>Table 3</th>
+
+			<th>Age Group</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td rowspan="3">
+				<p>Street<br />
+				row</p>
+
+				<ul>
+					<li>City</li>
+				</ul>
+			</td>
+
+			<td>Junior</td>
+		</tr>
+
+		<tr>
+			<td> </td>
+		</tr>
+
+		<tr>
+			<td>Senior</td>
+		</tr>
+
+		<tr>
+			<td>– Another place ^</td>
+
+			<td>Junior</td>
+		</tr>
+	</tbody>
+</table>
+
+<table>
+	<tbody>
+		<tr>
+			<th rowspan="3">
+				<p>Table 4</p>
+
+				<p>test</p>
+			</th>
+
+			<td>Age Group</td>
+		</tr>
+
+		<tr>
+			<td> </td>
+		</tr>
+
+		<tr>
+			<td>item</td>
+		</tr>
+
+		<tr>
+			<th>^</th>
+
+			<td>item2</td>
+		</tr>
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<tr>
+			<th>Table 5</th>
+
+			<th>Age Group</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td rowspan="2">
+				<p>Street</p>
+
+				<ul>
+					<li>City</li>
+
+					<li>Place</li>
+				</ul>
+			</td>
+
+			<td>A</td>
+		</tr>
+
+		<tr>
+			<td rowspan="2">
+				<p>B C D</p>
+			</td>
+		</tr>
+
+		<tr>
+			<td>– Village</td>
+		</tr>
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<tr>
+			<th colspan="2">Table 6</th>
+
+			<th>Group</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td>empty</td>
+
+			<td colspan="2" rowspan="4">col&amp;row span</td>
+
+			<td>Senior</td>
+		</tr>
+
+		<tr>
+			<td>empty</td>
+
+			<td>Junior</td>
+		</tr>
+
+		<tr>
+			<td>empty</td>
+
+			<td> </td>
+
+			<td>Junior</td>
+		</tr>
+
+		<tr>
+			<td>empty</td>
+
+			<td colspan="2"> </td>
+
+			<td>Junior</td>
+		</tr>
+	</tbody>
+</table>
+
+<table>
+	<thead>
+		<tr>
+			<th>Table in table</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td rowspan="2">
+				<p>| inner A | inner B</p>
+
+				<p>| inner C | inner D</p>
+			</td>
+
+			<td>outer 1</td>
+		</tr>
+
+		<tr>
+			<td>outer 2</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>List block collapses:</p>
+
+<table>
+	<tbody>
+		<tr>
+			<th>Column 1</th>
+
+			<th>Column 2</th>
+
+			<th>Column 3</th>
+		</tr>
+
+		<tr>
+			<td> </td>
+
+			<td>
+				<ol>
+					<li>one</li>
+
+					<li>two</li>
+
+					<li>three</li>
+				</ol>
+			</td>
+
+			<td> </td>
+		</tr>
+	</tbody>
+</table>
+
+<p>List block correct, but extra table cell (bottom-right):</p>
+
+<table>
+	<tbody>
+		<tr>
+			<th>Column 1</th>
+
+			<th>Column 2</th>
+
+			<th>Column 3</th>
+		</tr>
+
+		<tr>
+			<td rowspan="2"> </td>
+
+			<td rowspan="2">
+				<ol>
+					<li>one</li>
+
+					<li>two</li>
+
+					<li>three</li>
+				</ol>
+			</td>
+
+			<td> </td>
+		</tr>
+
+		<tr>
+			<td> </td>
+		</tr>
+	</tbody>
+</table>

@@ -1,0 +1,13 @@
+/--html
+<p>
+<!------->
+\--
+
+
+První <!-- komentář -->  <!--[ komentář2 ]-->  <!-- komentář3 < > -->
+
+<!-- invalid -- comment1 -->
+
+<!-- invalid -- comment2---->
+
+<!---- invalid -- comment2---->
