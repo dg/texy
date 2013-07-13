@@ -30,7 +30,6 @@ require_once __DIR__ . '/Texy/TexyHtml.php';
 require_once __DIR__ . '/Texy/TexyModifier.php';
 require_once __DIR__ . '/Texy/TexyModule.php';
 require_once __DIR__ . '/Texy/TexyParser.php';
-require_once __DIR__ . '/Texy/TexyUtf.php';
 require_once __DIR__ . '/Texy/TexyConfigurator.php';
 require_once __DIR__ . '/Texy/TexyHandlerInvocation.php';
 require_once __DIR__ . '/Texy/TexyRegexp.php';

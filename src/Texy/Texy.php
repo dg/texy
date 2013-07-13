@@ -47,9 +47,6 @@ class Texy extends TexyObject
 	const XHTML1_STRICT = 3; // Texy::HTML4_STRICT | Texy::XML;
 	const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
 
-	/** @var string  input & output text encoding */
-	public $encoding = 'utf-8';
-
 	/** @var array  Texy! syntax configuration */
 	public $allowed = array();
 
@@ -393,9 +390,6 @@ class Texy extends TexyObject
 			$this->_styles = $this->allowedStyles;
 		}
 
-		// convert to UTF-8 (and check source encoding)
-		$text = TexyUtf::toUtf($text, $this->encoding);
-
 		if ($this->removeSoftHyphens) {
 			$text = str_replace("\xC2\xAD", '', $text);
 		}
@@ -444,8 +438,7 @@ class Texy extends TexyObject
 		$html = str_replace("\r", "\n", $html);
 
 		$this->processing = FALSE;
-
-		return TexyUtf::utf2html($html, $this->encoding);
+		return $html;
 	}
 
 
@@ -463,14 +456,11 @@ class Texy extends TexyObject
 
 	/**
 	 * Makes only typographic corrections.
-	 * @param  string   input text (in encoding defined by Texy::$encoding)
-	 * @return string   output text (in UTF-8)
+	 * @param  string   input text
+	 * @return string   output text
 	 */
 	public function processTypo($text)
 	{
-		// convert to UTF-8 (and check source encoding)
-		$text = TexyUtf::toUtf($text, $this->encoding);
-
 		// standardize line endings and spaces
 		$text = self::normalize($text);
 
@@ -481,7 +471,7 @@ class Texy extends TexyObject
 			$text = $this->longWordsModule->postLine($text);
 		}
 
-		return TexyUtf::utf2html($text, $this->encoding);
+		return $text;
 	}
 
 
@@ -495,12 +485,12 @@ class Texy extends TexyObject
 			throw new RuntimeException('Call $texy->process() first.');
 		}
 
-		return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
+		return $this->DOM->toText($this);
 	}
 
 
 	/**
-	 * Converts internal string representation to final HTML code in UTF-8.
+	 * Converts internal string representation to final HTML code.
 	 * @return string
 	 */
 	final public function stringToHtml($s)
@@ -539,7 +529,7 @@ class Texy extends TexyObject
 
 
 	/**
-	 * Converts internal string representation to final HTML code in UTF-8.
+	 * Converts internal string representation to final HTML code.
 	 * @return string
 	 */
 	final public function stringToText($s)
@@ -680,7 +670,16 @@ class Texy extends TexyObject
 	 */
 	final public static function webalize($s, $charlist = NULL)
 	{
-		$s = TexyUtf::utf2ascii($s);
+		$s = strtr($s, '`\'"^~', '-----');
+		if (ICONV_IMPL === 'glibc') {
+			$s = @iconv('UTF-8', 'WINDOWS-1250//TRANSLIT', $s); // intentionally @
+			$s = strtr($s, "\xa5\xa3\xbc\x8c\xa7\x8a\xaa\x8d\x8f\x8e\xaf\xb9\xb3\xbe\x9c\x9a\xba\x9d\x9f\x9e\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2"
+				."\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf8\xf9\xfa\xfb\xfc\xfd\xfe",
+				"ALLSSSSTZZZallssstzzzRAAAALCCCEEEEIIDDNNOOOOxRUUUUYTsraaaalccceeeeiiddnnooooruuuuyt");
+		} else {
+			$s = @iconv('UTF-8', 'ASCII//TRANSLIT', $s); // intentionally @
+		}
+		$s = str_replace(array('`', "'", '"', '^', '~'), '', $s);
 		$s = strtolower($s);
 		$s = TexyRegexp::replace($s, '#[^a-z0-9'.preg_quote($charlist, '#').']+#', '-');
 		$s = trim($s, '-');
@@ -701,7 +700,7 @@ class Texy extends TexyObject
 
 
 	/**
-	 * Texy! version of html_entity_decode (always UTF-8, much faster than original!).
+	 * Texy! version of html_entity_decode.
 	 * @param  string
 	 * @return string
 	 */
