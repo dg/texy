@@ -88,7 +88,7 @@ final class TexyLongWordsModule extends TexyModule
 		list($mWord) = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd
 
-		if (iconv_strlen($mWord) > self::SAFE_LIMIT) {
+		if (iconv_strlen($mWord, 'UTF-8') > self::SAFE_LIMIT) {
 			return $mWord;
 		}
 

@@ -48,7 +48,7 @@ class TexyUtf
 	 */
 	public static function utfTo($s, $encoding)
 	{
-		return iconv('utf-8', $encoding.'//TRANSLIT', $s);
+		return iconv('UTF-8', $encoding.'//TRANSLIT', $s);
 	}
 
 
