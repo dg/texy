@@ -13,6 +13,9 @@
 	"require": {
 		"php": ">=5.0.0"
 	},
+	"require-dev": {
+		"nette/tester": "0.9.*"
+	},
 	"autoload": {
 		"files": ["src/texy.php"]
 	}
