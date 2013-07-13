@@ -1,1 +1,0 @@
-Texy! 2.2 (revision $WCREV$ released on $WCDATE$)
