@@ -199,7 +199,7 @@ final class TexyLinkModule extends TexyModule
 	 */
 	public function addReference($name, TexyLink $link)
 	{
-		$link->name = TexyUtf::strtolower($name);
+		$link->name = function_exists('mb_strtolower') ? mb_strtolower($name, 'UTF-8') : $name;
 		$this->references[$link->name] = $link;
 	}
 
@@ -212,7 +212,7 @@ final class TexyLinkModule extends TexyModule
 	 */
 	public function getReference($name)
 	{
-		$name = TexyUtf::strtolower($name);
+		$name = function_exists('mb_strtolower') ? mb_strtolower($name, 'UTF-8') : $name;
 		if (isset($this->references[$name])) {
 			return clone $this->references[$name];
 
