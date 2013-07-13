@@ -9,7 +9,7 @@
 
 
 // include libs
-require_once dirname(__FILE__).'/../../Texy/Texy.php';
+require_once dirname(__FILE__) . '/../../src/texy.php';
 
 
 // MY OWN TEXY! OBJECT

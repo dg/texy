@@ -3,91 +3,11 @@
 /**
  * Texy! is human-readable text to HTML converter (http://texy.info)
  *
- * Copyright (c) 2004, 2012 David Grudl (http://davidgrudl.com)
+ * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  *
  * For the full copyright and license information, please view
  * the file license.txt that was distributed with this source code.
  */
-
-
-define('TEXY_VERSION', '2.2');
-
-
-/**
- * Check PHP configuration.
- */
-if (extension_loaded('mbstring')) {
-	if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
-		mb_internal_encoding('pass');
-		trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
-	}
-}
-
-if (ini_get('zend.ze1_compatibility_mode') % 256 ||
-	preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))
-) {
-	throw new RuntimeException("Texy cannot run with zend.ze1_compatibility_mode enabled.");
-}
-
-
-// Texy! libraries
-require_once dirname(__FILE__) . '/libs/RegExp.Patterns.php';
-require_once dirname(__FILE__) . '/libs/TexyObject.php';
-require_once dirname(__FILE__) . '/libs/TexyHtml.php';
-require_once dirname(__FILE__) . '/libs/TexyModifier.php';
-require_once dirname(__FILE__) . '/libs/TexyModule.php';
-require_once dirname(__FILE__) . '/libs/TexyParser.php';
-require_once dirname(__FILE__) . '/libs/TexyUtf.php';
-require_once dirname(__FILE__) . '/libs/TexyConfigurator.php';
-require_once dirname(__FILE__) . '/libs/TexyHandlerInvocation.php';
-require_once dirname(__FILE__) . '/modules/TexyParagraphModule.php';
-require_once dirname(__FILE__) . '/modules/TexyBlockModule.php';
-require_once dirname(__FILE__) . '/modules/TexyHeadingModule.php';
-require_once dirname(__FILE__) . '/modules/TexyHorizLineModule.php';
-require_once dirname(__FILE__) . '/modules/TexyHtmlModule.php';
-require_once dirname(__FILE__) . '/modules/TexyFigureModule.php';
-require_once dirname(__FILE__) . '/modules/TexyImageModule.php';
-require_once dirname(__FILE__) . '/modules/TexyLinkModule.php';
-require_once dirname(__FILE__) . '/modules/TexyListModule.php';
-require_once dirname(__FILE__) . '/modules/TexyLongWordsModule.php';
-require_once dirname(__FILE__) . '/modules/TexyPhraseModule.php';
-require_once dirname(__FILE__) . '/modules/TexyBlockQuoteModule.php';
-require_once dirname(__FILE__) . '/modules/TexyScriptModule.php';
-require_once dirname(__FILE__) . '/modules/TexyEmoticonModule.php';
-require_once dirname(__FILE__) . '/modules/TexyTableModule.php';
-require_once dirname(__FILE__) . '/modules/TexyTypographyModule.php';
-require_once dirname(__FILE__) . '/modules/TexyHtmlOutputModule.php';
-
-
-/**
- * Compatibility with PHP < 5.1.
- */
-if (!class_exists('LogicException', FALSE)) {
-	class LogicException extends Exception {}
-}
-
-if (!class_exists('InvalidArgumentException', FALSE)) {
-	class InvalidArgumentException extends LogicException {}
-}
-
-if (!class_exists('RuntimeException', FALSE)) {
-	class RuntimeException extends Exception {}
-}
-
-if (!class_exists('UnexpectedValueException', FALSE)) {
-	class UnexpectedValueException extends RuntimeException {}
-}
-
-
-/**
- * For Texy 1 backward compatibility.
- */
-define('TEXY_ALL', TRUE);
-define('TEXY_NONE', FALSE);
-define('TEXY_CONTENT_MARKUP', "\x17");
-define('TEXY_CONTENT_REPLACED', "\x16");
-define('TEXY_CONTENT_TEXTUAL', "\x15");
-define('TEXY_CONTENT_BLOCK', "\x14");
 
 
 /**
@@ -340,7 +260,7 @@ class Texy extends TexyObject
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
-			require dirname(__FILE__) . '/libs/DTD.php';
+			require dirname(__FILE__) . '/DTD.php';
 			self::$dtdCache[$mode] = $dtd;
 		}
 
