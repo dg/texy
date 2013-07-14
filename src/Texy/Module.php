@@ -5,13 +5,15 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * Texy! modules base class.
  *
  * @author     David Grudl
  */
-abstract class TexyModule extends TexyObject
+abstract class Module extends Object
 {
 	/** @var Texy */
 	protected $texy;

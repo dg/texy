@@ -5,12 +5,16 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  *
  * @author     David Grudl
  */
-final class TexyHtmlOutputModule extends TexyModule
+final class HtmlOutputModule extends Texy\Module
 {
 	/** @var bool  indent HTML code? */
 	public $indent = TRUE;
@@ -59,13 +63,13 @@ final class TexyHtmlOutputModule extends TexyModule
 		$this->space = $this->baseIndent;
 		$this->tagStack = array();
 		$this->tagUsed = array();
-		$this->xml = $texy->getOutputMode() & Texy::XML;
+		$this->xml = $texy->getOutputMode() & Texy\Texy::XML;
 
 		// special "base content"
 		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + array('html'=>1);
 
 		// wellform and reformat
-		$s = TexyRegexp::replace(
+		$s = Texy\Regexp::replace(
 			$s . '</end/>',
 			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
 			array($this, 'cb')
@@ -77,20 +81,20 @@ final class TexyHtmlOutputModule extends TexyModule
 		}
 
 		// right trim
-		$s = TexyRegexp::replace($s, "#[\t ]+(\n|\r|$)#", '$1'); // right trim
+		$s = Texy\Regexp::replace($s, "#[\t ]+(\n|\r|$)#", '$1'); // right trim
 
 		// join double \r to single \n
 		$s = str_replace("\r\r", "\n", $s);
 		$s = strtr($s, "\r", "\n");
 
 		// greedy chars
-		$s = TexyRegexp::replace($s, "#\\x07 *#", '');
+		$s = Texy\Regexp::replace($s, "#\\x07 *#", '');
 		// back-tabs
-		$s = TexyRegexp::replace($s, "#\\t? *\\x08#", '');
+		$s = Texy\Regexp::replace($s, "#\\t? *\\x08#", '');
 
 		// line wrap
 		if ($this->lineWrap > 0) {
-			$s = TexyRegexp::replace(
+			$s = Texy\Regexp::replace(
 				$s,
 				'#^(\t*)(.*)$#m',
 				array($this, 'wrap')
@@ -99,7 +103,7 @@ final class TexyHtmlOutputModule extends TexyModule
 
 		// remove HTML 4.01 optional end tags
 		if (!$this->xml && $this->removeOptional) {
-			$s = TexyRegexp::replace($s, '#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '');
+			$s = Texy\Regexp::replace($s, '#\\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '');
 		}
 	}
 
@@ -128,22 +132,22 @@ final class TexyHtmlOutputModule extends TexyModule
 			if ($item && !isset($item['dtdContent']['%DATA'])) {  // text not allowed?
 
 			} elseif (array_intersect(array_keys($this->tagUsed, TRUE), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
-				$s = Texy::freezeSpaces($mText);
+				$s = Texy\Texy::freezeSpaces($mText);
 
 			} else {
-				$s = TexyRegexp::replace($mText, '#[ \n]+#', ' '); // otherwise shrink multiple spaces
+				$s = Texy\Regexp::replace($mText, '#[ \n]+#', ' '); // otherwise shrink multiple spaces
 			}
 		}
 
 
 		// phase #2 - HTML comment
 		if ($mComment) {
-			return $s . '<' . Texy::freezeSpaces($mComment) . '>';
+			return $s . '<' . Texy\Texy::freezeSpaces($mComment) . '>';
 		}
 
 
 		// phase #3 - HTML tag
-		$mEmpty = $mEmpty || isset(TexyHtml::$emptyElements[$mTag]);
+		$mEmpty = $mEmpty || isset(Texy\HtmlElement::$emptyElements[$mTag]);
 		if ($mEmpty && $mEnd) {
 			return $s; // bad tag; /end/
 		}
@@ -164,7 +168,7 @@ final class TexyHtmlOutputModule extends TexyModule
 				$s .= $item['close'];
 				$this->space -= $item['indent'];
 				$this->tagUsed[$tag]--;
-				$back = $back && isset(TexyHtml::$inlineElements[$tag]);
+				$back = $back && isset(Texy\HtmlElement::$inlineElements[$tag]);
 				unset($this->tagStack[$i]);
 				if ($tag === $mTag) {
 					break;
@@ -217,7 +221,7 @@ final class TexyHtmlOutputModule extends TexyModule
 					$tag = $item['tag'];
 
 					// auto-close hidden, optional and inline tags
-					if ($item['close'] && (!isset(TexyHtml::$optionalEnds[$tag]) && !isset(TexyHtml::$inlineElements[$tag]))) {
+					if ($item['close'] && (!isset(Texy\HtmlElement::$optionalEnds[$tag]) && !isset(Texy\HtmlElement::$inlineElements[$tag]))) {
 						break;
 					}
 
@@ -233,8 +237,8 @@ final class TexyHtmlOutputModule extends TexyModule
 				$allowed = isset($dtdContent[$mTag]);
 
 				// check deep element prohibitions
-				if ($allowed && isset(TexyHtml::$prohibits[$mTag])) {
-					foreach (TexyHtml::$prohibits[$mTag] as $pTag) {
+				if ($allowed && isset(Texy\HtmlElement::$prohibits[$mTag])) {
+					foreach (Texy\HtmlElement::$prohibits[$mTag] as $pTag) {
 						if (!empty($this->tagUsed[$pTag])) {
 							$allowed = FALSE; break;
 						}
@@ -257,7 +261,7 @@ final class TexyHtmlOutputModule extends TexyModule
 				if ($indent && $mTag === 'br') { // formatting exception
 					return rtrim($s) . '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-				} elseif ($indent && !isset(TexyHtml::$inlineElements[$mTag])) {
+				} elseif ($indent && !isset(Texy\HtmlElement::$inlineElements[$mTag])) {
 					$space = "\r" . str_repeat("\t", $this->space);
 					return $s . $space . '<' . $mTag . $mAttr . '>' . $space;
 
@@ -271,7 +275,7 @@ final class TexyHtmlOutputModule extends TexyModule
 			$indent = 0;
 
 			/*
-			if (!isset(TexyHtml::$inlineElements[$mTag])) {
+			if (!isset(Texy\HtmlElement::$inlineElements[$mTag])) {
 				// block tags always decorate with \n
 				$s .= "\n";
 				$close = "\n";
@@ -287,7 +291,7 @@ final class TexyHtmlOutputModule extends TexyModule
 				}
 
 				// format output
-				if ($this->indent && !isset(TexyHtml::$inlineElements[$mTag])) {
+				if ($this->indent && !isset(Texy\HtmlElement::$inlineElements[$mTag])) {
 					$close = "\x08" . '</'.$mTag.'>' . "\n" . str_repeat("\t", $this->space);
 					$s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
 					$indent = 1;

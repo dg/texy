@@ -5,8 +5,10 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
 
-class TexyRegexpException extends Exception
+
+class RegexpException extends \Exception
 {
 	private static $messages = array(
 		PREG_INTERNAL_ERROR => 'Internal error',

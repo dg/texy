@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Images module.
  *
  * @author     David Grudl
  */
-final class TexyImageModule extends TexyModule
+final class ImageModule extends Texy\Module
 {
 	/** @var string  root of relative images (http) */
 	public $root = 'images/';
@@ -46,8 +50,8 @@ final class TexyImageModule extends TexyModule
 		// [*image*]:LINK
 		$texy->registerLinePattern(
 			array($this, 'patternImage'),
-			'#\[\* *+([^\n'.TexyPatterns::MARK.']{1,1000})'.TexyPatterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::('.TexyPatterns::LINK_URL.'|:))??()#Uu',
+			'#\[\* *+([^\n'.Texy\Patterns::MARK.']{1,1000})'.Texy\Patterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
+			. '(?::('.Texy\Patterns::LINK_URL.'|:))??()#Uu',
 			'image'
 		);
 	}
@@ -63,9 +67,9 @@ final class TexyImageModule extends TexyModule
 	{
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
-			$text = TexyRegexp::replace(
+			$text = Texy\Regexp::replace(
 				$text,
-				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *'.TexyPatterns::MODIFIER.'?\s*()$#mUu',
+				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *'.Texy\Patterns::MODIFIER.'?\s*()$#mUu',
 				array($this, 'patternReferenceDef')
 			);
 		}
@@ -95,10 +99,10 @@ final class TexyImageModule extends TexyModule
 	/**
 	 * Callback for [* small.jpg 80x13 | big.jpg .(alternative text)[class]{style}>]:LINK.
 	 *
-	 * @param  TexyLineParser
+	 * @param  Texy\LineParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function patternImage($parser, $matches)
 	{
@@ -114,9 +118,9 @@ final class TexyImageModule extends TexyModule
 
 		if ($mLink) {
 			if ($mLink === ':') {
-				$link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
+				$link = new Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
 				$link->raw = ':';
-				$link->type = TexyLink::IMAGE;
+				$link->type = Link::IMAGE;
 			} else {
 				$link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
 			}
@@ -132,10 +136,10 @@ final class TexyImageModule extends TexyModule
 	 * Adds new named reference to image.
 	 *
 	 * @param  string  reference name
-	 * @param  TexyImage
+	 * @param  Image
 	 * @return void
 	 */
-	public function addReference($name, TexyImage $image)
+	public function addReference($name, Image $image)
 	{
 		$image->name = function_exists('mb_strtolower') ? mb_strtolower($name, 'UTF-8') : $name;
 		$this->references[$image->name] = $image;
@@ -146,7 +150,7 @@ final class TexyImageModule extends TexyModule
 	 * Returns named reference.
 	 *
 	 * @param  string  reference name
-	 * @return TexyImage  reference descriptor (or FALSE)
+	 * @return Image  reference descriptor (or FALSE)
 	 */
 	public function getReference($name)
 	{
@@ -164,7 +168,7 @@ final class TexyImageModule extends TexyModule
 	 * @param  string  input: small.jpg 80x13 | linked.jpg
 	 * @param  string
 	 * @param  bool
-	 * @return TexyImage
+	 * @return Image
 	 */
 	public function factoryImage($content, $mod, $tryRef = TRUE)
 	{
@@ -173,11 +177,11 @@ final class TexyImageModule extends TexyModule
 		if (!$image) {
 			$tx = $this->texy;
 			$content = explode('|', $content);
-			$image = new TexyImage;
+			$image = new Image;
 
 			// dimensions
 			$matches = NULL;
-			if ($matches = TexyRegexp::match($content[0], '#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U')) {
+			if ($matches = Texy\Regexp::match($content[0], '#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U')) {
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';
 				$image->width = $matches[2] === '?' ? NULL : (int) $matches[2];
@@ -186,7 +190,7 @@ final class TexyImageModule extends TexyModule
 				$image->URL = trim($content[0]);
 			}
 
-			if (!$tx->checkURL($image->URL, Texy::FILTER_IMAGE)) {
+			if (!$tx->checkURL($image->URL, Texy\Texy::FILTER_IMAGE)) {
 				$image->URL = NULL;
 			}
 
@@ -204,12 +208,12 @@ final class TexyImageModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
-	 * @param  TexyImage
-	 * @param  TexyLink
-	 * @return TexyHtml|FALSE
+	 * @param  Texy\HandlerInvocation  handler invocation
+	 * @param  Image
+	 * @param  Link
+	 * @return Texy\HtmlElement|FALSE
 	 */
-	public function solve($invocation, TexyImage $image, $link)
+	public function solve($invocation, Image $image, $link)
 	{
 		if ($image->URL == NULL) {
 			return FALSE;
@@ -223,10 +227,10 @@ final class TexyImageModule extends TexyModule
 		$hAlign = $mod->hAlign;
 		$mod->hAlign = NULL;
 
-		$el = TexyHtml::el('img');
+		$el = Texy\HtmlElement::el('img');
 		$el->attrs['src'] = NULL; // trick - move to front
 		$mod->decorate($tx, $el);
-		$el->attrs['src'] = Texy::prependRoot($image->URL, $this->root);
+		$el->attrs['src'] = Texy\Texy::prependRoot($image->URL, $this->root);
 		if (!isset($el->attrs['alt'])) {
 			$el->attrs['alt'] = $alt === NULL ? $this->defaultAlt : $tx->typographyModule->postLine($alt);
 		}
@@ -252,7 +256,7 @@ final class TexyImageModule extends TexyModule
 
 			// detect dimensions
 			// absolute URL & security check for double dot
-			if (Texy::isRelative($image->URL) && strpos($image->URL, '..') === FALSE) {
+			if (Texy\Texy::isRelative($image->URL) && strpos($image->URL, '..') === FALSE) {
 				$file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
 				if (@is_file($file)) { // intentionally @
 					$size = @getImageSize($file); // intentionally @
@@ -298,7 +302,7 @@ final class TexyImageModule extends TexyModule
 }
 
 
-final class TexyImage extends TexyObject
+final class Image extends Texy\Object
 {
 	/** @var string  base image URL */
 	public $URL;
@@ -315,7 +319,7 @@ final class TexyImage extends TexyObject
 	/** @var bool  image width and height are maximal */
 	public $asMax;
 
-	/** @var TexyModifier */
+	/** @var Texy\Modifier */
 	public $modifier;
 
 	/** @var string  reference name (if is stored as reference) */
@@ -324,7 +328,7 @@ final class TexyImage extends TexyObject
 
 	public function __construct()
 	{
-		$this->modifier = new TexyModifier;
+		$this->modifier = new Texy\Modifier;
 	}
 
 

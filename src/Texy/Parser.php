@@ -5,18 +5,20 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * Texy parser base class.
  *
  * @author     David Grudl
  */
-class TexyParser extends TexyObject
+class Parser extends Object
 {
 	/** @var Texy */
 	protected $texy;
 
-	/** @var TexyHtml */
+	/** @var HtmlElement */
 	protected $element;
 
 	/** @var array */
@@ -37,7 +39,7 @@ class TexyParser extends TexyObject
 /**
  * Parser for block structures.
  */
-class TexyBlockParser extends TexyParser
+class BlockParser extends Parser
 {
 	/** @var string */
 	private $text;
@@ -51,9 +53,9 @@ class TexyBlockParser extends TexyParser
 
 	/**
 	 * @param  Texy
-	 * @param  TexyHtml
+	 * @param  HtmlElement
 	 */
-	public function __construct(Texy $texy, TexyHtml $element, $indented)
+	public function __construct(Texy $texy, HtmlElement $element, $indented)
 	{
 		$this->texy = $texy;
 		$this->element = $element;
@@ -75,10 +77,10 @@ class TexyBlockParser extends TexyParser
 		if ($this->offset > strlen($this->text)) {
 			return FALSE;
 		}
-		$matches = TexyRegexp::match(
+		$matches = Regexp::match(
 			$this->text,
 			$pattern . 'Am', // anchored & multiline
-			TexyRegexp::OFFSET_CAPTURE,
+			Regexp::OFFSET_CAPTURE,
 			$this->offset
 		);
 
@@ -137,10 +139,10 @@ class TexyBlockParser extends TexyParser
 		$matches = array();
 		$priority = 0;
 		foreach ($this->patterns as $name => $pattern) {
-			$ms = TexyRegexp::match(
+			$ms = Regexp::match(
 				$text,
 				$pattern['pattern'],
-				TexyRegexp::OFFSET_CAPTURE | TexyRegexp::ALL
+				Regexp::OFFSET_CAPTURE | Regexp::ALL
 			);
 
 			foreach ((array) $ms as $m) {
@@ -194,7 +196,7 @@ class TexyBlockParser extends TexyParser
 				$this->offset = $mOffset; // turn offset back
 				continue;
 
-			} elseif ($res instanceof TexyHtml) {
+			} elseif ($res instanceof HtmlElement) {
 				$el->insert(NULL, $res);
 
 			} elseif (is_string($res)) {
@@ -210,7 +212,7 @@ class TexyBlockParser extends TexyParser
 /**
  * Parser for single line structures.
  */
-class TexyLineParser extends TexyParser
+class LineParser extends Parser
 {
 	/** @var bool */
 	public $again;
@@ -218,9 +220,9 @@ class TexyLineParser extends TexyParser
 
 	/**
 	 * @param  Texy
-	 * @param  TexyHtml
+	 * @param  HtmlElement
 	 */
-	public function __construct(Texy $texy, TexyHtml $element)
+	public function __construct(Texy $texy, HtmlElement $element)
 	{
 		$this->texy = $texy;
 		$this->element = $element;
@@ -270,10 +272,10 @@ class TexyLineParser extends TexyParser
 						unset($names[$index]);
 						continue;
 
-					} elseif ($arrMatches[$name] = TexyRegexp::match(
+					} elseif ($arrMatches[$name] = Regexp::match(
 							$text,
 							$pl[$name]['pattern'],
-							TexyRegexp::OFFSET_CAPTURE,
+							Regexp::OFFSET_CAPTURE,
 							$offset + $delta)
 					) {
 						$m = & $arrMatches[$name];
@@ -287,7 +289,7 @@ class TexyLineParser extends TexyParser
 
 					} else {
 						// try next time?
-						if (!$pl[$name]['again'] || !TexyRegexp::match($text, $pl[$name]['again'], NULL, $offset + $delta)) {
+						if (!$pl[$name]['again'] || !Regexp::match($text, $pl[$name]['again'], NULL, $offset + $delta)) {
 							unset($names[$index]);
 						}
 						continue;
@@ -313,7 +315,7 @@ class TexyLineParser extends TexyParser
 				array($this, $arrMatches[$min], $min)
 			);
 
-			if ($res instanceof TexyHtml) {
+			if ($res instanceof HtmlElement) {
 				$res = $res->toString($tx);
 			} elseif ($res === FALSE) {
 				$arrOffset[$min] = -2;

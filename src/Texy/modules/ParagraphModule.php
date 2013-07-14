@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Paragraph module.
  *
  * @author     David Grudl
  */
-final class TexyParagraphModule extends TexyModule
+final class ParagraphModule extends Texy\Module
 {
 
 
@@ -23,10 +27,10 @@ final class TexyParagraphModule extends TexyModule
 
 
 	/**
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  string     text
 	 * @param  array
-	 * @param  TexyHtml
+	 * @param  Texy\HtmlElement
 	 * @return vois
 	 */
 	public function process($parser, $content, $el)
@@ -47,13 +51,13 @@ final class TexyParagraphModule extends TexyModule
 
 			// try to find modifier
 			$mod = NULL;
-			if ($mx = TexyRegexp::match($s, '#'.TexyPatterns::MODIFIER_H.'(?=\n|\z)#sUm', TexyRegexp::OFFSET_CAPTURE)) {
+			if ($mx = Texy\Regexp::match($s, '#'.Texy\Patterns::MODIFIER_H.'(?=\n|\z)#sUm', Texy\Regexp::OFFSET_CAPTURE)) {
 				list($mMod) = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
 				if ($s === '') {
 					continue;
 				}
-				$mod = new TexyModifier;
+				$mod = new Texy\Modifier;
 				$mod->setProperties($mMod);
 			}
 
@@ -68,10 +72,10 @@ final class TexyParagraphModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
+	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  string
-	 * @param  TexyModifier|NULL
-	 * @return TexyHtml|FALSE
+	 * @param  Texy\Modifier|NULL
+	 * @return Texy\HtmlElement|FALSE
 	 */
 	public function solve($invocation, $content, $mod)
 	{
@@ -81,30 +85,30 @@ final class TexyParagraphModule extends TexyModule
 		if ($tx->mergeLines) {
 			// ....
 			// ... => \r means break line
-			$content = TexyRegexp::replace($content, '#\n +(?=\S)#', "\r");
+			$content = Texy\Regexp::replace($content, '#\n +(?=\S)#', "\r");
 		} else {
-			$content = TexyRegexp::replace($content, '#\n#', "\r");
+			$content = Texy\Regexp::replace($content, '#\n#', "\r");
 		}
 
-		$el = TexyHtml::el('p');
+		$el = Texy\HtmlElement::el('p');
 		$el->parseLine($tx, $content);
 		$content = $el->getText(); // string
 
 		// check content type
 		// block contains block tag
-		if (strpos($content, Texy::CONTENT_BLOCK) !== FALSE) {
+		if (strpos($content, Texy\Texy::CONTENT_BLOCK) !== FALSE) {
 			$el->setName(NULL); // ignores modifier!
 
 		// block contains text (protected)
-		} elseif (strpos($content, Texy::CONTENT_TEXTUAL) !== FALSE) {
+		} elseif (strpos($content, Texy\Texy::CONTENT_TEXTUAL) !== FALSE) {
 			// leave element p
 
 		// block contains text
-		} elseif (preg_match('#[^\s'.TexyPatterns::MARK.']#u', $content)) {
+		} elseif (preg_match('#[^\s'.Texy\Patterns::MARK.']#u', $content)) {
 			// leave element p
 
 		// block contains only replaced element
-		} elseif (strpos($content, Texy::CONTENT_REPLACED) !== FALSE) {
+		} elseif (strpos($content, Texy\Texy::CONTENT_REPLACED) !== FALSE) {
 			$el->setName($tx->nontextParagraph);
 
 		// block contains only markup tags or spaces or nothing
@@ -123,7 +127,7 @@ final class TexyParagraphModule extends TexyModule
 
 			// add <br />
 			if (strpos($content, "\r") !== FALSE) {
-				$key = $tx->protect('<br />', Texy::CONTENT_REPLACED);
+				$key = $tx->protect('<br />', Texy\Texy::CONTENT_REPLACED);
 				$content = str_replace("\r", $key, $content);
 			};
 		}

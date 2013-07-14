@@ -5,8 +5,10 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
 
-class TexyRegexp
+
+class Regexp
 {
 	const ALL = 1;
 	const OFFSET_CAPTURE = 2;
@@ -23,13 +25,13 @@ class TexyRegexp
 	{
 		/*set_error_handler(function($severity, $message) use ($pattern) { // preg_last_error does not return compile errors
 			restore_error_handler();
-			throw new TexyRegexpException("$message in pattern: $pattern");
+			throw new RegexpException("$message in pattern: $pattern");
 		});*/
 		$reFlags = (($flags & self::OFFSET_CAPTURE) ? PREG_SPLIT_OFFSET_CAPTURE : 0) | PREG_SPLIT_DELIM_CAPTURE;
 		$res = preg_split($pattern, $subject, -1, $reFlags);
 		//restore_error_handler();
 		if (preg_last_error()) { // run-time error
-			throw new TexyRegexpException(NULL, preg_last_error(), $pattern);
+			throw new RegexpException(NULL, preg_last_error(), $pattern);
 		}
 		return $res;
 	}
@@ -51,7 +53,7 @@ class TexyRegexp
 		}
 		/*set_error_handler(function($severity, $message) use ($pattern) { // preg_last_error does not return compile errors
 			restore_error_handler();
-			throw new TexyRegexpException("$message in pattern: $pattern");
+			throw new RegexpException("$message in pattern: $pattern");
 		});*/
 		$reFlags = ($flags & self::OFFSET_CAPTURE) ? PREG_OFFSET_CAPTURE : 0;
 		if ($flags & self::ALL) {
@@ -61,7 +63,7 @@ class TexyRegexp
 		}
 		//restore_error_handler();
 		if (preg_last_error()) { // run-time error
-			throw new TexyRegexpException(NULL, preg_last_error(), $pattern);
+			throw new RegexpException(NULL, preg_last_error(), $pattern);
 		} elseif ($res) {
 			return $m;
 		}
@@ -90,7 +92,7 @@ class TexyRegexp
 
 			$res = preg_replace_callback($pattern, $replacement, $subject);
 			if ($res === NULL && preg_last_error()) { // run-time error
-				throw new TexyRegexpException(NULL, preg_last_error(), $pattern);
+				throw new RegexpException(NULL, preg_last_error(), $pattern);
 			}
 			return $res;
 
@@ -101,12 +103,12 @@ class TexyRegexp
 
 		/*set_error_handler(function($severity, $message) use ($pattern) { // preg_last_error does not return compile errors
 			restore_error_handler();
-			throw new TexyRegexpException("$message in pattern: " . implode(' or ', (array) $pattern));
+			throw new RegexpException("$message in pattern: " . implode(' or ', (array) $pattern));
 		});*/
 		$res = preg_replace($pattern, $replacement, $subject);
 		//restore_error_handler();
 		if (preg_last_error()) { // run-time error
-			throw new TexyRegexpException(NULL, preg_last_error(), implode(' or ', (array) $pattern));
+			throw new RegexpException(NULL, preg_last_error(), implode(' or ', (array) $pattern));
 		}
 		return $res;
 	}

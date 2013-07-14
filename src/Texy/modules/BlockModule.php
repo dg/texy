@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Special blocks module.
  *
  * @author     David Grudl
  */
-final class TexyBlockModule extends TexyModule
+final class BlockModule extends Texy\Module
 {
 
 	public function __construct($texy)
@@ -33,7 +37,7 @@ final class TexyBlockModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'pattern'),
-			'#^/--++ *+(.*)'.TexyPatterns::MODIFIER_H.'?$((?:\n(?0)|\n.*+)*)(?:\n\\\\--.*$|\z)#mUi',
+			'#^/--++ *+(.*)'.Texy\Patterns::MODIFIER_H.'?$((?:\n(?0)|\n.*+)*)(?:\n\\\\--.*$|\z)#mUi',
 			'blocks'
 		);
 	}
@@ -41,14 +45,14 @@ final class TexyBlockModule extends TexyModule
 
 	/**
 	 * Single block pre-processing.
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  string
 	 * @return void
 	 */
 	public function beforeBlockParse($parser, & $text)
 	{
 		// autoclose exclusive blocks
-		$text = TexyRegexp::replace(
+		$text = Texy\Regexp::replace(
 			$text,
 			'#^(/--++ *+(?!div|texysource).*)$((?:\n.*+)*?)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mi',
 			"\$1\$2\n\\--"
@@ -63,10 +67,10 @@ final class TexyBlockModule extends TexyModule
 	 * ....
 	 * \----
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function pattern($parser, $matches)
 	{
@@ -76,7 +80,7 @@ final class TexyBlockModule extends TexyModule
 		// [3] => .(title)[class]{style}<>
 		// [4] => ... content
 
-		$mod = new TexyModifier($mMod);
+		$mod = new Texy\Modifier($mMod);
 		$parts = preg_split('#\s+#u', $mParam, 2);
 		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? NULL : $parts[1];
@@ -88,12 +92,12 @@ final class TexyBlockModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
+	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  string   blocktype
 	 * @param  string   content
 	 * @param  string   additional parameter
-	 * @param  TexyModifier
-	 * @return TexyHtml|string|FALSE
+	 * @param  Texy\Modifier
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function solve($invocation, $blocktype, $s, $param, $mod)
 	{
@@ -101,7 +105,7 @@ final class TexyBlockModule extends TexyModule
 		$parser = $invocation->parser;
 
 		if ($blocktype === 'block/texy') {
-			$el = TexyHtml::el();
+			$el = Texy\HtmlElement::el();
 			$el->parseBlock($tx, $s, $parser->isIndented());
 			return $el;
 		}
@@ -111,11 +115,11 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/texysource') {
-			$s = Texy::outdent($s);
+			$s = Texy\Texy::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
-			$el = TexyHtml::el();
+			$el = Texy\HtmlElement::el();
 			if ($param === 'line') {
 				$el->parseLine($tx, $s);
 			} else {
@@ -126,13 +130,13 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/code') {
-			$s = Texy::outdent($s);
+			$s = Texy\Texy::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
-			$s = Texy::escapeHtml($s);
-			$s = $tx->protect($s, Texy::CONTENT_BLOCK);
-			$el = TexyHtml::el('pre');
+			$s = Texy\Texy::escapeHtml($s);
+			$s = $tx->protect($s, Texy\Texy::CONTENT_BLOCK);
+			$el = Texy\HtmlElement::el('pre');
 			$mod->decorate($tx, $el);
 			$el->attrs['class'][] = $param; // lang
 			$el->create('code', $s);
@@ -140,27 +144,27 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/default') {
-			$s = Texy::outdent($s);
+			$s = Texy\Texy::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
-			$el = TexyHtml::el('pre');
+			$el = Texy\HtmlElement::el('pre');
 			$mod->decorate($tx, $el);
 			$el->attrs['class'][] = $param; // lang
-			$s = Texy::escapeHtml($s);
-			$s = $tx->protect($s, Texy::CONTENT_BLOCK);
+			$s = Texy\Texy::escapeHtml($s);
+			$s = $tx->protect($s, Texy\Texy::CONTENT_BLOCK);
 			$el->setText($s);
 			return $el;
 		}
 
 		if ($blocktype === 'block/pre') {
-			$s = Texy::outdent($s);
+			$s = Texy\Texy::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
-			$el = TexyHtml::el('pre');
+			$el = Texy\HtmlElement::el('pre');
 			$mod->decorate($tx, $el);
-			$lineParser = new TexyLineParser($tx, $el);
+			$lineParser = new Texy\LineParser($tx, $el);
 			// special mode - parse only html tags
 			$tmp = $lineParser->patterns;
 			$lineParser->patterns = array();
@@ -174,10 +178,10 @@ final class TexyBlockModule extends TexyModule
 
 			$lineParser->parse($s);
 			$s = $el->getText();
-			$s = Texy::unescapeHtml($s);
-			$s = Texy::escapeHtml($s);
+			$s = Texy\Texy::unescapeHtml($s);
+			$s = Texy\Texy::escapeHtml($s);
 			$s = $tx->unprotect($s);
-			$s = $tx->protect($s, Texy::CONTENT_BLOCK);
+			$s = $tx->protect($s, Texy\Texy::CONTENT_BLOCK);
 			$el->setText($s);
 			return $el;
 		}
@@ -187,8 +191,8 @@ final class TexyBlockModule extends TexyModule
 			if ($s === '') {
 				return "\n";
 			}
-			$el = TexyHtml::el();
-			$lineParser = new TexyLineParser($tx, $el);
+			$el = Texy\HtmlElement::el();
+			$lineParser = new Texy\LineParser($tx, $el);
 			// special mode - parse only html tags
 			$tmp = $lineParser->patterns;
 			$lineParser->patterns = array();
@@ -202,10 +206,10 @@ final class TexyBlockModule extends TexyModule
 
 			$lineParser->parse($s);
 			$s = $el->getText();
-			$s = Texy::unescapeHtml($s);
-			$s = Texy::escapeHtml($s);
+			$s = Texy\Texy::unescapeHtml($s);
+			$s = Texy\Texy::escapeHtml($s);
 			$s = $tx->unprotect($s);
-			return $tx->protect($s, Texy::CONTENT_BLOCK) . "\n";
+			return $tx->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
 		}
 
 		if ($blocktype === 'block/text') {
@@ -213,9 +217,9 @@ final class TexyBlockModule extends TexyModule
 			if ($s === '') {
 				return "\n";
 			}
-			$s = Texy::escapeHtml($s);
-			$s = str_replace("\n", TexyHtml::el('br')->startTag() , $s); // nl2br
-			return $tx->protect($s, Texy::CONTENT_BLOCK) . "\n";
+			$s = Texy\Texy::escapeHtml($s);
+			$s = str_replace("\n", Texy\HtmlElement::el('br')->startTag() , $s); // nl2br
+			return $tx->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
 		}
 
 		if ($blocktype === 'block/comment') {
@@ -223,11 +227,11 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/div') {
-			$s = Texy::outdent($s);
+			$s = Texy\Texy::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
-			$el = TexyHtml::el('div');
+			$el = Texy\HtmlElement::el('div');
 			$mod->decorate($tx, $el);
 			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
 			return $el;

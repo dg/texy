@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Typography replacements module.
  *
  * @author     David Grudl
  */
-final class TexyTypographyModule extends TexyModule
+final class TypographyModule extends Texy\Module
 {
 	// @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
@@ -105,15 +109,15 @@ final class TexyTypographyModule extends TexyModule
 			'#(?<=.{50})\s++(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
 
 			// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-			'#(?<=^| |\.|,|-|\+|\x16|\(|\d\x{A0})([\x17-\x1F]*\d++\.?[\x17-\x1F]*)\s++(?=[\x17-\x1F]*[%'.TexyPatterns::CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
+			'#(?<=^| |\.|,|-|\+|\x16|\(|\d\x{A0})([\x17-\x1F]*\d++\.?[\x17-\x1F]*)\s++(?=[\x17-\x1F]*[%'.Texy\Patterns::CHAR.'\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
 													=> "\$1\xc2\xa0",
 
 			// space between preposition and word
-			'#(?<=^|[^0-9'.TexyPatterns::CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9'.TexyPatterns::CHAR.'])#mus'
+			'#(?<=^|[^0-9'.Texy\Patterns::CHAR.'])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9'.Texy\Patterns::CHAR.'])#mus'
 													=> "\$1\xc2\xa0",
 
-			'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["'.TexyPatterns::CHAR.'])()#Uu' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
-			'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\''.TexyPatterns::CHAR.'])()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
+			'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["'.Texy\Patterns::CHAR.'])()#Uu' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
+			'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\''.Texy\Patterns::CHAR.'])()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
 		);
 	}
 
@@ -121,9 +125,9 @@ final class TexyTypographyModule extends TexyModule
 	public function postLine($text, $preserveSpaces = FALSE)
 	{
 		if (!$preserveSpaces) {
-			$text = TexyRegexp::replace($text, '# {2,}#', ' ');
+			$text = Texy\Regexp::replace($text, '# {2,}#', ' ');
 		}
-		return TexyRegexp::replace($text, $this->pattern);
+		return Texy\Regexp::replace($text, $this->pattern);
 	}
 
 }

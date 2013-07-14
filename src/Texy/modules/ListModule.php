@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Ordered / unordered nested list module.
  *
  * @author     David Grudl
  */
-final class TexyListModule extends TexyModule
+final class ListModule extends Texy\Module
 {
 	public $bullets = array(
 		// first-rexexp ordered? list-style-type next-regexp
@@ -49,15 +53,15 @@ final class TexyListModule extends TexyModule
 
 		$this->texy->registerBlockPattern(
 			array($this, 'patternList'),
-			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?' // .{color: red}
+			'#^(?:'.Texy\Patterns::MODIFIER_H.'\n)?' // .{color: red}
 			. '('.implode('|', $RE).')\ *+\S.*$#mUu', // item (unmatched)
 			'list'
 		);
 
 		$this->texy->registerBlockPattern(
 			array($this, 'patternDefList'),
-			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?' // .{color:red}
-			. '(\S.{0,2000})\:\ *'.TexyPatterns::MODIFIER_H.'?\n' // Term:
+			'#^(?:'.Texy\Patterns::MODIFIER_H.'\n)?' // .{color:red}
+			. '(\S.{0,2000})\:\ *'.Texy\Patterns::MODIFIER_H.'?\n' // Term:
 			. '(\ ++)('.implode('|', $REul).')\ *+\S.*$#mUu', // - description
 			'list/definition'
 		);
@@ -73,10 +77,10 @@ final class TexyListModule extends TexyModule
 	 *   + ...
 	 * 3) ....
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|FALSE
+	 * @return Texy\HtmlElement|FALSE
 	 */
 	public function patternList($parser, $matches)
 	{
@@ -86,7 +90,7 @@ final class TexyListModule extends TexyModule
 
 		$tx = $this->texy;
 
-		$el = TexyHtml::el();
+		$el = Texy\HtmlElement::el();
 
 		$bullet = $min = NULL;
 		foreach ($this->bullets as $type => $desc) {
@@ -108,7 +112,7 @@ final class TexyListModule extends TexyModule
 			}
 		}
 
-		$mod = new TexyModifier($mMod);
+		$mod = new Texy\Modifier($mMod);
 		$mod->decorate($tx, $el);
 
 		$parser->moveBackward(1);
@@ -136,10 +140,10 @@ final class TexyListModule extends TexyModule
 	 * - description 2
 	 * - description 3
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml
+	 * @return Texy\HtmlElement
 	 */
 	public function patternDefList($parser, $matches)
 	{
@@ -160,12 +164,12 @@ final class TexyListModule extends TexyModule
 			}
 		}
 
-		$el = TexyHtml::el('dl');
-		$mod = new TexyModifier($mMod);
+		$el = Texy\HtmlElement::el('dl');
+		$mod = new Texy\Modifier($mMod);
 		$mod->decorate($tx, $el);
 		$parser->moveBackward(2);
 
-		$patternTerm = '#^\n?(\S.*)\:\ *'.TexyPatterns::MODIFIER_H.'?()$#mUA';
+		$patternTerm = '#^\n?(\S.*)\:\ *'.Texy\Patterns::MODIFIER_H.'?()$#mUA';
 
 		while (TRUE) {
 			if ($elItem = $this->patternItem($parser, $bullet, TRUE, 'dd')) {
@@ -178,8 +182,8 @@ final class TexyListModule extends TexyModule
 				// [1] => ...
 				// [2] => .(title)[class]{style}<>
 
-				$elItem = TexyHtml::el('dt');
-				$modItem = new TexyModifier($mMod);
+				$elItem = Texy\HtmlElement::el('dt');
+				$modItem = new Texy\Modifier($mMod);
 				$modItem->decorate($tx, $elItem);
 
 				$elItem->parseLine($tx, $mContent);
@@ -200,17 +204,17 @@ final class TexyListModule extends TexyModule
 	/**
 	 * Callback for single list item.
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  string  bullet type
 	 * @param  string  left space
 	 * @param  string  html tag
-	 * @return TexyHtml|FALSE
+	 * @return Texy\HtmlElement|FALSE
 	 */
 	public function patternItem($parser, $bullet, $indented, $tag)
 	{
 		$tx = $this->texy;
 		$spacesBase = $indented ? ('\ {1,}') : '';
-		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".TexyPatterns::MODIFIER_H."?()$#mAUu";
+		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".Texy\Patterns::MODIFIER_H."?()$#mAUu";
 
 		// first line with bullet
 		$matches = NULL;
@@ -223,8 +227,8 @@ final class TexyListModule extends TexyModule
 			// [2] => ...
 			// [3] => .(title)[class]{style}<>
 
-		$elItem = TexyHtml::el($tag);
-		$mod = new TexyModifier($mMod);
+		$elItem = Texy\HtmlElement::el($tag);
+		$mod = new Texy\Modifier($mMod);
 		$mod->decorate($tx, $elItem);
 
 		// next lines
@@ -245,7 +249,7 @@ final class TexyListModule extends TexyModule
 		// parse content
 		$elItem->parseBlock($tx, $content, TRUE);
 
-		if (isset($elItem[0]) && $elItem[0] instanceof TexyHtml) {
+		if (isset($elItem[0]) && $elItem[0] instanceof Texy\HtmlElement) {
 			$elItem[0]->setName(NULL);
 		}
 

@@ -5,6 +5,8 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * Texy! - Convert plain text to XHTML format using {@link process()}.
@@ -16,7 +18,7 @@
  *
  * @author     David Grudl
  */
-class Texy extends TexyObject
+class Texy extends Object
 {
 	// configuration directives
 	const ALL = TRUE;
@@ -100,55 +102,55 @@ class Texy extends TexyObject
 	/** @var string */
 	public $nontextParagraph = 'div';
 
-	/** @var TexyScriptModule */
+	/** @var Modules\ScriptModule */
 	public $scriptModule;
 
-	/** @var TexyParagraphModule */
+	/** @var Modules\ParagraphModule */
 	public $paragraphModule;
 
-	/** @var TexyHtmlModule */
+	/** @var Modules\HtmlModule */
 	public $htmlModule;
 
-	/** @var TexyImageModule */
+	/** @var Modules\ImageModule */
 	public $imageModule;
 
-	/** @var TexyLinkModule */
+	/** @var Modules\LinkModule */
 	public $linkModule;
 
-	/** @var TexyPhraseModule */
+	/** @var Modules\PhraseModule */
 	public $phraseModule;
 
-	/** @var TexyEmoticonModule */
+	/** @var Modules\EmoticonModule */
 	public $emoticonModule;
 
-	/** @var TexyBlockModule */
+	/** @var Modules\BlockModule */
 	public $blockModule;
 
-	/** @var TexyHeadingModule */
+	/** @var Modules\HeadingModule */
 	public $headingModule;
 
-	/** @var TexyHorizLineModule */
+	/** @var Modules\HorizLineModule */
 	public $horizLineModule;
 
-	/** @var TexyBlockQuoteModule */
+	/** @var Modules\BlockQuoteModule */
 	public $blockQuoteModule;
 
-	/** @var TexyListModule */
+	/** @var Modules\ListModule */
 	public $listModule;
 
-	/** @var TexyTableModule */
+	/** @var Modules\TableModule */
 	public $tableModule;
 
-	/** @var TexyFigureModule */
+	/** @var Modules\FigureModule */
 	public $figureModule;
 
-	/** @var TexyTypographyModule */
+	/** @var Modules\TypographyModule */
 	public $typographyModule;
 
-	/** @var TexyLongWordsModule */
+	/** @var Modules\LongWordsModule */
 	public $longWordsModule;
 
-	/** @var TexyHtmlOutputModule */
+	/** @var Modules\HtmlOutputModule */
 	public $htmlOutputModule;
 
 
@@ -169,7 +171,7 @@ class Texy extends TexyObject
 	/** @var array */
 	private $postHandlers = array();
 
-	/** @var TexyHtml  DOM structure for parsed text */
+	/** @var HtmlElement  DOM structure for parsed text */
 	private $DOM;
 
 	/** @var array  Texy protect markup table */
@@ -224,15 +226,15 @@ class Texy extends TexyObject
 		$this->cleaner = & $this->htmlOutputModule;
 
 		// examples of link references ;-)
-		$link = new TexyLink('http://texy.info/');
+		$link = new Modules\Link('http://texy.info/');
 		$link->modifier->title = 'The best text -> HTML converter and formatter';
 		$link->label = 'Texy!';
 		$this->linkModule->addReference('texy', $link);
 
-		$link = new TexyLink('http://www.google.com/search?q=%s');
+		$link = new Modules\Link('http://www.google.com/search?q=%s');
 		$this->linkModule->addReference('google', $link);
 
-		$link = new TexyLink('http://en.wikipedia.org/wiki/Special:Search?search=%s');
+		$link = new Modules\Link('http://en.wikipedia.org/wiki/Special:Search?search=%s');
 		$this->linkModule->addReference('wikipedia', $link);
 	}
 
@@ -247,7 +249,7 @@ class Texy extends TexyObject
 		if (!in_array($mode, array(self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
 			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5), TRUE)
 		) {
-			throw new InvalidArgumentException("Invalid mode.");
+			throw new \InvalidArgumentException("Invalid mode.");
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
@@ -257,7 +259,7 @@ class Texy extends TexyObject
 
 		$this->mode = $mode;
 		$this->dtd = self::$dtdCache[$mode];
-		TexyHtml::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
+		HtmlElement::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
 
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = array();
@@ -284,27 +286,27 @@ class Texy extends TexyObject
 	protected function loadModules()
 	{
 		// line parsing
-		$this->scriptModule = new TexyScriptModule($this);
-		$this->htmlModule = new TexyHtmlModule($this);
-		$this->imageModule = new TexyImageModule($this);
-		$this->phraseModule = new TexyPhraseModule($this);
-		$this->linkModule = new TexyLinkModule($this);
-		$this->emoticonModule = new TexyEmoticonModule($this);
+		$this->scriptModule = new Modules\ScriptModule($this);
+		$this->htmlModule = new Modules\HtmlModule($this);
+		$this->imageModule = new Modules\ImageModule($this);
+		$this->phraseModule = new Modules\PhraseModule($this);
+		$this->linkModule = new Modules\LinkModule($this);
+		$this->emoticonModule = new Modules\EmoticonModule($this);
 
 		// block parsing
-		$this->paragraphModule = new TexyParagraphModule($this);
-		$this->blockModule = new TexyBlockModule($this);
-		$this->figureModule = new TexyFigureModule($this);
-		$this->horizLineModule = new TexyHorizLineModule($this);
-		$this->blockQuoteModule = new TexyBlockQuoteModule($this);
-		$this->tableModule = new TexyTableModule($this);
-		$this->headingModule = new TexyHeadingModule($this);
-		$this->listModule = new TexyListModule($this);
+		$this->paragraphModule = new Modules\ParagraphModule($this);
+		$this->blockModule = new Modules\BlockModule($this);
+		$this->figureModule = new Modules\FigureModule($this);
+		$this->horizLineModule = new Modules\HorizLineModule($this);
+		$this->blockQuoteModule = new Modules\BlockQuoteModule($this);
+		$this->tableModule = new Modules\TableModule($this);
+		$this->headingModule = new Modules\HeadingModule($this);
+		$this->listModule = new Modules\ListModule($this);
 
 		// post process
-		$this->typographyModule = new TexyTypographyModule($this);
-		$this->longWordsModule = new TexyLongWordsModule($this);
-		$this->htmlOutputModule = new TexyHtmlOutputModule($this);
+		$this->typographyModule = new Modules\TypographyModule($this);
+		$this->longWordsModule = new Modules\LongWordsModule($this);
+		$this->htmlOutputModule = new Modules\HtmlOutputModule($this);
 	}
 
 
@@ -312,7 +314,7 @@ class Texy extends TexyObject
 	{
 		if (!is_callable($handler)) {
 			$able = is_callable($handler, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		if (!isset($this->allowed[$name])) {
@@ -331,7 +333,7 @@ class Texy extends TexyObject
 	{
 		if (!is_callable($handler)) {
 			$able = is_callable($handler, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		// if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
@@ -350,7 +352,7 @@ class Texy extends TexyObject
 	{
 		if (!is_callable($handler)) {
 			$able = is_callable($handler, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		if (!isset($this->allowed[$name])) {
@@ -371,7 +373,7 @@ class Texy extends TexyObject
 	public function process($text, $singleLine = FALSE)
 	{
 		if ($this->processing) {
-			throw new RuntimeException('Processing is in progress yet.');
+			throw new \RuntimeException('Processing is in progress yet.');
 		}
 
 		// initialization
@@ -400,7 +402,7 @@ class Texy extends TexyObject
 		// replace tabs with spaces
 		$this->tabWidth = max(1, (int) $this->tabWidth);
 		while (strpos($text, "\t") !== FALSE) {
-			$text = TexyRegexp::replace($text, '#^([^\t\n]*+)\t#mU', array($this, 'tabCb'));
+			$text = Regexp::replace($text, '#^([^\t\n]*+)\t#mU', array($this, 'tabCb'));
 		}
 
 		// user before handler
@@ -421,7 +423,7 @@ class Texy extends TexyObject
 		}
 
 		// parse Texy! document into internal DOM structure
-		$this->DOM = TexyHtml::el();
+		$this->DOM = HtmlElement::el();
 		if ($singleLine) {
 			$this->DOM->parseLine($this, $text);
 		} else {
@@ -482,7 +484,7 @@ class Texy extends TexyObject
 	public function toText()
 	{
 		if (!$this->DOM) {
-			throw new RuntimeException('Call $texy->process() first.');
+			throw new \RuntimeException('Call $texy->process() first.');
 		}
 
 		return $this->DOM->toText($this);
@@ -540,9 +542,9 @@ class Texy extends TexyObject
 		$this->htmlOutputModule->lineWrap = $save;
 
 		// remove tags
-		$s = TexyRegexp::replace($s, '#<(script|style)(.*)</\\1>#Uis', '');
+		$s = Regexp::replace($s, '#<(script|style)(.*)</\\1>#Uis', '');
 		$s = strip_tags($s);
-		$s = TexyRegexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
+		$s = Regexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
 
 		// entities -> chars
 		$s = self::unescapeHtml($s);
@@ -568,7 +570,7 @@ class Texy extends TexyObject
 	{
 		if (!is_callable($callback)) {
 			$able = is_callable($callback, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		$this->handlers[$event][] = $callback;
@@ -579,7 +581,7 @@ class Texy extends TexyObject
 	 * Invoke registered around-handlers.
 	 *
 	 * @param  string   event name
-	 * @param  TexyParser  actual parser object
+	 * @param  Parser  actual parser object
 	 * @param  array    arguments passed into handler
 	 * @return mixed
 	 */
@@ -589,7 +591,7 @@ class Texy extends TexyObject
 			return FALSE;
 		}
 
-		$invocation = new TexyHandlerInvocation($this->handlers[$event], $parser, $args);
+		$invocation = new HandlerInvocation($this->handlers[$event], $parser, $args);
 		$res = $invocation->proceed();
 		$invocation->free();
 		return $res;
@@ -617,7 +619,7 @@ class Texy extends TexyObject
 
 	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
-	 * which are ignored by TexyHtmlOutputModule routine
+	 * which are ignored by HtmlOutputModule routine
 	 * @param  string
 	 * @return string
 	 */
@@ -650,10 +652,10 @@ class Texy extends TexyObject
 		$s = strtr($s, "\r", "\n"); // Mac
 
 		// remove special chars; leave \t + \n
-		$s = TexyRegexp::replace($s, '#[\x00-\x08\x0B-\x1F]+#', '');
+		$s = Regexp::replace($s, '#[\x00-\x08\x0B-\x1F]+#', '');
 
 		// right trim
-		$s = TexyRegexp::replace($s, "#[\t ]+$#m", '');
+		$s = Regexp::replace($s, "#[\t ]+$#m", '');
 
 		// trailing spaces
 		$s = trim($s, "\n");
@@ -681,7 +683,7 @@ class Texy extends TexyObject
 		}
 		$s = str_replace(array('`', "'", '"', '^', '~'), '', $s);
 		$s = strtolower($s);
-		$s = TexyRegexp::replace($s, '#[^a-z0-9'.preg_quote($charlist, '#').']+#', '-');
+		$s = Regexp::replace($s, '#[^a-z0-9'.preg_quote($charlist, '#').']+#', '-');
 		$s = trim($s, '-');
 		return $s;
 	}
@@ -722,11 +724,11 @@ class Texy extends TexyObject
 	{
 		$s = trim($s, "\n");
 		$min = strlen($s);
-		foreach (TexyRegexp::match($s, '#^ *\S#m', TexyRegexp::ALL) as $m) {
+		foreach (Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
 			$min = min($min, strlen($m[0]) - 1);
 		}
 		if ($min) {
-			$s = TexyRegexp::replace($s, "#^ {{$min}}#m", '');
+			$s = Regexp::replace($s, "#^ {{$min}}#m", '');
 		}
 		return $s;
 	}
@@ -842,7 +844,7 @@ class Texy extends TexyObject
 
 	final public function __clone()
 	{
-		throw new Exception('Clone is not supported.');
+		throw new \Exception('Clone is not supported.');
 	}
 
 }
