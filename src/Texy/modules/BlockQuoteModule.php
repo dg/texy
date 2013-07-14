@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Blockquote module.
  *
  * @author     David Grudl
  */
-final class TexyBlockQuoteModule extends TexyModule
+final class BlockQuoteModule extends Texy\Module
 {
 
 	public function __construct($texy)
@@ -20,9 +24,9 @@ final class TexyBlockQuoteModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'pattern'),
-			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?\>(\ ++|:)(\S.*+)$#mU', // original
-			// '#^(?:'.TexyPatterns::MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU', // >>>>
-			// '#^(?:'.TexyPatterns::MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU', // only >
+			'#^(?:'.Texy\Patterns::MODIFIER_H.'\n)?\>(\ ++|:)(\S.*+)$#mU', // original
+			// '#^(?:'.Texy\Patterns::MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU', // >>>>
+			// '#^(?:'.Texy\Patterns::MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU', // only >
 			'blockquote'
 		);
 	}
@@ -37,10 +41,10 @@ final class TexyBlockQuoteModule extends TexyModule
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function pattern($parser, $matches)
 	{
@@ -51,8 +55,8 @@ final class TexyBlockQuoteModule extends TexyModule
 
 		$tx = $this->texy;
 
-		$el = TexyHtml::el('blockquote');
-		$mod = new TexyModifier($mMod);
+		$el = Texy\HtmlElement::el('blockquote');
+		$mod = new Texy\Modifier($mMod);
 		$mod->decorate($tx, $el);
 
 		$content = '';
@@ -120,7 +124,7 @@ final class TexyBlockQuoteModule extends TexyModule
 			$link = substr($link, 1, -1);
 			$ref = $tx->linkModule->getReference($link);
 			if ($ref) {
-				return Texy::prependRoot($ref->URL, $tx->linkModule->root);
+				return Texy\Texy::prependRoot($ref->URL, $tx->linkModule->root);
 			}
 		}
 
@@ -129,7 +133,7 @@ final class TexyBlockQuoteModule extends TexyModule
 			return 'http://' . $link;
 		}
 
-		return Texy::prependRoot($link, $tx->linkModule->root);
+		return Texy\Texy::prependRoot($link, $tx->linkModule->root);
 	}
 
 }

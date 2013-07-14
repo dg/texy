@@ -5,11 +5,13 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
- * TexyObject is the ultimate ancestor of all instantiable classes.
+ * Object is the ultimate ancestor of all instantiable classes.
  *
- * TexyObject is copy of Nette\Object from Nette Framework (http://nette.org).
+ * Object is copy of Nette\Object from Nette Framework (http://nette.org).
  *
  * It defines some handful methods and enhances object core of PHP:
  * - access to undeclared members throws exceptions
@@ -46,7 +48,7 @@
  *
  * @author     David Grudl
  */
-abstract class TexyObject
+abstract class Object
 {
 	/** @var array (method => array(type => callback)) */
 	private static $extMethods;
@@ -87,7 +89,7 @@ abstract class TexyObject
 		$class = get_class($this);
 
 		if ($name === '') {
-			throw new LogicException("Call to class '$class' method without name.");
+			throw new \LogicException("Call to class '$class' method without name.");
 		}
 
 		// event functionality
@@ -115,7 +117,7 @@ abstract class TexyObject
 			return call_user_func_array($cb, $args);
 		}
 
-		throw new LogicException("Call to undefined method $class::$name().");
+		throw new \LogicException("Call to undefined method $class::$name().");
 	}
 
 
@@ -130,7 +132,7 @@ abstract class TexyObject
 	public static function __callStatic($name, $args)
 	{
 		$class = get_called_class();
-		throw new LogicException("Call to undefined static method $class::$name().");
+		throw new \LogicException("Call to undefined static method $class::$name().");
 	}
 
 
@@ -210,7 +212,7 @@ abstract class TexyObject
 		$class = get_class($this);
 
 		if ($name === '') {
-			throw new LogicException("Cannot read a class '$class' property without name.");
+			throw new \LogicException("Cannot read a class '$class' property without name.");
 		}
 
 		// property getter support
@@ -231,7 +233,7 @@ abstract class TexyObject
 		}
 
 		$name = func_get_arg(0);
-		throw new LogicException("Cannot read an undeclared property $class::\$$name.");
+		throw new \LogicException("Cannot read an undeclared property $class::\$$name.");
 	}
 
 
@@ -248,7 +250,7 @@ abstract class TexyObject
 		$class = get_class($this);
 
 		if ($name === '') {
-			throw new LogicException("Cannot assign to a class '$class' property without name.");
+			throw new \LogicException("Cannot assign to a class '$class' property without name.");
 		}
 
 		// property setter support
@@ -261,12 +263,12 @@ abstract class TexyObject
 
 			} else {
 				$name = func_get_arg(0);
-				throw new LogicException("Cannot assign to a read-only property $class::\$$name.");
+				throw new \LogicException("Cannot assign to a read-only property $class::\$$name.");
 			}
 		}
 
 		$name = func_get_arg(0);
-		throw new LogicException("Cannot assign to an undeclared property $class::\$$name.");
+		throw new \LogicException("Cannot assign to an undeclared property $class::\$$name.");
 	}
 
 
@@ -293,7 +295,7 @@ abstract class TexyObject
 	public function __unset($name)
 	{
 		$class = get_class($this);
-		throw new LogicException("Cannot unset the property $class::\$$name.");
+		throw new \LogicException("Cannot unset the property $class::\$$name.");
 	}
 
 

@@ -15,9 +15,9 @@ require_once __DIR__ . '/../../src/texy.php';
 /**
  * User handler for unknown reference
  *
- * @param TexyHandlerInvocation  handler invocation
+ * @param Texy\HandlerInvocation  handler invocation
  * @param string   [refName]
- * @return TexyHtml|string
+ * @return Texy\HtmlElement|string
  */
 function newReferenceHandler($parser, $refName)
 {
@@ -27,7 +27,7 @@ function newReferenceHandler($parser, $refName)
 
 	$name = $names[$refName];
 
-	$el = TexyHtml::el('a');
+	$el = Texy\HtmlElement::el('a');
 	$el->attrs['href'] = '#comm-' . $refName; // set link destination
 	$el->attrs['class'][] = 'comment';        // set class name
 	$el->attrs['rel'] = 'nofollow';           // enable rel="nofollow"
@@ -42,7 +42,7 @@ $texy = new Texy();
 $texy->addHandler('newReference', 'newReferenceHandler');
 
 // configuration
-TexyConfigurator::safeMode($texy);     // safe mode prevets attacker to inject some HTML code and disable images
+Texy\Configurator::safeMode($texy);     // safe mode prevets attacker to inject some HTML code and disable images
 
 // how generally disable links or enable images? here is a way:
 //    $disallow = array('image', 'figure', 'linkReference', 'linkEmail', 'linkURL', 'linkQuick');

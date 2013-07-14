@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Horizontal line module.
  *
  * @author     David Grudl
  */
-final class TexyHorizLineModule extends TexyModule
+final class HorizLineModule extends Texy\Module
 {
 	/** @var array  default CSS class */
 	public $classes = array(
@@ -28,7 +32,7 @@ final class TexyHorizLineModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'pattern'),
-			'#^(\*{3,}+|-{3,}+)\ *'.TexyPatterns::MODIFIER.'?()$#mU',
+			'#^(\*{3,}+|-{3,}+)\ *'.Texy\Patterns::MODIFIER.'?()$#mU',
 			'horizline'
 		);
 	}
@@ -37,10 +41,10 @@ final class TexyHorizLineModule extends TexyModule
 	/**
 	 * Callback for: -------.
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml
+	 * @return Texy\HtmlElement
 	 */
 	public function pattern($parser, $matches)
 	{
@@ -48,7 +52,7 @@ final class TexyHorizLineModule extends TexyModule
 		// [1] => ---
 		// [2] => .(title)[class]{style}<>
 
-		$mod = new TexyModifier($mMod);
+		$mod = new Texy\Modifier($mMod);
 		return $this->texy->invokeAroundHandlers('horizline', $parser, array($mType, $mod));
 	}
 
@@ -56,14 +60,14 @@ final class TexyHorizLineModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
+	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  string
-	 * @param  TexyModifier
-	 * @return TexyHtml
+	 * @param  Texy\Modifier
+	 * @return Texy\HtmlElement
 	 */
 	public function solve($invocation, $type, $modifier)
 	{
-		$el = TexyHtml::el('hr');
+		$el = Texy\HtmlElement::el('hr');
 		$modifier->decorate($invocation->texy, $el);
 
 		$class = $this->classes[ $type[0] ];

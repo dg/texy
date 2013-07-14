@@ -24,14 +24,14 @@ $texy->allowed['phrase/em-alt2'] = FALSE;
 // add new syntax: *bold*
 $texy->registerLinePattern(
 	'userInlineHandler',  // callback function or method
-	'#(?<!\*)\*(?!\ |\*)(.+)'.TexyPatterns::MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U', // regular expression
+	'#(?<!\*)\*(?!\ |\*)(.+)'.Texy\Patterns::MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U', // regular expression
 	'myInlineSyntax1' // any syntax name
 );
 
 // add new syntax: _italic_
 $texy->registerLinePattern(
 	'userInlineHandler',
-	'#(?<!_)_(?!\ |_)(.+)'.TexyPatterns::MODIFIER.'?(?<!\ |_)_(?!_)()#U',
+	'#(?<!_)_(?!\ |_)(.+)'.Texy\Patterns::MODIFIER.'?(?<!\ |_)_(?!_)()#U',
 	'myInlineSyntax2'
 );
 
@@ -47,10 +47,10 @@ $texy->registerBlockPattern(
 /**
  * Pattern handler for inline syntaxes
  *
- * @param TexyLineParser
+ * @param Texy\LineParser
  * @param array   reg-exp matches
  * @param string  pattern name (myInlineSyntax1 or myInlineSyntax2)
- * @return TexyHtml|string
+ * @return Texy\HtmlElement|string
  */
 function userInlineHandler($parser, $matches, $name)
 {
@@ -60,10 +60,10 @@ function userInlineHandler($parser, $matches, $name)
 
 	// create element
 	$tag = $name === 'myInlineSyntax1' ? 'b' : 'i';
-	$el = TexyHtml::el($tag);
+	$el = Texy\HtmlElement::el($tag);
 
 	// apply modifier
-	$mod = new TexyModifier($mMod);
+	$mod = new Texy\Modifier($mMod);
 	$mod->decorate($texy, $el);
 
 	$el->attrs['class'] = 'myclass';
@@ -79,10 +79,10 @@ function userInlineHandler($parser, $matches, $name)
 /**
  * Pattern handler for block syntaxes
  *
- * @param TexyBlockParser
+ * @param Texy\BlockParser
  * @param array      regexp matches
  * @param string     pattern name (myBlockSyntax1)
- * @return TexyHtml|string|FALSE
+ * @return Texy\HtmlElement|string|FALSE
  */
 function userBlockHandler($parser, $matches, $name)
 {
@@ -92,11 +92,11 @@ function userBlockHandler($parser, $matches, $name)
 
 	// create element
 	if ($mTag === 'perex') {
-		$el = TexyHtml::el('div');
+		$el = Texy\HtmlElement::el('div');
 		$el->attrs['class'][] = 'perex';
 
 	} else {
-		$el = TexyHtml::el($mTag);
+		$el = Texy\HtmlElement::el($mTag);
 	}
 
 	// create content

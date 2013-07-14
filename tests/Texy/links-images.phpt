@@ -25,7 +25,7 @@ Assert::matchFile(
 );
 
 $texy = createTexy();
-TexyConfigurator::safeMode($texy);
+Texy\Configurator::safeMode($texy);
 $texy->allowedTags['a'][] = 'rel';
 Assert::matchFile(
 	__DIR__ . '/expected/links-images2.html',

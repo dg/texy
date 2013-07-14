@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Html tags module.
  *
  * @author     David Grudl
  */
-final class TexyHtmlModule extends TexyModule
+final class HtmlModule extends Texy\Module
 {
 	/** @var bool   pass HTML comments to output? */
 	public $passComment = TRUE;
@@ -26,13 +30,13 @@ final class TexyHtmlModule extends TexyModule
 
 		$texy->registerLinePattern(
 			array($this, 'patternTag'),
-			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9:-]++|=\s*+"[^"'.TexyPatterns::MARK.']*+"|=\s*+\'[^\''.TexyPatterns::MARK.']*+\'|=[^\s>'.TexyPatterns::MARK.']++)*)\s*+(/?)>#isu',
+			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9:-]++|=\s*+"[^"'.Texy\Patterns::MARK.']*+"|=\s*+\'[^\''.Texy\Patterns::MARK.']*+\'|=[^\s>'.Texy\Patterns::MARK.']++)*)\s*+(/?)>#isu',
 			'html/tag'
 		);
 
 		$texy->registerLinePattern(
 			array($this, 'patternComment'),
-			'#<!--([^'.TexyPatterns::MARK.']*?)-->#is',
+			'#<!--([^'.Texy\Patterns::MARK.']*?)-->#is',
 			'html/comment'
 		);
 	}
@@ -41,10 +45,10 @@ final class TexyHtmlModule extends TexyModule
 	/**
 	 * Callback for: <!-- comment -->.
 	 *
-	 * @param  TexyLineParser
+	 * @param  Texy\LineParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function patternComment($parser, $matches)
 	{
@@ -56,10 +60,10 @@ final class TexyHtmlModule extends TexyModule
 	/**
 	 * Callback for: <tag attr="...">.
 	 *
-	 * @param  TexyLineParser
+	 * @param  Texy\LineParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function patternTag($parser, $matches)
 	{
@@ -89,7 +93,7 @@ final class TexyHtmlModule extends TexyModule
 			return FALSE;
 		}
 
-		$el = TexyHtml::el($mTag);
+		$el = Texy\HtmlElement::el($mTag);
 
 		if ($isStart) {
 			// parse attributes
@@ -107,16 +111,16 @@ final class TexyHtmlModule extends TexyModule
 				if ($value == NULL) {
 					$el->attrs[$key] = TRUE;
 				} elseif ($value{0} === '\'' || $value{0} === '"') {
-					$el->attrs[$key] = Texy::unescapeHtml(substr($value, 1, -1));
+					$el->attrs[$key] = Texy\Texy::unescapeHtml(substr($value, 1, -1));
 				} else {
-					$el->attrs[$key] = Texy::unescapeHtml($value);
+					$el->attrs[$key] = Texy\Texy::unescapeHtml($value);
 				}
 			}
 		}
 
 		$res = $tx->invokeAroundHandlers('htmlTag', $parser, array($el, $isStart, $isEmpty));
 
-		if ($res instanceof TexyHtml) {
+		if ($res instanceof Texy\HtmlElement) {
 			return $tx->protect($isStart ? $res->startTag() : $res->endTag(), $res->getContentType());
 		}
 
@@ -127,13 +131,13 @@ final class TexyHtmlModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
-	 * @param  TexyHtml  element
+	 * @param  Texy\HandlerInvocation  handler invocation
+	 * @param  Texy\HtmlElement  element
 	 * @param  bool      is start tag?
 	 * @param  bool      is empty?
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function solveTag($invocation, TexyHtml $el, $isStart, $forceEmpty = NULL)
+	public function solveTag($invocation, Texy\HtmlElement $el, $isStart, $forceEmpty = NULL)
 	{
 		$tx = $this->texy;
 
@@ -159,11 +163,11 @@ final class TexyHtmlModule extends TexyModule
 			$allowedAttrs = $allowedTags[$name]; // allowed attrs
 
 		} else {
-			// allowedTags === Texy::ALL
+			// allowedTags === Texy\Texy::ALL
 			if ($forceEmpty) {
 				$el->setName($name, TRUE);
 			}
-			$allowedAttrs = Texy::ALL; // all attrs are allowed
+			$allowedAttrs = Texy\Texy::ALL; // all attrs are allowed
 		}
 
 		// end tag? we are finished
@@ -199,7 +203,7 @@ final class TexyHtmlModule extends TexyModule
 					}
 				}
 
-			} elseif ($tmp !== Texy::ALL) {
+			} elseif ($tmp !== Texy\Texy::ALL) {
 				$elAttrs['class'] = NULL;
 			}
 		}
@@ -210,7 +214,7 @@ final class TexyHtmlModule extends TexyModule
 				if (!isset($tmp['#' . $elAttrs['id']])) {
 					$elAttrs['id'] = NULL;
 				}
-			} elseif ($tmp !== Texy::ALL) {
+			} elseif ($tmp !== Texy\Texy::ALL) {
 				$elAttrs['id'] = NULL;
 			}
 		}
@@ -228,13 +232,13 @@ final class TexyHtmlModule extends TexyModule
 						$elAttrs['style'][$prop] = $pair[1];
 					}
 				}
-			} elseif ($tmp !== Texy::ALL) {
+			} elseif ($tmp !== Texy\Texy::ALL) {
 				$elAttrs['style'] = NULL;
 			}
 		}
 
 		if ($name === 'img') {
-			if (!isset($elAttrs['src']) || !$tx->checkURL($elAttrs['src'], Texy::FILTER_IMAGE)) {
+			if (!isset($elAttrs['src']) || !$tx->checkURL($elAttrs['src'], Texy\Texy::FILTER_IMAGE)) {
 				return FALSE;
 			}
 
@@ -252,7 +256,7 @@ final class TexyHtmlModule extends TexyModule
 					$elAttrs['rel'][] = 'nofollow';
 				}
 
-				if (!$tx->checkURL($elAttrs['href'], Texy::FILTER_ANCHOR)) {
+				if (!$tx->checkURL($elAttrs['href'], Texy\Texy::FILTER_ANCHOR)) {
 					return FALSE;
 				}
 
@@ -276,7 +280,7 @@ final class TexyHtmlModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
+	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  string
 	 * @return string
 	 */
@@ -287,10 +291,10 @@ final class TexyHtmlModule extends TexyModule
 		}
 
 		// sanitize comment
-		$content = TexyRegexp::replace($content, '#-{2,}#', ' - ');
+		$content = Texy\Regexp::replace($content, '#-{2,}#', ' - ');
 		$content = trim($content, '-');
 
-		return $this->texy->protect('<!--' . $content . '-->', Texy::CONTENT_MARKUP);
+		return $this->texy->protect('<!--' . $content . '-->', Texy\Texy::CONTENT_MARKUP);
 	}
 
 }
