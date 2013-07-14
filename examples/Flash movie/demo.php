@@ -12,10 +12,10 @@ require_once __DIR__ . '/../../src/texy.php';
 /**
  * User handler for images
  *
- * @param TexyHandlerInvocation  handler invocation
- * @param TexyImage
- * @param TexyLink
- * @return TexyHtml|string|FALSE
+ * @param Texy\HandlerInvocation  handler invocation
+ * @param Texy\Modules\Image
+ * @param Texy\Modules\Link
+ * @return Texy\HtmlElement|string|FALSE
  */
 function imageHandler($invocation, $image, $link)
 {
@@ -23,7 +23,7 @@ function imageHandler($invocation, $image, $link)
 
 	if (substr($image->URL, -4) === '.swf')  // accepts only *.swf
 	{
-		$movie = TexyHelpers::prependRoot($image->URL, $texy->imageModule->root);
+		$movie = Texy\Helpers::prependRoot($image->URL, $texy->imageModule->root);
 
 		$dimensions =
 			($image->width ? 'width="'.$image->width.'" ' : '')

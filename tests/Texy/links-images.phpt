@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 function createTexy()
 {
-	$texy = new Texy;
+	$texy = new Texy\Texy;
 	$texy->linkModule->root = 'xxx/';
 	$texy->imageModule->root = '../images/';
 	$texy->imageModule->linkedRoot = '../images/big/';
@@ -27,7 +27,7 @@ Assert::matchFile(
 );
 
 $texy = createTexy();
-TexyConfigurator::safeMode($texy);
+Texy\Configurator::safeMode($texy);
 $texy->allowedTags['a'][] = 'rel';
 Assert::matchFile(
 	__DIR__ . '/expected/links-images2.html',

@@ -21,12 +21,12 @@ if (!class_exists('fshlParser')) {
 /**
  * User handler for code block
  *
- * @param TexyHandlerInvocation  handler invocation
+ * @param Texy\HandlerInvocation  handler invocation
  * @param string  block type
  * @param string  text to highlight
  * @param string  language
- * @param TexyModifier modifier
- * @return TexyHtml
+ * @param Texy\Modifier modifier
+ * @return Texy\HtmlElement
  */
 function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 {
@@ -45,11 +45,11 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 	}
 
 	$texy = $invocation->getTexy();
-	$content = TexyHelpers::outdent($content);
+	$content = Texy\Helpers::outdent($content);
 	$content = $fshl->highlightString($lang, $content);
 	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
-	$elPre = TexyHtml::el('pre');
+	$elPre = Texy\HtmlElement::el('pre');
 	if ($modifier) {
 		$modifier->decorate($texy, $elPre);
 	}

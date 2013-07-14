@@ -9,7 +9,7 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-$texy = new Texy;
+$texy = new Texy\Texy;
 
 Assert::same(
 	str_replace("\r", '', file_get_contents(__DIR__ . '/expected/long-line1.html')),
