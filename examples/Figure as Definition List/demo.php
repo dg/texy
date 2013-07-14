@@ -10,12 +10,12 @@ require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
- * @param TexyHandlerInvocation  handler invocation
- * @param TexyImage
- * @param TexyLink
+ * @param Texy\HandlerInvocation  handler invocation
+ * @param Texy\Modules\Image
+ * @param Texy\Modules\Link
  * @param string
- * @param TexyModifier
- * @return TexyHtml|string|FALSE
+ * @param Texy\Modifier
+ * @return Texy\HtmlElement|string|FALSE
  */
 function figureHandler($invocation, $image, $link, $content, $modifier)
 {
@@ -32,7 +32,7 @@ function figureHandler($invocation, $image, $link, $content, $modifier)
 	$img = $el[0];
 	unset($el[0]);
 
-	$dt = TexyHtml::el('dt');
+	$dt = Texy\HtmlElement::el('dt');
 	$dt->add($img);
 	$el->insert(0, $dt);
 

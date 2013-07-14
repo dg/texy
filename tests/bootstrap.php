@@ -20,7 +20,7 @@ date_default_timezone_set('Europe/Prague');
 $_GET = $_POST = $_COOKIE = [];
 
 
-function test(\Closure $function)
+function test(Closure $function)
 {
 	$function();
 }

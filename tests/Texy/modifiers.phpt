@@ -10,7 +10,7 @@ require __DIR__ . '/../bootstrap.php';
 
 
 test(function () {
-	$texy = new Texy;
+	$texy = new Texy\Texy;
 	$texy->allowedClasses = FALSE;
 	$texy->allowedStyles = FALSE;
 
@@ -27,7 +27,7 @@ test(function () {
 
 
 test(function () {
-	$texy = new Texy;
+	$texy = new Texy\Texy;
 	$texy->htmlOutputModule->lineWrap = 180;
 	$texy->allowedClasses = ['one', '#id'];
 	$texy->allowedStyles = ['color'];

@@ -21,6 +21,6 @@
 	},
 	"autoload": {
 		"classmap": ["src/"],
-		"files": ["src/compatibility.php"]
+		"files": ["src/texy.php"]
 	}
 }
