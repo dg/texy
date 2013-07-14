@@ -9,7 +9,7 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-$texy = new Texy;
+$texy = new Texy\Texy;
 $texy->htmlOutputModule->lineWrap = 180;
 $texy->emoticonModule->root = 'images/images/';
 $texy->emoticonModule->class = 'smiley';

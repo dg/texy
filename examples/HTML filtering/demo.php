@@ -45,11 +45,11 @@ $texy->allowedTags = Texy::ALL;
 doIt($texy);
 
 echo '<h2>safeMode() - enables only some "safe" tags</h2>';
-TexyConfigurator::safeMode($texy);
+Texy\Configurator::safeMode($texy);
 doIt($texy);
 
 echo '<h2>disableLinks() - disable all links</h2>';
-TexyConfigurator::disableLinks($texy);
+Texy\Configurator::disableLinks($texy);
 doIt($texy);
 
 echo '<h2>Texy::NONE - disables all tags</h2>';
