@@ -5,6 +5,8 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * Modifier processor.
@@ -19,7 +21,7 @@
  *
  * @author     David Grudl
  */
-final class TexyModifier extends TexyObject
+final class Modifier extends Object
 {
 	/** @var string */
 	public $id;
@@ -139,9 +141,9 @@ final class TexyModifier extends TexyObject
 
 
 	/**
-	 * Decorates TexyHtml element.
+	 * Decorates HtmlElement element.
 	 * @param  Texy   base Texy object
-	 * @param  TexyHtml  element to decorate
+	 * @param  HtmlElement  element to decorate
 	 * @return void
 	 */
 	public function decorate($texy, $el)

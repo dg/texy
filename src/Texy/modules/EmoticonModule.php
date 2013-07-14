@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Emoticon module.
  *
  * @author     David Grudl
  */
-final class TexyEmoticonModule extends TexyModule
+final class EmoticonModule extends Texy\Module
 {
 	/** @var array  supported emoticons and image files */
 	public $icons = array(
@@ -71,10 +75,10 @@ final class TexyEmoticonModule extends TexyModule
 	/**
 	 * Callback for: :-))).
 	 *
-	 * @param  TexyLineParser
+	 * @param  Texy\LineParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function pattern($parser, $matches)
 	{
@@ -95,17 +99,17 @@ final class TexyEmoticonModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
+	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  string
 	 * @param  string
-	 * @return TexyHtml|FALSE
+	 * @return Texy\HtmlElement|FALSE
 	 */
 	public function solve($invocation, $emoticon, $raw)
 	{
 		$tx = $this->texy;
 		$file = $this->icons[$emoticon];
-		$el = TexyHtml::el('img');
-		$el->attrs['src'] = Texy::prependRoot($file, $this->root === NULL ? $tx->imageModule->root : $this->root);
+		$el = Texy\HtmlElement::el('img');
+		$el->attrs['src'] = Texy\Texy::prependRoot($file, $this->root === NULL ? $tx->imageModule->root : $this->root);
 		$el->attrs['alt'] = $raw;
 		$el->attrs['class'][] = $this->class;
 

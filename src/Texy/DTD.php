@@ -5,6 +5,8 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 // @param $mode
 // @return $dtd
@@ -305,11 +307,11 @@ $dtd = array(
 ),
 'label' => array(
 	$attrs + array('for'=>1,'accesskey'=>1,'onfocus'=>1,'onblur'=>1),
-	$i, // - label by TexyHtml::$prohibits
+	$i, // - label by HtmlElement::$prohibits
 ),
 'button' => array(
 	$attrs + array('name'=>1,'value'=>1,'type'=>1,'disabled'=>1,'tabindex'=>1,'accesskey'=>1,'onfocus'=>1,'onblur'=>1),
-	$bi, // - a input select textarea label button form fieldset, by TexyHtml::$prohibits
+	$bi, // - a input select textarea label button form fieldset, by HtmlElement::$prohibits
 ),
 'ins' => array(
 	$attrs + array('cite'=>1,'datetime'=>1),

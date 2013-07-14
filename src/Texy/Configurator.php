@@ -5,18 +5,20 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * Texy basic configurators.
  *
  * <code>
  * $texy = new Texy();
- * TexyConfigurator::safeMode($texy);
+ * Configurator::safeMode($texy);
  * </code>
  *
  * @author     David Grudl
  */
-class TexyConfigurator
+class Configurator
 {
 	public static $safeTags = array(
 		'a' => array('href', 'title'),
@@ -40,7 +42,7 @@ class TexyConfigurator
 	 */
 	final public function __construct()
 	{
-		throw new LogicException("Cannot instantiate static class " . get_class($this));
+		throw new \LogicException("Cannot instantiate static class " . get_class($this));
 	}
 
 

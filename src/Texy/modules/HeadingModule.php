@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Heading module.
  *
  * @author     David Grudl
  */
-final class TexyHeadingModule extends TexyModule
+final class HeadingModule extends Texy\Module
 {
 	const
 		DYNAMIC = 1, // auto-leveling
@@ -36,9 +40,9 @@ final class TexyHeadingModule extends TexyModule
 	public $moreMeansHigher = TRUE;
 
 	/** @var int  balancing mode */
-	public $balancing = TexyHeadingModule::DYNAMIC;
+	public $balancing = HeadingModule::DYNAMIC;
 
-	/** @var array  when $balancing = TexyHeadingModule::FIXED */
+	/** @var array  when $balancing = HeadingModule::FIXED */
 	public $levels = array(
 		'#' => 0, // # --> $levels['#'] + $top = 0 + 1 = 1 --> <h1> ... </h1>
 		'*' => 1,
@@ -60,14 +64,14 @@ final class TexyHeadingModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'patternUnderline'),
-			'#^(\S.{0,1000})'.TexyPatterns::MODIFIER_H.'?\n'
+			'#^(\S.{0,1000})'.Texy\Patterns::MODIFIER_H.'?\n'
 			. '(\#{3,}+|\*{3,}+|={3,}+|-{3,}+)$#mU',
 			'heading/underlined'
 		);
 
 		$texy->registerBlockPattern(
 			array($this, 'patternSurround'),
-			'#^(\#{2,}+|={2,}+)(.+)'.TexyPatterns::MODIFIER_H.'?()$#mU',
+			'#^(\#{2,}+|={2,}+)(.+)'.Texy\Patterns::MODIFIER_H.'?()$#mU',
 			'heading/surrounded'
 		);
 	}
@@ -83,7 +87,7 @@ final class TexyHeadingModule extends TexyModule
 
 	/**
 	 * @param  Texy
-	 * @param  TexyHtml
+	 * @param  Texy\HtmlElement
 	 * @param  bool
 	 * @return void
 	 */
@@ -137,7 +141,7 @@ final class TexyHeadingModule extends TexyModule
 				}
 				$this->TOC[$key]['title'] = $title;
 				if (empty($item['el']->attrs['id'])) {
-					$id = $this->idPrefix . Texy::webalize($title);
+					$id = $this->idPrefix . Texy\Texy::webalize($title);
 					$counter = '';
 					if (isset($this->usedID[$id . $counter])) {
 						$counter = 2;
@@ -166,10 +170,10 @@ final class TexyHeadingModule extends TexyModule
 	 * Heading .(title)[class]{style}>
 	 * -------------------------------
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function patternUnderline($parser, $matches)
 	{
@@ -179,7 +183,7 @@ final class TexyHeadingModule extends TexyModule
 		// [2] => .(title)[class]{style}<>
 		// [3] => ...
 
-		$mod = new TexyModifier($mMod);
+		$mod = new Texy\Modifier($mMod);
 		$level = $this->levels[$mLine[0]];
 		return $this->texy->invokeAroundHandlers('heading', $parser, array($level, $mContent, $mod, FALSE));
 	}
@@ -190,10 +194,10 @@ final class TexyHeadingModule extends TexyModule
 	 *
 	 * ### Heading .(title)[class]{style}>
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function patternSurround($parser, $matches)
 	{
@@ -202,7 +206,7 @@ final class TexyHeadingModule extends TexyModule
 		// [2] => ...
 		// [3] => .(title)[class]{style}<>
 
-		$mod = new TexyModifier($mMod);
+		$mod = new Texy\Modifier($mMod);
 		$level = min(7, max(2, strlen($mLine)));
 		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
@@ -213,17 +217,17 @@ final class TexyHeadingModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
+	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  int  0..5
 	 * @param  string
-	 * @param  TexyModifier
+	 * @param  Texy\Modifier
 	 * @param  bool
-	 * @return TexyHtml
+	 * @return Texy\HtmlElement
 	 */
 	public function solve($invocation, $level, $content, $mod, $isSurrounded)
 	{
 		// as fixed balancing, for block/texysource & correct decorating
-		$el = TexyHtml::el('h' . min(6, max(1, $level + $this->top)));
+		$el = Texy\HtmlElement::el('h' . min(6, max(1, $level + $this->top)));
 		$mod->decorate($this->texy, $el);
 
 		$el->parseLine($this->texy, trim($content));

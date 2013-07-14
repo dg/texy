@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Long words wrap module.
  *
  * @author     David Grudl
  */
-final class TexyLongWordsModule extends TexyModule
+final class LongWordsModule extends Texy\Module
 {
 	public $wordLimit = 20;
 
@@ -64,7 +68,7 @@ final class TexyLongWordsModule extends TexyModule
 
 	public function postLine($text)
 	{
-		return TexyRegexp::replace(
+		return Texy\Regexp::replace(
 			$text,
 			'#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
 			array($this, 'pattern')
@@ -90,7 +94,7 @@ final class TexyLongWordsModule extends TexyModule
 
 		$chars = array();
 		preg_match_all(
-			'#['.TexyPatterns::MARK.']+|.#u',
+			'#['.Texy\Patterns::MARK.']+|.#u',
 			$mWord,
 			$chars
 		);

@@ -5,13 +5,15 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * Around advice handlers.
  *
  * @author     David Grudl
  */
-final class TexyHandlerInvocation extends TexyObject
+final class HandlerInvocation extends Object
 {
 	/** @var array of callbacks */
 	private $handlers;
@@ -22,16 +24,16 @@ final class TexyHandlerInvocation extends TexyObject
 	/** @var array */
 	private $args;
 
-	/** @var TexyParser */
+	/** @var Parser */
 	private $parser;
 
 
 	/**
 	 * @param  array    array of callbacks
-	 * @param  TexyParser
+	 * @param  Parser
 	 * @param  array    arguments
 	 */
-	public function __construct($handlers, TexyParser $parser, $args)
+	public function __construct($handlers, Parser $parser, $args)
 	{
 		$this->handlers = $handlers;
 		$this->pos = count($handlers);
@@ -48,7 +50,7 @@ final class TexyHandlerInvocation extends TexyObject
 	public function proceed()
 	{
 		if ($this->pos === 0) {
-			throw new RuntimeException('No more handlers.');
+			throw new \RuntimeException('No more handlers.');
 		}
 
 		if (func_num_args()) {
@@ -59,14 +61,14 @@ final class TexyHandlerInvocation extends TexyObject
 		$this->pos--;
 		$res = call_user_func_array($this->handlers[$this->pos], $this->args);
 		if ($res === NULL) {
-			throw new UnexpectedValueException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], TRUE) . "'.");
+			throw new \UnexpectedValueException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], TRUE) . "'.");
 		}
 		return $res;
 	}
 
 
 	/**
-	 * @return TexyParser
+	 * @return Parser
 	 */
 	public function getParser()
 	{
