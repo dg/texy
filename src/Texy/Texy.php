@@ -446,6 +446,9 @@ class Texy extends TexyObject
 		// converts internal DOM structure to final HTML code
 		$html = $this->DOM->toHtml($this);
 
+		// created by TexyParagraphModule and then protected
+		$html = str_replace("\r", "\n", $html);
+
 		// this notice should remain
 		if (self::$advertisingNotice) {
 			$html .= "\n<!-- by Texy2! -->";
