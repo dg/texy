@@ -28,7 +28,7 @@ class Texy extends TexyObject
 	const NONE = FALSE;
 
 	// Texy version
-	const VERSION = '2.2';
+	const VERSION = '2.3';
 	const REVISION = '$WCREV$ released on $WCDATE$';
 
 	// types of protection marks
