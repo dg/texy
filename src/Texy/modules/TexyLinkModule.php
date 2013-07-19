@@ -395,7 +395,7 @@ final class TexyLinkModule extends TexyModule
 	private function textualUrl($link)
 	{
 		if ($this->texy->obfuscateEmail && preg_match('#^'.TEXY_EMAIL.'$#u', $link->raw)) { // email
-			return str_replace('@', "&#64;<!---->", $link->raw);
+			return str_replace('@', "&#64;<!-- -->", $link->raw);
 		}
 
 		if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#i', $link->raw)) {
