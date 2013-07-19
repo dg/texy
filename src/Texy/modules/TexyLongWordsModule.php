@@ -94,7 +94,7 @@ final class TexyLongWordsModule extends TexyModule
 
 		$chars = array();
 		preg_match_all(
-			'#['.TEXY_MARK.']+|.#u',
+			'#['.TexyPatterns::MARK.']+|.#u',
 			$mWord,
 			$chars
 		);

@@ -54,7 +54,8 @@ final class TexyImageModule extends TexyModule
 		// [*image*]:LINK
 		$texy->registerLinePattern(
 			array($this, 'patternImage'),
-			'#'.TEXY_IMAGE.TEXY_LINK_N.'??()#Uu',
+			'#\[\* *+([^\n'.TexyPatterns::MARK.']{1,1000})'.TexyPatterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
+			. '(?::('.TexyPatterns::LINK_URL.'|:))??()#Uu',
 			'image'
 		);
 	}
@@ -71,7 +72,7 @@ final class TexyImageModule extends TexyModule
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
 			$text = preg_replace_callback(
-				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *'.TEXY_MODIFIER.'?\s*()$#mUu',
+				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *'.TexyPatterns::MODIFIER.'?\s*()$#mUu',
 				array($this, 'patternReferenceDef'),
 				$text
 			);

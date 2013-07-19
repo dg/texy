@@ -55,7 +55,7 @@ final class TexyPhraseModule extends TexyModule
 		// UNIVERSAL
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#((?>([*+/^_"~`-])+?))(?!\s)(.*(?!\\2).)'.TEXY_MODIFIER.'?(?<!\s)\\1(?!\\2)'.TEXY_LINK.'??()#Uus',
+			'#((?>([*+/^_"~`-])+?))(?!\s)(.*(?!\\2).)'.TexyPatterns::MODIFIER.'?(?<!\s)\\1(?!\\2)(?::('.TexyPatterns::LINK_URL.'))??()#Uus',
 			'phrase/strong'
 		);
 */
@@ -63,56 +63,56 @@ final class TexyPhraseModule extends TexyModule
 		// ***strong+emphasis***
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\*)\*\*\*(?![\s*])((?:[^ *]++|[ *])+)'.TEXY_MODIFIER.'?(?<![\s*])\*\*\*(?!\*)'.TEXY_LINK.'??()#Uus',
+			'#(?<!\*)\*\*\*(?![\s*])((?:[^ *]++|[ *])+)'.TexyPatterns::MODIFIER.'?(?<![\s*])\*\*\*(?!\*)(?::('.TexyPatterns::LINK_URL.'))??()#Uus',
 			'phrase/strong+em'
 		);
 
 		// **strong**
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\*)\*\*(?![\s*])((?:[^ *]++|[ *])+)'.TEXY_MODIFIER.'?(?<![\s*])\*\*(?!\*)'.TEXY_LINK.'??()#Uus',
+			'#(?<!\*)\*\*(?![\s*])((?:[^ *]++|[ *])+)'.TexyPatterns::MODIFIER.'?(?<![\s*])\*\*(?!\*)(?::('.TexyPatterns::LINK_URL.'))??()#Uus',
 			'phrase/strong'
 		);
 
 		// //emphasis//
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<![/:])\/\/(?![\s/])((?:[^ /]++|[ /])+)'.TEXY_MODIFIER.'?(?<![\s/:])\/\/(?!\/)'.TEXY_LINK.'??()#Uus',
+			'#(?<![/:])\/\/(?![\s/])((?:[^ /]++|[ /])+)'.TexyPatterns::MODIFIER.'?(?<![\s/:])\/\/(?!\/)(?::('.TexyPatterns::LINK_URL.'))??()#Uus',
 			'phrase/em'
 		);
 
 		// *emphasisAlt*
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\*)\*(?![\s*])((?:[^\s*]++|[*])+)'.TEXY_MODIFIER.'?(?<![\s*])\*(?!\*)'.TEXY_LINK.'??()#Uus',
+			'#(?<!\*)\*(?![\s*])((?:[^\s*]++|[*])+)'.TexyPatterns::MODIFIER.'?(?<![\s*])\*(?!\*)(?::('.TexyPatterns::LINK_URL.'))??()#Uus',
 			'phrase/em-alt'
 		);
 
 		// *emphasisAlt2*
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<![^\s.,;:<>()"\''.TEXY_MARK.'-])\*(?![\s*])((?:[^ *]++|[ *])+)'.TEXY_MODIFIER.'?(?<![\s*])\*(?![^\s.,;:<>()"?!\'-])'.TEXY_LINK.'??()#Uus',
+			'#(?<![^\s.,;:<>()"\''.TexyPatterns::MARK.'-])\*(?![\s*])((?:[^ *]++|[ *])+)'.TexyPatterns::MODIFIER.'?(?<![\s*])\*(?![^\s.,;:<>()"?!\'-])(?::('.TexyPatterns::LINK_URL.'))??()#Uus',
 			'phrase/em-alt2'
 		);
 
 		// ++inserted++
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\+)\+\+(?![\s+])((?:[^\r\n +]++|[ +])+)'.TEXY_MODIFIER.'?(?<![\s+])\+\+(?!\+)()#Uu',
+			'#(?<!\+)\+\+(?![\s+])((?:[^\r\n +]++|[ +])+)'.TexyPatterns::MODIFIER.'?(?<![\s+])\+\+(?!\+)()#Uu',
 			'phrase/ins'
 		);
 
 		// --deleted--
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<![<-])\-\-(?![\s>-])((?:[^\r\n -]++|[ -])+)'.TEXY_MODIFIER.'?(?<![\s<-])\-\-(?![>-])()#Uu',
+			'#(?<![<-])\-\-(?![\s>-])((?:[^\r\n -]++|[ -])+)'.TexyPatterns::MODIFIER.'?(?<![\s<-])\-\-(?![>-])()#Uu',
 			'phrase/del'
 		);
 
 		// ^^superscript^^
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\^)\^\^(?![\s^])((?:[^\r\n ^]++|[ ^])+)'.TEXY_MODIFIER.'?(?<![\s^])\^\^(?!\^)()#Uu',
+			'#(?<!\^)\^\^(?![\s^])((?:[^\r\n ^]++|[ ^])+)'.TexyPatterns::MODIFIER.'?(?<![\s^])\^\^(?!\^)()#Uu',
 			'phrase/sup'
 		);
 
@@ -126,7 +126,7 @@ final class TexyPhraseModule extends TexyModule
 		// __subscript__
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\_)\_\_(?![\s_])((?:[^\r\n _]++|[ _])+)'.TEXY_MODIFIER.'?(?<![\s_])\_\_(?!\_)()#Uu',
+			'#(?<!\_)\_\_(?![\s_])((?:[^\r\n _]++|[ _])+)'.TexyPatterns::MODIFIER.'?(?<![\s_])\_\_(?!\_)()#Uu',
 			'phrase/sub'
 		);
 
@@ -140,56 +140,56 @@ final class TexyPhraseModule extends TexyModule
 		// "span"
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\")\"(?!\s)((?:[^\r "]++|[ ])+)'.TEXY_MODIFIER.'?(?<!\s)\"(?!\")'.TEXY_LINK.'??()#Uu',
+			'#(?<!\")\"(?!\s)((?:[^\r "]++|[ ])+)'.TexyPatterns::MODIFIER.'?(?<!\s)\"(?!\")(?::('.TexyPatterns::LINK_URL.'))??()#Uu',
 			'phrase/span'
 		);
 
 		// ~alternative span~
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\~)\~(?!\s)((?:[^\r ~]++|[ ])+)'.TEXY_MODIFIER.'?(?<!\s)\~(?!\~)'.TEXY_LINK.'??()#Uu',
+			'#(?<!\~)\~(?!\s)((?:[^\r ~]++|[ ])+)'.TexyPatterns::MODIFIER.'?(?<!\s)\~(?!\~)(?::('.TexyPatterns::LINK_URL.'))??()#Uu',
 			'phrase/span-alt'
 		);
 
 		// ~~cite~~
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\~)\~\~(?![\s~])((?:[^\r\n ~]++|[ ~])+)'.TEXY_MODIFIER.'?(?<![\s~])\~\~(?!\~)'.TEXY_LINK.'??()#Uu',
+			'#(?<!\~)\~\~(?![\s~])((?:[^\r\n ~]++|[ ~])+)'.TexyPatterns::MODIFIER.'?(?<![\s~])\~\~(?!\~)(?::('.TexyPatterns::LINK_URL.'))??()#Uu',
 			'phrase/cite'
 		);
 
 		// >>quote<<
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\>)\>\>(?![\s>])((?:[^\r\n <]++|[ <])+)'.TEXY_MODIFIER.'?(?<![\s<])\<\<(?!\<)'.TEXY_LINK.'??()#Uu',
+			'#(?<!\>)\>\>(?![\s>])((?:[^\r\n <]++|[ <])+)'.TexyPatterns::MODIFIER.'?(?<![\s<])\<\<(?!\<)(?::('.TexyPatterns::LINK_URL.'))??()#Uu',
 			'phrase/quote'
 		);
 
 		// acronym/abbr "et al."((and others))
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!\")\"(?!\s)((?:[^\r\n "]++|[ ])+)'.TEXY_MODIFIER.'?(?<!\s)\"(?!\")\(\((.+)\)\)()#Uu',
+			'#(?<!\")\"(?!\s)((?:[^\r\n "]++|[ ])+)'.TexyPatterns::MODIFIER.'?(?<!\s)\"(?!\")\(\((.+)\)\)()#Uu',
 			'phrase/acronym'
 		);
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(?<!['.TEXY_CHAR.'])(['.TEXY_CHAR.']{2,})()\(\(((?:[^\n )]++|[ )])+)\)\)#Uu',
+			'#(?<!['.TexyPatterns::CHAR.'])(['.TexyPatterns::CHAR.']{2,})()\(\(((?:[^\n )]++|[ )])+)\)\)#Uu',
 			'phrase/acronym-alt'
 		);
 
 		// ''notexy''
 		$texy->registerLinePattern(
 			array($this, 'patternNoTexy'),
-			'#(?<!\')\'\'(?![\s\'])((?:[^'.TEXY_MARK.'\r\n\']++|[\'])+)(?<![\s\'])\'\'(?!\')()#Uu',
+			'#(?<!\')\'\'(?![\s\'])((?:[^'.TexyPatterns::MARK.'\r\n\']++|[\'])+)(?<![\s\'])\'\'(?!\')()#Uu',
 			'phrase/notexy'
 		);
 
 		// `code`
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#\`(\S(?:[^'.TEXY_MARK.'\r\n `]++|[ `])*)'.TEXY_MODIFIER.'?(?<!\s)\`'.TEXY_LINK.'??()#Uu',
+			'#\`(\S(?:[^'.TexyPatterns::MARK.'\r\n `]++|[ `])*)'.TexyPatterns::MODIFIER.'?(?<!\s)\`(?::('.TexyPatterns::LINK_URL.'))??()#Uu',
 			'phrase/code'
 		);
 
@@ -197,7 +197,7 @@ final class TexyPhraseModule extends TexyModule
 		// ....:LINK
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#(['.TEXY_CHAR.'0-9@\#$%&.,_-]++)()(?=:\[)'.TEXY_LINK.'()#Uu',
+			'#(['.TexyPatterns::CHAR.'0-9@\#$%&.,_-]++)()(?=:\[)(?::('.TexyPatterns::LINK_URL.'))()#Uu',
 			'phrase/quicklink'
 		);
 

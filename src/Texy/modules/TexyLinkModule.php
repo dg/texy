@@ -39,6 +39,8 @@ final class TexyLinkModule extends TexyModule
 	/** @var array */
 	private static $livelock;
 
+	private static $EMAIL;
+
 
 	public function __construct($texy)
 	{
@@ -54,23 +56,25 @@ final class TexyLinkModule extends TexyModule
 		// [reference]
 		$texy->registerLinePattern(
 			array($this, 'patternReference'),
-			'#(\[[^\[\]\*\n'.TEXY_MARK.']++\])#U',
+			'#(\[[^\[\]\*\n'.TexyPatterns::MARK.']++\])#U',
 			'link/reference'
 		);
 
 		// direct url and email
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
-			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TEXY_CHAR.'-][/\d'.TEXY_CHAR.'+\.~%&?@=_:;\#,\x{ad}-]{1,1000}[/\d'.TEXY_CHAR.'+~%?@=_\#]#u',
+			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TexyPatterns::CHAR.'-][/\d'.TexyPatterns::CHAR.'+\.~%&?@=_:;\#,\x{ad}-]{1,1000}[/\d'.TexyPatterns::CHAR.'+~%?@=_\#]#u',
 			'link/url',
 			'#(?:https?://|www\.|ftp://)#u'
 		);
 
+		self::$EMAIL = '['.TexyPatterns::CHAR.'][0-9.+_'.TexyPatterns::CHAR.'-]{0,63}@[0-9.+_'.TexyPatterns::CHAR.'\x{ad}-]{1,252}\.['.TexyPatterns::CHAR.'\x{ad}]{2,19}';
+
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
-			'#(?<=^|[\s([<\x17])'.TEXY_EMAIL.'#u',
+			'#(?<=^|[\s([<\x17])'.self::$EMAIL.'#u',
 			'link/email',
-			'#'.TEXY_EMAIL.'#u'
+			'#'.self::$EMAIL.'#u'
 		);
 	}
 
@@ -88,7 +92,7 @@ final class TexyLinkModule extends TexyModule
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = preg_replace_callback(
-				'#^\[([^\[\]\#\?\*\n]{1,100})\]: ++(\S{1,1000})(\ .{1,1000})?'.TEXY_MODIFIER.'?\s*()$#mUu',
+				'#^\[([^\[\]\#\?\*\n]{1,100})\]: ++(\S{1,1000})(\ .{1,1000})?'.TexyPatterns::MODIFIER.'?\s*()$#mUu',
 				array($this, 'patternReferenceDef'),
 				$text
 			);
@@ -374,7 +378,7 @@ final class TexyLinkModule extends TexyModule
 			// special supported case
 			$link->URL = 'http://' . $link->URL;
 
-		} elseif (preg_match('#'.TEXY_EMAIL.'$#Au', $link->URL)) {
+		} elseif (preg_match('#'.self::$EMAIL.'$#Au', $link->URL)) {
 			// email
 			$link->URL = 'mailto:' . $link->URL;
 
@@ -394,7 +398,7 @@ final class TexyLinkModule extends TexyModule
 	 */
 	private function textualUrl($link)
 	{
-		if ($this->texy->obfuscateEmail && preg_match('#^'.TEXY_EMAIL.'$#u', $link->raw)) { // email
+		if ($this->texy->obfuscateEmail && preg_match('#^'.self::$EMAIL.'$#u', $link->raw)) { // email
 			return str_replace('@', "&#64;<!-- -->", $link->raw);
 		}
 

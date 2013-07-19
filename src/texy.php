@@ -10,9 +10,6 @@
  */
 
 
-define('TEXY_VERSION', '2.2');
-
-
 /**
  * Check PHP configuration.
  */
@@ -31,7 +28,7 @@ if (ini_get('zend.ze1_compatibility_mode') % 256 ||
 
 
 // Texy! libraries
-require_once dirname(__FILE__) . '/Texy/RegExp.Patterns.php';
+require_once dirname(__FILE__) . '/Texy/TexyPatterns.php';
 require_once dirname(__FILE__) . '/Texy/TexyObject.php';
 require_once dirname(__FILE__) . '/Texy/TexyHtml.php';
 require_once dirname(__FILE__) . '/Texy/TexyModifier.php';
@@ -78,14 +75,3 @@ if (!class_exists('RuntimeException', FALSE)) {
 if (!class_exists('UnexpectedValueException', FALSE)) {
 	class UnexpectedValueException extends RuntimeException {}
 }
-
-
-/**
- * For Texy 1 backward compatibility.
- */
-define('TEXY_ALL', TRUE);
-define('TEXY_NONE', FALSE);
-define('TEXY_CONTENT_MARKUP', "\x17");
-define('TEXY_CONTENT_REPLACED', "\x16");
-define('TEXY_CONTENT_TEXTUAL', "\x15");
-define('TEXY_CONTENT_BLOCK', "\x14");

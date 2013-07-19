@@ -52,7 +52,7 @@ final class TexyParagraphModule extends TexyModule
 
 			// try to find modifier
 			$mx = $mod = NULL;
-			if (preg_match('#'.TEXY_MODIFIER_H.'(?=\n|\z)#sUm', $s, $mx, PREG_OFFSET_CAPTURE)) {
+			if (preg_match('#'.TexyPatterns::MODIFIER_H.'(?=\n|\z)#sUm', $s, $mx, PREG_OFFSET_CAPTURE)) {
 				list($mMod) = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
 				if ($s === '') {
@@ -105,7 +105,7 @@ final class TexyParagraphModule extends TexyModule
 			// leave element p
 
 		// block contains text
-		} elseif (preg_match('#[^\s'.TEXY_MARK.']#u', $content)) {
+		} elseif (preg_match('#[^\s'.TexyPatterns::MARK.']#u', $content)) {
 			// leave element p
 
 		// block contains only replaced element

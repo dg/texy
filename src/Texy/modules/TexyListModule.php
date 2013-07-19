@@ -54,15 +54,15 @@ final class TexyListModule extends TexyModule
 
 		$this->texy->registerBlockPattern(
 			array($this, 'patternList'),
-			'#^(?:'.TEXY_MODIFIER_H.'\n)?' // .{color: red}
+			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?' // .{color: red}
 			. '('.implode('|', $RE).')\ *+\S.*$#mUu', // item (unmatched)
 			'list'
 		);
 
 		$this->texy->registerBlockPattern(
 			array($this, 'patternDefList'),
-			'#^(?:'.TEXY_MODIFIER_H.'\n)?' // .{color:red}
-			. '(\S.{0,2000})\:\ *'.TEXY_MODIFIER_H.'?\n' // Term:
+			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?' // .{color:red}
+			. '(\S.{0,2000})\:\ *'.TexyPatterns::MODIFIER_H.'?\n' // Term:
 			. '(\ ++)('.implode('|', $REul).')\ *+\S.*$#mUu', // - description
 			'list/definition'
 		);
@@ -170,7 +170,7 @@ final class TexyListModule extends TexyModule
 		$mod->decorate($tx, $el);
 		$parser->moveBackward(2);
 
-		$patternTerm = '#^\n?(\S.*)\:\ *'.TEXY_MODIFIER_H.'?()$#mUA';
+		$patternTerm = '#^\n?(\S.*)\:\ *'.TexyPatterns::MODIFIER_H.'?()$#mUA';
 
 		while (TRUE) {
 			if ($elItem = $this->patternItem($parser, $bullet, TRUE, 'dd')) {
@@ -215,7 +215,7 @@ final class TexyListModule extends TexyModule
 	{
 		$tx = $this->texy;
 		$spacesBase = $indented ? ('\ {1,}') : '';
-		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".TEXY_MODIFIER_H."?()$#mAUu";
+		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".TexyPatterns::MODIFIER_H."?()$#mAUu";
 
 		// first line with bullet
 		$matches = NULL;

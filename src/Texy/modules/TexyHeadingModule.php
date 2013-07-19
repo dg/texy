@@ -70,14 +70,14 @@ final class TexyHeadingModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'patternUnderline'),
-			'#^(\S.{0,1000})'.TEXY_MODIFIER_H.'?\n'
+			'#^(\S.{0,1000})'.TexyPatterns::MODIFIER_H.'?\n'
 			. '(\#{3,}+|\*{3,}+|={3,}+|-{3,}+)$#mU',
 			'heading/underlined'
 		);
 
 		$texy->registerBlockPattern(
 			array($this, 'patternSurround'),
-			'#^(\#{2,}+|={2,}+)(.+)'.TEXY_MODIFIER_H.'?()$#mU',
+			'#^(\#{2,}+|={2,}+)(.+)'.TexyPatterns::MODIFIER_H.'?()$#mU',
 			'heading/surrounded'
 		);
 	}

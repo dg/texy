@@ -31,13 +31,13 @@ final class TexyHtmlModule extends TexyModule
 
 		$texy->registerLinePattern(
 			array($this, 'patternTag'),
-			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9:-]++|=\s*+"[^"'.TEXY_MARK.']*+"|=\s*+\'[^\''.TEXY_MARK.']*+\'|=[^\s>'.TEXY_MARK.']++)*)\s*+(/?)>#isu',
+			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9:-]++|=\s*+"[^"'.TexyPatterns::MARK.']*+"|=\s*+\'[^\''.TexyPatterns::MARK.']*+\'|=[^\s>'.TexyPatterns::MARK.']++)*)\s*+(/?)>#isu',
 			'html/tag'
 		);
 
 		$texy->registerLinePattern(
 			array($this, 'patternComment'),
-			'#<!--([^'.TEXY_MARK.']*?)-->#is',
+			'#<!--([^'.TexyPatterns::MARK.']*?)-->#is',
 			'html/comment'
 		);
 	}

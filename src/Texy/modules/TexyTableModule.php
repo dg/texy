@@ -33,7 +33,7 @@ final class TexyTableModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'patternTable'),
-			'#^(?:'.TEXY_MODIFIER_HV.'\n)?' // .{color: red}
+			'#^(?:'.TexyPatterns::MODIFIER_HV.'\n)?' // .{color: red}
 			. '\|.*()$#mU', // | ....
 			'table'
 		);
@@ -70,7 +70,7 @@ final class TexyTableModule extends TexyModule
 
 		$parser->moveBackward();
 
-		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\\1*\|? *'.TEXY_MODIFIER_H.'?()$#Um', $matches)) {
+		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\\1*\|? *'.TexyPatterns::MODIFIER_H.'?()$#Um', $matches)) {
 			list(, , $mContent, $mMod) = $matches;
 			// [1] => # / =
 			// [2] => ....
@@ -104,7 +104,7 @@ final class TexyTableModule extends TexyModule
 				continue;
 			}
 
-			if ($parser->next('#^\|(.*)(?:|\|\ *'.TEXY_MODIFIER_HV.'?)()$#U', $matches)) {
+			if ($parser->next('#^\|(.*)(?:|\|\ *'.TexyPatterns::MODIFIER_HV.'?)()$#U', $matches)) {
 				// smarter head detection
 				if ($rowCounter === 0 && !$isHead && $parser->next('#^\|[=-][+|=-]{2,}$#Um', $foo)) {
 					$isHead = TRUE;
@@ -164,7 +164,7 @@ final class TexyTableModule extends TexyModule
 					}
 
 					// common cell
-					if (!preg_match('#(\*??)\ *'.TEXY_MODIFIER_HV.'??(.*)'.TEXY_MODIFIER_HV.'?\ *()$#AU', $cell, $matches)) {
+					if (!preg_match('#(\*??)\ *'.TexyPatterns::MODIFIER_HV.'??(.*)'.TexyPatterns::MODIFIER_HV.'?\ *()$#AU', $cell, $matches)) {
 						continue;
 					}
 					list(, $mHead, $mModCol, $mContent, $mMod) = $matches;
