@@ -16,6 +16,9 @@
 	"require-dev": {
 		"nette/tester": "0.9.*"
 	},
+	"replace": {
+		"dg/texy": "self.version"
+	},
 	"autoload": {
 		"files": ["src/texy.php"]
 	}
