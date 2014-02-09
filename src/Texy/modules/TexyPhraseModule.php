@@ -188,12 +188,18 @@ final class TexyPhraseModule extends TexyModule
 			'phrase/code'
 		);
 
-
 		// ....:LINK
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
 			'#(['.TexyPatterns::CHAR.'0-9@\#$%&.,_-]++)()(?=:\[)(?::('.TexyPatterns::LINK_URL.'))()#Uu',
 			'phrase/quicklink'
+		);
+
+		// [text |link]
+		$texy->registerLinePattern(
+			array($this, 'patternPhrase'),
+			'#(?<!\[)\[(?![\s*])([^|\r\n\]]++)\|((?:[^'.TexyPatterns::MARK.'|\r\n \]]++|[ ])+)'.TexyPatterns::MODIFIER.'?(?<!\s)\](?!\])()#Uu',
+			'phrase/wikilink'
 		);
 
 
@@ -220,6 +226,11 @@ final class TexyPhraseModule extends TexyModule
 		// [2] => ...
 		// [3] => .(title)[class]{style}
 		// [4] => LINK
+
+		if ($phrase === 'phrase/wikilink') {
+			list($mLink, $mMod) = array($mMod, $mLink);
+			$mContent = trim($mContent);
+		}
 
 		$tx = $this->texy;
 		$mod = new TexyModifier($mMod);

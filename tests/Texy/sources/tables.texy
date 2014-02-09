@@ -67,3 +67,6 @@ List block correct, but extra table cell (bottom-right):
 |           | 1) one     |           |
 |          ^| 2) two    ^|          ^|
 |          ^| 3) three  ^|           |
+
+
+| [a|link] | [b | link] |
