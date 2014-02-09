@@ -8,6 +8,10 @@
 
 
 // Check PHP configuration
+if (version_compare(PHP_VERSION, '5.2.0') < 0) {
+	throw new Exception('Texy requires PHP 5.2.0 or newer.');
+}
+
 if (extension_loaded('mbstring')) {
 	if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
 		mb_internal_encoding('pass');
@@ -50,23 +54,3 @@ require_once dirname(__FILE__) . '/Texy/modules/TexyEmoticonModule.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyTableModule.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyTypographyModule.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyHtmlOutputModule.php';
-
-
-/**
- * Compatibility with PHP < 5.1.
- */
-if (!class_exists('LogicException', FALSE)) {
-	class LogicException extends Exception {}
-}
-
-if (!class_exists('InvalidArgumentException', FALSE)) {
-	class InvalidArgumentException extends LogicException {}
-}
-
-if (!class_exists('RuntimeException', FALSE)) {
-	class RuntimeException extends Exception {}
-}
-
-if (!class_exists('UnexpectedValueException', FALSE)) {
-	class UnexpectedValueException extends RuntimeException {}
-}
