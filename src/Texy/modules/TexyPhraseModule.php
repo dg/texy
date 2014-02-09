@@ -202,6 +202,13 @@ final class TexyPhraseModule extends TexyModule
 			'phrase/wikilink'
 		);
 
+		// [text](link)
+		$texy->registerLinePattern(
+			array($this, 'patternPhrase'),
+			'#(?<![[.])\[(?![\s*])((?:[^|\r\n \]]++|[ ])+)'.TexyPatterns::MODIFIER.'?(?<!\s)\]\(((?:[^'.TexyPatterns::MARK.'\r )]++|[ ])+)\)()#Uu',
+			'phrase/markdown'
+		);
+
 
 		$texy->allowed['phrase/ins'] = FALSE;
 		$texy->allowed['phrase/del'] = FALSE;

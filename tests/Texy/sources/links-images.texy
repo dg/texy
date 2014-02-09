@@ -28,6 +28,8 @@ Odkazy
 
 - wiki link [Texy|http://texy.info]
 - wiki link [Texy | http://texy.info .{color:blue}]
+- markdown link [Texy](http://texy.info)
+- markdown link [Texy .{color:blue}](http://texy.info)
 
 Obrázkové odkazy:
 -----------------
