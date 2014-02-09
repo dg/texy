@@ -1,12 +1,8 @@
 <?php
 
 /**
- * Texy! is human-readable text to HTML converter (http://texy.info)
- *
+ * This file is part of the Texy! (http://texy.info)
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
  */
 
 
@@ -14,7 +10,6 @@
  * Images module.
  *
  * @author     David Grudl
- * @package    Texy
  */
 final class TexyImageModule extends TexyModule
 {
@@ -326,9 +321,6 @@ final class TexyImageModule extends TexyModule
 }
 
 
-/**
- * @package Texy
- */
 final class TexyImage extends TexyObject
 {
 	/** @var string  base image URL */

@@ -3,16 +3,11 @@
 /**
  * Texy! is human-readable text to HTML converter (http://texy.info)
  *
- * Copyright (c) 2004, 2012 David Grudl (http://davidgrudl.com)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
+ * Copyright (c) 2004, 2014 David Grudl (http://davidgrudl.com)
  */
 
 
-/**
- * Check PHP configuration.
- */
+// Check PHP configuration
 if (extension_loaded('mbstring')) {
 	if (mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') { // U??
 		mb_internal_encoding('pass');
@@ -27,7 +22,7 @@ if (ini_get('zend.ze1_compatibility_mode') % 256 ||
 }
 
 
-// Texy! libraries
+// load libraries
 require_once dirname(__FILE__) . '/Texy/TexyPatterns.php';
 require_once dirname(__FILE__) . '/Texy/TexyObject.php';
 require_once dirname(__FILE__) . '/Texy/TexyHtml.php';
