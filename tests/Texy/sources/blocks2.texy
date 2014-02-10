@@ -48,25 +48,72 @@ Text mezi @notexy ..... a @ nebude Texy *formátovat*
 
 
 /--texysource
-Text mezi @notexy ..... a @ nebude Texy *formátovat*
+Code: *formátovat*
+  &nbsp; <br /> <xx>
 \--
 
 /--code
-  function reImage($matches) {
-    $content = $matches[1];
-    $align = $matches[5];
-    $href = $matches[6];
-  }
-  &nbsp; <br />
-  &amp;amp;
+Code: *formátovat*
+  &nbsp; <br /> <xx>
 \-- xxx
 
+/--code
+	Code: Odsazeny
+	 text
+\--
+
 /--html
-Text mezi @notexy ..... a @ nebude Texy *formátovat*
-  &nbsp; <br />
+HTML: *formátovat*
+  &nbsp; <br /> <xx>
+\--
+
+/--html
+	Html: Odsazeny
+	 text
 \--
 
 /--text
-Text mezi @notexy ..... a @ nebude Texy *formátovat*
-  &nbsp; <br />
+Text: *formátovat*
+  &nbsp; <br /> <xx>
+\--
+
+/--text
+	Text: Odsazeny
+	 text
+\--
+
+/--
+Defaut: *formátovat*
+  &nbsp; <br /> <xx>
+\--
+
+
+/--
+	Default: Odsazeny
+	 text
+\--
+
+/--pre
+PRE: *formátovat*
+  &nbsp; <br /> <xx>
+\--
+
+/--pre
+	PRE: Odsazeny
+	 text
+\--
+
+/--comment
+Comment: *formátovat*
+  &nbsp; <br /> <xx>
+\--
+
+/--div
+Div: *formátovat*
+  &nbsp; <br /> <xx>
+\--
+
+/--div
+	Div: Odsazeny
+	 text
 \--
