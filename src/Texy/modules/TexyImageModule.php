@@ -43,6 +43,7 @@ final class TexyImageModule extends TexyModule
 		$this->texy = $texy;
 
 		$texy->allowed['image/definition'] = TRUE;
+		$texy->allowed['image/hover'] = TRUE;
 		$texy->addHandler('image', array($this, 'solve'));
 		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
 
@@ -302,7 +303,7 @@ final class TexyImageModule extends TexyModule
 		$el->attrs['height'] = $image->height;
 
 		// onmouseover actions generate
-		if ($image->overURL !== NULL) {
+		if (!empty($tx->allowed['image/hover']) && $image->overURL !== NULL) {
 			$overSrc = Texy::prependRoot($image->overURL, $this->root);
 			$el->attrs['onmouseover'] = 'this.src=\'' . addSlashes($overSrc) . '\'';
 			$el->attrs['onmouseout'] = 'this.src=\'' . addSlashes($el->attrs['src']) . '\'';
