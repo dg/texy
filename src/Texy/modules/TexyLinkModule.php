@@ -16,6 +16,9 @@ final class TexyLinkModule extends TexyModule
 	/** @var string  root of relative links */
 	public $root = '';
 
+	/** @var string image popup class */
+	public $imageClass;
+
 	/** @var string image popup event */
 	public $imageOnClick = 'return !popupImage(this.href)';  //
 
@@ -305,7 +308,11 @@ final class TexyLinkModule extends TexyModule
 		if ($link->type === TexyLink::IMAGE) {
 			// image
 			$el->attrs['href'] = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
-			$el->attrs['onclick'] = $this->imageOnClick;
+			if ($this->imageClass) {
+				$el->attrs['class'][] = $this->imageClass;
+			} else {
+				$el->attrs['onclick'] = $this->imageOnClick;
+			}
 
 		} else {
 			$el->attrs['href'] = Texy::prependRoot($link->URL, $this->root);
