@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * The captioned figures.
  *
  * @author     David Grudl
  */
-final class TexyFigureModule extends TexyModule
+final class FigureModule extends Texy\Module
 {
 	/** @var string  non-floated box CSS class */
 	public $class = 'figure';
@@ -34,8 +38,8 @@ final class TexyFigureModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'pattern'),
-			'#^\[\* *+([^\n'.TexyPatterns::MARK.']{1,1000})'.TexyPatterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::('.TexyPatterns::LINK_URL.'|:))?? ++\*\*\* ++(.{0,2000})'.TexyPatterns::MODIFIER_H.'?()$#mUu',
+			'#^\[\* *+([^\n'.Texy\Patterns::MARK.']{1,1000})'.Texy\Patterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
+			. '(?::('.Texy\Patterns::LINK_URL.'|:))?? ++\*\*\* ++(.{0,2000})'.Texy\Patterns::MODIFIER_H.'?()$#mUu',
 			'figure'
 		);
 	}
@@ -44,10 +48,10 @@ final class TexyFigureModule extends TexyModule
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function pattern($parser, $matches)
 	{
@@ -61,14 +65,14 @@ final class TexyFigureModule extends TexyModule
 
 		$tx = $this->texy;
 		$image = $tx->imageModule->factoryImage($mURLs, $mImgMod.$mAlign);
-		$mod = new TexyModifier($mMod);
+		$mod = new Texy\Modifier($mMod);
 		$mContent = ltrim($mContent);
 
 		if ($mLink) {
 			if ($mLink === ':') {
-				$link = new TexyLink($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
+				$link = new Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
 				$link->raw = ':';
-				$link->type = TexyLink::IMAGE;
+				$link->type = Link::IMAGE;
 			} else {
 				$link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
 			}
@@ -83,33 +87,33 @@ final class TexyFigureModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
-	 * @param  TexyImage
-	 * @param  TexyLink
+	 * @param  Texy\HandlerInvocation  handler invocation
+	 * @param  Image
+	 * @param  Link
 	 * @param  string
-	 * @param  TexyModifier
-	 * @return TexyHtml|FALSE
+	 * @param  Texy\Modifier
+	 * @return Texy\HtmlElement|FALSE
 	 */
-	public function solve($invocation, TexyImage $image, $link, $content, $mod)
+	public function solve($invocation, Image $image, $link, $content, $mod)
 	{
 		$tx = $this->texy;
 
 		$hAlign = $image->modifier->hAlign;
 		$image->modifier->hAlign = NULL;
 
-		$elImg = $tx->imageModule->solve(NULL, $image, $link); // returns TexyHtml or false!
+		$elImg = $tx->imageModule->solve(NULL, $image, $link); // returns Texy\HtmlElement or false!
 		if (!$elImg) {
 			return FALSE;
 		}
 
-		$el = TexyHtml::el('div');
+		$el = Texy\HtmlElement::el('div');
 		if (!empty($image->width) && $this->widthDelta !== FALSE) {
 			$el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
 		}
 		$mod->decorate($tx, $el);
 
 		$el[0] = $elImg;
-		$el[1] = TexyHtml::el('p');
+		$el[1] = Texy\HtmlElement::el('p');
 		$el[1]->parseLine($tx, ltrim($content));
 
 		$class = $this->class;

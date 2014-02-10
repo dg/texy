@@ -5,12 +5,14 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * HTML helper.
  *
  * usage:
- * $anchor = TexyHtml::el('a')->href($link)->setText('Texy');
+ * $anchor = HtmlElement::el('a')->href($link)->setText('Texy');
  * $el->class = 'myclass';
  *
  * echo $el->startTag(), $el->endTag();
@@ -18,7 +20,7 @@
  * @property   mixed element's attributes
  * @author     David Grudl
  */
-class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ IteratorAggregate
+class HtmlElement extends Object implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 {
 	/** @var string  element's name */
 	private $name;
@@ -29,7 +31,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	/** @var array  element's attributes */
 	public $attrs = array();
 
-	/** @var array  of TexyHtml | string nodes */
+	/** @var array  of HtmlElement | string nodes */
 	protected $children = array();
 
 	/** @var bool  use XHTML syntax? */
@@ -77,7 +79,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	 * Static factory.
 	 * @param  string element name (or NULL)
 	 * @param  array|string element's attributes (or textual content)
-	 * @return TexyHtml
+	 * @return HtmlElement
 	 */
 	public static function el($name = NULL, $attrs = NULL)
 	{
@@ -102,7 +104,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	final public function setName($name, $empty = NULL)
 	{
 		if ($name !== NULL && !is_string($name)) {
-			throw new InvalidArgumentException("Name must be string or NULL.");
+			throw new \InvalidArgumentException("Name must be string or NULL.");
 		}
 
 		$this->name = $name;
@@ -164,7 +166,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	final public function __call($m, $args)
 	{
 		if (count($args) !== 1) {
-			throw new InvalidArgumentException("Just one argument is required.");
+			throw new \InvalidArgumentException("Just one argument is required.");
 		}
 		$this->attrs[$m] = $args[0];
 		return $this;
@@ -202,7 +204,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 			$this->removeChildren();
 			$this->children = array($text);
 		} elseif ($text !== NULL) {
-			throw new InvalidArgumentException('Content must be scalar.');
+			throw new \InvalidArgumentException('Content must be scalar.');
 		}
 		return $this;
 	}
@@ -227,7 +229,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 
 	/**
 	 * Adds new element's child.
-	 * @param  TexyHtml|string child node
+	 * @param  HtmlElement|string child node
 	 * @return self
 	 */
 	final public function add($child)
@@ -237,10 +239,10 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 
 
 	/**
-	 * Creates and adds a new TexyHtml child.
+	 * Creates and adds a new HtmlElement child.
 	 * @param  string  elements's name
 	 * @param  array|string element's attributes (or textual content)
-	 * @return TexyHtml  created element
+	 * @return HtmlElement  created element
 	 */
 	final public function create($name, $attrs = NULL)
 	{
@@ -252,14 +254,14 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	/**
 	 * Inserts child node.
 	 * @param  int
-	 * @param  TexyHtml node
+	 * @param  HtmlElement node
 	 * @param  bool
 	 * @return self
 	 * @throws Exception
 	 */
 	public function insert($index, $child, $replace = FALSE)
 	{
-		if ($child instanceof TexyHtml || is_string($child)) {
+		if ($child instanceof HtmlElement || is_string($child)) {
 			if ($index === NULL) { // append
 				$this->children[] = $child;
 
@@ -268,7 +270,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 			}
 
 		} else {
-			throw new /*::*/InvalidArgumentException('Child node must be scalar or TexyHtml object.');
+			throw new \InvalidArgumentException('Child node must be scalar or HtmlElement object.');
 		}
 
 		return $this;
@@ -278,7 +280,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	/**
 	 * Inserts (replaces) child node (ArrayAccess implementation).
 	 * @param  int
-	 * @param  TexyHtml node
+	 * @param  HtmlElement node
 	 * @return void
 	 */
 	final public function offsetSet($index, $child)
@@ -541,7 +543,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	public function validateChild($child, $dtd)
 	{
 		if (isset($dtd[$this->name])) {
-			if ($child instanceof TexyHtml) {
+			if ($child instanceof HtmlElement) {
 				$child = $child->name;
 			}
 			return isset($dtd[$this->name][1][$child]);
@@ -563,7 +565,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 		// special escape sequences
 		$s = str_replace(array('\)', '\*'), array('&#x29;', '&#x2A;'), $s);
 
-		$parser = new TexyLineParser($texy, $this);
+		$parser = new LineParser($texy, $this);
 		$parser->parse($s);
 		return $parser;
 	}
@@ -578,7 +580,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	 */
 	final public function parseBlock(Texy $texy, $s, $indented = FALSE)
 	{
-		$parser = new TexyBlockParser($texy, $this, $indented);
+		$parser = new BlockParser($texy, $this, $indented);
 		$parser->parse($s);
 	}
 

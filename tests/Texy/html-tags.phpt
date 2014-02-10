@@ -21,7 +21,7 @@ Assert::matchFile(
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))
 );
 
-TexyConfigurator::safeMode($texy);
+Texy\Configurator::safeMode($texy);
 Assert::matchFile(
 	__DIR__ . '/expected/html-tags1b.html',
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))

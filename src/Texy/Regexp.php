@@ -5,19 +5,13 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy;
 
-class TexyRegexp
+
+class Regexp
 {
 	const ALL = 1;
 	const OFFSET_CAPTURE = 2;
-
-	private static $messages = array(
-		PREG_INTERNAL_ERROR => 'Internal error',
-		PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit was exhausted',
-		PREG_RECURSION_LIMIT_ERROR => 'Recursion limit was exhausted',
-		PREG_BAD_UTF8_ERROR => 'Malformed UTF-8 data',
-		5 => 'Offset didn\'t correspond to the begin of a valid UTF-8 code point', // PREG_BAD_UTF8_OFFSET_ERROR
-	);
 
 
 	/**
@@ -29,10 +23,15 @@ class TexyRegexp
 	 */
 	public static function split($subject, $pattern, $flags = 0)
 	{
+		/*set_error_handler(function($severity, $message) use ($pattern) { // preg_last_error does not return compile errors
+			restore_error_handler();
+			throw new RegexpException("$message in pattern: $pattern");
+		});*/
 		$reFlags = (($flags & self::OFFSET_CAPTURE) ? PREG_SPLIT_OFFSET_CAPTURE : 0) | PREG_SPLIT_DELIM_CAPTURE;
 		$res = preg_split($pattern, $subject, -1, $reFlags);
+		//restore_error_handler();
 		if (preg_last_error()) { // run-time error
-			trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
+			throw new RegexpException(NULL, preg_last_error(), $pattern);
 		}
 		return $res;
 	}
@@ -51,14 +50,19 @@ class TexyRegexp
 		if ($offset > strlen($subject)) {
 			return NULL;
 		}
+		/*set_error_handler(function($severity, $message) use ($pattern) { // preg_last_error does not return compile errors
+			restore_error_handler();
+			throw new RegexpException("$message in pattern: $pattern");
+		});*/
 		$reFlags = ($flags & self::OFFSET_CAPTURE) ? PREG_OFFSET_CAPTURE : 0;
 		if ($flags & self::ALL) {
 			$res = preg_match_all($pattern, $subject, $m, $reFlags | PREG_SET_ORDER, $offset);
 		} else {
 			$res = preg_match($pattern, $subject, $m, $reFlags, $offset);
 		}
+		//restore_error_handler();
 		if (preg_last_error()) { // run-time error
-			trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
+			throw new RegexpException(NULL, preg_last_error(), $pattern);
 		} elseif ($res) {
 			return $m;
 		}
@@ -75,9 +79,18 @@ class TexyRegexp
 	public static function replace($subject, $pattern, $replacement = NULL)
 	{
 		if (is_object($replacement) || is_array($replacement)) {
+			/*set_error_handler(function($severity, $message) use (& $tmp) { // preg_last_error does not return compile errors
+				restore_error_handler();
+				throw new RegexpException("$message in pattern: $tmp");
+			});
+			foreach ((array) $pattern as $tmp) {
+				preg_match($tmp, '');
+			}
+			restore_error_handler();*/
+
 			$res = preg_replace_callback($pattern, $replacement, $subject);
 			if ($res === NULL && preg_last_error()) { // run-time error
-				trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
+				throw new RegexpException(NULL, preg_last_error(), $pattern);
 			}
 			return $res;
 
@@ -86,9 +99,14 @@ class TexyRegexp
 			$pattern = array_keys($pattern);
 		}
 
+		/*set_error_handler(function($severity, $message) use ($pattern) { // preg_last_error does not return compile errors
+			restore_error_handler();
+			throw new RegexpException("$message in pattern: " . implode(' or ', (array) $pattern));
+		});*/
 		$res = preg_replace($pattern, $replacement, $subject);
+		//restore_error_handler();
 		if (preg_last_error()) { // run-time error
-			trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
+			throw new RegexpException(NULL, preg_last_error(), implode(' or ', (array) $pattern));
 		}
 		return $res;
 	}

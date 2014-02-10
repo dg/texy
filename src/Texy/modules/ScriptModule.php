@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Scripts module.
  *
  * @author     David Grudl
  */
-final class TexyScriptModule extends TexyModule
+final class ScriptModule extends Texy\Module
 {
 	/**
 	 * @var callback|object  script elements handler
@@ -32,7 +36,7 @@ final class TexyScriptModule extends TexyModule
 
 		$texy->registerLinePattern(
 			array($this, 'pattern'),
-			'#\{\{((?:[^'.TexyPatterns::MARK.'}]++|[}])+)\}\}()#U',
+			'#\{\{((?:[^'.Texy\Patterns::MARK.'}]++|[}])+)\}\}()#U',
 			'script'
 		);
 	}
@@ -41,10 +45,10 @@ final class TexyScriptModule extends TexyModule
 	/**
 	 * Callback for: {{...}}.
 	 *
-	 * @param  TexyLineParser
+	 * @param  Texy\LineParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function pattern($parser, $matches)
 	{
@@ -58,7 +62,7 @@ final class TexyScriptModule extends TexyModule
 
 		$args = $raw = NULL;
 		// function(arg, arg, ...) or function: arg, arg
-		if ($matches = TexyRegexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
+		if ($matches = Texy\Regexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
 			$cmd = $matches[1];
 			$raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
 			if ($raw === '') {
@@ -88,11 +92,11 @@ final class TexyScriptModule extends TexyModule
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  TexyHandlerInvocation  handler invocation
+	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  string  command
 	 * @param  array   arguments
 	 * @param  string  arguments in raw format
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function solve($invocation, $cmd, $args, $raw)
 	{

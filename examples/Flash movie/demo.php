@@ -6,16 +6,16 @@
 
 
 // include Texy!
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
  * User handler for images
  *
- * @param TexyHandlerInvocation  handler invocation
- * @param TexyImage
- * @param TexyLink
- * @return TexyHtml|string|FALSE
+ * @param Texy\HandlerInvocation  handler invocation
+ * @param Texy\Modules\Image
+ * @param Texy\Modules\Link
+ * @return Texy\HtmlElement|string|FALSE
  */
 function imageHandler($invocation, $image, $link)
 {

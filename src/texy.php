@@ -8,8 +8,8 @@
 
 
 // Check PHP configuration
-if (version_compare(PHP_VERSION, '5.2.0') < 0) {
-	throw new Exception('Texy requires PHP 5.2.0 or newer.');
+if (version_compare(PHP_VERSION, '5.3.0') < 0) {
+	throw new Exception('Texy requires PHP 5.3.0 or newer.');
 }
 
 if (extension_loaded('mbstring')) {
@@ -19,39 +19,35 @@ if (extension_loaded('mbstring')) {
 	}
 }
 
-if (ini_get('zend.ze1_compatibility_mode') % 256 ||
-	preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))
-) {
-	throw new RuntimeException("Texy cannot run with zend.ze1_compatibility_mode enabled.");
-}
-
 
 // load libraries
-require_once dirname(__FILE__) . '/Texy/TexyPatterns.php';
-require_once dirname(__FILE__) . '/Texy/TexyObject.php';
-require_once dirname(__FILE__) . '/Texy/TexyHtml.php';
-require_once dirname(__FILE__) . '/Texy/TexyModifier.php';
-require_once dirname(__FILE__) . '/Texy/TexyModule.php';
-require_once dirname(__FILE__) . '/Texy/TexyParser.php';
-require_once dirname(__FILE__) . '/Texy/TexyUtf.php';
-require_once dirname(__FILE__) . '/Texy/TexyConfigurator.php';
-require_once dirname(__FILE__) . '/Texy/TexyHandlerInvocation.php';
-require_once dirname(__FILE__) . '/Texy/TexyRegexp.php';
-require_once dirname(__FILE__) . '/Texy/Texy.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyParagraphModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyBlockModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyHeadingModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyHorizLineModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyHtmlModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyFigureModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyImageModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyLinkModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyListModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyLongWordsModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyPhraseModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyBlockQuoteModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyScriptModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyEmoticonModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyTableModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyTypographyModule.php';
-require_once dirname(__FILE__) . '/Texy/modules/TexyHtmlOutputModule.php';
+require_once __DIR__ . '/Texy/Patterns.php';
+require_once __DIR__ . '/Texy/Object.php';
+require_once __DIR__ . '/Texy/HtmlElement.php';
+require_once __DIR__ . '/Texy/Modifier.php';
+require_once __DIR__ . '/Texy/Module.php';
+require_once __DIR__ . '/Texy/Parser.php';
+require_once __DIR__ . '/Texy/Configurator.php';
+require_once __DIR__ . '/Texy/HandlerInvocation.php';
+require_once __DIR__ . '/Texy/Regexp.php';
+require_once __DIR__ . '/Texy/RegexpException.php';
+require_once __DIR__ . '/Texy/Texy.php';
+require_once __DIR__ . '/Texy/modules/ParagraphModule.php';
+require_once __DIR__ . '/Texy/modules/BlockModule.php';
+require_once __DIR__ . '/Texy/modules/HeadingModule.php';
+require_once __DIR__ . '/Texy/modules/HorizLineModule.php';
+require_once __DIR__ . '/Texy/modules/HtmlModule.php';
+require_once __DIR__ . '/Texy/modules/FigureModule.php';
+require_once __DIR__ . '/Texy/modules/ImageModule.php';
+require_once __DIR__ . '/Texy/modules/LinkModule.php';
+require_once __DIR__ . '/Texy/modules/ListModule.php';
+require_once __DIR__ . '/Texy/modules/LongWordsModule.php';
+require_once __DIR__ . '/Texy/modules/PhraseModule.php';
+require_once __DIR__ . '/Texy/modules/BlockQuoteModule.php';
+require_once __DIR__ . '/Texy/modules/ScriptModule.php';
+require_once __DIR__ . '/Texy/modules/EmoticonModule.php';
+require_once __DIR__ . '/Texy/modules/TableModule.php';
+require_once __DIR__ . '/Texy/modules/TypographyModule.php';
+require_once __DIR__ . '/Texy/modules/HtmlOutputModule.php';
+
+class_alias('Texy\Texy', 'Texy');

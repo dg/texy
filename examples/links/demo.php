@@ -6,16 +6,16 @@
 
 
 // include Texy!
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
- * @param TexyHandlerInvocation  handler invocation
+ * @param Texy\HandlerInvocation  handler invocation
  * @param string
  * @param string
- * @param TexyModifier
- * @param TexyLink
- * @return TexyHtml|string|FALSE
+ * @param Texy\Modifier
+ * @param Texy\Modules\Link
+ * @return Texy\HtmlElement|string|FALSE
  */
 function phraseHandler($invocation, $phrase, $content, $modifier, $link)
 {

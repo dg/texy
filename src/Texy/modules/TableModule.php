@@ -5,13 +5,17 @@
  * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
  */
 
+namespace Texy\Modules;
+
+use Texy;
+
 
 /**
  * Table module.
  *
  * @author     David Grudl
  */
-final class TexyTableModule extends TexyModule
+final class TableModule extends Texy\Module
 {
 	/** @var string  CSS class for odd rows */
 	public $oddClass;
@@ -28,7 +32,7 @@ final class TexyTableModule extends TexyModule
 
 		$texy->registerBlockPattern(
 			array($this, 'patternTable'),
-			'#^(?:'.TexyPatterns::MODIFIER_HV.'\n)?' // .{color: red}
+			'#^(?:'.Texy\Patterns::MODIFIER_HV.'\n)?' // .{color: red}
 			. '\|.*()$#mU', // | ....
 			'table'
 		);
@@ -44,10 +48,10 @@ final class TexyTableModule extends TexyModule
 	 * |------------------
 	 * | aa | bb | cc |
 	 *
-	 * @param  TexyBlockParser
+	 * @param  Texy\BlockParser
 	 * @param  array      regexp matches
 	 * @param  string     pattern name
-	 * @return TexyHtml|string|FALSE
+	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	public function patternTable($parser, $matches)
 	{
@@ -59,20 +63,20 @@ final class TexyTableModule extends TexyModule
 
 		$tx = $this->texy;
 
-		$el = TexyHtml::el('table');
-		$mod = new TexyModifier($mMod);
+		$el = Texy\HtmlElement::el('table');
+		$mod = new Texy\Modifier($mMod);
 		$mod->decorate($tx, $el);
 
 		$parser->moveBackward();
 
-		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\\1*\|? *'.TexyPatterns::MODIFIER_H.'?()$#Um', $matches)) {
+		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\\1*\|? *'.Texy\Patterns::MODIFIER_H.'?()$#Um', $matches)) {
 			list(, , $mContent, $mMod) = $matches;
 			// [1] => # / =
 			// [2] => ....
 			// [3] => .(title)[class]{style}<>
 
 			$caption = $el->create('caption');
-			$mod = new TexyModifier($mMod);
+			$mod = new Texy\Modifier($mMod);
 			$mod->decorate($tx, $caption);
 			$caption->parseLine($tx, $mContent);
 		}
@@ -99,7 +103,7 @@ final class TexyTableModule extends TexyModule
 				continue;
 			}
 
-			if ($parser->next('#^\|(.*)(?:|\|\ *'.TexyPatterns::MODIFIER_HV.'?)()$#U', $matches)) {
+			if ($parser->next('#^\|(.*)(?:|\|\ *'.Texy\Patterns::MODIFIER_HV.'?)()$#U', $matches)) {
 				// smarter head detection
 				if ($rowCounter === 0 && !$isHead && $parser->next('#^\|[=-][+|=-]{2,}$#Um', $foo)) {
 					$isHead = TRUE;
@@ -120,8 +124,8 @@ final class TexyTableModule extends TexyModule
 				// [1] => ....
 				// [2] => .(title)[class]{style}<>_
 
-				$elRow = TexyHtml::el('tr');
-				$mod = new TexyModifier($mMod);
+				$elRow = Texy\HtmlElement::el('tr');
+				$mod = new Texy\Modifier($mMod);
 				$mod->decorate($tx, $elRow);
 
 				$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
@@ -134,12 +138,12 @@ final class TexyTableModule extends TexyModule
 
 				// special escape sequence \|
 				$mContent = str_replace('\\|', "\x13", $mContent);
-				$mContent = TexyRegexp::replace($mContent, '#(\[[^\]]*)\|#', "$1\x13"); // HACK: support for [..|..]
+				$mContent = Texy\Regexp::replace($mContent, '#(\[[^\]]*)\|#', "$1\x13"); // HACK: support for [..|..]
 
 				foreach (explode('|', $mContent) as $cell) {
 					$cell = strtr($cell, "\x13", '|');
 					// rowSpan
-					if (isset($prevRow[$col]) && ($lineMode || ($matches = TexyRegexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU')))) {
+					if (isset($prevRow[$col]) && ($lineMode || ($matches = Texy\Regexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU')))) {
 						$prevRow[$col]->rowSpan++;
 						if (!$lineMode) {
 							$cell = isset($matches[1]) ? $matches[1] : '';
@@ -159,7 +163,7 @@ final class TexyTableModule extends TexyModule
 					}
 
 					// common cell
-					$matches = TexyRegexp::match($cell, '#(\*??)\ *'.TexyPatterns::MODIFIER_HV.'??(.*)'.TexyPatterns::MODIFIER_HV.'?\ *()$#AU');
+					$matches = Texy\Regexp::match($cell, '#(\*??)\ *'.Texy\Patterns::MODIFIER_HV.'??(.*)'.Texy\Patterns::MODIFIER_HV.'?\ *()$#AU');
 					if (!$matches) {
 						continue;
 					}
@@ -170,18 +174,18 @@ final class TexyTableModule extends TexyModule
 					// [4] => .(title)[class]{style}<>_
 
 					if ($mModCol) {
-						$colModifier[$col] = new TexyModifier($mModCol);
+						$colModifier[$col] = new Texy\Modifier($mModCol);
 					}
 
 					if (isset($colModifier[$col])) {
 						$mod = clone $colModifier[$col];
 					} else {
-						$mod = new TexyModifier;
+						$mod = new Texy\Modifier;
 					}
 
 					$mod->setProperties($mMod);
 
-					$elCell = new TexyTableCellElement;
+					$elCell = new TableCellElement;
 					$elCell->setName($isHead || ($mHead === '*') ? 'th' : 'td');
 					$mod->decorate($tx, $elCell);
 					$elCell->text = $mContent;
@@ -199,7 +203,7 @@ final class TexyTableModule extends TexyModule
 						$prevRow[$col]->text .= "\n";
 
 					} else {
-						$elCell = new TexyTableCellElement;
+						$elCell = new TableCellElement;
 						$elCell->setName($isHead ? 'th' : 'td');
 						if (isset($colModifier[$col])) {
 							$colModifier[$col]->decorate($tx, $elCell);
@@ -250,7 +254,7 @@ final class TexyTableModule extends TexyModule
 
 	/**
 	 * Parse text in all cells.
-	 * @param  TexyHtml
+	 * @param  Texy\HtmlElement
 	 * @return void
 	 */
 	private function finishPart($elPart)
@@ -272,7 +276,7 @@ final class TexyTableModule extends TexyModule
 					// multiline parse as block
 					// HACK: disable tables
 					$this->disableTables = TRUE;
-					$elCell->parseBlock($tx, Texy::outdent($text));
+					$elCell->parseBlock($tx, Texy\Texy::outdent($text));
 					$this->disableTables = FALSE;
 				} else {
 					$elCell->parseLine($tx, ltrim($text));
@@ -291,7 +295,7 @@ final class TexyTableModule extends TexyModule
 /**
  * Table cell TD / TH.
  */
-class TexyTableCellElement extends TexyHtml
+class TableCellElement extends Texy\HtmlElement
 {
 	/** @var int */
 	public $colSpan = 1;
