@@ -731,9 +731,12 @@ class Texy extends Object
 	final public static function outdent($s)
 	{
 		$s = trim($s, "\n");
-		$spaces = strspn($s, ' ');
-		if ($spaces) {
-			return Regexp::replace($s, "#^ {1,$spaces}#m", '');
+		$min = strlen($s);
+		foreach (Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
+			$min = min($min, strlen($m[0]) - 1);
+		}
+		if ($min) {
+			$s = Regexp::replace($s, "#^ {{$min}}#m", '');
 		}
 		return $s;
 	}
