@@ -47,8 +47,9 @@ class Regexp
 	 */
 	public static function match($subject, $pattern, $flags = 0, $offset = 0)
 	{
+		$empty = $flags & self::ALL ? array() : NULL;
 		if ($offset > strlen($subject)) {
-			return NULL;
+			return $empty;
 		}
 		/*set_error_handler(function($severity, $message) use ($pattern) { // preg_last_error does not return compile errors
 			restore_error_handler();
@@ -66,6 +67,7 @@ class Regexp
 		} elseif ($res) {
 			return $m;
 		}
+		return $empty;
 	}
 
 
