@@ -98,8 +98,8 @@ class Texy extends TexyObject
 	/** @var bool  remove soft hyphens (SHY)? */
 	public $removeSoftHyphens = TRUE;
 
-	/** @var mixed */
-	public static $advertisingNotice = 'once';
+	/** @deprecated */
+	public static $advertisingNotice = FALSE;
 
 	/** @var string */
 	public $nontextParagraph = 'div';
@@ -443,14 +443,6 @@ class Texy extends TexyObject
 
 		// created by TexyParagraphModule and then protected
 		$html = str_replace("\r", "\n", $html);
-
-		// this notice should remain
-		if (self::$advertisingNotice) {
-			$html .= "\n<!-- by Texy2! -->";
-			if (self::$advertisingNotice === 'once') {
-				self::$advertisingNotice = FALSE;
-			}
-		}
 
 		$this->processing = FALSE;
 

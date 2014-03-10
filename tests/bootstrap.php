@@ -16,7 +16,6 @@ Tester\Environment::setup();
 class_alias('Tester\Assert', 'Assert');
 date_default_timezone_set('Europe/Prague');
 $_GET = $_POST = $_COOKIE = array();
-Texy::$advertisingNotice = FALSE;
 
 
 if (extension_loaded('xdebug')) {
