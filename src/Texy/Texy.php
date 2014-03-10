@@ -732,7 +732,7 @@ class Texy extends Object
 	{
 		$s = trim($s, "\n");
 		$min = strlen($s);
-		foreach (Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
+		foreach ((array) Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
 			$min = min($min, strlen($m[0]) - 1);
 		}
 		if ($min) {
