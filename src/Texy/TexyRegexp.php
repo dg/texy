@@ -48,8 +48,9 @@ class TexyRegexp
 	 */
 	public static function match($subject, $pattern, $flags = 0, $offset = 0)
 	{
+		$empty = $flags & self::ALL ? array() : NULL;
 		if ($offset > strlen($subject)) {
-			return NULL;
+			return $empty;
 		}
 		$reFlags = ($flags & self::OFFSET_CAPTURE) ? PREG_OFFSET_CAPTURE : 0;
 		if ($flags & self::ALL) {
@@ -62,6 +63,7 @@ class TexyRegexp
 		} elseif ($res) {
 			return $m;
 		}
+		return $empty;
 	}
 
 
