@@ -138,8 +138,8 @@ final class BlockModule extends Texy\Module
 			$s = $tx->protect($s, Texy\Texy::CONTENT_BLOCK);
 			$el = Texy\HtmlElement::el('pre');
 			$mod->decorate($tx, $el);
-			$el->attrs['class'][] = $param; // lang
-			$el->create('code', $s);
+			$c = $el->create('code', $s);
+			$c->attrs['class'][] = "language-$param"; // lang
 			return $el;
 		}
 
