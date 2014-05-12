@@ -11,6 +11,12 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 }
 
 
+if (defined('PCRE_VERSION') && PCRE_VERSION == 8.34) {
+	Tester\Environment::skip('PCRE 8.34 is not supported due to bug #1451');
+}
+
+
+
 // configure environment
 Tester\Environment::setup();
 class_alias('Tester\Assert', 'Assert');

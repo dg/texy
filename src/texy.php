@@ -10,6 +10,9 @@
 // Check PHP configuration
 if (version_compare(PHP_VERSION, '5.2.0') < 0) {
 	throw new Exception('Texy requires PHP 5.2.0 or newer.');
+
+} elseif (defined('PCRE_VERSION') && PCRE_VERSION == 8.34) {
+	trigger_error('Texy: PCRE 8.34 is not supported due to bug #1451', E_USER_WARNING);
 }
 
 if (extension_loaded('mbstring')) {
