@@ -110,6 +110,19 @@ Specialni
 - <a href="javascript:alert('')">test7</a>
 - <a href="mailto:dave@example.com">test8</a>
 
+Pure
+------
+- www.texy.info
+- www.texy.info/path, www.texy.info/path? www.texy.info/path! www.texy.info/path)
+- www.texy.info/path#flag
+- www.texy.info/path/#!/flag
+- http://texy.info
+- https://texy.info
+- ftp://example.com
+- ftps://example.com
+- ftps://user:pass@example.com
+- dave@example.com
+
 
 [php Fashion1]: http://phpfashion.com/ text *o*dkazu .(title)[aa]
 [php Fashion2]: /trine/ .(title)
