@@ -294,7 +294,7 @@ Typography
 
 	en-dash: one – two
 
-	dimension sign 10×20
+	dimension sign 10 × 20 or 10×20
 
 	nonbreakable spaces in phone numbers +420 776 552 046
 
