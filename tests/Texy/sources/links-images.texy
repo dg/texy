@@ -105,6 +105,9 @@ Specialni
 - "text3":javascript:alert('')
 - "text4":mailto:dave@example.com
 - "text4":mailTO:dave@example.com
+- "text":#id
+- "text":./xx
+- "text":/xx
 - <a href="www.text.cz">test5</a>
 - <a href="hxxp://test/">test6</a>
 - <a href="javascript:alert('')">test7</a>
