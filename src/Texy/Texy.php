@@ -23,8 +23,8 @@ class Texy extends TexyObject
 	const NONE = FALSE;
 
 	// Texy version
-	const VERSION = '2.4';
-	const REVISION = 'released on 2014-02-10';
+	const VERSION = '2.5';
+	const REVISION = 'released on 2014-05-12';
 
 	// types of protection marks
 	const CONTENT_MARKUP = "\x17";
