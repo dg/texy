@@ -1,4 +1,4 @@
-Texy!
+Texy!   [![Buy me a coffee](http://files.nette.org/images/coffee1s.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CKHXEYFDKXKE8)
 ====
 
 Texy is text-to-HTML formatter and converter library written in PHP. It allows 
