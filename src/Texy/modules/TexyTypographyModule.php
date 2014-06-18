@@ -86,9 +86,9 @@ final class TexyTypographyModule extends TexyModule
 			'# --- #'                                 => "\xc2\xa0\xe2\x80\x94 ",          // em dash ---
 			'# ([\x{2013}\x{2014}])#u'                => "\xc2\xa0\$1",                    // &nbsp; behind dash (dash stays at line end)
 			'# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
-			'#-{1,}> #'                               => " \xe2\x86\x92 ",                 // right arrow -->
+			'#-{1,}> #'                               => "\xe2\x86\x92 ",                  // right arrow -->
 			'# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
-			'#={1,}> #'                               => " \xe2\x87\x92 ",                 // right arrow ==>
+			'#={1,}> #'                               => "\xe2\x87\x92 ",                  // right arrow ==>
 			'#\\+-#'                                  => "\xc2\xb1",                       // +-
 			'#(\d++) x (?=\d)#'                       => "\$1\xc2\xa0\xc3\x97\xc2\xa0",    // dimension sign 123 x 123...
 			'#(\d++)x(?=\d)#'                         => "\$1\xc3\x97",                    // dimension sign 123x123...
