@@ -16,7 +16,7 @@ final class TexyHtmlOutputModule extends TexyModule
 	public $indent = TRUE;
 
 	/** @var array */
-	public $preserveSpaces = array('textarea', 'pre', 'script');
+	public $preserveSpaces = array('textarea', 'pre', 'script', 'code', 'samp', 'kbd');
 
 	/** @var int  base indent level */
 	public $baseIndent = 0;
