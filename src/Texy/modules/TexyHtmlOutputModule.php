@@ -15,6 +15,9 @@ final class TexyHtmlOutputModule extends TexyModule
 	/** @var bool  indent HTML code? */
 	public $indent = TRUE;
 
+	/** @var array */
+	public $preserveSpaces = array('textarea', 'pre', 'script');
+
 	/** @var int  base indent level */
 	public $baseIndent = 0;
 
@@ -124,7 +127,7 @@ final class TexyHtmlOutputModule extends TexyModule
 			$item = reset($this->tagStack);
 			if ($item && !isset($item['dtdContent']['%DATA'])) {  // text not allowed?
 
-			} elseif (!empty($this->tagUsed['pre']) || !empty($this->tagUsed['textarea']) || !empty($this->tagUsed['script'])) {// inside pre & textarea preserve spaces
+			} elseif (array_intersect(array_keys($this->tagUsed, TRUE), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
 				$s = Texy::freezeSpaces($mText);
 
 			} else {
@@ -249,7 +252,7 @@ final class TexyHtmlOutputModule extends TexyModule
 					$mAttr .= " /";
 				}
 
-				$indent = $this->indent && empty($this->tagUsed['pre']) && empty($this->tagUsed['textarea']);
+				$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, TRUE), $this->preserveSpaces);
 
 				if ($indent && $mTag === 'br') { // formatting exception
 					return rtrim($s) . '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
