@@ -1,7 +1,7 @@
 Texy!   [![Buy me a coffee](http://files.nette.org/images/coffee1s.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CKHXEYFDKXKE8)
 ====
 
-Texy is text-to-HTML formatter and converter library written in PHP. It allows 
+Texy is text-to-HTML formatter and converter library written in PHP. It allows
 you to write structured documents (with images, links, nested lists, tables) without
 knowledge or using of HTML language. You write documents in humane easy-to-read
 plain text format and Texy! converts it to structurally and valid HTML code.
