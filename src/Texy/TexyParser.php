@@ -259,7 +259,12 @@ class TexyLineParser extends TexyParser
 
 			foreach ($names as $index => $name) {
 				if ($arrOffset[$name] < $offset) {
-					$delta = ($arrOffset[$name] === -2) ? 1 : 0;
+					$delta = 0;
+					if ($arrOffset[$name] === -2) {
+						do {
+							$delta++;
+						} while (isset($text[$offset + $delta]) && $text[$offset + $delta] >= "\x80" && $text[$offset + $delta] < "\xC0");
+					}
 
 					if ($offset + $delta > strlen($text)) {
 						unset($names[$index]);
