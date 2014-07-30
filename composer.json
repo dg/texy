@@ -21,8 +21,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Texy\\": "src/",
-			"Texy\\Modules\\": "src/modules/"
+			"Texy\\": "src/"
 		}
 	}
 }
