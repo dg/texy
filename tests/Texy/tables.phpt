@@ -4,6 +4,8 @@
  * Test: Tables
  */
 
+use Texy\Texy;
+
 require __DIR__ . '/../bootstrap.php';
 
 

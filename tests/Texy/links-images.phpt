@@ -4,6 +4,8 @@
  * Test: link & images.
  */
 
+use Texy\Texy;
+
 require __DIR__ . '/../bootstrap.php';
 
 
@@ -25,7 +27,7 @@ Assert::matchFile(
 );
 
 $texy = createTexy();
-Texy\Configurator::safeMode($texy);
+\Texy\Configurator::safeMode($texy);
 $texy->allowedTags['a'][] = 'rel';
 Assert::matchFile(
 	__DIR__ . '/expected/links-images2.html',
