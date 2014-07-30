@@ -7,6 +7,11 @@
 
 namespace Texy;
 
+// Check PCRE_VERSION here, because Composer cannot do that.
+if (PCRE_VERSION == 8.34 && PHP_VERSION_ID < 50513) {
+        trigger_error('Texy: PCRE 8.34 is not supported due to bug #1451', E_USER_WARNING);
+}
+
 
 /**
  * Texy! - Convert plain text to XHTML format using {@link process()}.
