@@ -4,6 +4,8 @@
  * Test: Very long lines.
  */
 
+use Texy\Texy;
+
 require __DIR__ . '/../bootstrap.php';
 
 

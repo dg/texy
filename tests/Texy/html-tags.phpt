@@ -4,6 +4,8 @@
  * Test: HTML tags.
  */
 
+use Texy\Texy;
+
 require __DIR__ . '/../bootstrap.php';
 
 
@@ -21,7 +23,7 @@ Assert::matchFile(
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))
 );
 
-Texy\Configurator::safeMode($texy);
+\Texy\Configurator::safeMode($texy);
 Assert::matchFile(
 	__DIR__ . '/expected/html-tags1b.html',
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))
