@@ -284,7 +284,6 @@ final class TexyImageModule extends TexyModule
 							$image->height = round($ratio * $size[1]);
 
 						} elseif (is_int($image->width)) {
-							$ratio = round($size[1] / $size[0] * $image->width);
 							$image->height = round($size[1] / $size[0] * $image->width);
 
 						} elseif (is_int($image->height)) {
