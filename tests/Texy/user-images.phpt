@@ -14,15 +14,15 @@ $texy->htmlOutputModule->lineWrap = 180;
 
 function imageHandler($invocation, $image, $link)
 {
-    $texy = $invocation->getTexy();
-    if ($image->URL == 'user')  // accepts only [* user *]
-    {
-        $image->URL = 'image.gif'; // image URL
-        $image->modifier->title = 'Texy! logo';
-        if ($link) $link->URL = 'image-big.gif'; // linked image
-    }
+	$texy = $invocation->getTexy();
+	if ($image->URL == 'user')  // accepts only [* user *]
+	{
+		$image->URL = 'image.gif'; // image URL
+		$image->modifier->title = 'Texy! logo';
+		if ($link) $link->URL = 'image-big.gif'; // linked image
+	}
 
-    return $invocation->proceed();
+	return $invocation->proceed();
 }
 
 $texy->addHandler('image', 'imageHandler');
