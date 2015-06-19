@@ -102,7 +102,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	final public function setName($name, $empty = NULL)
 	{
 		if ($name !== NULL && !is_string($name)) {
-			throw new InvalidArgumentException("Name must be string or NULL.");
+			throw new InvalidArgumentException('Name must be string or NULL.');
 		}
 
 		$this->name = $name;
@@ -259,7 +259,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	 */
 	public function insert($index, $child, $replace = FALSE)
 	{
-		if ($child instanceof TexyHtml || is_string($child)) {
+		if ($child instanceof self || is_string($child)) {
 			if ($index === NULL) { // append
 				$this->children[] = $child;
 
@@ -541,7 +541,7 @@ class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ Itera
 	public function validateChild($child, $dtd)
 	{
 		if (isset($dtd[$this->name])) {
-			if ($child instanceof TexyHtml) {
+			if ($child instanceof self) {
 				$child = $child->name;
 			}
 			return isset($dtd[$this->name][1][$child]);

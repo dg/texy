@@ -7,7 +7,6 @@
 
 
 /**
- *
  * @author     David Grudl
  */
 final class TexyHtmlOutputModule extends TexyModule
@@ -62,7 +61,7 @@ final class TexyHtmlOutputModule extends TexyModule
 		$this->xml = $texy->getOutputMode() & Texy::XML;
 
 		// special "base content"
-		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + array('html'=>1);
+		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + array('html' => 1);
 
 		// wellform and reformat
 		$s = TexyRegexp::replace(
@@ -84,9 +83,9 @@ final class TexyHtmlOutputModule extends TexyModule
 		$s = strtr($s, "\r", "\n");
 
 		// greedy chars
-		$s = TexyRegexp::replace($s, "#\\x07 *#", '');
+		$s = TexyRegexp::replace($s, '#\\x07 *#', '');
 		// back-tabs
-		$s = TexyRegexp::replace($s, "#\\t? *\\x08#", '');
+		$s = TexyRegexp::replace($s, '#\\t? *\\x08#', '');
 
 		// line wrap
 		if ($this->lineWrap > 0) {
@@ -191,7 +190,6 @@ final class TexyHtmlOutputModule extends TexyModule
 				array_unshift($this->tagStack, $item);
 			}
 
-
 		} else { // start tag
 
 			$dtdContent = $this->baseDTD;
@@ -203,7 +201,6 @@ final class TexyHtmlOutputModule extends TexyModule
 				if ($item) {
 					$dtdContent = $item['dtdContent'];
 				}
-
 
 			} else {
 				// optional end tag closing
@@ -236,7 +233,8 @@ final class TexyHtmlOutputModule extends TexyModule
 				if ($allowed && isset(TexyHtml::$prohibits[$mTag])) {
 					foreach (TexyHtml::$prohibits[$mTag] as $pTag) {
 						if (!empty($this->tagUsed[$pTag])) {
-							$allowed = FALSE; break;
+							$allowed = FALSE;
+							break;
 						}
 					}
 				}
@@ -249,7 +247,7 @@ final class TexyHtmlOutputModule extends TexyModule
 				}
 
 				if ($this->xml) {
-					$mAttr .= " /";
+					$mAttr .= ' /';
 				}
 
 				$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, TRUE), $this->preserveSpaces);
@@ -309,7 +307,8 @@ final class TexyHtmlOutputModule extends TexyModule
 				'indent' => $indent,
 			);
 			array_unshift($this->tagStack, $item);
-			$tmp = & $this->tagUsed[$mTag]; $tmp++;
+			$tmp = & $this->tagUsed[$mTag];
+			$tmp++;
 		}
 
 		return $s;

@@ -15,7 +15,7 @@ $text = file_get_contents('sample.texy');
 
 // 1) Dynamic method
 
-$texy->headingModule->top       = 2;   // set headings top limit
+$texy->headingModule->top = 2;   // set headings top limit
 $texy->headingModule->balancing = TexyHeadingModule::DYNAMIC;
 
 // generate ID
@@ -38,7 +38,7 @@ echo '<hr />';
 
 // 2) Fixed method
 
-$texy->headingModule->top       = 1;   // set headings top limit
+$texy->headingModule->top = 1;   // set headings top limit
 $texy->headingModule->balancing = TexyHeadingModule::FIXED;
 
 $html = $texy->process($text);  // that's all folks!
@@ -53,7 +53,7 @@ echo '<hr />';
 
 // 3) User-defined fixed method
 
-$texy->headingModule->top       = 1;   // set headings top limit
+$texy->headingModule->top = 1;   // set headings top limit
 $texy->headingModule->balancing = TexyHeadingModule::FIXED;
 
 $texy->headingModule->levels['='] = 0;  // = means 0 + top (1) = 1 (h1)

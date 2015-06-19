@@ -22,12 +22,13 @@ require_once dirname(__FILE__) . '/../../src/texy.php';
  */
 function imageHandler($invocation, $image, $link)
 {
-	if ($image->URL == 'user')  // accepts only [* user *]
-	{
+	if ($image->URL == 'user') { // accepts only [* user *]
 		$image->URL = 'image.gif'; // image URL
 		$image->overURL = 'image-over.gif'; // onmouseover image
 		$image->modifier->title = 'Texy! logo';
-		if ($link) $link->URL = 'big.gif'; // linked image
+		if ($link) { // linked image
+			$link->URL = 'big.gif';
+		}
 	}
 
 	return $invocation->proceed($image, $link);
@@ -36,9 +37,9 @@ function imageHandler($invocation, $image, $link)
 
 $texy = new Texy();
 $texy->addHandler('image', 'imageHandler');
-$texy->imageModule->root       = 'imagesdir/';       // "in-line" images root
+$texy->imageModule->root = 'imagesdir/';       // "in-line" images root
 $texy->imageModule->linkedRoot = 'imagesdir/big/';   // "linked" images root
-$texy->imageModule->leftClass  = 'my-left-class';    // left-floated image modifier
+$texy->imageModule->leftClass = 'my-left-class';    // left-floated image modifier
 $texy->imageModule->rightClass = 'my-right-class';   // right-floated image modifier
 $texy->imageModule->defaultAlt = 'default alt. text';// default image alternative text
 

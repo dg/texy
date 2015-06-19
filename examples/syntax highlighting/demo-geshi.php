@@ -40,7 +40,9 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 
 	global $geshiPath;
 
-	if ($lang == 'html') $lang = 'html4strict';
+	if ($lang == 'html') {
+		$lang = 'html4strict';
+	}
 	$content = Texy::outdent($content);
 	$geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
@@ -53,8 +55,8 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 	$geshi->set_encoding('UTF-8');
 	$geshi->set_header_type(GESHI_HEADER_PRE);
 	$geshi->enable_classes();
-	$geshi->set_overall_style('color: #000066; border: 1px solid #d0d0d0; background-color: #f0f0f0;', true);
-	$geshi->set_line_style('font: normal normal 95% \'Courier New\', Courier, monospace; color: #003030;', 'font-weight: bold; color: #006060;', true);
+	$geshi->set_overall_style('color: #000066; border: 1px solid #d0d0d0; background-color: #f0f0f0;', TRUE);
+	$geshi->set_line_style('font: normal normal 95% \'Courier New\', Courier, monospace; color: #003030;', 'font-weight: bold; color: #006060;', TRUE);
 	$geshi->set_code_style('color: #000020;', 'color: #000020;');
 	$geshi->set_link_styles(GESHI_LINK, 'color: #000060;');
 	$geshi->set_link_styles(GESHI_HOVER, 'background-color: #f0f000;');

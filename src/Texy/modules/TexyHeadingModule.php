@@ -41,7 +41,7 @@ final class TexyHeadingModule extends TexyModule
 	public $moreMeansHigher = TRUE;
 
 	/** @var int  balancing mode */
-	public $balancing = TexyHeadingModule::DYNAMIC;
+	public $balancing = self::DYNAMIC;
 
 	/** @var array  when $balancing = TexyHeadingModule::FIXED */
 	public $levels = array(

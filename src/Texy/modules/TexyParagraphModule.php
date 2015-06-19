@@ -14,7 +14,6 @@
 final class TexyParagraphModule extends TexyModule
 {
 
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;

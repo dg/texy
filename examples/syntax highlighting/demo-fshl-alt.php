@@ -35,7 +35,9 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 	}
 
 	$lang = strtoupper($lang);
-	if ($lang == 'JAVASCRIPT') $lang = 'JS';
+	if ($lang == 'JAVASCRIPT') {
+		$lang = 'JS';
+	}
 
 	$fshl = new fshlParser('HTML_UTF8', P_TAB_INDENT);
 	if (!$fshl->isLanguage($lang)) {
@@ -48,7 +50,9 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
 	$elPre = TexyHtml::el('pre');
-	if ($modifier) $modifier->decorate($texy, $elPre);
+	if ($modifier) {
+		$modifier->decorate($texy, $elPre);
+	}
 	$elPre->attrs['class'] = strtolower($lang);
 
 	$elCode = $elPre->create('code', $content);

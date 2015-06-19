@@ -57,15 +57,15 @@ class Texy extends TexyObject
 	public $allowedTags;
 
 	/** @var TRUE|FALSE|array  Allowed classes */
-	public $allowedClasses = Texy::ALL; // all classes and id are allowed
+	public $allowedClasses = self::ALL; // all classes and id are allowed
 
 	/** @var TRUE|FALSE|array  Allowed inline CSS style */
-	public $allowedStyles = Texy::ALL;  // all inline styles are allowed
+	public $allowedStyles = self::ALL;  // all inline styles are allowed
 
 	/** @var int  TAB width (for converting tabs to spaces) */
 	public $tabWidth = 8;
 
-	/** @var boolean  Do obfuscate e-mail addresses? */
+	/** @var bool  Do obfuscate e-mail addresses? */
 	public $obfuscateEmail = TRUE;
 
 	/** @var array  regexps to check URL schemes */
@@ -251,7 +251,7 @@ class Texy extends TexyObject
 		if (!in_array($mode, array(self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
 			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5), TRUE)
 		) {
-			throw new InvalidArgumentException("Invalid mode.");
+			throw new InvalidArgumentException('Invalid mode.');
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
@@ -547,7 +547,7 @@ class Texy extends TexyObject
 	{
 		$save = $this->htmlOutputModule->lineWrap;
 		$this->htmlOutputModule->lineWrap = FALSE;
-		$s = $this->stringToHtml( $s );
+		$s = $this->stringToHtml($s);
 		$this->htmlOutputModule->lineWrap = $save;
 
 		// remove tags
@@ -834,7 +834,7 @@ class Texy extends TexyObject
 	 */
 	final public function free()
 	{
-		if (version_compare(PHP_VERSION , '5.3', '<')) {
+		if (version_compare(PHP_VERSION, '5.3', '<')) {
 			foreach (array_keys(get_object_vars($this)) as $key) {
 				$this->$key = NULL;
 			}

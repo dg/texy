@@ -34,7 +34,7 @@ Assert::matchFile(
 
 $texy = createTexy();
 $texy->allowedClasses = array('#nofollow');
-$texy->allowedStyles = false;
+$texy->allowedStyles = FALSE;
 Assert::matchFile(
 	__DIR__ . '/expected/links-images3.html',
 	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy'))

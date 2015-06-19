@@ -20,7 +20,9 @@ require_once dirname(__FILE__) . '/../../src/texy.php';
 function phraseHandler($invocation, $phrase, $content, $modifier, $link)
 {
 	// is there link?
-	if (!$link) return $invocation->proceed();
+	if (!$link) {
+		return $invocation->proceed();
+	}
 
 	if (Texy::isRelative($link->URL)) {
 		// modifiy link

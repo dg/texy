@@ -25,7 +25,7 @@ if (extension_loaded('mbstring')) {
 if (ini_get('zend.ze1_compatibility_mode') % 256 ||
 	preg_match('#on$|true$|yes$#iA', ini_get('zend.ze1_compatibility_mode'))
 ) {
-	throw new RuntimeException("Texy cannot run with zend.ze1_compatibility_mode enabled.");
+	throw new RuntimeException('Texy cannot run with zend.ze1_compatibility_mode enabled.');
 }
 
 

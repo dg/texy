@@ -140,7 +140,7 @@ class myHandler
 	 * @param  bool
 	 * @return TexyHtml|string|FALSE
 	 */
-	function htmlTag($invocation, $el, $isStart, $forceEmpty=NULL)
+	function htmlTag($invocation, $el, $isStart, $forceEmpty = NULL)
 	{
 		return $invocation->proceed();
 	}

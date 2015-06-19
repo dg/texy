@@ -14,7 +14,7 @@ require_once dirname(__FILE__) . '/../../src/texy.php';
 
 
 $texy = new Texy();
-$texy->htmlOutputModule->baseIndent  = 1;
+$texy->htmlOutputModule->baseIndent = 1;
 
 
 function doIt($texy)
@@ -58,8 +58,8 @@ doIt($texy);
 
 echo '<h2>Enable custom tags</h2>';
 $texy->allowedTags =
-	array(            // enable only tags <myExtraTag> with attribute & <strong>
+	array( // enable only tags <myExtraTag> with attribute & <strong>
 		'myExtraTag' => array('attr1'),
-		'strong'     => array(),
+		'strong' => array(),
 	);
 doIt($texy);

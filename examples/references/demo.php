@@ -23,7 +23,9 @@ function newReferenceHandler($parser, $refName)
 {
 	$names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
 
-	if (!isset($names[$refName])) return FALSE; // it's not my job
+	if (!isset($names[$refName])) {
+		return FALSE; // it's not my job
+	}
 
 	$name = $names[$refName];
 

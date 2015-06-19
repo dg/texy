@@ -20,7 +20,9 @@ require_once dirname(__FILE__) . '/../../src/texy.php';
 function imageHandler($invocation, $image, $link)
 {
 	$parts = explode(':', $image->URL);
-	if (count($parts) !== 2) return $invocation->proceed();
+	if (count($parts) !== 2) {
+		return $invocation->proceed();
+	}
 
 	switch ($parts[0]) {
 	case 'youtube':

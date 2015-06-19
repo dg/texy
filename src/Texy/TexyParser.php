@@ -95,7 +95,7 @@ class TexyBlockParser extends TexyParser
 	public function moveBackward($linesCount = 1)
 	{
 		while (--$this->offset > 0) {
-			if ($this->text{ $this->offset-1 } === "\n") {
+			if ($this->text{ $this->offset - 1 } === "\n") {
 				$linesCount--;
 				if ($linesCount < 1) {
 					break;

@@ -130,7 +130,8 @@ final class TexyBlockModule extends TexyModule
 				$el->parseBlock($tx, $s);
 			}
 			$s = $el->toHtml($tx);
-			$blocktype = 'block/code'; $param = 'html'; // to be continue (as block/code)
+			$blocktype = 'block/code';
+			$param = 'html'; // to be continue (as block/code)
 		}
 
 		if ($blocktype === 'block/code') {
@@ -222,7 +223,7 @@ final class TexyBlockModule extends TexyModule
 				return "\n";
 			}
 			$s = Texy::escapeHtml($s);
-			$s = str_replace("\n", TexyHtml::el('br')->startTag() , $s); // nl2br
+			$s = str_replace("\n", TexyHtml::el('br')->startTag(), $s); // nl2br
 			return $tx->protect($s, Texy::CONTENT_BLOCK) . "\n";
 		}
 

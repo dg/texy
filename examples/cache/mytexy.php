@@ -46,7 +46,7 @@ class MyTexy extends Texy
 			} else {                           // doesn't exists
 				$html = parent::process($text);
 				file_put_contents($cacheFile,
-					serialize( array($html, $this->styleSheet, $this->headingModule->title) )
+					serialize(array($html, $this->styleSheet, $this->headingModule->title))
 				);
 			}
 

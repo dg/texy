@@ -210,7 +210,7 @@ final class TexyListModule extends TexyModule
 	{
 		$tx = $this->texy;
 		$spacesBase = $indented ? ('\ {1,}') : '';
-		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".TexyPatterns::MODIFIER_H."?()$#mAUu";
+		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".TexyPatterns::MODIFIER_H.'?()$#mAUu';
 
 		// first line with bullet
 		$matches = NULL;
