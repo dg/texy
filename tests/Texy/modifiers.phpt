@@ -7,7 +7,7 @@
 require __DIR__ . '/../bootstrap.php';
 
 
-test(function() {
+test(function () {
 	$texy = new Texy;
 	$texy->allowedClasses = FALSE;
 	$texy->allowedStyles = FALSE;
@@ -24,7 +24,7 @@ test(function() {
 });
 
 
-test(function() {
+test(function () {
 	$texy = new Texy;
 	$texy->htmlOutputModule->lineWrap = 180;
 	$texy->allowedClasses = array('one', '#id');
