@@ -11,25 +11,25 @@
  */
 final class TexyListModule extends TexyModule
 {
-	public $bullets = array(
+	public $bullets = [
 		// first-rexexp ordered? list-style-type next-regexp
-		'*' => array('\*\ ', 0, ''),
-		'-' => array('[\x{2013}-](?![>-])',0, ''),
-		'+' => array('\+\ ', 0, ''),
-		'1.' => array('1\.\ ',/* not \d !*/ 1, '', '\d{1,3}\.\ '),
-		'1)' => array('\d{1,3}\)\ ', 1, ''),
-		'I.' => array('I\.\ ', 1, 'upper-roman', '[IVX]{1,4}\.\ '),
-		'I)' => array('[IVX]+\)\ ', 1, 'upper-roman'), // before A) !
-		'a)' => array('[a-z]\)\ ', 1, 'lower-alpha'),
-		'A)' => array('[A-Z]\)\ ', 1, 'upper-alpha'),
-	);
+		'*' => ['\*\ ', 0, ''],
+		'-' => ['[\x{2013}-](?![>-])',0, ''],
+		'+' => ['\+\ ', 0, ''],
+		'1.' => ['1\.\ ',/* not \d !*/ 1, '', '\d{1,3}\.\ '],
+		'1)' => ['\d{1,3}\)\ ', 1, ''],
+		'I.' => ['I\.\ ', 1, 'upper-roman', '[IVX]{1,4}\.\ '],
+		'I)' => ['[IVX]+\)\ ', 1, 'upper-roman'], // before A) !
+		'a)' => ['[a-z]\)\ ', 1, 'lower-alpha'],
+		'A)' => ['[A-Z]\)\ ', 1, 'upper-alpha'],
+	];
 
 
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
+		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
 		$texy->allowed['list'] = TRUE;
 		$texy->allowed['list/definition'] = TRUE;
 	}
@@ -37,7 +37,7 @@ final class TexyListModule extends TexyModule
 
 	public function beforeParse()
 	{
-		$RE = $REul = array();
+		$RE = $REul = [];
 		foreach ($this->bullets as $desc) {
 			$RE[] = $desc[0];
 			if (!$desc[1]) {
@@ -46,14 +46,14 @@ final class TexyListModule extends TexyModule
 		}
 
 		$this->texy->registerBlockPattern(
-			array($this, 'patternList'),
+			[$this, 'patternList'],
 			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?' // .{color: red}
 			. '('.implode('|', $RE).')\ *+\S.*$#mUu', // item (unmatched)
 			'list'
 		);
 
 		$this->texy->registerBlockPattern(
-			array($this, 'patternDefList'),
+			[$this, 'patternDefList'],
 			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?' // .{color:red}
 			. '(\S.{0,2000})\:\ *'.TexyPatterns::MODIFIER_H.'?\n' // Term:
 			. '(\ ++)('.implode('|', $REul).')\ *+\S.*$#mUu', // - description
@@ -120,7 +120,7 @@ final class TexyListModule extends TexyModule
 		}
 
 		// event listener
-		$tx->invokeHandlers('afterList', array($parser, $el, $mod));
+		$tx->invokeHandlers('afterList', [$parser, $el, $mod]);
 
 		return $el;
 	}
@@ -189,7 +189,7 @@ final class TexyListModule extends TexyModule
 		}
 
 		// event listener
-		$tx->invokeHandlers('afterDefinitionList', array($parser, $el, $mod));
+		$tx->invokeHandlers('afterDefinitionList', [$parser, $el, $mod]);
 
 		return $el;
 	}

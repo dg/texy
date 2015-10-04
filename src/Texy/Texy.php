@@ -49,7 +49,7 @@ class Texy extends TexyObject
 	public $encoding = 'utf-8';
 
 	/** @var array  Texy! syntax configuration */
-	public $allowed = array();
+	public $allowed = [];
 
 	/** @var TRUE|FALSE|array  Allowed HTML tags */
 	public $allowedTags;
@@ -73,17 +73,17 @@ class Texy extends TexyObject
 	public $mergeLines = TRUE;
 
 	/** @var array  Parsing summary */
-	public $summary = array(
-		'images' => array(),
-		'links' => array(),
-		'preload' => array(),
-	);
+	public $summary = [
+		'images' => [],
+		'links' => [],
+		'preload' => [],
+	];
 
 	/** @var string  Generated stylesheet */
 	public $styleSheet = '';
 
 	/** @var array  CSS classes for align modifiers */
-	public $alignClasses = array(
+	public $alignClasses = [
 		'left' => NULL,
 		'right' => NULL,
 		'center' => NULL,
@@ -91,7 +91,7 @@ class Texy extends TexyObject
 		'top' => NULL,
 		'middle' => NULL,
 		'bottom' => NULL,
-	);
+	];
 
 	/** @var bool  remove soft hyphens (SHY)? */
 	public $removeSoftHyphens = TRUE;
@@ -158,24 +158,24 @@ class Texy extends TexyObject
 	 * Registered regexps and associated handlers for inline parsing.
 	 * @var array of ('handler' => callback, 'pattern' => regular expression)
 	 */
-	private $linePatterns = array();
+	private $linePatterns = [];
 	private $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
 	 * @var array of ('handler' => callback, 'pattern' => regular expression)
 	 */
-	private $blockPatterns = array();
+	private $blockPatterns = [];
 	private $_blockPatterns;
 
 	/** @var array */
-	private $postHandlers = array();
+	private $postHandlers = [];
 
 	/** @var TexyHtml  DOM structure for parsed text */
 	private $DOM;
 
 	/** @var array  Texy protect markup table */
-	private $marks = array();
+	private $marks = [];
 
 	/** @var array  for internal usage */
 	public $_classes, $_styles;
@@ -184,7 +184,7 @@ class Texy extends TexyObject
 	private $processing;
 
 	/** @var array of events and registered handlers */
-	private $handlers = array();
+	private $handlers = [];
 
 	/**
 	 * DTD descriptor.
@@ -212,7 +212,7 @@ class Texy extends TexyObject
 
 	public function __construct()
 	{
-		if (defined('PCRE_VERSION') && PCRE_VERSION == 8.34 && defined('PHP_VERSION_ID') && PHP_VERSION_ID < 50513) {
+		if (defined('PCRE_VERSION') && PCRE_VERSION == 8.34 && PHP_VERSION_ID < 50513) {
 			trigger_error('Texy: PCRE 8.34 is not supported due to bug #1451', E_USER_WARNING);
 		}
 
@@ -255,14 +255,14 @@ class Texy extends TexyObject
 	 */
 	public function setOutputMode($mode)
 	{
-		if (!in_array($mode, array(self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
-			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5), TRUE)
+		if (!in_array($mode, [self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
+			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5], TRUE)
 		) {
 			throw new InvalidArgumentException('Invalid mode.');
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
-			require dirname(__FILE__) . '/DTD.php';
+			require __DIR__ . '/DTD.php';
 			self::$dtdCache[$mode] = $dtd;
 		}
 
@@ -271,7 +271,7 @@ class Texy extends TexyObject
 		TexyHtml::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
 
 		// accept all valid HTML tags and attributes by default
-		$this->allowedTags = array();
+		$this->allowedTags = [];
 		foreach ($this->dtd as $tag => $dtd) {
 			$this->allowedTags[$tag] = self::ALL;
 		}
@@ -330,11 +330,11 @@ class Texy extends TexyObject
 			$this->allowed[$name] = TRUE;
 		}
 
-		$this->linePatterns[$name] = array(
+		$this->linePatterns[$name] = [
 			'handler' => $handler,
 			'pattern' => $pattern,
 			'again' => $againTest,
-		);
+		];
 	}
 
 
@@ -350,10 +350,10 @@ class Texy extends TexyObject
 			$this->allowed[$name] = TRUE;
 		}
 
-		$this->blockPatterns[$name] = array(
+		$this->blockPatterns[$name] = [
 			'handler' => $handler,
 			'pattern' => $pattern . 'm', // force multiline
-		);
+		];
 	}
 
 
@@ -386,7 +386,7 @@ class Texy extends TexyObject
 		}
 
 		// initialization
-		$this->marks = array();
+		$this->marks = [];
 		$this->processing = TRUE;
 
 		// speed-up
@@ -414,11 +414,13 @@ class Texy extends TexyObject
 		// replace tabs with spaces
 		$this->tabWidth = max(1, (int) $this->tabWidth);
 		while (strpos($text, "\t") !== FALSE) {
-			$text = TexyRegexp::replace($text, '#^([^\t\n]*+)\t#mU', array($this, 'tabCb'));
+			$text = TexyRegexp::replace($text, '#^([^\t\n]*+)\t#mU', function ($m) {
+				return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
+			});
 		}
 
 		// user before handler
-		$this->invokeHandlers('beforeParse', array($this, & $text, $singleLine));
+		$this->invokeHandlers('beforeParse', [$this, & $text, $singleLine]);
 
 		// select patterns
 		$this->_linePatterns = $this->linePatterns;
@@ -443,7 +445,7 @@ class Texy extends TexyObject
 		}
 
 		// user after handler
-		$this->invokeHandlers('afterParse', array($this, $this->DOM, $singleLine));
+		$this->invokeHandlers('afterParse', [$this, $this->DOM, $singleLine]);
 
 		// converts internal DOM structure to final HTML code
 		$html = $this->DOM->toHtml($this);
@@ -537,7 +539,7 @@ class Texy extends TexyObject
 		$s = $this->unProtect($s);
 
 		// wellform and reformat HTML
-		$this->invokeHandlers('postProcess', array($this, & $s));
+		$this->invokeHandlers('postProcess', [$this, & $s]);
 
 		// unfreeze spaces
 		$s = self::unfreezeSpaces($s);
@@ -567,10 +569,10 @@ class Texy extends TexyObject
 		$s = self::unescapeHtml($s);
 
 		// convert nbsp to normal space and remove shy
-		$s = strtr($s, array(
+		$s = strtr($s, [
 			"\xC2\xAD" => '', // shy
 			"\xC2\xA0" => ' ', // nbsp
-		));
+		]);
 
 		return $s;
 	}
@@ -703,7 +705,7 @@ class Texy extends TexyObject
 	 */
 	final public static function escapeHtml($s)
 	{
-		return str_replace(array('&', '<', '>'), array('&amp;', '&lt;', '&gt;'), $s);
+		return str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $s);
 	}
 
 
@@ -825,13 +827,6 @@ class Texy extends TexyObject
 	final public function getDOM()
 	{
 		return $this->DOM;
-	}
-
-
-	/** @internal */
-	public function tabCb($m)
-	{
-		return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
 	}
 
 

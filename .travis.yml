@@ -12,12 +12,12 @@ matrix:
 
 script:
     - vendor/bin/tester tests -s -p php -c tests/php-unix.ini
-    - php code-checker/src/code-checker.php -i windows-1250.html -i windows-1250.texy
+    - php temp/code-checker/src/code-checker.php --short-arrays -i windows-1250.html -i windows-1250.texy
 
 before_script:
     # Install Nette Tester & Code Checker
     - travis_retry composer install --no-interaction
-    - travis_retry composer create-project nette/code-checker code-checker ~2.5 --no-interaction
+    - travis_retry composer create-project nette/code-checker temp/code-checker ~2.5 --no-interaction
 
 sudo: false
 

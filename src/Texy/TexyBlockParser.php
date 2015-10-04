@@ -79,18 +79,6 @@ class TexyBlockParser extends TexyParser
 	}
 
 
-	public static function cmp($a, $b)
-	{
-		if ($a[0] === $b[0]) {
-			return $a[3] < $b[3] ? -1 : 1;
-		}
-		if ($a[0] < $b[0]) {
-			return -1;
-		}
-		return 1;
-	}
-
-
 	/**
 	 * @param  string
 	 * @return void
@@ -99,14 +87,14 @@ class TexyBlockParser extends TexyParser
 	{
 		$tx = $this->texy;
 
-		$tx->invokeHandlers('beforeBlockParse', array($this, & $text));
+		$tx->invokeHandlers('beforeBlockParse', [$this, & $text]);
 
 		// parser initialization
 		$this->text = $text;
 		$this->offset = 0;
 
 		// parse loop
-		$matches = array();
+		$matches = [];
 		$priority = 0;
 		foreach ($this->patterns as $name => $pattern) {
 			$ms = TexyRegexp::match(
@@ -120,14 +108,22 @@ class TexyBlockParser extends TexyParser
 				foreach ($m as $k => $v) {
 					$m[$k] = $v[0];
 				}
-				$matches[] = array($offset, $name, $m, $priority);
+				$matches[] = [$offset, $name, $m, $priority];
 			}
 			$priority++;
 		}
 		unset($name, $pattern, $ms, $m, $k, $v);
 
-		usort($matches, array(__CLASS__, 'cmp')); // generates strict error in PHP 5.1.2
-		$matches[] = array(strlen($text), NULL, NULL); // terminal cap
+		usort($matches, function ($a, $b) {
+			if ($a[0] === $b[0]) {
+				return $a[3] < $b[3] ? -1 : 1;
+			}
+			if ($a[0] < $b[0]) {
+				return -1;
+			}
+			return 1;
+		});
+		$matches[] = [strlen($text), NULL, NULL]; // terminal cap
 
 
 		// process loop
@@ -158,7 +154,7 @@ class TexyBlockParser extends TexyParser
 
 			$res = call_user_func_array(
 				$this->patterns[$mName]['handler'],
-				array($this, $mMatches, $mName)
+				[$this, $mMatches, $mName]
 			);
 
 			if ($res === FALSE || $this->offset <= $mOffset) { // module rejects text
