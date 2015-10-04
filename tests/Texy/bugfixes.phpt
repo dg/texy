@@ -12,3 +12,8 @@ test(function () { // fixed Offset didn't correspond to the begin of a valid UTF
 	TexyConfigurator::safeMode($texy);
 	Assert::truthy($texy->process('"š":xxx://')); // i.e. triggers no error
 });
+
+test(function () { // "label":@link
+	$texy = new Texy;
+	Assert::same("<p><a href=\"&#64;link\">a</a></p>\n", $texy->process('"a":@link'));
+});
