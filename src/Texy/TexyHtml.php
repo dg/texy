@@ -16,7 +16,6 @@
  * echo $el->startTag(), $el->endTag();
  *
  * @property   mixed element's attributes
- * @author     David Grudl
  */
 class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ IteratorAggregate
 {

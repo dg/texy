@@ -8,8 +8,6 @@
 
 /**
  * Table module.
- *
- * @author     David Grudl
  */
 final class TexyTableModule extends TexyModule
 {

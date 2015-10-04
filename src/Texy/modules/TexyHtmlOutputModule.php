@@ -7,7 +7,7 @@
 
 
 /**
- * @author     David Grudl
+ * HTML output
  */
 final class TexyHtmlOutputModule extends TexyModule
 {

@@ -8,8 +8,6 @@
 
 /**
  * Emoticon module.
- *
- * @author     David Grudl
  */
 final class TexyEmoticonModule extends TexyModule
 {

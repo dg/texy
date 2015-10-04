@@ -8,8 +8,6 @@
 
 /**
  * Typography replacements module.
- *
- * @author     David Grudl
  */
 final class TexyTypographyModule extends TexyModule
 {

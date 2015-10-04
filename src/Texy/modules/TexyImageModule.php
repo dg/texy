@@ -8,8 +8,6 @@
 
 /**
  * Images module.
- *
- * @author     David Grudl
  */
 final class TexyImageModule extends TexyModule
 {

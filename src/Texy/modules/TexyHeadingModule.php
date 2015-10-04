@@ -13,8 +13,6 @@ define('TEXY_HEADING_FIXED', 2);
 
 /**
  * Heading module.
- *
- * @author     David Grudl
  */
 final class TexyHeadingModule extends TexyModule
 {

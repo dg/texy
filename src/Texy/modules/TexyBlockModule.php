@@ -8,8 +8,6 @@
 
 /**
  * Special blocks module.
- *
- * @author     David Grudl
  */
 final class TexyBlockModule extends TexyModule
 {

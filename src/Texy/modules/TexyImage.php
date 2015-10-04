@@ -8,8 +8,6 @@
 
 /**
  * Image.
- *
- * @author     David Grudl
  */
 final class TexyImage extends TexyObject
 {

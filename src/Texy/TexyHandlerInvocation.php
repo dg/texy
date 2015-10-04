@@ -8,8 +8,6 @@
 
 /**
  * Around advice handlers.
- *
- * @author     David Grudl
  */
 final class TexyHandlerInvocation extends TexyObject
 {

@@ -16,8 +16,6 @@
  *   {...}     inner style modifier
  *   < > <> =  horizontal align modifier
  *   ^ - _     vertical align modifier
- *
- * @author     David Grudl
  */
 final class TexyModifier extends TexyObject
 {

@@ -8,8 +8,6 @@
 
 /**
  * Paragraph module.
- *
- * @author     David Grudl
  */
 final class TexyParagraphModule extends TexyModule
 {

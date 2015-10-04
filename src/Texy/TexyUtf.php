@@ -8,8 +8,6 @@
 
 /**
  * UTF-8 helper.
- *
- * @author     David Grudl
  */
 class TexyUtf
 {

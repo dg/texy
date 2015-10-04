@@ -8,8 +8,6 @@
 
 /**
  * Html tags module.
- *
- * @author     David Grudl
  */
 final class TexyHtmlModule extends TexyModule
 {

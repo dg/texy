@@ -8,8 +8,6 @@
 
 /**
  * Links module.
- *
- * @author     David Grudl
  */
 final class TexyLinkModule extends TexyModule
 {

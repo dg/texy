@@ -8,8 +8,6 @@
 
 /**
  * Ordered / unordered nested list module.
- *
- * @author     David Grudl
  */
 final class TexyListModule extends TexyModule
 {

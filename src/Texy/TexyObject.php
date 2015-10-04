@@ -43,8 +43,6 @@
  * $obj = new MyClass;
  * $obj->newMethod($x);
  * </code>
- *
- * @author     David Grudl
  */
 abstract class TexyObject
 {

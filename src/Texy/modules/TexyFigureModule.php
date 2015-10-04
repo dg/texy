@@ -8,8 +8,6 @@
 
 /**
  * The captioned figures.
- *
- * @author     David Grudl
  */
 final class TexyFigureModule extends TexyModule
 {

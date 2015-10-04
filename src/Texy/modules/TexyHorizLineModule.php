@@ -8,8 +8,6 @@
 
 /**
  * Horizontal line module.
- *
- * @author     David Grudl
  */
 final class TexyHorizLineModule extends TexyModule
 {

@@ -8,8 +8,6 @@
 
 /**
  * Long words wrap module.
- *
- * @author     David Grudl
  */
 final class TexyLongWordsModule extends TexyModule
 {

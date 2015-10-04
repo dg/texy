@@ -13,8 +13,6 @@
  * $texy = new Texy();
  * $html = $texy->process($text);
  * </code>
- *
- * @author     David Grudl
  */
 class Texy extends TexyObject
 {

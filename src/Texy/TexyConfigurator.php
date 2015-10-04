@@ -13,8 +13,6 @@
  * $texy = new Texy();
  * TexyConfigurator::safeMode($texy);
  * </code>
- *
- * @author     David Grudl
  */
 class TexyConfigurator
 {

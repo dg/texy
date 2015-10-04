@@ -8,8 +8,6 @@
 
 /**
  * Blockquote module.
- *
- * @author     David Grudl
  */
 final class TexyBlockQuoteModule extends TexyModule
 {

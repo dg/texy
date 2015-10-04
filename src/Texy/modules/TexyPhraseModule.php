@@ -8,8 +8,6 @@
 
 /**
  * Phrases module.
- *
- * @author     David Grudl
  */
 final class TexyPhraseModule extends TexyModule
 {

@@ -8,8 +8,6 @@
 
 /**
  * Texy parser base class.
- *
- * @author     David Grudl
  */
 class TexyParser extends TexyObject
 {

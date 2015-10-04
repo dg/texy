@@ -8,8 +8,6 @@
 
 /**
  * Link.
- *
- * @author     David Grudl
  */
 final class TexyLink extends TexyObject
 {

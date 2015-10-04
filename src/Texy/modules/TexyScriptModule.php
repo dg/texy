@@ -8,8 +8,6 @@
 
 /**
  * Scripts module.
- *
- * @author     David Grudl
  */
 final class TexyScriptModule extends TexyModule
 {

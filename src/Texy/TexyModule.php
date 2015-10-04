@@ -8,8 +8,6 @@
 
 /**
  * Texy! modules base class.
- *
- * @author     David Grudl
  */
 abstract class TexyModule extends TexyObject
 {
