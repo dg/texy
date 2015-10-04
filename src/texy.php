@@ -12,37 +12,45 @@ if (PHP_VERSION_ID < 50404) {
 }
 
 // load libraries
-require_once __DIR__ . '/Texy/TexyPatterns.php';
-require_once __DIR__ . '/Texy/TexyObject.php';
-require_once __DIR__ . '/Texy/TexyHtml.php';
-require_once __DIR__ . '/Texy/TexyModifier.php';
-require_once __DIR__ . '/Texy/TexyModule.php';
-require_once __DIR__ . '/Texy/TexyParser.php';
-require_once __DIR__ . '/Texy/TexyBlockParser.php';
-require_once __DIR__ . '/Texy/TexyLineParser.php';
-require_once __DIR__ . '/Texy/TexyUtf.php';
-require_once __DIR__ . '/Texy/TexyConfigurator.php';
-require_once __DIR__ . '/Texy/TexyHandlerInvocation.php';
-require_once __DIR__ . '/Texy/TexyRegexp.php';
-require_once __DIR__ . '/Texy/Texy.php';
-require_once __DIR__ . '/Texy/modules/TexyImage.php';
-require_once __DIR__ . '/Texy/modules/TexyLink.php';
-require_once __DIR__ . '/Texy/modules/TexyTableCellElement.php';
-require_once __DIR__ . '/Texy/modules/TexyParagraphModule.php';
-require_once __DIR__ . '/Texy/modules/TexyBlockModule.php';
-require_once __DIR__ . '/Texy/modules/TexyHeadingModule.php';
-require_once __DIR__ . '/Texy/modules/TexyHorizLineModule.php';
-require_once __DIR__ . '/Texy/modules/TexyHtmlModule.php';
-require_once __DIR__ . '/Texy/modules/TexyFigureModule.php';
-require_once __DIR__ . '/Texy/modules/TexyImageModule.php';
-require_once __DIR__ . '/Texy/modules/TexyLinkModule.php';
-require_once __DIR__ . '/Texy/modules/TexyListModule.php';
-require_once __DIR__ . '/Texy/modules/TexyLongWordsModule.php';
-require_once __DIR__ . '/Texy/modules/TexyPhraseModule.php';
-require_once __DIR__ . '/Texy/modules/TexyBlockQuoteModule.php';
-require_once __DIR__ . '/Texy/modules/TexyScriptModule.php';
-require_once __DIR__ . '/Texy/modules/TexyEmoticonModule.php';
-require_once __DIR__ . '/Texy/modules/TexyTableModule.php';
-require_once __DIR__ . '/Texy/modules/TexyTypographyModule.php';
-require_once __DIR__ . '/Texy/modules/TexyHtmlOutputModule.php';
+spl_autoload_register(function ($class) {
+	static $map = [
+		'Texy' => 'Texy.php',
+		'TexyBlockParser' => 'TexyBlockParser.php',
+		'TexyConfigurator' => 'TexyConfigurator.php',
+		'TexyHandlerInvocation' => 'TexyHandlerInvocation.php',
+		'TexyHtml' => 'TexyHtml.php',
+		'TexyLineParser' => 'TexyLineParser.php',
+		'TexyModifier' => 'TexyModifier.php',
+		'TexyModule' => 'TexyModule.php',
+		'TexyObject' => 'TexyObject.php',
+		'TexyParser' => 'TexyParser.php',
+		'TexyPatterns' => 'TexyPatterns.php',
+		'TexyRegexp' => 'TexyRegexp.php',
+		'TexyUtf' => 'TexyUtf.php',
+		'TexyBlockModule' => 'modules/TexyBlockModule.php',
+		'TexyBlockQuoteModule' => 'modules/TexyBlockQuoteModule.php',
+		'TexyEmoticonModule' => 'modules/TexyEmoticonModule.php',
+		'TexyFigureModule' => 'modules/TexyFigureModule.php',
+		'TexyHeadingModule' => 'modules/TexyHeadingModule.php',
+		'TexyHorizLineModule' => 'modules/TexyHorizLineModule.php',
+		'TexyHtmlModule' => 'modules/TexyHtmlModule.php',
+		'TexyHtmlOutputModule' => 'modules/TexyHtmlOutputModule.php',
+		'TexyImage' => 'modules/TexyImage.php',
+		'TexyImageModule' => 'modules/TexyImageModule.php',
+		'TexyLink' => 'modules/TexyLink.php',
+		'TexyLinkModule' => 'modules/TexyLinkModule.php',
+		'TexyListModule' => 'modules/TexyListModule.php',
+		'TexyLongWordsModule' => 'modules/TexyLongWordsModule.php',
+		'TexyParagraphModule' => 'modules/TexyParagraphModule.php',
+		'TexyPhraseModule' => 'modules/TexyPhraseModule.php',
+		'TexyScriptModule' => 'modules/TexyScriptModule.php',
+		'TexyTableCellElement' => 'modules/TexyTableCellElement.php',
+		'TexyTableModule' => 'modules/TexyTableModule.php',
+		'TexyTypographyModule' => 'modules/TexyTypographyModule.php',
+	];
+	if (isset($map[$class])) {
+		require __DIR__ . '/Texy/' . $map[$class];
+	}
+});
+
 require_once __DIR__ . '/compatibility.php';
