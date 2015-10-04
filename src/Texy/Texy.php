@@ -14,8 +14,10 @@
  * $html = $texy->process($text);
  * </code>
  */
-class Texy extends TexyObject
+class Texy
 {
+	use TexyStrict;
+
 	// configuration directives
 	const ALL = TRUE;
 	const NONE = FALSE;

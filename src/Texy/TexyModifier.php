@@ -17,8 +17,10 @@
  *   < > <> =  horizontal align modifier
  *   ^ - _     vertical align modifier
  */
-final class TexyModifier extends TexyObject
+final class TexyModifier
 {
+	use TexyStrict;
+
 	/** @var string */
 	public $id;
 

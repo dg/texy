@@ -17,8 +17,10 @@
  *
  * @property   mixed element's attributes
  */
-class TexyHtml extends TexyObject implements ArrayAccess, /* Countable, */ IteratorAggregate
+class TexyHtml implements ArrayAccess, /* Countable, */ IteratorAggregate
 {
+	use TexyStrict;
+
 	/** @var string  element's name */
 	private $name;
 

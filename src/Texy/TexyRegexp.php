@@ -8,6 +8,8 @@
 
 class TexyRegexp
 {
+	use TexyStrict;
+
 	const ALL = 1;
 	const OFFSET_CAPTURE = 2;
 

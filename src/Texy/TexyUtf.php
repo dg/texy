@@ -11,6 +11,8 @@
  */
 class TexyUtf
 {
+	use TexyStrict;
+
 	/** @var array */
 	private static $xlat;
 

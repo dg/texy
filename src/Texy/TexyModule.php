@@ -9,8 +9,10 @@
 /**
  * Texy! modules base class.
  */
-abstract class TexyModule extends TexyObject
+abstract class TexyModule
 {
+	use TexyStrict;
+
 	/** @var Texy */
 	protected $texy;
 
