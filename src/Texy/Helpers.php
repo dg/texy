@@ -22,6 +22,15 @@ final class Helpers
 
 
 	/**
+	 * StrToLower in UTF-8.
+	 */
+	public static function toLower($s)
+	{
+		return function_exists('mb_strtolower') ? mb_strtolower($s, 'UTF-8') : $s;
+	}
+
+
+	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
 	 * which are ignored by TexyHtmlOutputModule routine
 	 * @param  string

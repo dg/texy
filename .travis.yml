@@ -25,7 +25,7 @@ jobs:
                 # Install Nette Code Checker
                 - travis_retry composer create-project nette/code-checker temp/code-checker ~2 --no-progress
             script:
-                - php temp/code-checker/src/code-checker.php --short-arrays -i windows-1250.html -i windows-1250.texy
+                - php temp/code-checker/src/code-checker.php --short-arrays
 
 
         -   stage: Code Coverage
