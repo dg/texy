@@ -4,6 +4,8 @@
  * Test: link & images.
  */
 
+use Tester\Assert;
+
 require __DIR__ . '/../bootstrap.php';
 
 

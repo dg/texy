@@ -4,6 +4,8 @@
  * Test: Non-UTF-8 encoding.
  */
 
+use Tester\Assert;
+
 require __DIR__ . '/../bootstrap.php';
 
 

@@ -4,6 +4,8 @@
  * Test: Special cases.
  */
 
+use Tester\Assert;
+
 require __DIR__ . '/../bootstrap.php';
 
 

@@ -4,6 +4,8 @@
  * Test: Very long lines.
  */
 
+use Tester\Assert;
+
 require __DIR__ . '/../bootstrap.php';
 
 
