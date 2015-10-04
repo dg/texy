@@ -26,7 +26,6 @@ spl_autoload_register(function ($class) {
 		'Texy\Patterns' => 'Patterns.php',
 		'Texy\Regexp' => 'Regexp.php',
 		'Texy\Strict' => 'Strict.php',
-		'Texy\Utf' => 'Utf.php',
 		'Texy\Modules\BlockModule' => 'Modules/BlockModule.php',
 		'Texy\Modules\BlockQuoteModule' => 'Modules/BlockQuoteModule.php',
 		'Texy\Modules\EmoticonModule' => 'Modules/EmoticonModule.php',
