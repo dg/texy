@@ -773,7 +773,7 @@ class Texy extends TexyObject
 	{
 		// absolute URL with scheme? check scheme!
 		return empty($this->urlSchemeFilters[$type])
-			|| !preg_match('#[a-z][a-z0-9+.-]{0,20}:#A', $URL) // http: | mailto:
+			|| !preg_match('#[a-z][a-z0-9+.-]{0,20}:#Ai', $URL) // http: | mailto:
 			|| preg_match($this->urlSchemeFilters[$type], $URL);
 	}
 
@@ -786,7 +786,7 @@ class Texy extends TexyObject
 	final public static function isRelative($URL)
 	{
 		// check for scheme, or absolute path, or absolute URL
-		return !preg_match('#[a-z][a-z0-9+.-]{0,20}:|[\#/?]#A', $URL);
+		return !preg_match('#[a-z][a-z0-9+.-]{0,20}:|[\#/?]#Ai', $URL);
 	}
 
 
