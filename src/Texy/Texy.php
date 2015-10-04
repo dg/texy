@@ -534,6 +534,7 @@ class Texy extends TexyObject
 
 		// unfreeze spaces
 		$s = self::unfreezeSpaces($s);
+		$s = ltrim($s, "\n");
 
 		return $s;
 	}
