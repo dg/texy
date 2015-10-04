@@ -49,9 +49,6 @@ class Texy
 	const XHTML1_STRICT = 3; // Texy::HTML4_STRICT | Texy::XML;
 	const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
 
-	/** @var string  input & output text encoding */
-	public $encoding = 'utf-8';
-
 	/** @var array  Texy! syntax configuration */
 	public $allowed = [];
 
@@ -405,9 +402,6 @@ class Texy
 			$this->_styles = $this->allowedStyles;
 		}
 
-		// convert to UTF-8 (and check source encoding)
-		$text = Utf::toUtf($text, $this->encoding);
-
 		if ($this->removeSoftHyphens) {
 			$text = str_replace("\xC2\xAD", '', $text);
 		}
@@ -458,8 +452,7 @@ class Texy
 		$html = str_replace("\r", "\n", $html);
 
 		$this->processing = FALSE;
-
-		return Utf::utf2html($html, $this->encoding);
+		return $html;
 	}
 
 
@@ -477,14 +470,11 @@ class Texy
 
 	/**
 	 * Makes only typographic corrections.
-	 * @param  string   input text (in encoding defined by Texy::$encoding)
-	 * @return string   output text (in UTF-8)
+	 * @param  string   input text
+	 * @return string   output text
 	 */
 	public function processTypo($text)
 	{
-		// convert to UTF-8 (and check source encoding)
-		$text = Utf::toUtf($text, $this->encoding);
-
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
 
@@ -495,7 +485,7 @@ class Texy
 			$text = $this->longWordsModule->postLine($text);
 		}
 
-		return Utf::utf2html($text, $this->encoding);
+		return $text;
 	}
 
 
@@ -509,12 +499,12 @@ class Texy
 			throw new \RuntimeException('Call $texy->process() first.');
 		}
 
-		return Utf::utfTo($this->DOM->toText($this), $this->encoding);
+		return $this->DOM->toText($this);
 	}
 
 
 	/**
-	 * Converts internal string representation to final HTML code in UTF-8.
+	 * Converts internal string representation to final HTML code.
 	 * @return string
 	 */
 	final public function stringToHtml($s)
@@ -554,7 +544,7 @@ class Texy
 
 
 	/**
-	 * Converts internal string representation to final HTML code in UTF-8.
+	 * Converts internal string representation to final HTML code.
 	 * @return string
 	 */
 	final public function stringToText($s)
