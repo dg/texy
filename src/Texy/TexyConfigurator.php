@@ -16,6 +16,8 @@
  */
 class TexyConfigurator
 {
+	use TexyStrict;
+
 	public static $safeTags = [
 		'a' => ['href', 'title'],
 		'acronym' => ['title'],

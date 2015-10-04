@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Test: TexyObject
+ * Test: TexyStrict
  */
 
 use Tester\Assert;
@@ -9,8 +9,10 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-class TestClass extends TexyObject
+class TestClass
 {
+	use TexyStrict;
+
 	public $public;
 
 	protected $protected;
@@ -29,14 +31,17 @@ class TestClass extends TexyObject
 	protected static function protectedMethodS()
 	{}
 
-	public function callParent()
-	{
-		parent::callParent();
-	}
-
 	public function getBar()
 	{
 		return 123;
+	}
+}
+
+class TestChild extends TestClass
+{
+	public function callParent()
+	{
+		parent::callParent();
 	}
 }
 
@@ -52,7 +57,7 @@ Assert::exception(function () {
 }, 'LogicException', 'Call to undefined static method TestClass::undeclared().');
 
 Assert::exception(function () {
-	$obj = new TestClass;
+	$obj = new TestChild;
 	$obj->callParent();
 }, 'LogicException', 'Call to undefined method parent::callParent().');
 

@@ -9,8 +9,10 @@
 /**
  * Around advice handlers.
  */
-final class TexyHandlerInvocation extends TexyObject
+final class TexyHandlerInvocation
 {
+	use TexyStrict;
+
 	/** @var array of callbacks */
 	private $handlers;
 
