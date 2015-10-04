@@ -22,7 +22,6 @@ spl_autoload_register(function ($class) {
 		'TexyParser' => 'TexyParser.php',
 		'TexyBlockParser' => 'TexyBlockParser.php',
 		'TexyLineParser' => 'TexyLineParser.php',
-		'TexyUtf' => 'TexyUtf.php',
 		'TexyConfigurator' => 'TexyConfigurator.php',
 		'TexyHandlerInvocation' => 'TexyHandlerInvocation.php',
 		'TexyRegexp' => 'TexyRegexp.php',

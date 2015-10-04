@@ -139,7 +139,7 @@ final class TexyImageModule extends TexyModule
 	 */
 	public function addReference($name, TexyImage $image)
 	{
-		$image->name = TexyUtf::strtolower($name);
+		$image->name = function_exists('mb_strtolower') ? mb_strtolower($name, 'UTF-8') : $name;
 		$this->references[$image->name] = $image;
 	}
 
@@ -152,7 +152,7 @@ final class TexyImageModule extends TexyModule
 	 */
 	public function getReference($name)
 	{
-		$name = TexyUtf::strtolower($name);
+		$name = function_exists('mb_strtolower') ? mb_strtolower($name, 'UTF-8') : $name;
 		if (isset($this->references[$name])) {
 			return clone $this->references[$name];
 		}
