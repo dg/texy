@@ -125,6 +125,8 @@ Pure
 - ftps://example.com
 - ftps://user:pass@example.com
 - dave@example.com
+- www.text.cz?(x)
+- www.text.cz?(x)#$%10
 
 
 [php Fashion1]: http://phpfashion.com/ text *o*dkazu .(title)[aa]
