@@ -6,7 +6,7 @@
 
 
 // include libs
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 // MY OWN TEXY! OBJECT
@@ -43,7 +43,7 @@ class MyTexy extends Texy
 			} else {                           // doesn't exists
 				$html = parent::process($text);
 				file_put_contents($cacheFile,
-					serialize(array($html, $this->styleSheet, $this->headingModule->title))
+					serialize([$html, $this->styleSheet, $this->headingModule->title])
 				);
 			}
 

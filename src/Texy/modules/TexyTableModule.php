@@ -25,7 +25,7 @@ final class TexyTableModule extends TexyModule
 		$this->texy = $texy;
 
 		$texy->registerBlockPattern(
-			array($this, 'patternTable'),
+			[$this, 'patternTable'],
 			'#^(?:'.TexyPatterns::MODIFIER_HV.'\n)?' // .{color: red}
 			. '\|.*()$#mU', // | ....
 			'table'
@@ -76,8 +76,8 @@ final class TexyTableModule extends TexyModule
 		}
 
 		$isHead = FALSE;
-		$colModifier = array();
-		$prevRow = array(); // rowSpan building helper
+		$colModifier = [];
+		$prevRow = []; // rowSpan building helper
 		$rowCounter = 0;
 		$colCounter = 0;
 		$elPart = NULL;
@@ -93,7 +93,7 @@ final class TexyTableModule extends TexyModule
 					$isHead = !$isHead;
 					$lineMode = $matches[1] === '=';
 				}
-				$prevRow = array();
+				$prevRow = [];
 				continue;
 			}
 
@@ -240,7 +240,7 @@ final class TexyTableModule extends TexyModule
 
 
 		// event listener
-		$tx->invokeHandlers('afterTable', array($parser, $el, $mod));
+		$tx->invokeHandlers('afterTable', [$parser, $el, $mod]);
 
 		return $el;
 	}

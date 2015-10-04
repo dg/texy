@@ -6,31 +6,31 @@
 
 
 // include Texy!
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 $texy = new Texy();
-$texy->addHandler('emoticon', array('myHandler', 'emoticon'));
-$texy->addHandler('image', array('myHandler', 'image'));
-$texy->addHandler('linkReference', array('myHandler', 'linkReference'));
-$texy->addHandler('linkEmail', array('myHandler', 'linkEmail'));
-$texy->addHandler('linkURL', array('myHandler', 'linkURL'));
-$texy->addHandler('phrase', array('myHandler', 'phrase'));
-$texy->addHandler('newReference', array('myHandler', 'newReference'));
-$texy->addHandler('htmlComment', array('myHandler', 'htmlComment'));
-$texy->addHandler('htmlTag', array('myHandler', 'htmlTag'));
-$texy->addHandler('script', array('myHandler', 'script'));
+$texy->addHandler('emoticon', ['myHandler', 'emoticon']);
+$texy->addHandler('image', ['myHandler', 'image']);
+$texy->addHandler('linkReference', ['myHandler', 'linkReference']);
+$texy->addHandler('linkEmail', ['myHandler', 'linkEmail']);
+$texy->addHandler('linkURL', ['myHandler', 'linkURL']);
+$texy->addHandler('phrase', ['myHandler', 'phrase']);
+$texy->addHandler('newReference', ['myHandler', 'newReference']);
+$texy->addHandler('htmlComment', ['myHandler', 'htmlComment']);
+$texy->addHandler('htmlTag', ['myHandler', 'htmlTag']);
+$texy->addHandler('script', ['myHandler', 'script']);
 //$texy->addHandler('paragraph', array('myHandler', 'paragraph'));
-$texy->addHandler('figure', array('myHandler', 'figure'));
-$texy->addHandler('heading', array('myHandler', 'heading'));
-$texy->addHandler('horizline', array('myHandler', 'horizline'));
-$texy->addHandler('block', array('myHandler', 'block'));
-$texy->addHandler('afterList', array('myHandler', 'afterList'));
-$texy->addHandler('afterDefinitionList', array('myHandler', 'afterDefinitionList'));
-$texy->addHandler('afterTable', array('myHandler', 'afterTable'));
-$texy->addHandler('afterBlockquote', array('myHandler', 'afterBlockquote'));
-$texy->addHandler('beforeParse', array('myHandler', 'beforeParse'));
-$texy->addHandler('afterParse', array('myHandler', 'afterParse'));
+$texy->addHandler('figure', ['myHandler', 'figure']);
+$texy->addHandler('heading', ['myHandler', 'heading']);
+$texy->addHandler('horizline', ['myHandler', 'horizline']);
+$texy->addHandler('block', ['myHandler', 'block']);
+$texy->addHandler('afterList', ['myHandler', 'afterList']);
+$texy->addHandler('afterDefinitionList', ['myHandler', 'afterDefinitionList']);
+$texy->addHandler('afterTable', ['myHandler', 'afterTable']);
+$texy->addHandler('afterBlockquote', ['myHandler', 'afterBlockquote']);
+$texy->addHandler('beforeParse', ['myHandler', 'beforeParse']);
+$texy->addHandler('afterParse', ['myHandler', 'afterParse']);
 
 
 class myHandler

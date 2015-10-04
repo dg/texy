@@ -6,7 +6,7 @@
 
 
 // include Texy!
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 $texy = new Texy();
@@ -43,6 +43,6 @@ $texy->allowedStyles = FALSE;
 doIt($texy);
 
 echo '<h2>mode: Custom</h2>';
-$texy->allowedClasses = array('one', '#id');
-$texy->allowedStyles = array('color');
+$texy->allowedClasses = ['one', '#id'];
+$texy->allowedStyles = ['color'];
 doIt($texy);

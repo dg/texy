@@ -9,7 +9,7 @@
 
 
 // include Texy!
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 /**

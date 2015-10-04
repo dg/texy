@@ -19,17 +19,17 @@ final class TexyHtmlModule extends TexyModule
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('htmlComment', array($this, 'solveComment'));
-		$texy->addHandler('htmlTag', array($this, 'solveTag'));
+		$texy->addHandler('htmlComment', [$this, 'solveComment']);
+		$texy->addHandler('htmlTag', [$this, 'solveTag']);
 
 		$texy->registerLinePattern(
-			array($this, 'patternTag'),
+			[$this, 'patternTag'],
 			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9:-]++|=\s*+"[^"'.TexyPatterns::MARK.']*+"|=\s*+\'[^\''.TexyPatterns::MARK.']*+\'|=[^\s>'.TexyPatterns::MARK.']++)*)\s*+(/?)>#isu',
 			'html/tag'
 		);
 
 		$texy->registerLinePattern(
-			array($this, 'patternComment'),
+			[$this, 'patternComment'],
 			'#<!--([^'.TexyPatterns::MARK.']*?)-->#is',
 			'html/comment'
 		);
@@ -47,7 +47,7 @@ final class TexyHtmlModule extends TexyModule
 	public function patternComment($parser, $matches)
 	{
 		list(, $mComment) = $matches;
-		return $this->texy->invokeAroundHandlers('htmlComment', $parser, array($mComment));
+		return $this->texy->invokeAroundHandlers('htmlComment', $parser, [$mComment]);
 	}
 
 
@@ -112,7 +112,7 @@ final class TexyHtmlModule extends TexyModule
 			}
 		}
 
-		$res = $tx->invokeAroundHandlers('htmlTag', $parser, array($el, $isStart, $isEmpty));
+		$res = $tx->invokeAroundHandlers('htmlTag', $parser, [$el, $isStart, $isEmpty]);
 
 		if ($res instanceof TexyHtml) {
 			return $tx->protect($isStart ? $res->startTag() : $res->endTag(), $res->getContentType());
@@ -173,7 +173,7 @@ final class TexyHtmlModule extends TexyModule
 
 		// process attributes
 		if (!$allowedAttrs) {
-			$elAttrs = array();
+			$elAttrs = [];
 
 		} elseif (is_array($allowedAttrs)) {
 
@@ -258,11 +258,11 @@ final class TexyHtmlModule extends TexyModule
 			}
 
 		} elseif (preg_match('#^h[1-6]#i', $name)) {
-			$tx->headingModule->TOC[] = array(
+			$tx->headingModule->TOC[] = [
 				'el' => $el,
 				'level' => (int) substr($name, 1),
 				'type' => 'html',
-			);
+			];
 		}
 
 		$el->validateAttrs($tx->dtd);

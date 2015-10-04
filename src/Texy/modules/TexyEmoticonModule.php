@@ -12,7 +12,7 @@
 final class TexyEmoticonModule extends TexyModule
 {
 	/** @var array  supported emoticons and image files */
-	public $icons = array(
+	public $icons = [
 		':-)' => 'smile.gif',
 		':-(' => 'sad.gif',
 		';-)' => 'wink.gif',
@@ -23,7 +23,7 @@ final class TexyEmoticonModule extends TexyModule
 		':-x' => 'mad.gif',
 		':-P' => 'razz.gif',
 		':-|' => 'neutral.gif',
-	);
+	];
 
 	/** @var string  CSS class for emoticons */
 	public $class;
@@ -39,8 +39,8 @@ final class TexyEmoticonModule extends TexyModule
 	{
 		$this->texy = $texy;
 		$texy->allowed['emoticon'] = FALSE;
-		$texy->addHandler('emoticon', array($this, 'solve'));
-		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
+		$texy->addHandler('emoticon', [$this, 'solve']);
+		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
 	}
 
 
@@ -52,13 +52,13 @@ final class TexyEmoticonModule extends TexyModule
 
 		krsort($this->icons);
 
-		$pattern = array();
+		$pattern = [];
 		foreach ($this->icons as $key => $foo) {
 			$pattern[] = preg_quote($key, '#') . '+'; // last char can be repeated
 		}
 
 		$this->texy->registerLinePattern(
-			array($this, 'pattern'),
+			[$this, 'pattern'],
 			'#(?<=^|[\\x00-\\x20])(' . implode('|', $pattern) . ')#',
 			'emoticon',
 			'#' . implode('|', $pattern) . '#'
@@ -82,7 +82,7 @@ final class TexyEmoticonModule extends TexyModule
 		// find the closest match
 		foreach ($this->icons as $emoticon => $foo) {
 			if (strncmp($match, $emoticon, strlen($emoticon)) === 0) {
-				return $tx->invokeAroundHandlers('emoticon', $parser, array($emoticon, $match));
+				return $tx->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
 			}
 		}
 

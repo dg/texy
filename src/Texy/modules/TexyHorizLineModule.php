@@ -12,20 +12,20 @@
 final class TexyHorizLineModule extends TexyModule
 {
 	/** @var array  default CSS class */
-	public $classes = array(
+	public $classes = [
 		'-' => NULL,
 		'*' => NULL,
-	);
+	];
 
 
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('horizline', array($this, 'solve'));
+		$texy->addHandler('horizline', [$this, 'solve']);
 
 		$texy->registerBlockPattern(
-			array($this, 'pattern'),
+			[$this, 'pattern'],
 			'#^(\*{3,}+|-{3,}+)\ *'.TexyPatterns::MODIFIER.'?()$#mU',
 			'horizline'
 		);
@@ -47,7 +47,7 @@ final class TexyHorizLineModule extends TexyModule
 		// [2] => .(title)[class]{style}<>
 
 		$mod = new TexyModifier($mMod);
-		return $this->texy->invokeAroundHandlers('horizline', $parser, array($mType, $mod));
+		return $this->texy->invokeAroundHandlers('horizline', $parser, [$mType, $mod]);
 	}
 
 

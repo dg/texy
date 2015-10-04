@@ -28,10 +28,10 @@ final class TexyFigureModule extends TexyModule
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('figure', array($this, 'solve'));
+		$texy->addHandler('figure', [$this, 'solve']);
 
 		$texy->registerBlockPattern(
-			array($this, 'pattern'),
+			[$this, 'pattern'],
 			'#^\[\* *+([^\n'.TexyPatterns::MARK.']{1,1000})'.TexyPatterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
 			. '(?::('.TexyPatterns::LINK_URL.'|:))?? ++\*\*\* ++(.{0,2000})'.TexyPatterns::MODIFIER_H.'?()$#mUu',
 			'figure'
@@ -74,7 +74,7 @@ final class TexyFigureModule extends TexyModule
 			$link = NULL;
 		}
 
-		return $tx->invokeAroundHandlers('figure', $parser, array($image, $link, $mContent, $mod));
+		return $tx->invokeAroundHandlers('figure', $parser, [$image, $link, $mContent, $mod]);
 	}
 
 

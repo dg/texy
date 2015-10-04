@@ -13,32 +13,32 @@ final class TexyTypographyModule extends TexyModule
 {
 	// @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 
-	public static $locales = array(
-		'cs' => array(
-			'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
-			'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
-		),
+	public static $locales = [
+		'cs' => [
+			'singleQuotes' => ["\xe2\x80\x9a", "\xe2\x80\x98"], // U+201A, U+2018
+			'doubleQuotes' => ["\xe2\x80\x9e", "\xe2\x80\x9c"], // U+201E, U+201C
+		],
 
-		'en' => array(
-			'singleQuotes' => array("\xe2\x80\x98", "\xe2\x80\x99"), // U+2018, U+2019
-			'doubleQuotes' => array("\xe2\x80\x9c", "\xe2\x80\x9d"), // U+201C, U+201D
-		),
+		'en' => [
+			'singleQuotes' => ["\xe2\x80\x98", "\xe2\x80\x99"], // U+2018, U+2019
+			'doubleQuotes' => ["\xe2\x80\x9c", "\xe2\x80\x9d"], // U+201C, U+201D
+		],
 
-		'fr' => array(
-			'singleQuotes' => array("\xe2\x80\xb9", "\xe2\x80\xba"), // U+2039, U+203A
-			'doubleQuotes' => array("\xc2\xab", "\xc2\xbb"),         // U+00AB, U+00BB
-		),
+		'fr' => [
+			'singleQuotes' => ["\xe2\x80\xb9", "\xe2\x80\xba"], // U+2039, U+203A
+			'doubleQuotes' => ["\xc2\xab", "\xc2\xbb"],         // U+00AB, U+00BB
+		],
 
-		'de' => array(
-			'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x98"), // U+201A, U+2018
-			'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9c"), // U+201E, U+201C
-		),
+		'de' => [
+			'singleQuotes' => ["\xe2\x80\x9a", "\xe2\x80\x98"], // U+201A, U+2018
+			'doubleQuotes' => ["\xe2\x80\x9e", "\xe2\x80\x9c"], // U+201E, U+201C
+		],
 
-		'pl' => array(
-			'singleQuotes' => array("\xe2\x80\x9a", "\xe2\x80\x99"), // U+201A, U+2019
-			'doubleQuotes' => array("\xe2\x80\x9e", "\xe2\x80\x9d"), // U+201E, U+201D
-		),
-	);
+		'pl' => [
+			'singleQuotes' => ["\xe2\x80\x9a", "\xe2\x80\x99"], // U+201A, U+2019
+			'doubleQuotes' => ["\xe2\x80\x9e", "\xe2\x80\x9d"], // U+201E, U+201D
+		],
+	];
 
 	/** @var string */
 	public $locale = 'cs';
@@ -50,8 +50,8 @@ final class TexyTypographyModule extends TexyModule
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
-		$texy->registerPostLine(array($this, 'postLine'), 'typography');
-		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
+		$texy->registerPostLine([$this, 'postLine'], 'typography');
+		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
 	}
 
 
@@ -74,7 +74,7 @@ final class TexyTypographyModule extends TexyModule
 			$locale = self::$locales['en'];
 		}
 
-		$this->pattern = array(
+		$this->pattern = [
 			'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
 			'#(?<=[\d ]|^)-(?=[\d ]|$)#'              => "\xe2\x80\x93",                   // en dash 123-123
 			'#(?<=[^!*+,/:;<=>@\\\\_|-])--(?=[^!*+,/:;<=>@\\\\_|-])#' => "\xe2\x80\x93",   // en dash alphanum--alphanum
@@ -112,7 +112,7 @@ final class TexyTypographyModule extends TexyModule
 
 			'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["'.TexyPatterns::CHAR.'])()#Uu' => $locale['doubleQuotes'][0].'$1'.$locale['doubleQuotes'][1], // double ""
 			'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\''.TexyPatterns::CHAR.'])()#Uu' => $locale['singleQuotes'][0].'$1'.$locale['singleQuotes'][1], // single ''
-		);
+		];
 	}
 
 

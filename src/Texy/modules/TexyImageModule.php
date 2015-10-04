@@ -33,7 +33,7 @@ final class TexyImageModule extends TexyModule
 	public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
 
 	/** @var array image references */
-	private $references = array();
+	private $references = [];
 
 
 	public function __construct($texy)
@@ -42,12 +42,12 @@ final class TexyImageModule extends TexyModule
 
 		$texy->allowed['image/definition'] = TRUE;
 		$texy->allowed['image/hover'] = TRUE;
-		$texy->addHandler('image', array($this, 'solve'));
-		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
+		$texy->addHandler('image', [$this, 'solve']);
+		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
 
 		// [*image*]:LINK
 		$texy->registerLinePattern(
-			array($this, 'patternImage'),
+			[$this, 'patternImage'],
 			'#\[\* *+([^\n'.TexyPatterns::MARK.']{1,1000})'.TexyPatterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
 			. '(?::('.TexyPatterns::LINK_URL.'|:))??()#Uu',
 			'image'
@@ -68,7 +68,7 @@ final class TexyImageModule extends TexyModule
 			$text = TexyRegexp::replace(
 				$text,
 				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *'.TexyPatterns::MODIFIER.'?\s*()$#mUu',
-				array($this, 'patternReferenceDef')
+				[$this, 'patternReferenceDef']
 			);
 		}
 	}
@@ -126,7 +126,7 @@ final class TexyImageModule extends TexyModule
 			$link = NULL;
 		}
 
-		return $tx->invokeAroundHandlers('image', $parser, array($image, $link));
+		return $tx->invokeAroundHandlers('image', $parser, [$image, $link]);
 	}
 
 

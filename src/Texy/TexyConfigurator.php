@@ -16,21 +16,21 @@
  */
 class TexyConfigurator
 {
-	public static $safeTags = array(
-		'a' => array('href', 'title'),
-		'acronym' => array('title'),
-		'b' => array(),
-		'br' => array(),
-		'cite' => array(),
-		'code' => array(),
-		'em' => array(),
-		'i' => array(),
-		'strong' => array(),
-		'sub' => array(),
-		'sup' => array(),
-		'q' => array(),
-		'small' => array(),
-	);
+	public static $safeTags = [
+		'a' => ['href', 'title'],
+		'acronym' => ['title'],
+		'b' => [],
+		'br' => [],
+		'cite' => [],
+		'code' => [],
+		'em' => [],
+		'i' => [],
+		'strong' => [],
+		'sub' => [],
+		'sup' => [],
+		'q' => [],
+		'small' => [],
+	];
 
 
 	/**

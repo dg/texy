@@ -26,11 +26,11 @@ final class TexyBlockModule extends TexyModule
 		$texy->allowed['block/comment'] = TRUE;
 		$texy->allowed['block/div'] = TRUE;
 
-		$texy->addHandler('block', array($this, 'solve'));
-		$texy->addHandler('beforeBlockParse', array($this, 'beforeBlockParse'));
+		$texy->addHandler('block', [$this, 'solve']);
+		$texy->addHandler('beforeBlockParse', [$this, 'beforeBlockParse']);
 
 		$texy->registerBlockPattern(
-			array($this, 'pattern'),
+			[$this, 'pattern'],
 			'#^/--++ *+(.*)'.TexyPatterns::MODIFIER_H.'?$((?:\n(?0)|\n.*+)*)(?:\n\\\\--.*$|\z)#mUi',
 			'blocks'
 		);
@@ -79,7 +79,7 @@ final class TexyBlockModule extends TexyModule
 		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? NULL : $parts[1];
 
-		return $this->texy->invokeAroundHandlers('block', $parser, array($blocktype, $mContent, $param, $mod));
+		return $this->texy->invokeAroundHandlers('block', $parser, [$blocktype, $mContent, $param, $mod]);
 	}
 
 
@@ -170,7 +170,7 @@ final class TexyBlockModule extends TexyModule
 			$lineParser = new TexyLineParser($tx, $el);
 			// special mode - parse only html tags
 			$tmp = $lineParser->patterns;
-			$lineParser->patterns = array();
+			$lineParser->patterns = [];
 			if (isset($tmp['html/tag'])) {
 				$lineParser->patterns['html/tag'] = $tmp['html/tag'];
 			}
@@ -198,7 +198,7 @@ final class TexyBlockModule extends TexyModule
 			$lineParser = new TexyLineParser($tx, $el);
 			// special mode - parse only html tags
 			$tmp = $lineParser->patterns;
-			$lineParser->patterns = array();
+			$lineParser->patterns = [];
 			if (isset($tmp['html/tag'])) {
 				$lineParser->patterns['html/tag'] = $tmp['html/tag'];
 			}

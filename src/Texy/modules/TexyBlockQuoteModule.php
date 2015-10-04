@@ -17,7 +17,7 @@ final class TexyBlockQuoteModule extends TexyModule
 		$this->texy = $texy;
 
 		$texy->registerBlockPattern(
-			array($this, 'pattern'),
+			[$this, 'pattern'],
 			'#^(?:'.TexyPatterns::MODIFIER_H.'\n)?\>(\ ++|:)(\S.*+)$#mU', // original
 			// '#^(?:'.TexyPatterns::MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU', // >>>>
 			// '#^(?:'.TexyPatterns::MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU', // only >
@@ -95,7 +95,7 @@ final class TexyBlockQuoteModule extends TexyModule
 		}
 
 		// event listener
-		$tx->invokeHandlers('afterBlockquote', array($parser, $el, $mod));
+		$tx->invokeHandlers('afterBlockquote', [$parser, $el, $mod]);
 
 		return $el;
 	}

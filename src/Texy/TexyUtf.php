@@ -77,7 +77,7 @@ class TexyUtf
 		} else {
 			$s = @iconv('UTF-8', 'ASCII//TRANSLIT', $s); // intentionally @
 		}
-		$s = str_replace(array('`', "'", '"', '^', '~'), '', $s);
+		$s = str_replace(['`', "'", '"', '^', '~'], '', $s);
 		return $s;
 	}
 
@@ -104,7 +104,7 @@ class TexyUtf
 		}
 
 		// convert
-		return preg_replace_callback('#[\x80-\x{FFFF}]#u', array(__CLASS__, 'cb'), $s);
+		return preg_replace_callback('#[\x80-\x{FFFF}]#u', [__CLASS__, 'cb'], $s);
 	}
 
 

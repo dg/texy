@@ -96,7 +96,7 @@ abstract class TexyObject
 				if (is_array($list) || $list instanceof Traversable) {
 					foreach ($list as $handler) {
 						/**/if (is_object($handler)) {
-							call_user_func_array(array($handler, '__invoke'), $args);
+							call_user_func_array([$handler, '__invoke'], $args);
 
 						} else /**/{
 							call_user_func_array($handler, $args);

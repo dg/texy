@@ -45,7 +45,7 @@ class TexyLineParser extends TexyParser
 
 		$offset = 0;
 		$names = array_keys($pl);
-		$arrMatches = $arrOffset = array();
+		$arrMatches = $arrOffset = [];
 		foreach ($names as $name) {
 			$arrOffset[$name] = -1;
 		}
@@ -109,7 +109,7 @@ class TexyLineParser extends TexyParser
 			$this->again = FALSE;
 			$res = call_user_func_array(
 				$px['handler'],
-				array($this, $arrMatches[$min], $min)
+				[$this, $arrMatches[$min], $min]
 			);
 
 			if ($res instanceof TexyHtml) {

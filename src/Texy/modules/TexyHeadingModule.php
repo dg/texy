@@ -37,12 +37,12 @@ final class TexyHeadingModule extends TexyModule
 	public $balancing = self::DYNAMIC;
 
 	/** @var array  when $balancing = TexyHeadingModule::FIXED */
-	public $levels = array(
+	public $levels = [
 		'#' => 0, // # --> $levels['#'] + $top = 0 + 1 = 1 --> <h1> ... </h1>
 		'*' => 1,
 		'=' => 2,
 		'-' => 3,
-	);
+	];
 
 	/** @var array  used ID's */
 	private $usedID;
@@ -52,19 +52,19 @@ final class TexyHeadingModule extends TexyModule
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('heading', array($this, 'solve'));
-		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
-		$texy->addHandler('afterParse', array($this, 'afterParse'));
+		$texy->addHandler('heading', [$this, 'solve']);
+		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
+		$texy->addHandler('afterParse', [$this, 'afterParse']);
 
 		$texy->registerBlockPattern(
-			array($this, 'patternUnderline'),
+			[$this, 'patternUnderline'],
 			'#^(\S.{0,1000})'.TexyPatterns::MODIFIER_H.'?\n'
 			. '(\#{3,}+|\*{3,}+|={3,}+|-{3,}+)$#mU',
 			'heading/underlined'
 		);
 
 		$texy->registerBlockPattern(
-			array($this, 'patternSurround'),
+			[$this, 'patternSurround'],
 			'#^(\#{2,}+|={2,}+)(.+)'.TexyPatterns::MODIFIER_H.'?()$#mU',
 			'heading/surrounded'
 		);
@@ -74,8 +74,8 @@ final class TexyHeadingModule extends TexyModule
 	public function beforeParse()
 	{
 		$this->title = NULL;
-		$this->usedID = array();
-		$this->TOC = array();
+		$this->usedID = [];
+		$this->TOC = [];
 	}
 
 
@@ -93,7 +93,7 @@ final class TexyHeadingModule extends TexyModule
 
 		if ($this->balancing === self::DYNAMIC) {
 			$top = $this->top;
-			$map = array();
+			$map = [];
 			$min = 100;
 			foreach ($this->TOC as $item) {
 				$level = $item['level'];
@@ -179,7 +179,7 @@ final class TexyHeadingModule extends TexyModule
 
 		$mod = new TexyModifier($mMod);
 		$level = $this->levels[$mLine[0]];
-		return $this->texy->invokeAroundHandlers('heading', $parser, array($level, $mContent, $mod, FALSE));
+		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, FALSE]);
 	}
 
 
@@ -204,7 +204,7 @@ final class TexyHeadingModule extends TexyModule
 		$level = min(7, max(2, strlen($mLine)));
 		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
-		return $this->texy->invokeAroundHandlers('heading', $parser, array($level, $mContent, $mod, TRUE));
+		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, TRUE]);
 	}
 
 
@@ -226,11 +226,11 @@ final class TexyHeadingModule extends TexyModule
 
 		$el->parseLine($this->texy, trim($content));
 
-		$this->TOC[] = array(
+		$this->TOC[] = [
 			'el' => $el,
 			'level' => $level,
 			'type' => $isSurrounded ? 'surrounded' : 'underlined',
-		);
+		];
 
 		return $el;
 	}
