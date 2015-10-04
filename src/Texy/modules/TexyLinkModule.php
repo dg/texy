@@ -30,7 +30,7 @@ final class TexyLinkModule extends TexyModule
 	public $shorten = TRUE;
 
 	/** @var array link references */
-	private $references = array();
+	private $references = [];
 
 	/** @var array */
 	private static $livelock;
@@ -43,22 +43,22 @@ final class TexyLinkModule extends TexyModule
 		$this->texy = $texy;
 
 		$texy->allowed['link/definition'] = TRUE;
-		$texy->addHandler('newReference', array($this, 'solveNewReference'));
-		$texy->addHandler('linkReference', array($this, 'solve'));
-		$texy->addHandler('linkEmail', array($this, 'solveUrlEmail'));
-		$texy->addHandler('linkURL', array($this, 'solveUrlEmail'));
-		$texy->addHandler('beforeParse', array($this, 'beforeParse'));
+		$texy->addHandler('newReference', [$this, 'solveNewReference']);
+		$texy->addHandler('linkReference', [$this, 'solve']);
+		$texy->addHandler('linkEmail', [$this, 'solveUrlEmail']);
+		$texy->addHandler('linkURL', [$this, 'solveUrlEmail']);
+		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
 
 		// [reference]
 		$texy->registerLinePattern(
-			array($this, 'patternReference'),
+			[$this, 'patternReference'],
 			'#(\[[^\[\]\*\n'.TexyPatterns::MARK.']++\])#U',
 			'link/reference'
 		);
 
 		// direct url; charaters not allowed in URL <>[\]^`{|}
 		$texy->registerLinePattern(
-			array($this, 'patternUrlEmail'),
+			[$this, 'patternUrlEmail'],
 			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TexyPatterns::CHAR.'-][/\d'.TexyPatterns::CHAR.'+\.~%&?@=_:;\#$!,*()\x{ad}-]{1,1000}[/\d'.TexyPatterns::CHAR.'+~?@=_\#$*]#u',
 			'link/url',
 			'#(?:https?://|www\.|ftp://)#u'
@@ -67,7 +67,7 @@ final class TexyLinkModule extends TexyModule
 		// direct email
 		self::$EMAIL = '['.TexyPatterns::CHAR.'][0-9.+_'.TexyPatterns::CHAR.'-]{0,63}@[0-9.+_'.TexyPatterns::CHAR.'\x{ad}-]{1,252}\.['.TexyPatterns::CHAR.'\x{ad}]{2,19}';
 		$texy->registerLinePattern(
-			array($this, 'patternUrlEmail'),
+			[$this, 'patternUrlEmail'],
 			'#(?<=^|[\s([<\x17])'.self::$EMAIL.'#u',
 			'link/email',
 			'#'.self::$EMAIL.'#u'
@@ -83,14 +83,14 @@ final class TexyLinkModule extends TexyModule
 	 */
 	public function beforeParse($texy, & $text)
 	{
-		self::$livelock = array();
+		self::$livelock = [];
 
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = TexyRegexp::replace(
 				$text,
 				'#^\[([^\[\]\#\?\*\n]{1,100})\]: ++(\S{1,1000})(\ .{1,1000})?'.TexyPatterns::MODIFIER.'?\s*()$#mUu',
-				array($this, 'patternReferenceDef')
+				[$this, 'patternReferenceDef']
 			);
 		}
 	}
@@ -138,7 +138,7 @@ final class TexyLinkModule extends TexyModule
 		$link = $this->getReference($name);
 
 		if (!$link) {
-			return $tx->invokeAroundHandlers('newReference', $parser, array($name));
+			return $tx->invokeAroundHandlers('newReference', $parser, [$name]);
 		}
 
 		$link->type = TexyLink::BRACKET;
@@ -160,7 +160,7 @@ final class TexyLinkModule extends TexyModule
 			$content = $this->texy->protect($content, Texy::CONTENT_TEXTUAL);
 		}
 
-		return $tx->invokeAroundHandlers('linkReference', $parser, array($link, $content));
+		return $tx->invokeAroundHandlers('linkReference', $parser, [$link, $content]);
 	}
 
 
@@ -183,7 +183,7 @@ final class TexyLinkModule extends TexyModule
 		return $this->texy->invokeAroundHandlers(
 			$name === 'link/email' ? 'linkEmail' : 'linkURL',
 			$parser,
-			array($link)
+			[$link]
 		);
 	}
 

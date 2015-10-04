@@ -10,7 +10,7 @@
 
 
 // include Texy!
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 $texy = new Texy();
@@ -58,8 +58,8 @@ doIt($texy);
 
 echo '<h2>Enable custom tags</h2>';
 $texy->allowedTags =
-	array( // enable only tags <myExtraTag> with attribute & <strong>
-		'myExtraTag' => array('attr1'),
-		'strong' => array(),
-	);
+	[ // enable only tags <myExtraTag> with attribute & <strong>
+		'myExtraTag' => ['attr1'],
+		'strong' => [],
+	];
 doIt($texy);

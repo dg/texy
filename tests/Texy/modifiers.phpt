@@ -29,8 +29,8 @@ test(function () {
 test(function () {
 	$texy = new Texy;
 	$texy->htmlOutputModule->lineWrap = 180;
-	$texy->allowedClasses = array('one', '#id');
-	$texy->allowedStyles = array('color');
+	$texy->allowedClasses = ['one', '#id'];
+	$texy->allowedStyles = ['color'];
 
 	Assert::match(
 		'<p>This <strong style="color:red">text is formatted</strong> with <em>style</em> modifiers.</p>',

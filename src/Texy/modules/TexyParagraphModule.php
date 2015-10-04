@@ -15,7 +15,7 @@ final class TexyParagraphModule extends TexyModule
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
-		$texy->addHandler('paragraph', array($this, 'solve'));
+		$texy->addHandler('paragraph', [$this, 'solve']);
 	}
 
 
@@ -54,7 +54,7 @@ final class TexyParagraphModule extends TexyModule
 				$mod->setProperties($mMod);
 			}
 
-			$res = $tx->invokeAroundHandlers('paragraph', $parser, array($s, $mod));
+			$res = $tx->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
 			if ($res) {
 				$el->insert(NULL, $res);
 			}

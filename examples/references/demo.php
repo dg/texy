@@ -9,7 +9,7 @@
 
 
 // include Texy!
-require_once dirname(__FILE__) . '/../../src/texy.php';
+require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
@@ -21,7 +21,7 @@ require_once dirname(__FILE__) . '/../../src/texy.php';
  */
 function newReferenceHandler($parser, $refName)
 {
-	$names = array('Me', 'Punkrats', 'Servats', 'Bonifats');
+	$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
 
 	if (!isset($names[$refName])) {
 		return FALSE; // it's not my job

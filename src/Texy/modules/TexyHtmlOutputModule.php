@@ -15,7 +15,7 @@ final class TexyHtmlOutputModule extends TexyModule
 	public $indent = TRUE;
 
 	/** @var array */
-	public $preserveSpaces = array('textarea', 'pre', 'script', 'code', 'samp', 'kbd');
+	public $preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
 
 	/** @var int  base indent level */
 	public $baseIndent = 0;
@@ -45,7 +45,7 @@ final class TexyHtmlOutputModule extends TexyModule
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
-		$texy->addHandler('postProcess', array($this, 'postProcess'));
+		$texy->addHandler('postProcess', [$this, 'postProcess']);
 	}
 
 
@@ -56,18 +56,18 @@ final class TexyHtmlOutputModule extends TexyModule
 	public function postProcess($texy, & $s)
 	{
 		$this->space = $this->baseIndent;
-		$this->tagStack = array();
-		$this->tagUsed = array();
+		$this->tagStack = [];
+		$this->tagUsed = [];
 		$this->xml = $texy->getOutputMode() & Texy::XML;
 
 		// special "base content"
-		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + array('html' => 1);
+		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + ['html' => 1];
 
 		// wellform and reformat
 		$s = TexyRegexp::replace(
 			$s . '</end/>',
 			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
-			array($this, 'cb')
+			[$this, 'cb']
 		);
 
 		// empty out stack
@@ -92,7 +92,7 @@ final class TexyHtmlOutputModule extends TexyModule
 			$s = TexyRegexp::replace(
 				$s,
 				'#^(\t*)(.*)$#m',
-				array($this, 'wrap')
+				[$this, 'wrap']
 			);
 		}
 
@@ -156,7 +156,7 @@ final class TexyHtmlOutputModule extends TexyModule
 			}
 
 			// autoclose tags
-			$tmp = array();
+			$tmp = [];
 			$back = TRUE;
 			foreach ($this->tagStack as $i => $item) {
 				$tag = $item['tag'];
@@ -299,13 +299,13 @@ final class TexyHtmlOutputModule extends TexyModule
 
 
 			// open tag, put to stack, increase counter
-			$item = array(
+			$item = [
 				'tag' => $mTag,
 				'open' => $open,
 				'close' => $close,
 				'dtdContent' => $dtdContent,
 				'indent' => $indent,
-			);
+			];
 			array_unshift($this->tagStack, $item);
 			$tmp = & $this->tagUsed[$mTag];
 			$tmp++;

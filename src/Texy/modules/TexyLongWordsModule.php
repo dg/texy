@@ -20,29 +20,29 @@ final class TexyLongWordsModule extends TexyModule
 
 	const SAFE_LIMIT = 1000;
 
-	private $consonants = array(
+	private $consonants = [
 		'b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','z',
 		'B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Z',
 		"\xc4\x8d","\xc4\x8f","\xc5\x88","\xc5\x99","\xc5\xa1","\xc5\xa5","\xc5\xbe", //czech utf-8
-		"\xc4\x8c","\xc4\x8e","\xc5\x87","\xc5\x98","\xc5\xa0","\xc5\xa4","\xc5\xbd");
+		"\xc4\x8c","\xc4\x8e","\xc5\x87","\xc5\x98","\xc5\xa0","\xc5\xa4","\xc5\xbd"];
 
-	private $vowels = array(
+	private $vowels = [
 		'a','e','i','o','u','y',
 		'A','E','I','O','U','Y',
 		"\xc3\xa1","\xc3\xa9","\xc4\x9b","\xc3\xad","\xc3\xb3","\xc3\xba","\xc5\xaf","\xc3\xbd", //czech utf-8
-		"\xc3\x81","\xc3\x89","\xc4\x9a","\xc3\x8d","\xc3\x93","\xc3\x9a","\xc5\xae","\xc3\x9d");
+		"\xc3\x81","\xc3\x89","\xc4\x9a","\xc3\x8d","\xc3\x93","\xc3\x9a","\xc5\xae","\xc3\x9d"];
 
-	private $before_r = array(
+	private $before_r = [
 		'b','B','c','C','d','D','f','F','g','G','k','K','p','P','r','R','t','T','v','V',
-		"\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4"); //czech utf-8
+		"\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4"]; //czech utf-8
 
-	private $before_l = array(
+	private $before_l = [
 		'b','B','c','C','d','D','f','F','g','G','k','K','l','L','p','P','t','T','v','V',
-		"\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\xa5","\xc5\xa4"); //czech utf-8
+		"\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\xa5","\xc5\xa4"]; //czech utf-8
 
-	private $before_h = array('c','C','s','S');
+	private $before_h = ['c','C','s','S'];
 
-	private $doubleVowels = array('a','A','o','O');
+	private $doubleVowels = ['a','A','o','O'];
 
 
 	public function __construct($texy)
@@ -56,7 +56,7 @@ final class TexyLongWordsModule extends TexyModule
 		$this->before_h = array_flip($this->before_h);
 		$this->doubleVowels = array_flip($this->doubleVowels);
 
-		$texy->registerPostLine(array($this, 'postLine'), 'longwords');
+		$texy->registerPostLine([$this, 'postLine'], 'longwords');
 	}
 
 
@@ -65,7 +65,7 @@ final class TexyLongWordsModule extends TexyModule
 		return TexyRegexp::replace(
 			$text,
 			'#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{'.$this->wordLimit.',}#u',
-			array($this, 'pattern')
+			[$this, 'pattern']
 		);
 	}
 
@@ -86,7 +86,7 @@ final class TexyLongWordsModule extends TexyModule
 			return $mWord;
 		}
 
-		$chars = array();
+		$chars = [];
 		preg_match_all(
 			'#['.TexyPatterns::MARK.']+|.#u',
 			$mWord,
@@ -105,8 +105,8 @@ final class TexyLongWordsModule extends TexyModule
 		$before_h = $this->before_h;
 		$doubleVowels = $this->doubleVowels;
 
-		$s = array();
-		$trans = array();
+		$s = [];
+		$trans = [];
 
 		$s[] = '';
 		$trans[] = -1;
@@ -120,7 +120,7 @@ final class TexyLongWordsModule extends TexyModule
 		$s[] = '';
 		$len = count($s) - 2;
 
-		$positions = array();
+		$positions = [];
 		$a = 0;
 		$last = 1;
 
@@ -202,7 +202,7 @@ final class TexyLongWordsModule extends TexyModule
 			array_pop($positions);
 		}
 
-		$syllables = array();
+		$syllables = [];
 		$last = 0;
 		foreach ($positions as $pos) {
 			if ($pos - $last > $this->wordLimit * 0.6) {

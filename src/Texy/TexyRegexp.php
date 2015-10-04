@@ -11,13 +11,13 @@ class TexyRegexp
 	const ALL = 1;
 	const OFFSET_CAPTURE = 2;
 
-	private static $messages = array(
+	private static $messages = [
 		PREG_INTERNAL_ERROR => 'Internal error',
 		PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit was exhausted',
 		PREG_RECURSION_LIMIT_ERROR => 'Recursion limit was exhausted',
 		PREG_BAD_UTF8_ERROR => 'Malformed UTF-8 data',
 		5 => 'Offset didn\'t correspond to the begin of a valid UTF-8 code point', // PREG_BAD_UTF8_OFFSET_ERROR
-	);
+	];
 
 
 	/**
@@ -48,7 +48,7 @@ class TexyRegexp
 	 */
 	public static function match($subject, $pattern, $flags = 0, $offset = 0)
 	{
-		$empty = $flags & self::ALL ? array() : NULL;
+		$empty = $flags & self::ALL ? [] : NULL;
 		if ($offset > strlen($subject)) {
 			return $empty;
 		}
