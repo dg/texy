@@ -766,7 +766,7 @@ class Texy extends TexyObject
 	/**
 	 * Filters bad URLs.
 	 * @param  string   user URL
-	 * @param  string   type: a-anchor, i-image, c-cite
+	 * @param  string   FILTER_ANCHOR | FILTER_IMAGE
 	 * @return bool
 	 */
 	final public function checkURL($URL, $type)

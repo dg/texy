@@ -58,7 +58,7 @@ final class TexyLinkModule extends TexyModule
 			'link/reference'
 		);
 
-		// direct url and email
+		// direct url; charaters not allowed in URL $()*<>[\]^`{|}
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
 			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.'.TexyPatterns::CHAR.'-][/\d'.TexyPatterns::CHAR.'+\.~%&?@=_:;\#!,\x{ad}-]{1,1000}[/\d'.TexyPatterns::CHAR.'+~%?@=_\#]#u',
@@ -66,8 +66,8 @@ final class TexyLinkModule extends TexyModule
 			'#(?:https?://|www\.|ftp://)#u'
 		);
 
+		// direct email
 		self::$EMAIL = '['.TexyPatterns::CHAR.'][0-9.+_'.TexyPatterns::CHAR.'-]{0,63}@[0-9.+_'.TexyPatterns::CHAR.'\x{ad}-]{1,252}\.['.TexyPatterns::CHAR.'\x{ad}]{2,19}';
-
 		$texy->registerLinePattern(
 			array($this, 'patternUrlEmail'),
 			'#(?<=^|[\s([<\x17])'.self::$EMAIL.'#u',
