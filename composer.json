@@ -20,6 +20,6 @@
 		"dg/texy": "self.version"
 	},
 	"autoload": {
-		"files": ["src/texy.php"]
+		"classmap": ["src/"]
 	}
 }
