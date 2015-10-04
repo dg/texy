@@ -9,8 +9,10 @@
 /**
  * Link.
  */
-final class TexyLink extends TexyObject
+final class TexyLink
 {
+	use TexyStrict;
+
 	/** @see $type */
 	const
 		COMMON = 1,

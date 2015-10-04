@@ -9,8 +9,10 @@
 /**
  * Image.
  */
-final class TexyImage extends TexyObject
+final class TexyImage
 {
+	use TexyStrict;
+
 	/** @var string  base image URL */
 	public $URL;
 

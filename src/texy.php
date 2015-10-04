@@ -15,7 +15,7 @@ if (version_compare(PHP_VERSION, '5.4.0') < 0) {
 spl_autoload_register(function ($class) {
 	static $map = [
 		'TexyPatterns' => 'TexyPatterns.php',
-		'TexyObject' => 'TexyObject.php',
+		'TexyStrict' => 'TexyStrict.php',
 		'TexyHtml' => 'TexyHtml.php',
 		'TexyModifier' => 'TexyModifier.php',
 		'TexyModule' => 'TexyModule.php',

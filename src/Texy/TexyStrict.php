@@ -7,9 +7,9 @@
 
 
 /**
- * Object is the ultimate ancestor of all instantiable classes.
+ * Better OOP experience.
  */
-abstract class TexyObject
+trait TexyStrict
 {
 
 	/**

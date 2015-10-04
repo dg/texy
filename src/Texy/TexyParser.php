@@ -9,8 +9,10 @@
 /**
  * Texy parser base class.
  */
-class TexyParser extends TexyObject
+class TexyParser
 {
+	use TexyStrict;
+
 	/** @var Texy */
 	protected $texy;
 
