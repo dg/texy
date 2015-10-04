@@ -286,20 +286,3 @@ final class TexyTableModule extends TexyModule
 	}
 
 }
-
-
-/**
- * Table cell TD / TH.
- */
-class TexyTableCellElement extends TexyHtml
-{
-	/** @var int */
-	public $colSpan = 1;
-
-	/** @var int */
-	public $rowSpan = 1;
-
-	/** @var string */
-	public $text;
-
-}
