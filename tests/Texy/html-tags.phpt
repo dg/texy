@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 function createTexy()
 {
-	$texy = new Texy;
+	$texy = new Texy\Texy;
 	$texy->linkModule->root = 'xxx/';
 	$texy->htmlOutputModule->lineWrap = 180;
 	return $texy;
@@ -23,7 +23,7 @@ Assert::matchFile(
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))
 );
 
-TexyConfigurator::safeMode($texy);
+Texy\Configurator::safeMode($texy);
 Assert::matchFile(
 	__DIR__ . '/expected/html-tags1b.html',
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))

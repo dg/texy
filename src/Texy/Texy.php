@@ -5,6 +5,8 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
+namespace Texy;
+
 
 /**
  * Texy! - Convert plain text to XHTML format using {@link process()}.
@@ -16,14 +18,14 @@
  */
 class Texy
 {
-	use TexyStrict;
+	use Strict;
 
 	// configuration directives
 	const ALL = TRUE;
 	const NONE = FALSE;
 
 	// Texy version
-	const VERSION = '2.7';
+	const VERSION = '3.0-dev';
 	const REVISION = 'released on 2015-10-04';
 
 	// types of protection marks
@@ -46,9 +48,6 @@ class Texy
 	const XHTML1_TRANSITIONAL = 2; // Texy::HTML4_TRANSITIONAL | Texy::XML;
 	const XHTML1_STRICT = 3; // Texy::HTML4_STRICT | Texy::XML;
 	const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
-
-	/** @var string  input & output text encoding */
-	public $encoding = 'utf-8';
 
 	/** @var array  Texy! syntax configuration */
 	public $allowed = [];
@@ -78,7 +77,6 @@ class Texy
 	public $summary = [
 		'images' => [],
 		'links' => [],
-		'preload' => [],
 	];
 
 	/** @var string  Generated stylesheet */
@@ -104,55 +102,55 @@ class Texy
 	/** @var string */
 	public $nontextParagraph = 'div';
 
-	/** @var TexyScriptModule */
+	/** @var Modules\ScriptModule */
 	public $scriptModule;
 
-	/** @var TexyParagraphModule */
+	/** @var Modules\ParagraphModule */
 	public $paragraphModule;
 
-	/** @var TexyHtmlModule */
+	/** @var Modules\HtmlModule */
 	public $htmlModule;
 
-	/** @var TexyImageModule */
+	/** @var Modules\ImageModule */
 	public $imageModule;
 
-	/** @var TexyLinkModule */
+	/** @var Modules\LinkModule */
 	public $linkModule;
 
-	/** @var TexyPhraseModule */
+	/** @var Modules\PhraseModule */
 	public $phraseModule;
 
-	/** @var TexyEmoticonModule */
+	/** @var Modules\EmoticonModule */
 	public $emoticonModule;
 
-	/** @var TexyBlockModule */
+	/** @var Modules\BlockModule */
 	public $blockModule;
 
-	/** @var TexyHeadingModule */
+	/** @var Modules\HeadingModule */
 	public $headingModule;
 
-	/** @var TexyHorizLineModule */
+	/** @var Modules\HorizLineModule */
 	public $horizLineModule;
 
-	/** @var TexyBlockQuoteModule */
+	/** @var Modules\BlockQuoteModule */
 	public $blockQuoteModule;
 
-	/** @var TexyListModule */
+	/** @var Modules\ListModule */
 	public $listModule;
 
-	/** @var TexyTableModule */
+	/** @var Modules\TableModule */
 	public $tableModule;
 
-	/** @var TexyFigureModule */
+	/** @var Modules\FigureModule */
 	public $figureModule;
 
-	/** @var TexyTypographyModule */
+	/** @var Modules\TypographyModule */
 	public $typographyModule;
 
-	/** @var TexyLongWordsModule */
+	/** @var Modules\LongWordsModule */
 	public $longWordsModule;
 
-	/** @var TexyHtmlOutputModule */
+	/** @var Modules\HtmlOutputModule */
 	public $htmlOutputModule;
 
 
@@ -173,7 +171,7 @@ class Texy
 	/** @var array */
 	private $postHandlers = [];
 
-	/** @var TexyHtml  DOM structure for parsed text */
+	/** @var HtmlElement  DOM structure for parsed text */
 	private $DOM;
 
 	/** @var array  Texy protect markup table */
@@ -237,15 +235,15 @@ class Texy
 		$this->cleaner = & $this->htmlOutputModule;
 
 		// examples of link references ;-)
-		$link = new TexyLink('http://texy.info/');
+		$link = new Modules\Link('http://texy.info/');
 		$link->modifier->title = 'The best text -> HTML converter and formatter';
 		$link->label = 'Texy!';
 		$this->linkModule->addReference('texy', $link);
 
-		$link = new TexyLink('https://www.google.com/search?q=%s');
+		$link = new Modules\Link('https://www.google.com/search?q=%s');
 		$this->linkModule->addReference('google', $link);
 
-		$link = new TexyLink('https://en.wikipedia.org/wiki/Special:Search?search=%s');
+		$link = new Modules\Link('https://en.wikipedia.org/wiki/Special:Search?search=%s');
 		$this->linkModule->addReference('wikipedia', $link);
 	}
 
@@ -260,7 +258,7 @@ class Texy
 		if (!in_array($mode, [self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
 			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5], TRUE)
 		) {
-			throw new InvalidArgumentException('Invalid mode.');
+			throw new \InvalidArgumentException('Invalid mode.');
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
@@ -270,7 +268,7 @@ class Texy
 
 		$this->mode = $mode;
 		$this->dtd = self::$dtdCache[$mode];
-		TexyHtml::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
+		HtmlElement::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
 
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = [];
@@ -297,27 +295,27 @@ class Texy
 	protected function loadModules()
 	{
 		// line parsing
-		$this->scriptModule = new TexyScriptModule($this);
-		$this->htmlModule = new TexyHtmlModule($this);
-		$this->imageModule = new TexyImageModule($this);
-		$this->phraseModule = new TexyPhraseModule($this);
-		$this->linkModule = new TexyLinkModule($this);
-		$this->emoticonModule = new TexyEmoticonModule($this);
+		$this->scriptModule = new Modules\ScriptModule($this);
+		$this->htmlModule = new Modules\HtmlModule($this);
+		$this->imageModule = new Modules\ImageModule($this);
+		$this->phraseModule = new Modules\PhraseModule($this);
+		$this->linkModule = new Modules\LinkModule($this);
+		$this->emoticonModule = new Modules\EmoticonModule($this);
 
 		// block parsing
-		$this->paragraphModule = new TexyParagraphModule($this);
-		$this->blockModule = new TexyBlockModule($this);
-		$this->figureModule = new TexyFigureModule($this);
-		$this->horizLineModule = new TexyHorizLineModule($this);
-		$this->blockQuoteModule = new TexyBlockQuoteModule($this);
-		$this->tableModule = new TexyTableModule($this);
-		$this->headingModule = new TexyHeadingModule($this);
-		$this->listModule = new TexyListModule($this);
+		$this->paragraphModule = new Modules\ParagraphModule($this);
+		$this->blockModule = new Modules\BlockModule($this);
+		$this->figureModule = new Modules\FigureModule($this);
+		$this->horizLineModule = new Modules\HorizLineModule($this);
+		$this->blockQuoteModule = new Modules\BlockQuoteModule($this);
+		$this->tableModule = new Modules\TableModule($this);
+		$this->headingModule = new Modules\HeadingModule($this);
+		$this->listModule = new Modules\ListModule($this);
 
 		// post process
-		$this->typographyModule = new TexyTypographyModule($this);
-		$this->longWordsModule = new TexyLongWordsModule($this);
-		$this->htmlOutputModule = new TexyHtmlOutputModule($this);
+		$this->typographyModule = new Modules\TypographyModule($this);
+		$this->longWordsModule = new Modules\LongWordsModule($this);
+		$this->htmlOutputModule = new Modules\HtmlOutputModule($this);
 	}
 
 
@@ -325,7 +323,7 @@ class Texy
 	{
 		if (!is_callable($handler)) {
 			$able = is_callable($handler, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		if (!isset($this->allowed[$name])) {
@@ -344,7 +342,7 @@ class Texy
 	{
 		if (!is_callable($handler)) {
 			$able = is_callable($handler, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		// if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
@@ -363,7 +361,7 @@ class Texy
 	{
 		if (!is_callable($handler)) {
 			$able = is_callable($handler, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		if (!isset($this->allowed[$name])) {
@@ -384,7 +382,7 @@ class Texy
 	public function process($text, $singleLine = FALSE)
 	{
 		if ($this->processing) {
-			throw new RuntimeException('Processing is in progress yet.');
+			throw new \RuntimeException('Processing is in progress yet.');
 		}
 
 		// initialization
@@ -403,9 +401,6 @@ class Texy
 			$this->_styles = $this->allowedStyles;
 		}
 
-		// convert to UTF-8 (and check source encoding)
-		$text = TexyUtf::toUtf($text, $this->encoding);
-
 		if ($this->removeSoftHyphens) {
 			$text = str_replace("\xC2\xAD", '', $text);
 		}
@@ -416,7 +411,7 @@ class Texy
 		// replace tabs with spaces
 		$this->tabWidth = max(1, (int) $this->tabWidth);
 		while (strpos($text, "\t") !== FALSE) {
-			$text = TexyRegexp::replace($text, '#^([^\t\n]*+)\t#mU', [$this, 'tabCb']);
+			$text = Regexp::replace($text, '#^([^\t\n]*+)\t#mU', [$this, 'tabCb']);
 		}
 
 		// user before handler
@@ -437,7 +432,7 @@ class Texy
 		}
 
 		// parse Texy! document into internal DOM structure
-		$this->DOM = TexyHtml::el();
+		$this->DOM = HtmlElement::el();
 		if ($singleLine) {
 			$this->DOM->parseLine($this, $text);
 		} else {
@@ -454,8 +449,7 @@ class Texy
 		$html = str_replace("\r", "\n", $html);
 
 		$this->processing = FALSE;
-
-		return TexyUtf::utf2html($html, $this->encoding);
+		return $html;
 	}
 
 
@@ -473,14 +467,11 @@ class Texy
 
 	/**
 	 * Makes only typographic corrections.
-	 * @param  string   input text (in encoding defined by Texy::$encoding)
-	 * @return string   output text (in UTF-8)
+	 * @param  string   input text
+	 * @return string   output text
 	 */
 	public function processTypo($text)
 	{
-		// convert to UTF-8 (and check source encoding)
-		$text = TexyUtf::toUtf($text, $this->encoding);
-
 		// standardize line endings and spaces
 		$text = self::normalize($text);
 
@@ -491,7 +482,7 @@ class Texy
 			$text = $this->longWordsModule->postLine($text);
 		}
 
-		return TexyUtf::utf2html($text, $this->encoding);
+		return $text;
 	}
 
 
@@ -502,15 +493,15 @@ class Texy
 	public function toText()
 	{
 		if (!$this->DOM) {
-			throw new RuntimeException('Call $texy->process() first.');
+			throw new \RuntimeException('Call $texy->process() first.');
 		}
 
-		return TexyUtf::utfTo($this->DOM->toText($this), $this->encoding);
+		return $this->DOM->toText($this);
 	}
 
 
 	/**
-	 * Converts internal string representation to final HTML code in UTF-8.
+	 * Converts internal string representation to final HTML code.
 	 * @return string
 	 */
 	final public function stringToHtml($s)
@@ -550,7 +541,7 @@ class Texy
 
 
 	/**
-	 * Converts internal string representation to final HTML code in UTF-8.
+	 * Converts internal string representation to final HTML code.
 	 * @return string
 	 */
 	final public function stringToText($s)
@@ -561,9 +552,9 @@ class Texy
 		$this->htmlOutputModule->lineWrap = $save;
 
 		// remove tags
-		$s = TexyRegexp::replace($s, '#<(script|style)(.*)</\\1>#Uis', '');
+		$s = Regexp::replace($s, '#<(script|style)(.*)</\\1>#Uis', '');
 		$s = strip_tags($s);
-		$s = TexyRegexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
+		$s = Regexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
 
 		// entities -> chars
 		$s = self::unescapeHtml($s);
@@ -589,7 +580,7 @@ class Texy
 	{
 		if (!is_callable($callback)) {
 			$able = is_callable($callback, TRUE, $textual);
-			throw new InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
+			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		$this->handlers[$event][] = $callback;
@@ -600,7 +591,7 @@ class Texy
 	 * Invoke registered around-handlers.
 	 *
 	 * @param  string   event name
-	 * @param  TexyParser  actual parser object
+	 * @param  Parser  actual parser object
 	 * @param  array    arguments passed into handler
 	 * @return mixed
 	 */
@@ -610,7 +601,7 @@ class Texy
 			return FALSE;
 		}
 
-		$invocation = new TexyHandlerInvocation($this->handlers[$event], $parser, $args);
+		$invocation = new HandlerInvocation($this->handlers[$event], $parser, $args);
 		$res = $invocation->proceed();
 		$invocation->free();
 		return $res;
@@ -638,7 +629,7 @@ class Texy
 
 	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
-	 * which are ignored by TexyHtmlOutputModule routine
+	 * which are ignored by HtmlOutputModule routine
 	 * @param  string
 	 * @return string
 	 */
@@ -671,10 +662,10 @@ class Texy
 		$s = strtr($s, "\r", "\n"); // Mac
 
 		// remove special chars; leave \t + \n
-		$s = TexyRegexp::replace($s, '#[\x00-\x08\x0B-\x1F]+#', '');
+		$s = Regexp::replace($s, '#[\x00-\x08\x0B-\x1F]+#', '');
 
 		// right trim
-		$s = TexyRegexp::replace($s, "#[\t ]+$#m", '');
+		$s = Regexp::replace($s, "#[\t ]+$#m", '');
 
 		// trailing spaces
 		$s = trim($s, "\n");
@@ -691,9 +682,18 @@ class Texy
 	 */
 	final public static function webalize($s, $charlist = NULL)
 	{
-		$s = TexyUtf::utf2ascii($s);
+		$s = strtr($s, '`\'"^~', '-----');
+		if (ICONV_IMPL === 'glibc') {
+			$s = @iconv('UTF-8', 'WINDOWS-1250//TRANSLIT', $s); // intentionally @
+			$s = strtr($s, "\xa5\xa3\xbc\x8c\xa7\x8a\xaa\x8d\x8f\x8e\xaf\xb9\xb3\xbe\x9c\x9a\xba\x9d\x9f\x9e\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2"
+				."\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf8\xf9\xfa\xfb\xfc\xfd\xfe",
+				"ALLSSSSTZZZallssstzzzRAAAALCCCEEEEIIDDNNOOOOxRUUUUYTsraaaalccceeeeiiddnnooooruuuuyt");
+		} else {
+			$s = @iconv('UTF-8', 'ASCII//TRANSLIT', $s); // intentionally @
+		}
+		$s = str_replace(['`', "'", '"', '^', '~'], '', $s);
 		$s = strtolower($s);
-		$s = TexyRegexp::replace($s, '#[^a-z0-9'.preg_quote($charlist, '#').']+#', '-');
+		$s = Regexp::replace($s, '#[^a-z0-9'.preg_quote($charlist, '#').']+#', '-');
 		$s = trim($s, '-');
 		return $s;
 	}
@@ -712,7 +712,7 @@ class Texy
 
 
 	/**
-	 * Texy! version of html_entity_decode (always UTF-8, much faster than original!).
+	 * Texy! version of html_entity_decode.
 	 * @param  string
 	 * @return string
 	 */
@@ -734,11 +734,11 @@ class Texy
 	{
 		$s = trim($s, "\n");
 		$min = strlen($s);
-		foreach (TexyRegexp::match($s, '#^ *\S#m', TexyRegexp::ALL) as $m) {
+		foreach (Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
 			$min = min($min, strlen($m[0]) - 1);
 		}
 		if ($min) {
-			$s = TexyRegexp::replace($s, "#^ {{$min}}#m", '');
+			$s = Regexp::replace($s, "#^ {{$min}}#m", '');
 		}
 		return $s;
 	}
@@ -854,7 +854,7 @@ class Texy
 
 	final public function __clone()
 	{
-		throw new Exception('Clone is not supported.');
+		throw new \Exception('Clone is not supported.');
 	}
 
 }

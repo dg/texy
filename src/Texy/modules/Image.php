@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * This file is part of the Texy! (http://texy.info)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
+ */
+
+namespace Texy\Modules;
+
+use Texy;
+
+
+/**
+ * Image.
+ */
+final class Image
+{
+	use Texy\Strict;
+
+	/** @var string  base image URL */
+	public $URL;
+
+	/** @var string  anchored image URL */
+	public $linkedURL;
+
+	/** @var int  optional image width */
+	public $width;
+
+	/** @var int  optional image height */
+	public $height;
+
+	/** @var bool  image width and height are maximal */
+	public $asMax;
+
+	/** @var Texy\Modifier */
+	public $modifier;
+
+	/** @var string  reference name (if is stored as reference) */
+	public $name;
+
+
+	public function __construct()
+	{
+		$this->modifier = new Texy\Modifier;
+	}
+
+
+	public function __clone()
+	{
+		if ($this->modifier) {
+			$this->modifier = clone $this->modifier;
+		}
+	}
+
+}
