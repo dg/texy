@@ -19,7 +19,9 @@ abstract class TexyObject
 	public function __call($name, $args)
 	{
 		$class = method_exists($this, $name) ? 'parent' : get_class($this);
-		throw new LogicException("Call to undefined method $class::$name().");
+		$items = (new ReflectionClass($this))->getMethods(ReflectionMethod::IS_PUBLIC);
+		$hint = ($t = self::getSuggestion($items, $name)) ? ", did you mean $t()?" : '.';
+		throw new LogicException("Call to undefined method $class::$name()$hint");
 	}
 
 
@@ -29,8 +31,10 @@ abstract class TexyObject
 	 */
 	public static function __callStatic($name, $args)
 	{
-		$class = get_called_class();
-		throw new LogicException("Call to undefined static method $class::$name().");
+		$rc = new ReflectionClass(get_called_class());
+		$items = array_intersect($rc->getMethods(ReflectionMethod::IS_PUBLIC), $rc->getMethods(ReflectionMethod::IS_STATIC));
+		$hint = ($t = self::getSuggestion($items, $name)) ? ", did you mean $t()?" : '.';
+		throw new LogicException("Call to undefined static method {$rc->getName()}::$name()$hint");
 	}
 
 
@@ -44,8 +48,10 @@ abstract class TexyObject
 			$ret = $this->$m();
 			return $ret;
 		}
-		$class = get_class($this);
-		throw new LogicException("Attempt to read undeclared property $class::\$$name.");
+		$rc = new ReflectionClass($this);
+		$items = array_diff($rc->getProperties(ReflectionProperty::IS_PUBLIC), $rc->getProperties(ReflectionProperty::IS_STATIC));
+		$hint = ($t = self::getSuggestion($items, $name)) ? ", did you mean \$$t?" : '.';
+		throw new LogicException("Attempt to read undeclared property {$rc->getName()}::\$$name$hint");
 	}
 
 
@@ -55,8 +61,10 @@ abstract class TexyObject
 	 */
 	public function __set($name, $value)
 	{
-		$class = get_class($this);
-		throw new LogicException("Attempt to write to undeclared property $class::\$$name.");
+		$rc = new ReflectionClass($this);
+		$items = array_diff($rc->getProperties(ReflectionProperty::IS_PUBLIC), $rc->getProperties(ReflectionProperty::IS_STATIC));
+		$hint = ($t = self::getSuggestion($items, $name)) ? ", did you mean \$$t?" : '.';
+		throw new LogicException("Attempt to write to undeclared property {$rc->getName()}::\$$name$hint");
 	}
 
 
@@ -77,6 +85,25 @@ abstract class TexyObject
 	{
 		$class = get_class($this);
 		throw new LogicException("Attempt to unset undeclared property $class::\$$name.");
+	}
+
+
+	/**
+	 * Finds the best suggestion.
+	 * @return string|NULL
+	 */
+	private static function getSuggestion(array $items, $value)
+	{
+		$best = NULL;
+		$min = (int) (strlen($value) / 4) + 2;
+		foreach ($items as $item) {
+			$item = is_object($item) ? $item->getName() : $item;
+			if (($len = levenshtein($item, $value)) > 0 && $len < $min) {
+				$min = $len;
+				$best = $item;
+			}
+		}
+		return $best;
 	}
 
 }
