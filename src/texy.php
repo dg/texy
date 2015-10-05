@@ -51,3 +51,4 @@ require_once dirname(__FILE__) . '/Texy/modules/TexyEmoticonModule.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyTableModule.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyTypographyModule.php';
 require_once dirname(__FILE__) . '/Texy/modules/TexyHtmlOutputModule.php';
+require_once dirname(__FILE__) . '/compatibility.php';
