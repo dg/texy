@@ -609,9 +609,7 @@ class Texy extends TexyObject
 		}
 
 		$invocation = new TexyHandlerInvocation($this->handlers[$event], $parser, $args);
-		$res = $invocation->proceed();
-		$invocation->free();
-		return $res;
+		return $invocation->proceed();
 	}
 
 
@@ -837,16 +835,9 @@ class Texy extends TexyObject
 	}
 
 
-	/**
-	 * PHP garbage collector helper.
-	 */
+	/** @deprecated */
 	final public function free()
 	{
-		if (version_compare(PHP_VERSION, '5.3', '<')) {
-			foreach (array_keys(get_object_vars($this)) as $key) {
-				$this->$key = NULL;
-			}
-		}
 	}
 
 

@@ -81,12 +81,9 @@ final class TexyHandlerInvocation extends TexyObject
 	}
 
 
-	/**
-	 * PHP garbage collector helper.
-	 */
+	/** @deprecated */
 	public function free()
 	{
-		$this->handlers = $this->parser = $this->args = NULL;
 	}
 
 }
