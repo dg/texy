@@ -32,7 +32,7 @@ function imageHandler($invocation, $image, $link)
 		$movie = htmlSpecialChars($movie);
 		$altContent = htmlSpecialChars($image->modifier->title);
 
-		// @see http://phpfashion.com/how-to-correctly-insert-a-flash-into-xhtml
+		// @see https://phpfashion.com/how-to-correctly-insert-a-flash-into-xhtml
 		$code = '
 <!--[if !IE]> -->
 <object type="application/x-shockwave-flash" data="'.$movie.'" '.$dimensions.'>

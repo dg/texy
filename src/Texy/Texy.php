@@ -2,7 +2,7 @@
 
 /**
  * This file is part of the Texy! (http://texy.info)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 
@@ -240,10 +240,10 @@ class Texy extends TexyObject
 		$link->label = 'Texy!';
 		$this->linkModule->addReference('texy', $link);
 
-		$link = new TexyLink('http://www.google.com/search?q=%s');
+		$link = new TexyLink('https://www.google.com/search?q=%s');
 		$this->linkModule->addReference('google', $link);
 
-		$link = new TexyLink('http://en.wikipedia.org/wiki/Special:Search?search=%s');
+		$link = new TexyLink('https://en.wikipedia.org/wiki/Special:Search?search=%s');
 		$this->linkModule->addReference('wikipedia', $link);
 	}
 

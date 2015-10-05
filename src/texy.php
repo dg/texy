@@ -3,7 +3,7 @@
 /**
  * Texy! is human-readable text to HTML converter (http://texy.info)
  *
- * Copyright (c) 2004, 2014 David Grudl (http://davidgrudl.com)
+ * Copyright (c) 2004, 2014 David Grudl (https://davidgrudl.com)
  */
 
 

@@ -29,8 +29,8 @@ function imageHandler($invocation, $image, $link)
 		$video = htmlSpecialChars($parts[1]);
 		$dimensions = 'width="'.($image->width ? $image->width : 425).'" height="'.($image->height ? $image->height : 350).'"';
 		$code = '<div><object '.$dimensions.'>'
-			. '<param name="movie" value="http://www.youtube.com/v/'.$video.'" /><param name="wmode" value="transparent" />'
-			. '<embed src="http://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
+			. '<param name="movie" value="https://www.youtube.com/v/'.$video.'" /><param name="wmode" value="transparent" />'
+			. '<embed src="https://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
 
 		$texy = $invocation->getTexy();
 		return $texy->protect($code, Texy::CONTENT_BLOCK);

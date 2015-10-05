@@ -30,7 +30,7 @@ function phraseHandler($invocation, $phrase, $content, $modifier, $link)
 
 	} elseif (substr($link->URL, 0, 5) === 'wiki:') {
 		// modifiy link
-		$link->URL = 'http://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
+		$link->URL = 'https://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($link->URL, 5));
 	}
 
 	return $invocation->proceed();

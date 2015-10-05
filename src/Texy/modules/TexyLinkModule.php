@@ -2,7 +2,7 @@
 
 /**
  * This file is part of the Texy! (http://texy.info)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 
