@@ -232,17 +232,21 @@ final class TexyHtmlModule extends TexyModule
 		}
 
 		if ($name === 'img') {
-			if (!isset($elAttrs['src']) || !$tx->checkURL($elAttrs['src'], Texy::FILTER_IMAGE)) {
-				return FALSE;
-			}
+			if (isset($elAttrs['src'])) {
+				$elAttrs['src'] = trim($elAttrs['src']);
+				if (!$tx->checkURL($elAttrs['src'], Texy::FILTER_IMAGE)) {
+					return FALSE;
+				}
 
-			$tx->summary['images'][] = $elAttrs['src'];
+				$tx->summary['images'][] = $elAttrs['src'];
+			}
 
 		} elseif ($name === 'a') {
 			if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) {
 				return FALSE;
 			}
 			if (isset($elAttrs['href'])) {
+				$elAttrs['href'] = trim($elAttrs['href']);
 				if ($tx->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== FALSE) {
 					if (isset($elAttrs['rel'])) {
 						$elAttrs['rel'] = (array) $elAttrs['rel'];
