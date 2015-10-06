@@ -780,7 +780,7 @@ class Texy extends TexyObject
 	{
 		// absolute URL with scheme? check scheme!
 		return empty($this->urlSchemeFilters[$type])
-			|| !preg_match('#[a-z][a-z0-9+.-]{0,20}:#Ai', $URL) // http: | mailto:
+			|| !preg_match('#\s*[a-z][a-z0-9+.-]{0,20}:#Ai', $URL) // http: | mailto:
 			|| preg_match($this->urlSchemeFilters[$type], $URL);
 	}
 
