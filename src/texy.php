@@ -18,6 +18,7 @@ spl_autoload_register(function ($class) {
 		'TexyBlockParser' => 'TexyBlockParser.php',
 		'TexyConfigurator' => 'TexyConfigurator.php',
 		'TexyHandlerInvocation' => 'TexyHandlerInvocation.php',
+		'TexyHelpers' => 'TexyHelpers.php',
 		'TexyHtml' => 'TexyHtml.php',
 		'TexyLineParser' => 'TexyLineParser.php',
 		'TexyModifier' => 'TexyModifier.php',

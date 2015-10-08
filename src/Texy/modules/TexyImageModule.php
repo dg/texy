@@ -239,7 +239,7 @@ final class TexyImageModule extends TexyModule
 		$el = TexyHtml::el('img');
 		$el->attrs['src'] = NULL; // trick - move to front
 		$mod->decorate($tx, $el);
-		$el->attrs['src'] = Texy::prependRoot($image->URL, $this->root);
+		$el->attrs['src'] = TexyHelpers::prependRoot($image->URL, $this->root);
 		if (!isset($el->attrs['alt'])) {
 			$el->attrs['alt'] = $alt === NULL ? $this->defaultAlt : $tx->typographyModule->postLine($alt);
 		}
@@ -265,7 +265,7 @@ final class TexyImageModule extends TexyModule
 
 			// detect dimensions
 			// absolute URL & security check for double dot
-			if (Texy::isRelative($image->URL) && strpos($image->URL, '..') === FALSE) {
+			if (TexyHelpers::isRelative($image->URL) && strpos($image->URL, '..') === FALSE) {
 				$file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
 				if (@is_file($file)) { // intentionally @
 					$size = @getImageSize($file); // intentionally @
@@ -301,7 +301,7 @@ final class TexyImageModule extends TexyModule
 
 		// onmouseover actions generate
 		if (!empty($tx->allowed['image/hover']) && $image->overURL !== NULL) {
-			$overSrc = Texy::prependRoot($image->overURL, $this->root);
+			$overSrc = TexyHelpers::prependRoot($image->overURL, $this->root);
 			$el->attrs['onmouseover'] = 'this.src=\'' . addSlashes($overSrc) . '\'';
 			$el->attrs['onmouseout'] = 'this.src=\'' . addSlashes($el->attrs['src']) . '\'';
 			$el->attrs['onload'] = str_replace('%i', addSlashes($overSrc), $this->onLoad);

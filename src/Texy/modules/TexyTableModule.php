@@ -270,7 +270,7 @@ final class TexyTableModule extends TexyModule
 					// multiline parse as block
 					// HACK: disable tables
 					$this->disableTables = TRUE;
-					$elCell->parseBlock($tx, Texy::outdent($text));
+					$elCell->parseBlock($tx, TexyHelpers::outdent($text));
 					$this->disableTables = FALSE;
 				} else {
 					$elCell->parseLine($tx, ltrim($text));

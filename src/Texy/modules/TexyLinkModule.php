@@ -305,7 +305,7 @@ final class TexyLinkModule extends TexyModule
 
 		if ($link->type === TexyLink::IMAGE) {
 			// image
-			$el->attrs['href'] = Texy::prependRoot($link->URL, $tx->imageModule->linkedRoot);
+			$el->attrs['href'] = TexyHelpers::prependRoot($link->URL, $tx->imageModule->linkedRoot);
 			if ($this->imageClass) {
 				$el->attrs['class'][] = $this->imageClass;
 			} else {
@@ -313,7 +313,7 @@ final class TexyLinkModule extends TexyModule
 			}
 
 		} else {
-			$el->attrs['href'] = Texy::prependRoot($link->URL, $this->root);
+			$el->attrs['href'] = TexyHelpers::prependRoot($link->URL, $this->root);
 
 			// rel="nofollow"
 			if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== FALSE)) {

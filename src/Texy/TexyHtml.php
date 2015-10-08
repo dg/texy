@@ -469,7 +469,7 @@ class TexyHtml implements ArrayAccess, /* Countable, */ IteratorAggregate
 
 				// add new attribute
 				$value = str_replace(['&', '"', '<', '>', '@'], ['&amp;', '&quot;', '&lt;', '&gt;', '&#64;'], $value);
-				$s .= ' ' . $key . '="' . Texy::freezeSpaces($value) . '"';
+				$s .= ' ' . $key . '="' . TexyHelpers::freezeSpaces($value) . '"';
 			}
 		}
 

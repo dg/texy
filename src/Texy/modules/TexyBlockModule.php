@@ -86,8 +86,8 @@ final class TexyBlockModule extends TexyModule
 	// for backward compatibility
 	function outdent($s)
 	{
-		trigger_error('Use Texy::outdent()', E_USER_WARNING);
-		return Texy::outdent($s);
+		trigger_error('Use TexyHelpers::outdent()', E_USER_WARNING);
+		return TexyHelpers::outdent($s);
 	}
 
 
@@ -117,7 +117,7 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/texysource') {
-			$s = Texy::outdent($s);
+			$s = TexyHelpers::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
@@ -133,7 +133,7 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/code') {
-			$s = Texy::outdent($s);
+			$s = TexyHelpers::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
@@ -147,7 +147,7 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/default') {
-			$s = Texy::outdent($s);
+			$s = TexyHelpers::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
@@ -161,7 +161,7 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/pre') {
-			$s = Texy::outdent($s);
+			$s = TexyHelpers::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}
@@ -230,7 +230,7 @@ final class TexyBlockModule extends TexyModule
 		}
 
 		if ($blocktype === 'block/div') {
-			$s = Texy::outdent($s);
+			$s = TexyHelpers::outdent($s);
 			if ($s === '') {
 				return "\n";
 			}

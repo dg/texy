@@ -43,7 +43,7 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 	if ($lang == 'html') {
 		$lang = 'html4strict';
 	}
-	$content = Texy::outdent($content);
+	$content = TexyHelpers::outdent($content);
 	$geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
 
 	// GeSHi could not find the language

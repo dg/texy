@@ -127,7 +127,7 @@ final class TexyHtmlOutputModule extends TexyModule
 			if ($item && !isset($item['dtdContent']['%DATA'])) {  // text not allowed?
 
 			} elseif (array_intersect(array_keys($this->tagUsed, TRUE), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
-				$s = Texy::freezeSpaces($mText);
+				$s = TexyHelpers::freezeSpaces($mText);
 
 			} else {
 				$s = TexyRegexp::replace($mText, '#[ \n]+#', ' '); // otherwise shrink multiple spaces
@@ -137,7 +137,7 @@ final class TexyHtmlOutputModule extends TexyModule
 
 		// phase #2 - HTML comment
 		if ($mComment) {
-			return $s . '<' . Texy::freezeSpaces($mComment) . '>';
+			return $s . '<' . TexyHelpers::freezeSpaces($mComment) . '>';
 		}
 
 

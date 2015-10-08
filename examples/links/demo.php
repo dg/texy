@@ -24,7 +24,7 @@ function phraseHandler($invocation, $phrase, $content, $modifier, $link)
 		return $invocation->proceed();
 	}
 
-	if (Texy::isRelative($link->URL)) {
+	if (TexyHelpers::isRelative($link->URL)) {
 		// modifiy link
 		$link->URL = 'index?page=' . urlencode($link->URL);
 

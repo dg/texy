@@ -118,7 +118,7 @@ final class TexyBlockQuoteModule extends TexyModule
 			$link = substr($link, 1, -1);
 			$ref = $tx->linkModule->getReference($link);
 			if ($ref) {
-				return Texy::prependRoot($ref->URL, $tx->linkModule->root);
+				return TexyHelpers::prependRoot($ref->URL, $tx->linkModule->root);
 			}
 		}
 
@@ -127,7 +127,7 @@ final class TexyBlockQuoteModule extends TexyModule
 			return 'http://' . $link;
 		}
 
-		return Texy::prependRoot($link, $tx->linkModule->root);
+		return TexyHelpers::prependRoot($link, $tx->linkModule->root);
 	}
 
 }

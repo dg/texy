@@ -45,7 +45,7 @@ function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
 	}
 
 	$texy = $invocation->getTexy();
-	$content = Texy::outdent($content);
+	$content = TexyHelpers::outdent($content);
 	$content = $fshl->highlightString($lang, $content);
 	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
