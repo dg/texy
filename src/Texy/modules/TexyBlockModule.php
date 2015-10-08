@@ -137,7 +137,7 @@ final class TexyBlockModule extends TexyModule
 			if ($s === '') {
 				return "\n";
 			}
-			$s = Texy::escapeHtml($s);
+			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $tx->protect($s, Texy::CONTENT_BLOCK);
 			$el = TexyHtml::el('pre');
 			$mod->decorate($tx, $el);
@@ -154,7 +154,7 @@ final class TexyBlockModule extends TexyModule
 			$el = TexyHtml::el('pre');
 			$mod->decorate($tx, $el);
 			$el->attrs['class'][] = $param; // lang
-			$s = Texy::escapeHtml($s);
+			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $tx->protect($s, Texy::CONTENT_BLOCK);
 			$el->setText($s);
 			return $el;
@@ -181,8 +181,8 @@ final class TexyBlockModule extends TexyModule
 
 			$lineParser->parse($s);
 			$s = $el->getText();
-			$s = Texy::unescapeHtml($s);
-			$s = Texy::escapeHtml($s);
+			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $tx->unprotect($s);
 			$s = $tx->protect($s, Texy::CONTENT_BLOCK);
 			$el->setText($s);
@@ -209,8 +209,8 @@ final class TexyBlockModule extends TexyModule
 
 			$lineParser->parse($s);
 			$s = $el->getText();
-			$s = Texy::unescapeHtml($s);
-			$s = Texy::escapeHtml($s);
+			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $tx->unprotect($s);
 			return $tx->protect($s, Texy::CONTENT_BLOCK) . "\n";
 		}
@@ -220,7 +220,7 @@ final class TexyBlockModule extends TexyModule
 			if ($s === '') {
 				return "\n";
 			}
-			$s = Texy::escapeHtml($s);
+			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = str_replace("\n", TexyHtml::el('br')->startTag(), $s); // nl2br
 			return $tx->protect($s, Texy::CONTENT_BLOCK) . "\n";
 		}

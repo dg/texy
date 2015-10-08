@@ -518,7 +518,7 @@ class Texy
 	final public function stringToHtml($s)
 	{
 		// decode HTML entities to UTF-8
-		$s = self::unescapeHtml($s);
+		$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 
 		// line-postprocessing
 		$blocks = explode(self::CONTENT_BLOCK, $s);
@@ -535,7 +535,7 @@ class Texy
 		$s = implode(self::CONTENT_BLOCK, $blocks);
 
 		// encode < > &
-		$s = self::escapeHtml($s);
+		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 
 		// replace protected marks
 		$s = $this->unProtect($s);
@@ -568,7 +568,7 @@ class Texy
 		$s = TexyRegexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
 
 		// entities -> chars
-		$s = self::unescapeHtml($s);
+		$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 
 		// convert nbsp to normal space and remove shy
 		$s = strtr($s, [
@@ -699,28 +699,16 @@ class Texy
 	}
 
 
-	/**
-	 * Texy! version of htmlSpecialChars (much faster than htmlSpecialChars!).
-	 * note: &quot; is not encoded!
-	 * @param  string
-	 * @return string
-	 */
+	/** @deprecated */
 	final public static function escapeHtml($s)
 	{
-		return str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $s);
+		return htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 	}
 
 
-	/**
-	 * Texy! version of html_entity_decode (always UTF-8, much faster than original!).
-	 * @param  string
-	 * @return string
-	 */
+	/** @deprecated */
 	final public static function unescapeHtml($s)
 	{
-		if (strpos($s, '&') === FALSE) {
-			return $s;
-		}
 		return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 	}
 

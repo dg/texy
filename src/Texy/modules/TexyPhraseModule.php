@@ -253,7 +253,7 @@ final class TexyPhraseModule extends TexyModule
 			}
 
 		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
-			$mod->title = trim(Texy::unescapeHtml($mLink));
+			$mod->title = trim(html_entity_decode($mLink, ENT_QUOTES, 'UTF-8'));
 
 		} elseif ($phrase === 'phrase/quote') {
 			$mod->cite = $tx->blockQuoteModule->citeLink($mLink);
@@ -293,7 +293,7 @@ final class TexyPhraseModule extends TexyModule
 	public function patternNoTexy($parser, $matches)
 	{
 		list(, $mContent) = $matches;
-		return $this->texy->protect(Texy::escapeHtml($mContent), Texy::CONTENT_TEXTUAL);
+		return $this->texy->protect(htmlspecialchars($mContent, ENT_NOQUOTES, 'UTF-8'), Texy::CONTENT_TEXTUAL);
 	}
 
 
@@ -318,7 +318,7 @@ final class TexyPhraseModule extends TexyModule
 		}
 
 		if ($phrase === 'phrase/code') {
-			$content = $tx->protect(Texy::escapeHtml($content), Texy::CONTENT_TEXTUAL);
+			$content = $tx->protect(htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8'), Texy::CONTENT_TEXTUAL);
 		}
 
 		if ($phrase === 'phrase/strong+em') {
