@@ -29,7 +29,7 @@ Assert::matchFile(
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))
 );
 
-$texy->allowedTags = Texy::NONE;
+$texy->allowedTags = $texy::NONE;
 Assert::matchFile(
 	__DIR__ . '/expected/html-tags1c.html',
 	$texy->process(file_get_contents(__DIR__ . '/sources/html-tags1.texy'))

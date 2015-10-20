@@ -41,7 +41,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 	$texy = $invocation->getTexy();
 	$content = Texy\Helpers::outdent($content);
 	$content = $fshl->highlightString($lang, $content);
-	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
+	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
 
 	$elPre = new Texy\HtmlElement('pre');
 	if ($modifier) {
@@ -71,7 +71,7 @@ function codeBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 	$fshl = new fshlParser('HTML_UTF8', P_TAB_INDENT);
 	$texy = $parser->getTexy();
 	$content = $fshl->highlightString($lang, $content);
-	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
+	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
 
 	$elPre = new Texy\HtmlElement('pre');
 	$elPre->attrs['class'] = strtolower($lang);

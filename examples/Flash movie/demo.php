@@ -44,7 +44,7 @@ codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#ve
 </object>
 <!-- <![endif]-->
 ';
-		return $texy->protect($code, Texy::CONTENT_BLOCK);
+		return $texy->protect($code, $texy::CONTENT_BLOCK);
 	}
 
 	return $invocation->proceed();

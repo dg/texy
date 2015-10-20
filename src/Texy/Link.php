@@ -31,7 +31,7 @@ final class Link
 	public $modifier;
 
 	/** @var int  how was link created? */
-	public $type = Link::COMMON;
+	public $type = self::COMMON;
 
 	/** @var string  optional label, used by references */
 	public $label;

@@ -64,7 +64,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 	$content = iconv('UTF-8', 'UTF-8//IGNORE', $content);
 
 	// protect output is in HTML
-	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
+	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
 
 	$el = new Texy\HtmlElement;
 	$el->setText($content);

@@ -29,7 +29,7 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Tex
 			. '<embed src="https://www.youtube.com/v/'.$video.'" type="application/x-shockwave-flash" wmode="transparent" '.$dimensions.' /></object></div>';
 
 		$texy = $invocation->getTexy();
-		return $texy->protect($code, Texy::CONTENT_BLOCK);
+		return $texy->protect($code, $texy::CONTENT_BLOCK);
 	}
 
 	return $invocation->proceed();

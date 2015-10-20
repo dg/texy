@@ -133,7 +133,7 @@ final class BlockModule extends Texy\Module
 				return "\n";
 			}
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-			$s = $texy->protect($s, Texy\Texy::CONTENT_BLOCK);
+			$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 			$el = new HtmlElement('pre');
 			$mod->decorate($texy, $el);
 			$el->attrs['class'][] = $param; // lang
@@ -150,7 +150,7 @@ final class BlockModule extends Texy\Module
 			$mod->decorate($texy, $el);
 			$el->attrs['class'][] = $param; // lang
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-			$s = $texy->protect($s, Texy\Texy::CONTENT_BLOCK);
+			$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 			$el->setText($s);
 			return $el;
 		}
@@ -179,7 +179,7 @@ final class BlockModule extends Texy\Module
 			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $texy->unprotect($s);
-			$s = $texy->protect($s, Texy\Texy::CONTENT_BLOCK);
+			$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 			$el->setText($s);
 			return $el;
 		}
@@ -207,7 +207,7 @@ final class BlockModule extends Texy\Module
 			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $texy->unprotect($s);
-			return $texy->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
+			return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
 		}
 
 		if ($blocktype === 'block/text') {
@@ -217,7 +217,7 @@ final class BlockModule extends Texy\Module
 			}
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = str_replace("\n", (new HtmlElement('br'))->startTag() , $s); // nl2br
-			return $texy->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
+			return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
 		}
 
 		if ($blocktype === 'block/comment') {

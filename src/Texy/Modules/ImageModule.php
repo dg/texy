@@ -182,14 +182,14 @@ final class ImageModule extends Texy\Module
 				$image->URL = trim($content[0]);
 			}
 
-			if (!$texy->checkURL($image->URL, Texy\Texy::FILTER_IMAGE)) {
+			if (!$texy->checkURL($image->URL, $texy::FILTER_IMAGE)) {
 				$image->URL = NULL;
 			}
 
 			// onmouseover image
 			if (isset($content[1])) {
 				$tmp = trim($content[1]);
-				if ($tmp !== '' && $texy->checkURL($tmp, Texy\Texy::FILTER_IMAGE)) {
+				if ($tmp !== '' && $texy->checkURL($tmp, $texy::FILTER_IMAGE)) {
 					$image->overURL = $tmp;
 				}
 			}
@@ -197,7 +197,7 @@ final class ImageModule extends Texy\Module
 			// linked image
 			if (isset($content[2])) {
 				$tmp = trim($content[2]);
-				if ($tmp !== '' && $texy->checkURL($tmp, Texy\Texy::FILTER_ANCHOR)) {
+				if ($tmp !== '' && $texy->checkURL($tmp, $texy::FILTER_ANCHOR)) {
 					$image->linkedURL = $tmp;
 				}
 			}

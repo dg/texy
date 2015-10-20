@@ -64,7 +64,7 @@ final class HtmlOutputModule extends Texy\Module
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
 		$this->tagUsed = [];
-		$this->xml = $texy->getOutputMode() & Texy\Texy::XML;
+		$this->xml = $texy->getOutputMode() & $texy::XML;
 
 		// special "base content"
 		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + ['html' => 1];

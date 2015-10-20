@@ -152,7 +152,7 @@ final class HtmlModule extends Texy\Module
 			if ($forceEmpty) {
 				$el->setName($name, TRUE);
 			}
-			$allowedAttrs = Texy\Texy::ALL; // all attrs are allowed
+			$allowedAttrs = $texy::ALL; // all attrs are allowed
 		}
 
 		// end tag? we are finished
@@ -188,7 +188,7 @@ final class HtmlModule extends Texy\Module
 					}
 				}
 
-			} elseif ($tmp !== Texy\Texy::ALL) {
+			} elseif ($tmp !== $texy::ALL) {
 				$elAttrs['class'] = NULL;
 			}
 		}
@@ -199,7 +199,7 @@ final class HtmlModule extends Texy\Module
 				if (!isset($tmp['#' . $elAttrs['id']])) {
 					$elAttrs['id'] = NULL;
 				}
-			} elseif ($tmp !== Texy\Texy::ALL) {
+			} elseif ($tmp !== $texy::ALL) {
 				$elAttrs['id'] = NULL;
 			}
 		}
@@ -217,7 +217,7 @@ final class HtmlModule extends Texy\Module
 						$elAttrs['style'][$prop] = $pair[1];
 					}
 				}
-			} elseif ($tmp !== Texy\Texy::ALL) {
+			} elseif ($tmp !== $texy::ALL) {
 				$elAttrs['style'] = NULL;
 			}
 		}
@@ -225,7 +225,7 @@ final class HtmlModule extends Texy\Module
 		if ($name === 'img') {
 			if (isset($elAttrs['src'])) {
 				$elAttrs['src'] = trim($elAttrs['src']);
-				if (!$texy->checkURL($elAttrs['src'], Texy\Texy::FILTER_IMAGE)) {
+				if (!$texy->checkURL($elAttrs['src'], $texy::FILTER_IMAGE)) {
 					return FALSE;
 				}
 
@@ -245,7 +245,7 @@ final class HtmlModule extends Texy\Module
 					$elAttrs['rel'][] = 'nofollow';
 				}
 
-				if (!$texy->checkURL($elAttrs['href'], Texy\Texy::FILTER_ANCHOR)) {
+				if (!$texy->checkURL($elAttrs['href'], $texy::FILTER_ANCHOR)) {
 					return FALSE;
 				}
 

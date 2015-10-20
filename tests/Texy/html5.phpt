@@ -24,6 +24,6 @@ test(function () {
 
 test(function () {
 	$texy = new Texy;
-	$texy->setOutputMode(Texy::XHTML5);
+	$texy->setOutputMode($texy::XHTML5);
 	Assert::same("<div data-test=\"hello\"></div>\n", $texy->process('<div data-test=hello>'));
 });

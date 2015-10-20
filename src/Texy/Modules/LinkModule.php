@@ -141,7 +141,7 @@ final class LinkModule extends Texy\Module
 			return $texy->invokeAroundHandlers('newReference', $parser, [$name]);
 		}
 
-		$link->type = Link::BRACKET;
+		$link->type = $link::BRACKET;
 
 		if ($link->label != '') { // NULL or ''
 			// prevent circular references
@@ -157,7 +157,7 @@ final class LinkModule extends Texy\Module
 			}
 		} else {
 			$content = $this->textualUrl($link);
-			$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
+			$content = $this->texy->protect($content, $texy::CONTENT_TEXTUAL);
 		}
 
 		return $texy->invokeAroundHandlers('linkReference', $parser, [$link, $content]);

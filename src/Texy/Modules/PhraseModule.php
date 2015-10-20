@@ -309,7 +309,7 @@ final class PhraseModule extends Texy\Module
 		}
 
 		if ($phrase === 'phrase/code') {
-			$content = $texy->protect(htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
+			$content = $texy->protect(htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8'), $texy::CONTENT_TEXTUAL);
 		}
 
 		if ($phrase === 'phrase/strong+em') {

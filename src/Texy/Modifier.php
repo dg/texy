@@ -152,14 +152,14 @@ final class Modifier
 		$tmp = $texy->allowedTags; // speed-up
 		if (!$this->attrs) {
 
-		} elseif ($tmp === Texy::ALL) {
+		} elseif ($tmp === $texy::ALL) {
 			$elAttrs = $this->attrs;
 			$el->validateAttrs($texy->dtd);
 
 		} elseif (is_array($tmp) && isset($tmp[$el->getName()])) {
 			$tmp = $tmp[$el->getName()];
 
-			if ($tmp === Texy::ALL) {
+			if ($tmp === $texy::ALL) {
 				$elAttrs = $this->attrs;
 
 			} elseif (is_array($tmp) && count($tmp)) {
@@ -181,7 +181,7 @@ final class Modifier
 		// classes & ID
 		if ($this->classes || $this->id !== NULL) {
 			$tmp = $texy->_classes; // speed-up
-			if ($tmp === Texy::ALL) {
+			if ($tmp === $texy::ALL) {
 				foreach ($this->classes as $value => $foo) {
 					$elAttrs['class'][] = $value;
 				}
@@ -202,7 +202,7 @@ final class Modifier
 		// styles
 		if ($this->styles) {
 			$tmp = $texy->_styles; // speed-up
-			if ($tmp === Texy::ALL) {
+			if ($tmp === $texy::ALL) {
 				foreach ($this->styles as $prop => $value) {
 					$elAttrs['style'][$prop] = $value;
 				}

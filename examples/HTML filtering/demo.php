@@ -41,7 +41,7 @@ echo '<h2>Enable nearly all valid tags</h2>';
 doIt($texy);
 
 echo '<h2>Texy::ALL - enables all tags</h2>';
-$texy->allowedTags = Texy::ALL;
+$texy->allowedTags = $texy::ALL;
 doIt($texy);
 
 echo '<h2>safeMode() - enables only some "safe" tags</h2>';
@@ -53,7 +53,7 @@ Texy\Configurator::disableLinks($texy);
 doIt($texy);
 
 echo '<h2>Texy::NONE - disables all tags</h2>';
-$texy->allowedTags = Texy::NONE;
+$texy->allowedTags = $texy::NONE;
 doIt($texy);
 
 echo '<h2>Enable custom tags</h2>';

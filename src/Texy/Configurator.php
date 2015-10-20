@@ -52,11 +52,11 @@ class Configurator
 	 */
 	public static function safeMode(Texy $texy)
 	{
-		$texy->allowedClasses = Texy::NONE; // no class or ID are allowed
-		$texy->allowedStyles = Texy::NONE; // style modifiers are disabled
+		$texy->allowedClasses = $texy::NONE; // no class or ID are allowed
+		$texy->allowedStyles = $texy::NONE; // style modifiers are disabled
 		$texy->allowedTags = self::$safeTags; // only some "safe" HTML tags and attributes are allowed
-		$texy->urlSchemeFilters[Texy::FILTER_ANCHOR] = '#https?:|ftp:|mailto:#A';
-		$texy->urlSchemeFilters[Texy::FILTER_IMAGE] = '#https?:#A';
+		$texy->urlSchemeFilters[$texy::FILTER_ANCHOR] = '#https?:|ftp:|mailto:#A';
+		$texy->urlSchemeFilters[$texy::FILTER_IMAGE] = '#https?:#A';
 		$texy->allowed['image'] = FALSE; // disable images
 		$texy->allowed['link/definition'] = FALSE; // disable [ref]: URL reference definitions
 		$texy->allowed['html/comment'] = FALSE; // disable HTML comments
