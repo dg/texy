@@ -44,9 +44,6 @@ final class HtmlOutputModule extends Texy\Module
 	/** @var array  content DTD used, when context is not defined */
 	private $baseDTD;
 
-	/** @var bool */
-	private $xml;
-
 
 	public function __construct($texy)
 	{
@@ -64,7 +61,6 @@ final class HtmlOutputModule extends Texy\Module
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
 		$this->tagUsed = [];
-		$this->xml = $texy->getOutputMode() & $texy::XML;
 
 		// special "base content"
 		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + ['html' => 1];
@@ -103,7 +99,7 @@ final class HtmlOutputModule extends Texy\Module
 		}
 
 		// remove HTML 4.01 optional end tags
-		if (!$this->xml && $this->removeOptional) {
+		if ($this->removeOptional) {
 			$s = Regexp::replace($s, '#\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '');
 		}
 	}
@@ -250,10 +246,6 @@ final class HtmlOutputModule extends Texy\Module
 			if ($mEmpty) {
 				if (!$allowed) {
 					return $s;
-				}
-
-				if ($this->xml) {
-					$mAttr .= ' /';
 				}
 
 				$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, TRUE), $this->preserveSpaces);

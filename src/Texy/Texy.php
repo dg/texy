@@ -9,7 +9,7 @@ namespace Texy;
 
 
 /**
- * Texy! - Convert plain text to XHTML format using {@link process()}.
+ * Texy! - Convert plain text to HTML format using {@link process()}.
  *
  * <code>
  * $texy = new Texy();
@@ -38,16 +38,15 @@ class Texy
 	const FILTER_ANCHOR = 'anchor';
 	const FILTER_IMAGE = 'image';
 
-	// HTML minor-modes
-	const XML = 2;
-
 	// HTML modes
 	const HTML4_TRANSITIONAL = 0;
 	const HTML4_STRICT = 1;
 	const HTML5 = 4;
-	const XHTML1_TRANSITIONAL = 2; // Texy::HTML4_TRANSITIONAL | Texy::XML;
-	const XHTML1_STRICT = 3; // Texy::HTML4_STRICT | Texy::XML;
-	const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
+	// depecated
+	const XHTML1_TRANSITIONAL = 2;
+	const XHTML1_STRICT = 3;
+	const XHTML5 = 6;
+	const XML = 2;
 
 	/** @var array  Texy! syntax configuration */
 	public $allowed = [];
@@ -211,7 +210,7 @@ class Texy
 
 		$this->loadModules();
 
-		$this->setOutputMode(self::XHTML1_TRANSITIONAL);
+		$this->setOutputMode(self::HTML5);
 
 		// examples of link references ;-)
 		$link = new Link('https://texy.info/');
@@ -228,7 +227,7 @@ class Texy
 
 
 	/**
-	 * Set HTML/XHTML output mode (overwrites self::$allowedTags)
+	 * Set HTML output mode (overwrites self::$allowedTags)
 	 * @param  int
 	 * @return void
 	 */
@@ -238,6 +237,8 @@ class Texy
 			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5], TRUE)
 		) {
 			throw new \InvalidArgumentException('Invalid mode.');
+		} elseif ($mode & self::XML) {
+			trigger_error('XHTML support has been dropped.', E_USER_DEPRECATED);
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
@@ -246,7 +247,6 @@ class Texy
 
 		$this->mode = $mode;
 		$this->dtd = self::$dtdCache[$mode];
-		HtmlElement::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
 
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = [];
@@ -257,7 +257,7 @@ class Texy
 
 
 	/**
-	 * Get HTML/XHTML output mode
+	 * Get HTML output mode
 	 * @return int
 	 */
 	public function getOutputMode()

@@ -113,9 +113,9 @@ final class ParagraphModule extends Texy\Module
 				$mod->decorate($texy, $el);
 			}
 
-			// add <br />
+			// add <br>
 			if (strpos($content, "\r") !== FALSE) {
-				$key = $texy->protect('<br />', $texy::CONTENT_REPLACED);
+				$key = $texy->protect('<br>', $texy::CONTENT_REPLACED);
 				$content = str_replace("\r", $key, $content);
 			};
 		}

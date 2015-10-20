@@ -1,7 +1,7 @@
 {
 	"name": "texy/texy",
 	"description": "Texy converts plain text in easy to read Texy syntax into structurally valid (X)HTML. It supports adding of images, links, nested lists, tables and has full support for CSS. Texy supports hyphenation of long words (which reflects language rules), clickable emails and URL (emails are obfuscated against spambots), national typographic single and double quotation marks, ellipses, em dashes, dimension sign, nonbreakable spaces (e.g. in phone numbers), acronyms, arrows and many others. Texy code can optionally contain HTML tags.",
-	"keywords": ["texy", "text", "wiki", "plain text", "html", "xhtml", "markup language", "markdown", "textile"],
+	"keywords": ["texy", "text", "wiki", "plain text", "html", "markup language", "markdown", "textile"],
 	"homepage": "https://texy.info",
 	"license": ["BSD-3-Clause", "GPL-2.0", "GPL-3.0"],
 	"authors": [
