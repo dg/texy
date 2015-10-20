@@ -52,7 +52,7 @@ $texy->registerBlockPattern(
  * @param string  pattern name (myInlineSyntax1 or myInlineSyntax2)
  * @return Texy\HtmlElement|string
  */
-function userInlineHandler($parser, $matches, $name)
+function userInlineHandler(Texy\LineParser $parser, array $matches, $name)
 {
 	list(, $mContent, $mMod) = $matches;
 
@@ -84,7 +84,7 @@ function userInlineHandler($parser, $matches, $name)
  * @param string     pattern name (myBlockSyntax1)
  * @return Texy\HtmlElement|string|FALSE
  */
-function userBlockHandler($parser, $matches, $name)
+function userBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 {
 	list(, $mTag, $mText) = $matches;
 

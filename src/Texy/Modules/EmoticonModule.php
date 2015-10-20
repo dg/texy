@@ -72,13 +72,9 @@ final class EmoticonModule extends Texy\Module
 
 	/**
 	 * Callback for: :-))).
-	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function pattern($parser, $matches)
+	public function pattern(Texy\LineParser $parser, array $matches)
 	{
 		$match = $matches[0];
 		$tx = $this->texy;
@@ -96,13 +92,9 @@ final class EmoticonModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  string
 	 * @return Texy\HtmlElement|FALSE
 	 */
-	public function solve($invocation, $emoticon, $raw)
+	public function solve(Texy\HandlerInvocation $invocation, $emoticon, $raw)
 	{
 		$tx = $this->texy;
 		$file = $this->icons[$emoticon];

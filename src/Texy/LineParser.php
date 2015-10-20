@@ -17,10 +17,6 @@ class LineParser extends Parser
 	public $again;
 
 
-	/**
-	 * @param  Texy
-	 * @param  HtmlElement
-	 */
 	public function __construct(Texy $texy, HtmlElement $element)
 	{
 		$this->texy = $texy;

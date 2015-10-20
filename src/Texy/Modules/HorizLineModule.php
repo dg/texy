@@ -38,13 +38,9 @@ final class HorizLineModule extends Texy\Module
 
 	/**
 	 * Callback for: -------.
-	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement
 	 */
-	public function pattern($parser, $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
 		list(, $mType, $mMod) = $matches;
 		// [1] => ---
@@ -57,13 +53,9 @@ final class HorizLineModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  Texy\Modifier
 	 * @return Texy\HtmlElement
 	 */
-	public function solve($invocation, $type, $modifier)
+	public function solve(Texy\HandlerInvocation $invocation, $type, Texy\Modifier $modifier)
 	{
 		$el = Texy\HtmlElement::el('hr');
 		$modifier->decorate($invocation->getTexy(), $el);

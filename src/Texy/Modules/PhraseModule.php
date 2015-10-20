@@ -8,6 +8,8 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\LineParser;
+use Texy\Modifier;
 use Texy\Patterns;
 
 
@@ -224,12 +226,9 @@ final class PhraseModule extends Texy\Module
 	/**
 	 * Callback for: **.... .(title)[class]{style}**:LINK.
 	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function patternPhrase($parser, $matches, $phrase)
+	public function patternPhrase(LineParser $parser, array $matches, $phrase)
 	{
 		list(, $mContent, $mMod, $mLink) = $matches;
 		// [1] => **
@@ -243,7 +242,7 @@ final class PhraseModule extends Texy\Module
 		}
 
 		$tx = $this->texy;
-		$mod = new Texy\Modifier($mMod);
+		$mod = new Modifier($mMod);
 		$link = NULL;
 
 		$parser->again = $phrase !== 'phrase/code' && $phrase !== 'phrase/quicklink';
@@ -273,16 +272,12 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: any^2 any_2.
-	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function patternSupSub($parser, $matches, $phrase)
+	public function patternSupSub(LineParser $parser, array $matches, $phrase)
 	{
 		list(, $mContent) = $matches;
-		$mod = new Texy\Modifier();
+		$mod = new Modifier();
 		$link = NULL;
 		$mContent = str_replace('-', "\xE2\x88\x92", $mContent); // &minus;
 		return $this->texy->invokeAroundHandlers('phrase', $parser, [$phrase, $mContent, $mod, $link]);
@@ -290,12 +285,9 @@ final class PhraseModule extends Texy\Module
 
 
 	/**
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return string
 	 */
-	public function patternNoTexy($parser, $matches)
+	public function patternNoTexy(LineParser $parser, array $matches)
 	{
 		list(, $mContent) = $matches;
 		return $this->texy->protect(htmlspecialchars($mContent, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
@@ -304,15 +296,9 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  string
-	 * @param  Texy\Modifier
-	 * @param  Link
 	 * @return Texy\HtmlElement
 	 */
-	public function solve($invocation, $phrase, $content, $mod, $link)
+	public function solve(Texy\HandlerInvocation $invocation, $phrase, $content, Modifier $mod, Texy\Link $link = NULL)
 	{
 		$tx = $this->texy;
 

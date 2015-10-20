@@ -40,36 +40,18 @@ class myHandler
 	/** Line parsing */
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  string
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function emoticon($invocation, $emoticon, $rawEmoticon)
+	function emoticon(Texy\HandlerInvocation $invocation, $emoticon, $rawEmoticon)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Image
-	 * @param  Texy\Link|NULL
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function image($invocation, $image, $link)
-	{
-		return $invocation->proceed();
-	}
-
-
-	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Link
-	 * @param  string
-	 * @return Texy\HtmlElement|string|FALSE
-	 */
-	function linkReference($invocation, $link, $content)
+	function image(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = NULL)
 	{
 		return $invocation->proceed();
 	}
@@ -78,82 +60,73 @@ class myHandler
 	/**
 	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  Texy\Link
-	 * @return Texy\HtmlElement|string|FALSE
-	 */
-	function linkEmail($invocation, $link)
-	{
-		return $invocation->proceed();
-	}
-
-
-	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Link
-	 * @return Texy\HtmlElement|string|FALSE
-	 */
-	function linkURL($invocation, $link)
-	{
-		return $invocation->proceed();
-	}
-
-
-	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  string
-	 * @param  Texy\Modifier
-	 * @param  Texy\Link|NULL
-	 * @return Texy\HtmlElement|string|FALSE
-	 */
-	function phrase($invocation, $phrase, $content, $modifier, $link)
-	{
-		return $invocation->proceed();
-	}
-
-
-	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  string
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function newReference($invocation, $name)
+	function linkReference(Texy\HandlerInvocation $invocation, $link, $content)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function htmlComment($invocation, $content)
+	function linkEmail(Texy\HandlerInvocation $invocation, Texy\Link $link)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\HtmlElement
-	 * @param  bool
-	 * @param  bool
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function htmlTag($invocation, $el, $isStart, $forceEmpty = NULL)
+	function linkURL(Texy\HandlerInvocation $invocation, Texy\Link $link)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string  command
-	 * @param  array   arguments
-	 * @param  string  arguments in raw format
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function script($invocation, $cmd, $args, $raw)
+	function phrase(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = NULL)
+	{
+		return $invocation->proceed();
+	}
+
+
+	/**
+	 * @return Texy\HtmlElement|string|FALSE
+	 */
+	function newReference(Texy\HandlerInvocation $invocation, $name)
+	{
+		return $invocation->proceed();
+	}
+
+
+	/**
+	 * @return Texy\HtmlElement|string|FALSE
+	 */
+	function htmlComment(Texy\HandlerInvocation $invocation, $content)
+	{
+		return $invocation->proceed();
+	}
+
+
+	/**
+	 * @return Texy\HtmlElement|string|FALSE
+	 */
+	function htmlTag(Texy\HandlerInvocation $invocation, Texy\HtmlElement $el, $isStart, $forceEmpty = NULL)
+	{
+		return $invocation->proceed();
+	}
+
+
+	/**
+	 * @return Texy\HtmlElement|string|FALSE
+	 */
+	function script(Texy\HandlerInvocation $invocation, $command, array $args, $rawArgs)
 	{
 		return $invocation->proceed();
 	}
@@ -162,13 +135,10 @@ class myHandler
 	/** Blocks */
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  Texy\Modifier|NULL
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
 /*
-	function paragraph($invocation, $content, $modifier)
+	function paragraph(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();
 	}
@@ -176,99 +146,69 @@ class myHandler
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Image
-	 * @param  Texy\Link|NULL
-	 * @param  string
-	 * @param  Texy\Modifier
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function figure($invocation, $image, $link, $content, $modifier)
+	function figure(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = NULL, $content, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  int
-	 * @param  string
-	 * @param  Texy\Modifier
-	 * @param  bool
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function heading($invocation, $level, $content, $modifier, $isSurrounded)
+	function heading(Texy\HandlerInvocation $invocation, /*int*/ $level, $content, Texy\Modifier $modifier, $isSurrounded)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  Texy\Modifier
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	function horizline($invocation, $type, $modifier)
+	function horizline(Texy\HandlerInvocation $invocation, $type, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  string
-	 * @param  string
-	 * @param  Texy\Modifier
 	 * @return Texy\HtmlElement|string
 	 */
-	function block($invocation, $blocktype, $content, $param, $modifier)
+	function block(Texy\HandlerInvocation $invocation, $blocktype, $content, $param, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();
 	}
 
 
 	/**
-	 * @param  Texy\BlockParser
-	 * @param  Texy\HtmlElement
-	 * @param  Texy\Modifier
 	 * @return void
 	 */
-	function afterList($parser, $element, $modifier)
+	function afterList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
 	{
 	}
 
 
 	/**
-	 * @param  Texy\BlockParser
-	 * @param  Texy\HtmlElement
-	 * @param  Texy\Modifier
 	 * @return void
 	 */
-	function afterDefinitionList($parser, $element, $modifier)
+	function afterDefinitionList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
 	{
 	}
 
 
 	/**
-	 * @param  Texy\BlockParser
-	 * @param  Texy\HtmlElement
-	 * @param  Texy\Modifier
 	 * @return void
 	 */
-	function afterTable($parser, $element, $modifier)
+	function afterTable(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
 	{
 	}
 
 
 	/**
-	 * @param  Texy\BlockParser
-	 * @param  Texy\HtmlElement
-	 * @param  Texy\Modifier
 	 * @return void
 	 */
-	function afterBlockquote($parser, $element, $modifier)
+	function afterBlockquote(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
 	{
 	}
 
@@ -276,23 +216,17 @@ class myHandler
 	/** Special */
 
 	/**
-	 * @param  Texy
-	 * @param  string
-	 * @param  bool
 	 * @return void
 	 */
-	function beforeParse($texy, & $text, $isSingleLine)
+	function beforeParse(Texy\Texy $texy, & $text, $isSingleLine)
 	{
 	}
 
 
 	/**
-	 * @param  Texy
-	 * @param  Texy\HtmlElement
-	 * @param  bool
 	 * @return void
 	 */
-	function afterParse($texy, $DOM, $isSingleLine)
+	function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, $isSingleLine)
 	{
 	}
 }

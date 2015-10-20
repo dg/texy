@@ -602,13 +602,9 @@ class Texy
 
 	/**
 	 * Invoke registered around-handlers.
-	 *
-	 * @param  string   event name
-	 * @param  Parser  actual parser object
-	 * @param  array    arguments passed into handler
 	 * @return mixed
 	 */
-	final public function invokeAroundHandlers($event, $parser, $args)
+	final public function invokeAroundHandlers($event, Parser $parser, array $args)
 	{
 		if (!isset($this->handlers[$event])) {
 			return FALSE;
@@ -621,12 +617,9 @@ class Texy
 
 	/**
 	 * Invoke registered after-handlers.
-	 *
-	 * @param  string   event name
-	 * @param  array    arguments passed into handler
 	 * @return void
 	 */
-	final public function invokeHandlers($event, $args)
+	final public function invokeHandlers($event, array $args)
 	{
 		if (!isset($this->handlers[$event])) {
 			return;

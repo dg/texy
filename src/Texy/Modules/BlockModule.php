@@ -45,11 +45,9 @@ final class BlockModule extends Texy\Module
 
 	/**
 	 * Single block pre-processing.
-	 * @param  Texy\BlockParser
-	 * @param  string
 	 * @return void
 	 */
-	public function beforeBlockParse($parser, & $text)
+	public function beforeBlockParse(Texy\BlockParser $parser, & $text)
 	{
 		// autoclose exclusive blocks
 		$text = Texy\Regexp::replace(
@@ -67,12 +65,9 @@ final class BlockModule extends Texy\Module
 	 * ....
 	 * \----
 	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return HtmlElement|string|FALSE
 	 */
-	public function pattern($parser, $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
 		list(, $mParam, $mMod, $mContent) = $matches;
 		// [1] => code | text | ...
@@ -99,15 +94,9 @@ final class BlockModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string   blocktype
-	 * @param  string   content
-	 * @param  string   additional parameter
-	 * @param  Texy\Modifier
 	 * @return HtmlElement|string|FALSE
 	 */
-	public function solve($invocation, $blocktype, $s, $param, $mod)
+	public function solve(Texy\HandlerInvocation $invocation, $blocktype, $s, $param, Texy\Modifier $mod)
 	{
 		$tx = $this->texy;
 		$parser = $invocation->getParser();

@@ -23,10 +23,6 @@ class BlockParser extends Parser
 	private $indented;
 
 
-	/**
-	 * @param  Texy
-	 * @param  HtmlElement
-	 */
 	public function __construct(Texy $texy, HtmlElement $element, $indented)
 	{
 		$this->texy = $texy;

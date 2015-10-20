@@ -64,11 +64,9 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Text pre-processing.
-	 * @param  Texy
-	 * @param  string
 	 * @return void
 	 */
-	public function beforeParse($texy, & $text)
+	public function beforeParse(Texy\Texy $texy, & $text)
 	{
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
@@ -84,11 +82,10 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Callback for: [*image*]: urls .(title)[class]{style}.
 	 *
-	 * @param  array      regexp matches
 	 * @return string
 	 * @internal
 	 */
-	public function patternReferenceDef($matches)
+	public function patternReferenceDef(array $matches)
 	{
 		list(, $mRef, $mURLs, $mMod) = $matches;
 		// [1] => [* (reference) *]
@@ -103,13 +100,9 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK.
-	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function patternImage($parser, $matches)
+	public function patternImage(Texy\LineParser $parser, array $matches)
 	{
 		list(, $mURLs, $mMod, $mAlign, $mLink) = $matches;
 		// [1] => URLs
@@ -139,9 +132,6 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Adds new named reference to image.
-	 *
-	 * @param  string  reference name
-	 * @param  Image
 	 * @return void
 	 */
 	public function addReference($name, Image $image)
@@ -153,7 +143,6 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Returns named reference.
-	 *
 	 * @param  string  reference name
 	 * @return Image  reference descriptor (or FALSE)
 	 */
@@ -223,13 +212,9 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Image
-	 * @param  Texy\Link
 	 * @return Texy\HtmlElement|FALSE
 	 */
-	public function solve($invocation, Image $image, $link)
+	public function solve(Texy\HandlerInvocation $invocation = NULL, Image $image, Texy\Link $link = NULL)
 	{
 		if ($image->URL == NULL) {
 			return FALSE;

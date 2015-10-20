@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\BlockParser;
 use Texy\HtmlElement;
 use Texy\Modifier;
 use Texy\Patterns;
@@ -78,12 +79,9 @@ final class ListModule extends Texy\Module
 	 *   + ...
 	 * 3) ....
 	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return HtmlElement|FALSE
 	 */
-	public function patternList($parser, $matches)
+	public function patternList(BlockParser $parser, array $matches)
 	{
 		list(, $mMod, $mBullet) = $matches;
 		// [1] => .(title)[class]{style}<>
@@ -141,12 +139,9 @@ final class ListModule extends Texy\Module
 	 * - description 2
 	 * - description 3
 	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return HtmlElement
 	 */
-	public function patternDefList($parser, $matches)
+	public function patternDefList(BlockParser $parser, array $matches)
 	{
 		list(, $mMod, , , , $mBullet) = $matches;
 		// [1] => .(title)[class]{style}<>
@@ -204,14 +199,9 @@ final class ListModule extends Texy\Module
 
 	/**
 	 * Callback for single list item.
-	 *
-	 * @param  Texy\BlockParser
-	 * @param  string  bullet type
-	 * @param  string  left space
-	 * @param  string  html tag
 	 * @return HtmlElement|FALSE
 	 */
-	public function patternItem($parser, $bullet, $indented, $tag)
+	public function patternItem(BlockParser $parser, $bullet, $indented, $tag)
 	{
 		$tx = $this->texy;
 		$spacesBase = $indented ? ('\ {1,}') : '';

@@ -142,11 +142,9 @@ final class Modifier
 
 	/**
 	 * Decorates HtmlElement element.
-	 * @param  Texy   base Texy object
-	 * @param  HtmlElement  element to decorate
 	 * @return void
 	 */
-	public function decorate($texy, $el)
+	public function decorate(Texy $texy, HtmlElement $el)
 	{
 		$elAttrs = & $el->attrs;
 

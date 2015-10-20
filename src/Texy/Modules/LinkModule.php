@@ -8,6 +8,8 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\HandlerInvocation;
+use Texy\LineParser;
 use Texy\Link;
 use Texy\Patterns;
 
@@ -83,11 +85,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Text pre-processing.
-	 * @param  Texy
-	 * @param  string
 	 * @return void
 	 */
-	public function beforeParse($texy, & $text)
+	public function beforeParse(Texy\Texy $texy, & $text)
 	{
 		self::$livelock = [];
 
@@ -104,12 +104,10 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}.
-	 *
-	 * @param  array      regexp matches
 	 * @return string
 	 * @internal
 	 */
-	public function patternReferenceDef($matches)
+	public function patternReferenceDef(array $matches)
 	{
 		list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
 		// [1] => [ (reference) ]
@@ -128,13 +126,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [ref].
-	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function patternReference($parser, $matches)
+	public function patternReference(LineParser $parser, array $matches)
 	{
 		list(, $mRef) = $matches;
 		// [1] => [ref]
@@ -156,7 +150,7 @@ final class LinkModule extends Texy\Module
 			} else {
 				self::$livelock[$link->name] = TRUE;
 				$el = Texy\HtmlElement::el();
-				$lineParser = new Texy\LineParser($tx, $el);
+				$lineParser = new LineParser($tx, $el);
 				$lineParser->parse($link->label);
 				$content = $el->toString($tx);
 				unset(self::$livelock[$link->name]);
@@ -172,13 +166,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: http://davidgrudl.com david@grudl.com.
-	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function patternUrlEmail($parser, $matches, $name)
+	public function patternUrlEmail(LineParser $parser, array $matches, $name)
 	{
 		list($mURL) = $matches;
 		// [0] => URL
@@ -196,9 +186,6 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Adds new named reference.
-	 *
-	 * @param  string  reference name
-	 * @param  Link
 	 * @return void
 	 */
 	public function addReference($name, Link $link)
@@ -210,7 +197,6 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Returns named reference.
-	 *
 	 * @param  string  reference name
 	 * @return Link reference descriptor (or FALSE)
 	 */
@@ -284,12 +270,10 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Link
-	 * @param  Texy\HtmlElement|string
+	 * @param  Texy\HtmlElement|string $content
 	 * @return Texy\HtmlElement|string
 	 */
-	public function solve($invocation, $link, $content = NULL)
+	public function solve(HandlerInvocation $invocation = NULL, Link $link, $content = NULL)
 	{
 		if ($link->URL == NULL) {
 			return $content;
@@ -344,12 +328,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Link
 	 * @return Texy\HtmlElement|string
 	 */
-	public function solveUrlEmail($invocation, $link)
+	public function solveUrlEmail(HandlerInvocation $invocation, Link $link)
 	{
 		$content = $this->textualUrl($link);
 		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
@@ -359,12 +340,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
 	 * @return FALSE
 	 */
-	public function solveNewReference($invocation, $name)
+	public function solveNewReference(HandlerInvocation $invocation, $name)
 	{
 		// no change
 		return FALSE;
@@ -373,10 +351,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Checks and corrects $URL.
-	 * @param  Link
 	 * @return void
 	 */
-	private function checkLink($link)
+	private function checkLink(Link $link)
 	{
 		// remove soft hyphens; if not removed by Texy\Texy::process()
 		$link->URL = str_replace("\xC2\xAD", '', $link->URL);
@@ -400,10 +377,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Returns textual representation of URL.
-	 * @param  Link
 	 * @return string
 	 */
-	private function textualUrl($link)
+	private function textualUrl(Link $link)
 	{
 		if ($this->texy->obfuscateEmail && preg_match('#^'.self::$EMAIL.'$#u', $link->raw)) { // email
 			return str_replace('@', '&#64;<!-- -->', $link->raw);

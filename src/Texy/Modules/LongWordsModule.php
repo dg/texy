@@ -76,12 +76,10 @@ final class LongWordsModule extends Texy\Module
 
 	/**
 	 * Callback for long words.
-	 * (c) David Grudl
-	 * @param  array
 	 * @return string
 	 * @internal
 	 */
-	public function pattern($matches)
+	public function pattern(array $matches)
 	{
 		list($mWord) = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd

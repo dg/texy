@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\HtmlElement;
 use Texy\Modifier;
 use Texy\Patterns;
 use Texy\Regexp;
@@ -49,12 +50,9 @@ final class TableModule extends Texy\Module
 	 * |------------------
 	 * | aa | bb | cc |
 	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
-	 * @return Texy\HtmlElement|string|FALSE
+	 * @return HtmlElement|string|FALSE
 	 */
-	public function patternTable($parser, $matches)
+	public function patternTable(Texy\BlockParser $parser, array $matches)
 	{
 		if ($this->disableTables) {
 			return FALSE;
@@ -64,7 +62,7 @@ final class TableModule extends Texy\Module
 
 		$tx = $this->texy;
 
-		$el = Texy\HtmlElement::el('table');
+		$el = HtmlElement::el('table');
 		$mod = new Modifier($mMod);
 		$mod->decorate($tx, $el);
 
@@ -125,7 +123,7 @@ final class TableModule extends Texy\Module
 				// [1] => ....
 				// [2] => .(title)[class]{style}<>_
 
-				$elRow = Texy\HtmlElement::el('tr');
+				$elRow = HtmlElement::el('tr');
 				$mod = new Modifier($mMod);
 				$mod->decorate($tx, $elRow);
 
@@ -255,10 +253,9 @@ final class TableModule extends Texy\Module
 
 	/**
 	 * Parse text in all cells.
-	 * @param  Texy\HtmlElement
 	 * @return void
 	 */
-	private function finishPart($elPart)
+	private function finishPart(HtmlElement $elPart)
 	{
 		$tx = $this->texy;
 

@@ -14,12 +14,9 @@ require_once __DIR__ . '/../../src/texy.php';
 
 /**
  * User handler for unknown reference
- *
- * @param Texy\HandlerInvocation  handler invocation
- * @param string   [refName]
  * @return Texy\HtmlElement|string
  */
-function newReferenceHandler($parser, $refName)
+function newReferenceHandler(Texy\HandlerInvocation $parser, $refName)
 {
 	$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
 

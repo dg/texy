@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Modifier;
 
 
 /**
@@ -84,12 +85,9 @@ final class HeadingModule extends Texy\Module
 
 
 	/**
-	 * @param  Texy
-	 * @param  Texy\HtmlElement
-	 * @param  bool
 	 * @return void
 	 */
-	public function afterParse($texy, $DOM, $isSingleLine)
+	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, $isSingleLine)
 	{
 		if ($isSingleLine) {
 			return;
@@ -167,13 +165,9 @@ final class HeadingModule extends Texy\Module
 	 *
 	 * Heading .(title)[class]{style}>
 	 * -------------------------------
-	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function patternUnderline($parser, $matches)
+	public function patternUnderline(Texy\BlockParser $parser, array $matches)
 	{
 		list(, $mContent, $mMod, $mLine) = $matches;
 		// $matches:
@@ -181,7 +175,7 @@ final class HeadingModule extends Texy\Module
 		// [2] => .(title)[class]{style}<>
 		// [3] => ...
 
-		$mod = new Texy\Modifier($mMod);
+		$mod = new Modifier($mMod);
 		$level = $this->levels[$mLine[0]];
 		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, FALSE]);
 	}
@@ -191,20 +185,16 @@ final class HeadingModule extends Texy\Module
 	 * Callback for surrounded heading.
 	 *
 	 * ### Heading .(title)[class]{style}>
-	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function patternSurround($parser, $matches)
+	public function patternSurround(Texy\BlockParser $parser, array $matches)
 	{
 		list(, $mLine, $mContent, $mMod) = $matches;
 		// [1] => ###
 		// [2] => ...
 		// [3] => .(title)[class]{style}<>
 
-		$mod = new Texy\Modifier($mMod);
+		$mod = new Modifier($mMod);
 		$level = min(7, max(2, strlen($mLine)));
 		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
@@ -214,15 +204,9 @@ final class HeadingModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  int  0..5
-	 * @param  string
-	 * @param  Texy\Modifier
-	 * @param  bool
 	 * @return Texy\HtmlElement
 	 */
-	public function solve($invocation, $level, $content, $mod, $isSurrounded)
+	public function solve(Texy\HandlerInvocation $invocation, $level, $content, Modifier $mod, $isSurrounded)
 	{
 		// as fixed balancing, for block/texysource & correct decorating
 		$el = Texy\HtmlElement::el('h' . min(6, max(1, $level + $this->top)));

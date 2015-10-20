@@ -11,13 +11,9 @@ require_once __DIR__ . '/../../src/texy.php';
 
 /**
  * User handler for images
- *
- * @param Texy\HandlerInvocation  handler invocation
- * @param Texy\Image
- * @param Texy\Link
  * @return Texy\HtmlElement|string|FALSE
  */
-function imageHandler($invocation, $image, $link)
+function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = NULL)
 {
 	$texy = $invocation->getTexy();
 

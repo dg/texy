@@ -25,13 +25,9 @@ final class ParagraphModule extends Texy\Module
 
 
 	/**
-	 * @param  Texy\BlockParser
-	 * @param  string     text
-	 * @param  array
-	 * @param  Texy\HtmlElement
-	 * @return vois
+	 * @return void
 	 */
-	public function process($parser, $content, $el)
+	public function process(Texy\BlockParser $parser, $content, Texy\HtmlElement $el)
 	{
 		$tx = $this->texy;
 
@@ -69,13 +65,9 @@ final class ParagraphModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
-	 * @param  Texy\Modifier|NULL
 	 * @return Texy\HtmlElement|FALSE
 	 */
-	public function solve($invocation, $content, $mod)
+	public function solve(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $mod = NULL)
 	{
 		$tx = $this->texy;
 

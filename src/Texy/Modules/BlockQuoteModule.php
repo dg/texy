@@ -39,12 +39,9 @@ final class BlockQuoteModule extends Texy\Module
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function pattern($parser, $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
 		list(, $mMod, $mPrefix, $mContent) = $matches;
 		// [1] => .(title)[class]{style}<>

@@ -367,7 +367,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Renders element's start tag, content and end tag to internal string representation.
-	 * @param  Texy
 	 * @return string
 	 */
 	final public function toString(Texy $texy)
@@ -396,7 +395,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Renders to final HTML.
-	 * @param  Texy
 	 * @return string
 	 */
 	final public function toHtml(Texy $texy)
@@ -407,7 +405,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Renders to final text.
-	 * @param  Texy
 	 * @return string
 	 */
 	final public function toText(Texy $texy)
@@ -523,10 +520,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
-	 * @param  array
 	 * @return void
 	 */
-	final public function validateAttrs($dtd)
+	final public function validateAttrs(array $dtd)
 	{
 		if (isset($dtd[$this->name])) {
 			$allowed = $dtd[$this->name][0];

@@ -46,13 +46,9 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
-	 *
-	 * @param  Texy\BlockParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function pattern($parser, $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
 		list(, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod) = $matches;
 		// [1] => URLs
@@ -85,15 +81,9 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Image
-	 * @param  Texy\Link
-	 * @param  string
-	 * @param  Texy\Modifier
 	 * @return Texy\HtmlElement|FALSE
 	 */
-	public function solve($invocation, $image, $link, $content, $mod)
+	public function solve(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = NULL, $content, Texy\Modifier $mod)
 	{
 		$tx = $this->texy;
 

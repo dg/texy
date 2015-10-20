@@ -28,12 +28,7 @@ final class HandlerInvocation
 	private $parser;
 
 
-	/**
-	 * @param  array    array of callbacks
-	 * @param  Parser
-	 * @param  array    arguments
-	 */
-	public function __construct($handlers, Parser $parser, $args)
+	public function __construct(array $handlers, Parser $parser, array $args)
 	{
 		$this->handlers = $handlers;
 		$this->pos = count($handlers);

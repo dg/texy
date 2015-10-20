@@ -43,12 +43,9 @@ final class ScriptModule extends Texy\Module
 	/**
 	 * Callback for: {{...}}.
 	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function pattern($parser, $matches)
+	public function pattern(Texy\LineParser $parser, array $matches)
 	{
 		list(, $mContent) = $matches;
 		// [1] => ...
@@ -89,14 +86,9 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string  command
-	 * @param  array   arguments
-	 * @param  string  arguments in raw format
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
-	public function solve($invocation, $cmd, $args, $raw)
+	public function solve(Texy\HandlerInvocation $invocation, $cmd, array $args = NULL, $raw)
 	{
 		if ($cmd === 'texy') {
 			if (!$args) {

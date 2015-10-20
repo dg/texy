@@ -10,14 +10,9 @@ require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
- * @param Texy\HandlerInvocation  handler invocation
- * @param Texy\Image
- * @param Texy\Link
- * @param string
- * @param Texy\Modifier
  * @return Texy\HtmlElement|string|FALSE
  */
-function figureHandler($invocation, $image, $link, $content, $modifier)
+function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = NULL, $content, Texy\Modifier $modifier)
 {
 	// finish invocation by default way
 	$el = $invocation->proceed();

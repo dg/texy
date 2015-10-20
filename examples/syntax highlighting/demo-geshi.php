@@ -22,15 +22,9 @@ if (!class_exists('Geshi')) {
 
 /**
  * User handler for code block
- *
- * @param Texy\HandlerInvocation  handler invocation
- * @param string  block type
- * @param string  text to highlight
- * @param string  language
- * @param Texy\Modifier modifier
  * @return Texy\HtmlElement
  */
-function blockHandler($invocation, $blocktype, $content, $lang, $modifier)
+function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier)
 {
 	if ($blocktype !== 'block/code') {
 		return $invocation->proceed();

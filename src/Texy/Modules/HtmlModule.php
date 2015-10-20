@@ -44,13 +44,9 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <!-- comment -->.
-	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return HtmlElement|string|FALSE
 	 */
-	public function patternComment($parser, $matches)
+	public function patternComment(Texy\LineParser $parser, array $matches)
 	{
 		list(, $mComment) = $matches;
 		return $this->texy->invokeAroundHandlers('htmlComment', $parser, [$mComment]);
@@ -59,13 +55,9 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <tag attr="...">.
-	 *
-	 * @param  Texy\LineParser
-	 * @param  array      regexp matches
-	 * @param  string     pattern name
 	 * @return HtmlElement|string|FALSE
 	 */
-	public function patternTag($parser, $matches)
+	public function patternTag(Texy\LineParser $parser, array $matches)
 	{
 		list(, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
 		// [1] => /
@@ -130,14 +122,9 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  HtmlElement  element
-	 * @param  bool      is start tag?
-	 * @param  bool      is empty?
 	 * @return HtmlElement|string|FALSE
 	 */
-	public function solveTag($invocation, HtmlElement $el, $isStart, $forceEmpty = NULL)
+	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, $isStart, $forceEmpty = NULL)
 	{
 		$tx = $this->texy;
 
@@ -283,12 +270,9 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  string
 	 * @return string
 	 */
-	public function solveComment($invocation, $content)
+	public function solveComment(Texy\HandlerInvocation $invocation, $content)
 	{
 		if (!$this->passComment) {
 			return '';

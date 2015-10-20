@@ -10,14 +10,9 @@ require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
- * @param Texy\HandlerInvocation  handler invocation
- * @param string
- * @param string
- * @param Texy\Modifier
- * @param Texy\Link
  * @return Texy\HtmlElement|string|FALSE
  */
-function phraseHandler($invocation, $phrase, $content, $modifier, $link)
+function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = NULL)
 {
 	// is there link?
 	if (!$link) {
