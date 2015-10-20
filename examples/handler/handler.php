@@ -53,8 +53,8 @@ class myHandler
 
 	/**
 	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Modules\Image
-	 * @param  Texy\Modules\Link|NULL
+	 * @param  Texy\Image
+	 * @param  Texy\Link|NULL
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	function image($invocation, $image, $link)
@@ -65,7 +65,7 @@ class myHandler
 
 	/**
 	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Modules\Link
+	 * @param  Texy\Link
 	 * @param  string
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
@@ -77,7 +77,7 @@ class myHandler
 
 	/**
 	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Modules\Link
+	 * @param  Texy\Link
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	function linkEmail($invocation, $link)
@@ -88,7 +88,7 @@ class myHandler
 
 	/**
 	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Modules\Link
+	 * @param  Texy\Link
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	function linkURL($invocation, $link)
@@ -102,7 +102,7 @@ class myHandler
 	 * @param  string
 	 * @param  string
 	 * @param  Texy\Modifier
-	 * @param  Texy\Modules\Link|NULL
+	 * @param  Texy\Link|NULL
 	 * @return Texy\HtmlElement|string|FALSE
 	 */
 	function phrase($invocation, $phrase, $content, $modifier, $link)
@@ -177,8 +177,8 @@ class myHandler
 
 	/**
 	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Modules\Image
-	 * @param  Texy\Modules\Link|NULL
+	 * @param  Texy\Image
+	 * @param  Texy\Link|NULL
 	 * @param  string
 	 * @param  Texy\Modifier
 	 * @return Texy\HtmlElement|string|FALSE

@@ -5,9 +5,7 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy\Modules;
-
-use Texy;
+namespace Texy;
 
 
 /**
@@ -15,7 +13,7 @@ use Texy;
  */
 final class Image
 {
-	use Texy\Strict;
+	use Strict;
 
 	/** @var string  base image URL */
 	public $URL;
@@ -35,7 +33,7 @@ final class Image
 	/** @var bool  image width and height are maximal */
 	public $asMax;
 
-	/** @var Texy\Modifier */
+	/** @var Modifier */
 	public $modifier;
 
 	/** @var string  reference name (if is stored as reference) */
@@ -44,7 +42,7 @@ final class Image
 
 	public function __construct()
 	{
-		$this->modifier = new Texy\Modifier;
+		$this->modifier = new Modifier;
 	}
 
 

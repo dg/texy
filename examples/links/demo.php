@@ -14,7 +14,7 @@ require_once __DIR__ . '/../../src/texy.php';
  * @param string
  * @param string
  * @param Texy\Modifier
- * @param Texy\Modules\Link
+ * @param Texy\Link
  * @return Texy\HtmlElement|string|FALSE
  */
 function phraseHandler($invocation, $phrase, $content, $modifier, $link)

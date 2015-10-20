@@ -11,8 +11,8 @@ require_once __DIR__ . '/../../src/texy.php';
 
 /**
  * @param Texy\HandlerInvocation  handler invocation
- * @param Texy\Modules\Image
- * @param Texy\Modules\Link
+ * @param Texy\Image
+ * @param Texy\Link
  * @param string
  * @param Texy\Modifier
  * @return Texy\HtmlElement|string|FALSE

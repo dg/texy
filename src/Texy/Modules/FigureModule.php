@@ -69,9 +69,9 @@ final class FigureModule extends Texy\Module
 
 		if ($mLink) {
 			if ($mLink === ':') {
-				$link = new Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
+				$link = new Texy\Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
 				$link->raw = ':';
-				$link->type = Link::IMAGE;
+				$link->type = $link::IMAGE;
 			} else {
 				$link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
 			}
@@ -87,13 +87,13 @@ final class FigureModule extends Texy\Module
 	 * Finish invocation.
 	 *
 	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Image
-	 * @param  Link
+	 * @param  Texy\Image
+	 * @param  Texy\Link
 	 * @param  string
 	 * @param  Texy\Modifier
 	 * @return Texy\HtmlElement|FALSE
 	 */
-	public function solve($invocation, Image $image, $link, $content, $mod)
+	public function solve($invocation, $image, $link, $content, $mod)
 	{
 		$tx = $this->texy;
 

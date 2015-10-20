@@ -5,9 +5,7 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy\Modules;
-
-use Texy;
+namespace Texy;
 
 
 /**
@@ -15,7 +13,7 @@ use Texy;
  */
 final class Link
 {
-	use Texy\Strict;
+	use Strict;
 
 	/** @see $type */
 	const
@@ -29,7 +27,7 @@ final class Link
 	/** @var string  URL as written in text */
 	public $raw;
 
-	/** @var Texy\Modifier */
+	/** @var Modifier */
 	public $modifier;
 
 	/** @var int  how was link created? */
@@ -46,7 +44,7 @@ final class Link
 	{
 		$this->URL = $URL;
 		$this->raw = $URL;
-		$this->modifier = new Texy\Modifier;
+		$this->modifier = new Modifier;
 	}
 
 

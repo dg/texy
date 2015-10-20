@@ -239,15 +239,15 @@ class Texy
 		$this->cleaner = & $this->htmlOutputModule;
 
 		// examples of link references ;-)
-		$link = new Modules\Link('http://texy.info/');
+		$link = new Link('http://texy.info/');
 		$link->modifier->title = 'The best text -> HTML converter and formatter';
 		$link->label = 'Texy!';
 		$this->linkModule->addReference('texy', $link);
 
-		$link = new Modules\Link('https://www.google.com/search?q=%s');
+		$link = new Link('https://www.google.com/search?q=%s');
 		$this->linkModule->addReference('google', $link);
 
-		$link = new Modules\Link('https://en.wikipedia.org/wiki/Special:Search?search=%s');
+		$link = new Link('https://en.wikipedia.org/wiki/Special:Search?search=%s');
 		$this->linkModule->addReference('wikipedia', $link);
 	}
 

@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Image;
 use Texy\Helpers;
 use Texy\Patterns;
 
@@ -122,9 +123,9 @@ final class ImageModule extends Texy\Module
 
 		if ($mLink) {
 			if ($mLink === ':') {
-				$link = new Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
+				$link = new Texy\Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
 				$link->raw = ':';
-				$link->type = Link::IMAGE;
+				$link->type = $link::IMAGE;
 			} else {
 				$link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
 			}
@@ -225,7 +226,7 @@ final class ImageModule extends Texy\Module
 	 *
 	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  Image
-	 * @param  Link
+	 * @param  Texy\Link
 	 * @return Texy\HtmlElement|FALSE
 	 */
 	public function solve($invocation, Image $image, $link)
