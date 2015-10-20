@@ -11,7 +11,7 @@ namespace Texy;
 
 
 /**
- * Texy! - Convert plain text to XHTML format using {@link process()}.
+ * Texy! - Convert plain text to HTML format using {@link process()}.
  *
  * <code>
  * $texy = new Texy();
@@ -39,16 +39,15 @@ class Texy
 	public const FILTER_ANCHOR = 'anchor';
 	public const FILTER_IMAGE = 'image';
 
-	// HTML minor-modes
-	public const XML = 2;
-
 	// HTML modes
-	public const HTML4_TRANSITIONAL = 0;
-	public const HTML4_STRICT = 1;
-	public const HTML5 = 4;
-	public const XHTML1_TRANSITIONAL = 2; // Texy::HTML4_TRANSITIONAL | Texy::XML;
-	public const XHTML1_STRICT = 3; // Texy::HTML4_STRICT | Texy::XML;
-	public const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
+	const HTML4_TRANSITIONAL = 0;
+	const HTML4_STRICT = 1;
+	const HTML5 = 4;
+	// depecated
+	const XHTML1_TRANSITIONAL = 2;
+	const XHTML1_STRICT = 3;
+	const XHTML5 = 6;
+	const XML = 2;
 
 	/** @var array  Texy! syntax configuration */
 	public $allowed = [];
@@ -208,7 +207,7 @@ class Texy
 
 		$this->loadModules();
 
-		$this->setOutputMode(self::XHTML1_TRANSITIONAL);
+		$this->setOutputMode(self::HTML5);
 
 		// examples of link references ;-)
 		$link = new Link('https://texy.info/');
@@ -225,7 +224,7 @@ class Texy
 
 
 	/**
-	 * Set HTML/XHTML output mode (overwrites self::$allowedTags)
+	 * Set HTML output mode (overwrites self::$allowedTags)
 	 */
 	public function setOutputMode(int $mode): void
 	{
@@ -233,6 +232,8 @@ class Texy
 			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5, ], true)
 		) {
 			throw new \InvalidArgumentException('Invalid mode.');
+		} elseif ($mode & self::XML) {
+			trigger_error('XHTML support has been dropped.', E_USER_DEPRECATED);
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
@@ -241,7 +242,6 @@ class Texy
 
 		$this->mode = $mode;
 		$this->dtd = self::$dtdCache[$mode];
-		HtmlElement::$xhtml = (bool) ($mode & self::XML); // TODO: remove?
 
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = [];
@@ -252,7 +252,7 @@ class Texy
 
 
 	/**
-	 * Get HTML/XHTML output mode
+	 * Get HTML output mode
 	 */
 	public function getOutputMode(): int
 	{

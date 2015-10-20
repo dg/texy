@@ -29,9 +29,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/** @var array  element's attributes */
 	public $attrs = [];
 
-	/** @var bool  use XHTML syntax? */
-	public static $xhtml = true;
-
 	/** @var array  empty elements */
 	public static $emptyElements = ['img' => 1, 'hr' => 1, 'br' => 1, 'input' => 1, 'meta' => 1, 'area' => 1,
 		'base' => 1, 'col' => 1, 'link' => 1, 'param' => 1, 'basefont' => 1, 'frame' => 1, 'isindex' => 1, 'wbr' => 1, 'embed' => 1, ];
@@ -387,12 +384,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 				// true boolean attribute
 				if ($value === true) {
-					// in XHTML must use unminimized form
-					if (self::$xhtml) {
-						$s .= ' ' . $key . '="' . $key . '"';
-					} else {
-						$s .= ' ' . $key;
-					}
+					$s .= ' ' . $key;
 					continue;
 
 				} elseif (is_array($value)) {
@@ -424,10 +416,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 			}
 		}
 
-		// finish start tag
-		if (self::$xhtml && $this->isEmpty) {
-			return $s . ' />';
-		}
 		return $s . '>';
 	}
 
