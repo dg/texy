@@ -11,7 +11,7 @@ namespace Texy;
 // @param $mode
 // @return $dtd
 
-$strict = $mode === Texy::HTML4_STRICT || $mode === Texy::XHTML1_STRICT;
+$strict = FALSE;
 
 
 // attributes
@@ -19,9 +19,7 @@ $coreattrs = ['id'=>1,'class'=>1,'style'=>1,'title'=>1,'xml:id'=>1]; // extra: x
 $i18n = ['lang'=>1,'dir'=>1,'xml:lang'=>1]; // extra: xml:lang
 $attrs = $coreattrs + $i18n + ['onclick'=>1,'ondblclick'=>1,'onmousedown'=>1,'onmouseup'=>1,
 	'onmouseover'=>1, 'onmousemove'=>1,'onmouseout'=>1,'onkeypress'=>1,'onkeydown'=>1,'onkeyup'=>1];
-if ($mode & Texy::HTML5) {
-	$attrs += ['data-*'=>1];
-}
+$attrs += ['data-*'=>1];
 $cellalign = $attrs + ['align'=>1,'char'=>1,'charoff'=>1,'valign'=>1];
 
 // content elements

@@ -38,11 +38,10 @@ class Texy
 	const FILTER_ANCHOR = 'anchor';
 	const FILTER_IMAGE = 'image';
 
-	// HTML modes
+	// depecated
 	const HTML4_TRANSITIONAL = 0;
 	const HTML4_STRICT = 1;
 	const HTML5 = 4;
-	// depecated
 	const XHTML1_TRANSITIONAL = 2;
 	const XHTML1_STRICT = 3;
 	const XHTML5 = 6;
@@ -193,9 +192,6 @@ class Texy
 	/** @var array */
 	private static $dtdCache;
 
-	/** @var int  HTML mode */
-	private $mode;
-
 
 	public function __construct()
 	{
@@ -233,20 +229,15 @@ class Texy
 	 */
 	public function setOutputMode($mode)
 	{
-		if (!in_array($mode, [self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
-			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5], TRUE)
-		) {
-			throw new \InvalidArgumentException('Invalid mode.');
-		} elseif ($mode & self::XML) {
-			trigger_error('XHTML support has been dropped.', E_USER_DEPRECATED);
+		if ($mode !== self::HTML5) {
+			trigger_error('Texy::setOutputMode() is deprecated, only HTML5 mode is supported.', E_USER_DEPRECATED);
 		}
 
-		if (!isset(self::$dtdCache[$mode])) {
-			self::$dtdCache[$mode] = require __DIR__ . '/DTD.php';
+		if (!self::$dtdCache) {
+			self::$dtdCache = require __DIR__ . '/DTD.php';
 		}
 
-		$this->mode = $mode;
-		$this->dtd = self::$dtdCache[$mode];
+		$this->dtd = self::$dtdCache;
 
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = [];
@@ -262,7 +253,8 @@ class Texy
 	 */
 	public function getOutputMode()
 	{
-		return $this->mode;
+		trigger_error('Texy::getOutputMode() is deprecated, only HTML5 mode is supported.', E_USER_DEPRECATED);
+		return self::HTML5;
 	}
 
 
