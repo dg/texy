@@ -9,462 +9,727 @@ declare(strict_types=1);
 
 namespace Texy;
 
-
-// @param $mode
-// @return $dtd
-
-$strict = $mode === Texy::HTML4_STRICT || $mode === Texy::XHTML1_STRICT;
+$globalAttrs = array_fill_keys([
+	'data-*',
+	'xml:lang',
 
 
-// attributes
-$coreattrs = ['id' => 1, 'class' => 1, 'style' => 1, 'title' => 1, 'xml:id' => 1]; // extra: xml:id
-$i18n = ['lang' => 1, 'dir' => 1, 'xml:lang' => 1]; // extra: xml:lang
-$attrs = $coreattrs + $i18n + ['onclick' => 1, 'ondblclick' => 1, 'onmousedown' => 1, 'onmouseup' => 1,
-	'onmouseover' => 1, 'onmousemove' => 1, 'onmouseout' => 1, 'onkeypress' => 1, 'onkeydown' => 1, 'onkeyup' => 1, ];
-if ($mode & Texy::HTML5) {
-	$attrs += ['data-*' => 1];
-}
-$cellalign = $attrs + ['align' => 1, 'char' => 1, 'charoff' => 1, 'valign' => 1];
-
-// content elements
-
-// %block;
-$b = ['ins' => 1, 'del' => 1, 'p' => 1, 'h1' => 1, 'h2' => 1, 'h3' => 1, 'h4' => 1,
-	'h5' => 1, 'h6' => 1, 'ul' => 1, 'ol' => 1, 'dl' => 1, 'pre' => 1, 'div' => 1, 'blockquote' => 1, 'noscript' => 1,
-	'noframes' => 1, 'form' => 1, 'hr' => 1, 'table' => 1, 'address' => 1, 'fieldset' => 1, ];
-
-if (!$strict) {
-	$b += [
-		'dir' => 1, 'menu' => 1, 'center' => 1, 'iframe' => 1, 'isindex' => 1, // transitional
-		'marquee' => 1, // proprietary
-	];
-}
-
-// %inline;
-$i = ['ins' => 1, 'del' => 1, 'tt' => 1, 'i' => 1, 'b' => 1, 'big' => 1, 'small' => 1, 'em' => 1,
-	'strong' => 1, 'dfn' => 1, 'code' => 1, 'samp' => 1, 'kbd' => 1, 'var' => 1, 'cite' => 1, 'abbr' => 1, 'acronym' => 1,
-	'sub' => 1, 'sup' => 1, 'q' => 1, 'span' => 1, 'bdo' => 1, 'a' => 1, 'object' => 1, 'img' => 1, 'br' => 1, 'script' => 1,
-	'map' => 1, 'input' => 1, 'select' => 1, 'textarea' => 1, 'label' => 1, 'button' => 1, HtmlElement::INNER_TEXT => 1, ];
-
-if (!$strict) {
-	$i += [
-		'u' => 1, 's' => 1, 'strike' => 1, 'font' => 1, 'applet' => 1, 'basefont' => 1, // transitional
-		'embed' => 1, 'wbr' => 1, 'nobr' => 1, 'canvas' => 1, // proprietary
-	];
-}
+	'accesskey',
+	'autocapitalize',
+	'autofocus',
+	'contenteditable',
+	'dir',
+	'draggable',
+	'enterkeyhint',
+	'hidden',
+	'inputmode',
+	'is',
+	'itemid',
+	'itemprop',
+	'itemref',
+	'itemscope',
+	'itemtype',
+	'lang',
+	'nonce',
+	'spellcheck',
+	'style',
+	'tabindex',
+	'title',
+	'translate',
+	'class',
+	'id',
+	'slot',
 
 
-$bi = $b + $i;
+	'onabort',
+	'onauxclick',
+	'onblur',
+	'oncancel',
+	'oncanplay',
+	'oncanplaythrough',
+	'onchange',
+	'onclick',
+	'onclose',
+	'oncontextmenu',
+	'oncopy',
+	'oncuechange',
+	'oncut',
+	'ondblclick',
+	'ondrag',
+	'ondragend',
+	'ondragenter',
+	'ondragexit',
+	'ondragleave',
+	'ondragover',
+	'ondragstart',
+	'ondrop',
+	'ondurationchange',
+	'onemptied',
+	'onended',
+	'onerror',
+	'onfocus',
+	'onformdata',
+	'oninput',
+	'oninvalid',
+	'onkeydown',
+	'onkeypress',
+	'onkeyup',
+	'onload',
+	'onloadeddata',
+	'onloadedmetadata',
+	'onloadstart',
+	'onmousedown',
+	'onmouseenter',
+	'onmouseleave',
+	'onmousemove',
+	'onmouseout',
+	'onmouseover',
+	'onmouseup',
+	'onpaste',
+	'onpause',
+	'onplay',
+	'onplaying',
+	'onprogress',
+	'onratechange',
+	'onreset',
+	'onresize',
+	'onscroll',
+	'onsecuritypolicyviolation',
+	'onseeked',
+	'onseeking',
+	'onselect',
+	'onslotchange',
+	'onstalled',
+	'onsubmit',
+	'onsuspend',
+	'ontimeupdate',
+	'ontoggle',
+	'onvolumechange',
+	'onwaiting',
+	'onwheel',
+], 1);
 
-// build DTD
-$dtd = [
-'html' => [
-	$strict ? $i18n + ['xmlns' => 1] : $i18n + ['version' => 1, 'xmlns' => 1], // extra: xmlns
-	['head' => 1, 'body' => 1],
-],
-'head' => [
-	$i18n + ['profile' => 1],
-	['title' => 1, 'script' => 1, 'style' => 1, 'base' => 1, 'meta' => 1, 'link' => 1, 'object' => 1, 'isindex' => 1],
-],
-'title' => [
-	[],
-	[HtmlElement::INNER_TEXT => 1],
-],
-'body' => [
-	$attrs + ['onload' => 1, 'onunload' => 1],
-	$strict ? ['script' => 1] + $b : $bi,
-],
-'script' => [
-	['charset' => 1, 'type' => 1, 'src' => 1, 'defer' => 1, 'event' => 1, 'for' => 1],
-	[HtmlElement::INNER_TEXT => 1],
-],
-'style' => [
-	$i18n + ['type' => 1, 'media' => 1, 'title' => 1],
-	[HtmlElement::INNER_TEXT => 1],
-],
-'p' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'h1' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'h2' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'h3' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'h4' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'h5' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'h6' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'ul' => [
-	$strict ? $attrs : $attrs + ['type' => 1, 'compact' => 1],
-	['li' => 1],
-],
-'ol' => [
-	$strict ? $attrs : $attrs + ['type' => 1, 'compact' => 1, 'start' => 1],
-	['li' => 1],
-],
-'li' => [
-	$strict ? $attrs : $attrs + ['type' => 1, 'value' => 1],
-	$bi,
-],
-'dl' => [
-	$strict ? $attrs : $attrs + ['compact' => 1],
-	['dt' => 1, 'dd' => 1],
-],
-'dt' => [
-	$attrs,
-	$i,
-],
-'dd' => [
-	$attrs,
-	$bi,
-],
-'pre' => [
-	$strict ? $attrs : $attrs + ['width' => 1],
-	array_flip(array_diff(array_keys($i), ['img', 'object', 'applet', 'big', 'small', 'sub', 'sup', 'font', 'basefont'])),
-],
-'div' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$bi,
-],
-'blockquote' => [
-	$attrs + ['cite' => 1],
-	$strict ? ['script' => 1] + $b : $bi,
-],
-'noscript' => [
-	$attrs,
-	$bi,
-],
-'form' => [
-	$attrs + ['action' => 1, 'method' => 1, 'enctype' => 1, 'accept' => 1, 'name' => 1, 'onsubmit' => 1, 'onreset' => 1, 'accept-charset' => 1],
-	$strict ? ['script' => 1] + $b : $bi,
-],
-'table' => [
-	$attrs + ['summary' => 1, 'width' => 1, 'border' => 1, 'frame' => 1, 'rules' => 1, 'cellspacing' => 1, 'cellpadding' => 1, 'datapagesize' => 1],
-	['caption' => 1, 'colgroup' => 1, 'col' => 1, 'thead' => 1, 'tbody' => 1, 'tfoot' => 1, 'tr' => 1],
-],
-'caption' => [
-	$strict ? $attrs : $attrs + ['align' => 1],
-	$i,
-],
-'colgroup' => [
-	$cellalign + ['span' => 1, 'width' => 1],
-	['col' => 1],
-],
-'thead' => [
-	$cellalign,
-	['tr' => 1],
-],
-'tbody' => [
-	$cellalign,
-	['tr' => 1],
-],
-'tfoot' => [
-	$cellalign,
-	['tr' => 1],
-],
-'tr' => [
-	$strict ? $cellalign : $cellalign + ['bgcolor' => 1],
-	['td' => 1, 'th' => 1],
-],
-'td' => [
-	$cellalign + ['abbr' => 1, 'axis' => 1, 'headers' => 1, 'scope' => 1, 'rowspan' => 1, 'colspan' => 1],
-	$bi,
-],
-'th' => [
-	$cellalign + ['abbr' => 1, 'axis' => 1, 'headers' => 1, 'scope' => 1, 'rowspan' => 1, 'colspan' => 1],
-	$bi,
-],
-'address' => [
-	$attrs,
-	$strict ? $i : ['p' => 1] + $i,
-],
-'fieldset' => [
-	$attrs,
-	['legend' => 1] + $bi,
-],
-'legend' => [
-	$strict ? $attrs + ['accesskey' => 1] : $attrs + ['accesskey' => 1, 'align' => 1],
-	$i,
-],
-'tt' => [
-	$attrs,
-	$i,
-],
-'i' => [
-	$attrs,
-	$i,
-],
-'b' => [
-	$attrs,
-	$i,
-],
-'big' => [
-	$attrs,
-	$i,
-],
-'small' => [
-	$attrs,
-	$i,
-],
-'em' => [
-	$attrs,
-	$i,
-],
-'strong' => [
-	$attrs,
-	$i,
-],
-'dfn' => [
-	$attrs,
-	$i,
-],
-'code' => [
-	$attrs,
-	$i,
-],
-'samp' => [
-	$attrs,
-	$i,
-],
-'kbd' => [
-	$attrs,
-	$i,
-],
-'var' => [
-	$attrs,
-	$i,
-],
-'cite' => [
-	$attrs,
-	$i,
-],
-'abbr' => [
-	$attrs,
-	$i,
-],
-'acronym' => [
-	$attrs,
-	$i,
-],
-'sub' => [
-	$attrs,
-	$i,
-],
-'sup' => [
-	$attrs,
-	$i,
-],
-'q' => [
-	$attrs + ['cite' => 1],
-	$i,
-],
-'span' => [
-	$attrs,
-	$i,
-],
-'bdo' => [
-	$coreattrs + ['lang' => 1, 'dir' => 1],
-	$i,
-],
-'a' => [
-	$attrs + ['charset' => 1, 'type' => 1, 'name' => 1, 'href' => 1, 'hreflang' => 1, 'rel' => 1, 'rev' => 1, 'accesskey' => 1, 'shape' => 1, 'coords' => 1, 'tabindex' => 1, 'onfocus' => 1, 'onblur' => 1],
-	$i,
-],
-'object' => [
-	$attrs + ['declare' => 1, 'classid' => 1, 'codebase' => 1, 'data' => 1, 'type' => 1, 'codetype' => 1, 'archive' => 1, 'standby' => 1, 'height' => 1, 'width' => 1, 'usemap' => 1, 'name' => 1, 'tabindex' => 1],
-	['param' => 1] + $bi,
-],
-'map' => [
-	$attrs + ['name' => 1],
-	['area' => 1] + $b,
-],
-'select' => [
-	$attrs + ['name' => 1, 'size' => 1, 'multiple' => 1, 'disabled' => 1, 'tabindex' => 1, 'onfocus' => 1, 'onblur' => 1, 'onchange' => 1],
-	['option' => 1, 'optgroup' => 1],
-],
-'optgroup' => [
-	$attrs + ['disabled' => 1, 'label' => 1],
-	['option' => 1],
-],
-'option' => [
-	$attrs + ['selected' => 1, 'disabled' => 1, 'label' => 1, 'value' => 1],
-	[HtmlElement::INNER_TEXT => 1],
-],
-'textarea' => [
-	$attrs + ['name' => 1, 'rows' => 1, 'cols' => 1, 'disabled' => 1, 'readonly' => 1, 'tabindex' => 1, 'accesskey' => 1, 'onfocus' => 1, 'onblur' => 1, 'onselect' => 1, 'onchange' => 1],
-	[HtmlElement::INNER_TEXT => 1],
-],
-'label' => [
-	$attrs + ['for' => 1, 'accesskey' => 1, 'onfocus' => 1, 'onblur' => 1],
-	$i, // - label by HtmlElement::$prohibits
-],
-'button' => [
-	$attrs + ['name' => 1, 'value' => 1, 'type' => 1, 'disabled' => 1, 'tabindex' => 1, 'accesskey' => 1, 'onfocus' => 1, 'onblur' => 1],
-	$bi, // - a input select textarea label button form fieldset, by HtmlElement::$prohibits
-],
-'ins' => [
-	$attrs + ['cite' => 1, 'datetime' => 1],
-	[HtmlElement::INNER_TRANSPARENT => 1],
-],
-'del' => [
-	$attrs + ['cite' => 1, 'datetime' => 1],
-	[HtmlElement::INNER_TRANSPARENT => 1],
-],
 
-// empty elements
-'img' => [
-	$attrs + ['src' => 1, 'alt' => 1, 'longdesc' => 1, 'name' => 1, 'height' => 1, 'width' => 1, 'usemap' => 1, 'ismap' => 1],
-	false,
-],
-'hr' => [
-	$strict ? $attrs : $attrs + ['align' => 1, 'noshade' => 1, 'size' => 1, 'width' => 1],
-	false,
-],
-'br' => [
-	$strict ? $coreattrs : $coreattrs + ['clear' => 1],
-	false,
-],
-'input' => [
-	$attrs + ['type' => 1, 'name' => 1, 'value' => 1, 'checked' => 1, 'disabled' => 1, 'readonly' => 1, 'size' => 1, 'maxlength' => 1, 'src' => 1, 'alt' => 1, 'usemap' => 1, 'ismap' => 1, 'tabindex' => 1, 'accesskey' => 1, 'onfocus' => 1, 'onblur' => 1, 'onselect' => 1, 'onchange' => 1, 'accept' => 1],
-	false,
-],
-'meta' => [
-	$i18n + ['http-equiv' => 1, 'name' => 1, 'content' => 1, 'scheme' => 1],
-	false,
-],
-'area' => [
-	$attrs + ['shape' => 1, 'coords' => 1, 'href' => 1, 'nohref' => 1, 'alt' => 1, 'tabindex' => 1, 'accesskey' => 1, 'onfocus' => 1, 'onblur' => 1],
-	false,
-],
-'base' => [
-	$strict ? ['href' => 1] : ['href' => 1, 'target' => 1],
-	false,
-],
-'col' => [
-	$cellalign + ['span' => 1, 'width' => 1],
-	false,
-],
-'link' => [
-	$attrs + ['charset' => 1, 'href' => 1, 'hreflang' => 1, 'type' => 1, 'rel' => 1, 'rev' => 1, 'media' => 1],
-	false,
-],
-'param' => [
-	['id' => 1, 'name' => 1, 'value' => 1, 'valuetype' => 1, 'type' => 1],
-	false,
-],
+$metadataContent = array_fill_keys([
+	'base',
+	'link',
+	'meta',
+	'noscript',
+	'script',
+	'style',
+	'template',
+	'title',
+], 1);
+
+
+$flowContent = array_fill_keys([
+	'a',
+	'abbr',
+	'address',
+	'area',
+	'article',
+	'aside',
+	'audio',
+	'b',
+	'bdi',
+	'bdo',
+	'blockquote',
+	'br',
+	'button',
+	'canvas',
+	'cite',
+	'code',
+	'data',
+	'datalist',
+	'del',
+	'details',
+	'dfn',
+	'dialog',
+	'div',
+	'dl',
+	'em',
+	'embed',
+	'fieldset',
+	'figure',
+	'footer',
+	'form',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'header',
+	'hgroup',
+	'hr',
+	'i',
+	'iframe',
+	'img',
+	'input',
+	'ins',
+	'kbd',
+	'label',
+	'link',
+	'main',
+	'map',
+	'mark',
+	'menu',
+	'meta',
+	'meter',
+	'nav',
+	'noscript',
+	'object',
+	'ol',
+	'output',
+	'p',
+	'picture',
+	'pre',
+	'progress',
+	'q',
+	'ruby',
+	's',
+	'samp',
+	'script',
+	'section',
+	'select',
+	'slot',
+	'small',
+	'span',
+	'strong',
+	'sub',
+	'sup',
+	'svg',
+	'table',
+	'template',
+	'textarea',
+	'time',
+	'u',
+	'ul',
+	'var',
+	'video',
+	'wbr',
+	HtmlElement::INNER_TEXT,
+], 1);
+
+
+$phrasingContent = array_fill_keys([
+	'a',
+	'abbr',
+	'area',
+	'audio',
+	'b',
+	'bdi',
+	'bdo',
+	'br',
+	'button',
+	'canvas',
+	'cite',
+	'code',
+	'data',
+	'datalist',
+	'del',
+	'dfn',
+	'em',
+	'embed',
+	'i',
+	'iframe',
+	'img',
+	'input',
+	'ins',
+	'kbd',
+	'label',
+	'link',
+	'map',
+	'mark',
+	'math',
+	'meta',
+	'meter',
+	'noscript',
+	'object',
+	'output',
+	'picture',
+	'progress',
+	'q',
+	'ruby',
+	's',
+	'samp',
+	'script',
+	'select',
+	'slot',
+	'small',
+	'span',
+	'strong',
+	'sub',
+	'sup',
+	'svg',
+	'template',
+	'textarea',
+	'time',
+	'u',
+	'var',
+	'video',
+	'wbr',
+	HtmlElement::INNER_TEXT,
+], 1);
+
+
+$scriptSupportingElements = array_fill_keys([
+	'script',
+	'template',
+], 1);
+
+
+return [/*
+	element => [
+		allowed attributes
+		allowed children content model | false for empty elements
+	],*/
+	'a' => [
+		$globalAttrs + array_fill_keys(['href', 'target', 'download', 'ping', 'rel', 'hreflang', 'type', 'referrerpolicy'], 1),
+		[HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'abbr' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'address' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'area' => [
+		$globalAttrs + array_fill_keys(['alt', 'coords', 'shape', 'href', 'target', 'download', 'ping', 'rel', 'referrerpolicy'], 1),
+		false,
+	],
+	'article' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'aside' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'audio' => [
+		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'preload', 'autoplay', 'loop', 'muted', 'controls'], 1),
+		['source' => 1, 'track' => 1, HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'b' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'base' => [
+		$globalAttrs + ['href' => 1, 'target' => 1],
+		false,
+	],
+	'bdi' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'bdo' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'blockquote' => [
+		$globalAttrs + ['cite' => 1],
+		$flowContent,
+	],
+	'body' => [
+		$globalAttrs + array_fill_keys(['onafterprint', 'onbeforeprint', 'onbeforeunload', 'onhashchange', 'onlanguagechange', 'onmessage', 'onmessageerror', 'onoffline', 'ononline', 'onpagehide', 'onpageshow', 'onpopstate', 'onrejectionhandled', 'onstorage', 'onunhandledrejection', 'onunload'], 1),
+		$flowContent,
+	],
+	'br' => [
+		$globalAttrs,
+		false,
+	],
+	'button' => [
+		$globalAttrs + array_fill_keys(['disabled', 'form', 'formaction', 'formenctype', 'formmethod', 'formnovalidate', 'formtarget', 'name', 'type', 'value'], 1),
+		$phrasingContent,
+	],
+	'canvas' => [
+		$globalAttrs + ['width' => 1, 'height' => 1],
+		[HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'caption' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'cite' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'code' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'col' => [
+		$globalAttrs + ['span' => 1],
+		false,
+	],
+	'colgroup' => [
+		$globalAttrs + ['span' => 1],
+		['col' => 1, 'template' => 1],
+	],
+	'data' => [
+		$globalAttrs + ['value' => 1],
+		$phrasingContent,
+	],
+	'datalist' => [
+		$globalAttrs,
+		$phrasingContent + $scriptSupportingElements + ['option' => 1],
+	],
+	'dd' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'del' => [
+		$globalAttrs + ['cite' => 1, 'datetime' => 1],
+		[HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'details' => [
+		$globalAttrs + ['open' => 1],
+		$flowContent + ['summary' => 1],
+	],
+	'dfn' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'dialog' => [
+		$globalAttrs + ['open' => 1],
+		$flowContent,
+	],
+	'div' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'dl' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['dt' => 1, 'dd' => 1, 'div' => 1],
+	],
+	'dt' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'em' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'embed' => [
+		$globalAttrs + ['src' => 1, 'type' => 1, 'width' => 1, 'height' => 1],
+		false,
+	],
+	'fieldset' => [
+		$globalAttrs + ['disabled' => 1, 'form' => 1, 'name' => 1],
+		$flowContent + ['legend' => 1],
+	],
+	'figcaption' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'figure' => [
+		$globalAttrs,
+		$flowContent + ['figcaption' => 1],
+	],
+	'footer' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'form' => [
+		$globalAttrs + array_fill_keys(['accept-charset', 'action', 'autocomplete', 'enctype', 'method', 'name', 'novalidate', 'target'], 1),
+		$flowContent,
+	],
+	'h1' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'h2' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'h3' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'h4' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'h5' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'h6' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'head' => [
+		$globalAttrs,
+		$metadataContent,
+	],
+	'header' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'hgroup' => [
+		$globalAttrs,
+		$scriptSupportingElements + array_fill_keys(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], 1),
+	],
+	'hr' => [
+		$globalAttrs,
+		false,
+	],
+	'html' => [
+		$globalAttrs + ['manifest' => 1],
+		['head' => 1, 'body' => 1],
+	],
+	'i' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'iframe' => [
+		$globalAttrs + array_fill_keys(['src', 'srcdoc', 'name', 'sandbox', 'allow', 'allowfullscreen', 'allowpaymentrequest', 'width', 'height', 'referrerpolicy'], 1),
+		[],
+	],
+	'img' => [
+		$globalAttrs + array_fill_keys(['alt', 'src', 'srcset', 'crossorigin', 'usemap', 'ismap', 'width', 'height', 'decoding', 'referrerpolicy'], 1),
+		false,
+	],
+	'input' => [
+		$globalAttrs + array_fill_keys(['accept', 'alt', 'autocomplete', 'checked', 'dirname', 'disabled', 'form', 'formaction', 'formenctype', 'formmethod', 'formnovalidate', 'formtarget', 'height', 'list', 'max', 'maxlength', 'min', 'minlength', 'multiple', 'name', 'pattern', 'placeholder', 'readonly', 'required', 'size', 'src', 'step', 'type', 'value', 'width'], 1),
+		false,
+	],
+	'ins' => [
+		$globalAttrs + ['cite' => 1, 'datetime' => 1],
+		[HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'kbd' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'label' => [
+		$globalAttrs + ['for' => 1],
+		$phrasingContent,
+	],
+	'legend' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'li' => [
+		$globalAttrs + ['value' => 1],
+		$flowContent,
+	],
+	'link' => [
+		$globalAttrs + array_fill_keys(['href', 'crossorigin', 'rel', 'as', 'media', 'hreflang', 'type', 'sizes', 'imagesrcset', 'imagesizes', 'referrerpolicy', 'integrity'], 1),
+		false,
+	],
+	'main' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'map' => [
+		$globalAttrs + ['name' => 1],
+		[HtmlElement::INNER_TRANSPARENT => 1, 'area' => 1],
+	],
+	'mark' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'menu' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['li' => 1],
+	],
+	'meta' => [
+		$globalAttrs + ['name' => 1, 'http-equiv' => 1, 'content' => 1, 'charset' => 1],
+		false,
+	],
+	'meter' => [
+		$globalAttrs + array_fill_keys(['value', 'min', 'max', 'low', 'high', 'optimum'], 1),
+		$phrasingContent,
+	],
+	'nav' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'noscript' => [
+		$globalAttrs,
+		[HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'object' => [
+		$globalAttrs + array_fill_keys(['data', 'type', 'name', 'usemap', 'form', 'width', 'height'], 1),
+		['param' => 1, HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'ol' => [
+		$globalAttrs + ['reversed' => 1, 'start' => 1, 'type' => 1],
+		$scriptSupportingElements + ['li' => 1],
+	],
+	'optgroup' => [
+		$globalAttrs + ['disabled' => 1, 'label' => 1],
+		$scriptSupportingElements + ['option' => 1],
+	],
+	'option' => [
+		$globalAttrs + ['disabled' => 1, 'label' => 1, 'selected' => 1, 'value' => 1],
+		[HtmlElement::INNER_TEXT => 1],
+	],
+	'output' => [
+		$globalAttrs + ['for' => 1, 'form' => 1, 'name' => 1],
+		$phrasingContent,
+	],
+	'p' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'param' => [
+		$globalAttrs + ['name' => 1, 'value' => 1],
+		false,
+	],
+	'picture' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['source' => 1, 'img' => 1],
+	],
+	'pre' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'progress' => [
+		$globalAttrs + ['value' => 1, 'max' => 1],
+		$phrasingContent,
+	],
+	'q' => [
+		$globalAttrs + ['cite' => 1],
+		$phrasingContent,
+	],
+	'rp' => [
+		$globalAttrs,
+		[HtmlElement::INNER_TEXT => 1],
+	],
+	'rt' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'ruby' => [
+		$globalAttrs,
+		$phrasingContent + ['rt' => 1, 'rp' => 1],
+	],
+	's' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'samp' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'script' => [
+		$globalAttrs + array_fill_keys(['src', 'type', 'async', 'defer', 'crossorigin', 'integrity', 'referrerpolicy'], 1),
+		[HtmlElement::INNER_TEXT => 1],
+	],
+	'section' => [
+		$globalAttrs,
+		$flowContent,
+	],
+	'select' => [
+		$globalAttrs + array_fill_keys(['autocomplete', 'disabled', 'form', 'multiple', 'name', 'required', 'size'], 1),
+		$scriptSupportingElements + ['option' => 1, 'optgroup' => 1],
+	],
+	'slot' => [
+		$globalAttrs + ['name' => 1],
+		[HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'small' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'source' => [
+		$globalAttrs + array_fill_keys(['src', 'type', 'srcset', 'sizes', 'media'], 1),
+		false,
+	],
+	'span' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'strong' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'style' => [
+		$globalAttrs + ['media' => 1],
+		[HtmlElement::INNER_TEXT => 1],
+	],
+	'sub' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'summary' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'sup' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'table' => [
+		$globalAttrs,
+		$scriptSupportingElements + array_fill_keys(['caption', 'colgroup', 'thead', 'tbody', 'tfoot', 'tr'], 1),
+	],
+	'tbody' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['tr' => 1],
+	],
+	'td' => [
+		$globalAttrs + ['colspan' => 1, 'rowspan' => 1, 'headers' => 1],
+		$flowContent,
+	],
+	'template' => [
+		$globalAttrs,
+		[],
+	],
+	'textarea' => [
+		$globalAttrs + array_fill_keys(['cols', 'dirname', 'disabled', 'form', 'maxlength', 'minlength', 'name', 'placeholder', 'readonly', 'required', 'rows', 'wrap'], 1),
+		[HtmlElement::INNER_TEXT => 1],
+	],
+	'tfoot' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['tr' => 1],
+	],
+	'th' => [
+		$globalAttrs + array_fill_keys(['colspan', 'rowspan', 'headers', 'scope', 'abbr'], 1),
+		$flowContent,
+	],
+	'thead' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['tr' => 1],
+	],
+	'time' => [
+		$globalAttrs + ['datetime' => 1],
+		$phrasingContent,
+	],
+	'title' => [
+		$globalAttrs,
+		[HtmlElement::INNER_TEXT => 1],
+	],
+	'tr' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['th' => 1, 'td' => 1],
+	],
+	'track' => [
+		$globalAttrs + array_fill_keys(['default', 'kind', 'label', 'src', 'srclang'], 1),
+		false,
+	],
+	'u' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'ul' => [
+		$globalAttrs,
+		$scriptSupportingElements + ['li' => 1],
+	],
+	'var' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'video' => [
+		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'poster', 'preload', 'autoplay', 'playsinline', 'loop', 'muted', 'controls', 'width', 'height'], 1),
+		['source' => 1, 'track' => 1, HtmlElement::INNER_TRANSPARENT => 1],
+	],
+	'wbr' => [
+		$globalAttrs,
+		false,
+	],
 ];
-
-
-if ($strict) {
-	return $dtd;
-}
-
-
-// LOOSE DTD
-$dtd += [
-// transitional
-'dir' => [
-	$attrs + ['compact' => 1],
-	['li' => 1],
-],
-'menu' => [
-	$attrs + ['compact' => 1],
-	['li' => 1], // it's inline-li, ignored
-],
-'center' => [
-	$attrs,
-	$bi,
-],
-'iframe' => [
-	$coreattrs + ['longdesc' => 1, 'name' => 1, 'src' => 1, 'frameborder' => 1, 'marginwidth' => 1, 'marginheight' => 1, 'scrolling' => 1, 'align' => 1, 'height' => 1, 'width' => 1],
-	$bi,
-],
-'noframes' => [
-	$attrs,
-	$bi,
-],
-'u' => [
-	$attrs,
-	$i,
-],
-'s' => [
-	$attrs,
-	$i,
-],
-'strike' => [
-	$attrs,
-	$i,
-],
-'font' => [
-	$coreattrs + $i18n + ['size' => 1, 'color' => 1, 'face' => 1],
-	$i,
-],
-'applet' => [
-	$coreattrs + ['codebase' => 1, 'archive' => 1, 'code' => 1, 'object' => 1, 'alt' => 1, 'name' => 1, 'width' => 1, 'height' => 1, 'align' => 1, 'hspace' => 1, 'vspace' => 1],
-	['param' => 1] + $bi,
-],
-'basefont' => [
-	['id' => 1, 'size' => 1, 'color' => 1, 'face' => 1],
-	false,
-],
-'isindex' => [
-	$coreattrs + $i18n + ['prompt' => 1],
-	false,
-],
-
-// proprietary
-'marquee' => [
-	Texy::ALL,
-	$bi,
-],
-'nobr' => [
-	[],
-	$i,
-],
-'canvas' => [
-	Texy::ALL,
-	$i,
-],
-'embed' => [
-	Texy::ALL,
-	false,
-],
-'wbr' => [
-	[],
-	false,
-],
-];
-
-// transitional modified
-$dtd['a'][0] += ['target' => 1];
-$dtd['area'][0] += ['target' => 1];
-$dtd['body'][0] += ['background' => 1, 'bgcolor' => 1, 'text' => 1, 'link' => 1, 'vlink' => 1, 'alink' => 1];
-$dtd['form'][0] += ['target' => 1];
-$dtd['img'][0] += ['align' => 1, 'border' => 1, 'hspace' => 1, 'vspace' => 1];
-$dtd['input'][0] += ['align' => 1];
-$dtd['link'][0] += ['target' => 1];
-$dtd['object'][0] += ['align' => 1, 'border' => 1, 'hspace' => 1, 'vspace' => 1];
-$dtd['script'][0] += ['language' => 1];
-$dtd['table'][0] += ['align' => 1, 'bgcolor' => 1];
-$dtd['td'][0] += ['nowrap' => 1, 'bgcolor' => 1, 'width' => 1, 'height' => 1];
-$dtd['th'][0] += ['nowrap' => 1, 'bgcolor' => 1, 'width' => 1, 'height' => 1];
-
-// missing: FRAMESET, FRAME, BGSOUND, XMP, ...
-
-return $dtd;

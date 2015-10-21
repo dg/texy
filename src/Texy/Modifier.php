@@ -51,15 +51,11 @@ final class Modifier
 
 	/** @var array  list of properties which are regarded as HTML element attributes */
 	public static $elAttrs = [
-		'abbr' => 1, 'accesskey' => 1, 'align' => 1, 'alt' => 1, 'archive' => 1, 'axis' => 1, 'bgcolor' => 1, 'cellpadding' => 1,
-		'cellspacing' => 1, 'char' => 1, 'charoff' => 1, 'charset' => 1, 'cite' => 1, 'classid' => 1, 'codebase' => 1, 'codetype' => 1,
-		'colspan' => 1, 'compact' => 1, 'coords' => 1, 'data' => 1, 'datetime' => 1, 'declare' => 1, 'dir' => 1, 'face' => 1, 'frame' => 1,
-		'headers' => 1, 'href' => 1, 'hreflang' => 1, 'hspace' => 1, 'ismap' => 1, 'lang' => 1, 'longdesc' => 1, 'name' => 1,
-		'noshade' => 1, 'nowrap' => 1, 'onblur' => 1, 'onclick' => 1, 'ondblclick' => 1, 'onkeydown' => 1, 'onkeypress' => 1,
-		'onkeyup' => 1, 'onmousedown' => 1, 'onmousemove' => 1, 'onmouseout' => 1, 'onmouseover' => 1, 'onmouseup' => 1, 'rel' => 1,
-		'rev' => 1, 'rowspan' => 1, 'rules' => 1, 'scope' => 1, 'shape' => 1, 'size' => 1, 'span' => 1, 'src' => 1, 'standby' => 1,
-		'start' => 1, 'summary' => 1, 'tabindex' => 1, 'target' => 1, 'title' => 1, 'type' => 1, 'usemap' => 1, 'valign' => 1,
-		'value' => 1, 'vspace' => 1,
+		'abbr' => 1, 'accesskey' => 1, 'alt' => 1, 'cite' => 1, 'colspan' => 1, 'contenteditable' => 1, 'crossorigin' => 1,
+		'datetime' => 1, 'decoding' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1, 'hidden' => 1,
+		'href' => 1, 'hreflang' => 1, 'id' => 1, 'itemid' => 1, 'itemprop' => 1, 'itemref' => 1, 'itemscope' => 1, 'itemtype' => 1,
+		'lang' => 1, 'name' => 1, 'ping' => 1, 'referrerpolicy' => 1, 'rel' => 1, 'reversed' => 1, 'rowspan' => 1, 'scope' => 1,
+		'slot' => 1, 'src' => 1, 'srcset' => 1, 'start' => 1, 'target' => 1, 'title' => 1, 'translate' => 1, 'type' => 1, 'value' => 1,
 	];
 
 

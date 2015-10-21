@@ -52,3 +52,8 @@ Assert::matchFile(
 	__DIR__ . '/expected/html-tags4.html',
 	createTexy()->process(file_get_contents(__DIR__ . '/sources/html-tags4.texy'))
 );
+
+Assert::matchFile(
+	__DIR__ . '/expected/html-tags5.html',
+	createTexy()->process(file_get_contents(__DIR__ . '/sources/html-tags5.texy'))
+);

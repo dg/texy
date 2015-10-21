@@ -29,41 +29,57 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/** @var array  element's attributes */
 	public $attrs = [];
 
-	/** @var array  empty elements */
-	public static $emptyElements = ['img' => 1, 'hr' => 1, 'br' => 1, 'input' => 1, 'meta' => 1, 'area' => 1,
-		'base' => 1, 'col' => 1, 'link' => 1, 'param' => 1, 'basefont' => 1, 'frame' => 1, 'isindex' => 1, 'wbr' => 1, 'embed' => 1, ];
+	/** @var array  void elements */
+	public static $emptyElements = [
+		'area' => '1', 'base' => '1', 'br' => '1', 'col' => '1', 'embed' => '1', 'hr' => '1', 'img' => '1', 'input' => '1',
+		'link' => '1', 'meta' => '1', 'param' => '1', 'source' => '1', 'track' => '1', 'wbr' => '1',
+	];
 
-	/** @var array  %inline; elements; replaced elements + br have value '1' */
-	public static $inlineElements = ['ins' => 0, 'del' => 0, 'tt' => 0, 'i' => 0, 'b' => 0, 'big' => 0, 'small' => 0, 'em' => 0,
-		'strong' => 0, 'dfn' => 0, 'code' => 0, 'samp' => 0, 'kbd' => 0, 'var' => 0, 'cite' => 0, 'abbr' => 0, 'acronym' => 0,
-		'sub' => 0, 'sup' => 0, 'q' => 0, 'span' => 0, 'bdo' => 0, 'a' => 0, 'object' => 1, 'img' => 1, 'br' => 1, 'script' => 1,
-		'map' => 0, 'input' => 1, 'select' => 1, 'textarea' => 1, 'label' => 0, 'button' => 1,
-		'u' => 0, 's' => 0, 'strike' => 0, 'font' => 0, 'applet' => 1, 'basefont' => 0, // transitional
-		'embed' => 1, 'wbr' => 0, 'nobr' => 0, 'canvas' => 1, // proprietary
+	/** @var array  phrasing elements; replaced elements + br have value '1' */
+	public static $inlineElements = [
+		'a' => 0, 'abbr' => 0, 'area' => 0, 'audio' => 0, 'b' => 0, 'bdi' => 0, 'bdo' => 0, 'br' => 1, 'button' => 1, 'canvas' => 1,
+		'cite' => 0, 'code' => 0, 'data' => 0, 'datalist' => 0, 'del' => 0, 'dfn' => 0, 'em' => 0, 'embed' => 1, 'i' => 0, 'iframe' => 1,
+		'img' => 1, 'input' => 1, 'ins' => 0, 'kbd' => 0, 'label' => 0, 'link' => 0, 'map' => 0, 'mark' => 0, 'math' => 1, 'meta' => 0,
+		'meter' => 1, 'noscript' => 1, 'object' => 1, 'output' => 1, 'picture' => 1, 'progress' => 1, 'q' => 0, 'ruby' => 0, 's' => 0,
+		'samp' => 0, 'script' => 1, 'select' => 1, 'slot' => 0, 'small' => 0, 'span' => 0, 'strong' => 0, 'sub' => 0, 'sup' => 0,
+		'svg' => 1, 'template' => 0, 'textarea' => 1, 'time' => 0, 'u' => 0, 'var' => 0, 'video' => 1, 'wbr' => 0,
 	];
 
 	/** @var array  elements with optional end tag in HTML */
-	public static $optionalEnds = ['body' => 1, 'head' => 1, 'html' => 1, 'colgroup' => 1, 'dd' => 1,
-		'dt' => 1, 'li' => 1, 'option' => 1, 'p' => 1, 'tbody' => 1, 'td' => 1, 'tfoot' => 1, 'th' => 1, 'thead' => 1, 'tr' => 1, ];
+	public static $optionalEnds = [
+		'body' => 1, 'head' => 1, 'html' => 1, 'colgroup' => 1, 'dd' => 1, 'dt' => 1, 'li' => 1,
+		'option' => 1, 'p' => 1, 'tbody' => 1, 'td' => 1, 'tfoot' => 1, 'th' => 1, 'thead' => 1, 'tr' => 1,
+	];
 
-	/** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
 	public static $prohibits = [
 		'a' => ['a', 'button'],
-		'img' => ['pre'],
-		'object' => ['pre'],
-		'big' => ['pre'],
-		'small' => ['pre'],
-		'sub' => ['pre'],
-		'sup' => ['pre'],
-		'input' => ['button'],
-		'select' => ['button'],
-		'textarea' => ['button'],
-		'label' => ['button', 'label'],
-		'button' => ['button'],
-		'form' => ['button', 'form'],
-		'fieldset' => ['button'],
-		'iframe' => ['button'],
-		'isindex' => ['button'],
+		'button' => ['a', 'button'],
+		'details' => ['a', 'button'],
+		'embed' => ['a', 'button'],
+		'iframe' => ['a', 'button'],
+		'input' => ['a', 'button'],
+		'label' => ['a', 'button', 'label'],
+		'select' => ['a', 'button'],
+		'textarea' => ['a', 'button'],
+		'header' => ['address', 'dt', 'footer', 'header', 'th'],
+		'footer' => ['address', 'dt', 'footer', 'header', 'th'],
+		'address' => ['address'],
+		'h1' => ['address', 'dt', 'th'],
+		'h2' => ['address', 'dt', 'th'],
+		'h3' => ['address', 'dt', 'th'],
+		'h4' => ['address', 'dt', 'th'],
+		'h5' => ['address', 'dt', 'th'],
+		'h6' => ['address', 'dt', 'th'],
+		'hgroup' => ['address', 'dt', 'th'],
+		'article' => ['address', 'dt', 'th'],
+		'aside' => ['address', 'dt', 'th'],
+		'nav' => ['address', 'dt', 'th'],
+		'section' => ['address', 'dt', 'th'],
+		'table' => ['caption'],
+		'dfn' => ['dfn'],
+		'form' => ['form'],
+		'meter' => ['meter'],
+		'progress' => ['progress'],
 	];
 
 	/** @var array  of HtmlElement | string nodes */
