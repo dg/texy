@@ -67,4 +67,12 @@ spl_autoload_register(function ($class) {
 	}
 });
 
+
+// preload for compatiblity
+array_map('class_exists', [
+	'TexyHtml',
+	'TexyImage',
+	'TexyLink',
+]);
+
 require_once __DIR__ . '/compatibility.php';
