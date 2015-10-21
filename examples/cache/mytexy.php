@@ -40,12 +40,12 @@ class mytexy extends Texy
 			$cacheFile = $this->cachePath . $md5 . '.html';
 			$content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : null;
 			if ($content) {         // read from cache
-				[$html, $this->styleSheet, $this->headingModule->title] = $content;
+				[$html, $this->headingModule->title] = $content;
 
 			} else {                           // doesn't exists
 				$html = parent::process($text);
 				file_put_contents($cacheFile,
-					serialize([$html, $this->styleSheet, $this->headingModule->title])
+					serialize([$html, $this->headingModule->title])
 				);
 			}
 
