@@ -701,7 +701,7 @@ class Texy
 
 	final public function __clone()
 	{
-		throw new Exception('Clone is not supported.');
+		throw new \Exception('Clone is not supported.');
 	}
 
 

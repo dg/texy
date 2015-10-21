@@ -347,11 +347,11 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Required by the IteratorAggregate interface.
-	 * @return ArrayIterator
+	 * @return \ArrayIterator
 	 */
 	final public function getIterator()
 	{
-		return new ArrayIterator($this->children);
+		return new \ArrayIterator($this->children);
 	}
 
 
