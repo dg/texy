@@ -80,7 +80,7 @@ final class ParagraphModule extends Texy\Module
 			$content = Regexp::replace($content, '#\n#', "\r");
 		}
 
-		$el = Texy\HtmlElement::el('p');
+		$el = new Texy\HtmlElement('p');
 		$el->parseLine($tx, $content);
 		$content = $el->getText(); // string
 

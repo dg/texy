@@ -26,7 +26,7 @@ function newReferenceHandler(Texy\HandlerInvocation $parser, $refName)
 
 	$name = $names[$refName];
 
-	$el = Texy\HtmlElement::el('a');
+	$el = new Texy\HtmlElement('a');
 	$el->attrs['href'] = '#comm-' . $refName; // set link destination
 	$el->attrs['class'][] = 'comment';        // set class name
 	$el->attrs['rel'] = 'nofollow';           // enable rel="nofollow"

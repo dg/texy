@@ -209,7 +209,7 @@ final class HeadingModule extends Texy\Module
 	public function solve(Texy\HandlerInvocation $invocation, $level, $content, Modifier $mod, $isSurrounded)
 	{
 		// as fixed balancing, for block/texysource & correct decorating
-		$el = Texy\HtmlElement::el('h' . min(6, max(1, $level + $this->top)));
+		$el = new Texy\HtmlElement('h' . min(6, max(1, $level + $this->top)));
 		$mod->decorate($this->texy, $el);
 
 		$el->parseLine($this->texy, trim($content));

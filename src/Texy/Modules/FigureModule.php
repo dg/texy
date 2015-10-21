@@ -95,14 +95,14 @@ final class FigureModule extends Texy\Module
 			return FALSE;
 		}
 
-		$el = Texy\HtmlElement::el('div');
+		$el = new Texy\HtmlElement('div');
 		if (!empty($image->width) && $this->widthDelta !== FALSE) {
 			$el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
 		}
 		$mod->decorate($tx, $el);
 
 		$el[0] = $elImg;
-		$el[1] = Texy\HtmlElement::el('p');
+		$el[1] = new Texy\HtmlElement('p');
 		$el[1]->parseLine($tx, ltrim($content));
 
 		$class = $this->class;

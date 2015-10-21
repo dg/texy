@@ -27,7 +27,7 @@ function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Te
 	$img = $el[0];
 	unset($el[0]);
 
-	$dt = Texy\HtmlElement::el('dt');
+	$dt = new Texy\HtmlElement('dt');
 	$dt->add($img);
 	$el->insert(0, $dt);
 

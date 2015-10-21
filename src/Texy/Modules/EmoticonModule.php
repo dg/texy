@@ -98,7 +98,7 @@ final class EmoticonModule extends Texy\Module
 	{
 		$tx = $this->texy;
 		$file = $this->icons[$emoticon];
-		$el = Texy\HtmlElement::el('img');
+		$el = new Texy\HtmlElement('img');
 		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root === NULL ? $tx->imageModule->root : $this->root);
 		$el->attrs['alt'] = $raw;
 		$el->attrs['class'][] = $this->class;

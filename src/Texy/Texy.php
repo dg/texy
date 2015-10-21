@@ -441,7 +441,7 @@ class Texy
 		}
 
 		// parse Texy! document into internal DOM structure
-		$this->DOM = HtmlElement::el();
+		$this->DOM = new HtmlElement;
 		if ($singleLine) {
 			$this->DOM->parseLine($this, $text);
 		} else {

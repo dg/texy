@@ -313,12 +313,12 @@ final class PhraseModule extends Texy\Module
 		}
 
 		if ($phrase === 'phrase/strong+em') {
-			$el = Texy\HtmlElement::el($this->tags['phrase/strong']);
+			$el = new Texy\HtmlElement($this->tags['phrase/strong']);
 			$el->create($this->tags['phrase/em'], $content);
 			$mod->decorate($tx, $el);
 
 		} elseif ($tag) {
-			$el = Texy\HtmlElement::el($tag)->setText($content);
+			$el = new Texy\HtmlElement($tag, $content);
 			$mod->decorate($tx, $el);
 
 			if ($tag === 'q') {

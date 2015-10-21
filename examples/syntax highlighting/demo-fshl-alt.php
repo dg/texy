@@ -43,7 +43,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 	$content = $fshl->highlightString($lang, $content);
 	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
-	$elPre = Texy\HtmlElement::el('pre');
+	$elPre = new Texy\HtmlElement('pre');
 	if ($modifier) {
 		$modifier->decorate($texy, $elPre);
 	}
@@ -73,7 +73,7 @@ function codeBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 	$content = $fshl->highlightString($lang, $content);
 	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
-	$elPre = Texy\HtmlElement::el('pre');
+	$elPre = new Texy\HtmlElement('pre');
 	$elPre->attrs['class'] = strtolower($lang);
 
 	$elCode = $elPre->create('code', $content);

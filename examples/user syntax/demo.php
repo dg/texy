@@ -60,7 +60,7 @@ function userInlineHandler(Texy\LineParser $parser, array $matches, $name)
 
 	// create element
 	$tag = $name === 'myInlineSyntax1' ? 'b' : 'i';
-	$el = Texy\HtmlElement::el($tag);
+	$el = new Texy\HtmlElement($tag);
 
 	// apply modifier
 	$mod = new Texy\Modifier($mMod);
@@ -92,11 +92,11 @@ function userBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 
 	// create element
 	if ($mTag === 'perex') {
-		$el = Texy\HtmlElement::el('div');
+		$el = new Texy\HtmlElement('div');
 		$el->attrs['class'][] = 'perex';
 
 	} else {
-		$el = Texy\HtmlElement::el($mTag);
+		$el = new Texy\HtmlElement($mTag);
 	}
 
 	// create content

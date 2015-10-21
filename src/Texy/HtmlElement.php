@@ -12,7 +12,7 @@ namespace Texy;
  * HTML helper.
  *
  * usage:
- * $anchor = HtmlElement::el('a')->href($link)->setText('Texy');
+ * $anchor = (new HtmlElement('a'))->href($link)->setText('Texy');
  * $el->class = 'myclass';
  *
  * echo $el->startTag(), $el->endTag();
@@ -77,21 +77,23 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
-	 * Static factory.
 	 * @param  string element name (or NULL)
 	 * @param  array|string element's attributes (or textual content)
-	 * @return HtmlElement
 	 */
+	public function __construct($name = NULL, $attrs = NULL)
+	{
+		$this->setName($name);
+		if (is_array($attrs)) {
+			$this->attrs = $attrs;
+		} elseif ($attrs !== NULL) {
+			$this->setText($attrs);
+		}
+	}
+
+
 	public static function el($name = NULL, $attrs = NULL)
 	{
-		$el = new self;
-		$el->setName($name);
-		if (is_array($attrs)) {
-			$el->attrs = $attrs;
-		} elseif ($attrs !== NULL) {
-			$el->setText($attrs);
-		}
-		return $el;
+		return new self($name, $attrs);
 	}
 
 
@@ -247,7 +249,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 */
 	final public function create($name, $attrs = NULL)
 	{
-		$this->insert(NULL, $child = self::el($name, $attrs));
+		$this->insert(NULL, $child = new self($name, $attrs));
 		return $child;
 	}
 

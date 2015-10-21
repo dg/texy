@@ -57,7 +57,7 @@ final class HorizLineModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $type, Texy\Modifier $modifier)
 	{
-		$el = Texy\HtmlElement::el('hr');
+		$el = new Texy\HtmlElement('hr');
 		$modifier->decorate($invocation->getTexy(), $el);
 
 		$class = $this->classes[ $type[0] ];

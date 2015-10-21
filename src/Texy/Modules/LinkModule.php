@@ -149,7 +149,7 @@ final class LinkModule extends Texy\Module
 				$content = $link->label;
 			} else {
 				self::$livelock[$link->name] = TRUE;
-				$el = Texy\HtmlElement::el();
+				$el = new Texy\HtmlElement;
 				$lineParser = new LineParser($tx, $el);
 				$lineParser->parse($link->label);
 				$content = $el->toString($tx);
@@ -281,7 +281,7 @@ final class LinkModule extends Texy\Module
 
 		$tx = $this->texy;
 
-		$el = Texy\HtmlElement::el('a');
+		$el = new Texy\HtmlElement('a');
 
 		if (empty($link->modifier)) {
 			$nofollow = $popup = FALSE;

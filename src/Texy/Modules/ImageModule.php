@@ -228,7 +228,7 @@ final class ImageModule extends Texy\Module
 		$hAlign = $mod->hAlign;
 		$mod->hAlign = NULL;
 
-		$el = Texy\HtmlElement::el('img');
+		$el = new Texy\HtmlElement('img');
 		$el->attrs['src'] = NULL; // trick - move to front
 		$mod->decorate($tx, $el);
 		$el->attrs['src'] = Helpers::prependRoot($image->URL, $this->root);

@@ -85,7 +85,7 @@ final class HtmlModule extends Texy\Module
 			return FALSE;
 		}
 
-		$el = HtmlElement::el($mTag);
+		$el = new HtmlElement($mTag);
 
 		if ($isStart) {
 			// parse attributes

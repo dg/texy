@@ -66,7 +66,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 	// protect output is in HTML
 	$content = $texy->protect($content, Texy::CONTENT_BLOCK);
 
-	$el = Texy\HtmlElement::el();
+	$el = new Texy\HtmlElement;
 	$el->setText($content);
 	return $el;
 }

@@ -62,7 +62,7 @@ final class TableModule extends Texy\Module
 
 		$tx = $this->texy;
 
-		$el = HtmlElement::el('table');
+		$el = new HtmlElement('table');
 		$mod = new Modifier($mMod);
 		$mod->decorate($tx, $el);
 
@@ -123,7 +123,7 @@ final class TableModule extends Texy\Module
 				// [1] => ....
 				// [2] => .(title)[class]{style}<>_
 
-				$elRow = HtmlElement::el('tr');
+				$elRow = new HtmlElement('tr');
 				$mod = new Modifier($mMod);
 				$mod->decorate($tx, $elRow);
 
