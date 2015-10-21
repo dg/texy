@@ -48,17 +48,17 @@ final class BlockQuoteModule extends Texy\Module
 		// [2] => spaces |
 		// [3] => ... / LINK
 
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		$el = new Texy\HtmlElement('blockquote');
 		$mod = new Texy\Modifier($mMod);
-		$mod->decorate($tx, $el);
+		$mod->decorate($texy, $el);
 
 		$content = '';
 		$spaces = '';
 		do {
 			if ($mPrefix === ':') {
-				$mod->cite = $tx->blockQuoteModule->citeLink($mContent);
+				$mod->cite = $texy->blockQuoteModule->citeLink($mContent);
 				$content .= "\n";
 			} else {
 				if ($spaces === '') {
@@ -75,7 +75,7 @@ final class BlockQuoteModule extends Texy\Module
 			if ($mPrefix === '>') {
 				$content .= $mPrefix . $mContent . "\n";
 			} elseif ($mPrefix === ':') {
-				$mod->cite = $tx->blockQuoteModule->citeLink($mContent);
+				$mod->cite = $texy->blockQuoteModule->citeLink($mContent);
 				$content .= "\n";
 			} else {
 				if ($spaces === '') $spaces = max(1, strlen($mPrefix));
@@ -88,7 +88,7 @@ final class BlockQuoteModule extends Texy\Module
 		} while (TRUE);
 
 		$el->attrs['cite'] = $mod->cite;
-		$el->parseBlock($tx, $content, $parser->isIndented());
+		$el->parseBlock($texy, $content, $parser->isIndented());
 
 		// no content?
 		if (!$el->count()) {
@@ -96,7 +96,7 @@ final class BlockQuoteModule extends Texy\Module
 		}
 
 		// event listener
-		$tx->invokeHandlers('afterBlockquote', [$parser, $el, $mod]);
+		$texy->invokeHandlers('afterBlockquote', [$parser, $el, $mod]);
 
 		return $el;
 	}
@@ -109,7 +109,7 @@ final class BlockQuoteModule extends Texy\Module
 	 */
 	public function citeLink($link)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		if ($link == NULL) {
 			return NULL;
@@ -117,9 +117,9 @@ final class BlockQuoteModule extends Texy\Module
 
 		if ($link{0} === '[') { // [ref]
 			$link = substr($link, 1, -1);
-			$ref = $tx->linkModule->getReference($link);
+			$ref = $texy->linkModule->getReference($link);
 			if ($ref) {
-				return Texy\Helpers::prependRoot($ref->URL, $tx->linkModule->root);
+				return Texy\Helpers::prependRoot($ref->URL, $texy->linkModule->root);
 			}
 		}
 
@@ -128,7 +128,7 @@ final class BlockQuoteModule extends Texy\Module
 			return 'http://' . $link;
 		}
 
-		return Texy\Helpers::prependRoot($link, $tx->linkModule->root);
+		return Texy\Helpers::prependRoot($link, $texy->linkModule->root);
 	}
 
 }

@@ -87,8 +87,6 @@ final class ListModule extends Texy\Module
 		// [1] => .(title)[class]{style}<>
 		// [2] => bullet * + - 1) a) A) IV)
 
-		$tx = $this->texy;
-
 		$el = new HtmlElement;
 
 		$bullet = $min = NULL;
@@ -112,7 +110,7 @@ final class ListModule extends Texy\Module
 		}
 
 		$mod = new Modifier($mMod);
-		$mod->decorate($tx, $el);
+		$mod->decorate($this->texy, $el);
 
 		$parser->moveBackward(1);
 
@@ -125,7 +123,7 @@ final class ListModule extends Texy\Module
 		}
 
 		// event listener
-		$tx->invokeHandlers('afterList', [$parser, $el, $mod]);
+		$this->texy->invokeHandlers('afterList', [$parser, $el, $mod]);
 
 		return $el;
 	}
@@ -150,7 +148,7 @@ final class ListModule extends Texy\Module
 		// [4] => space
 		// [5] => - * +
 
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		$bullet = NULL;
 		foreach ($this->bullets as $desc) {
@@ -162,7 +160,7 @@ final class ListModule extends Texy\Module
 
 		$el = new HtmlElement('dl');
 		$mod = new Modifier($mMod);
-		$mod->decorate($tx, $el);
+		$mod->decorate($texy, $el);
 		$parser->moveBackward(2);
 
 		$patternTerm = '#^\n?(\S.*)\:\ *'.Patterns::MODIFIER_H.'?()$#mUA';
@@ -180,9 +178,9 @@ final class ListModule extends Texy\Module
 
 				$elItem = new HtmlElement('dt');
 				$modItem = new Modifier($mMod);
-				$modItem->decorate($tx, $elItem);
+				$modItem->decorate($texy, $elItem);
 
-				$elItem->parseLine($tx, $mContent);
+				$elItem->parseLine($texy, $mContent);
 				$el->add($elItem);
 				continue;
 			}
@@ -191,7 +189,7 @@ final class ListModule extends Texy\Module
 		}
 
 		// event listener
-		$tx->invokeHandlers('afterDefinitionList', [$parser, $el, $mod]);
+		$texy->invokeHandlers('afterDefinitionList', [$parser, $el, $mod]);
 
 		return $el;
 	}
@@ -203,7 +201,6 @@ final class ListModule extends Texy\Module
 	 */
 	public function patternItem(BlockParser $parser, $bullet, $indented, $tag)
 	{
-		$tx = $this->texy;
 		$spacesBase = $indented ? ('\ {1,}') : '';
 		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".Patterns::MODIFIER_H.'?()$#mAUu';
 
@@ -220,7 +217,7 @@ final class ListModule extends Texy\Module
 
 		$elItem = new HtmlElement($tag);
 		$mod = new Modifier($mMod);
-		$mod->decorate($tx, $elItem);
+		$mod->decorate($this->texy, $elItem);
 
 		// next lines
 		$spaces = '';
@@ -238,7 +235,7 @@ final class ListModule extends Texy\Module
 		}
 
 		// parse content
-		$elItem->parseBlock($tx, $content, TRUE);
+		$elItem->parseBlock($this->texy, $content, TRUE);
 
 		if (isset($elItem[0]) && $elItem[0] instanceof HtmlElement) {
 			$elItem[0]->setName(NULL);

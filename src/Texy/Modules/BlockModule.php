@@ -98,16 +98,16 @@ final class BlockModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $blocktype, $s, $param, Texy\Modifier $mod)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 		$parser = $invocation->getParser();
 
 		if ($blocktype === 'block/texy') {
 			$el = new HtmlElement;
-			$el->parseBlock($tx, $s, $parser->isIndented());
+			$el->parseBlock($texy, $s, $parser->isIndented());
 			return $el;
 		}
 
-		if (empty($tx->allowed[$blocktype])) {
+		if (empty($texy->allowed[$blocktype])) {
 			return FALSE;
 		}
 
@@ -118,11 +118,11 @@ final class BlockModule extends Texy\Module
 			}
 			$el = new HtmlElement;
 			if ($param === 'line') {
-				$el->parseLine($tx, $s);
+				$el->parseLine($texy, $s);
 			} else {
-				$el->parseBlock($tx, $s);
+				$el->parseBlock($texy, $s);
 			}
-			$s = $el->toHtml($tx);
+			$s = $el->toHtml($texy);
 			$blocktype = 'block/code';
 			$param = 'html'; // to be continue (as block/code)
 		}
@@ -133,9 +133,9 @@ final class BlockModule extends Texy\Module
 				return "\n";
 			}
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-			$s = $tx->protect($s, Texy\Texy::CONTENT_BLOCK);
+			$s = $texy->protect($s, Texy\Texy::CONTENT_BLOCK);
 			$el = new HtmlElement('pre');
-			$mod->decorate($tx, $el);
+			$mod->decorate($texy, $el);
 			$el->attrs['class'][] = $param; // lang
 			$el->create('code', $s);
 			return $el;
@@ -147,10 +147,10 @@ final class BlockModule extends Texy\Module
 				return "\n";
 			}
 			$el = new HtmlElement('pre');
-			$mod->decorate($tx, $el);
+			$mod->decorate($texy, $el);
 			$el->attrs['class'][] = $param; // lang
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-			$s = $tx->protect($s, Texy\Texy::CONTENT_BLOCK);
+			$s = $texy->protect($s, Texy\Texy::CONTENT_BLOCK);
 			$el->setText($s);
 			return $el;
 		}
@@ -161,8 +161,8 @@ final class BlockModule extends Texy\Module
 				return "\n";
 			}
 			$el = new HtmlElement('pre');
-			$mod->decorate($tx, $el);
-			$lineParser = new Texy\LineParser($tx, $el);
+			$mod->decorate($texy, $el);
+			$lineParser = new Texy\LineParser($texy, $el);
 			// special mode - parse only html tags
 			$tmp = $lineParser->patterns;
 			$lineParser->patterns = [];
@@ -178,8 +178,8 @@ final class BlockModule extends Texy\Module
 			$s = $el->getText();
 			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-			$s = $tx->unprotect($s);
-			$s = $tx->protect($s, Texy\Texy::CONTENT_BLOCK);
+			$s = $texy->unprotect($s);
+			$s = $texy->protect($s, Texy\Texy::CONTENT_BLOCK);
 			$el->setText($s);
 			return $el;
 		}
@@ -190,7 +190,7 @@ final class BlockModule extends Texy\Module
 				return "\n";
 			}
 			$el = new HtmlElement;
-			$lineParser = new Texy\LineParser($tx, $el);
+			$lineParser = new Texy\LineParser($texy, $el);
 			// special mode - parse only html tags
 			$tmp = $lineParser->patterns;
 			$lineParser->patterns = [];
@@ -206,8 +206,8 @@ final class BlockModule extends Texy\Module
 			$s = $el->getText();
 			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-			$s = $tx->unprotect($s);
-			return $tx->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
+			$s = $texy->unprotect($s);
+			return $texy->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
 		}
 
 		if ($blocktype === 'block/text') {
@@ -217,7 +217,7 @@ final class BlockModule extends Texy\Module
 			}
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = str_replace("\n", (new HtmlElement('br'))->startTag() , $s); // nl2br
-			return $tx->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
+			return $texy->protect($s, Texy\Texy::CONTENT_BLOCK) . "\n";
 		}
 
 		if ($blocktype === 'block/comment') {
@@ -230,8 +230,8 @@ final class BlockModule extends Texy\Module
 				return "\n";
 			}
 			$el = new HtmlElement('div');
-			$mod->decorate($tx, $el);
-			$el->parseBlock($tx, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+			$mod->decorate($texy, $el);
+			$el->parseBlock($texy, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
 			return $el;
 		}
 

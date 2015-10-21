@@ -241,7 +241,7 @@ final class PhraseModule extends Texy\Module
 			$mContent = trim($mContent);
 		}
 
-		$tx = $this->texy;
+		$texy = $this->texy;
 		$mod = new Modifier($mMod);
 		$link = NULL;
 
@@ -253,20 +253,20 @@ final class PhraseModule extends Texy\Module
 					return FALSE; // means "..."
 				}
 			} else {
-				$link = $tx->linkModule->factoryLink($mLink, $mMod, $mContent);
+				$link = $texy->linkModule->factoryLink($mLink, $mMod, $mContent);
 			}
 
 		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
 			$mod->title = trim(html_entity_decode($mLink, ENT_QUOTES, 'UTF-8'));
 
 		} elseif ($phrase === 'phrase/quote') {
-			$mod->cite = $tx->blockQuoteModule->citeLink($mLink);
+			$mod->cite = $texy->blockQuoteModule->citeLink($mLink);
 
 		} elseif ($mLink != NULL) {
-			$link = $tx->linkModule->factoryLink($mLink, NULL, $mContent);
+			$link = $texy->linkModule->factoryLink($mLink, NULL, $mContent);
 		}
 
-		return $tx->invokeAroundHandlers('phrase', $parser, [$phrase, $mContent, $mod, $link]);
+		return $texy->invokeAroundHandlers('phrase', $parser, [$phrase, $mContent, $mod, $link]);
 	}
 
 
@@ -300,7 +300,7 @@ final class PhraseModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $phrase, $content, Modifier $mod, Texy\Link $link = NULL)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		$tag = isset($this->tags[$phrase]) ? $this->tags[$phrase] : NULL;
 
@@ -309,17 +309,17 @@ final class PhraseModule extends Texy\Module
 		}
 
 		if ($phrase === 'phrase/code') {
-			$content = $tx->protect(htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
+			$content = $texy->protect(htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
 		}
 
 		if ($phrase === 'phrase/strong+em') {
 			$el = new Texy\HtmlElement($this->tags['phrase/strong']);
 			$el->create($this->tags['phrase/em'], $content);
-			$mod->decorate($tx, $el);
+			$mod->decorate($texy, $el);
 
 		} elseif ($tag) {
 			$el = new Texy\HtmlElement($tag, $content);
-			$mod->decorate($tx, $el);
+			$mod->decorate($texy, $el);
 
 			if ($tag === 'q') {
 				$el->attrs['cite'] = $mod->cite;
@@ -329,7 +329,7 @@ final class PhraseModule extends Texy\Module
 		}
 
 		if ($link && $this->linksAllowed) {
-			return $tx->linkModule->solve(NULL, $link, $el);
+			return $texy->linkModule->solve(NULL, $link, $el);
 		}
 
 		return $el;

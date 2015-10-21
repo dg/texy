@@ -60,11 +60,11 @@ final class TableModule extends Texy\Module
 		list(, $mMod) = $matches;
 		// [1] => .(title)[class]{style}<>_
 
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		$el = new HtmlElement('table');
 		$mod = new Modifier($mMod);
-		$mod->decorate($tx, $el);
+		$mod->decorate($texy, $el);
 
 		$parser->moveBackward();
 
@@ -76,8 +76,8 @@ final class TableModule extends Texy\Module
 
 			$caption = $el->create('caption');
 			$mod = new Modifier($mMod);
-			$mod->decorate($tx, $caption);
-			$caption->parseLine($tx, $mContent);
+			$mod->decorate($texy, $caption);
+			$caption->parseLine($texy, $mContent);
 		}
 
 		$isHead = FALSE;
@@ -125,7 +125,7 @@ final class TableModule extends Texy\Module
 
 				$elRow = new HtmlElement('tr');
 				$mod = new Modifier($mMod);
-				$mod->decorate($tx, $elRow);
+				$mod->decorate($texy, $elRow);
 
 				$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
 				if ($rowClass && !isset($mod->classes[$this->oddClass]) && !isset($mod->classes[$this->evenClass])) {
@@ -186,7 +186,7 @@ final class TableModule extends Texy\Module
 
 					$elCell = new TableCellElement;
 					$elCell->setName($isHead || ($mHead === '*') ? 'th' : 'td');
-					$mod->decorate($tx, $elCell);
+					$mod->decorate($texy, $elCell);
 					$elCell->text = $mContent;
 
 					$elRow->add($elCell);
@@ -205,7 +205,7 @@ final class TableModule extends Texy\Module
 						$elCell = new TableCellElement;
 						$elCell->setName($isHead ? 'th' : 'td');
 						if (isset($colModifier[$col])) {
-							$colModifier[$col]->decorate($tx, $elCell);
+							$colModifier[$col]->decorate($texy, $elCell);
 						}
 						$elRow->add($elCell);
 						$prevRow[$col] = $elCell;
@@ -245,7 +245,7 @@ final class TableModule extends Texy\Module
 
 
 		// event listener
-		$tx->invokeHandlers('afterTable', [$parser, $el, $mod]);
+		$texy->invokeHandlers('afterTable', [$parser, $el, $mod]);
 
 		return $el;
 	}
@@ -257,8 +257,6 @@ final class TableModule extends Texy\Module
 	 */
 	private function finishPart(HtmlElement $elPart)
 	{
-		$tx = $this->texy;
-
 		foreach ($elPart->getChildren() as $elRow) {
 			foreach ($elRow->getChildren() as $elCell) {
 				if ($elCell->colSpan > 1) {
@@ -274,10 +272,10 @@ final class TableModule extends Texy\Module
 					// multiline parse as block
 					// HACK: disable tables
 					$this->disableTables = TRUE;
-					$elCell->parseBlock($tx, Texy\Helpers::outdent($text));
+					$elCell->parseBlock($this->texy, Texy\Helpers::outdent($text));
 					$this->disableTables = FALSE;
 				} else {
-					$elCell->parseLine($tx, ltrim($text));
+					$elCell->parseLine($this->texy, ltrim($text));
 				}
 
 				if ($elCell->getText() === '') {

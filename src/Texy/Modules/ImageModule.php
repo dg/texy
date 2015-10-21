@@ -110,8 +110,6 @@ final class ImageModule extends Texy\Module
 		// [3] => * < >
 		// [4] => url | [ref] | [*image*]
 
-		$tx = $this->texy;
-
 		$image = $this->factoryImage($mURLs, $mMod.$mAlign);
 
 		if ($mLink) {
@@ -120,13 +118,13 @@ final class ImageModule extends Texy\Module
 				$link->raw = ':';
 				$link->type = $link::IMAGE;
 			} else {
-				$link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
+				$link = $this->texy->linkModule->factoryLink($mLink, NULL, NULL);
 			}
 		} else {
 			$link = NULL;
 		}
 
-		return $tx->invokeAroundHandlers('image', $parser, [$image, $link]);
+		return $this->texy->invokeAroundHandlers('image', $parser, [$image, $link]);
 	}
 
 
@@ -169,7 +167,7 @@ final class ImageModule extends Texy\Module
 		$image = $tryRef ? $this->getReference(trim($content)) : FALSE;
 
 		if (!$image) {
-			$tx = $this->texy;
+			$texy = $this->texy;
 			$content = explode('|', $content);
 			$image = new Image;
 
@@ -184,14 +182,14 @@ final class ImageModule extends Texy\Module
 				$image->URL = trim($content[0]);
 			}
 
-			if (!$tx->checkURL($image->URL, Texy\Texy::FILTER_IMAGE)) {
+			if (!$texy->checkURL($image->URL, Texy\Texy::FILTER_IMAGE)) {
 				$image->URL = NULL;
 			}
 
 			// onmouseover image
 			if (isset($content[1])) {
 				$tmp = trim($content[1]);
-				if ($tmp !== '' && $tx->checkURL($tmp, Texy\Texy::FILTER_IMAGE)) {
+				if ($tmp !== '' && $texy->checkURL($tmp, Texy\Texy::FILTER_IMAGE)) {
 					$image->overURL = $tmp;
 				}
 			}
@@ -199,7 +197,7 @@ final class ImageModule extends Texy\Module
 			// linked image
 			if (isset($content[2])) {
 				$tmp = trim($content[2]);
-				if ($tmp !== '' && $tx->checkURL($tmp, Texy\Texy::FILTER_ANCHOR)) {
+				if ($tmp !== '' && $texy->checkURL($tmp, Texy\Texy::FILTER_ANCHOR)) {
 					$image->linkedURL = $tmp;
 				}
 			}
@@ -220,7 +218,7 @@ final class ImageModule extends Texy\Module
 			return FALSE;
 		}
 
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		$mod = $image->modifier;
 		$alt = $mod->title;
@@ -230,10 +228,10 @@ final class ImageModule extends Texy\Module
 
 		$el = new Texy\HtmlElement('img');
 		$el->attrs['src'] = NULL; // trick - move to front
-		$mod->decorate($tx, $el);
+		$mod->decorate($texy, $el);
 		$el->attrs['src'] = Helpers::prependRoot($image->URL, $this->root);
 		if (!isset($el->attrs['alt'])) {
-			$el->attrs['alt'] = $alt === NULL ? $this->defaultAlt : $tx->typographyModule->postLine($alt);
+			$el->attrs['alt'] = $alt === NULL ? $this->defaultAlt : $texy->typographyModule->postLine($alt);
 		}
 
 		if ($hAlign) {
@@ -241,11 +239,11 @@ final class ImageModule extends Texy\Module
 			if (!empty($this->$var)) {
 				$el->attrs['class'][] = $this->$var;
 
-			} elseif (empty($tx->alignClasses[$hAlign])) {
+			} elseif (empty($texy->alignClasses[$hAlign])) {
 				$el->attrs['style']['float'] = $hAlign;
 
 			} else {
-				$el->attrs['class'][] = $tx->alignClasses[$hAlign];
+				$el->attrs['class'][] = $texy->alignClasses[$hAlign];
 			}
 		}
 
@@ -292,18 +290,18 @@ final class ImageModule extends Texy\Module
 		$el->attrs['height'] = $image->height;
 
 		// onmouseover actions generate
-		if (!empty($tx->allowed['image/hover']) && $image->overURL !== NULL) {
+		if (!empty($texy->allowed['image/hover']) && $image->overURL !== NULL) {
 			$overSrc = Helpers::prependRoot($image->overURL, $this->root);
 			$el->attrs['onmouseover'] = 'this.src=\'' . addSlashes($overSrc) . '\'';
 			$el->attrs['onmouseout'] = 'this.src=\'' . addSlashes($el->attrs['src']) . '\'';
 			$el->attrs['onload'] = str_replace('%i', addSlashes($overSrc), $this->onLoad);
-			$tx->summary['preload'][] = $overSrc;
+			$texy->summary['preload'][] = $overSrc;
 		}
 
-		$tx->summary['images'][] = $el->attrs['src'];
+		$texy->summary['images'][] = $el->attrs['src'];
 
 		if ($link) {
-			return $tx->linkModule->solve(NULL, $link, $el);
+			return $texy->linkModule->solve(NULL, $link, $el);
 		}
 
 		return $el;

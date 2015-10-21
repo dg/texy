@@ -83,9 +83,7 @@ class BlockParser extends Parser
 	 */
 	public function parse($text)
 	{
-		$tx = $this->texy;
-
-		$tx->invokeHandlers('beforeBlockParse', [$this, & $text]);
+		$this->texy->invokeHandlers('beforeBlockParse', [$this, & $text]);
 
 		// parser initialization
 		$this->text = $text;
@@ -140,7 +138,7 @@ class BlockParser extends Parser
 			if ($mOffset > $this->offset) {
 				$s = trim(substr($text, $this->offset, $mOffset - $this->offset));
 				if ($s !== '') {
-					$tx->paragraphModule->process($this, $s, $el);
+					$this->texy->paragraphModule->process($this, $s, $el);
 				}
 			}
 

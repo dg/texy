@@ -58,8 +58,8 @@ final class FigureModule extends Texy\Module
 		// [5] => ...
 		// [6] => .(title)[class]{style}<>
 
-		$tx = $this->texy;
-		$image = $tx->imageModule->factoryImage($mURLs, $mImgMod.$mAlign);
+		$texy = $this->texy;
+		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod.$mAlign);
 		$mod = new Texy\Modifier($mMod);
 		$mContent = ltrim($mContent);
 
@@ -69,13 +69,13 @@ final class FigureModule extends Texy\Module
 				$link->raw = ':';
 				$link->type = $link::IMAGE;
 			} else {
-				$link = $tx->linkModule->factoryLink($mLink, NULL, NULL);
+				$link = $texy->linkModule->factoryLink($mLink, NULL, NULL);
 			}
 		} else {
 			$link = NULL;
 		}
 
-		return $tx->invokeAroundHandlers('figure', $parser, [$image, $link, $mContent, $mod]);
+		return $texy->invokeAroundHandlers('figure', $parser, [$image, $link, $mContent, $mod]);
 	}
 
 
@@ -85,12 +85,12 @@ final class FigureModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = NULL, $content, Texy\Modifier $mod)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		$hAlign = $image->modifier->hAlign;
 		$image->modifier->hAlign = NULL;
 
-		$elImg = $tx->imageModule->solve(NULL, $image, $link); // returns Texy\HtmlElement or false!
+		$elImg = $texy->imageModule->solve(NULL, $image, $link); // returns Texy\HtmlElement or false!
 		if (!$elImg) {
 			return FALSE;
 		}
@@ -99,11 +99,11 @@ final class FigureModule extends Texy\Module
 		if (!empty($image->width) && $this->widthDelta !== FALSE) {
 			$el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
 		}
-		$mod->decorate($tx, $el);
+		$mod->decorate($texy, $el);
 
 		$el[0] = $elImg;
 		$el[1] = new Texy\HtmlElement('p');
-		$el[1]->parseLine($tx, ltrim($content));
+		$el[1]->parseLine($texy, ltrim($content));
 
 		$class = $this->class;
 		if ($hAlign) {
@@ -111,11 +111,11 @@ final class FigureModule extends Texy\Module
 			if (!empty($this->$var)) {
 				$class = $this->$var;
 
-			} elseif (empty($tx->alignClasses[$hAlign])) {
+			} elseif (empty($texy->alignClasses[$hAlign])) {
 				$el->attrs['style']['float'] = $hAlign;
 
 			} else {
-				$class .= '-' . $tx->alignClasses[$hAlign];
+				$class .= '-' . $texy->alignClasses[$hAlign];
 			}
 		}
 		$el->attrs['class'][] = $class;

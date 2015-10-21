@@ -133,12 +133,12 @@ final class LinkModule extends Texy\Module
 		list(, $mRef) = $matches;
 		// [1] => [ref]
 
-		$tx = $this->texy;
+		$texy = $this->texy;
 		$name = substr($mRef, 1, -1);
 		$link = $this->getReference($name);
 
 		if (!$link) {
-			return $tx->invokeAroundHandlers('newReference', $parser, [$name]);
+			return $texy->invokeAroundHandlers('newReference', $parser, [$name]);
 		}
 
 		$link->type = Link::BRACKET;
@@ -150,9 +150,9 @@ final class LinkModule extends Texy\Module
 			} else {
 				self::$livelock[$link->name] = TRUE;
 				$el = new Texy\HtmlElement;
-				$lineParser = new LineParser($tx, $el);
+				$lineParser = new LineParser($texy, $el);
 				$lineParser->parse($link->label);
-				$content = $el->toString($tx);
+				$content = $el->toString($texy);
 				unset(self::$livelock[$link->name]);
 			}
 		} else {
@@ -160,7 +160,7 @@ final class LinkModule extends Texy\Module
 			$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
 		}
 
-		return $tx->invokeAroundHandlers('linkReference', $parser, [$link, $content]);
+		return $texy->invokeAroundHandlers('linkReference', $parser, [$link, $content]);
 	}
 
 
@@ -233,7 +233,7 @@ final class LinkModule extends Texy\Module
 	 */
 	public function factoryLink($dest, $mMod, $label)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 		$type = Link::COMMON;
 
 		// [ref]
@@ -246,7 +246,7 @@ final class LinkModule extends Texy\Module
 		} elseif (strlen($dest) > 1 && $dest{0} === '[' && $dest{1} === '*') {
 			$type = Link::IMAGE;
 			$dest = trim(substr($dest, 2, -2));
-			$image = $tx->imageModule->getReference($dest);
+			$image = $texy->imageModule->getReference($dest);
 			if ($image) {
 				$link = new Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
 				$link->modifier = $image->modifier;
@@ -259,7 +259,7 @@ final class LinkModule extends Texy\Module
 		}
 
 		if (strpos($link->URL, '%s') !== FALSE) {
-			$link->URL = str_replace('%s', urlencode($tx->stringToText($label)), $link->URL);
+			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
 		}
 		$link->modifier->setProperties($mMod);
 		$link->type = $type;
@@ -279,7 +279,7 @@ final class LinkModule extends Texy\Module
 			return $content;
 		}
 
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		$el = new Texy\HtmlElement('a');
 
@@ -290,12 +290,12 @@ final class LinkModule extends Texy\Module
 			$popup = isset($link->modifier->classes['popup']);
 			unset($link->modifier->classes['nofollow'], $link->modifier->classes['popup']);
 			$el->attrs['href'] = NULL; // trick - move to front
-			$link->modifier->decorate($tx, $el);
+			$link->modifier->decorate($texy, $el);
 		}
 
 		if ($link->type === Link::IMAGE) {
 			// image
-			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $tx->imageModule->linkedRoot);
+			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->linkedRoot);
 			if ($this->imageClass) {
 				$el->attrs['class'][] = $this->imageClass;
 			} else {
@@ -320,7 +320,7 @@ final class LinkModule extends Texy\Module
 			$el->add($content);
 		}
 
-		$tx->summary['links'][] = $el->attrs['href'];
+		$texy->summary['links'][] = $el->attrs['href'];
 
 		return $el;
 	}

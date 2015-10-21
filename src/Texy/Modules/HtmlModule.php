@@ -65,8 +65,6 @@ final class HtmlModule extends Texy\Module
 		// [3] => attributes
 		// [4] => /
 
-		$tx = $this->texy;
-
 		$isStart = $mEnd !== '/';
 		$isEmpty = $mEmpty === '/';
 		if (!$isEmpty && substr($mAttr, -1) === '/') { // uvizlo v $mAttr?
@@ -110,10 +108,10 @@ final class HtmlModule extends Texy\Module
 			}
 		}
 
-		$res = $tx->invokeAroundHandlers('htmlTag', $parser, [$el, $isStart, $isEmpty]);
+		$res = $this->texy->invokeAroundHandlers('htmlTag', $parser, [$el, $isStart, $isEmpty]);
 
 		if ($res instanceof HtmlElement) {
-			return $tx->protect($isStart ? $res->startTag() : $res->endTag(), $res->getContentType());
+			return $this->texy->protect($isStart ? $res->startTag() : $res->endTag(), $res->getContentType());
 		}
 
 		return $res;
@@ -126,10 +124,10 @@ final class HtmlModule extends Texy\Module
 	 */
 	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, $isStart, $forceEmpty = NULL)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		// tag & attibutes
-		$allowedTags = $tx->allowedTags; // speed-up
+		$allowedTags = $texy->allowedTags; // speed-up
 		if (!$allowedTags) {
 			return FALSE; // all tags are disabled
 		}
@@ -137,7 +135,7 @@ final class HtmlModule extends Texy\Module
 		// convert case
 		$name = $el->getName();
 		$lower = strtolower($name);
-		if (isset($tx->dtd[$lower]) || $name === strtoupper($name)) {
+		if (isset($texy->dtd[$lower]) || $name === strtoupper($name)) {
 			// complete UPPER convert to lower
 			$name = $lower;
 			$el->setName($name);
@@ -180,7 +178,7 @@ final class HtmlModule extends Texy\Module
 		}
 
 		// apply allowedClasses
-		$tmp = $tx->_classes; // speed-up
+		$tmp = $texy->_classes; // speed-up
 		if (isset($elAttrs['class'])) {
 			if (is_array($tmp)) {
 				$elAttrs['class'] = explode(' ', $elAttrs['class']);
@@ -208,7 +206,7 @@ final class HtmlModule extends Texy\Module
 
 		// apply allowedStyles
 		if (isset($elAttrs['style'])) {
-			$tmp = $tx->_styles; // speed-up
+			$tmp = $texy->_styles; // speed-up
 			if (is_array($tmp)) {
 				$styles = explode(';', $elAttrs['style']);
 				$elAttrs['style'] = NULL;
@@ -227,11 +225,11 @@ final class HtmlModule extends Texy\Module
 		if ($name === 'img') {
 			if (isset($elAttrs['src'])) {
 				$elAttrs['src'] = trim($elAttrs['src']);
-				if (!$tx->checkURL($elAttrs['src'], Texy\Texy::FILTER_IMAGE)) {
+				if (!$texy->checkURL($elAttrs['src'], Texy\Texy::FILTER_IMAGE)) {
 					return FALSE;
 				}
 
-				$tx->summary['images'][] = $elAttrs['src'];
+				$texy->summary['images'][] = $elAttrs['src'];
 			}
 
 		} elseif ($name === 'a') {
@@ -240,29 +238,29 @@ final class HtmlModule extends Texy\Module
 			}
 			if (isset($elAttrs['href'])) {
 				$elAttrs['href'] = trim($elAttrs['href']);
-				if ($tx->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== FALSE) {
+				if ($texy->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== FALSE) {
 					if (isset($elAttrs['rel'])) {
 						$elAttrs['rel'] = (array) $elAttrs['rel'];
 					}
 					$elAttrs['rel'][] = 'nofollow';
 				}
 
-				if (!$tx->checkURL($elAttrs['href'], Texy\Texy::FILTER_ANCHOR)) {
+				if (!$texy->checkURL($elAttrs['href'], Texy\Texy::FILTER_ANCHOR)) {
 					return FALSE;
 				}
 
-				$tx->summary['links'][] = $elAttrs['href'];
+				$texy->summary['links'][] = $elAttrs['href'];
 			}
 
 		} elseif (preg_match('#^h[1-6]#i', $name)) {
-			$tx->headingModule->TOC[] = [
+			$texy->headingModule->TOC[] = [
 				'el' => $el,
 				'level' => (int) substr($name, 1),
 				'type' => 'html',
 			];
 		}
 
-		$el->validateAttrs($tx->dtd);
+		$el->validateAttrs($texy->dtd);
 
 		return $el;
 	}

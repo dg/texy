@@ -29,8 +29,6 @@ final class ParagraphModule extends Texy\Module
 	 */
 	public function process(Texy\BlockParser $parser, $content, Texy\HtmlElement $el)
 	{
-		$tx = $this->texy;
-
 		if ($parser->isIndented()) {
 			$parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
 		} else {
@@ -55,7 +53,7 @@ final class ParagraphModule extends Texy\Module
 				$mod->setProperties($mMod);
 			}
 
-			$res = $tx->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
+			$res = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
 			if ($res) {
 				$el->insert(NULL, $res);
 			}
@@ -69,10 +67,10 @@ final class ParagraphModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $mod = NULL)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 
 		// find hard linebreaks
-		if ($tx->mergeLines) {
+		if ($texy->mergeLines) {
 			// ....
 			// ... => \r means break line
 			$content = Regexp::replace($content, '#\n +(?=\S)#', "\r");
@@ -81,7 +79,7 @@ final class ParagraphModule extends Texy\Module
 		}
 
 		$el = new Texy\HtmlElement('p');
-		$el->parseLine($tx, $content);
+		$el->parseLine($texy, $content);
 		$content = $el->getText(); // string
 
 		// check content type
@@ -99,7 +97,7 @@ final class ParagraphModule extends Texy\Module
 
 		// block contains only replaced element
 		} elseif (strpos($content, Texy\Texy::CONTENT_REPLACED) !== FALSE) {
-			$el->setName($tx->nontextParagraph);
+			$el->setName($texy->nontextParagraph);
 
 		// block contains only markup tags or spaces or nothing
 		} else {
@@ -112,12 +110,12 @@ final class ParagraphModule extends Texy\Module
 		if ($el->getName()) {
 			// apply modifier
 			if ($mod) {
-				$mod->decorate($tx, $el);
+				$mod->decorate($texy, $el);
 			}
 
 			// add <br />
 			if (strpos($content, "\r") !== FALSE) {
-				$key = $tx->protect('<br />', Texy\Texy::CONTENT_REPLACED);
+				$key = $texy->protect('<br />', Texy\Texy::CONTENT_REPLACED);
 				$content = str_replace("\r", $key, $content);
 			};
 		}

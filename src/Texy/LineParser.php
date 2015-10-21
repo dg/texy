@@ -31,8 +31,6 @@ class LineParser extends Parser
 	 */
 	public function parse($text)
 	{
-		$tx = $this->texy;
-
 		// initialization
 		$pl = $this->patterns;
 		if (!$pl) {
@@ -111,7 +109,7 @@ class LineParser extends Parser
 			);
 
 			if ($res instanceof HtmlElement) {
-				$res = $res->toString($tx);
+				$res = $res->toString($this->texy);
 			} elseif ($res === FALSE) {
 				$arrOffset[$min] = -2;
 				continue;

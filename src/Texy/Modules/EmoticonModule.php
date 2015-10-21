@@ -77,12 +77,11 @@ final class EmoticonModule extends Texy\Module
 	public function pattern(Texy\LineParser $parser, array $matches)
 	{
 		$match = $matches[0];
-		$tx = $this->texy;
 
 		// find the closest match
 		foreach ($this->icons as $emoticon => $foo) {
 			if (strncmp($match, $emoticon, strlen($emoticon)) === 0) {
-				return $tx->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
+				return $this->texy->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
 			}
 		}
 
@@ -96,15 +95,15 @@ final class EmoticonModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $emoticon, $raw)
 	{
-		$tx = $this->texy;
+		$texy = $this->texy;
 		$file = $this->icons[$emoticon];
 		$el = new Texy\HtmlElement('img');
-		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root === NULL ? $tx->imageModule->root : $this->root);
+		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root === NULL ? $texy->imageModule->root : $this->root);
 		$el->attrs['alt'] = $raw;
 		$el->attrs['class'][] = $this->class;
 
 		// file path
-		$file = rtrim($this->fileRoot === NULL ? $tx->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
+		$file = rtrim($this->fileRoot === NULL ? $texy->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
 		if (@is_file($file)) { // intentionally @
 			$size = @getImageSize($file); // intentionally @
 			if (is_array($size)) {
@@ -112,7 +111,7 @@ final class EmoticonModule extends Texy\Module
 				$el->attrs['height'] = $size[1];
 			}
 		}
-		$tx->summary['images'][] = $el->attrs['src'];
+		$texy->summary['images'][] = $el->attrs['src'];
 		return $el;
 	}
 
