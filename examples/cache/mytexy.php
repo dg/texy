@@ -38,12 +38,12 @@ class MyTexy extends Texy
 			$cacheFile = $this->cachePath . $md5 . '.html';
 			$content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : NULL;
 			if ($content) {         // read from cache
-				list($html, $this->styleSheet, $this->headingModule->title) = $content;
+				list($html, $this->headingModule->title) = $content;
 
 			} else {                           // doesn't exists
 				$html = parent::process($text);
 				file_put_contents($cacheFile,
-					serialize([$html, $this->styleSheet, $this->headingModule->title])
+					serialize([$html, $this->headingModule->title])
 				);
 			}
 

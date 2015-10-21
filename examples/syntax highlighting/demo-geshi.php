@@ -56,7 +56,8 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 	$geshi->set_link_styles(GESHI_HOVER, 'background-color: #f0f000;');
 
 	// save generated stylesheet
-	$texy->styleSheet .= $geshi->get_stylesheet();
+	global $styleSheet
+	$styleSheet .= $geshi->get_stylesheet();
 
 	$content = $geshi->parse_code();
 
@@ -76,7 +77,7 @@ $texy = new Texy();
 $texy->addHandler('block', 'blockHandler');
 
 // prepare CSS stylesheet
-$texy->styleSheet = 'pre { padding:10px } ';
+$styleSheet = 'pre { padding:10px } ';
 
 // processing
 $text = file_get_contents('sample.texy');
@@ -84,7 +85,7 @@ $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
 header('Content-type: text/html; charset=utf-8');
-echo '<style type="text/css">'. $texy->styleSheet . '</style>';
+echo '<style type="text/css">'. $styleSheet . '</style>';
 echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
 echo $html;

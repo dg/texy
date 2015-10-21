@@ -79,9 +79,6 @@ class Texy
 		'links' => [],
 	];
 
-	/** @var string  Generated stylesheet */
-	public $styleSheet = '';
-
 	/** @var array  CSS classes for align modifiers */
 	public $alignClasses = [
 		'left' => NULL,
