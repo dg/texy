@@ -25,12 +25,6 @@ final class LinkModule extends Texy\Module
 	/** @var string image popup class */
 	public $imageClass;
 
-	/** @var string image popup event */
-	public $imageOnClick = 'return !popupImage(this.href)';  //
-
-	/** @var string class 'popup' event */
-	public $popupOnClick = 'return !popup(this.href)';
-
 	/** @var bool  always use rel="nofollow" for absolute links? */
 	public $forceNoFollow = FALSE;
 
@@ -284,11 +278,10 @@ final class LinkModule extends Texy\Module
 		$el = new Texy\HtmlElement('a');
 
 		if (empty($link->modifier)) {
-			$nofollow = $popup = FALSE;
+			$nofollow = FALSE;
 		} else {
 			$nofollow = isset($link->modifier->classes['nofollow']);
-			$popup = isset($link->modifier->classes['popup']);
-			unset($link->modifier->classes['nofollow'], $link->modifier->classes['popup']);
+			unset($link->modifier->classes['nofollow']);
 			$el->attrs['href'] = NULL; // trick - move to front
 			$link->modifier->decorate($texy, $el);
 		}
@@ -298,8 +291,6 @@ final class LinkModule extends Texy\Module
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->linkedRoot);
 			if ($this->imageClass) {
 				$el->attrs['class'][] = $this->imageClass;
-			} else {
-				$el->attrs['onclick'] = $this->imageOnClick;
 			}
 
 		} else {
@@ -309,11 +300,6 @@ final class LinkModule extends Texy\Module
 			if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== FALSE)) {
 				$el->attrs['rel'] = 'nofollow';
 			}
-		}
-
-		// popup on click
-		if ($popup) {
-			$el->attrs['onclick'] = $this->popupOnClick;
 		}
 
 		if ($content !== NULL) {
