@@ -3,6 +3,7 @@ Texy!   [![Buy me a coffee](https://files.nette.org/images/coffee1s.png)](https:
 
 [![Downloads this Month](https://img.shields.io/packagist/dm/texy/texy.svg)](https://packagist.org/packages/texy/texy)
 [![Build Status](https://travis-ci.org/dg/texy.svg?branch=master)](https://travis-ci.org/dg/texy)
+[![Build Status Windows](https://ci.appveyor.com/api/projects/status/github/dg/texy?branch=master&svg=true)](https://ci.appveyor.com/project/dg/texy/branch/master)
 [![Latest Stable Version](https://poser.pugx.org/dg/texy/v/stable)](https://github.com/dg/texy/releases)
 [![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://github.com/dg/texy/blob/master/license.md)
 
