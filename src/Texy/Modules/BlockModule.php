@@ -225,7 +225,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		if ($blocktype === 'block/div') {
-			$s = Helpers::outdent($s);
+			$s = Helpers::outdent($s, TRUE);
 			if ($s === '') {
 				return "\n";
 			}

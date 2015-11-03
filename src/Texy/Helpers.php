@@ -109,15 +109,19 @@ final class Helpers
 	 * @param  string
 	 * @return string
 	 */
-	public static function outdent($s)
+	public static function outdent($s, $firstLine = FALSE)
 	{
 		$s = trim($s, "\n");
-		$min = strlen($s);
-		foreach (Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
-			$min = min($min, strlen($m[0]) - 1);
+		if ($firstLine) {
+			$min = strspn($s, ' ');
+		} else {
+			$min = strlen($s);
+			foreach (Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
+				$min = min($min, strlen($m[0]) - 1);
+			}
 		}
 		if ($min) {
-			$s = Regexp::replace($s, "#^ {{$min}}#m", '');
+			$s = Regexp::replace($s, "#^ {1,$min}#m", '');
 		}
 		return $s;
 	}
