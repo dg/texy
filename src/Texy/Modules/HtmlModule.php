@@ -222,22 +222,26 @@ final class HtmlModule extends Texy\Module
 			}
 		}
 
-		if ($name === 'img') {
-			if (isset($elAttrs['src'])) {
-				$elAttrs['src'] = trim($elAttrs['src']);
-				if (!$texy->checkURL($elAttrs['src'], $texy::FILTER_IMAGE)) {
-					return FALSE;
+		foreach (['src', 'href', 'name', 'id'] as $attr) {
+			if (isset($elAttrs[$attr])) {
+				$elAttrs[$attr] = is_string($elAttrs[$attr]) ? trim($elAttrs[$attr]) : '';
+				if ($elAttrs[$attr] === '') {
+					unset($elAttrs[$attr]);
 				}
-
-				$texy->summary['images'][] = $elAttrs['src'];
 			}
+		}
+
+		if ($name === 'img') {
+			if (!isset($elAttrs['src']) || !$texy->checkURL($elAttrs['src'], $texy::FILTER_IMAGE)) {
+				return FALSE;
+			}
+			$texy->summary['images'][] = $elAttrs['src'];
 
 		} elseif ($name === 'a') {
 			if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) {
 				return FALSE;
 			}
 			if (isset($elAttrs['href'])) {
-				$elAttrs['href'] = trim($elAttrs['href']);
 				if ($texy->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== FALSE) {
 					if (isset($elAttrs['rel'])) {
 						$elAttrs['rel'] = (array) $elAttrs['rel'];
