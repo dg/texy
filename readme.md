@@ -24,4 +24,4 @@ Documentation and Examples
 --------------------------
 
 Refer to the 'examples' directory for examples. Texy documentation is
-available on the homepage http://texy.info.
+available on the homepage https://texy.info.
