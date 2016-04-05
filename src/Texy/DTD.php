@@ -470,3 +470,5 @@ $dtd['td'][0] += ['nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1];
 $dtd['th'][0] += ['nowrap'=>1,'bgcolor'=>1,'width'=>1,'height'=>1];
 
 // missing: FRAMESET, FRAME, BGSOUND, XMP, ...
+
+return $dtd;
