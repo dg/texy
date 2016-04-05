@@ -241,8 +241,7 @@ class Texy
 		}
 
 		if (!isset(self::$dtdCache[$mode])) {
-			require __DIR__ . '/DTD.php';
-			self::$dtdCache[$mode] = $dtd;
+			self::$dtdCache[$mode] = require __DIR__ . '/DTD.php';
 		}
 
 		$this->mode = $mode;
