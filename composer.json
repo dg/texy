@@ -17,7 +17,7 @@
 		"nette/tester": "~1.5"
 	},
 	"replace": {
-		"dg/texy": "self.version"
+		"dg/texy": "*"
 	},
 	"autoload": {
 		"classmap": ["src/"],
