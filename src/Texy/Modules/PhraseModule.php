@@ -55,7 +55,7 @@ final class PhraseModule extends Texy\Module
 		// UNIVERSAL
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'#((?>([*+/^_"~`-])+?))(?!\s)(.*(?!\\2).)'.Texy\Patterns::MODIFIER.'?(?<!\s)\\1(?!\\2)(?::('.Texy\Patterns::LINK_URL.'))??()#Uus',
+			'#((?>([*+/^_"~`-])+?))(?!\s)(.*(?!\2).)'.Texy\Patterns::MODIFIER.'?(?<!\s)\1(?!\2)(?::('.Texy\Patterns::LINK_URL.'))??()#Uus',
 			'phrase/strong'
 		);
 */

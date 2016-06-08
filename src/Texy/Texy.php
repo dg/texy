@@ -349,7 +349,7 @@ class Texy
 			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
-		// if (!preg_match('#(.)\^.*\$\\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
+		// if (!preg_match('#(.)\^.*\$\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = TRUE;
 		}
@@ -565,7 +565,7 @@ class Texy
 		$this->htmlOutputModule->lineWrap = $save;
 
 		// remove tags
-		$s = Regexp::replace($s, '#<(script|style)(.*)</\\1>#Uis', '');
+		$s = Regexp::replace($s, '#<(script|style)(.*)</\1>#Uis', '');
 		$s = strip_tags($s);
 		$s = Regexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
 

@@ -90,7 +90,7 @@ final class TypographyModule extends Texy\Module
 			'#-{1,}> #'                               => "\xe2\x86\x92 ",                  // right arrow -->
 			'# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
 			'#={1,}> #'                               => "\xe2\x87\x92 ",                  // right arrow ==>
-			'#\\+-#'                                  => "\xc2\xb1",                       // +-
+			'#\+-#'                                   => "\xc2\xb1",                       // +-
 			'#(\d++) x (?=\d)#'                       => "\$1\xc2\xa0\xc3\x97\xc2\xa0",    // dimension sign 123 x 123...
 			'#(\d++)x(?=\d)#'                         => "\$1\xc3\x97",                    // dimension sign 123x123...
 			'#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // dimension sign 123x

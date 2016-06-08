@@ -68,7 +68,7 @@ final class TableModule extends Texy\Module
 
 		$parser->moveBackward();
 
-		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\\1*\|? *'.Patterns::MODIFIER_H.'?()$#Um', $matches)) {
+		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\1*\|? *'.Patterns::MODIFIER_H.'?()$#Um', $matches)) {
 			list(, , $mContent, $mMod) = $matches;
 			// [1] => # / =
 			// [2] => ....
@@ -136,7 +136,7 @@ final class TableModule extends Texy\Module
 				$elCell = NULL;
 
 				// special escape sequence \|
-				$mContent = str_replace('\\|', "\x13", $mContent);
+				$mContent = str_replace('\|', "\x13", $mContent);
 				$mContent = Regexp::replace($mContent, '#(\[[^\]]*)\|#', "$1\x13"); // HACK: support for [..|..]
 
 				foreach (explode('|', $mContent) as $cell) {
