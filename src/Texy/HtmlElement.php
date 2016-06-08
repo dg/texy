@@ -560,10 +560,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 */
 	final public function parseLine(Texy $texy, $s)
 	{
-		// TODO!
-		// special escape sequences
-		$s = str_replace(['\)', '\*'], ['&#x29;', '&#x2A;'], $s);
-
 		$parser = new LineParser($texy, $this);
 		$parser->parse($s);
 		return $parser;

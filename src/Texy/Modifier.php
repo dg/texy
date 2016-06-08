@@ -83,9 +83,9 @@ final class Modifier
 			$ch = $mod[$p];
 
 			if ($ch === '(') { // title
-				$a = strpos($mod, ')', $p) + 1;
-				$this->title = html_entity_decode(trim(substr($mod, $p + 1, $a - $p - 2)), ENT_QUOTES, 'UTF-8');
-				$p = $a;
+				preg_match('#(?:\\\\\)|[^)\n])++\)#', $mod, $m, 0, $p);
+				$this->title = html_entity_decode(str_replace('\)', ')', trim(substr($m[0], 1, -1))), ENT_QUOTES, 'UTF-8');
+				$p += strlen($m[0]);
 
 			} elseif ($ch === '{') { // style & attributes
 				$a = strpos($mod, '}', $p) + 1;
