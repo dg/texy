@@ -38,7 +38,7 @@ final class FigureModule extends Texy\Module
 		$texy->registerBlockPattern(
 			[$this, 'pattern'],
 			'#^\[\* *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::(' . Patterns::LINK_URL . '|:))?? ++\*\*\* ++(.{0,2000})' . Patterns::MODIFIER_H . '?()$#mUu',
+			. '(?::(' . Patterns::LINK_URL . '|:))??(?: ++\*\*\* ++(.{0,2000}))?' . Patterns::MODIFIER_H . '?()$#mUu',
 			'figure'
 		);
 	}
@@ -102,8 +102,12 @@ final class FigureModule extends Texy\Module
 		$mod->decorate($texy, $el);
 
 		$el[0] = $elImg;
-		$el[1] = new Texy\HtmlElement('p');
-		$el[1]->parseLine($texy, ltrim($content));
+
+		$content = ltrim($content);
+		if ($content) {
+			$el[1] = new Texy\HtmlElement('p');
+			$el[1]->parseLine($texy, $content);
+		}
 
 		$class = $this->class;
 		if ($hAlign) {
