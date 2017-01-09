@@ -1,8 +1,8 @@
 Title
 *****
 
-subtitle
-========
+subtitle * 123
+==============
 
 /--texysource
 **aa**
@@ -13,7 +13,7 @@ subtitle
 \--
 
 
-Title2
+Title .{toc: jiny toc}
 ******
 
 last title
