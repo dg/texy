@@ -25,3 +25,5 @@ test3
 <a href="one">text1<span><a href="two">test2</span></a>test3</a></span>
 
 <a href=" http://www.texy.info "><img src=" image.gif "></a>
+
+<hr data-a_b=1>
