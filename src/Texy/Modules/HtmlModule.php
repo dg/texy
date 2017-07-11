@@ -160,7 +160,7 @@ final class HtmlModule extends Texy\Module
 			return $el;
 		}
 
-		$elAttrs = & $el->attrs;
+		$elAttrs = &$el->attrs;
 
 		// process attributes
 		if (!$allowedAttrs) {

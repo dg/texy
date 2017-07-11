@@ -22,9 +22,9 @@ final class ListModule extends Texy\Module
 	public $bullets = [
 		// first-rexexp ordered? list-style-type next-regexp
 		'*' => ['\*\ ', 0, ''],
-		'-' => ['[\x{2013}-](?![>-])',0, ''],
+		'-' => ['[\x{2013}-](?![>-])', 0, ''],
 		'+' => ['\+\ ', 0, ''],
-		'1.' => ['1\.\ ',/* not \d !*/ 1, '', '\d{1,3}\.\ '],
+		'1.' => ['1\.\ ', /* not \d !*/ 1, '', '\d{1,3}\.\ '],
 		'1)' => ['\d{1,3}\)\ ', 1, ''],
 		'I.' => ['I\.\ ', 1, 'upper-roman', '[IVX]{1,4}\.\ '],
 		'I)' => ['[IVX]+\)\ ', 1, 'upper-roman'], // before A) !

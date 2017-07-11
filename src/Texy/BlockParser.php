@@ -40,7 +40,7 @@ class BlockParser extends Parser
 
 	// match current line against RE.
 	// if succesfull, increments current position and returns true
-	public function next($pattern, & $matches)
+	public function next($pattern, &$matches)
 	{
 		if ($this->offset > strlen($this->text)) {
 			return false;
@@ -65,7 +65,7 @@ class BlockParser extends Parser
 	public function moveBackward($linesCount = 1)
 	{
 		while (--$this->offset > 0) {
-			if ($this->text{ $this->offset - 1 } === "\n") {
+			if ($this->text[$this->offset - 1] === "\n") {
 				$linesCount--;
 				if ($linesCount < 1) {
 					break;
@@ -83,7 +83,7 @@ class BlockParser extends Parser
 	 */
 	public function parse($text)
 	{
-		$this->texy->invokeHandlers('beforeBlockParse', [$this, & $text]);
+		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
 
 		// parser initialization
 		$this->text = $text;

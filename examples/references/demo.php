@@ -72,5 +72,5 @@ foreach ($texy->summary['links'] as $link) {
 // and echo generated HTML code
 echo '<hr />';
 echo '<pre>';
-echo htmlSpecialChars($html);
+echo htmlspecialchars($html);
 echo '</pre>';

@@ -26,7 +26,7 @@ final class LinkModule extends Texy\Module
 	public $imageClass;
 
 	/** @var string image popup event */
-	public $imageOnClick = 'return !popupImage(this.href)';  //
+	public $imageOnClick = 'return !popupImage(this.href)';
 
 	/** @var string class 'popup' event */
 	public $popupOnClick = 'return !popup(this.href)';
@@ -87,7 +87,7 @@ final class LinkModule extends Texy\Module
 	 * Text pre-processing.
 	 * @return void
 	 */
-	public function beforeParse(Texy\Texy $texy, & $text)
+	public function beforeParse(Texy\Texy $texy, &$text)
 	{
 		self::$livelock = [];
 

@@ -136,7 +136,7 @@ final class Modifier
 				$p++;
 			} elseif (substr($mod, $p, 2) === '<>') {
 				$this->hAlign = 'center';
-				$p+=2;
+				$p += 2;
 			} elseif ($ch === '<') {
 				$this->hAlign = 'left';
 				$p++;
@@ -153,7 +153,7 @@ final class Modifier
 	 */
 	public function decorate(Texy $texy, HtmlElement $el)
 	{
-		$elAttrs = & $el->attrs;
+		$elAttrs = &$el->attrs;
 
 		// tag & attibutes
 		$tmp = $texy->allowedTags; // speed-up

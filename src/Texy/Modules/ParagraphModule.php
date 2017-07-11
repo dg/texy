@@ -116,7 +116,7 @@ final class ParagraphModule extends Texy\Module
 			if (strpos($content, "\r") !== false) {
 				$key = $texy->protect('<br />', $texy::CONTENT_REPLACED);
 				$content = str_replace("\r", $key, $content);
-			};
+			}
 		}
 
 		$content = strtr($content, "\r\n", '  ');

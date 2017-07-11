@@ -25,7 +25,7 @@ final class ImageModule extends Texy\Module
 	public $linkedRoot = 'images/';
 
 	/** @var string  physical location of images on server */
-	public $fileRoot = null;
+	public $fileRoot;
 
 	/** @var string  left-floated images CSS class */
 	public $leftClass;
@@ -66,7 +66,7 @@ final class ImageModule extends Texy\Module
 	 * Text pre-processing.
 	 * @return void
 	 */
-	public function beforeParse(Texy\Texy $texy, & $text)
+	public function beforeParse(Texy\Texy $texy, &$text)
 	{
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
@@ -110,7 +110,7 @@ final class ImageModule extends Texy\Module
 		// [3] => * < >
 		// [4] => url | [ref] | [*image*]
 
-		$image = $this->factoryImage($mURLs, $mMod.$mAlign);
+		$image = $this->factoryImage($mURLs, $mMod . $mAlign);
 
 		if ($mLink) {
 			if ($mLink === ':') {
@@ -258,7 +258,7 @@ final class ImageModule extends Texy\Module
 			if (Helpers::isRelative($image->URL) && strpos($image->URL, '..') === false) {
 				$file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
 				if (@is_file($file)) { // intentionally @
-					$size = @getImageSize($file); // intentionally @
+					$size = @getimagesize($file); // intentionally @
 					if (is_array($size)) {
 						if ($image->asMax) {
 							$ratio = 1;
@@ -292,9 +292,9 @@ final class ImageModule extends Texy\Module
 		// onmouseover actions generate
 		if (!empty($texy->allowed['image/hover']) && $image->overURL !== null) {
 			$overSrc = Helpers::prependRoot($image->overURL, $this->root);
-			$el->attrs['onmouseover'] = 'this.src=\'' . addSlashes($overSrc) . '\'';
-			$el->attrs['onmouseout'] = 'this.src=\'' . addSlashes($el->attrs['src']) . '\'';
-			$el->attrs['onload'] = str_replace('%i', addSlashes($overSrc), $this->onLoad);
+			$el->attrs['onmouseover'] = 'this.src=\'' . addslashes($overSrc) . '\'';
+			$el->attrs['onmouseout'] = 'this.src=\'' . addslashes($el->attrs['src']) . '\'';
+			$el->attrs['onload'] = str_replace('%i', addslashes($overSrc), $this->onLoad);
 			$texy->summary['preload'][] = $overSrc;
 		}
 

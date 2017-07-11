@@ -64,7 +64,7 @@ final class TypographyModule extends Texy\Module
 	 * Text pre-processing.
 	 * @return void
 	 */
-	public function beforeParse(Texy\Texy $texy, & $text)
+	public function beforeParse(Texy\Texy $texy, &$text)
 	{
 		// CONTENT_MARKUP mark: \x17-\x1F
 		// CONTENT_REPLACED mark: \x16

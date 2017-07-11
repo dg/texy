@@ -45,7 +45,7 @@ class Utf
 	 */
 	public static function utfTo($s, $encoding)
 	{
-		return iconv('UTF-8', $encoding.'//TRANSLIT', $s);
+		return iconv('UTF-8', $encoding . '//TRANSLIT', $s);
 	}
 
 
@@ -86,7 +86,7 @@ class Utf
 		}
 
 		// prepare UTF-8 -> charset table
-		self::$xlat = & self::$xlatCache[strtolower($encoding)];
+		self::$xlat = &self::$xlatCache[strtolower($encoding)];
 		if (!self::$xlat) {
 			for ($i = 128; $i < 256; $i++) {
 				$ch = @iconv($encoding, 'UTF-8//IGNORE', chr($i)); // intentionally @

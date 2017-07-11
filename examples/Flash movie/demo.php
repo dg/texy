@@ -17,30 +17,29 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Tex
 {
 	$texy = $invocation->getTexy();
 
-	if (substr($image->URL, -4) === '.swf')  // accepts only *.swf
-	{
+	if (substr($image->URL, -4) === '.swf') {  // accepts only *.swf
 		$movie = Texy\Helpers::prependRoot($image->URL, $texy->imageModule->root);
 
 		$dimensions =
-			($image->width ? 'width="'.$image->width.'" ' : '')
-			. ($image->height ? 'width="'.$image->height.'" ' : '');
+			($image->width ? 'width="' . $image->width . '" ' : '')
+			. ($image->height ? 'width="' . $image->height . '" ' : '');
 
-		$movie = htmlSpecialChars($movie);
-		$altContent = htmlSpecialChars($image->modifier->title);
+		$movie = htmlspecialchars($movie);
+		$altContent = htmlspecialchars($image->modifier->title);
 
 		// @see https://phpfashion.com/how-to-correctly-insert-a-flash-into-xhtml
 		$code = '
 <!--[if !IE]> -->
-<object type="application/x-shockwave-flash" data="'.$movie.'" '.$dimensions.'>
+<object type="application/x-shockwave-flash" data="' . $movie . '" ' . $dimensions . '>
 <!-- <![endif]-->
 
 <!--[if IE]>
-<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" '.$dimensions.'
+<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" ' . $dimensions . '
 codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=5,0,0,0">
-<param name="movie" value="'.$movie.'" />
+<param name="movie" value="' . $movie . '" />
 <!--><!--dgx-->
 
-	<p>'.$altContent.'</p>
+	<p>' . $altContent . '</p>
 </object>
 <!-- <![endif]-->
 ';
@@ -68,5 +67,5 @@ echo $html;
 // echo generated HTML code
 echo '<hr />';
 echo '<pre>';
-echo htmlSpecialChars($html);
+echo htmlspecialchars($html);
 echo '</pre>';

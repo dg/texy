@@ -71,7 +71,7 @@ class LineParser extends Parser
 							Regexp::OFFSET_CAPTURE,
 							$offset + $delta)
 					) {
-						$m = & $arrMatches[$name];
+						$m = &$arrMatches[$name];
 						if (!strlen($m[0][0])) {
 							continue;
 						}

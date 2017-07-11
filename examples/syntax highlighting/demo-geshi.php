@@ -11,7 +11,7 @@
 require_once __DIR__ . '/../../src/texy.php';
 
 
-$geshiPath = __DIR__.'/geshi/';
+$geshiPath = __DIR__ . '/geshi/';
 @include_once $geshiPath . 'geshi.php';
 
 
@@ -38,7 +38,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 		$lang = 'html4strict';
 	}
 	$content = Texy\Helpers::outdent($content);
-	$geshi = new GeSHi($content, $lang, $geshiPath.'geshi/');
+	$geshi = new GeSHi($content, $lang, $geshiPath . 'geshi/');
 
 	// GeSHi could not find the language
 	if ($geshi->error) {
@@ -84,7 +84,7 @@ $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
 header('Content-type: text/html; charset=utf-8');
-echo '<style type="text/css">'. $texy->styleSheet . '</style>';
+echo '<style type="text/css">' . $texy->styleSheet . '</style>';
 echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
 echo $html;
@@ -92,5 +92,5 @@ echo $html;
 // and echo generated HTML code
 echo '<hr />';
 echo '<pre>';
-echo htmlSpecialChars($html);
+echo htmlspecialchars($html);
 echo '</pre>';

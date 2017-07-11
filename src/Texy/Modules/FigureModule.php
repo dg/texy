@@ -59,7 +59,7 @@ final class FigureModule extends Texy\Module
 		// [6] => .(title)[class]{style}<>
 
 		$texy = $this->texy;
-		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod.$mAlign);
+		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
 		$mod = new Texy\Modifier($mMod);
 		$mContent = ltrim($mContent);
 

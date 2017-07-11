@@ -11,13 +11,13 @@ require_once __DIR__ . '/../../src/texy.php';
 
 // MY OWN TEXY! OBJECT
 
-class MyTexy extends Texy
+class mytexy extends Texy
 {
-	var $cachePath = './cache/';
-	var $time;
+	public $cachePath = './cache/';
+	public $time;
 
 
-	function __construct()
+	public function __construct()
 	{
 		parent::__construct();
 
@@ -27,7 +27,7 @@ class MyTexy extends Texy
 	}
 
 
-	function process($text, $useCache = true)
+	public function process($text, $useCache = true)
 	{
 		$this->time = -microtime(true);
 
@@ -54,5 +54,4 @@ class MyTexy extends Texy
 		$this->time += microtime(true);
 		return $html;
 	}
-
 }

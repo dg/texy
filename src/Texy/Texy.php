@@ -71,7 +71,7 @@ class Texy
 	public $obfuscateEmail = true;
 
 	/** @var array  regexps to check URL schemes */
-	public $urlSchemeFilters = null; // disable URL scheme filter
+	public $urlSchemeFilters; // disable URL scheme filter
 
 	/** @var bool  Paragraph merging mode */
 	public $mergeLines = true;
@@ -236,7 +236,7 @@ class Texy
 		}
 
 		// DEPRECATED
-		$this->cleaner = & $this->htmlOutputModule;
+		$this->cleaner = &$this->htmlOutputModule;
 
 		// examples of link references ;-)
 		$link = new Link('https://texy.info/');
@@ -260,7 +260,7 @@ class Texy
 	public function setOutputMode($mode)
 	{
 		if (!in_array($mode, [self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
-			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5], true)
+			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5, ], true)
 		) {
 			throw new \InvalidArgumentException('Invalid mode.');
 		}
@@ -424,7 +424,7 @@ class Texy
 		}
 
 		// user before handler
-		$this->invokeHandlers('beforeParse', [$this, & $text, $singleLine]);
+		$this->invokeHandlers('beforeParse', [$this, &$text, $singleLine]);
 
 		// select patterns
 		$this->_linePatterns = $this->linePatterns;
@@ -543,7 +543,7 @@ class Texy
 		$s = $this->unProtect($s);
 
 		// wellform and reformat HTML
-		$this->invokeHandlers('postProcess', [$this, & $s]);
+		$this->invokeHandlers('postProcess', [$this, &$s]);
 
 		// unfreeze spaces
 		$s = Helpers::unfreezeSpaces($s);

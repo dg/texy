@@ -59,7 +59,7 @@ final class HtmlOutputModule extends Texy\Module
 	 * Converts <strong><em> ... </strong> ... </em>.
 	 * into <strong><em> ... </em></strong><em> ... </em>
 	 */
-	public function postProcess($texy, & $s)
+	public function postProcess($texy, &$s)
 	{
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
@@ -292,11 +292,11 @@ final class HtmlOutputModule extends Texy\Module
 
 				// format output
 				if ($this->indent && !isset(HtmlElement::$inlineElements[$mTag])) {
-					$close = "\x08" . '</'.$mTag.'>' . "\n" . str_repeat("\t", $this->space);
+					$close = "\x08" . '</' . $mTag . '>' . "\n" . str_repeat("\t", $this->space);
 					$s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
 					$indent = 1;
 				} else {
-					$close = '</'.$mTag.'>';
+					$close = '</' . $mTag . '>';
 					$s .= $open;
 				}
 
@@ -313,7 +313,7 @@ final class HtmlOutputModule extends Texy\Module
 				'indent' => $indent,
 			];
 			array_unshift($this->tagStack, $item);
-			$tmp = & $this->tagUsed[$mTag];
+			$tmp = &$this->tagUsed[$mTag];
 			$tmp++;
 		}
 

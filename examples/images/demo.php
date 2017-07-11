@@ -53,7 +53,7 @@ echo $html;
 // echo generated HTML code
 echo '<hr />';
 echo '<pre>';
-echo htmlSpecialChars($html);
+echo htmlspecialchars($html);
 echo '</pre>';
 
 

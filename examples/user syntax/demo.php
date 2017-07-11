@@ -24,14 +24,14 @@ $texy->allowed['phrase/em-alt2'] = false;
 // add new syntax: *bold*
 $texy->registerLinePattern(
 	'userInlineHandler',  // callback function or method
-	'#(?<!\*)\*(?!\ |\*)(.+)'.Texy\Patterns::MODIFIER.'?(?<!\ |\*)\*(?!\*)()#U', // regular expression
+	'#(?<!\*)\*(?!\ |\*)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |\*)\*(?!\*)()#U', // regular expression
 	'myInlineSyntax1' // any syntax name
 );
 
 // add new syntax: _italic_
 $texy->registerLinePattern(
 	'userInlineHandler',
-	'#(?<!_)_(?!\ |_)(.+)'.Texy\Patterns::MODIFIER.'?(?<!\ |_)_(?!_)()#U',
+	'#(?<!_)_(?!\ |_)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |_)_(?!_)()#U',
 	'myInlineSyntax2'
 );
 
@@ -117,5 +117,5 @@ echo $html;
 // and echo generated HTML code
 echo '<hr />';
 echo '<pre>';
-echo htmlSpecialChars($html);
+echo htmlspecialchars($html);
 echo '</pre>';

@@ -9,7 +9,7 @@
 // include libs
 require_once __DIR__ . '/../../src/texy.php';
 
-$fshlPath = __DIR__.'/fshl/';
+$fshlPath = __DIR__ . '/fshl/';
 @include_once $fshlPath . 'fshl.php';
 
 
@@ -64,7 +64,7 @@ $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
 header('Content-type: text/html; charset=utf-8');
-echo '<style type="text/css">'. file_get_contents($fshlPath.'styles/COHEN_style.css') . '</style>';
+echo '<style type="text/css">' . file_get_contents($fshlPath . 'styles/COHEN_style.css') . '</style>';
 echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
 echo $html;
@@ -72,5 +72,5 @@ echo $html;
 // and echo generated HTML code
 echo '<hr />';
 echo '<pre>';
-echo htmlSpecialChars($html);
+echo htmlspecialchars($html);
 echo '</pre>';

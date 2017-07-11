@@ -24,7 +24,7 @@ function doIt($texy)
 
 	// and echo generated HTML code
 	echo '<pre>';
-	echo htmlSpecialChars($html);
+	echo htmlspecialchars($html);
 	echo '</pre>';
 	echo '<hr />';
 }

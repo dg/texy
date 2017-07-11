@@ -153,7 +153,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * @param  string    property name
 	 * @return mixed    property value
 	 */
-	final public function & __get($name)
+	final public function &__get($name)
 	{
 		return $this->attrs[$name];
 	}

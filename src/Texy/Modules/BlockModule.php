@@ -46,7 +46,7 @@ final class BlockModule extends Texy\Module
 	 * Single block pre-processing.
 	 * @return void
 	 */
-	public function beforeBlockParse(Texy\BlockParser $parser, & $text)
+	public function beforeBlockParse(Texy\BlockParser $parser, &$text)
 	{
 		// autoclose exclusive blocks
 		$text = Texy\Regexp::replace(
@@ -84,7 +84,7 @@ final class BlockModule extends Texy\Module
 
 
 	// for backward compatibility
-	function outdent($s)
+	public function outdent($s)
 	{
 		trigger_error('Use Texy\Helpers::outdent()', E_USER_WARNING);
 		return Helpers::outdent($s);
@@ -215,7 +215,7 @@ final class BlockModule extends Texy\Module
 				return "\n";
 			}
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-			$s = str_replace("\n", (new HtmlElement('br'))->startTag() , $s); // nl2br
+			$s = str_replace("\n", (new HtmlElement('br'))->startTag(), $s); // nl2br
 			return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
 		}
 
