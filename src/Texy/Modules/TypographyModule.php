@@ -119,7 +119,7 @@ final class TypographyModule extends Texy\Module
 	}
 
 
-	public function postLine($text, $preserveSpaces = FALSE)
+	public function postLine($text, $preserveSpaces = false)
 	{
 		if (!$preserveSpaces) {
 			$text = Texy\Regexp::replace($text, '# {2,}#', ' ');

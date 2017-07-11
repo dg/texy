@@ -11,8 +11,8 @@ require __DIR__ . '/../bootstrap.php';
 
 test(function () {
 	$texy = new Texy\Texy;
-	$texy->allowedClasses = FALSE;
-	$texy->allowedStyles = FALSE;
+	$texy->allowedClasses = false;
+	$texy->allowedStyles = false;
 
 	Assert::match(
 		'<p>This <strong>text is formatted</strong> with <em>style</em> modifiers.</p>',

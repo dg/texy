@@ -79,7 +79,7 @@ trait Strict
 	 */
 	public function __isset($name)
 	{
-		return FALSE;
+		return false;
 	}
 
 
@@ -96,11 +96,11 @@ trait Strict
 
 	/**
 	 * Finds the best suggestion.
-	 * @return string|NULL
+	 * @return string|null
 	 */
 	private static function getSuggestion(array $items, $value)
 	{
-		$best = NULL;
+		$best = null;
 		$min = (strlen($value) / 4 + 1) * 10 + .1;
 		foreach (array_unique($items, SORT_REGULAR) as $item) {
 			$item = is_object($item) ? $item->getName() : $item;

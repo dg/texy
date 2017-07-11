@@ -35,7 +35,7 @@ class LineParser extends Parser
 		$pl = $this->patterns;
 		if (!$pl) {
 			// nothing to do
-			$this->element->insert(NULL, $text);
+			$this->element->insert(null, $text);
 			return;
 		}
 
@@ -49,7 +49,7 @@ class LineParser extends Parser
 
 		// parse loop
 		do {
-			$min = NULL;
+			$min = null;
 			$minOffset = strlen($text);
 
 			foreach ($names as $index => $name) {
@@ -82,7 +82,7 @@ class LineParser extends Parser
 
 					} else {
 						// try next time?
-						if (!$pl[$name]['again'] || !Regexp::match($text, $pl[$name]['again'], NULL, $offset + $delta)) {
+						if (!$pl[$name]['again'] || !Regexp::match($text, $pl[$name]['again'], null, $offset + $delta)) {
 							unset($names[$index]);
 						}
 						continue;
@@ -95,14 +95,14 @@ class LineParser extends Parser
 				}
 			} // foreach
 
-			if ($min === NULL) {
+			if ($min === null) {
 				break;
 			}
 
 			$px = $pl[$min];
 			$offset = $start = $arrOffset[$min];
 
-			$this->again = FALSE;
+			$this->again = false;
 			$res = call_user_func_array(
 				$px['handler'],
 				[$this, $arrMatches[$min], $min]
@@ -110,7 +110,7 @@ class LineParser extends Parser
 
 			if ($res instanceof HtmlElement) {
 				$res = $res->toString($this->texy);
-			} elseif ($res === FALSE) {
+			} elseif ($res === false) {
 				$arrOffset[$min] = -2;
 				continue;
 			}
@@ -140,6 +140,6 @@ class LineParser extends Parser
 			}
 		} while (1);
 
-		$this->element->insert(NULL, $text);
+		$this->element->insert(null, $text);
 	}
 }

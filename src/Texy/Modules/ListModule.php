@@ -38,8 +38,8 @@ final class ListModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
-		$texy->allowed['list'] = TRUE;
-		$texy->allowed['list/definition'] = TRUE;
+		$texy->allowed['list'] = true;
+		$texy->allowed['list/definition'] = true;
 	}
 
 
@@ -79,7 +79,7 @@ final class ListModule extends Texy\Module
 	 *   + ...
 	 * 3) ....
 	 *
-	 * @return HtmlElement|FALSE
+	 * @return HtmlElement|false
 	 */
 	public function patternList(BlockParser $parser, array $matches)
 	{
@@ -89,7 +89,7 @@ final class ListModule extends Texy\Module
 
 		$el = new HtmlElement;
 
-		$bullet = $min = NULL;
+		$bullet = $min = null;
 		foreach ($this->bullets as $type => $desc) {
 			if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
 				$bullet = isset($desc[3]) ? $desc[3] : $desc[0];
@@ -114,12 +114,12 @@ final class ListModule extends Texy\Module
 
 		$parser->moveBackward(1);
 
-		while ($elItem = $this->patternItem($parser, $bullet, FALSE, 'li')) {
+		while ($elItem = $this->patternItem($parser, $bullet, false, 'li')) {
 			$el->add($elItem);
 		}
 
 		if ($el->count() < $min) {
-			return FALSE;
+			return false;
 		}
 
 		// event listener
@@ -150,7 +150,7 @@ final class ListModule extends Texy\Module
 
 		$texy = $this->texy;
 
-		$bullet = NULL;
+		$bullet = null;
 		foreach ($this->bullets as $desc) {
 			if (preg_match('#'.$desc[0].'#Au', $mBullet)) {
 				$bullet = isset($desc[3]) ? $desc[3] : $desc[0];
@@ -165,8 +165,8 @@ final class ListModule extends Texy\Module
 
 		$patternTerm = '#^\n?(\S.*)\:\ *'.Patterns::MODIFIER_H.'?()$#mUA';
 
-		while (TRUE) {
-			if ($elItem = $this->patternItem($parser, $bullet, TRUE, 'dd')) {
+		while (true) {
+			if ($elItem = $this->patternItem($parser, $bullet, true, 'dd')) {
 				$el->add($elItem);
 				continue;
 			}
@@ -197,7 +197,7 @@ final class ListModule extends Texy\Module
 
 	/**
 	 * Callback for single list item.
-	 * @return HtmlElement|FALSE
+	 * @return HtmlElement|false
 	 */
 	public function patternItem(BlockParser $parser, $bullet, $indented, $tag)
 	{
@@ -205,9 +205,9 @@ final class ListModule extends Texy\Module
 		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?".Patterns::MODIFIER_H.'?()$#mAUu';
 
 		// first line with bullet
-		$matches = NULL;
+		$matches = null;
 		if (!$parser->next($patternItem, $matches)) {
-			return FALSE;
+			return false;
 		}
 
 		list(, $mIndent, $mContent, $mMod) = $matches;
@@ -235,10 +235,10 @@ final class ListModule extends Texy\Module
 		}
 
 		// parse content
-		$elItem->parseBlock($this->texy, $content, TRUE);
+		$elItem->parseBlock($this->texy, $content, true);
 
 		if (isset($elItem[0]) && $elItem[0] instanceof HtmlElement) {
-			$elItem[0]->setName(NULL);
+			$elItem[0]->setName(null);
 		}
 
 		return $elItem;

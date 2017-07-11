@@ -50,12 +50,12 @@ final class TableModule extends Texy\Module
 	 * |------------------
 	 * | aa | bb | cc |
 	 *
-	 * @return HtmlElement|string|FALSE
+	 * @return HtmlElement|string|false
 	 */
 	public function patternTable(Texy\BlockParser $parser, array $matches)
 	{
 		if ($this->disableTables) {
-			return FALSE;
+			return false;
 		}
 		list(, $mMod) = $matches;
 		// [1] => .(title)[class]{style}<>_
@@ -80,15 +80,15 @@ final class TableModule extends Texy\Module
 			$caption->parseLine($texy, $mContent);
 		}
 
-		$isHead = FALSE;
+		$isHead = false;
 		$colModifier = [];
 		$prevRow = []; // rowSpan building helper
 		$rowCounter = 0;
 		$colCounter = 0;
-		$elPart = NULL;
-		$lineMode = FALSE; // rows must be separated by lines
+		$elPart = null;
+		$lineMode = false; // rows must be separated by lines
 
-		while (TRUE) {
+		while (true) {
 			if ($parser->next('#^\|([=-])[+|=-]{2,}$#Um', $matches)) { // line
 				if ($lineMode) {
 					if ($matches[1] === '=') {
@@ -105,11 +105,11 @@ final class TableModule extends Texy\Module
 			if ($parser->next('#^\|(.*)(?:|\|\ *'.Patterns::MODIFIER_HV.'?)()$#U', $matches)) {
 				// smarter head detection
 				if ($rowCounter === 0 && !$isHead && $parser->next('#^\|[=-][+|=-]{2,}$#Um', $foo)) {
-					$isHead = TRUE;
+					$isHead = true;
 					$parser->moveBackward();
 				}
 
-				if ($elPart === NULL) {
+				if ($elPart === null) {
 					$elPart = $el->create($isHead ? 'thead' : 'tbody');
 
 				} elseif (!$isHead && $elPart->getName() === 'thead') {
@@ -133,7 +133,7 @@ final class TableModule extends Texy\Module
 				}
 
 				$col = 0;
-				$elCell = NULL;
+				$elCell = null;
 
 				// special escape sequence \|
 				$mContent = str_replace('\|', "\x13", $mContent);
@@ -149,7 +149,7 @@ final class TableModule extends Texy\Module
 						}
 						$prevRow[$col]->text .= "\n" . $cell;
 						$col += $prevRow[$col]->colSpan;
-						$elCell = NULL;
+						$elCell = null;
 						continue;
 					}
 
@@ -231,9 +231,9 @@ final class TableModule extends Texy\Module
 			break;
 		}
 
-		if ($elPart === NULL) {
+		if ($elPart === null) {
 			// invalid table
-			return FALSE;
+			return false;
 		}
 
 		if ($elPart->getName() === 'thead') {
@@ -268,12 +268,12 @@ final class TableModule extends Texy\Module
 				}
 
 				$text = rtrim($elCell->text);
-				if (strpos($text, "\n") !== FALSE) {
+				if (strpos($text, "\n") !== false) {
 					// multiline parse as block
 					// HACK: disable tables
-					$this->disableTables = TRUE;
+					$this->disableTables = true;
 					$elCell->parseBlock($this->texy, Texy\Helpers::outdent($text));
-					$this->disableTables = FALSE;
+					$this->disableTables = false;
 				} else {
 					$elCell->parseLine($this->texy, ltrim($text));
 				}

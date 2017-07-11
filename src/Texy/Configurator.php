@@ -57,10 +57,10 @@ class Configurator
 		$texy->allowedTags = self::$safeTags; // only some "safe" HTML tags and attributes are allowed
 		$texy->urlSchemeFilters[$texy::FILTER_ANCHOR] = '#https?:|ftp:|mailto:#A';
 		$texy->urlSchemeFilters[$texy::FILTER_IMAGE] = '#https?:#A';
-		$texy->allowed['image'] = FALSE; // disable images
-		$texy->allowed['link/definition'] = FALSE; // disable [ref]: URL reference definitions
-		$texy->allowed['html/comment'] = FALSE; // disable HTML comments
-		$texy->linkModule->forceNoFollow = TRUE; // force rel="nofollow"
+		$texy->allowed['image'] = false; // disable images
+		$texy->allowed['link/definition'] = false; // disable [ref]: URL reference definitions
+		$texy->allowed['html/comment'] = false; // disable HTML comments
+		$texy->linkModule->forceNoFollow = true; // force rel="nofollow"
 	}
 
 
@@ -70,11 +70,11 @@ class Configurator
 	 */
 	public static function disableLinks(Texy $texy)
 	{
-		$texy->allowed['link/reference'] = FALSE;
-		$texy->allowed['link/email'] = FALSE;
-		$texy->allowed['link/url'] = FALSE;
-		$texy->allowed['link/definition'] = FALSE;
-		$texy->phraseModule->linksAllowed = FALSE;
+		$texy->allowed['link/reference'] = false;
+		$texy->allowed['link/email'] = false;
+		$texy->allowed['link/url'] = false;
+		$texy->allowed['link/definition'] = false;
+		$texy->phraseModule->linksAllowed = false;
 
 		if (is_array($texy->allowedTags)) {
 			unset($texy->allowedTags['a']);
@@ -88,9 +88,9 @@ class Configurator
 	 */
 	public static function disableImages(Texy $texy)
 	{
-		$texy->allowed['image'] = FALSE;
-		$texy->allowed['figure'] = FALSE;
-		$texy->allowed['image/definition'] = FALSE;
+		$texy->allowed['image'] = false;
+		$texy->allowed['figure'] = false;
+		$texy->allowed['image/definition'] = false;
 
 		if (is_array($texy->allowedTags)) {
 			unset($texy->allowedTags['img'], $texy->allowedTags['object'], $texy->allowedTags['embed'], $texy->allowedTags['applet']);

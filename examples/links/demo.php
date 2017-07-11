@@ -10,9 +10,9 @@ require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
- * @return Texy\HtmlElement|string|FALSE
+ * @return Texy\HtmlElement|string|false
  */
-function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = NULL)
+function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = null)
 {
 	// is there link?
 	if (!$link) {

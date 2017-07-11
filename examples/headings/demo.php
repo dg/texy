@@ -19,7 +19,7 @@ $texy->headingModule->top = 2;   // set headings top limit
 $texy->headingModule->balancing = Texy\Modules\HeadingModule::DYNAMIC;
 
 // generate ID
-$texy->headingModule->generateID = TRUE;
+$texy->headingModule->generateID = true;
 
 
 $html = $texy->process($text);  // that's all folks!

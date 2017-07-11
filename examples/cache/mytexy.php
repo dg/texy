@@ -27,16 +27,16 @@ class MyTexy extends Texy
 	}
 
 
-	function process($text, $useCache = TRUE)
+	function process($text, $useCache = true)
 	{
-		$this->time = -microtime(TRUE);
+		$this->time = -microtime(true);
 
 		if ($useCache) {
 			$md5 = md5($text); // md5 is key for caching
 
 			// check, if cached file exists
 			$cacheFile = $this->cachePath . $md5 . '.html';
-			$content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : NULL;
+			$content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : null;
 			if ($content) {         // read from cache
 				list($html, $this->styleSheet, $this->headingModule->title) = $content;
 
@@ -51,7 +51,7 @@ class MyTexy extends Texy
 			$html = parent::process($text);
 		}
 
-		$this->time += microtime(TRUE);
+		$this->time += microtime(true);
 		return $html;
 	}
 

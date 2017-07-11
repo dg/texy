@@ -61,7 +61,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
  * @param Texy\BlockParser
  * @param array      regexp matches
  * @param string     pattern name
- * @return Texy\HtmlElement|string|FALSE
+ * @return Texy\HtmlElement|string|false
  */
 function codeBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 {

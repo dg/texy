@@ -21,8 +21,8 @@ class Texy
 	use Strict;
 
 	// configuration directives
-	const ALL = TRUE;
-	const NONE = FALSE;
+	const ALL = true;
+	const NONE = false;
 
 	// Texy version
 	const VERSION = '2.9.1';
@@ -55,26 +55,26 @@ class Texy
 	/** @var array  Texy! syntax configuration */
 	public $allowed = [];
 
-	/** @var TRUE|FALSE|array  Allowed HTML tags */
+	/** @var true|false|array  Allowed HTML tags */
 	public $allowedTags;
 
-	/** @var TRUE|FALSE|array  Allowed classes */
+	/** @var true|false|array  Allowed classes */
 	public $allowedClasses = self::ALL; // all classes and id are allowed
 
-	/** @var TRUE|FALSE|array  Allowed inline CSS style */
+	/** @var true|false|array  Allowed inline CSS style */
 	public $allowedStyles = self::ALL;  // all inline styles are allowed
 
 	/** @var int  TAB width (for converting tabs to spaces) */
 	public $tabWidth = 8;
 
 	/** @var bool  Do obfuscate e-mail addresses? */
-	public $obfuscateEmail = TRUE;
+	public $obfuscateEmail = true;
 
 	/** @var array  regexps to check URL schemes */
-	public $urlSchemeFilters = NULL; // disable URL scheme filter
+	public $urlSchemeFilters = null; // disable URL scheme filter
 
 	/** @var bool  Paragraph merging mode */
-	public $mergeLines = TRUE;
+	public $mergeLines = true;
 
 	/** @var array  Parsing summary */
 	public $summary = [
@@ -88,20 +88,20 @@ class Texy
 
 	/** @var array  CSS classes for align modifiers */
 	public $alignClasses = [
-		'left' => NULL,
-		'right' => NULL,
-		'center' => NULL,
-		'justify' => NULL,
-		'top' => NULL,
-		'middle' => NULL,
-		'bottom' => NULL,
+		'left' => null,
+		'right' => null,
+		'center' => null,
+		'justify' => null,
+		'top' => null,
+		'middle' => null,
+		'bottom' => null,
 	];
 
 	/** @var bool  remove soft hyphens (SHY)? */
-	public $removeSoftHyphens = TRUE;
+	public $removeSoftHyphens = true;
 
 	/** @deprecated */
-	public static $advertisingNotice = FALSE;
+	public static $advertisingNotice = false;
 
 	/** @var string */
 	public $nontextParagraph = 'div';
@@ -195,7 +195,7 @@ class Texy
 	 *   $dtd[element][0] - allowed attributes (as array keys)
 	 *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
 	 *                    - array of allowed elements (as keys)
-	 *                    - FALSE - empty element
+	 *                    - false - empty element
 	 *                    - 0 - special case for ins & del
 	 * @var array
 	 */
@@ -229,7 +229,7 @@ class Texy
 		$this->loadModules();
 
 		// DEPRECATED
-		if (self::$strictDTD !== NULL) {
+		if (self::$strictDTD !== null) {
 			$this->setOutputMode(self::$strictDTD ? self::XHTML1_STRICT : self::XHTML1_TRANSITIONAL);
 		} else {
 			$this->setOutputMode(self::XHTML1_TRANSITIONAL);
@@ -260,7 +260,7 @@ class Texy
 	public function setOutputMode($mode)
 	{
 		if (!in_array($mode, [self::HTML4_TRANSITIONAL, self::HTML4_STRICT,
-			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5], TRUE)
+			self::HTML5, self::XHTML1_TRANSITIONAL, self::XHTML1_STRICT, self::XHTML5], true)
 		) {
 			throw new \InvalidArgumentException('Invalid mode.');
 		}
@@ -323,15 +323,15 @@ class Texy
 	}
 
 
-	final public function registerLinePattern($handler, $pattern, $name, $againTest = NULL)
+	final public function registerLinePattern($handler, $pattern, $name, $againTest = null)
 	{
 		if (!is_callable($handler)) {
-			$able = is_callable($handler, TRUE, $textual);
+			$able = is_callable($handler, true, $textual);
 			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = TRUE;
+			$this->allowed[$name] = true;
 		}
 
 		$this->linePatterns[$name] = [
@@ -345,13 +345,13 @@ class Texy
 	final public function registerBlockPattern($handler, $pattern, $name)
 	{
 		if (!is_callable($handler)) {
-			$able = is_callable($handler, TRUE, $textual);
+			$able = is_callable($handler, true, $textual);
 			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		// if (!preg_match('#(.)\^.*\$\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = TRUE;
+			$this->allowed[$name] = true;
 		}
 
 		$this->blockPatterns[$name] = [
@@ -364,12 +364,12 @@ class Texy
 	final public function registerPostLine($handler, $name)
 	{
 		if (!is_callable($handler)) {
-			$able = is_callable($handler, TRUE, $textual);
+			$able = is_callable($handler, true, $textual);
 			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
 		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = TRUE;
+			$this->allowed[$name] = true;
 		}
 
 		$this->postHandlers[$name] = $handler;
@@ -383,7 +383,7 @@ class Texy
 	 * @param  bool     is single line?
 	 * @return string   output HTML code
 	 */
-	public function process($text, $singleLine = FALSE)
+	public function process($text, $singleLine = false)
 	{
 		if ($this->processing) {
 			throw new \RuntimeException('Processing is in progress yet.');
@@ -391,7 +391,7 @@ class Texy
 
 		// initialization
 		$this->marks = [];
-		$this->processing = TRUE;
+		$this->processing = true;
 
 		// speed-up
 		if (is_array($this->allowedClasses)) {
@@ -417,7 +417,7 @@ class Texy
 
 		// replace tabs with spaces
 		$this->tabWidth = max(1, (int) $this->tabWidth);
-		while (strpos($text, "\t") !== FALSE) {
+		while (strpos($text, "\t") !== false) {
 			$text = Regexp::replace($text, '#^([^\t\n]*+)\t#mU', function ($m) {
 				return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
 			});
@@ -457,7 +457,7 @@ class Texy
 		// created by ParagraphModule and then protected
 		$html = str_replace("\r", "\n", $html);
 
-		$this->processing = FALSE;
+		$this->processing = false;
 
 		return Utf::utf2html($html, $this->encoding);
 	}
@@ -471,7 +471,7 @@ class Texy
 	 */
 	public function processLine($text)
 	{
-		return $this->process($text, TRUE);
+		return $this->process($text, true);
 	}
 
 
@@ -489,7 +489,7 @@ class Texy
 		$text = Helpers::normalize($text);
 
 		$this->typographyModule->beforeParse($this, $text);
-		$text = $this->typographyModule->postLine($text, TRUE);
+		$text = $this->typographyModule->postLine($text, true);
 
 		if (!empty($this->allowed['longwords'])) {
 			$text = $this->longWordsModule->postLine($text);
@@ -560,7 +560,7 @@ class Texy
 	final public function stringToText($s)
 	{
 		$save = $this->htmlOutputModule->lineWrap;
-		$this->htmlOutputModule->lineWrap = FALSE;
+		$this->htmlOutputModule->lineWrap = false;
 		$s = $this->stringToHtml($s);
 		$this->htmlOutputModule->lineWrap = $save;
 
@@ -592,7 +592,7 @@ class Texy
 	final public function addHandler($event, $callback)
 	{
 		if (!is_callable($callback)) {
-			$able = is_callable($callback, TRUE, $textual);
+			$able = is_callable($callback, true, $textual);
 			throw new \InvalidArgumentException("Handler '$textual' is not " . ($able ? 'callable.' : 'valid PHP callback.'));
 		}
 
@@ -607,7 +607,7 @@ class Texy
 	final public function invokeAroundHandlers($event, Parser $parser, array $args)
 	{
 		if (!isset($this->handlers[$event])) {
-			return FALSE;
+			return false;
 		}
 
 		$invocation = new HandlerInvocation($this->handlers[$event], $parser, $args);
@@ -720,7 +720,7 @@ class Texy
 
 
 	/** @deprecated */
-	final public static function webalize($s, $charlist = NULL)
+	final public static function webalize($s, $charlist = null)
 	{
 		return Helpers::webalize($s, $charlist);
 	}

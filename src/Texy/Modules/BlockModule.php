@@ -21,15 +21,15 @@ final class BlockModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		//$texy->allowed['blocks'] = TRUE;
-		$texy->allowed['block/default'] = TRUE;
-		$texy->allowed['block/pre'] = TRUE;
-		$texy->allowed['block/code'] = TRUE;
-		$texy->allowed['block/html'] = TRUE;
-		$texy->allowed['block/text'] = TRUE;
-		$texy->allowed['block/texysource'] = TRUE;
-		$texy->allowed['block/comment'] = TRUE;
-		$texy->allowed['block/div'] = TRUE;
+		//$texy->allowed['blocks'] = true;
+		$texy->allowed['block/default'] = true;
+		$texy->allowed['block/pre'] = true;
+		$texy->allowed['block/code'] = true;
+		$texy->allowed['block/html'] = true;
+		$texy->allowed['block/text'] = true;
+		$texy->allowed['block/texysource'] = true;
+		$texy->allowed['block/comment'] = true;
+		$texy->allowed['block/div'] = true;
 
 		$texy->addHandler('block', [$this, 'solve']);
 		$texy->addHandler('beforeBlockParse', [$this, 'beforeBlockParse']);
@@ -64,7 +64,7 @@ final class BlockModule extends Texy\Module
 	 * ....
 	 * \----
 	 *
-	 * @return HtmlElement|string|FALSE
+	 * @return HtmlElement|string|false
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
@@ -77,7 +77,7 @@ final class BlockModule extends Texy\Module
 		$mod = new Texy\Modifier($mMod);
 		$parts = preg_split('#\s+#u', $mParam, 2);
 		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
-		$param = empty($parts[1]) ? NULL : $parts[1];
+		$param = empty($parts[1]) ? null : $parts[1];
 
 		return $this->texy->invokeAroundHandlers('block', $parser, [$blocktype, $mContent, $param, $mod]);
 	}
@@ -93,7 +93,7 @@ final class BlockModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return HtmlElement|string|FALSE
+	 * @return HtmlElement|string|false
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $blocktype, $s, $param, Texy\Modifier $mod)
 	{
@@ -107,7 +107,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		if (empty($texy->allowed[$blocktype])) {
-			return FALSE;
+			return false;
 		}
 
 		if ($blocktype === 'block/texysource') {
@@ -224,7 +224,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		if ($blocktype === 'block/div') {
-			$s = Helpers::outdent($s, TRUE);
+			$s = Helpers::outdent($s, true);
 			if ($s === '') {
 				return "\n";
 			}
@@ -234,6 +234,6 @@ final class BlockModule extends Texy\Module
 			return $el;
 		}
 
-		return FALSE;
+		return false;
 	}
 }

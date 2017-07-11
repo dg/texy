@@ -17,7 +17,7 @@ Assert::matchFile(
 	$texy->process(file_get_contents(__DIR__ . '/sources/headings1.texy'))
 );
 
-$texy->headingModule->generateID = TRUE;
+$texy->headingModule->generateID = true;
 
 Assert::matchFile(
 	__DIR__ . '/expected/headings2.html',

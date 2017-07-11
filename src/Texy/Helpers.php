@@ -94,7 +94,7 @@ final class Helpers
 	 * @param  string
 	 * @return string
 	 */
-	public static function webalize($s, $charlist = NULL)
+	public static function webalize($s, $charlist = null)
 	{
 		$s = self::toAscii($s);
 		$s = strtolower($s);
@@ -109,7 +109,7 @@ final class Helpers
 	 * @param  string
 	 * @return string
 	 */
-	public static function outdent($s, $firstLine = FALSE)
+	public static function outdent($s, $firstLine = false)
 	{
 		$s = trim($s, "\n");
 		if ($firstLine) {
@@ -147,7 +147,7 @@ final class Helpers
 	 */
 	public static function prependRoot($URL, $root)
 	{
-		if ($root == NULL || !self::isRelative($URL)) {
+		if ($root == null || !self::isRelative($URL)) {
 			return $URL;
 		}
 		return rtrim($root, '/\\') . '/' . $URL;

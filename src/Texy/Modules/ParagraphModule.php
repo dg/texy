@@ -41,7 +41,7 @@ final class ParagraphModule extends Texy\Module
 			}
 
 			// try to find modifier
-			$mod = NULL;
+			$mod = null;
 			if ($mx = Regexp::match($s, '#'.Texy\Patterns::MODIFIER_H.'(?=\n|\z)#sUm', Regexp::OFFSET_CAPTURE)) {
 				list($mMod) = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
@@ -54,7 +54,7 @@ final class ParagraphModule extends Texy\Module
 
 			$res = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
 			if ($res) {
-				$el->insert(NULL, $res);
+				$el->insert(null, $res);
 			}
 		}
 	}
@@ -62,9 +62,9 @@ final class ParagraphModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|FALSE
+	 * @return Texy\HtmlElement|false
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $mod = NULL)
+	public function solve(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $mod = null)
 	{
 		$texy = $this->texy;
 
@@ -83,11 +83,11 @@ final class ParagraphModule extends Texy\Module
 
 		// check content type
 		// block contains block tag
-		if (strpos($content, $texy::CONTENT_BLOCK) !== FALSE) {
-			$el->setName(NULL); // ignores modifier!
+		if (strpos($content, $texy::CONTENT_BLOCK) !== false) {
+			$el->setName(null); // ignores modifier!
 
 		// block contains text (protected)
-		} elseif (strpos($content, $texy::CONTENT_TEXTUAL) !== FALSE) {
+		} elseif (strpos($content, $texy::CONTENT_TEXTUAL) !== false) {
 			// leave element p
 
 		// block contains text
@@ -95,14 +95,14 @@ final class ParagraphModule extends Texy\Module
 			// leave element p
 
 		// block contains only replaced element
-		} elseif (strpos($content, $texy::CONTENT_REPLACED) !== FALSE) {
+		} elseif (strpos($content, $texy::CONTENT_REPLACED) !== false) {
 			$el->setName($texy->nontextParagraph);
 
 		// block contains only markup tags or spaces or nothing
 		} else {
-			// if {ignoreEmptyStuff} return FALSE;
+			// if {ignoreEmptyStuff} return false;
 			if (!$mod) {
-				$el->setName(NULL);
+				$el->setName(null);
 			}
 		}
 
@@ -113,7 +113,7 @@ final class ParagraphModule extends Texy\Module
 			}
 
 			// add <br />
-			if (strpos($content, "\r") !== FALSE) {
+			if (strpos($content, "\r") !== false) {
 				$key = $texy->protect('<br />', $texy::CONTENT_REPLACED);
 				$content = str_replace("\r", $key, $content);
 			};

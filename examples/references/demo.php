@@ -21,7 +21,7 @@ function newReferenceHandler(Texy\HandlerInvocation $parser, $refName)
 	$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
 
 	if (!isset($names[$refName])) {
-		return FALSE; // it's not my job
+		return false; // it's not my job
 	}
 
 	$name = $names[$refName];
@@ -46,7 +46,7 @@ Texy\Configurator::safeMode($texy);     // safe mode prevets attacker to inject 
 // how generally disable links or enable images? here is a way:
 //    $disallow = array('image', 'figure', 'linkReference', 'linkEmail', 'linkURL', 'linkQuick');
 //    foreach ($diallow as $item)
-//        $texy->allowed[$item] = FALSE;
+//        $texy->allowed[$item] = false;
 
 
 // processing
@@ -60,10 +60,10 @@ echo $html;
 
 
 // do some antispam filtering - this is just very simple example ;-)
-$spam = FALSE;
+$spam = false;
 foreach ($texy->summary['links'] as $link) {
 	if (strpos($link, 'casino')) {
-		$spam = TRUE;
+		$spam = true;
 		break;
 	}
 }

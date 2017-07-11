@@ -39,11 +39,11 @@ class BlockParser extends Parser
 
 
 	// match current line against RE.
-	// if succesfull, increments current position and returns TRUE
+	// if succesfull, increments current position and returns true
 	public function next($pattern, & $matches)
 	{
 		if ($this->offset > strlen($this->text)) {
-			return FALSE;
+			return false;
 		}
 		$matches = Regexp::match(
 			$this->text,
@@ -57,7 +57,7 @@ class BlockParser extends Parser
 			foreach ($matches as $key => $value) {
 				$matches[$key] = $value[0];
 			}
-			return TRUE;
+			return true;
 		}
 	}
 
@@ -119,7 +119,7 @@ class BlockParser extends Parser
 			}
 			return 1;
 		});
-		$matches[] = [strlen($text), NULL, NULL]; // terminal cap
+		$matches[] = [strlen($text), null, null]; // terminal cap
 
 
 		// process loop
@@ -129,7 +129,7 @@ class BlockParser extends Parser
 			do {
 				list($mOffset, $mName, $mMatches) = $matches[$cursor];
 				$cursor++;
-				if ($mName === NULL || $mOffset >= $this->offset) {
+				if ($mName === null || $mOffset >= $this->offset) {
 					break;
 				}
 			} while (1);
@@ -142,7 +142,7 @@ class BlockParser extends Parser
 				}
 			}
 
-			if ($mName === NULL) {
+			if ($mName === null) {
 				break; // finito
 			}
 
@@ -153,16 +153,16 @@ class BlockParser extends Parser
 				[$this, $mMatches, $mName]
 			);
 
-			if ($res === FALSE || $this->offset <= $mOffset) { // module rejects text
+			if ($res === false || $this->offset <= $mOffset) { // module rejects text
 				// asi by se nemelo stat, rozdeli generic block
 				$this->offset = $mOffset; // turn offset back
 				continue;
 
 			} elseif ($res instanceof HtmlElement) {
-				$el->insert(NULL, $res);
+				$el->insert(null, $res);
 
 			} elseif (is_string($res)) {
-				$el->insert(NULL, $res);
+				$el->insert(null, $res);
 			}
 		} while (1);
 	}

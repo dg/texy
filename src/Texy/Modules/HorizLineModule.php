@@ -17,8 +17,8 @@ final class HorizLineModule extends Texy\Module
 {
 	/** @var array  default CSS class */
 	public $classes = [
-		'-' => NULL,
-		'*' => NULL,
+		'-' => null,
+		'*' => null,
 	];
 
 

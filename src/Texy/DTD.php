@@ -328,48 +328,48 @@ $dtd = [
 // empty elements
 'img' => [
 	$attrs + ['src'=>1,'alt'=>1,'longdesc'=>1,'name'=>1,'height'=>1,'width'=>1,'usemap'=>1,'ismap'=>1],
-	FALSE,
+	false,
 ],
 'hr' => [
 	$strict ? $attrs : $attrs + ['align'=>1,'noshade'=>1,'size'=>1,'width'=>1],
-	FALSE,
+	false,
 ],
 'br' => [
 	$strict ? $coreattrs : $coreattrs + ['clear'=>1],
-	FALSE,
+	false,
 ],
 'input' => [
 	$attrs + ['type'=>1,'name'=>1,'value'=>1,'checked'=>1,'disabled'=>1,'readonly'=>1,'size'=>1,'maxlength'=>1,'src'=>1,'alt'=>1,'usemap'=>1,'ismap'=>1,'tabindex'=>1,'accesskey'=>1,'onfocus'=>1,'onblur'=>1,'onselect'=>1,'onchange'=>1,'accept'=>1],
-	FALSE,
+	false,
 ],
 'meta' => [
 	$i18n + ['http-equiv'=>1,'name'=>1,'content'=>1,'scheme'=>1],
-	FALSE,
+	false,
 ],
 'area' => [
 	$attrs + ['shape'=>1,'coords'=>1,'href'=>1,'nohref'=>1,'alt'=>1,'tabindex'=>1,'accesskey'=>1,'onfocus'=>1,'onblur'=>1],
-	FALSE,
+	false,
 ],
 'base' => [
 	$strict ? ['href'=>1] : ['href'=>1,'target'=>1],
-	FALSE,
+	false,
 ],
 'col' => [
 	$cellalign + ['span'=>1,'width'=>1],
-	FALSE,
+	false,
 ],
 'link' => [
 	$attrs + ['charset'=>1,'href'=>1,'hreflang'=>1,'type'=>1,'rel'=>1,'rev'=>1,'media'=>1],
-	FALSE,
+	false,
 ],
 'param' => [
 	['id'=>1,'name'=>1,'value'=>1,'valuetype'=>1,'type'=>1],
-	FALSE,
+	false,
 ],
 
 // special "base content"
 '%BASE' => [
-	NULL,
+	null,
 	['html'=>1,'head'=>1,'body'=>1,'script'=>1] + $bi,
 ],
 ];
@@ -425,11 +425,11 @@ $dtd += [
 ],
 'basefont' => [
 	['id'=>1,'size'=>1,'color'=>1,'face'=>1],
-	FALSE,
+	false,
 ],
 'isindex' => [
 	$coreattrs + $i18n + ['prompt'=>1],
-	FALSE,
+	false,
 ],
 
 // proprietary
@@ -447,11 +447,11 @@ $dtd += [
 ],
 'embed' => [
 	Texy::ALL,
-	FALSE,
+	false,
 ],
 'wbr' => [
 	[],
-	FALSE,
+	false,
 ],
 ];
 

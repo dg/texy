@@ -11,9 +11,9 @@ require_once __DIR__ . '/../../src/texy.php';
 
 /**
  * User handler for images
- * @return Texy\HtmlElement|string|FALSE
+ * @return Texy\HtmlElement|string|false
  */
-function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = NULL)
+function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null)
 {
 	$parts = explode(':', $image->URL);
 	if (count($parts) !== 2) {

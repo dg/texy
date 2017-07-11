@@ -15,7 +15,7 @@ $texy->imageModule->root = '../images/';
 $texy->imageModule->linkedRoot = '../images/big/';
 $texy->imageModule->leftClass = 'left';
 $texy->htmlOutputModule->lineWrap = 180;
-$texy->allowed['longwords'] = FALSE;
+$texy->allowed['longwords'] = false;
 $texy->typographyModule->locale = 'en';
 
 Assert::matchFile(

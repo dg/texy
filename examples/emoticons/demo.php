@@ -13,7 +13,7 @@ $texy = new Texy();
 
 
 // EMOTICONS ARE DISABLED BY DEFAULT!
-$texy->allowed['emoticon'] = TRUE;
+$texy->allowed['emoticon'] = true;
 
 // configure it
 $texy->emoticonModule->class = 'smilie';

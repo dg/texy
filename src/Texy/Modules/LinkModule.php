@@ -32,10 +32,10 @@ final class LinkModule extends Texy\Module
 	public $popupOnClick = 'return !popup(this.href)';
 
 	/** @var bool  always use rel="nofollow" for absolute links? */
-	public $forceNoFollow = FALSE;
+	public $forceNoFollow = false;
 
 	/** @var bool  shorten URLs to more readable form? */
-	public $shorten = TRUE;
+	public $shorten = true;
 
 	/** @var array link references */
 	private $references = [];
@@ -50,7 +50,7 @@ final class LinkModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->allowed['link/definition'] = TRUE;
+		$texy->allowed['link/definition'] = true;
 		$texy->addHandler('newReference', [$this, 'solveNewReference']);
 		$texy->addHandler('linkReference', [$this, 'solve']);
 		$texy->addHandler('linkEmail', [$this, 'solveUrlEmail']);
@@ -126,7 +126,7 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [ref].
-	 * @return Texy\HtmlElement|string|FALSE
+	 * @return Texy\HtmlElement|string|false
 	 */
 	public function patternReference(LineParser $parser, array $matches)
 	{
@@ -143,12 +143,12 @@ final class LinkModule extends Texy\Module
 
 		$link->type = $link::BRACKET;
 
-		if ($link->label != '') { // NULL or ''
+		if ($link->label != '') { // null or ''
 			// prevent circular references
 			if (isset(self::$livelock[$link->name])) {
 				$content = $link->label;
 			} else {
-				self::$livelock[$link->name] = TRUE;
+				self::$livelock[$link->name] = true;
 				$el = new Texy\HtmlElement;
 				$lineParser = new LineParser($texy, $el);
 				$lineParser->parse($link->label);
@@ -166,7 +166,7 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: http://davidgrudl.com david@grudl.com.
-	 * @return Texy\HtmlElement|string|FALSE
+	 * @return Texy\HtmlElement|string|false
 	 */
 	public function patternUrlEmail(LineParser $parser, array $matches, $name)
 	{
@@ -198,7 +198,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Returns named reference.
 	 * @param  string  reference name
-	 * @return Link reference descriptor (or FALSE)
+	 * @return Link reference descriptor (or false)
 	 */
 	public function getReference($name)
 	{
@@ -208,10 +208,10 @@ final class LinkModule extends Texy\Module
 
 		} else {
 			$pos = strpos($name, '?');
-			if ($pos === FALSE) {
+			if ($pos === false) {
 				$pos = strpos($name, '#');
 			}
-			if ($pos !== FALSE) { // try to extract ?... #... part
+			if ($pos !== false) { // try to extract ?... #... part
 				$name2 = substr($name, 0, $pos);
 				if (isset($this->references[$name2])) {
 					$link = clone $this->references[$name2];
@@ -221,7 +221,7 @@ final class LinkModule extends Texy\Module
 			}
 		}
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -248,7 +248,7 @@ final class LinkModule extends Texy\Module
 			$dest = trim(substr($dest, 2, -2));
 			$image = $texy->imageModule->getReference($dest);
 			if ($image) {
-				$link = new Link($image->linkedURL === NULL ? $image->URL : $image->linkedURL);
+				$link = new Link($image->linkedURL === null ? $image->URL : $image->linkedURL);
 				$link->modifier = $image->modifier;
 			}
 		}
@@ -258,7 +258,7 @@ final class LinkModule extends Texy\Module
 			$this->checkLink($link);
 		}
 
-		if (strpos($link->URL, '%s') !== FALSE) {
+		if (strpos($link->URL, '%s') !== false) {
 			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
 		}
 		$link->modifier->setProperties($mMod);
@@ -273,9 +273,9 @@ final class LinkModule extends Texy\Module
 	 * @param  Texy\HtmlElement|string $content
 	 * @return Texy\HtmlElement|string
 	 */
-	public function solve(HandlerInvocation $invocation = NULL, Link $link, $content = NULL)
+	public function solve(HandlerInvocation $invocation = null, Link $link, $content = null)
 	{
-		if ($link->URL == NULL) {
+		if ($link->URL == null) {
 			return $content;
 		}
 
@@ -284,12 +284,12 @@ final class LinkModule extends Texy\Module
 		$el = new Texy\HtmlElement('a');
 
 		if (empty($link->modifier)) {
-			$nofollow = $popup = FALSE;
+			$nofollow = $popup = false;
 		} else {
 			$nofollow = isset($link->modifier->classes['nofollow']);
 			$popup = isset($link->modifier->classes['popup']);
 			unset($link->modifier->classes['nofollow'], $link->modifier->classes['popup']);
-			$el->attrs['href'] = NULL; // trick - move to front
+			$el->attrs['href'] = null; // trick - move to front
 			$link->modifier->decorate($texy, $el);
 		}
 
@@ -306,7 +306,7 @@ final class LinkModule extends Texy\Module
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $this->root);
 
 			// rel="nofollow"
-			if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== FALSE)) {
+			if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== false)) {
 				$el->attrs['rel'] = 'nofollow';
 			}
 		}
@@ -316,7 +316,7 @@ final class LinkModule extends Texy\Module
 			$el->attrs['onclick'] = $this->popupOnClick;
 		}
 
-		if ($content !== NULL) {
+		if ($content !== null) {
 			$el->add($content);
 		}
 
@@ -334,18 +334,18 @@ final class LinkModule extends Texy\Module
 	{
 		$content = $this->textualUrl($link);
 		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
-		return $this->solve(NULL, $link, $content);
+		return $this->solve(null, $link, $content);
 	}
 
 
 	/**
 	 * Finish invocation.
-	 * @return FALSE
+	 * @return false
 	 */
 	public function solveNewReference(HandlerInvocation $invocation, $name)
 	{
 		// no change
-		return FALSE;
+		return false;
 	}
 
 
@@ -367,7 +367,7 @@ final class LinkModule extends Texy\Module
 			$link->URL = 'mailto:' . $link->URL;
 
 		} elseif (!$this->texy->checkURL($link->URL, Texy\Texy::FILTER_ANCHOR)) {
-			$link->URL = NULL;
+			$link->URL = null;
 
 		} else {
 			$link->URL = str_replace('&amp;', '&', $link->URL); // replace unwanted &amp;

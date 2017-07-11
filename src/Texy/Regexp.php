@@ -52,7 +52,7 @@ class Regexp
 	 */
 	public static function match($subject, $pattern, $flags = 0, $offset = 0)
 	{
-		$empty = $flags & self::ALL ? [] : NULL;
+		$empty = $flags & self::ALL ? [] : null;
 		if ($offset > strlen($subject)) {
 			return $empty;
 		}
@@ -78,16 +78,16 @@ class Regexp
 	 * @param  string|callable
 	 * @return string
 	 */
-	public static function replace($subject, $pattern, $replacement = NULL)
+	public static function replace($subject, $pattern, $replacement = null)
 	{
 		if (is_object($replacement) || is_array($replacement)) {
 			$res = preg_replace_callback($pattern, $replacement, $subject);
-			if ($res === NULL && preg_last_error()) { // run-time error
+			if ($res === null && preg_last_error()) { // run-time error
 				trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
 			}
 			return $res;
 
-		} elseif ($replacement === NULL && is_array($pattern)) {
+		} elseif ($replacement === null && is_array($pattern)) {
 			$replacement = array_values($pattern);
 			$pattern = array_keys($pattern);
 		}

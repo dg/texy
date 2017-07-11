@@ -64,7 +64,7 @@ final class Modifier
 	/**
 	 * @param  string modifier to parse
 	 */
-	public function __construct($mod = NULL)
+	public function __construct($mod = null)
 	{
 		$this->setProperties($mod);
 	}
@@ -114,7 +114,7 @@ final class Modifier
 					} elseif ($value{0} === '#') {
 						$this->id = substr($value, 1);
 					} else {
-						$this->classes[$value] = TRUE;
+						$this->classes[$value] = true;
 					}
 				}
 				$p = $a;
@@ -180,12 +180,12 @@ final class Modifier
 		}
 
 		// title
-		if ($this->title !== NULL) {
+		if ($this->title !== null) {
 			$elAttrs['title'] = $texy->typographyModule->postLine($this->title);
 		}
 
 		// classes & ID
-		if ($this->classes || $this->id !== NULL) {
+		if ($this->classes || $this->id !== null) {
 			$tmp = $texy->_classes; // speed-up
 			if ($tmp === $texy::ALL) {
 				foreach ($this->classes as $value => $foo) {

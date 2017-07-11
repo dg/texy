@@ -33,13 +33,13 @@ function doIt($texy)
 header('Content-type: text/html; charset=utf-8');
 
 echo '<h2>mode: Styles and Classes allowed (default)</h2>';
-$texy->allowedClasses = TRUE;
-$texy->allowedStyles = TRUE;
+$texy->allowedClasses = true;
+$texy->allowedStyles = true;
 doIt($texy);
 
 echo '<h2>mode: Styles and Classes disabled</h2>';
-$texy->allowedClasses = FALSE;
-$texy->allowedStyles = FALSE;
+$texy->allowedClasses = false;
+$texy->allowedStyles = false;
 doIt($texy);
 
 echo '<h2>mode: Custom</h2>';

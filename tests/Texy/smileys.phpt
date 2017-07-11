@@ -13,7 +13,7 @@ $texy = new Texy\Texy;
 $texy->htmlOutputModule->lineWrap = 180;
 $texy->emoticonModule->root = 'images/images/';
 $texy->emoticonModule->class = 'smiley';
-$texy->allowed['emoticon'] = TRUE;
+$texy->allowed['emoticon'] = true;
 
 Assert::matchFile(
 	__DIR__ . '/expected/smileys.html',

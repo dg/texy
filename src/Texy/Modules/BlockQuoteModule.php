@@ -38,7 +38,7 @@ final class BlockQuoteModule extends Texy\Module
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 *
-	 * @return Texy\HtmlElement|string|FALSE
+	 * @return Texy\HtmlElement|string|false
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
@@ -84,14 +84,14 @@ final class BlockQuoteModule extends Texy\Module
 */
 
 			list(, $mPrefix, $mContent) = $matches;
-		} while (TRUE);
+		} while (true);
 
 		$el->attrs['cite'] = $mod->cite;
 		$el->parseBlock($texy, $content, $parser->isIndented());
 
 		// no content?
 		if (!$el->count()) {
-			return FALSE;
+			return false;
 		}
 
 		// event listener
@@ -104,14 +104,14 @@ final class BlockQuoteModule extends Texy\Module
 	/**
 	 * Converts cite source to URL.
 	 * @param  string
-	 * @return string|NULL
+	 * @return string|null
 	 */
 	public function citeLink($link)
 	{
 		$texy = $this->texy;
 
-		if ($link == NULL) {
-			return NULL;
+		if ($link == null) {
+			return null;
 		}
 
 		if ($link{0} === '[') { // [ref]

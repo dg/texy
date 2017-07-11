@@ -18,7 +18,7 @@ use Texy\Patterns;
 final class HtmlModule extends Texy\Module
 {
 	/** @var bool   pass HTML comments to output? */
-	public $passComment = TRUE;
+	public $passComment = true;
 
 
 	public function __construct($texy)
@@ -44,7 +44,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <!-- comment -->.
-	 * @return HtmlElement|string|FALSE
+	 * @return HtmlElement|string|false
 	 */
 	public function patternComment(Texy\LineParser $parser, array $matches)
 	{
@@ -55,7 +55,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <tag attr="...">.
-	 * @return HtmlElement|string|FALSE
+	 * @return HtmlElement|string|false
 	 */
 	public function patternTag(Texy\LineParser $parser, array $matches)
 	{
@@ -69,25 +69,25 @@ final class HtmlModule extends Texy\Module
 		$isEmpty = $mEmpty === '/';
 		if (!$isEmpty && substr($mAttr, -1) === '/') { // uvizlo v $mAttr?
 			$mAttr = substr($mAttr, 0, -1);
-			$isEmpty = TRUE;
+			$isEmpty = true;
 		}
 
 		// error - can't close empty element
 		if ($isEmpty && !$isStart) {
-			return FALSE;
+			return false;
 		}
 
 		// error - end element with atttrs
 		$mAttr = trim(strtr($mAttr, "\n", ' '));
 		if ($mAttr && !$isStart) {
-			return FALSE;
+			return false;
 		}
 
 		$el = new HtmlElement($mTag);
 
 		if ($isStart) {
 			// parse attributes
-			$matches2 = NULL;
+			$matches2 = null;
 			preg_match_all(
 				'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
 				$mAttr,
@@ -98,8 +98,8 @@ final class HtmlModule extends Texy\Module
 			foreach ($matches2 as $m) {
 				$key = strtolower($m[1]);
 				$value = $m[2];
-				if ($value == NULL) {
-					$el->attrs[$key] = TRUE;
+				if ($value == null) {
+					$el->attrs[$key] = true;
 				} elseif ($value{0} === '\'' || $value{0} === '"') {
 					$el->attrs[$key] = html_entity_decode(substr($value, 1, -1), ENT_QUOTES, 'UTF-8');
 				} else {
@@ -120,16 +120,16 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return HtmlElement|string|FALSE
+	 * @return HtmlElement|string|false
 	 */
-	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, $isStart, $forceEmpty = NULL)
+	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, $isStart, $forceEmpty = null)
 	{
 		$texy = $this->texy;
 
 		// tag & attibutes
 		$allowedTags = $texy->allowedTags; // speed-up
 		if (!$allowedTags) {
-			return FALSE; // all tags are disabled
+			return false; // all tags are disabled
 		}
 
 		// convert case
@@ -143,14 +143,14 @@ final class HtmlModule extends Texy\Module
 
 		if (is_array($allowedTags)) {
 			if (!isset($allowedTags[$name])) {
-				return FALSE;
+				return false;
 			}
 			$allowedAttrs = $allowedTags[$name]; // allowed attrs
 
 		} else {
 			// allowedTags === Texy\Texy::ALL
 			if ($forceEmpty) {
-				$el->setName($name, TRUE);
+				$el->setName($name, true);
 			}
 			$allowedAttrs = $texy::ALL; // all attrs are allowed
 		}
@@ -189,7 +189,7 @@ final class HtmlModule extends Texy\Module
 				}
 
 			} elseif ($tmp !== $texy::ALL) {
-				$elAttrs['class'] = NULL;
+				$elAttrs['class'] = null;
 			}
 		}
 
@@ -197,10 +197,10 @@ final class HtmlModule extends Texy\Module
 		if (isset($elAttrs['id'])) {
 			if (is_array($tmp)) {
 				if (!isset($tmp['#' . $elAttrs['id']])) {
-					$elAttrs['id'] = NULL;
+					$elAttrs['id'] = null;
 				}
 			} elseif ($tmp !== $texy::ALL) {
-				$elAttrs['id'] = NULL;
+				$elAttrs['id'] = null;
 			}
 		}
 
@@ -209,7 +209,7 @@ final class HtmlModule extends Texy\Module
 			$tmp = $texy->_styles; // speed-up
 			if (is_array($tmp)) {
 				$styles = explode(';', $elAttrs['style']);
-				$elAttrs['style'] = NULL;
+				$elAttrs['style'] = null;
 				foreach ($styles as $value) {
 					$pair = explode(':', $value, 2);
 					$prop = trim($pair[0]);
@@ -218,7 +218,7 @@ final class HtmlModule extends Texy\Module
 					}
 				}
 			} elseif ($tmp !== $texy::ALL) {
-				$elAttrs['style'] = NULL;
+				$elAttrs['style'] = null;
 			}
 		}
 
@@ -233,16 +233,16 @@ final class HtmlModule extends Texy\Module
 
 		if ($name === 'img') {
 			if (!isset($elAttrs['src']) || !$texy->checkURL($elAttrs['src'], $texy::FILTER_IMAGE)) {
-				return FALSE;
+				return false;
 			}
 			$texy->summary['images'][] = $elAttrs['src'];
 
 		} elseif ($name === 'a') {
 			if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) {
-				return FALSE;
+				return false;
 			}
 			if (isset($elAttrs['href'])) {
-				if ($texy->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== FALSE) {
+				if ($texy->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== false) {
 					if (isset($elAttrs['rel'])) {
 						$elAttrs['rel'] = (array) $elAttrs['rel'];
 					}
@@ -250,7 +250,7 @@ final class HtmlModule extends Texy\Module
 				}
 
 				if (!$texy->checkURL($elAttrs['href'], $texy::FILTER_ANCHOR)) {
-					return FALSE;
+					return false;
 				}
 
 				$texy->summary['links'][] = $elAttrs['href'];

@@ -14,11 +14,11 @@ $texy = new Texy();
 // other OPTIONAL configuration
 $texy->encoding = 'windows-1250';      // disable UTF-8
 $texy->imageModule->root = 'images/';  // specify image folder
-$texy->allowed['phrase/ins'] = TRUE;
-$texy->allowed['phrase/del'] = TRUE;
-$texy->allowed['phrase/sup'] = TRUE;
-$texy->allowed['phrase/sub'] = TRUE;
-$texy->allowed['phrase/cite'] = TRUE;
+$texy->allowed['phrase/ins'] = true;
+$texy->allowed['phrase/del'] = true;
+$texy->allowed['phrase/sup'] = true;
+$texy->allowed['phrase/sub'] = true;
+$texy->allowed['phrase/cite'] = true;
 
 
 // processing

@@ -43,7 +43,7 @@ final class ScriptModule extends Texy\Module
 	/**
 	 * Callback for: {{...}}.
 	 *
-	 * @return Texy\HtmlElement|string|FALSE
+	 * @return Texy\HtmlElement|string|false
 	 */
 	public function pattern(Texy\LineParser $parser, array $matches)
 	{
@@ -52,10 +52,10 @@ final class ScriptModule extends Texy\Module
 
 		$cmd = trim($mContent);
 		if ($cmd === '') {
-			return FALSE;
+			return false;
 		}
 
-		$raw = NULL;
+		$raw = null;
 		$args = [];
 		// function (arg, arg, ...) or function: arg, arg
 		if ($matches = Texy\Regexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
@@ -85,24 +85,24 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|string|FALSE
+	 * @return Texy\HtmlElement|string|false
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $cmd, array $args = NULL, $raw)
+	public function solve(Texy\HandlerInvocation $invocation, $cmd, array $args = null, $raw)
 	{
 		if ($cmd === 'texy') {
 			if (!$args) {
-				return FALSE;
+				return false;
 			}
 
 			switch ($args[0]) {
 				case 'nofollow':
-					$this->texy->linkModule->forceNoFollow = TRUE;
+					$this->texy->linkModule->forceNoFollow = true;
 					break;
 			}
 			return '';
 
 		} else {
-			return FALSE;
+			return false;
 		}
 	}
 }

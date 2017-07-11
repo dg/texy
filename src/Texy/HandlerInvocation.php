@@ -55,8 +55,8 @@ final class HandlerInvocation
 
 		$this->pos--;
 		$res = call_user_func_array($this->handlers[$this->pos], $this->args);
-		if ($res === NULL) {
-			throw new \UnexpectedValueException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], TRUE) . "'.");
+		if ($res === null) {
+			throw new \UnexpectedValueException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], true) . "'.");
 		}
 		return $res;
 	}
