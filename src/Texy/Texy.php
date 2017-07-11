@@ -765,5 +765,4 @@ class Texy
 	final public function free()
 	{
 	}
-
 }

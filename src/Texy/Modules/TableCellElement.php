@@ -23,5 +23,4 @@ class TableCellElement extends Texy\HtmlElement
 
 	/** @var string */
 	public $text;
-
 }

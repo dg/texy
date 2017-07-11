@@ -54,5 +54,4 @@ final class Link
 			$this->modifier = clone $this->modifier;
 		}
 	}
-
 }

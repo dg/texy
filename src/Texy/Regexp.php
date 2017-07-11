@@ -98,5 +98,4 @@ class Regexp
 		}
 		return $res;
 	}
-
 }

@@ -286,5 +286,4 @@ final class HtmlModule extends Texy\Module
 
 		return $this->texy->protect('<!--' . $content . '-->', Texy\Texy::CONTENT_MARKUP);
 	}
-
 }

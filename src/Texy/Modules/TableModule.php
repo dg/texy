@@ -284,5 +284,4 @@ final class TableModule extends Texy\Module
 			}
 		}
 	}
-
 }

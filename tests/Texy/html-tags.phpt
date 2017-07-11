@@ -17,6 +17,7 @@ function createTexy()
 	return $texy;
 }
 
+
 $texy = createTexy();
 Assert::matchFile(
 	__DIR__ . '/expected/html-tags1a.html',

@@ -52,5 +52,4 @@ final class Image
 			$this->modifier = clone $this->modifier;
 		}
 	}
-
 }

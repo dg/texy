@@ -32,5 +32,4 @@ class Parser
 	{
 		return $this->texy;
 	}
-
 }

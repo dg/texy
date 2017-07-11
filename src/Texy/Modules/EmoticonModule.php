@@ -114,5 +114,4 @@ final class EmoticonModule extends Texy\Module
 		$texy->summary['images'][] = $el->attrs['src'];
 		return $el;
 	}
-
 }

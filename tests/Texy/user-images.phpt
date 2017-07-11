@@ -14,6 +14,7 @@ $texy->imageModule->root = '../images/';
 $texy->imageModule->linkedRoot = '../images/big/';
 $texy->htmlOutputModule->lineWrap = 180;
 
+
 function imageHandler($invocation, $image, $link)
 {
 	$texy = $invocation->getTexy();
@@ -27,6 +28,7 @@ function imageHandler($invocation, $image, $link)
 
 	return $invocation->proceed();
 }
+
 
 $texy->addHandler('image', 'imageHandler');
 

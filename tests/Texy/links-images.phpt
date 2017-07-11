@@ -20,6 +20,7 @@ function createTexy()
 	return $texy;
 }
 
+
 $texy = createTexy();
 Assert::matchFile(
 	__DIR__ . '/expected/links-images1.html',

@@ -164,8 +164,6 @@ class BlockParser extends Parser
 			} elseif (is_string($res)) {
 				$el->insert(NULL, $res);
 			}
-
 		} while (1);
 	}
-
 }

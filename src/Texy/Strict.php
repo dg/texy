@@ -111,5 +111,4 @@ trait Strict
 		}
 		return $best;
 	}
-
 }

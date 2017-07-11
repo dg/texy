@@ -122,5 +122,4 @@ final class FigureModule extends Texy\Module
 
 		return $el;
 	}
-
 }

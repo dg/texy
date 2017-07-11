@@ -120,19 +120,26 @@ final class Modifier
 				$p = $a;
 
 			} elseif ($ch === '^') { // alignment
-				$this->vAlign = 'top'; $p++;
+				$this->vAlign = 'top';
+				$p++;
 			} elseif ($ch === '-') {
-				$this->vAlign = 'middle'; $p++;
+				$this->vAlign = 'middle';
+				$p++;
 			} elseif ($ch === '_') {
-				$this->vAlign = 'bottom'; $p++;
+				$this->vAlign = 'bottom';
+				$p++;
 			} elseif ($ch === '=') {
-				$this->hAlign = 'justify'; $p++;
+				$this->hAlign = 'justify';
+				$p++;
 			} elseif ($ch === '>') {
-				$this->hAlign = 'right'; $p++;
+				$this->hAlign = 'right';
+				$p++;
 			} elseif (substr($mod, $p, 2) === '<>') {
-				$this->hAlign = 'center'; $p+=2;
+				$this->hAlign = 'center';
+				$p+=2;
 			} elseif ($ch === '<') {
-				$this->hAlign = 'left'; $p++;
+				$this->hAlign = 'left';
+				$p++;
 			} else {
 				break;
 			}
@@ -151,7 +158,6 @@ final class Modifier
 		// tag & attibutes
 		$tmp = $texy->allowedTags; // speed-up
 		if (!$this->attrs) {
-
 		} elseif ($tmp === $texy::ALL) {
 			$elAttrs = $this->attrs;
 			$el->validateAttrs($texy->dtd);
@@ -235,5 +241,4 @@ final class Modifier
 
 		return $el;
 	}
-
 }

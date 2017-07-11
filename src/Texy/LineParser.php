@@ -138,10 +138,8 @@ class LineParser extends Parser
 				$arrOffset[$min] = -1;
 				$offset += strlen($res);
 			}
-
 		} while (1);
 
 		$this->element->insert(NULL, $text);
 	}
-
 }

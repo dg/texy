@@ -96,5 +96,4 @@ class Configurator
 			unset($texy->allowedTags['img'], $texy->allowedTags['object'], $texy->allowedTags['embed'], $texy->allowedTags['applet']);
 		} // TODO: else...
 	}
-
 }

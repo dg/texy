@@ -17,7 +17,6 @@ use Texy\HtmlElement;
  */
 final class BlockModule extends Texy\Module
 {
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
@@ -237,5 +236,4 @@ final class BlockModule extends Texy\Module
 
 		return FALSE;
 	}
-
 }

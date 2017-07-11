@@ -70,5 +70,4 @@ class TexyMacro extends Latte\Macros\MacroSet
 			$info[0] = $info[1];
 		}
 	}
-
 }

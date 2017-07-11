@@ -67,5 +67,4 @@ final class HorizLineModule extends Texy\Module
 
 		return $el;
 	}
-
 }

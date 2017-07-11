@@ -18,7 +18,6 @@ use Texy\Patterns;
  */
 final class PhraseModule extends Texy\Module
 {
-
 	public $tags = [
 		'phrase/strong' => 'strong', // or 'b'
 		'phrase/em' => 'em', // or 'i'
@@ -341,5 +340,4 @@ final class PhraseModule extends Texy\Module
 
 		return $el;
 	}
-
 }

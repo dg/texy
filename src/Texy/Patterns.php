@@ -42,5 +42,4 @@ class Patterns
 
 	// links, url - doesn't end by :).,!?
 	const LINK_URL = '(?:\[[^\]\n]++\]|(?=[\w/+.~%&?@=_\#$])[^\s\x14-\x1F]{0,1000}?[^:);,.!?\s\x14-\x1F])'; // any url - doesn't end by :).,!?
-
 }

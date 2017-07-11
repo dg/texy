@@ -15,7 +15,6 @@ use Texy;
  */
 final class BlockQuoteModule extends Texy\Module
 {
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
@@ -130,5 +129,4 @@ final class BlockQuoteModule extends Texy\Module
 
 		return Texy\Helpers::prependRoot($link, $texy->linkModule->root);
 	}
-
 }

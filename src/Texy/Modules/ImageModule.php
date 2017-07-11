@@ -8,8 +8,8 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Image;
 use Texy\Helpers;
+use Texy\Image;
 use Texy\Patterns;
 
 
@@ -306,5 +306,4 @@ final class ImageModule extends Texy\Module
 
 		return $el;
 	}
-
 }

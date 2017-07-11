@@ -16,7 +16,6 @@ use Texy\Regexp;
  */
 final class ParagraphModule extends Texy\Module
 {
-
 	public function __construct($texy)
 	{
 		$this->texy = $texy;
@@ -125,5 +124,4 @@ final class ParagraphModule extends Texy\Module
 
 		return $el;
 	}
-
 }

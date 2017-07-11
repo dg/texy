@@ -386,7 +386,6 @@ final class LinkModule extends Texy\Module
 		}
 
 		if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#i', $link->raw)) {
-
 			$raw = strncasecmp($link->raw, 'www.', 4) === 0 ? 'none://' . $link->raw : $link->raw;
 
 			// parse_url() in PHP damages UTF-8 - use regular expression
@@ -417,5 +416,4 @@ final class LinkModule extends Texy\Module
 
 		return $link->raw;
 	}
-
 }

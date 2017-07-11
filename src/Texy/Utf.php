@@ -68,6 +68,7 @@ class Utf
 
 	/** @deprecated */
 
+
 	public static function utf2ascii($s)
 	{
 		return Helpers::toAscii($s);
@@ -130,5 +131,4 @@ class Utf
 
 		return '';
 	}
-
 }

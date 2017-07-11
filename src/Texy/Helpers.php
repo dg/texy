@@ -152,5 +152,4 @@ final class Helpers
 		}
 		return rtrim($root, '/\\') . '/' . $URL;
 	}
-
 }

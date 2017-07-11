@@ -243,5 +243,4 @@ final class ListModule extends Texy\Module
 
 		return $elItem;
 	}
-
 }

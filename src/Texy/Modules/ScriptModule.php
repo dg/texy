@@ -105,5 +105,4 @@ final class ScriptModule extends Texy\Module
 			return FALSE;
 		}
 	}
-
 }

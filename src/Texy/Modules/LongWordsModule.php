@@ -219,5 +219,4 @@ final class LongWordsModule extends Texy\Module
 
 		return implode("\xC2\xAD", $syllables);
 	}
-
 }

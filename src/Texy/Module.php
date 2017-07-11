@@ -17,5 +17,4 @@ abstract class Module
 
 	/** @var Texy */
 	protected $texy;
-
 }

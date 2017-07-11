@@ -222,5 +222,4 @@ final class HeadingModule extends Texy\Module
 
 		return $el;
 	}
-
 }

@@ -126,5 +126,4 @@ final class TypographyModule extends Texy\Module
 		}
 		return Texy\Regexp::replace($text, $this->pattern);
 	}
-
 }

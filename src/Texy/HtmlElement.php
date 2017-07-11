@@ -578,5 +578,4 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		$parser = new BlockParser($texy, $this, $indented);
 		$parser->parse($s);
 	}
-
 }

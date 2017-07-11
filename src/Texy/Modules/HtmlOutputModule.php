@@ -331,5 +331,4 @@ final class HtmlOutputModule extends Texy\Module
 		list(, $space, $s) = $m;
 		return $space . wordwrap($s, $this->lineWrap, "\n" . $space);
 	}
-
 }
