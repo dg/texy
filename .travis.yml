@@ -5,23 +5,51 @@ php:
     - 5.6
     - 7.0
     - 7.1
-    - hhvm
+    - 7.2
 
-matrix:
-    allow_failures:
-        - php: hhvm
+before_install:
+    # turn off XDebug
+    - phpenv config-rm xdebug.ini || return 0
+
+install:
+    - travis_retry composer install --no-progress --prefer-dist
 
 script:
-    - vendor/bin/tester tests -s -p php -c tests/php-unix.ini
-    - php temp/code-checker/src/code-checker.php --short-arrays -i windows-1250.html -i windows-1250.texy
+    - vendor/bin/tester tests -s
 
-before_script:
-    # Install Nette Tester & Code Checker
-    - travis_retry composer install --no-interaction
-    - travis_retry composer create-project nette/code-checker temp/code-checker ~2.5 --no-interaction
+after_failure:
+    # Print *.actual content
+    - for i in $(find tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done
+
+jobs:
+    include:
+        -   stage: Code Standard Checker
+            php: 7.1
+            install:
+                # Install Nette Code Checker
+                - travis_retry composer create-project nette/code-checker temp/code-checker ~2 --no-progress
+            script:
+                - php temp/code-checker/src/code-checker.php --short-arrays -i windows-1250.html -i windows-1250.texy
+
+
+        -   stage: Code Coverage
+            php: 7.1
+            script:
+                - vendor/bin/tester -p phpdbg tests -s --coverage ./coverage.xml --coverage-src ./src
+            after_script:
+                - wget https://github.com/satooshi/php-coveralls/releases/download/v1.0.1/coveralls.phar
+                - php coveralls.phar --verbose --config tests/.coveralls.yml
+
+
+    allow_failures:
+        -   stage: Code Coverage
+
 
 sudo: false
 
 cache:
     directories:
         - $HOME/.composer/cache
+
+notifications:
+    email: false
