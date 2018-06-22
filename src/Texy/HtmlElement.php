@@ -23,41 +23,32 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 {
 	use Strict;
 
-	/** @var string  element's name */
-	private $name;
-
-	/** @var bool  is element empty? */
-	private $isEmpty;
-
 	/** @var array  element's attributes */
 	public $attrs = [];
-
-	/** @var array  of HtmlElement | string nodes */
-	protected $children = [];
 
 	/** @var bool  use XHTML syntax? */
 	public static $xhtml = true;
 
 	/** @var array  empty elements */
-	public static $emptyElements = ['img'=>1,'hr'=>1,'br'=>1,'input'=>1,'meta'=>1,'area'=>1,
-		'base'=>1,'col'=>1,'link'=>1,'param'=>1,'basefont'=>1,'frame'=>1,'isindex'=>1,'wbr'=>1,'embed'=>1];
+	public static $emptyElements = ['img' => 1, 'hr' => 1, 'br' => 1, 'input' => 1, 'meta' => 1, 'area' => 1,
+		'base' => 1, 'col' => 1, 'link' => 1, 'param' => 1, 'basefont' => 1, 'frame' => 1, 'isindex' => 1, 'wbr' => 1, 'embed' => 1, ];
 
 	/** @var array  %inline; elements; replaced elements + br have value '1' */
-	public static $inlineElements = ['ins'=>0,'del'=>0,'tt'=>0,'i'=>0,'b'=>0,'big'=>0,'small'=>0,'em'=>0,
-		'strong'=>0,'dfn'=>0,'code'=>0,'samp'=>0,'kbd'=>0,'var'=>0,'cite'=>0,'abbr'=>0,'acronym'=>0,
-		'sub'=>0,'sup'=>0,'q'=>0,'span'=>0,'bdo'=>0,'a'=>0,'object'=>1,'img'=>1,'br'=>1,'script'=>1,
-		'map'=>0,'input'=>1,'select'=>1,'textarea'=>1,'label'=>0,'button'=>1,
-		'u'=>0,'s'=>0,'strike'=>0,'font'=>0,'applet'=>1,'basefont'=>0, // transitional
-		'embed'=>1,'wbr'=>0,'nobr'=>0,'canvas'=>1, // proprietary
+	public static $inlineElements = ['ins' => 0, 'del' => 0, 'tt' => 0, 'i' => 0, 'b' => 0, 'big' => 0, 'small' => 0, 'em' => 0,
+		'strong' => 0, 'dfn' => 0, 'code' => 0, 'samp' => 0, 'kbd' => 0, 'var' => 0, 'cite' => 0, 'abbr' => 0, 'acronym' => 0,
+		'sub' => 0, 'sup' => 0, 'q' => 0, 'span' => 0, 'bdo' => 0, 'a' => 0, 'object' => 1, 'img' => 1, 'br' => 1, 'script' => 1,
+		'map' => 0, 'input' => 1, 'select' => 1, 'textarea' => 1, 'label' => 0, 'button' => 1,
+		'u' => 0, 's' => 0, 'strike' => 0, 'font' => 0, 'applet' => 1, 'basefont' => 0, // transitional
+		'embed' => 1, 'wbr' => 0, 'nobr' => 0, 'canvas' => 1, // proprietary
 	];
 
 	/** @var array  elements with optional end tag in HTML */
-	public static $optionalEnds = ['body'=>1,'head'=>1,'html'=>1,'colgroup'=>1,'dd'=>1,
-		'dt'=>1,'li'=>1,'option'=>1,'p'=>1,'tbody'=>1,'td'=>1,'tfoot'=>1,'th'=>1,'thead'=>1,'tr'=>1];
+	public static $optionalEnds = ['body' => 1, 'head' => 1, 'html' => 1, 'colgroup' => 1, 'dd' => 1,
+		'dt' => 1, 'li' => 1, 'option' => 1, 'p' => 1, 'tbody' => 1, 'td' => 1, 'tfoot' => 1, 'th' => 1, 'thead' => 1, 'tr' => 1, ];
 
 	/** @see http://www.w3.org/TR/xhtml1/prohibitions.html */
 	public static $prohibits = [
-		'a' => ['a','button'],
+		'a' => ['a', 'button'],
 		'img' => ['pre'],
 		'object' => ['pre'],
 		'big' => ['pre'],
@@ -74,6 +65,15 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		'iframe' => ['button'],
 		'isindex' => ['button'],
 	];
+
+	/** @var array  of HtmlElement | string nodes */
+	protected $children = [];
+
+	/** @var string  element's name */
+	private $name;
+
+	/** @var bool  is element empty? */
+	private $isEmpty;
 
 
 	/**

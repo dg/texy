@@ -37,8 +37,8 @@ final class FigureModule extends Texy\Module
 
 		$texy->registerBlockPattern(
 			[$this, 'pattern'],
-			'#^\[\* *+([^\n'.Patterns::MARK.']{1,1000})'.Patterns::MODIFIER.'? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::('.Patterns::LINK_URL.'|:))?? ++\*\*\* ++(.{0,2000})'.Patterns::MODIFIER_H.'?()$#mUu',
+			'#^\[\* *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
+			. '(?::(' . Patterns::LINK_URL . '|:))?? ++\*\*\* ++(.{0,2000})' . Patterns::MODIFIER_H . '?()$#mUu',
 			'figure'
 		);
 	}

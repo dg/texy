@@ -15,8 +15,6 @@ use Texy;
  */
 final class LongWordsModule extends Texy\Module
 {
-	public $wordLimit = 20;
-
 	const
 		DONT = 0, // don't hyphenate
 		HERE = 1, // hyphenate here
@@ -24,29 +22,31 @@ final class LongWordsModule extends Texy\Module
 
 	const SAFE_LIMIT = 1000;
 
+	public $wordLimit = 20;
+
 	private $consonants = [
-		'b','c','d','f','g','h','j','k','l','m','n','p','q','r','s','t','v','w','x','z',
-		'B','C','D','F','G','H','J','K','L','M','N','P','Q','R','S','T','V','W','X','Z',
-		"\xc4\x8d","\xc4\x8f","\xc5\x88","\xc5\x99","\xc5\xa1","\xc5\xa5","\xc5\xbe", //czech utf-8
-		"\xc4\x8c","\xc4\x8e","\xc5\x87","\xc5\x98","\xc5\xa0","\xc5\xa4","\xc5\xbd"];
+		'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z',
+		'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Z',
+		"\xc4\x8d", "\xc4\x8f", "\xc5\x88", "\xc5\x99", "\xc5\xa1", "\xc5\xa5", "\xc5\xbe", //czech utf-8
+		"\xc4\x8c", "\xc4\x8e", "\xc5\x87", "\xc5\x98", "\xc5\xa0", "\xc5\xa4", "\xc5\xbd", ];
 
 	private $vowels = [
-		'a','e','i','o','u','y',
-		'A','E','I','O','U','Y',
-		"\xc3\xa1","\xc3\xa9","\xc4\x9b","\xc3\xad","\xc3\xb3","\xc3\xba","\xc5\xaf","\xc3\xbd", //czech utf-8
-		"\xc3\x81","\xc3\x89","\xc4\x9a","\xc3\x8d","\xc3\x93","\xc3\x9a","\xc5\xae","\xc3\x9d"];
+		'a', 'e', 'i', 'o', 'u', 'y',
+		'A', 'E', 'I', 'O', 'U', 'Y',
+		"\xc3\xa1", "\xc3\xa9", "\xc4\x9b", "\xc3\xad", "\xc3\xb3", "\xc3\xba", "\xc5\xaf", "\xc3\xbd", //czech utf-8
+		"\xc3\x81", "\xc3\x89", "\xc4\x9a", "\xc3\x8d", "\xc3\x93", "\xc3\x9a", "\xc5\xae", "\xc3\x9d", ];
 
 	private $before_r = [
-		'b','B','c','C','d','D','f','F','g','G','k','K','p','P','r','R','t','T','v','V',
-		"\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\x99","\xc5\x98","\xc5\xa5","\xc5\xa4"]; //czech utf-8
+		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'p', 'P', 'r', 'R', 't', 'T', 'v', 'V',
+		"\xc4\x8d", "\xc4\x8c", "\xc4\x8f", "\xc4\x8e", "\xc5\x99", "\xc5\x98", "\xc5\xa5", "\xc5\xa4", ]; //czech utf-8
 
 	private $before_l = [
-		'b','B','c','C','d','D','f','F','g','G','k','K','l','L','p','P','t','T','v','V',
-		"\xc4\x8d","\xc4\x8c","\xc4\x8f","\xc4\x8e","\xc5\xa5","\xc5\xa4"]; //czech utf-8
+		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'l', 'L', 'p', 'P', 't', 'T', 'v', 'V',
+		"\xc4\x8d", "\xc4\x8c", "\xc4\x8f", "\xc4\x8e", "\xc5\xa5", "\xc5\xa4", ]; //czech utf-8
 
-	private $before_h = ['c','C','s','S'];
+	private $before_h = ['c', 'C', 's', 'S'];
 
-	private $doubleVowels = ['a','A','o','O'];
+	private $doubleVowels = ['a', 'A', 'o', 'O'];
 
 
 	public function __construct($texy)
@@ -90,7 +90,7 @@ final class LongWordsModule extends Texy\Module
 
 		$chars = [];
 		preg_match_all(
-			'#['.Texy\Patterns::MARK.']+|.#u',
+			'#[' . Texy\Patterns::MARK . ']+|.#u',
 			$mWord,
 			$chars
 		);
