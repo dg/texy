@@ -1,4 +1,4 @@
-Texy!   [![Buy me a coffee](https://files.nette.org/images/coffee1s.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CKHXEYFDKXKE8)
+Texy!   [![Buy me a coffee](https://files.nette.org/images/coffee1s.png)](https://nette.org/make-donation?to=texy)
 ====
 
 [![Downloads this Month](https://img.shields.io/packagist/dm/texy/texy.svg)](https://packagist.org/packages/texy/texy)
@@ -25,3 +25,5 @@ Documentation and Examples
 
 Refer to the 'examples' directory for examples. Texy documentation is
 available on the homepage https://texy.info.
+
+If you like Texy, **[please make a donation now](https://nette.org/make-donation?to=texy)**. Thank you!
