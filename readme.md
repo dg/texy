@@ -28,3 +28,9 @@ Refer to the 'examples' directory for examples. Texy documentation is
 available on the homepage https://texy.info.
 
 If you like Texy, **[please make a donation now](https://nette.org/make-donation?to=texy)**. Thank you!
+
+
+Dockerized Texy service
+-----------------------
+
+I am not quite sure how to contact the Texy community anywhere else, so herebe I am letting you know that I created a [Docker image with Texy converter](https://hub.docker.com/r/ondrazizka/texy-service/tags/).
