@@ -98,7 +98,7 @@ final class FigureModule extends Texy\Module
 
 		$el = new Texy\HtmlElement('div');
 		if (!empty($image->width) && $this->widthDelta !== false) {
-			$el->attrs['style']['width'] = ($image->width + $this->widthDelta) . 'px';
+			$el->attrs['style']['max-width'] = ($image->width + $this->widthDelta) . 'px';
 		}
 		$mod->decorate($texy, $el);
 
