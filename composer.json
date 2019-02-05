@@ -11,10 +11,10 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4.4"
+		"php": ">=7.1"
 	},
 	"require-dev": {
-		"nette/tester": "~1.5",
+		"nette/tester": "^2.0",
 		"tracy/tracy": "^2.4"
 	},
 	"replace": {
