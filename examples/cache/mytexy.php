@@ -27,7 +27,7 @@ class mytexy extends Texy
 	}
 
 
-	public function process($text, $useCache = true)
+	public function cachedProcess($text, $useCache = true)
 	{
 		$this->time = -microtime(true);
 
@@ -48,7 +48,7 @@ class mytexy extends Texy
 			}
 
 		} else { // if caching is disabled
-			$html = parent::process($text);
+			$html = $this->process($text);
 		}
 
 		$this->time += microtime(true);

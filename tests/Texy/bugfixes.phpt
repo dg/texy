@@ -36,6 +36,6 @@ test(function () { // allowed XSS for URLs #31
 
 test(function () { // allowed XSS for URLs #34
 	$texy = new Texy;
-	TexyConfigurator::safeMode($texy);
+	Configurator::safeMode($texy);
 	Assert::same("<p>&lt;a href=\" javascript:\"&gt;click</p>\n", $texy->process('<a href=" javascript:">click</a>'));
 });

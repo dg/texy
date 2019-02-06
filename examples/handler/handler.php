@@ -10,27 +10,28 @@ require_once __DIR__ . '/../../src/texy.php';
 
 
 $texy = new Texy();
-$texy->addHandler('emoticon', ['myHandler', 'emoticon']);
-$texy->addHandler('image', ['myHandler', 'image']);
-$texy->addHandler('linkReference', ['myHandler', 'linkReference']);
-$texy->addHandler('linkEmail', ['myHandler', 'linkEmail']);
-$texy->addHandler('linkURL', ['myHandler', 'linkURL']);
-$texy->addHandler('phrase', ['myHandler', 'phrase']);
-$texy->addHandler('newReference', ['myHandler', 'newReference']);
-$texy->addHandler('htmlComment', ['myHandler', 'htmlComment']);
-$texy->addHandler('htmlTag', ['myHandler', 'htmlTag']);
-$texy->addHandler('script', ['myHandler', 'script']);
-//$texy->addHandler('paragraph', array('myHandler', 'paragraph'));
-$texy->addHandler('figure', ['myHandler', 'figure']);
-$texy->addHandler('heading', ['myHandler', 'heading']);
-$texy->addHandler('horizline', ['myHandler', 'horizline']);
-$texy->addHandler('block', ['myHandler', 'block']);
-$texy->addHandler('afterList', ['myHandler', 'afterList']);
-$texy->addHandler('afterDefinitionList', ['myHandler', 'afterDefinitionList']);
-$texy->addHandler('afterTable', ['myHandler', 'afterTable']);
-$texy->addHandler('afterBlockquote', ['myHandler', 'afterBlockquote']);
-$texy->addHandler('beforeParse', ['myHandler', 'beforeParse']);
-$texy->addHandler('afterParse', ['myHandler', 'afterParse']);
+$handler = new myHandler;
+$texy->addHandler('emoticon', [$handler, 'emoticon']);
+$texy->addHandler('image', [$handler, 'image']);
+$texy->addHandler('linkReference', [$handler, 'linkReference']);
+$texy->addHandler('linkEmail', [$handler, 'linkEmail']);
+$texy->addHandler('linkURL', [$handler, 'linkURL']);
+$texy->addHandler('phrase', [$handler, 'phrase']);
+$texy->addHandler('newReference', [$handler, 'newReference']);
+$texy->addHandler('htmlComment', [$handler, 'htmlComment']);
+$texy->addHandler('htmlTag', [$handler, 'htmlTag']);
+$texy->addHandler('script', [$handler, 'script']);
+//$texy->addHandler('paragraph', array($handler, 'paragraph'));
+$texy->addHandler('figure', [$handler, 'figure']);
+$texy->addHandler('heading', [$handler, 'heading']);
+$texy->addHandler('horizline', [$handler, 'horizline']);
+$texy->addHandler('block', [$handler, 'block']);
+$texy->addHandler('afterList', [$handler, 'afterList']);
+$texy->addHandler('afterDefinitionList', [$handler, 'afterDefinitionList']);
+$texy->addHandler('afterTable', [$handler, 'afterTable']);
+$texy->addHandler('afterBlockquote', [$handler, 'afterBlockquote']);
+$texy->addHandler('beforeParse', [$handler, 'beforeParse']);
+$texy->addHandler('afterParse', [$handler, 'afterParse']);
 
 
 class myHandler
