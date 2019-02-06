@@ -21,33 +21,33 @@ class Texy
 	use Strict;
 
 	// configuration directives
-	const ALL = true;
-	const NONE = false;
+	public const ALL = true;
+	public const NONE = false;
 
 	// Texy version
-	const VERSION = '3.0-dev';
-	const REVISION = 'released on 2018-06-22';
+	public const VERSION = '3.0-dev';
+	public const REVISION = 'released on 2018-06-22';
 
 	// types of protection marks
-	const CONTENT_MARKUP = "\x17";
-	const CONTENT_REPLACED = "\x16";
-	const CONTENT_TEXTUAL = "\x15";
-	const CONTENT_BLOCK = "\x14";
+	public const CONTENT_MARKUP = "\x17";
+	public const CONTENT_REPLACED = "\x16";
+	public const CONTENT_TEXTUAL = "\x15";
+	public const CONTENT_BLOCK = "\x14";
 
 	// url filters
-	const FILTER_ANCHOR = 'anchor';
-	const FILTER_IMAGE = 'image';
+	public const FILTER_ANCHOR = 'anchor';
+	public const FILTER_IMAGE = 'image';
 
 	// HTML minor-modes
-	const XML = 2;
+	public const XML = 2;
 
 	// HTML modes
-	const HTML4_TRANSITIONAL = 0;
-	const HTML4_STRICT = 1;
-	const HTML5 = 4;
-	const XHTML1_TRANSITIONAL = 2; // Texy::HTML4_TRANSITIONAL | Texy::XML;
-	const XHTML1_STRICT = 3; // Texy::HTML4_STRICT | Texy::XML;
-	const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
+	public const HTML4_TRANSITIONAL = 0;
+	public const HTML4_STRICT = 1;
+	public const HTML5 = 4;
+	public const XHTML1_TRANSITIONAL = 2; // Texy::HTML4_TRANSITIONAL | Texy::XML;
+	public const XHTML1_STRICT = 3; // Texy::HTML4_STRICT | Texy::XML;
+	public const XHTML5 = 6; // Texy::HTML5 | Texy::XML;
 
 	/** @var string  input & output text encoding */
 	public $encoding = 'utf-8';
@@ -530,7 +530,7 @@ class Texy
 			}
 			foreach ($blocks as $n => $s) {
 				if ($n % 2 === 0 && $s !== '') {
-					$blocks[$n] = call_user_func($handler, $s);
+					$blocks[$n] = $handler($s);
 				}
 			}
 		}
@@ -626,7 +626,7 @@ class Texy
 		}
 
 		foreach ($this->handlers[$event] as $handler) {
-			call_user_func_array($handler, $args);
+			$handler(...$args);
 		}
 	}
 

@@ -42,7 +42,7 @@ final class HorizLineModule extends Texy\Module
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
-		list(, $mType, $mMod) = $matches;
+		[, $mType, $mMod] = $matches;
 		// [1] => ---
 		// [2] => .(title)[class]{style}<>
 

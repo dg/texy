@@ -65,7 +65,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
  */
 function codeBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 {
-	list($content) = $matches;
+	[$content] = $matches;
 	$lang = $name === 'phpBlockSyntax' ? 'PHP' : 'HTML';
 
 	$fshl = new fshlParser('HTML_UTF8', P_TAB_INDENT);

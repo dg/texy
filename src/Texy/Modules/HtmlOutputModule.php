@@ -117,7 +117,7 @@ final class HtmlOutputModule extends Texy\Module
 	public function cb($matches)
 	{
 		// html tag
-		list(, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
+		[, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 		// [1] => text
 		// [1] => !-- comment --
 		// [2] => /
@@ -328,7 +328,7 @@ final class HtmlOutputModule extends Texy\Module
 	 */
 	public function wrap($m)
 	{
-		list(, $space, $s) = $m;
+		[, $space, $s] = $m;
 		return $space . wordwrap($s, $this->lineWrap, "\n" . $space);
 	}
 }

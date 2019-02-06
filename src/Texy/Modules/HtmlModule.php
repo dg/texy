@@ -48,7 +48,7 @@ final class HtmlModule extends Texy\Module
 	 */
 	public function patternComment(Texy\LineParser $parser, array $matches)
 	{
-		list(, $mComment) = $matches;
+		[, $mComment] = $matches;
 		return $this->texy->invokeAroundHandlers('htmlComment', $parser, [$mComment]);
 	}
 
@@ -59,7 +59,7 @@ final class HtmlModule extends Texy\Module
 	 */
 	public function patternTag(Texy\LineParser $parser, array $matches)
 	{
-		list(, $mEnd, $mTag, $mAttr, $mEmpty) = $matches;
+		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 		// [1] => /
 		// [2] => tag
 		// [3] => attributes

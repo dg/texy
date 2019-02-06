@@ -127,7 +127,7 @@ class BlockParser extends Parser
 		$cursor = 0;
 		do {
 			do {
-				list($mOffset, $mName, $mMatches) = $matches[$cursor];
+				[$mOffset, $mName, $mMatches] = $matches[$cursor];
 				$cursor++;
 				if ($mName === null || $mOffset >= $this->offset) {
 					break;
@@ -148,10 +148,7 @@ class BlockParser extends Parser
 
 			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
 
-			$res = call_user_func_array(
-				$this->patterns[$mName]['handler'],
-				[$this, $mMatches, $mName]
-			);
+			$res = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
 
 			if ($res === false || $this->offset <= $mOffset) { // module rejects text
 				// asi by se nemelo stat, rozdeli generic block

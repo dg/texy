@@ -42,7 +42,7 @@ final class BlockQuoteModule extends Texy\Module
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
-		list(, $mMod, $mPrefix, $mContent) = $matches;
+		[, $mMod, $mPrefix, $mContent] = $matches;
 		// [1] => .(title)[class]{style}<>
 		// [2] => spaces |
 		// [3] => ... / LINK
@@ -83,7 +83,7 @@ final class BlockQuoteModule extends Texy\Module
 			if (!$parser->next("#^\\>(?:(\\>|\\ {1,$spaces}|:)(.*))?()$#mA", $matches)) break;
 */
 
-			list(, $mPrefix, $mContent) = $matches;
+			[, $mPrefix, $mContent] = $matches;
 		} while (true);
 
 		$el->attrs['cite'] = $mod->cite;

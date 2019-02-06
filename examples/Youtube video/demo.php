@@ -23,7 +23,7 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Tex
 	switch ($parts[0]) {
 	case 'youtube':
 		$video = htmlspecialchars($parts[1]);
-		$dimensions = 'width="' . ($image->width ? $image->width : 425) . '" height="' . ($image->height ? $image->height : 350) . '"';
+		$dimensions = 'width="' . ($image->width ?: 425) . '" height="' . ($image->height ?: 350) . '"';
 		$code = '<div><object ' . $dimensions . '>'
 			. '<param name="movie" value="https://www.youtube.com/v/' . $video . '" /><param name="wmode" value="transparent" />'
 			. '<embed src="https://www.youtube.com/v/' . $video . '" type="application/x-shockwave-flash" wmode="transparent" ' . $dimensions . ' /></object></div>';

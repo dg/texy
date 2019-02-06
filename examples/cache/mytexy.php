@@ -38,7 +38,7 @@ class mytexy extends Texy
 			$cacheFile = $this->cachePath . $md5 . '.html';
 			$content = is_file($cacheFile) ? unserialize(file_get_contents($cacheFile)) : null;
 			if ($content) {         // read from cache
-				list($html, $this->styleSheet, $this->headingModule->title) = $content;
+				[$html, $this->styleSheet, $this->headingModule->title] = $content;
 
 			} else {                           // doesn't exists
 				$html = parent::process($text);

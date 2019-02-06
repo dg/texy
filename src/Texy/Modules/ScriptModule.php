@@ -47,7 +47,7 @@ final class ScriptModule extends Texy\Module
 	 */
 	public function pattern(Texy\LineParser $parser, array $matches)
 	{
-		list(, $mContent) = $matches;
+		[, $mContent] = $matches;
 		// [1] => ...
 
 		$cmd = trim($mContent);
@@ -70,11 +70,11 @@ final class ScriptModule extends Texy\Module
 		if ($this->handler) {
 			if (is_callable([$this->handler, $cmd])) {
 				array_unshift($args, $parser);
-				return call_user_func_array([$this->handler, $cmd], $args);
+				return [$this->handler, $cmd](...$args);
 			}
 
 			if (is_callable($this->handler)) {
-				return call_user_func_array($this->handler, [$parser, $cmd, $args, $raw]);
+				return $this->handler($parser, $cmd, $args, $raw);
 			}
 		}
 

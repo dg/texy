@@ -16,7 +16,7 @@ final class Link
 	use Strict;
 
 	/** @see $type */
-	const
+	public const
 		COMMON = 1,
 		BRACKET = 2,
 		IMAGE = 3;

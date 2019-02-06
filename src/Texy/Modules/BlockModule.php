@@ -68,7 +68,7 @@ final class BlockModule extends Texy\Module
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
-		list(, $mParam, $mMod, $mContent) = $matches;
+		[, $mParam, $mMod, $mContent] = $matches;
 		// [1] => code | text | ...
 		// [2] => ... additional parameters
 		// [3] => .(title)[class]{style}<>

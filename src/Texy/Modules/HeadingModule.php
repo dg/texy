@@ -16,7 +16,7 @@ use Texy\Modifier;
  */
 final class HeadingModule extends Texy\Module
 {
-	const
+	public const
 		DYNAMIC = 1, // auto-leveling
 		FIXED = 2; // fixed-leveling
 
@@ -155,7 +155,7 @@ final class HeadingModule extends Texy\Module
 		// document title
 		if ($this->title === null && count($this->TOC)) {
 			$item = reset($this->TOC);
-			$this->title = isset($item['title']) ? $item['title'] : trim($item['el']->toText($this->texy));
+			$this->title = $item['title'] ?? trim($item['el']->toText($this->texy));
 		}
 	}
 
@@ -169,7 +169,7 @@ final class HeadingModule extends Texy\Module
 	 */
 	public function patternUnderline(Texy\BlockParser $parser, array $matches)
 	{
-		list(, $mContent, $mMod, $mLine) = $matches;
+		[, $mContent, $mMod, $mLine] = $matches;
 		// $matches:
 		// [1] => ...
 		// [2] => .(title)[class]{style}<>
@@ -189,7 +189,7 @@ final class HeadingModule extends Texy\Module
 	 */
 	public function patternSurround(Texy\BlockParser $parser, array $matches)
 	{
-		list(, $mLine, $mContent, $mMod) = $matches;
+		[, $mLine, $mContent, $mMod] = $matches;
 		// [1] => ###
 		// [2] => ...
 		// [3] => .(title)[class]{style}<>

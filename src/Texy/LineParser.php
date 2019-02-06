@@ -103,10 +103,7 @@ class LineParser extends Parser
 			$offset = $start = $arrOffset[$min];
 
 			$this->again = false;
-			$res = call_user_func_array(
-				$px['handler'],
-				[$this, $arrMatches[$min], $min]
-			);
+			$res = $px['handler']($this, $arrMatches[$min], $min);
 
 			if ($res instanceof HtmlElement) {
 				$res = $res->toString($this->texy);

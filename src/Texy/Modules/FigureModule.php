@@ -50,7 +50,7 @@ final class FigureModule extends Texy\Module
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
-		list(, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod) = $matches;
+		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 		// [1] => URLs
 		// [2] => .(title)[class]{style}<>
 		// [3] => * < >

@@ -43,7 +43,7 @@ final class ParagraphModule extends Texy\Module
 			// try to find modifier
 			$mod = null;
 			if ($mx = Regexp::match($s, '#' . Texy\Patterns::MODIFIER_H . '(?=\n|\z)#sUm', Regexp::OFFSET_CAPTURE)) {
-				list($mMod) = $mx[1];
+				[$mMod] = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
 				if ($s === '') {
 					continue;

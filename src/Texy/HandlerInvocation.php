@@ -39,22 +39,21 @@ final class HandlerInvocation
 
 
 	/**
-	 * @param  mixed
 	 * @return mixed
 	 */
-	public function proceed()
+	public function proceed(...$args)
 	{
 		if ($this->pos === 0) {
 			throw new \RuntimeException('No more handlers.');
 		}
 
-		if (func_num_args()) {
-			$this->args = func_get_args();
+		if ($args) {
+			$this->args = $args;
 			array_unshift($this->args, $this);
 		}
 
 		$this->pos--;
-		$res = call_user_func_array($this->handlers[$this->pos], $this->args);
+		$res = $this->handlers[$this->pos](...$this->args);
 		if ($res === null) {
 			throw new \UnexpectedValueException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], true) . "'.");
 		}

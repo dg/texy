@@ -57,7 +57,7 @@ final class TableModule extends Texy\Module
 		if ($this->disableTables) {
 			return false;
 		}
-		list(, $mMod) = $matches;
+		[, $mMod] = $matches;
 		// [1] => .(title)[class]{style}<>_
 
 		$texy = $this->texy;
@@ -69,7 +69,7 @@ final class TableModule extends Texy\Module
 		$parser->moveBackward();
 
 		if ($parser->next('#^\|(\#|\=){2,}(?![|\#=+])(.+)\1*\|? *' . Patterns::MODIFIER_H . '?()$#Um', $matches)) {
-			list(, , $mContent, $mMod) = $matches;
+			[, , $mContent, $mMod] = $matches;
 			// [1] => # / =
 			// [2] => ....
 			// [3] => .(title)[class]{style}<>
@@ -119,7 +119,7 @@ final class TableModule extends Texy\Module
 
 
 				// PARSE ROW
-				list(, $mContent, $mMod) = $matches;
+				[, $mContent, $mMod] = $matches;
 				// [1] => ....
 				// [2] => .(title)[class]{style}<>_
 
@@ -145,7 +145,7 @@ final class TableModule extends Texy\Module
 					if (isset($prevRow[$col]) && ($lineMode || ($matches = Regexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU')))) {
 						$prevRow[$col]->rowSpan++;
 						if (!$lineMode) {
-							$cell = isset($matches[1]) ? $matches[1] : '';
+							$cell = $matches[1] ?? '';
 						}
 						$prevRow[$col]->text .= "\n" . $cell;
 						$col += $prevRow[$col]->colSpan;
@@ -166,7 +166,7 @@ final class TableModule extends Texy\Module
 					if (!$matches) {
 						continue;
 					}
-					list(, $mHead, $mModCol, $mContent, $mMod) = $matches;
+					[, $mHead, $mModCol, $mContent, $mMod] = $matches;
 					// [1] => * ^
 					// [2] => .(title)[class]{style}<>_
 					// [3] => ....

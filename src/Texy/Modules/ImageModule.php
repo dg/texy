@@ -87,7 +87,7 @@ final class ImageModule extends Texy\Module
 	 */
 	public function patternReferenceDef(array $matches)
 	{
-		list(, $mRef, $mURLs, $mMod) = $matches;
+		[, $mRef, $mURLs, $mMod] = $matches;
 		// [1] => [* (reference) *]
 		// [2] => urls
 		// [3] => .(title)[class]{style}<>
@@ -104,7 +104,7 @@ final class ImageModule extends Texy\Module
 	 */
 	public function patternImage(Texy\LineParser $parser, array $matches)
 	{
-		list(, $mURLs, $mMod, $mAlign, $mLink) = $matches;
+		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		// [1] => URLs
 		// [2] => .(title)[class]{style}<>
 		// [3] => * < >

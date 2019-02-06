@@ -109,7 +109,7 @@ final class LinkModule extends Texy\Module
 	 */
 	public function patternReferenceDef(array $matches)
 	{
-		list(, $mRef, $mLink, $mLabel, $mMod) = $matches;
+		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		// [1] => [ (reference) ]
 		// [2] => link
 		// [3] => ...
@@ -130,7 +130,7 @@ final class LinkModule extends Texy\Module
 	 */
 	public function patternReference(LineParser $parser, array $matches)
 	{
-		list(, $mRef) = $matches;
+		[, $mRef] = $matches;
 		// [1] => [ref]
 
 		$texy = $this->texy;
@@ -170,7 +170,7 @@ final class LinkModule extends Texy\Module
 	 */
 	public function patternUrlEmail(LineParser $parser, array $matches, $name)
 	{
-		list($mURL) = $matches;
+		[$mURL] = $matches;
 		// [0] => URL
 
 		$link = new Link($mURL);

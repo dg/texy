@@ -15,12 +15,12 @@ use Texy;
  */
 final class LongWordsModule extends Texy\Module
 {
-	const
+	public const
 		DONT = 0, // don't hyphenate
 		HERE = 1, // hyphenate here
 		AFTER = 2; // hyphenate after
 
-	const SAFE_LIMIT = 1000;
+	public const SAFE_LIMIT = 1000;
 
 	public $wordLimit = 20;
 
@@ -81,7 +81,7 @@ final class LongWordsModule extends Texy\Module
 	 */
 	public function pattern(array $matches)
 	{
-		list($mWord) = $matches;
+		[$mWord] = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd
 
 		if (iconv_strlen($mWord, 'UTF-8') > self::SAFE_LIMIT) {

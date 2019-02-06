@@ -12,8 +12,8 @@ class Regexp
 {
 	use Strict;
 
-	const ALL = 1;
-	const OFFSET_CAPTURE = 2;
+	public const ALL = 1;
+	public const OFFSET_CAPTURE = 2;
 
 	private static $messages = [
 		PREG_INTERNAL_ERROR => 'Internal error',

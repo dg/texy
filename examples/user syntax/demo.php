@@ -54,7 +54,7 @@ $texy->registerBlockPattern(
  */
 function userInlineHandler(Texy\LineParser $parser, array $matches, $name)
 {
-	list(, $mContent, $mMod) = $matches;
+	[, $mContent, $mMod] = $matches;
 
 	$texy = $parser->getTexy();
 
@@ -86,7 +86,7 @@ function userInlineHandler(Texy\LineParser $parser, array $matches, $name)
  */
 function userBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 {
-	list(, $mTag, $mText) = $matches;
+	[, $mTag, $mText] = $matches;
 
 	$texy = $parser->getTexy();
 

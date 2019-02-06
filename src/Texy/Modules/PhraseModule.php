@@ -236,14 +236,14 @@ final class PhraseModule extends Texy\Module
 	 */
 	public function patternPhrase(LineParser $parser, array $matches, $phrase)
 	{
-		list(, $mContent, $mMod, $mLink) = $matches;
+		[, $mContent, $mMod, $mLink] = $matches;
 		// [1] => **
 		// [2] => ...
 		// [3] => .(title)[class]{style}
 		// [4] => LINK
 
 		if ($phrase === 'phrase/wikilink') {
-			list($mLink, $mMod) = [$mMod, $mLink];
+			[$mLink, $mMod] = [$mMod, $mLink];
 			$mContent = trim($mContent);
 		}
 
@@ -282,7 +282,7 @@ final class PhraseModule extends Texy\Module
 	 */
 	public function patternSupSub(LineParser $parser, array $matches, $phrase)
 	{
-		list(, $mContent) = $matches;
+		[, $mContent] = $matches;
 		$mod = new Modifier();
 		$link = null;
 		$mContent = str_replace('-', "\xE2\x88\x92", $mContent); // &minus;
@@ -295,7 +295,7 @@ final class PhraseModule extends Texy\Module
 	 */
 	public function patternNoTexy(LineParser $parser, array $matches)
 	{
-		list(, $mContent) = $matches;
+		[, $mContent] = $matches;
 		return $this->texy->protect(htmlspecialchars($mContent, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
 	}
 
