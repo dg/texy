@@ -14,7 +14,7 @@ require_once __DIR__ . '/../../src/texy.php';
 
 /**
  * User handler for images
- * @return Texy\HtmlElement|string|false
+ * @return Texy\HtmlElement|string|null
  */
 function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null)
 {

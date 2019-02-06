@@ -79,7 +79,7 @@ final class ListModule extends Texy\Module
 	 *   + ...
 	 * 3) ....
 	 *
-	 * @return HtmlElement|false
+	 * @return HtmlElement|null
 	 */
 	public function patternList(BlockParser $parser, array $matches)
 	{
@@ -119,7 +119,7 @@ final class ListModule extends Texy\Module
 		}
 
 		if ($el->count() < $min) {
-			return false;
+			return null;
 		}
 
 		// event listener
@@ -197,7 +197,7 @@ final class ListModule extends Texy\Module
 
 	/**
 	 * Callback for single list item.
-	 * @return HtmlElement|false
+	 * @return HtmlElement|null
 	 */
 	public function patternItem(BlockParser $parser, $bullet, $indented, $tag)
 	{
@@ -207,7 +207,7 @@ final class ListModule extends Texy\Module
 		// first line with bullet
 		$matches = null;
 		if (!$parser->next($patternItem, $matches)) {
-			return false;
+			return null;
 		}
 
 		[, $mIndent, $mContent, $mMod] = $matches;

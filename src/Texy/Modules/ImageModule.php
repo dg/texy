@@ -100,7 +100,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK.
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function patternImage(Texy\LineParser $parser, array $matches)
 	{
@@ -150,8 +150,7 @@ final class ImageModule extends Texy\Module
 		if (isset($this->references[$name])) {
 			return clone $this->references[$name];
 		}
-
-		return false;
+		return null;
 	}
 
 
@@ -164,7 +163,7 @@ final class ImageModule extends Texy\Module
 	 */
 	public function factoryImage($content, $mod, $tryRef = true)
 	{
-		$image = $tryRef ? $this->getReference(trim($content)) : false;
+		$image = $tryRef ? $this->getReference(trim($content)) : null;
 
 		if (!$image) {
 			$texy = $this->texy;
@@ -210,12 +209,12 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|false
+	 * @return Texy\HtmlElement|null
 	 */
 	public function solve(Texy\HandlerInvocation $invocation = null, Image $image, Texy\Link $link = null)
 	{
 		if ($image->URL == null) {
-			return false;
+			return null;
 		}
 
 		$texy = $this->texy;

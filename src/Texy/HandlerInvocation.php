@@ -54,8 +54,11 @@ final class HandlerInvocation
 
 		$this->pos--;
 		$res = $this->handlers[$this->pos](...$this->args);
-		if ($res === null) {
-			throw new \UnexpectedValueException("Invalid value returned from handler '" . print_r($this->handlers[$this->pos], true) . "'.");
+		if ($res === false) {
+			trigger_error('Return type of Texy handlers was changed from FALSE to NULL. (' . get_class($this->handlers[$this->pos][0]) . ')', E_USER_DEPRECATED);
+			return;
+		} elseif ($res !== null && !is_string($res) && !$res instanceof HtmlElement) {
+			throw new \UnexpectedValueException("Invalid value returned from handler '" . get_class($this->handlers[$this->pos][0]) . "'.");
 		}
 		return $res;
 	}

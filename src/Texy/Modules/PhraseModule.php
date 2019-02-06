@@ -232,7 +232,7 @@ final class PhraseModule extends Texy\Module
 	/**
 	 * Callback for: **.... .(title)[class]{style}**:LINK.
 	 *
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function patternPhrase(LineParser $parser, array $matches, $phrase)
 	{
@@ -256,7 +256,7 @@ final class PhraseModule extends Texy\Module
 		if ($phrase === 'phrase/span' || $phrase === 'phrase/span-alt') {
 			if ($mLink == null) {
 				if (!$mMod) {
-					return false; // means "..."
+					return; // means "..."
 				}
 			} else {
 				$link = $texy->linkModule->factoryLink($mLink, $mMod, $mContent);
@@ -278,7 +278,7 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: any^2 any_2.
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function patternSupSub(LineParser $parser, array $matches, $phrase)
 	{

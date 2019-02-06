@@ -46,7 +46,7 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
@@ -81,7 +81,7 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|false
+	 * @return Texy\HtmlElement|null
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, $content, Texy\Modifier $mod)
 	{
@@ -90,9 +90,9 @@ final class FigureModule extends Texy\Module
 		$hAlign = $image->modifier->hAlign;
 		$image->modifier->hAlign = null;
 
-		$elImg = $texy->imageModule->solve(null, $image, $link); // returns Texy\HtmlElement or false!
+		$elImg = $texy->imageModule->solve(null, $image, $link); // returns Texy\HtmlElement or null!
 		if (!$elImg) {
-			return false;
+			return null;
 		}
 
 		$el = new Texy\HtmlElement('div');

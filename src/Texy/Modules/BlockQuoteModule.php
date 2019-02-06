@@ -38,7 +38,7 @@ final class BlockQuoteModule extends Texy\Module
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 *
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
@@ -91,7 +91,7 @@ final class BlockQuoteModule extends Texy\Module
 
 		// no content?
 		if (!$el->count()) {
-			return false;
+			return;
 		}
 
 		// event listener

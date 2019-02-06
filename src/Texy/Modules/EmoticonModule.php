@@ -72,7 +72,7 @@ final class EmoticonModule extends Texy\Module
 
 	/**
 	 * Callback for: :-))).
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function pattern(Texy\LineParser $parser, array $matches)
 	{
@@ -84,14 +84,12 @@ final class EmoticonModule extends Texy\Module
 				return $this->texy->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
 			}
 		}
-
-		return false; // tohle se nestane
 	}
 
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|false
+	 * @return Texy\HtmlElement|null
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $emoticon, $raw)
 	{

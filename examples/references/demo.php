@@ -14,14 +14,14 @@ require_once __DIR__ . '/../../src/texy.php';
 
 /**
  * User handler for unknown reference
- * @return Texy\HtmlElement|string
+ * @return Texy\HtmlElement|string|null
  */
 function newReferenceHandler(Texy\HandlerInvocation $parser, $refName)
 {
 	$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
 
 	if (!isset($names[$refName])) {
-		return false; // it's not my job
+		return; // it's not my job
 	}
 
 	$name = $names[$refName];

@@ -197,14 +197,14 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Gets element's textual content.
-	 * @return string
+	 * @return string|null
 	 */
 	final public function getText()
 	{
 		$s = '';
 		foreach ($this->children as $child) {
 			if (is_object($child)) {
-				return false;
+				return null;
 			}
 			$s .= $child;
 		}

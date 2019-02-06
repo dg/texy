@@ -82,7 +82,7 @@ function userInlineHandler(Texy\LineParser $parser, array $matches, $name)
  * @param Texy\BlockParser
  * @param array      regexp matches
  * @param string     pattern name (myBlockSyntax1)
- * @return Texy\HtmlElement|string|false
+ * @return Texy\HtmlElement|string|null
  */
 function userBlockHandler(Texy\BlockParser $parser, array $matches, $name)
 {

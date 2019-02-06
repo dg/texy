@@ -575,7 +575,7 @@ class Texy
 	final public function invokeAroundHandlers($event, Parser $parser, array $args)
 	{
 		if (!isset($this->handlers[$event])) {
-			return false;
+			return;
 		}
 
 		$invocation = new HandlerInvocation($this->handlers[$event], $parser, $args);

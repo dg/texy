@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../src/texy.php';
 
 
 /**
- * @return Texy\HtmlElement|string|false
+ * @return Texy\HtmlElement|string|null
  */
 function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, $content, Texy\Modifier $modifier)
 {

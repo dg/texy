@@ -64,7 +64,7 @@ final class BlockModule extends Texy\Module
 	 * ....
 	 * \----
 	 *
-	 * @return HtmlElement|string|false
+	 * @return HtmlElement|string|null
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches)
 	{
@@ -85,7 +85,7 @@ final class BlockModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return HtmlElement|string|false
+	 * @return HtmlElement|string|null
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $blocktype, $s, $param, Texy\Modifier $mod)
 	{
@@ -99,7 +99,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		if (empty($texy->allowed[$blocktype])) {
-			return false;
+			return;
 		}
 
 		if ($blocktype === 'block/texysource') {
@@ -225,7 +225,5 @@ final class BlockModule extends Texy\Module
 			$el->parseBlock($texy, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
 			return $el;
 		}
-
-		return false;
 	}
 }

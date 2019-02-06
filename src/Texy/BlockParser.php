@@ -150,7 +150,7 @@ class BlockParser extends Parser
 
 			$res = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
 
-			if ($res === false || $this->offset <= $mOffset) { // module rejects text
+			if ($res === null || $this->offset <= $mOffset) { // module rejects text
 				// asi by se nemelo stat, rozdeli generic block
 				$this->offset = $mOffset; // turn offset back
 				continue;

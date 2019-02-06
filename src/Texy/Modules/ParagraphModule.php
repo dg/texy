@@ -62,7 +62,7 @@ final class ParagraphModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|false
+	 * @return Texy\HtmlElement|null
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $mod = null)
 	{
@@ -100,7 +100,7 @@ final class ParagraphModule extends Texy\Module
 
 		// block contains only markup tags or spaces or nothing
 		} else {
-			// if {ignoreEmptyStuff} return false;
+			// if {ignoreEmptyStuff} return null;
 			if (!$mod) {
 				$el->setName(null);
 			}

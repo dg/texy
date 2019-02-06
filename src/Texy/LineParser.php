@@ -107,7 +107,7 @@ class LineParser extends Parser
 
 			if ($res instanceof HtmlElement) {
 				$res = $res->toString($this->texy);
-			} elseif ($res === false) {
+			} elseif ($res === null) {
 				$arrOffset[$min] = -2;
 				continue;
 			}

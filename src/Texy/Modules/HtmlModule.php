@@ -44,7 +44,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <!-- comment -->.
-	 * @return HtmlElement|string|false
+	 * @return HtmlElement|string|null
 	 */
 	public function patternComment(Texy\LineParser $parser, array $matches)
 	{
@@ -55,7 +55,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <tag attr="...">.
-	 * @return HtmlElement|string|false
+	 * @return HtmlElement|string|null
 	 */
 	public function patternTag(Texy\LineParser $parser, array $matches)
 	{
@@ -74,13 +74,13 @@ final class HtmlModule extends Texy\Module
 
 		// error - can't close empty element
 		if ($isEmpty && !$isStart) {
-			return false;
+			return;
 		}
 
 		// error - end element with atttrs
 		$mAttr = trim(strtr($mAttr, "\n", ' '));
 		if ($mAttr && !$isStart) {
-			return false;
+			return;
 		}
 
 		$el = new HtmlElement($mTag);
@@ -120,7 +120,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return HtmlElement|string|false
+	 * @return HtmlElement|string|null
 	 */
 	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, $isStart, $forceEmpty = null)
 	{
@@ -129,7 +129,7 @@ final class HtmlModule extends Texy\Module
 		// tag & attibutes
 		$allowedTags = $texy->allowedTags; // speed-up
 		if (!$allowedTags) {
-			return false; // all tags are disabled
+			return; // all tags are disabled
 		}
 
 		// convert case
@@ -143,7 +143,7 @@ final class HtmlModule extends Texy\Module
 
 		if (is_array($allowedTags)) {
 			if (!isset($allowedTags[$name])) {
-				return false;
+				return;
 			}
 			$allowedAttrs = $allowedTags[$name]; // allowed attrs
 
@@ -233,13 +233,13 @@ final class HtmlModule extends Texy\Module
 
 		if ($name === 'img') {
 			if (!isset($elAttrs['src']) || !$texy->checkURL($elAttrs['src'], $texy::FILTER_IMAGE)) {
-				return false;
+				return;
 			}
 			$texy->summary['images'][] = $elAttrs['src'];
 
 		} elseif ($name === 'a') {
 			if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) {
-				return false;
+				return;
 			}
 			if (isset($elAttrs['href'])) {
 				if ($texy->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== false) {
@@ -250,7 +250,7 @@ final class HtmlModule extends Texy\Module
 				}
 
 				if (!$texy->checkURL($elAttrs['href'], $texy::FILTER_ANCHOR)) {
-					return false;
+					return;
 				}
 
 				$texy->summary['links'][] = $elAttrs['href'];

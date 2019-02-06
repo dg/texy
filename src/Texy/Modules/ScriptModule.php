@@ -43,7 +43,7 @@ final class ScriptModule extends Texy\Module
 	/**
 	 * Callback for: {{...}}.
 	 *
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function pattern(Texy\LineParser $parser, array $matches)
 	{
@@ -52,7 +52,7 @@ final class ScriptModule extends Texy\Module
 
 		$cmd = trim($mContent);
 		if ($cmd === '') {
-			return false;
+			return;
 		}
 
 		$raw = null;
@@ -85,13 +85,13 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, $cmd, array $args = null, $raw)
 	{
 		if ($cmd === 'texy') {
 			if (!$args) {
-				return false;
+				return;
 			}
 
 			switch ($args[0]) {
@@ -100,9 +100,6 @@ final class ScriptModule extends Texy\Module
 					break;
 			}
 			return '';
-
-		} else {
-			return false;
 		}
 	}
 }

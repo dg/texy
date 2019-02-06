@@ -50,12 +50,12 @@ final class TableModule extends Texy\Module
 	 * |------------------
 	 * | aa | bb | cc |
 	 *
-	 * @return HtmlElement|string|false
+	 * @return HtmlElement|string|null
 	 */
 	public function patternTable(Texy\BlockParser $parser, array $matches)
 	{
 		if ($this->disableTables) {
-			return false;
+			return;
 		}
 		[, $mMod] = $matches;
 		// [1] => .(title)[class]{style}<>_
@@ -233,7 +233,7 @@ final class TableModule extends Texy\Module
 
 		if ($elPart === null) {
 			// invalid table
-			return false;
+			return;
 		}
 
 		if ($elPart->getName() === 'thead') {

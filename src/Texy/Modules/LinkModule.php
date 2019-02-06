@@ -126,7 +126,7 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [ref].
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function patternReference(LineParser $parser, array $matches)
 	{
@@ -166,7 +166,7 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: http://davidgrudl.com david@grudl.com.
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function patternUrlEmail(LineParser $parser, array $matches, $name)
 	{
@@ -220,8 +220,7 @@ final class LinkModule extends Texy\Module
 				}
 			}
 		}
-
-		return false;
+		return null;
 	}
 
 
@@ -340,12 +339,10 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return false
 	 */
 	public function solveNewReference(HandlerInvocation $invocation, $name)
 	{
 		// no change
-		return false;
 	}
 
 

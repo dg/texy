@@ -42,7 +42,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function emoticon(Texy\HandlerInvocation $invocation, $emoticon, $rawEmoticon)
 	{
@@ -51,7 +51,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function image(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null)
 	{
@@ -63,7 +63,7 @@ class myHandler
 	 * @param  Texy\HandlerInvocation  handler invocation
 	 * @param  Texy\Link
 	 * @param  string
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function linkReference(Texy\HandlerInvocation $invocation, $link, $content)
 	{
@@ -72,7 +72,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function linkEmail(Texy\HandlerInvocation $invocation, Texy\Link $link)
 	{
@@ -81,7 +81,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function linkURL(Texy\HandlerInvocation $invocation, Texy\Link $link)
 	{
@@ -90,7 +90,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function phrase(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = null)
 	{
@@ -99,7 +99,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function newReference(Texy\HandlerInvocation $invocation, $name)
 	{
@@ -108,7 +108,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function htmlComment(Texy\HandlerInvocation $invocation, $content)
 	{
@@ -117,7 +117,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function htmlTag(Texy\HandlerInvocation $invocation, Texy\HtmlElement $el, $isStart, $forceEmpty = null)
 	{
@@ -126,7 +126,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function script(Texy\HandlerInvocation $invocation, $command, array $args, $rawArgs)
 	{
@@ -137,7 +137,7 @@ class myHandler
 	/** Blocks */
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 /*
 	function paragraph(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $modifier)
@@ -148,7 +148,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function figure(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, $content, Texy\Modifier $modifier)
 	{
@@ -157,7 +157,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function heading(Texy\HandlerInvocation $invocation, /*int*/ $level, $content, Texy\Modifier $modifier, $isSurrounded)
 	{
@@ -166,7 +166,7 @@ class myHandler
 
 
 	/**
-	 * @return Texy\HtmlElement|string|false
+	 * @return Texy\HtmlElement|string|null
 	 */
 	public function horizline(Texy\HandlerInvocation $invocation, $type, Texy\Modifier $modifier)
 	{
