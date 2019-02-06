@@ -49,7 +49,7 @@ final class TypographyModule extends Texy\Module
 	public $locale = 'cs';
 
 	/** @var array */
-	private $pattern;
+	private $pattern = [];
 
 
 	public function __construct($texy)

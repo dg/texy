@@ -22,13 +22,13 @@ final class LinkModule extends Texy\Module
 	/** @var string  root of relative links */
 	public $root = '';
 
-	/** @var string image popup class */
+	/** @var string|null image popup class */
 	public $imageClass;
 
-	/** @var string image popup event */
+	/** @var string|null image popup event */
 	public $imageOnClick = 'return !popupImage(this.href)';
 
-	/** @var string class 'popup' event */
+	/** @var string|null class 'popup' event */
 	public $popupOnClick = 'return !popup(this.href)';
 
 	/** @var bool  always use rel="nofollow" for absolute links? */

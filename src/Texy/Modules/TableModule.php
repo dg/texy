@@ -19,10 +19,10 @@ use Texy\Regexp;
  */
 final class TableModule extends Texy\Module
 {
-	/** @var string  CSS class for odd rows */
+	/** @var string|null  CSS class for odd rows */
 	public $oddClass;
 
-	/** @var string  CSS class for even rows */
+	/** @var string|null  CSS class for even rows */
 	public $evenClass;
 
 	private $disableTables;

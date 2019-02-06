@@ -16,13 +16,13 @@ use Texy\Patterns;
  */
 final class FigureModule extends Texy\Module
 {
-	/** @var string  non-floated box CSS class */
+	/** @var string|null  non-floated box CSS class */
 	public $class = 'figure';
 
-	/** @var string  left-floated box CSS class */
+	/** @var string|null  left-floated box CSS class */
 	public $leftClass;
 
-	/** @var string  right-floated box CSS class */
+	/** @var string|null  right-floated box CSS class */
 	public $rightClass;
 
 	/** @var int|false  how calculate div's width */

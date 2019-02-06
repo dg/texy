@@ -185,7 +185,7 @@ class Texy
 	public $_classes, $_styles;
 
 	/** @var bool */
-	private $processing;
+	private $processing = false;
 
 	/** @var array of events and registered handlers */
 	private $handlers = [];

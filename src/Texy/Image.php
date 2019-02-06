@@ -18,25 +18,25 @@ final class Image
 	/** @var string  base image URL */
 	public $URL;
 
-	/** @var string  on-mouse-over image URL */
+	/** @var string|null  on-mouse-over image URL */
 	public $overURL;
 
-	/** @var string  anchored image URL */
+	/** @var string|null  anchored image URL */
 	public $linkedURL;
 
-	/** @var int  optional image width */
+	/** @var int|null  optional image width */
 	public $width;
 
-	/** @var int  optional image height */
+	/** @var int|null  optional image height */
 	public $height;
 
 	/** @var bool  image width and height are maximal */
 	public $asMax;
 
-	/** @var Modifier */
+	/** @var Modifier|null */
 	public $modifier;
 
-	/** @var string  reference name (if is stored as reference) */
+	/** @var string|null  reference name (if is stored as reference) */
 	public $name;
 
 

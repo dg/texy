@@ -33,19 +33,19 @@ final class HtmlOutputModule extends Texy\Module
 	public $removeOptional = false;
 
 	/** @var int  indent space counter */
-	private $space;
+	private $space = 0;
 
 	/** @var array */
-	private $tagUsed;
+	private $tagUsed = [];
 
 	/** @var array */
-	private $tagStack;
+	private $tagStack = [];
 
 	/** @var array  content DTD used, when context is not defined */
-	private $baseDTD;
+	private $baseDTD = [];
 
 	/** @var bool */
-	private $xml;
+	private $xml = false;
 
 
 	public function __construct($texy)

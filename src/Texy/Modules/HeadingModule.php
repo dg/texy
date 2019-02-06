@@ -20,11 +20,11 @@ final class HeadingModule extends Texy\Module
 		DYNAMIC = 1, // auto-leveling
 		FIXED = 2; // fixed-leveling
 
-	/** @var string  textual content of first heading */
+	/** @var string|null  textual content of first heading */
 	public $title;
 
 	/** @var array  generated Table of Contents */
-	public $TOC;
+	public $TOC = [];
 
 	/** @var bool  autogenerate ID */
 	public $generateID = false;
@@ -50,7 +50,7 @@ final class HeadingModule extends Texy\Module
 	];
 
 	/** @var array  used ID's */
-	private $usedID;
+	private $usedID = [];
 
 
 	public function __construct($texy)

@@ -29,13 +29,13 @@ final class EmoticonModule extends Texy\Module
 		':-|' => 'neutral.gif',
 	];
 
-	/** @var string  CSS class for emoticons */
+	/** @var string|null  CSS class for emoticons */
 	public $class;
 
-	/** @var string  root of relative images (default value is $texy->imageModule->root) */
+	/** @var string|null  root of relative images (default value is $texy->imageModule->root) */
 	public $root;
 
-	/** @var string  physical location of images on server (default value is $texy->imageModule->fileRoot) */
+	/** @var string|null  physical location of images on server (default value is $texy->imageModule->fileRoot) */
 	public $fileRoot;
 
 

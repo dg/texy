@@ -21,6 +21,6 @@ class TableCellElement extends Texy\HtmlElement
 	/** @var int */
 	public $rowSpan = 1;
 
-	/** @var string */
+	/** @var string|null */
 	public $text;
 }

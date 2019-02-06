@@ -24,19 +24,19 @@ final class ImageModule extends Texy\Module
 	/** @var string  root of linked images (http) */
 	public $linkedRoot = 'images/';
 
-	/** @var string  physical location of images on server */
+	/** @var string|null  physical location of images on server */
 	public $fileRoot;
 
-	/** @var string  left-floated images CSS class */
+	/** @var string|null  left-floated images CSS class */
 	public $leftClass;
 
-	/** @var string  right-floated images CSS class */
+	/** @var string|null  right-floated images CSS class */
 	public $rightClass;
 
-	/** @var string  default alternative text */
+	/** @var string|null  default alternative text */
 	public $defaultAlt = '';
 
-	/** @var string  images onload handler */
+	/** @var string|null  images onload handler */
 	public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
 
 	/** @var array image references */

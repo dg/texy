@@ -69,7 +69,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/** @var array  of HtmlElement | string nodes */
 	protected $children = [];
 
-	/** @var string  element's name */
+	/** @var string|null  element's name */
 	private $name;
 
 	/** @var bool  is element empty? */

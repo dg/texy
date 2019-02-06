@@ -27,16 +27,16 @@ final class Link
 	/** @var string  URL as written in text */
 	public $raw;
 
-	/** @var Modifier */
+	/** @var Modifier|null */
 	public $modifier;
 
 	/** @var int  how was link created? */
 	public $type = self::COMMON;
 
-	/** @var string  optional label, used by references */
+	/** @var string|null  optional label, used by references */
 	public $label;
 
-	/** @var string  reference name (if is stored as reference) */
+	/** @var string|null  reference name (if is stored as reference) */
 	public $name;
 
 
