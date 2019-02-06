@@ -15,7 +15,7 @@ use Texy;
  */
 final class BlockQuoteModule extends Texy\Module
 {
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -103,10 +103,8 @@ final class BlockQuoteModule extends Texy\Module
 
 	/**
 	 * Converts cite source to URL.
-	 * @param  string
-	 * @return string|null
 	 */
-	public function citeLink($link)
+	public function citeLink(string $link): ?string
 	{
 		$texy = $this->texy;
 

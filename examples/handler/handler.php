@@ -61,11 +61,9 @@ class myHandler
 
 	/**
 	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @param  Texy\Link
-	 * @param  string
 	 * @return Texy\HtmlElement|string|null
 	 */
-	public function linkReference(Texy\HandlerInvocation $invocation, $link, $content)
+	public function linkReference(Texy\HandlerInvocation $invocation, Texy\Link $link, string $content)
 	{
 		return $invocation->proceed();
 	}
@@ -183,34 +181,22 @@ class myHandler
 	}
 
 
-	/**
-	 * @return void
-	 */
-	public function afterList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
+	public function afterList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
 
-	/**
-	 * @return void
-	 */
-	public function afterDefinitionList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
+	public function afterDefinitionList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
 
-	/**
-	 * @return void
-	 */
-	public function afterTable(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
+	public function afterTable(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
 
-	/**
-	 * @return void
-	 */
-	public function afterBlockquote(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier)
+	public function afterBlockquote(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
@@ -218,18 +204,12 @@ class myHandler
 	/** Special */
 
 
-	/**
-	 * @return void
-	 */
-	public function beforeParse(Texy\Texy $texy, &$text, $isSingleLine)
+	public function beforeParse(Texy\Texy $texy, &$text, $isSingleLine): void
 	{
 	}
 
 
-	/**
-	 * @return void
-	 */
-	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, $isSingleLine)
+	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, $isSingleLine): void
 	{
 	}
 }

@@ -29,7 +29,7 @@ final class FigureModule extends Texy\Module
 	public $widthDelta = 10;
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -81,9 +81,8 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, $content, Texy\Modifier $mod)
+	public function solve(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, string $content, Texy\Modifier $mod): ?Texy\HtmlElement
 	{
 		$texy = $this->texy;
 

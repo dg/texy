@@ -40,7 +40,7 @@ final class Link
 	public $name;
 
 
-	public function __construct($URL)
+	public function __construct(string $URL)
 	{
 		$this->URL = $URL;
 		$this->raw = $URL;

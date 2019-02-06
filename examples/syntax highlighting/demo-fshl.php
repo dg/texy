@@ -20,9 +20,8 @@ if (!class_exists('fshlParser')) {
 
 /**
  * User handler for code block
- * @return Texy\HtmlElement
  */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier)
+function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): Texy\HtmlElement
 {
 	if ($blocktype !== 'block/code') {
 		return $invocation->proceed();

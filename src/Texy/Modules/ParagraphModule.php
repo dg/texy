@@ -16,17 +16,14 @@ use Texy\Regexp;
  */
 final class ParagraphModule extends Texy\Module
 {
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 		$texy->addHandler('paragraph', [$this, 'solve']);
 	}
 
 
-	/**
-	 * @return void
-	 */
-	public function process(Texy\BlockParser $parser, $content, Texy\HtmlElement $el)
+	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
 	{
 		if ($parser->isIndented()) {
 			$parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
@@ -62,9 +59,8 @@ final class ParagraphModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $mod = null)
+	public function solve(Texy\HandlerInvocation $invocation, string $content, Texy\Modifier $mod = null): ?Texy\HtmlElement
 	{
 		$texy = $this->texy;
 

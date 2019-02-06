@@ -44,7 +44,7 @@ final class PhraseModule extends Texy\Module
 	public $linksAllowed = true;
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -234,7 +234,7 @@ final class PhraseModule extends Texy\Module
 	 *
 	 * @return Texy\HtmlElement|string|null
 	 */
-	public function patternPhrase(LineParser $parser, array $matches, $phrase)
+	public function patternPhrase(LineParser $parser, array $matches, string $phrase)
 	{
 		[, $mContent, $mMod, $mLink] = $matches;
 		// [1] => **
@@ -280,7 +280,7 @@ final class PhraseModule extends Texy\Module
 	 * Callback for: any^2 any_2.
 	 * @return Texy\HtmlElement|string|null
 	 */
-	public function patternSupSub(LineParser $parser, array $matches, $phrase)
+	public function patternSupSub(LineParser $parser, array $matches, string $phrase)
 	{
 		[, $mContent] = $matches;
 		$mod = new Modifier();
@@ -290,10 +290,7 @@ final class PhraseModule extends Texy\Module
 	}
 
 
-	/**
-	 * @return string
-	 */
-	public function patternNoTexy(LineParser $parser, array $matches)
+	public function patternNoTexy(LineParser $parser, array $matches): string
 	{
 		[, $mContent] = $matches;
 		return $this->texy->protect(htmlspecialchars($mContent, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
@@ -302,9 +299,9 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement
+	 * @return Texy\HtmlElement|string|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $phrase, $content, Modifier $mod, Texy\Link $link = null)
+	public function solve(Texy\HandlerInvocation $invocation, string $phrase, string $content, Modifier $mod, Texy\Link $link = null)
 	{
 		$texy = $this->texy;
 

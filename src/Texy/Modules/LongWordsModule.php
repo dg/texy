@@ -49,7 +49,7 @@ final class LongWordsModule extends Texy\Module
 	private $doubleVowels = ['a', 'A', 'o', 'O'];
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -64,7 +64,7 @@ final class LongWordsModule extends Texy\Module
 	}
 
 
-	public function postLine($text)
+	public function postLine(string $text): string
 	{
 		return Texy\Regexp::replace(
 			$text,
@@ -76,10 +76,9 @@ final class LongWordsModule extends Texy\Module
 
 	/**
 	 * Callback for long words.
-	 * @return string
 	 * @internal
 	 */
-	public function pattern(array $matches)
+	public function pattern(array $matches): string
 	{
 		[$mWord] = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd

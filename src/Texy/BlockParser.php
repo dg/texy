@@ -23,16 +23,16 @@ class BlockParser extends Parser
 	private $indented;
 
 
-	public function __construct(Texy $texy, HtmlElement $element, $indented)
+	public function __construct(Texy $texy, HtmlElement $element, bool $indented)
 	{
 		$this->texy = $texy;
 		$this->element = $element;
-		$this->indented = (bool) $indented;
+		$this->indented = $indented;
 		$this->patterns = $texy->getBlockPatterns();
 	}
 
 
-	public function isIndented()
+	public function isIndented(): bool
 	{
 		return $this->indented;
 	}
@@ -40,7 +40,7 @@ class BlockParser extends Parser
 
 	// match current line against RE.
 	// if succesfull, increments current position and returns true
-	public function next($pattern, &$matches)
+	public function next(string $pattern, &$matches): bool
 	{
 		if ($this->offset > strlen($this->text)) {
 			return false;
@@ -59,10 +59,11 @@ class BlockParser extends Parser
 			}
 			return true;
 		}
+		return false;
 	}
 
 
-	public function moveBackward($linesCount = 1)
+	public function moveBackward(int $linesCount = 1): void
 	{
 		while (--$this->offset > 0) {
 			if ($this->text[$this->offset - 1] === "\n") {
@@ -77,11 +78,7 @@ class BlockParser extends Parser
 	}
 
 
-	/**
-	 * @param  string
-	 * @return void
-	 */
-	public function parse($text)
+	public function parse(string $text): void
 	{
 		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
 
@@ -110,7 +107,7 @@ class BlockParser extends Parser
 		}
 		unset($name, $pattern, $ms, $m, $k, $v);
 
-		usort($matches, function ($a, $b) {
+		usort($matches, function ($a, $b): int {
 			if ($a[0] === $b[0]) {
 				return $a[3] < $b[3] ? -1 : 1;
 			}

@@ -64,19 +64,13 @@ final class HandlerInvocation
 	}
 
 
-	/**
-	 * @return Parser
-	 */
-	public function getParser()
+	public function getParser(): Parser
 	{
 		return $this->parser;
 	}
 
 
-	/**
-	 * @return Texy
-	 */
-	public function getTexy()
+	public function getTexy(): Texy
 	{
 		return $this->parser->getTexy();
 	}

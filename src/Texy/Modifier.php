@@ -64,13 +64,13 @@ final class Modifier
 	/**
 	 * @param  string modifier to parse
 	 */
-	public function __construct($mod = null)
+	public function __construct(string $mod = null)
 	{
 		$this->setProperties($mod);
 	}
 
 
-	public function setProperties($mod)
+	public function setProperties(?string $mod): void
 	{
 		if (!$mod) {
 			return;
@@ -149,9 +149,8 @@ final class Modifier
 
 	/**
 	 * Decorates HtmlElement element.
-	 * @return void
 	 */
-	public function decorate(Texy $texy, HtmlElement $el)
+	public function decorate(Texy $texy, HtmlElement $el): HtmlElement
 	{
 		$elAttrs = &$el->attrs;
 

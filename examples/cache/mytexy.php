@@ -27,7 +27,7 @@ class mytexy extends Texy
 	}
 
 
-	public function cachedProcess($text, $useCache = true)
+	public function cachedProcess(string $text, bool $useCache = true): string
 	{
 		$this->time = -microtime(true);
 

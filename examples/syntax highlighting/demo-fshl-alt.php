@@ -20,9 +20,8 @@ if (!class_exists('fshlParser')) {
 
 /**
  * User handler for code block
- * @return Texy\HtmlElement
  */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier)
+function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): Texy\HtmlElement
 {
 	if ($blocktype !== 'block/code') {
 		return $invocation->proceed();
@@ -58,12 +57,11 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 /**
  * Pattern handler for PHP & JavaScript block syntaxes
  *
- * @param Texy\BlockParser
- * @param array      regexp matches
- * @param string     pattern name
+ * @param  array $matches      regexp matches
+ * @param  string $name     pattern name
  * @return Texy\HtmlElement|string|null
  */
-function codeBlockHandler(Texy\BlockParser $parser, array $matches, $name)
+function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name)
 {
 	[$content] = $matches;
 	$lang = $name === 'phpBlockSyntax' ? 'PHP' : 'HTML';

@@ -17,7 +17,7 @@ use Texy\HtmlElement;
  */
 final class BlockModule extends Texy\Module
 {
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -44,9 +44,8 @@ final class BlockModule extends Texy\Module
 
 	/**
 	 * Single block pre-processing.
-	 * @return void
 	 */
-	public function beforeBlockParse(Texy\BlockParser $parser, &$text)
+	public function beforeBlockParse(Texy\BlockParser $parser, string &$text): void
 	{
 		// autoclose exclusive blocks
 		$text = Texy\Regexp::replace(
@@ -87,7 +86,7 @@ final class BlockModule extends Texy\Module
 	 * Finish invocation.
 	 * @return HtmlElement|string|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $blocktype, $s, $param, Texy\Modifier $mod)
+	public function solve(Texy\HandlerInvocation $invocation, string $blocktype, string $s, $param, Texy\Modifier $mod)
 	{
 		$texy = $this->texy;
 		$parser = $invocation->getParser();

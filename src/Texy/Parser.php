@@ -25,10 +25,7 @@ class Parser
 	protected $element;
 
 
-	/**
-	 * @return Texy
-	 */
-	public function getTexy()
+	public function getTexy(): Texy
 	{
 		return $this->texy;
 	}

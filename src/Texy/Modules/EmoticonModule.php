@@ -39,7 +39,7 @@ final class EmoticonModule extends Texy\Module
 	public $fileRoot;
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 		$texy->allowed['emoticon'] = false;
@@ -48,7 +48,7 @@ final class EmoticonModule extends Texy\Module
 	}
 
 
-	public function beforeParse()
+	public function beforeParse(): void
 	{
 		if (empty($this->texy->allowed['emoticon'])) {
 			return;
@@ -89,9 +89,8 @@ final class EmoticonModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $emoticon, $raw)
+	public function solve(Texy\HandlerInvocation $invocation, string $emoticon, string $raw): Texy\HtmlElement
 	{
 		$texy = $this->texy;
 		$file = $this->icons[$emoticon];

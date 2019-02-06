@@ -33,7 +33,7 @@ final class ListModule extends Texy\Module
 	];
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -43,7 +43,7 @@ final class ListModule extends Texy\Module
 	}
 
 
-	public function beforeParse()
+	public function beforeParse(): void
 	{
 		$RE = $REul = [];
 		foreach ($this->bullets as $desc) {
@@ -79,9 +79,8 @@ final class ListModule extends Texy\Module
 	 *   + ...
 	 * 3) ....
 	 *
-	 * @return HtmlElement|null
 	 */
-	public function patternList(BlockParser $parser, array $matches)
+	public function patternList(BlockParser $parser, array $matches): ?HtmlElement
 	{
 		[, $mMod, $mBullet] = $matches;
 		// [1] => .(title)[class]{style}<>
@@ -137,9 +136,8 @@ final class ListModule extends Texy\Module
 	 * - description 2
 	 * - description 3
 	 *
-	 * @return HtmlElement
 	 */
-	public function patternDefList(BlockParser $parser, array $matches)
+	public function patternDefList(BlockParser $parser, array $matches): HtmlElement
 	{
 		[, $mMod, , , , $mBullet] = $matches;
 		// [1] => .(title)[class]{style}<>
@@ -197,9 +195,8 @@ final class ListModule extends Texy\Module
 
 	/**
 	 * Callback for single list item.
-	 * @return HtmlElement|null
 	 */
-	public function patternItem(BlockParser $parser, $bullet, $indented, $tag)
+	public function patternItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
 	{
 		$spacesBase = $indented ? ('\ {1,}') : '';
 		$patternItem = "#^\n?($spacesBase)$bullet\\ *(\\S.*)?" . Patterns::MODIFIER_H . '?()$#mAUu';

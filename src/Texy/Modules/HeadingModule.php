@@ -53,7 +53,7 @@ final class HeadingModule extends Texy\Module
 	private $usedID = [];
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -76,7 +76,7 @@ final class HeadingModule extends Texy\Module
 	}
 
 
-	public function beforeParse()
+	public function beforeParse(): void
 	{
 		$this->title = null;
 		$this->usedID = [];
@@ -84,10 +84,7 @@ final class HeadingModule extends Texy\Module
 	}
 
 
-	/**
-	 * @return void
-	 */
-	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, $isSingleLine)
+	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, bool $isSingleLine): void
 	{
 		if ($isSingleLine) {
 			return;
@@ -204,9 +201,8 @@ final class HeadingModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $level, $content, Modifier $mod, $isSurrounded)
+	public function solve(Texy\HandlerInvocation $invocation, int $level, string $content, Modifier $mod, bool $isSurrounded): Texy\HtmlElement
 	{
 		// as fixed balancing, for block/texysource & correct decorating
 		$el = new Texy\HtmlElement('h' . min(6, max(1, $level + $this->top)));

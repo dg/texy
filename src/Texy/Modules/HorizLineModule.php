@@ -22,7 +22,7 @@ final class HorizLineModule extends Texy\Module
 	];
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -38,9 +38,8 @@ final class HorizLineModule extends Texy\Module
 
 	/**
 	 * Callback for: -------.
-	 * @return Texy\HtmlElement
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
 	{
 		[, $mType, $mMod] = $matches;
 		// [1] => ---
@@ -53,9 +52,8 @@ final class HorizLineModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $type, Texy\Modifier $modifier)
+	public function solve(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
 	{
 		$el = new Texy\HtmlElement('hr');
 		$modifier->decorate($invocation->getTexy(), $el);

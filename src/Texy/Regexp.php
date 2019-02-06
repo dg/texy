@@ -26,12 +26,9 @@ class Regexp
 
 	/**
 	 * Splits string by a regular expression.
-	 * @param  string
-	 * @param  string
-	 * @param  int  OFFSET_CAPTURE
-	 * @return array
+	 * @param  int $flags  OFFSET_CAPTURE
 	 */
-	public static function split($subject, $pattern, $flags = 0)
+	public static function split(string $subject, string $pattern, int $flags = 0): array
 	{
 		$reFlags = (($flags & self::OFFSET_CAPTURE) ? PREG_SPLIT_OFFSET_CAPTURE : 0) | PREG_SPLIT_DELIM_CAPTURE;
 		$res = preg_split($pattern, $subject, -1, $reFlags);
@@ -44,13 +41,11 @@ class Regexp
 
 	/**
 	 * Performs a regular expression match.
-	 * @param  string
-	 * @param  string
-	 * @param  int  OFFSET_CAPTURE, ALL
-	 * @param  int  offset in bytes
+	 * @param  int $flags  OFFSET_CAPTURE, ALL
+	 * @param  int $offset  offset in bytes
 	 * @return mixed
 	 */
-	public static function match($subject, $pattern, $flags = 0, $offset = 0)
+	public static function match(string $subject, string $pattern, int $flags = 0, int $offset = 0)
 	{
 		$empty = $flags & self::ALL ? [] : null;
 		if ($offset > strlen($subject)) {
@@ -73,12 +68,10 @@ class Regexp
 
 	/**
 	 * Perform a regular expression search and replace.
-	 * @param  string
-	 * @param  string|array
-	 * @param  string|callable
-	 * @return string
+	 * @param  string|array $pattern
+	 * @param  string|callable $replacement
 	 */
-	public static function replace($subject, $pattern, $replacement = null)
+	public static function replace(string $subject, $pattern, $replacement = null): string
 	{
 		if (is_object($replacement) || is_array($replacement)) {
 			$res = preg_replace_callback($pattern, $replacement, $subject);

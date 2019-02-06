@@ -25,11 +25,7 @@ class LineParser extends Parser
 	}
 
 
-	/**
-	 * @param  string
-	 * @return void
-	 */
-	public function parse($text)
+	public function parse(string $text): void
 	{
 		// initialization
 		$pl = $this->patterns;
@@ -82,7 +78,7 @@ class LineParser extends Parser
 
 					} else {
 						// try next time?
-						if (!$pl[$name]['again'] || !Regexp::match($text, $pl[$name]['again'], null, $offset + $delta)) {
+						if (!$pl[$name]['again'] || !Regexp::match($text, $pl[$name]['again'], 0, $offset + $delta)) {
 							unset($names[$index]);
 						}
 						continue;

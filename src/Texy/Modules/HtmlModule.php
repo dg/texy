@@ -21,7 +21,7 @@ final class HtmlModule extends Texy\Module
 	public $passComment = true;
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -122,7 +122,7 @@ final class HtmlModule extends Texy\Module
 	 * Finish invocation.
 	 * @return HtmlElement|string|null
 	 */
-	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, $isStart, $forceEmpty = null)
+	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, bool $isStart, bool $forceEmpty = null)
 	{
 		$texy = $this->texy;
 
@@ -272,9 +272,8 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return string
 	 */
-	public function solveComment(Texy\HandlerInvocation $invocation, $content)
+	public function solveComment(Texy\HandlerInvocation $invocation, string $content): string
 	{
 		if (!$this->passComment) {
 			return '';

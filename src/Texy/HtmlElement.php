@@ -80,7 +80,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * @param  string element name (or null)
 	 * @param  array|string element's attributes (or textual content)
 	 */
-	public function __construct($name = null, $attrs = null)
+	public function __construct(string $name = null, $attrs = null)
 	{
 		$this->setName($name);
 		if (is_array($attrs)) {
@@ -91,7 +91,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	public static function el($name = null, $attrs = null)
+	public static function el(string $name = null, $attrs = null): self
 	{
 		return new self($name, $attrs);
 	}
@@ -99,12 +99,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Changes element's name.
-	 * @param  string
-	 * @param  bool  Is element empty?
-	 * @return self
 	 * @throws InvalidArgumentException
 	 */
-	final public function setName($name, $empty = null)
+	final public function setName(?string $name, bool $empty = null): self
 	{
 		if ($name !== null && !is_string($name)) {
 			throw new \InvalidArgumentException('Name must be string or null.');
@@ -118,9 +115,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns element's name.
-	 * @return string
 	 */
-	final public function getName()
+	final public function getName(): ?string
 	{
 		return $this->name;
 	}
@@ -128,9 +124,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Is element empty?
-	 * @return bool
 	 */
-	final public function isEmpty()
+	final public function isEmpty(): bool
 	{
 		return $this->isEmpty;
 	}
@@ -140,9 +135,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * Overloaded setter for element's attribute.
 	 * @param  string    property name
 	 * @param  mixed     property value
-	 * @return void
 	 */
-	final public function __set($name, $value)
+	final public function __set(string $name, $value): void
 	{
 		$this->attrs[$name] = $value;
 	}
@@ -153,7 +147,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * @param  string    property name
 	 * @return mixed    property value
 	 */
-	final public function &__get($name)
+	final public function &__get(string $name)
 	{
 		return $this->attrs[$name];
 	}
@@ -161,11 +155,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Special setter for element's attribute.
-	 * @param  string path
-	 * @param  array query
-	 * @return self
 	 */
-	final public function href($path, $query = null)
+	final public function href(string $path, array $query = null): self
 	{
 		if ($query) {
 			$query = http_build_query($query, null, '&');
@@ -180,10 +171,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Sets element's textual content.
-	 * @param  string
-	 * @return self
 	 */
-	final public function setText($text)
+	final public function setText(string $text): self
 	{
 		if (is_scalar($text)) {
 			$this->removeChildren();
@@ -197,9 +186,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Gets element's textual content.
-	 * @return string|null
 	 */
-	final public function getText()
+	final public function getText(): ?string
 	{
 		$s = '';
 		foreach ($this->children as $child) {
@@ -215,9 +203,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Adds new element's child.
 	 * @param  HtmlElement|string child node
-	 * @return self
 	 */
-	final public function add($child)
+	final public function add($child): self
 	{
 		return $this->insert(null, $child);
 	}
@@ -225,11 +212,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Creates and adds a new HtmlElement child.
-	 * @param  string  elements's name
-	 * @param  array|string element's attributes (or textual content)
-	 * @return HtmlElement  created element
+	 * @param  array|string  $attrs element's attributes (or textual content)
 	 */
-	final public function create($name, $attrs = null)
+	final public function create(string $name, $attrs = null): self
 	{
 		$this->insert(null, $child = new self($name, $attrs));
 		return $child;
@@ -238,13 +223,10 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Inserts child node.
-	 * @param  int
-	 * @param  HtmlElement node
-	 * @param  bool
-	 * @return self
+	 * @param  HtmlElement|string $child node
 	 * @throws Exception
 	 */
-	public function insert($index, $child, $replace = false)
+	public function insert(?int $index, $child, bool $replace = false): self
 	{
 		if ($child instanceof self || is_string($child)) {
 			if ($index === null) { // append
@@ -266,9 +248,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * Inserts (replaces) child node (ArrayAccess implementation).
 	 * @param  int
 	 * @param  HtmlElement node
-	 * @return void
 	 */
-	final public function offsetSet($index, $child)
+	final public function offsetSet($index, $child): void
 	{
 		$this->insert($index, $child, true);
 	}
@@ -288,9 +269,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Exists child node? (ArrayAccess implementation).
 	 * @param  int index
-	 * @return bool
 	 */
-	final public function offsetExists($index)
+	final public function offsetExists($index): bool
 	{
 		return isset($this->children[$index]);
 	}
@@ -299,9 +279,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Removes child node (ArrayAccess implementation).
 	 * @param  int index
-	 * @return void
 	 */
-	public function offsetUnset($index)
+	public function offsetUnset($index): void
 	{
 		if (isset($this->children[$index])) {
 			array_splice($this->children, (int) $index, 1);
@@ -311,9 +290,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Required by the Countable interface.
-	 * @return int
 	 */
-	final public function count()
+	final public function count(): int
 	{
 		return count($this->children);
 	}
@@ -321,9 +299,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Removed all children.
-	 * @return void
 	 */
-	public function removeChildren()
+	public function removeChildren(): void
 	{
 		$this->children = [];
 	}
@@ -331,9 +308,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Required by the IteratorAggregate interface.
-	 * @return \ArrayIterator
 	 */
-	final public function getIterator()
+	final public function getIterator(): \ArrayIterator
 	{
 		return new \ArrayIterator($this->children);
 	}
@@ -341,9 +317,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns all of children.
-	 * return array
 	 */
-	final public function getChildren()
+	final public function getChildren(): array
 	{
 		return $this->children;
 	}
@@ -351,9 +326,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Renders element's start tag, content and end tag to internal string representation.
-	 * @return string
 	 */
-	final public function toString(Texy $texy)
+	final public function toString(Texy $texy): string
 	{
 		$ct = $this->getContentType();
 		$s = $texy->protect($this->startTag(), $ct);
@@ -379,9 +353,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Renders to final HTML.
-	 * @return string
 	 */
-	final public function toHtml(Texy $texy)
+	final public function toHtml(Texy $texy): string
 	{
 		return $texy->stringToHtml($this->toString($texy));
 	}
@@ -389,9 +362,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Renders to final text.
-	 * @return string
 	 */
-	final public function toText(Texy $texy)
+	final public function toText(Texy $texy): string
 	{
 		return $texy->stringToText($this->toString($texy));
 	}
@@ -399,9 +371,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns element's start tag.
-	 * @return string
 	 */
-	public function startTag()
+	public function startTag(): string
 	{
 		if (!$this->name) {
 			return '';
@@ -466,9 +437,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns element's end tag.
-	 * @return string
 	 */
-	public function endTag()
+	public function endTag(): string
 	{
 		if ($this->name && !$this->isEmpty) {
 			return '</' . $this->name . '>';
@@ -490,10 +460,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	/**
-	 * @return int
-	 */
-	final public function getContentType()
+	final public function getContentType(): string
 	{
 		if (!isset(self::$inlineElements[$this->name])) {
 			return Texy::CONTENT_BLOCK;
@@ -503,10 +470,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	/**
-	 * @return void
-	 */
-	final public function validateAttrs(array $dtd)
+	final public function validateAttrs(array $dtd): void
 	{
 		if (isset($dtd[$this->name])) {
 			$allowed = $dtd[$this->name][0];
@@ -521,7 +485,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	public function validateChild($child, $dtd)
+	public function validateChild($child, array $dtd): bool
 	{
 		if (isset($dtd[$this->name])) {
 			if ($child instanceof self) {
@@ -536,11 +500,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Parses text as single line.
-	 * @param  Texy
-	 * @param  string
-	 * @return void
 	 */
-	final public function parseLine(Texy $texy, $s)
+	final public function parseLine(Texy $texy, string $s): LineParser
 	{
 		$parser = new LineParser($texy, $this);
 		$parser->parse($s);
@@ -550,12 +511,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Parses text as block.
-	 * @param  Texy
-	 * @param  string
-	 * @param  bool
-	 * @return void
 	 */
-	final public function parseBlock(Texy $texy, $s, $indented = false)
+	final public function parseBlock(Texy $texy, string $s, bool $indented = false): void
 	{
 		$parser = new BlockParser($texy, $this, $indented);
 		$parser->parse($s);

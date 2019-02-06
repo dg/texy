@@ -48,7 +48,7 @@ final class HtmlOutputModule extends Texy\Module
 	private $xml = false;
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 		$texy->addHandler('postProcess', [$this, 'postProcess']);
@@ -59,7 +59,7 @@ final class HtmlOutputModule extends Texy\Module
 	 * Converts <strong><em> ... </strong> ... </em>.
 	 * into <strong><em> ... </em></strong><em> ... </em>
 	 */
-	public function postProcess($texy, &$s)
+	public function postProcess(Texy\Texy $texy, string &$s): void
 	{
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
@@ -111,10 +111,9 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: <tag> | </tag> | ....
-	 * @return string
 	 * @internal
 	 */
-	public function cb($matches)
+	public function cb(array $matches): string
 	{
 		// html tag
 		[, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
@@ -323,10 +322,9 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: wrap lines.
-	 * @return string
 	 * @internal
 	 */
-	public function wrap($m)
+	public function wrap(array $m): string
 	{
 		[, $space, $s] = $m;
 		return $space . wordwrap($s, $this->lineWrap, "\n" . $space);

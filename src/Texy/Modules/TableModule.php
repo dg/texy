@@ -28,7 +28,7 @@ final class TableModule extends Texy\Module
 	private $disableTables;
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -253,9 +253,8 @@ final class TableModule extends Texy\Module
 
 	/**
 	 * Parse text in all cells.
-	 * @return void
 	 */
-	private function finishPart(HtmlElement $elPart)
+	private function finishPart(HtmlElement $elPart): void
 	{
 		foreach ($elPart->getChildren() as $elRow) {
 			foreach ($elRow->getChildren() as $elCell) {

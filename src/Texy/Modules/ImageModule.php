@@ -43,7 +43,7 @@ final class ImageModule extends Texy\Module
 	private $references = [];
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -64,9 +64,8 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Text pre-processing.
-	 * @return void
 	 */
-	public function beforeParse(Texy\Texy $texy, &$text)
+	public function beforeParse(Texy\Texy $texy, &$text): void
 	{
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
@@ -82,10 +81,9 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Callback for: [*image*]: urls .(title)[class]{style}.
 	 *
-	 * @return string
 	 * @internal
 	 */
-	public function patternReferenceDef(array $matches)
+	public function patternReferenceDef(array $matches): string
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		// [1] => [* (reference) *]
@@ -130,9 +128,8 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Adds new named reference to image.
-	 * @return void
 	 */
-	public function addReference($name, Image $image)
+	public function addReference(string $name, Image $image): void
 	{
 		$image->name = Helpers::toLower($name);
 		$this->references[$image->name] = $image;
@@ -141,10 +138,8 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Returns named reference.
-	 * @param  string  reference name
-	 * @return Image  reference descriptor (or false)
 	 */
-	public function getReference($name)
+	public function getReference(string $name): ?Image
 	{
 		$name = Helpers::toLower($name);
 		if (isset($this->references[$name])) {
@@ -157,11 +152,8 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Parses image's syntax.
 	 * @param  string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
-	 * @param  string
-	 * @param  bool
-	 * @return Image
 	 */
-	public function factoryImage($content, $mod, $tryRef = true)
+	public function factoryImage(string $content, string $mod, bool $tryRef = true): Image
 	{
 		$image = $tryRef ? $this->getReference(trim($content)) : null;
 
@@ -209,9 +201,8 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation = null, Image $image, Texy\Link $link = null)
+	public function solve(Texy\HandlerInvocation $invocation = null, Image $image, Texy\Link $link = null): ?Texy\HtmlElement
 	{
 		if ($image->URL == null) {
 			return null;

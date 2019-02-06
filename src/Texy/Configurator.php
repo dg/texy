@@ -48,9 +48,8 @@ class Configurator
 
 	/**
 	 * Configure Texy! for web comments and other usages, where input text may insert attacker.
-	 * @return void
 	 */
-	public static function safeMode(Texy $texy)
+	public static function safeMode(Texy $texy): void
 	{
 		$texy->allowedClasses = $texy::NONE; // no class or ID are allowed
 		$texy->allowedStyles = $texy::NONE; // style modifiers are disabled
@@ -66,9 +65,8 @@ class Configurator
 
 	/**
 	 * Disable all links.
-	 * @return void
 	 */
-	public static function disableLinks(Texy $texy)
+	public static function disableLinks(Texy $texy): void
 	{
 		$texy->allowed['link/reference'] = false;
 		$texy->allowed['link/email'] = false;
@@ -84,9 +82,8 @@ class Configurator
 
 	/**
 	 * Disable all images.
-	 * @return void
 	 */
-	public static function disableImages(Texy $texy)
+	public static function disableImages(Texy $texy): void
 	{
 		$texy->allowed['image'] = false;
 		$texy->allowed['figure'] = false;

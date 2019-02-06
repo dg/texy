@@ -26,7 +26,7 @@ final class ScriptModule extends Texy\Module
 	public $separator = ',';
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -87,7 +87,7 @@ final class ScriptModule extends Texy\Module
 	 * Finish invocation.
 	 * @return Texy\HtmlElement|string|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, $cmd, array $args = null, $raw)
+	public function solve(Texy\HandlerInvocation $invocation, string $cmd, array $args = null, string $raw = null)
 	{
 		if ($cmd === 'texy') {
 			if (!$args) {

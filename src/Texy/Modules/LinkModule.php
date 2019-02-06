@@ -46,7 +46,7 @@ final class LinkModule extends Texy\Module
 	private static $EMAIL;
 
 
-	public function __construct($texy)
+	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
 
@@ -85,9 +85,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Text pre-processing.
-	 * @return void
 	 */
-	public function beforeParse(Texy\Texy $texy, &$text)
+	public function beforeParse(Texy\Texy $texy, &$text): void
 	{
 		self::$livelock = [];
 
@@ -104,10 +103,9 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}.
-	 * @return string
 	 * @internal
 	 */
-	public function patternReferenceDef(array $matches)
+	public function patternReferenceDef(array $matches): string
 	{
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		// [1] => [ (reference) ]
@@ -168,7 +166,7 @@ final class LinkModule extends Texy\Module
 	 * Callback for: http://davidgrudl.com david@grudl.com.
 	 * @return Texy\HtmlElement|string|null
 	 */
-	public function patternUrlEmail(LineParser $parser, array $matches, $name)
+	public function patternUrlEmail(LineParser $parser, array $matches, string $name)
 	{
 		[$mURL] = $matches;
 		// [0] => URL
@@ -186,9 +184,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Adds new named reference.
-	 * @return void
 	 */
-	public function addReference($name, Link $link)
+	public function addReference(string $name, Link $link): void
 	{
 		$link->name = Texy\Helpers::toLower($name);
 		$this->references[$link->name] = $link;
@@ -197,10 +194,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Returns named reference.
-	 * @param  string  reference name
-	 * @return Link reference descriptor (or false)
 	 */
-	public function getReference($name)
+	public function getReference(string $name): ?Link
 	{
 		$name = Texy\Helpers::toLower($name);
 		if (isset($this->references[$name])) {
@@ -224,13 +219,7 @@ final class LinkModule extends Texy\Module
 	}
 
 
-	/**
-	 * @param  string
-	 * @param  string
-	 * @param  string
-	 * @return Link
-	 */
-	public function factoryLink($dest, $mMod, $label)
+	public function factoryLink(string $dest, ?string $mMod, ?string $label): Link
 	{
 		$texy = $this->texy;
 		$type = Link::COMMON;
@@ -340,7 +329,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solveNewReference(HandlerInvocation $invocation, $name)
+	public function solveNewReference(HandlerInvocation $invocation, string $name)
 	{
 		// no change
 	}
@@ -348,9 +337,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Checks and corrects $URL.
-	 * @return void
 	 */
-	private function checkLink(Link $link)
+	private function checkLink(Link $link): void
 	{
 		// remove soft hyphens; if not removed by Texy\Texy::process()
 		$link->URL = str_replace("\xC2\xAD", '', $link->URL);
@@ -374,9 +362,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Returns textual representation of URL.
-	 * @return string
 	 */
-	private function textualUrl(Link $link)
+	private function textualUrl(Link $link): string
 	{
 		if ($this->texy->obfuscateEmail && preg_match('#^' . self::$EMAIL . '$#u', $link->raw)) { // email
 			return str_replace('@', '&#64;<!-- -->', $link->raw);
