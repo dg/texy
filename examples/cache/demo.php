@@ -5,6 +5,8 @@
  * demonstrates advantages of inheriting from base Texy object
  */
 
+declare(strict_types=1);
+
 
 require_once __DIR__ . '/mytexy.php';
 

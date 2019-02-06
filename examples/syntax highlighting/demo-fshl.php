@@ -5,6 +5,8 @@
  *       - define user callback (for /--code elements)
  */
 
+declare(strict_types=1);
+
 
 // include libs
 require_once __DIR__ . '/../../src/texy.php';

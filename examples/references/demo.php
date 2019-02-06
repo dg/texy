@@ -7,6 +7,8 @@
  *     - used links checking (antispam)
  */
 
+declare(strict_types=1);
+
 
 // include Texy!
 require_once __DIR__ . '/../../src/texy.php';

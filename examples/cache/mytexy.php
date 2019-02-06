@@ -4,6 +4,8 @@
  * TEXY! CACHE DEMO
  */
 
+declare(strict_types=1);
+
 
 // include libs
 require_once __DIR__ . '/../../src/texy.php';

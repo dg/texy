@@ -4,6 +4,8 @@
  * TEXY! USER SYNTAX DEMO
  */
 
+declare(strict_types=1);
+
 
 // include Texy!
 require_once __DIR__ . '/../../src/texy.php';
