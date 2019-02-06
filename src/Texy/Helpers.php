@@ -94,7 +94,7 @@ final class Helpers
 	/**
 	 * Converts to web safe characters [a-z0-9-] text.
 	 */
-	public static function webalize(string $s, string $charlist = null): string
+	public static function webalize(string $s, string $charlist = ''): string
 	{
 		$s = self::toAscii($s);
 		$s = strtolower($s);

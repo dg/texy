@@ -246,7 +246,7 @@ final class LinkModule extends Texy\Module
 			$this->checkLink($link);
 		}
 
-		if (strpos($link->URL, '%s') !== false) {
+		if (strpos((string) $link->URL, '%s') !== false) {
 			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
 		}
 		$link->modifier->setProperties($mMod);

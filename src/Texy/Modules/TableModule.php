@@ -266,7 +266,7 @@ final class TableModule extends Texy\Module
 					$elCell->attrs['rowspan'] = $elCell->rowSpan;
 				}
 
-				$text = rtrim($elCell->text);
+				$text = rtrim((string) $elCell->text);
 				if (strpos($text, "\n") !== false) {
 					// multiline parse as block
 					// HACK: disable tables

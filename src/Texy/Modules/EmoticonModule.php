@@ -100,7 +100,7 @@ final class EmoticonModule extends Texy\Module
 		$el->attrs['class'][] = $this->class;
 
 		// file path
-		$file = rtrim($this->fileRoot === null ? $texy->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
+		$file = rtrim($this->fileRoot === null ? (string) $texy->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
 		if (@is_file($file)) { // intentionally @
 			$size = @getimagesize($file); // intentionally @
 			if (is_array($size)) {

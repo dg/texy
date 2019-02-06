@@ -246,7 +246,7 @@ final class ImageModule extends Texy\Module
 			// detect dimensions
 			// absolute URL & security check for double dot
 			if (Helpers::isRelative($image->URL) && strpos($image->URL, '..') === false) {
-				$file = rtrim($this->fileRoot, '/\\') . '/' . $image->URL;
+				$file = rtrim((string) $this->fileRoot, '/\\') . '/' . $image->URL;
 				if (@is_file($file)) { // intentionally @
 					$size = @getimagesize($file); // intentionally @
 					if (is_array($size)) {
