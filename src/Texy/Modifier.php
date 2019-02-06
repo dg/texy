@@ -63,9 +63,6 @@ final class Modifier
 	];
 
 
-	/**
-	 * @param  string modifier to parse
-	 */
 	public function __construct(string $mod = null)
 	{
 		$this->setProperties($mod);

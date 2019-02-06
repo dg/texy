@@ -18,8 +18,6 @@ namespace Texy;
  * $el->class = 'myclass';
  *
  * echo $el->startTag(), $el->endTag();
- *
- * @property   mixed element's attributes
  */
 class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 {
@@ -79,8 +77,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
-	 * @param  string element name (or null)
-	 * @param  array|string element's attributes (or textual content)
+	 * @param  array|string  $attrs  element's attributes (or textual content)
 	 */
 	public function __construct(string $name = null, $attrs = null)
 	{
@@ -135,8 +132,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Overloaded setter for element's attribute.
-	 * @param  string    property name
-	 * @param  mixed     property value
 	 */
 	final public function __set(string $name, $value): void
 	{
@@ -146,8 +141,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Overloaded getter for element's attribute.
-	 * @param  string    property name
-	 * @return mixed    property value
 	 */
 	final public function &__get(string $name)
 	{
@@ -204,7 +197,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Adds new element's child.
-	 * @param  HtmlElement|string child node
+	 * @param  HtmlElement|string  $child node
 	 */
 	final public function add($child): self
 	{
@@ -225,7 +218,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Inserts child node.
-	 * @param  HtmlElement|string $child node
+	 * @param  HtmlElement|string  $child node
 	 * @throws Exception
 	 */
 	public function insert(?int $index, $child, bool $replace = false): self
@@ -248,8 +241,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Inserts (replaces) child node (ArrayAccess implementation).
-	 * @param  int
-	 * @param  HtmlElement node
+	 * @param  int  $index
+	 * @param  HtmlElement  $child
 	 */
 	final public function offsetSet($index, $child): void
 	{
@@ -259,7 +252,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns child node (ArrayAccess implementation).
-	 * @param  int index
+	 * @param  int  $index
 	 * @return mixed
 	 */
 	final public function offsetGet($index)
@@ -270,7 +263,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Exists child node? (ArrayAccess implementation).
-	 * @param  int index
+	 * @param  int  $index
 	 */
 	final public function offsetExists($index): bool
 	{
@@ -280,7 +273,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Removes child node (ArrayAccess implementation).
-	 * @param  int index
+	 * @param  int  $index
 	 */
 	public function offsetUnset($index): void
 	{
