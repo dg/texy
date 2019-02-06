@@ -25,7 +25,7 @@ class Texy
 	const NONE = false;
 
 	// Texy version
-	const VERSION = '2.9.3';
+	const VERSION = '3.0-dev';
 	const REVISION = 'released on 2018-06-22';
 
 	// types of protection marks
