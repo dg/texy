@@ -216,10 +216,6 @@ class Texy
 
 	public function __construct()
 	{
-		if (defined('PCRE_VERSION') && PCRE_VERSION == 8.34 && PHP_VERSION_ID < 50513) {
-			trigger_error('Texy: PCRE 8.34 is not supported due to bug #1451', E_USER_WARNING);
-		}
-
 		if (extension_loaded('mbstring') && mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') {
 			mb_internal_encoding('pass');
 			trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
