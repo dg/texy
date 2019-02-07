@@ -628,6 +628,7 @@ class Texy
 	/** @deprecated */
 	final public static function freezeSpaces(string $s): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::freezeSpaces()', E_USER_DEPRECATED);
 		return Helpers::freezeSpaces($s);
 	}
 
@@ -635,6 +636,7 @@ class Texy
 	/** @deprecated */
 	final public static function unfreezeSpaces(string $s): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::unfreezeSpaces()', E_USER_DEPRECATED);
 		return Helpers::unfreezeSpaces($s);
 	}
 
@@ -642,6 +644,7 @@ class Texy
 	/** @deprecated */
 	final public static function normalize(string $s): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::normalize()', E_USER_DEPRECATED);
 		return Helpers::normalize($s);
 	}
 
@@ -649,6 +652,7 @@ class Texy
 	/** @deprecated */
 	final public static function webalize(string $s, string $charlist = null): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::webalize()', E_USER_DEPRECATED);
 		return Helpers::webalize($s, $charlist);
 	}
 
@@ -656,6 +660,7 @@ class Texy
 	/** @deprecated */
 	final public static function escapeHtml(string $s): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use htmlspecialchars()', E_USER_DEPRECATED);
 		return htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 	}
 
@@ -663,6 +668,7 @@ class Texy
 	/** @deprecated */
 	final public static function unescapeHtml(string $s): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use html_entity_decode()', E_USER_DEPRECATED);
 		return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
 	}
 
@@ -670,6 +676,7 @@ class Texy
 	/** @deprecated */
 	final public static function outdent(string $s): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::outdent()', E_USER_DEPRECATED);
 		return Helpers::outdent($s);
 	}
 
@@ -677,6 +684,7 @@ class Texy
 	/** @deprecated */
 	final public static function isRelative(string $URL): bool
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::isRelative()', E_USER_DEPRECATED);
 		return Helpers::isRelative($URL);
 	}
 
@@ -684,6 +692,7 @@ class Texy
 	/** @deprecated */
 	final public static function prependRoot(string $URL, string $root): string
 	{
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::prependRoot()', E_USER_DEPRECATED);
 		return Helpers::prependRoot($URL, $root);
 	}
 
