@@ -24,7 +24,7 @@ class Configurator
 
 	public static $safeTags = [
 		'a' => ['href', 'title'],
-		'acronym' => ['title'],
+		'abbr' => ['title'],
 		'b' => [],
 		'br' => [],
 		'cite' => [],
