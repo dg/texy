@@ -79,7 +79,6 @@ class Texy
 	public $summary = [
 		'images' => [],
 		'links' => [],
-		'preload' => [],
 	];
 
 	/** @var array  CSS classes for align modifiers */

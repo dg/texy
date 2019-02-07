@@ -38,9 +38,6 @@ final class ImageModule extends Texy\Module
 	/** @var string|null  default alternative text */
 	public $defaultAlt = '';
 
-	/** @var string|null  images onload handler */
-	public $onLoad = "var i=new Image();i.src='%i';if(typeof preload=='undefined')preload=new Array();preload[preload.length]=i;this.onload=''";
-
 	/** @var array image references */
 	private $references = [];
 
@@ -50,7 +47,6 @@ final class ImageModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->allowed['image/definition'] = true;
-		$texy->allowed['image/hover'] = true;
 		$texy->addHandler('image', [$this, 'solve']);
 		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
 
@@ -99,7 +95,7 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Callback for [* small.jpg 80x13 | small-over.jpg | big.jpg .(alternative text)[class]{style}>]:LINK.
+	 * Callback for [* small.jpg 80x13 || big.jpg .(alternative text)[class]{style}>]:LINK.
 	 * @return Texy\HtmlElement|string|null
 	 */
 	public function patternImage(Texy\LineParser $parser, array $matches)
@@ -153,7 +149,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Parses image's syntax.
-	 * @param  string  input: small.jpg 80x13 | small-over.jpg | linked.jpg
+	 * @param  string  input: small.jpg 80x13 || linked.jpg
 	 */
 	public function factoryImage(string $content, string $mod, bool $tryRef = true): Image
 	{
@@ -177,14 +173,6 @@ final class ImageModule extends Texy\Module
 
 			if (!$texy->checkURL($image->URL, $texy::FILTER_IMAGE)) {
 				$image->URL = null;
-			}
-
-			// onmouseover image
-			if (isset($content[1])) {
-				$tmp = trim($content[1]);
-				if ($tmp !== '' && $texy->checkURL($tmp, $texy::FILTER_IMAGE)) {
-					$image->overURL = $tmp;
-				}
 			}
 
 			// linked image
@@ -280,15 +268,6 @@ final class ImageModule extends Texy\Module
 
 		$el->attrs['width'] = $image->width;
 		$el->attrs['height'] = $image->height;
-
-		// onmouseover actions generate
-		if (!empty($texy->allowed['image/hover']) && $image->overURL !== null) {
-			$overSrc = Helpers::prependRoot($image->overURL, $this->root);
-			$el->attrs['onmouseover'] = 'this.src=\'' . addslashes($overSrc) . '\'';
-			$el->attrs['onmouseout'] = 'this.src=\'' . addslashes($el->attrs['src']) . '\'';
-			$el->attrs['onload'] = str_replace('%i', addslashes($overSrc), $this->onLoad);
-			$texy->summary['preload'][] = $overSrc;
-		}
 
 		$texy->summary['images'][] = $el->attrs['src'];
 

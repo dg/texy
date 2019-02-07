@@ -20,9 +20,6 @@ final class Image
 	/** @var string  base image URL */
 	public $URL;
 
-	/** @var string|null  on-mouse-over image URL */
-	public $overURL;
-
 	/** @var string|null  anchored image URL */
 	public $linkedURL;
 
