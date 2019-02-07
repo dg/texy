@@ -24,14 +24,8 @@ final class LinkModule extends Texy\Module
 	/** @var string  root of relative links */
 	public $root = '';
 
-	/** @var string|null image popup class */
+	/** @var string|null linked image class */
 	public $imageClass;
-
-	/** @var string|null image popup event */
-	public $imageOnClick = 'return !popupImage(this.href)';
-
-	/** @var string|null class 'popup' event */
-	public $popupOnClick = 'return !popup(this.href)';
 
 	/** @var bool  always use rel="nofollow" for absolute links? */
 	public $forceNoFollow = false;
@@ -274,11 +268,10 @@ final class LinkModule extends Texy\Module
 		$el = new Texy\HtmlElement('a');
 
 		if (empty($link->modifier)) {
-			$nofollow = $popup = false;
+			$nofollow = false;
 		} else {
 			$nofollow = isset($link->modifier->classes['nofollow']);
-			$popup = isset($link->modifier->classes['popup']);
-			unset($link->modifier->classes['nofollow'], $link->modifier->classes['popup']);
+			unset($link->modifier->classes['nofollow']);
 			$el->attrs['href'] = null; // trick - move to front
 			$link->modifier->decorate($texy, $el);
 		}
@@ -288,8 +281,6 @@ final class LinkModule extends Texy\Module
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->linkedRoot);
 			if ($this->imageClass) {
 				$el->attrs['class'][] = $this->imageClass;
-			} else {
-				$el->attrs['onclick'] = $this->imageOnClick;
 			}
 
 		} else {
@@ -299,11 +290,6 @@ final class LinkModule extends Texy\Module
 			if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== false)) {
 				$el->attrs['rel'] = 'nofollow';
 			}
-		}
-
-		// popup on click
-		if ($popup) {
-			$el->attrs['onclick'] = $this->popupOnClick;
 		}
 
 		if ($content !== null) {
