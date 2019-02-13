@@ -7,8 +7,9 @@
 declare(strict_types=1);
 
 
-// include Texy!
-require_once __DIR__ . '/../../src/texy.php';
+if (@!include __DIR__ . '/../vendor/autoload.php') {
+	die('Install packages using `composer install`');
+}
 
 
 /**
@@ -24,11 +25,8 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Tex
 
 	switch ($parts[0]) {
 	case 'youtube':
-		$video = htmlspecialchars($parts[1]);
-		$dimensions = 'width="' . ($image->width ?: 425) . '" height="' . ($image->height ?: 350) . '"';
-		$code = '<div><object ' . $dimensions . '>'
-			. '<param name="movie" value="https://www.youtube.com/v/' . $video . '" /><param name="wmode" value="transparent" />'
-			. '<embed src="https://www.youtube.com/v/' . $video . '" type="application/x-shockwave-flash" wmode="transparent" ' . $dimensions . ' /></object></div>';
+		$code = '<iframe width="' . ($image->width ?: 425) . '" height="' . ($image->height ?: 350) . '" '
+			. 'src="https://www.youtube.com/embed/' . htmlspecialchars($parts[1]) . '" frameborder="0" allow="autoplay" allowfullscreen></iframe>';
 
 		$texy = $invocation->getTexy();
 		return $texy->protect($code, $texy::CONTENT_BLOCK);
@@ -38,7 +36,7 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Tex
 }
 
 
-$texy = new Texy();
+$texy = new Texy;
 $texy->addHandler('image', 'imageHandler');
 
 

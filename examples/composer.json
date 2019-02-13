@@ -1,0 +1,9 @@
+{
+	"type": "project",
+	"require": {
+		"php": ">=7.1",
+		"texy/texy": "^3.0",
+		"kukulich/fshl": "^2.1",
+		"geshi/geshi": "^1.0"
+	}
+}

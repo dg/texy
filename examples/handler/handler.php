@@ -7,11 +7,8 @@
 declare(strict_types=1);
 
 
-// include Texy!
-require_once __DIR__ . '/../../src/texy.php';
 
-
-$texy = new Texy();
+$texy = new Texy;
 $handler = new myHandler;
 $texy->addHandler('emoticon', [$handler, 'emoticon']);
 $texy->addHandler('image', [$handler, 'image']);

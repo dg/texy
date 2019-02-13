@@ -9,39 +9,42 @@ declare(strict_types=1);
 
 
 // include libs
-require_once __DIR__ . '/../../src/texy.php';
+if (@!include __DIR__ . '/../vendor/autoload.php') {
+	die('Install packages using `composer install`');
+}
 
-$fshlPath = __DIR__ . '/fshl/';
-@include_once $fshlPath . 'fshl.php';
-
-
-if (!class_exists('fshlParser')) {
-	die('DOWNLOAD <a href="http://hvge.sk/scripts/fshl/">FSHL</a> AND UNPACK TO FSHL FOLDER FIRST!');
+if (!class_exists('FSHL\Highlighter')) {
+	die('Install FSHL using `composer require kukulich/fshl`');
 }
 
 
 /**
  * User handler for code block
  */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): Texy\HtmlElement
+function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): ?Texy\HtmlElement
 {
 	if ($blocktype !== 'block/code') {
 		return $invocation->proceed();
 	}
 
-	$lang = strtoupper($lang);
-	if ($lang == 'JAVASCRIPT') {
-		$lang = 'JS';
-	}
+	static $lexers = [
+		'html' => FSHL\Lexer\Html::class,
+		'javascript' => FSHL\Lexer\Javascript::class,
+		'php' => FSHL\Lexer\Php::class,
+		'sql' => FSHL\Lexer\Sql::class,
+	];
 
-	$fshl = new fshlParser('HTML_UTF8', P_TAB_INDENT);
-	if (!$fshl->isLanguage($lang)) {
-		return $invocation->proceed();
+	if (!isset($lexers[$lang])) {
+		return null;
 	}
+	$langClass = $lexers[$lang];
 
 	$texy = $invocation->getTexy();
 	$content = Texy\Helpers::outdent($content);
-	$content = $fshl->highlightString($lang, $content);
+
+	$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
+	$content = $fshl->highlight($content, new $langClass);
+
 	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
 
 	$elPre = new Texy\HtmlElement('pre');
@@ -66,11 +69,11 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name)
 {
 	[$content] = $matches;
-	$lang = $name === 'phpBlockSyntax' ? 'PHP' : 'HTML';
+	$langClass = $name === 'phpBlockSyntax' ? FSHL\Lexer\Php::class : FSHL\Lexer\Html::class;
 
-	$fshl = new fshlParser('HTML_UTF8', P_TAB_INDENT);
+	$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
 	$texy = $parser->getTexy();
-	$content = $fshl->highlightString($lang, $content);
+	$content = $fshl->highlight($content, new $langClass);
 	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
 
 	$elPre = new Texy\HtmlElement('pre');
@@ -82,7 +85,7 @@ function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name
 }
 
 
-$texy = new Texy();
+$texy = new Texy;
 $texy->addHandler('block', 'blockHandler');
 
 // add new syntax: <?php ... ? >
@@ -105,7 +108,7 @@ $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
 header('Content-type: text/html; charset=utf-8');
-echo '<style type="text/css">' . file_get_contents($fshlPath . 'styles/COHEN_style.css') . '</style>';
+echo '<style>', file_get_contents('style.css'), '</style>';
 echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
 echo $html;

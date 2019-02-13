@@ -7,8 +7,9 @@
 declare(strict_types=1);
 
 
-// include Texy!
-require_once __DIR__ . '/../../src/texy.php';
+if (@!include __DIR__ . '/../vendor/autoload.php') {
+	die('Install packages using `composer install`');
+}
 
 
 /**
@@ -37,7 +38,7 @@ function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Te
 }
 
 
-$texy = new Texy();
+$texy = new Texy;
 $texy->addHandler('figure', 'figureHandler');
 
 // optionally set CSS classes

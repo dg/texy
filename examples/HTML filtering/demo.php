@@ -11,11 +11,12 @@
 declare(strict_types=1);
 
 
-// include Texy!
-require_once __DIR__ . '/../../src/texy.php';
+if (@!include __DIR__ . '/../vendor/autoload.php') {
+	die('Install packages using `composer install`');
+}
 
 
-$texy = new Texy();
+$texy = new Texy;
 $texy->htmlOutputModule->baseIndent = 1;
 
 

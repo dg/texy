@@ -8,8 +8,9 @@
 declare(strict_types=1);
 
 
-// include Texy!
-require_once __DIR__ . '/../../src/texy.php';
+if (@!include __DIR__ . '/../vendor/autoload.php') {
+	die('Install packages using `composer install`');
+}
 
 
 /**
@@ -30,7 +31,7 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Tex
 }
 
 
-$texy = new Texy();
+$texy = new Texy;
 $texy->addHandler('image', 'imageHandler');
 $texy->imageModule->root = 'imagesdir/';       // "in-line" images root
 $texy->imageModule->linkedRoot = 'imagesdir/big/';   // "linked" images root

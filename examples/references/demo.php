@@ -10,8 +10,9 @@
 declare(strict_types=1);
 
 
-// include Texy!
-require_once __DIR__ . '/../../src/texy.php';
+if (@!include __DIR__ . '/../vendor/autoload.php') {
+	die('Install packages using `composer install`');
+}
 
 
 /**
@@ -37,7 +38,7 @@ function newReferenceHandler(Texy\HandlerInvocation $parser, $refName)
 }
 
 
-$texy = new Texy();
+$texy = new Texy;
 
 // references link [1] [2] will be processed through user function
 $texy->addHandler('newReference', 'newReferenceHandler');

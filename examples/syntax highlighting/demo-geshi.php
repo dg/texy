@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This demo shows how combine Texy! with syntax highlighter GESHI
+ * This demo shows how combine Texy! with syntax highlighter GeSHi
  *       - define user callback (for /--code elements)
  *       - load language, highlight and return stylesheet + html output
  */
@@ -10,15 +10,13 @@ declare(strict_types=1);
 
 
 // include libs
-require_once __DIR__ . '/../../src/texy.php';
+if (@!include __DIR__ . '/../vendor/autoload.php') {
+	die('Install packages using `composer install`');
+}
 
 
-$geshiPath = __DIR__ . '/geshi/';
-@include_once $geshiPath . 'geshi.php';
-
-
-if (!class_exists('Geshi')) {
-	die('DOWNLOAD <a href="http://qbnz.com/highlighter/">GESHI</a> AND UNPACK TO GESHI FOLDER FIRST!');
+if (!class_exists('GeSHi')) {
+	die('Install GeSHi using `composer require geshi/geshi`');
 }
 
 
@@ -33,16 +31,14 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 
 	$texy = $invocation->getTexy();
 
-	global $geshiPath;
-
 	if ($lang == 'html') {
 		$lang = 'html4strict';
 	}
 	$content = Texy\Helpers::outdent($content);
-	$geshi = new GeSHi($content, $lang, $geshiPath . 'geshi/');
+	$geshi = new GeSHi($content, $lang);
 
 	// GeSHi could not find the language
-	if ($geshi->error) {
+	if ($geshi->error()) {
 		return $invocation->proceed();
 	}
 
@@ -74,7 +70,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 }
 
 
-$texy = new Texy();
+$texy = new Texy;
 $texy->addHandler('block', 'blockHandler');
 
 // prepare CSS stylesheet
