@@ -14,7 +14,7 @@
 		"php": ">=5.4.4"
 	},
 	"require-dev": {
-		"nette/tester": "~1.5",
+		"nette/tester": "^1.7 || ^2.0",
 		"tracy/tracy": "^2.4"
 	},
 	"replace": {
