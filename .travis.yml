@@ -55,3 +55,5 @@ cache:
 
 notifications:
     email: false
+
+dist: trusty
