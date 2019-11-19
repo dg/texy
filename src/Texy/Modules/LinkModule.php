@@ -221,13 +221,13 @@ final class LinkModule extends Texy\Module
 		$type = Link::COMMON;
 
 		// [ref]
-		if (strlen($dest) > 1 && $dest{0} === '[' && $dest{1} !== '*') {
+		if (strlen($dest) > 1 && $dest[0] === '[' && $dest[1] !== '*') {
 			$type = Link::BRACKET;
 			$dest = substr($dest, 1, -1);
 			$link = $this->getReference($dest);
 
 		// [* image *]
-		} elseif (strlen($dest) > 1 && $dest{0} === '[' && $dest{1} === '*') {
+		} elseif (strlen($dest) > 1 && $dest[0] === '[' && $dest[1] === '*') {
 			$type = Link::IMAGE;
 			$dest = trim(substr($dest, 2, -2));
 			$image = $texy->imageModule->getReference($dest);

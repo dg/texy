@@ -114,7 +114,7 @@ final class BlockQuoteModule extends Texy\Module
 			return null;
 		}
 
-		if ($link{0} === '[') { // [ref]
+		if ($link[0] === '[') { // [ref]
 			$link = substr($link, 1, -1);
 			$ref = $texy->linkModule->getReference($link);
 			if ($ref) {

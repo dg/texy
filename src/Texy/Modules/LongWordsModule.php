@@ -114,7 +114,7 @@ final class LongWordsModule extends Texy\Module
 		$s[] = '';
 		$trans[] = -1;
 		foreach ($chars as $key => $char) {
-			if (ord($char{0}) < 32) {
+			if (ord($char[0]) < 32) {
 				continue;
 			}
 			$s[] = $char;
