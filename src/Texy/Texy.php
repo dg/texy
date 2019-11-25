@@ -349,11 +349,12 @@ class Texy
 		$text = Helpers::normalize($text);
 
 		// replace tabs with spaces
-		$this->tabWidth = max(1, (int) $this->tabWidth);
-		while (strpos($text, "\t") !== false) {
-			$text = Regexp::replace($text, '#^([^\t\n]*+)\t#mU', function ($m) {
-				return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
-			});
+		if ($this->tabWidth) {
+			while (strpos($text, "\t") !== false) {
+				$text = Regexp::replace($text, '#^([^\t\n]*+)\t#mU', function ($m) {
+					return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
+				});
+			}
 		}
 
 		// user before handler
