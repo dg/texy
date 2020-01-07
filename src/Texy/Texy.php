@@ -649,7 +649,7 @@ class Texy
 
 
 	/** @deprecated */
-	final public static function webalize(string $s, string $charlist = null): string
+	final public static function webalize(string $s, string $charlist = ''): string
 	{
 		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::webalize()', E_USER_DEPRECATED);
 		return Helpers::webalize($s, $charlist);

@@ -22,7 +22,6 @@ $texy->allowed['phrase/cite'] = true;
 $texy->typographyModule->locale = 'en';
 $texy->horizLineModule->classes['*'] = 'hidden';
 
-$time = microtime(true);
 Assert::matchFile(
 	__DIR__ . '/expected/syntax.html',
 	$texy->process(file_get_contents(__DIR__ . '/sources/syntax.texy'))
@@ -32,4 +31,3 @@ Assert::matchFile(
 	__DIR__ . '/expected/syntax.txt',
 	$texy->toText()
 );
-echo $time - microtime(true);
