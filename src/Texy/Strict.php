@@ -19,7 +19,6 @@ use ReflectionProperty;
  */
 trait Strict
 {
-
 	/**
 	 * Call to undefined method.
 	 * @throws \LogicException

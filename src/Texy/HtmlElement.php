@@ -393,7 +393,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 					continue;
 
 				} elseif (is_array($value)) {
-
 					// prepare into temporary array
 					$tmp = null;
 					foreach ($value as $k => $v) {

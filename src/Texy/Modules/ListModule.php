@@ -80,7 +80,6 @@ final class ListModule extends Texy\Module
 	 *   + ...
 	 *   + ...
 	 * 3) ....
-	 *
 	 */
 	public function patternList(BlockParser $parser, array $matches): ?HtmlElement
 	{
@@ -137,7 +136,6 @@ final class ListModule extends Texy\Module
 	 * - description 1
 	 * - description 2
 	 * - description 3
-	 *
 	 */
 	public function patternDefList(BlockParser $parser, array $matches): HtmlElement
 	{

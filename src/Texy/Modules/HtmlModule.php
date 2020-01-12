@@ -169,7 +169,6 @@ final class HtmlModule extends Texy\Module
 			$elAttrs = [];
 
 		} elseif (is_array($allowedAttrs)) {
-
 			// skip disabled
 			$allowedAttrs = array_flip($allowedAttrs);
 			foreach ($elAttrs as $key => $foo) {

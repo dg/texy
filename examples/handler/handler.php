@@ -36,22 +36,17 @@ $texy->addHandler('afterParse', [$handler, 'afterParse']);
 class myHandler
 {
 
-
 	/** Line parsing */
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function emoticon(Texy\HandlerInvocation $invocation, $emoticon, $rawEmoticon)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function image(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null)
 	{
 		return $invocation->proceed();
@@ -68,63 +63,49 @@ class myHandler
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function linkEmail(Texy\HandlerInvocation $invocation, Texy\Link $link)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function linkURL(Texy\HandlerInvocation $invocation, Texy\Link $link)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function phrase(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = null)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function newReference(Texy\HandlerInvocation $invocation, $name)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function htmlComment(Texy\HandlerInvocation $invocation, $content)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function htmlTag(Texy\HandlerInvocation $invocation, Texy\HtmlElement $el, $isStart, $forceEmpty = null)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function script(Texy\HandlerInvocation $invocation, $command, array $args, $rawArgs)
 	{
 		return $invocation->proceed();
@@ -133,9 +114,7 @@ class myHandler
 
 	/** Blocks */
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 /*
 	function paragraph(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $modifier)
 	{
@@ -144,36 +123,28 @@ class myHandler
 */
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function figure(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, $content, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function heading(Texy\HandlerInvocation $invocation, /*int*/ $level, $content, Texy\Modifier $modifier, $isSurrounded)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string|null
-	 */
+	/** @return Texy\HtmlElement|string|null */
 	public function horizline(Texy\HandlerInvocation $invocation, $type, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();
 	}
 
 
-	/**
-	 * @return Texy\HtmlElement|string
-	 */
+	/** @return Texy\HtmlElement|string */
 	public function block(Texy\HandlerInvocation $invocation, $blocktype, $content, $param, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();

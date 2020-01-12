@@ -82,7 +82,7 @@ $html = $texy->process($text);  // that's all folks!
 
 // echo Geshi Stylesheet
 header('Content-type: text/html; charset=utf-8');
-echo '<style type="text/css">'. $styleSheet . '</style>';
+echo '<style type="text/css">' . $styleSheet . '</style>';
 echo '<title>' . $texy->headingModule->title . '</title>';
 // echo formated output
 echo $html;

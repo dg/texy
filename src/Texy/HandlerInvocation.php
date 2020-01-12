@@ -40,9 +40,7 @@ final class HandlerInvocation
 	}
 
 
-	/**
-	 * @return mixed
-	 */
+	/** @return mixed */
 	public function proceed(...$args)
 	{
 		if ($this->pos === 0) {
