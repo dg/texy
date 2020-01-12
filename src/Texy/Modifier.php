@@ -150,22 +150,22 @@ final class Modifier
 		$elAttrs = &$el->attrs;
 
 		// tag & attibutes
-		$tmp = $texy->allowedTags; // speed-up
+		$tags = $texy->allowedTags; // speed-up
 		if (!$this->attrs) {
-		} elseif ($tmp === $texy::ALL) {
+		} elseif ($tags === $texy::ALL) {
 			$elAttrs = $this->attrs;
 			$el->validateAttrs($texy->getDTD());
 
-		} elseif (is_array($tmp) && isset($tmp[$el->getName()])) {
-			$tmp = $tmp[$el->getName()];
+		} elseif (is_array($tags) && isset($tags[$el->getName()])) {
+			$attrs = $tags[$el->getName()];
 
-			if ($tmp === $texy::ALL) {
+			if ($attrs === $texy::ALL) {
 				$elAttrs = $this->attrs;
 
-			} elseif (is_array($tmp) && count($tmp)) {
-				$tmp = array_flip($tmp);
+			} elseif (is_array($attrs) && count($attrs)) {
+				$attrs = array_flip($attrs);
 				foreach ($this->attrs as $key => $value) {
-					if (isset($tmp[$key])) {
+					if (isset($attrs[$key])) {
 						$el->attrs[$key] = $value;
 					}
 				}
