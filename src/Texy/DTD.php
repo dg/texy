@@ -368,12 +368,6 @@ $dtd = [
 	['id' => 1, 'name' => 1, 'value' => 1, 'valuetype' => 1, 'type' => 1],
 	false,
 ],
-
-// special "base content"
-'%BASE' => [
-	null,
-	['html' => 1, 'head' => 1, 'body' => 1, 'script' => 1] + $bi,
-],
 ];
 
 
