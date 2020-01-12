@@ -94,7 +94,11 @@ final class ParagraphModule extends Texy\Module
 
 		// block contains only replaced element
 		} elseif (strpos($content, $texy::CONTENT_REPLACED) !== false) {
-			$el->setName($texy->nontextParagraph);
+			if ($texy->nontextParagraph instanceof Texy\HtmlElement) {
+				$el = (clone $texy->nontextParagraph)->setText($content);
+			} else {
+				$el->setName($texy->nontextParagraph);
+			}
 
 		// block contains only markup tags or spaces or nothing
 		} else {

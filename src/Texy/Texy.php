@@ -93,7 +93,7 @@ class Texy
 	/** @var bool  remove soft hyphens (SHY)? */
 	public $removeSoftHyphens = true;
 
-	/** @var string */
+	/** @var string|HtmlElement */
 	public $nontextParagraph = 'div';
 
 	/** @var Modules\ScriptModule */
