@@ -65,7 +65,8 @@ final class HtmlOutputModule extends Texy\Module
 		$this->tagUsed = [];
 
 		// special "base content"
-		$this->baseDTD = $texy->dtd['div'][1] + $texy->dtd['html'][1] /*+ $texy->dtd['head'][1]*/ + $texy->dtd['body'][1] + ['html' => 1];
+		$dtd = $texy->getDTD();
+		$this->baseDTD = $dtd['div'][1] + $dtd['html'][1] /*+ $dtd['head'][1]*/ + $dtd['body'][1] + ['html' => 1];
 
 		// wellform and reformat
 		$s = Regexp::replace(
@@ -197,7 +198,8 @@ final class HtmlOutputModule extends Texy\Module
 
 			$dtdContent = $this->baseDTD;
 
-			if (!isset($this->texy->dtd[$mTag])) {
+			$dtd = $this->texy->getDTD();
+			if (!isset($dtd[$mTag])) {
 				// unknown (non-html) tag
 				$allowed = true;
 				$item = reset($this->tagStack);
@@ -279,7 +281,7 @@ final class HtmlOutputModule extends Texy\Module
 				$open = '<' . $mTag . $mAttr . '>';
 
 				// receive new content
-				if ($tagDTD = $this->texy->dtd[$mTag] ?? null) {
+				if ($tagDTD = $dtd[$mTag] ?? null) {
 					if (isset($tagDTD[1][HtmlElement::INNER_TRANSPARENT])) {
 						$dtdContent += $tagDTD[1];
 						unset($dtdContent[HtmlElement::INNER_TRANSPARENT]);

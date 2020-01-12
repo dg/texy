@@ -137,7 +137,7 @@ final class HtmlModule extends Texy\Module
 		// convert case
 		$name = $el->getName();
 		$lower = strtolower($name);
-		if (isset($texy->dtd[$lower]) || $name === strtoupper($name)) {
+		if (isset($texy->getDTD()[$lower]) || $name === strtoupper($name)) {
 			// complete UPPER convert to lower
 			$name = $lower;
 			$el->setName($name);
@@ -265,7 +265,7 @@ final class HtmlModule extends Texy\Module
 			];
 		}
 
-		$el->validateAttrs($texy->dtd);
+		$el->validateAttrs($texy->getDTD());
 
 		return $el;
 	}

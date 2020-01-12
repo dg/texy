@@ -154,7 +154,7 @@ final class Modifier
 		if (!$this->attrs) {
 		} elseif ($tmp === $texy::ALL) {
 			$elAttrs = $this->attrs;
-			$el->validateAttrs($texy->dtd);
+			$el->validateAttrs($texy->getDTD());
 
 		} elseif (is_array($tmp) && isset($tmp[$el->getName()])) {
 			$tmp = $tmp[$el->getName()];
@@ -170,7 +170,7 @@ final class Modifier
 					}
 				}
 			}
-			$el->validateAttrs($texy->dtd);
+			$el->validateAttrs($texy->getDTD());
 		}
 
 		// title

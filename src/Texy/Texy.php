@@ -189,10 +189,7 @@ class Texy
 	 *                    - 0 - transparent
 	 * @var array
 	 */
-	public $dtd;
-
-	/** @var array */
-	private static $dtdCache;
+	private static $dtd;
 
 
 	public function __construct()
@@ -222,14 +219,13 @@ class Texy
 
 	private function initDTD(): void
 	{
-		if (!self::$dtdCache) {
-			self::$dtdCache = require __DIR__ . '/DTD.php';
+		if (!self::$dtd) {
+			self::$dtd = require __DIR__ . '/DTD.php';
 		}
-		$this->dtd = self::$dtdCache;
 
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = [];
-		foreach ($this->dtd as $tag => $dtd) {
+		foreach (self::$dtd as $tag => $dtd) {
 			$this->allowedTags[$tag] = self::ALL;
 		}
 	}
@@ -605,6 +601,13 @@ class Texy
 	final public function getDOM(): HtmlElement
 	{
 		return $this->DOM;
+	}
+
+
+	/** @internal */
+	public static function getDTD(): array
+	{
+		return self::$dtd;
 	}
 
 
