@@ -172,7 +172,8 @@ class Texy
 	private $marks = [];
 
 	/** @var array  for internal usage */
-	public $_classes, $_styles;
+	private $_classes;
+	private $_styles;
 
 	/** @var bool */
 	private $processing = false;
@@ -608,6 +609,13 @@ class Texy
 	public static function getDTD(): array
 	{
 		return self::$dtd;
+	}
+
+
+	/** @internal */
+	final public function getAllowedProps(): array
+	{
+		return [$this->_classes, $this->_styles];
 	}
 
 

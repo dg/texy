@@ -179,21 +179,21 @@ final class Modifier
 		}
 
 		// classes & ID
+		[$classes, $styles] = $texy->getAllowedProps();
 		if ($this->classes || $this->id !== null) {
-			$tmp = $texy->_classes; // speed-up
-			if ($tmp === $texy::ALL) {
+			if ($classes === $texy::ALL) {
 				foreach ($this->classes as $value => $foo) {
 					$elAttrs['class'][] = $value;
 				}
 				$elAttrs['id'] = $this->id;
-			} elseif (is_array($tmp)) {
+			} elseif (is_array($classes)) {
 				foreach ($this->classes as $value => $foo) {
-					if (isset($tmp[$value])) {
+					if (isset($classes[$value])) {
 						$elAttrs['class'][] = $value;
 					}
 				}
 
-				if (isset($tmp['#' . $this->id])) {
+				if (isset($classes['#' . $this->id])) {
 					$elAttrs['id'] = $this->id;
 				}
 			}
@@ -201,14 +201,13 @@ final class Modifier
 
 		// styles
 		if ($this->styles) {
-			$tmp = $texy->_styles; // speed-up
-			if ($tmp === $texy::ALL) {
+			if ($styles === $texy::ALL) {
 				foreach ($this->styles as $prop => $value) {
 					$elAttrs['style'][$prop] = $value;
 				}
-			} elseif (is_array($tmp)) {
+			} elseif (is_array($styles)) {
 				foreach ($this->styles as $prop => $value) {
-					if (isset($tmp[$prop])) {
+					if (isset($styles[$prop])) {
 						$elAttrs['style'][$prop] = $value;
 					}
 				}
