@@ -131,7 +131,7 @@ final class HtmlOutputModule extends Texy\Module
 		// phase #1 - stuff between tags
 		if ($mText !== '') {
 			$item = reset($this->tagStack);
-			if ($item && !isset($item['dtdContent']['%DATA'])) {  // text not allowed?
+			if ($item && !isset($item['dtdContent'][HtmlElement::INNER_TEXT])) {  // text not allowed?
 
 			} elseif (array_intersect(array_keys($this->tagUsed, true), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
 				$s = Texy\Helpers::freezeSpaces($mText);
@@ -286,9 +286,14 @@ final class HtmlOutputModule extends Texy\Module
 			if ($allowed) {
 				$open = '<' . $mTag . $mAttr . '>';
 
-				// receive new content (ins & del are special cases)
-				if (!empty($this->texy->dtd[$mTag][1])) {
-					$dtdContent = $this->texy->dtd[$mTag][1];
+				// receive new content
+				if ($tagDTD = $this->texy->dtd[$mTag] ?? null) {
+					if (isset($tagDTD[1][HtmlElement::INNER_TRANSPARENT])) {
+						$dtdContent += $tagDTD[1];
+						unset($dtdContent[HtmlElement::INNER_TRANSPARENT]);
+					} else {
+						$dtdContent = $tagDTD[1];
+					}
 				}
 
 				// format output

@@ -44,7 +44,7 @@ if (!$strict) {
 $i = ['ins' => 1, 'del' => 1, 'tt' => 1, 'i' => 1, 'b' => 1, 'big' => 1, 'small' => 1, 'em' => 1,
 	'strong' => 1, 'dfn' => 1, 'code' => 1, 'samp' => 1, 'kbd' => 1, 'var' => 1, 'cite' => 1, 'abbr' => 1, 'acronym' => 1,
 	'sub' => 1, 'sup' => 1, 'q' => 1, 'span' => 1, 'bdo' => 1, 'a' => 1, 'object' => 1, 'img' => 1, 'br' => 1, 'script' => 1,
-	'map' => 1, 'input' => 1, 'select' => 1, 'textarea' => 1, 'label' => 1, 'button' => 1, '%DATA' => 1, ];
+	'map' => 1, 'input' => 1, 'select' => 1, 'textarea' => 1, 'label' => 1, 'button' => 1, HtmlElement::INNER_TEXT => 1, ];
 
 if (!$strict) {
 	$i += [
@@ -68,7 +68,7 @@ $dtd = [
 ],
 'title' => [
 	[],
-	['%DATA' => 1],
+	[HtmlElement::INNER_TEXT => 1],
 ],
 'body' => [
 	$attrs + ['onload' => 1, 'onunload' => 1],
@@ -76,11 +76,11 @@ $dtd = [
 ],
 'script' => [
 	['charset' => 1, 'type' => 1, 'src' => 1, 'defer' => 1, 'event' => 1, 'for' => 1],
-	['%DATA' => 1],
+	[HtmlElement::INNER_TEXT => 1],
 ],
 'style' => [
 	$i18n + ['type' => 1, 'media' => 1, 'title' => 1],
-	['%DATA' => 1],
+	[HtmlElement::INNER_TEXT => 1],
 ],
 'p' => [
 	$strict ? $attrs : $attrs + ['align' => 1],
@@ -304,11 +304,11 @@ $dtd = [
 ],
 'option' => [
 	$attrs + ['selected' => 1, 'disabled' => 1, 'label' => 1, 'value' => 1],
-	['%DATA' => 1],
+	[HtmlElement::INNER_TEXT => 1],
 ],
 'textarea' => [
 	$attrs + ['name' => 1, 'rows' => 1, 'cols' => 1, 'disabled' => 1, 'readonly' => 1, 'tabindex' => 1, 'accesskey' => 1, 'onfocus' => 1, 'onblur' => 1, 'onselect' => 1, 'onchange' => 1],
-	['%DATA' => 1],
+	[HtmlElement::INNER_TEXT => 1],
 ],
 'label' => [
 	$attrs + ['for' => 1, 'accesskey' => 1, 'onfocus' => 1, 'onblur' => 1],
@@ -320,11 +320,11 @@ $dtd = [
 ],
 'ins' => [
 	$attrs + ['cite' => 1, 'datetime' => 1],
-	0, // special case
+	[HtmlElement::INNER_TRANSPARENT => 1],
 ],
 'del' => [
 	$attrs + ['cite' => 1, 'datetime' => 1],
-	0, // special case
+	[HtmlElement::INNER_TRANSPARENT => 1],
 ],
 
 // empty elements

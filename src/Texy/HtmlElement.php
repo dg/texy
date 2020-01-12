@@ -23,6 +23,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 {
 	use Strict;
 
+	public const INNER_TEXT = '%TEXT';
+	public const INNER_TRANSPARENT = '%TRANS';
+
 	/** @var array  element's attributes */
 	public $attrs = [];
 
