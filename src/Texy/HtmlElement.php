@@ -165,6 +165,25 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
+	 * Sets element's attribute.
+	 */
+	final public function setAttribute(string $name, $value): self
+	{
+		$this->attrs[$name] = $value;
+		return $this;
+	}
+
+
+	/**
+	 * Returns element's attribute.
+	 */
+	final public function getAttribute(string $name): self
+	{
+		return $this->attrs[$name] ?? null;
+	}
+
+
+	/**
 	 * Special setter for element's attribute.
 	 */
 	final public function href(string $path, array $query = null): self
