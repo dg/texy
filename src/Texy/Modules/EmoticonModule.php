@@ -17,27 +17,27 @@ use Texy;
  */
 final class EmoticonModule extends Texy\Module
 {
-	/** @var array  supported emoticons and image files */
+	/** @var array  supported emoticons and image files / chars */
 	public $icons = [
-		':-)' => 'smile.gif',
-		':-(' => 'sad.gif',
-		';-)' => 'wink.gif',
-		':-D' => 'biggrin.gif',
-		'8-O' => 'eek.gif',
-		'8-)' => 'cool.gif',
-		':-?' => 'confused.gif',
-		':-x' => 'mad.gif',
-		':-P' => 'razz.gif',
-		':-|' => 'neutral.gif',
+		':-)' => '🙂',
+		':-(' => '☹',
+		';-)' => '😉',
+		':-D' => '😁',
+		'8-O' => '😮',
+		'8-)' => '😄',
+		':-?' => '😕',
+		':-x' => '😶',
+		':-P' => '😛',
+		':-|' => '😐',
 	];
 
-	/** @var string|null  CSS class for emoticons */
+	/** @deprecated */
 	public $class;
 
-	/** @var string|null  root of relative images (default value is $texy->imageModule->root) */
+	/** @deprecated */
 	public $root;
 
-	/** @var string|null  physical location of images on server (default value is $texy->imageModule->fileRoot) */
+	/** @deprecated */
 	public $fileRoot;
 
 
@@ -91,11 +91,15 @@ final class EmoticonModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
+	 * @return Texy\HtmlElement|string
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, string $emoticon, string $raw): Texy\HtmlElement
+	public function solve(Texy\HandlerInvocation $invocation, string $emoticon, string $raw)
 	{
 		$texy = $this->texy;
 		$file = $this->icons[$emoticon];
+		if (strpos($file, '.') === false) {
+			return $file;
+		}
 		$el = new Texy\HtmlElement('img');
 		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root === null ? $texy->imageModule->root : $this->root);
 		$el->attrs['alt'] = $raw;
