@@ -31,7 +31,7 @@ final class HtmlOutputModule extends Texy\Module
 	/** @var int  wrap width, doesn't include indent space */
 	public $lineWrap = 80;
 
-	/** @var bool  remove optional HTML end tags? */
+	/** @deprecated */
 	public $removeOptional = false;
 
 	/** @var int  indent space counter */
@@ -99,11 +99,6 @@ final class HtmlOutputModule extends Texy\Module
 				'#^(\t*)(.*)$#m',
 				[$this, 'wrap']
 			);
-		}
-
-		// remove HTML 4.01 optional end tags
-		if ($this->removeOptional) {
-			$s = Regexp::replace($s, '#\s*</(colgroup|dd|dt|li|option|p|td|tfoot|th|thead|tr)>#u', '');
 		}
 	}
 
