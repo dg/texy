@@ -228,11 +228,6 @@ final class ImageModule extends Texy\Module
 		}
 
 		if (!is_int($image->width) || !is_int($image->height) || $image->asMax) {
-			// autodetect fileRoot
-			if ($this->fileRoot === null && isset($_SERVER['SCRIPT_FILENAME'])) {
-				$this->fileRoot = dirname($_SERVER['SCRIPT_FILENAME']) . '/' . $this->root;
-			}
-
 			// detect dimensions
 			// absolute URL & security check for double dot
 			if (Helpers::isRelative($image->URL) && strpos($image->URL, '..') === false) {
