@@ -17,7 +17,7 @@ function createTexy()
 
 $texy = createTexy();
 Assert::match(
-	'<div class="figure"><img src="images/image.gif" alt=""></div>',
+	'<div class="figure note"><img src="images/image.gif" alt=""></div>',
 	$texy->process('
-[* image.gif *]
+[* image.gif *] .[note]
 '));
