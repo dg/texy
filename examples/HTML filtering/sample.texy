@@ -7,6 +7,8 @@ Dangerous <span onmouseover="alert('onmouseover')">span</span>
 </div>
 
 
-<myExtraTag attr1="10" />
+<my-extraTag attr1="10">
 
 "Homepage .{target: _blank}":www.texy.info
+
+</my-extraTag>

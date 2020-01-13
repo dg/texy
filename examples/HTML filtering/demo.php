@@ -61,8 +61,8 @@ doIt($texy);
 
 echo '<h2>Enable custom tags</h2>';
 $texy->allowedTags =
-	[ // enable only tags <myExtraTag> with attribute & <strong>
-		'myExtraTag' => ['attr1'],
+	[ // enable only tags <my-extraTag> with attribute & <strong>
+		'my-extraTag' => ['attr1'],
 		'strong' => [],
 	];
 doIt($texy);
