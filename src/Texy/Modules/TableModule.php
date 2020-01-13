@@ -21,10 +21,10 @@ use Texy\Regexp;
  */
 final class TableModule extends Texy\Module
 {
-	/** @var string|null  CSS class for odd rows */
+	/** @deprecated */
 	public $oddClass;
 
-	/** @var string|null  CSS class for even rows */
+	/** @deprecated */
 	public $evenClass;
 
 	private $disableTables;
