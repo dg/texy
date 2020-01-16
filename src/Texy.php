@@ -9,4 +9,10 @@
 declare(strict_types=1);
 
 
-class_alias('Texy\Texy', 'Texy');
+if (false) {
+	class Texy extends Texy\Texy
+	{
+	}
+} elseif (!class_exists(Texy::class)) {
+	class_alias(Texy\Texy::class, Texy::class);
+}

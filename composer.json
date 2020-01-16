@@ -22,8 +22,7 @@
 		"dg/texy": "*"
 	},
 	"autoload": {
-		"classmap": ["src/"],
-		"files": ["src/texy.php"]
+		"classmap": ["src/"]
 	},
 	"scripts": {
 		"phpstan": "phpstan analyse --level 5 src",

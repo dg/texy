@@ -697,3 +697,6 @@ class Texy
 		return Helpers::prependRoot($URL, $root);
 	}
 }
+
+
+class_exists(\Texy::class);
