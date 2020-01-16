@@ -88,18 +88,10 @@ final class TableModule extends Texy\Module
 		$rowCounter = 0;
 		$colCounter = 0;
 		$elPart = null;
-		$lineMode = false; // rows must be separated by lines
 
 		while (true) {
 			if ($parser->next('#^\|([=-])[+|=-]{2,}$#Um', $matches)) { // line
-				if ($lineMode) {
-					if ($matches[1] === '=') {
-						$isHead = !$isHead;
-					}
-				} else {
-					$isHead = !$isHead;
-					$lineMode = $matches[1] === '=';
-				}
+				$isHead = !$isHead;
 				$prevRow = [];
 				continue;
 			}
@@ -144,11 +136,9 @@ final class TableModule extends Texy\Module
 				foreach (explode('|', $mContent) as $cell) {
 					$cell = strtr($cell, "\x13", '|');
 					// rowSpan
-					if (isset($prevRow[$col]) && ($lineMode || ($matches = Regexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU')))) {
+					if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU'))) {
 						$prevRow[$col]->rowSpan++;
-						if (!$lineMode) {
-							$cell = $matches[1] ?? '';
-						}
+						$cell = $matches[1] ?? '';
 						$prevRow[$col]->text .= "\n" . $cell;
 						$col += $prevRow[$col]->colSpan;
 						$elCell = null;
@@ -199,19 +189,13 @@ final class TableModule extends Texy\Module
 
 				// even up with empty cells
 				while ($col < $colCounter) {
-					if (isset($prevRow[$col]) && $lineMode) {
-						$prevRow[$col]->rowSpan++;
-						$prevRow[$col]->text .= "\n";
-
-					} else {
-						$elCell = new TableCellElement;
-						$elCell->setName($isHead ? 'th' : 'td');
-						if (isset($colModifier[$col])) {
-							$colModifier[$col]->decorate($texy, $elCell);
-						}
-						$elRow->add($elCell);
-						$prevRow[$col] = $elCell;
+					$elCell = new TableCellElement;
+					$elCell->setName($isHead ? 'th' : 'td');
+					if (isset($colModifier[$col])) {
+						$colModifier[$col]->decorate($texy, $elCell);
 					}
+					$elRow->add($elCell);
+					$prevRow[$col] = $elCell;
 					$col++;
 				}
 				$colCounter = $col;
