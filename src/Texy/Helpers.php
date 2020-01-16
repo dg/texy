@@ -34,7 +34,7 @@ final class Helpers
 
 	public static function unescapeHtml(string $s): string
 	{
-		return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+		return html_entity_decode($s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 	}
 
 
