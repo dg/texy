@@ -33,7 +33,6 @@ final class PhraseModule extends Texy\Module
 		'phrase/sub-alt' => 'sub',
 		'phrase/span' => 'a',
 		'phrase/span-alt' => 'a',
-		'phrase/cite' => 'cite',
 		'phrase/acronym' => 'abbr',
 		'phrase/acronym-alt' => 'abbr',
 		'phrase/code' => 'code',
@@ -150,13 +149,6 @@ final class PhraseModule extends Texy\Module
 			'phrase/span-alt',
 		);
 
-		// ~~cite~~
-		$texy->registerLinePattern(
-			$this->patternPhrase(...),
-			'#(?<!\~)\~\~(?![\s~])((?:[^\r\n ~]++|[ ~])+)' . Patterns::MODIFIER . '?(?<![\s~])\~\~(?!\~)(?::(' . Patterns::LINK_URL . '))??()#Uu',
-			'phrase/cite',
-		);
-
 		// >>quote<<
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
@@ -225,7 +217,6 @@ final class PhraseModule extends Texy\Module
 		$texy->allowed['phrase/del'] = false;
 		$texy->allowed['phrase/sup'] = false;
 		$texy->allowed['phrase/sub'] = false;
-		$texy->allowed['phrase/cite'] = false;
 	}
 
 
@@ -261,9 +252,6 @@ final class PhraseModule extends Texy\Module
 			}
 		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
 			$mod->title = trim(Texy\Helpers::unescapeHtml($mLink));
-
-		} elseif ($phrase === 'phrase/quote') {
-			$mod->cite = $texy->blockQuoteModule->citeLink($mLink);
 
 		} elseif ($mLink != null) {
 			$link = $texy->linkModule->factoryLink($mLink, null, $mContent);
@@ -323,10 +311,6 @@ final class PhraseModule extends Texy\Module
 		} elseif ($tag) {
 			$el = new Texy\HtmlElement($tag, $content);
 			$mod->decorate($texy, $el);
-
-			if ($tag === 'q') {
-				$el->attrs['cite'] = $mod->cite;
-			}
 		} else {
 			$el = $content; // trick
 		}

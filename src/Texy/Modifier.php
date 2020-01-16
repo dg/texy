@@ -36,7 +36,6 @@ final class Modifier
 	public ?string $hAlign = null;
 	public ?string $vAlign = null;
 	public ?string $title = null;
-	public ?string $cite = null;
 
 	/** @var array<string, int>  list of properties which are regarded as HTML element attributes */
 	public static array $elAttrs = [

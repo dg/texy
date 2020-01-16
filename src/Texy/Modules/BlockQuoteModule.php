@@ -54,16 +54,10 @@ final class BlockQuoteModule extends Texy\Module
 		$content = '';
 		$spaces = '';
 		do {
-			if ($mPrefix === ':') {
-				$mod->cite = $texy->blockQuoteModule->citeLink($mContent);
-				$content .= "\n";
-			} else {
-				if ($spaces === '') {
-					$spaces = max(1, strlen($mPrefix));
-				}
-
-				$content .= $mContent . "\n";
+			if ($spaces === '') {
+				$spaces = max(1, strlen($mPrefix));
 			}
+			$content .= $mContent . "\n";
 
 			if (!$parser->next("#^>(?:|([\\ \\t]{1,$spaces}|:)(.*))()$#mA", $matches)) {
 				break;
@@ -72,7 +66,6 @@ final class BlockQuoteModule extends Texy\Module
 			[, $mPrefix, $mContent] = $matches;
 		} while (true);
 
-		$el->attrs['cite'] = $mod->cite;
 		$el->parseBlock($texy, $content, $parser->isIndented());
 
 		// no content?
@@ -84,33 +77,5 @@ final class BlockQuoteModule extends Texy\Module
 		$texy->invokeHandlers('afterBlockquote', [$parser, $el, $mod]);
 
 		return $el;
-	}
-
-
-	/**
-	 * Converts cite source to URL.
-	 */
-	public function citeLink(string $link): ?string
-	{
-		$texy = $this->texy;
-
-		if ($link == null) {
-			return null;
-		}
-
-		if ($link[0] === '[') { // [ref]
-			$link = substr($link, 1, -1);
-			$ref = $texy->linkModule->getReference($link);
-			if ($ref) {
-				return Texy\Helpers::prependRoot($ref->URL, $texy->linkModule->root);
-			}
-		}
-
-		// special supported case
-		if (strncasecmp($link, 'www.', 4) === 0) {
-			return 'http://' . $link;
-		}
-
-		return Texy\Helpers::prependRoot($link, $texy->linkModule->root);
 	}
 }

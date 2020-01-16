@@ -65,12 +65,13 @@ class="php"><code>function reImage($matches) {
 
 <h2>BlockQuote</h2>
 
-<blockquote cite="http://www.microsoft.com">
+<blockquote>
 	<p>This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
 	consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus. Vestibulum
 	enim wisi, viverra nec, fringilla in, laoreet vitae, risus.</p>
 
-	<p>640 K should be enough for everyone</p>
+	<p>640 K should be enough for everyone <a
+	href="http://www.microsoft.com">http://www.microsoft.com</a></p>
 </blockquote>
 
 <h3>nested</h3>
@@ -143,9 +144,9 @@ consequat vel, laoreet in, blandit et, eros.</p>
 <p>Formatting: <em>emphasis</em>, <strong>strong emphasis</strong> and <strong
 style="color:green"><em>stronger emphasis</em></strong></p>
 
-<p>Quotes: <q cite="http://www.lipsum.com">Lorem Ipsum Dolores</q></p>
+<p>Quotes: <a href="http://www.lipsum.com"><q>Lorem Ipsum Dolores</q></a></p>
 
-<p>Cite: As <cite>Frank Borland</cite> said, …</p>
+<p>Cite: As ~~Frank Borland~~ said, …</p>
 
 <p>And other: <sup>superscript</sup> vs. <sub>subscript</sub></p>
 
