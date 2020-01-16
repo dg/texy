@@ -264,14 +264,6 @@ final class HtmlOutputModule extends Texy\Module
 			$close = null;
 			$indent = 0;
 
-			/*
-			if (!isset(Texy\HtmlElement::$inlineElements[$mTag])) {
-				// block tags always decorate with \n
-				$s .= "\n";
-				$close = "\n";
-			}
-			*/
-
 			if ($allowed) {
 				$open = '<' . $mTag . $mAttr . '>';
 
@@ -297,7 +289,6 @@ final class HtmlOutputModule extends Texy\Module
 
 				// TODO: problematic formatting of select / options, object / params
 			}
-
 
 			// open tag, put to stack, increase counter
 			$item = [

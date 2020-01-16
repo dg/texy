@@ -214,10 +214,6 @@ final class LongWordsModule extends Texy\Module
 			}
 		}
 		$syllables[] = implode('', $chars);
-
-		//$s = implode("\xC2\xAD", $syllables); // insert shy
-		//$s = str_replace(array("\xC2\xAD\xC2\xA0", "\xC2\xA0\xC2\xAD"), array(' ', ' '), $s); // shy+nbsp = normal space
-
 		return implode("\xC2\xAD", $syllables);
 	}
 }

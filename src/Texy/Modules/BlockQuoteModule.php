@@ -24,8 +24,6 @@ final class BlockQuoteModule extends Texy\Module
 		$texy->registerBlockPattern(
 			[$this, 'pattern'],
 			'#^(?:' . Texy\Patterns::MODIFIER_H . '\n)?\>(\ ++|:)(\S.*+)$#mU', // original
-			// '#^(?:'.Texy\Patterns::MODIFIER_H.'\n)?\>(?:(\>|\ +?|:)(.*))?()$#mU', // >>>>
-			// '#^(?:'.Texy\Patterns::MODIFIER_H.'\n)?\>(?:(\ +?|:)(.*))()$#mU', // only >
 			'blockquote'
 		);
 	}
@@ -71,19 +69,6 @@ final class BlockQuoteModule extends Texy\Module
 			if (!$parser->next("#^>(?:|(\\ {1,$spaces}|:)(.*))()$#mA", $matches)) {
 				break;
 			}
-
-/*
-			if ($mPrefix === '>') {
-				$content .= $mPrefix . $mContent . "\n";
-			} elseif ($mPrefix === ':') {
-				$mod->cite = $texy->blockQuoteModule->citeLink($mContent);
-				$content .= "\n";
-			} else {
-				if ($spaces === '') $spaces = max(1, strlen($mPrefix));
-				$content .= $mContent . "\n";
-			}
-			if (!$parser->next("#^\\>(?:(\\>|\\ {1,$spaces}|:)(.*))?()$#mA", $matches)) break;
-*/
 
 			[, $mPrefix, $mContent] = $matches;
 		} while (true);
