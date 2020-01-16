@@ -32,6 +32,12 @@ final class Helpers
 	}
 
 
+	public static function unescapeHtml(string $s): string
+	{
+		return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+	}
+
+
 	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
 	 * which are ignored by TexyHtmlOutputModule routine

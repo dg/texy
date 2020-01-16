@@ -79,7 +79,7 @@ final class Modifier
 
 			if ($ch === '(') { // title
 				preg_match('#(?:\\\\\)|[^)\n])++\)#', $mod, $m, 0, $p);
-				$this->title = html_entity_decode(str_replace('\)', ')', trim(substr($m[0], 1, -1))), ENT_QUOTES, 'UTF-8');
+				$this->title = Helpers::unescapeHtml(str_replace('\)', ')', trim(substr($m[0], 1, -1))));
 				$p += strlen($m[0]);
 
 			} elseif ($ch === '{') { // style & attributes

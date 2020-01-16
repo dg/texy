@@ -103,9 +103,9 @@ final class HtmlModule extends Texy\Module
 				if ($value == null) {
 					$el->attrs[$key] = true;
 				} elseif ($value[0] === '\'' || $value[0] === '"') {
-					$el->attrs[$key] = html_entity_decode(substr($value, 1, -1), ENT_QUOTES, 'UTF-8');
+					$el->attrs[$key] = Texy\Helpers::unescapeHtml(substr($value, 1, -1));
 				} else {
-					$el->attrs[$key] = html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+					$el->attrs[$key] = Texy\Helpers::unescapeHtml($value);
 				}
 			}
 		}

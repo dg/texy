@@ -265,7 +265,7 @@ final class PhraseModule extends Texy\Module
 			}
 
 		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
-			$mod->title = trim(html_entity_decode($mLink, ENT_QUOTES, 'UTF-8'));
+			$mod->title = trim(Texy\Helpers::unescapeHtml($mLink));
 
 		} elseif ($phrase === 'phrase/quote') {
 			$mod->cite = $texy->blockQuoteModule->citeLink($mLink);

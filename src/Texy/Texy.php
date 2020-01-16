@@ -448,7 +448,7 @@ class Texy
 	final public function stringToHtml(string $s): string
 	{
 		// decode HTML entities to UTF-8
-		$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+		$s = Helpers::unescapeHtml($s);
 
 		// line-postprocessing
 		$blocks = explode(self::CONTENT_BLOCK, $s);
@@ -497,7 +497,7 @@ class Texy
 		$s = Regexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
 
 		// entities -> chars
-		$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+		$s = Helpers::unescapeHtml($s);
 
 		// convert nbsp to normal space and remove shy
 		$s = strtr($s, [
@@ -669,8 +669,8 @@ class Texy
 	/** @deprecated */
 	final public static function unescapeHtml(string $s): string
 	{
-		trigger_error(__METHOD__ . '() is deprecated, use html_entity_decode()', E_USER_DEPRECATED);
-		return html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::unescapeHtml()', E_USER_DEPRECATED);
+		return Helpers::unescapeHtml($s);
 	}
 
 

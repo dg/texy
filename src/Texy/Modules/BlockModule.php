@@ -168,7 +168,7 @@ final class BlockModule extends Texy\Module
 
 			$lineParser->parse($s);
 			$s = $el->getText();
-			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+			$s = Helpers::unescapeHtml($s);
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $texy->unprotect($s);
 			$s = $texy->protect($s, $texy::CONTENT_BLOCK);
@@ -196,7 +196,7 @@ final class BlockModule extends Texy\Module
 
 			$lineParser->parse($s);
 			$s = $el->getText();
-			$s = html_entity_decode($s, ENT_QUOTES, 'UTF-8');
+			$s = Helpers::unescapeHtml($s);
 			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 			$s = $texy->unprotect($s);
 			return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
