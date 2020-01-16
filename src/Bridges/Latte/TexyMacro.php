@@ -54,13 +54,13 @@ class TexyMacro extends Latte\Macros\MacroSet
 		$restore = [];
 		$tokens = $node->tokenizer;
 		while ($tokens->isNext()) {
-			$module = $tokens->expectNextValue($tokens::T_SYMBOL) . 'Module';
-			$tokens->expectNextValue('.');
-			$prop = $tokens->expectNextValue($tokens::T_SYMBOL);
-			$tokens->expectNextValue('=');
-			$value = $tokens->expectNextValue($tokens::T_SYMBOL, $tokens::T_NUMBER);
+			$module = $tokens->consumeValue($tokens::T_SYMBOL) . 'Module';
+			$tokens->consumeValue('.');
+			$prop = $tokens->consumeValue($tokens::T_SYMBOL);
+			$tokens->consumeValue('=');
+			$value = $tokens->consumeValue($tokens::T_SYMBOL, $tokens::T_NUMBER);
 			if ($tokens->isNext()) {
-				$tokens->expectNextValue(',');
+				$tokens->consumeValue(',');
 			}
 			$restore[] = [&$this->texy->$module->$prop, $this->texy->$module->$prop];
 			$this->texy->$module->$prop = $value;
