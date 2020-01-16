@@ -118,7 +118,7 @@ class BlockParser extends Parser
 			}
 			return 1;
 		});
-		$matches[] = [strlen($text), null, null]; // terminal cap
+		$matches[] = [strlen($text), null, null]; // terminal sentinel
 
 
 		// process loop

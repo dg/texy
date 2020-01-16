@@ -17,7 +17,6 @@ use Texy;
  */
 final class ScriptModule extends Texy\Module
 {
-
 	/** @var string  arguments separator */
 	public $separator = ',';
 
@@ -56,7 +55,7 @@ final class ScriptModule extends Texy\Module
 		// function (arg, arg, ...) or function: arg, arg
 		if ($matches = Texy\Regexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
 			$cmd = $matches[1];
-			$raw = isset($matches[3]) ? trim($matches[3]) : trim($matches[2]);
+			$raw = trim($matches[3] ?? $matches[2]);
 			if ($raw !== '') {
 				$args = preg_split('#\s*' . preg_quote($this->separator, '#') . '\s*#u', $raw);
 			}

@@ -31,11 +31,11 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/** @var array  void elements */
 	public static $emptyElements = [
-		'area' => '1', 'base' => '1', 'br' => '1', 'col' => '1', 'embed' => '1', 'hr' => '1', 'img' => '1', 'input' => '1',
-		'link' => '1', 'meta' => '1', 'param' => '1', 'source' => '1', 'track' => '1', 'wbr' => '1',
+		'area' => 1, 'base' => 1, 'br' => 1, 'col' => 1, 'embed' => 1, 'hr' => 1, 'img' => 1, 'input' => 1,
+		'link' => 1, 'meta' => 1, 'param' => 1, 'source' => 1, 'track' => 1, 'wbr' => 1,
 	];
 
-	/** @var array  phrasing elements; replaced elements + br have value '1' */
+	/** @var array  phrasing elements; replaced elements + br have value 1 */
 	public static $inlineElements = [
 		'a' => 0, 'abbr' => 0, 'area' => 0, 'audio' => 0, 'b' => 0, 'bdi' => 0, 'bdo' => 0, 'br' => 1, 'button' => 1, 'canvas' => 1,
 		'cite' => 0, 'code' => 0, 'data' => 0, 'datalist' => 0, 'del' => 0, 'dfn' => 0, 'em' => 0, 'embed' => 1, 'i' => 0, 'iframe' => 1,

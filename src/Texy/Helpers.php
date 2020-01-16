@@ -40,7 +40,7 @@ final class Helpers
 
 	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
-	 * which are ignored by TexyHtmlOutputModule routine
+	 * which are ignored by HtmlOutputModule routine
 	 */
 	public static function freezeSpaces(string $s): string
 	{

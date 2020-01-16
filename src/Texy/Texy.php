@@ -22,22 +22,25 @@ class Texy
 {
 	use Strict;
 
-	// configuration directives
-	public const ALL = true;
-	public const NONE = false;
-
 	// Texy version
 	public const VERSION = '3.1.0';
 
+	// configuration directives
+	public const
+		ALL = true,
+		NONE = false;
+
 	// types of protection marks
-	public const CONTENT_MARKUP = "\x17";
-	public const CONTENT_REPLACED = "\x16";
-	public const CONTENT_TEXTUAL = "\x15";
-	public const CONTENT_BLOCK = "\x14";
+	public const
+		CONTENT_MARKUP = "\x17",
+		CONTENT_REPLACED = "\x16",
+		CONTENT_TEXTUAL = "\x15",
+		CONTENT_BLOCK = "\x14";
 
 	// url filters
-	public const FILTER_ANCHOR = 'anchor';
-	public const FILTER_IMAGE = 'image';
+	public const
+		FILTER_ANCHOR = 'anchor',
+		FILTER_IMAGE = 'image';
 
 	/** @deprecated  */
 	public const

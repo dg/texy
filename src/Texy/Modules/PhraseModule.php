@@ -306,8 +306,7 @@ final class PhraseModule extends Texy\Module
 	public function solve(Texy\HandlerInvocation $invocation, string $phrase, string $content, Modifier $mod, Texy\Link $link = null)
 	{
 		$texy = $this->texy;
-
-		$tag = isset($this->tags[$phrase]) ? $this->tags[$phrase] : null;
+		$tag = $this->tags[$phrase] ?? null;
 
 		if ($tag === 'a') {
 			$tag = $link && $this->linksAllowed ? null : 'span';
