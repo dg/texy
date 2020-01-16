@@ -105,18 +105,8 @@ final class LongWordsModule extends Texy\Module
 			return $mWord;
 		}
 
-		$consonants = $this->consonants;
-		$vowels = $this->vowels;
-		$before_r = $this->before_r;
-		$before_l = $this->before_l;
-		$before_h = $this->before_h;
-		$doubleVowels = $this->doubleVowels;
-
-		$s = [];
-		$trans = [];
-
-		$s[] = '';
-		$trans[] = -1;
+		$s = [''];
+		$trans = [-1];
 		foreach ($chars as $key => $char) {
 			if (ord($char[0]) < 32) {
 				continue;
@@ -132,64 +122,12 @@ final class LongWordsModule extends Texy\Module
 		$last = 1;
 
 		while (++$a < $len) {
-			$hyphen = self::DONT; // Do not hyphenate
-			do {
-				if ($s[$a] === "\u{A0}") {
-					$a++;
-					continue 2;  // here and after never
-				}
+			if ($s[$a] === "\u{A0}") {
+				$a++;
+				continue;  // here and after never
+			}
 
-				if ($s[$a] === '.') {
-					$hyphen = self::HERE;
-					break;
-				}
-
-				if (isset($consonants[$s[$a]])) { // consonants
-
-					if (isset($vowels[$s[$a + 1]])) {
-						if (isset($vowels[$s[$a - 1]])) {
-							$hyphen = self::HERE;
-						}
-						break;
-					}
-
-					if (($s[$a] === 's') && ($s[$a - 1] === 'n') && isset($consonants[$s[$a + 1]])) {
-						$hyphen = self::AFTER;
-						break;
-					}
-
-					if (isset($consonants[$s[$a + 1]]) && isset($vowels[$s[$a - 1]])) {
-						if ($s[$a + 1] === 'r') {
-							$hyphen = isset($before_r[$s[$a]]) ? self::HERE : self::AFTER;
-							break;
-						}
-
-						if ($s[$a + 1] === 'l') {
-							$hyphen = isset($before_l[$s[$a]]) ? self::HERE : self::AFTER;
-							break;
-						}
-
-						if ($s[$a + 1] === 'h') { // CH
-							$hyphen = isset($before_h[$s[$a]]) ? self::DONT : self::AFTER;
-							break;
-						}
-
-						$hyphen = self::AFTER;
-						break;
-					}
-
-					break;
-				} // end of consonants
-
-				if (($s[$a] === 'u') && isset($doubleVowels[$s[$a - 1]])) {
-					$hyphen = self::AFTER;
-					break;
-				}
-				if (isset($vowels[$s[$a]]) && isset($vowels[$s[$a - 1]])) {
-					$hyphen = self::HERE;
-					break;
-				}
-			} while (0);
+			$hyphen = $this->getHyphen($s[$a], $s[$a - 1], $s[$a + 1]);
 
 			if ($hyphen === self::DONT && ($a - $last > $this->wordLimit * 0.6)) {
 				$positions[] = $last = $a - 1; // Hyphenate here
@@ -201,11 +139,10 @@ final class LongWordsModule extends Texy\Module
 				$positions[] = $last = $a;
 				$a++; // Hyphenate after
 			}
-		} // while
-
+		}
 
 		$a = end($positions);
-		if (($a === $len - 1) && isset($consonants[$s[$len]])) {
+		if (($a === $len - 1) && isset($this->consonants[$s[$len]])) {
 			array_pop($positions);
 		}
 
@@ -219,5 +156,42 @@ final class LongWordsModule extends Texy\Module
 		}
 		$syllables[] = implode('', $chars);
 		return implode("\u{AD}", $syllables);
+	}
+
+
+	private function getHyphen(string $ch, string $prev, string $next): int
+	{
+		if ($ch === '.') {
+			return self::HERE;
+
+		} elseif (isset($this->consonants[$ch])) { // consonants
+			if (isset($this->vowels[$next])) {
+				return isset($this->vowels[$prev]) ? self::HERE : self::DONT;
+
+			} elseif (($ch === 's') && ($prev === 'n') && isset($this->consonants[$next])) {
+				return self::AFTER;
+
+			} elseif (isset($this->consonants[$next]) && isset($this->vowels[$prev])) {
+				if ($next === 'r') {
+					return isset($this->before_r[$ch]) ? self::HERE : self::AFTER;
+
+				} elseif ($next === 'l') {
+					return isset($this->before_l[$ch]) ? self::HERE : self::AFTER;
+
+				} elseif ($next === 'h') { // CH
+					return isset($this->before_h[$ch]) ? self::DONT : self::AFTER;
+				}
+				return self::AFTER;
+			}
+			return self::DONT;
+
+		} elseif (($ch === 'u') && isset($this->doubleVowels[$prev])) {
+			return self::AFTER;
+
+		} elseif (isset($this->vowels[$ch]) && isset($this->vowels[$prev])) {
+			return self::HERE;
+		}
+
+		return self::DONT; // Do not hyphenate
 	}
 }
