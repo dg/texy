@@ -32,89 +32,39 @@ class LineParser extends Parser
 
 	public function parse(string $text): void
 	{
-		// initialization
-		$pl = $this->patterns;
-		if (!$pl) {
-			// nothing to do
+		if (!$this->patterns) { // nothing to do
 			$this->element->insert(null, $text);
 			return;
 		}
 
 		$offset = 0;
-		$names = array_keys($pl);
-		/** @var array<string, array<int, array{string, int}>> $arrMatches */
-		$arrMatches = $arrOffset = [];
+		$names = array_keys($this->patterns);
+		/** @var array<string, array<int, array{string, int}>> $matches */
+		$matches = $offsets = [];
 		foreach ($names as $name) {
-			$arrOffset[$name] = -1;
+			$offsets[$name] = -1;
 		}
 
-
-		// parse loop
 		do {
-			$min = null;
-			$minOffset = strlen($text);
-
-			foreach ($names as $index => $name) {
-				if ($arrOffset[$name] < $offset) {
-					$delta = 0;
-					if ($arrOffset[$name] === -2) {
-						do {
-							$delta++;
-						} while (isset($text[$offset + $delta]) && $text[$offset + $delta] >= "\x80" && $text[$offset + $delta] < "\xC0");
-					}
-
-					if ($offset + $delta > strlen($text)) {
-						unset($names[$index]);
-						continue;
-
-					} elseif ($arrMatches[$name] = Regexp::match(
-							$text,
-							$pl[$name]['pattern'],
-							Regexp::OFFSET_CAPTURE,
-							$offset + $delta)
-					) {
-						$m = &$arrMatches[$name];
-						if (!strlen($m[0][0])) {
-							continue;
-						}
-						$arrOffset[$name] = $m[0][1];
-						foreach ($m as $keyx => $value) {
-							$m[$keyx] = $value[0];
-						}
-
-					} else {
-						// try next time?
-						if (!$pl[$name]['again'] || !Regexp::match($text, $pl[$name]['again'], 0, $offset + $delta)) {
-							unset($names[$index]);
-						}
-						continue;
-					}
-				} // if
-
-				if ($arrOffset[$name] < $minOffset) {
-					$minOffset = $arrOffset[$name];
-					$min = $name;
-				}
-			} // foreach
-
-			if ($min === null) {
+			$first = $this->match($text, $offset, $names, $offsets, $matches);
+			if ($first === null) {
 				break;
 			}
 
-			$px = $pl[$min];
-			$offset = $start = $arrOffset[$min];
+			$px = $this->patterns[$first];
+			$offset = $start = $offsets[$first];
 
 			$this->again = false;
-			$res = $px['handler']($this, $arrMatches[$min], $min);
+			$res = $px['handler']($this, $matches[$first], $first);
 
 			if ($res instanceof HtmlElement) {
 				$res = $res->toString($this->texy);
 			} elseif ($res === null) {
-				$arrOffset[$min] = -2;
+				$offsets[$first] = -2;
 				continue;
 			}
 
-			$len = strlen($arrMatches[$min][0]);
+			$len = strlen($matches[$first][0]);
 			$text = substr_replace(
 				$text,
 				(string) $res,
@@ -124,21 +74,73 @@ class LineParser extends Parser
 
 			$delta = strlen($res) - $len;
 			foreach ($names as $name) {
-				if ($arrOffset[$name] < $start + $len) {
-					$arrOffset[$name] = -1;
+				if ($offsets[$name] < $start + $len) {
+					$offsets[$name] = -1;
 				} else {
-					$arrOffset[$name] += $delta;
+					$offsets[$name] += $delta;
 				}
 			}
 
 			if ($this->again) {
-				$arrOffset[$min] = -2;
+				$offsets[$first] = -2;
 			} else {
-				$arrOffset[$min] = -1;
+				$offsets[$first] = -1;
 				$offset += strlen($res);
 			}
 		} while (1);
 
 		$this->element->insert(null, $text);
+	}
+
+
+	private function match(string $text, int $offset, array &$names, array &$offsets, array &$matches): ?string
+	{
+		$first = null;
+		$minOffset = strlen($text);
+
+		foreach ($names as $index => $name) {
+			if ($offsets[$name] < $offset) {
+				$delta = 0;
+				if ($offsets[$name] === -2) {
+					do {
+						$delta++;
+					} while (isset($text[$offset + $delta]) && $text[$offset + $delta] >= "\x80" && $text[$offset + $delta] < "\xC0");
+				}
+
+				if ($offset + $delta > strlen($text)) {
+					unset($names[$index]);
+					continue;
+
+				} elseif ($matches[$name] = Regexp::match(
+					$text,
+					$this->patterns[$name]['pattern'],
+					Regexp::OFFSET_CAPTURE,
+					$offset + $delta
+				)) {
+					$m = &$matches[$name];
+					if (!strlen($m[0][0])) {
+						continue;
+					}
+					$offsets[$name] = $m[0][1];
+					foreach ($m as $keyx => $value) {
+						$m[$keyx] = $value[0];
+					}
+
+				} else {
+					// try next time?
+					if (!$this->patterns[$name]['again'] || !Regexp::match($text, $this->patterns[$name]['again'], 0, $offset + $delta)) {
+						unset($names[$index]);
+					}
+					continue;
+				}
+			}
+
+			if ($offsets[$name] < $minOffset) {
+				$minOffset = $offsets[$name];
+				$first = $name;
+			}
+		}
+
+		return $first;
 	}
 }
