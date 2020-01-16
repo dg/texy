@@ -227,37 +227,7 @@ final class ImageModule extends Texy\Module
 		}
 
 		if (!is_int($image->width) || !is_int($image->height) || $image->asMax) {
-			// detect dimensions
-			// absolute URL & security check for double dot
-			if (Helpers::isRelative($image->URL) && strpos($image->URL, '..') === false) {
-				$file = rtrim((string) $this->fileRoot, '/\\') . '/' . $image->URL;
-				if (@is_file($file)) { // intentionally @
-					$size = @getimagesize($file); // intentionally @
-					if (is_array($size)) {
-						if ($image->asMax) {
-							$ratio = 1;
-							if (is_int($image->width)) {
-								$ratio = min($ratio, $image->width / $size[0]);
-							}
-							if (is_int($image->height)) {
-								$ratio = min($ratio, $image->height / $size[1]);
-							}
-							$image->width = (int) round($ratio * $size[0]);
-							$image->height = (int) round($ratio * $size[1]);
-
-						} elseif (is_int($image->width)) {
-							$image->height = (int) round($size[1] / $size[0] * $image->width);
-
-						} elseif (is_int($image->height)) {
-							$image->width = (int) round($size[0] / $size[1] * $image->height);
-
-						} else {
-							$image->width = $size[0];
-							$image->height = $size[1];
-						}
-					}
-				}
-			}
+			$this->detectDimensions($image);
 		}
 
 		$el->attrs['width'] = $image->width;
@@ -270,5 +240,39 @@ final class ImageModule extends Texy\Module
 		}
 
 		return $el;
+	}
+
+
+	private function detectDimensions(Image $image): void
+	{
+		// absolute URL & security check for double dot
+		if (!Helpers::isRelative($image->URL) || strpos($image->URL, '..') !== false) {
+			return;
+		}
+		$file = rtrim((string) $this->fileRoot, '/\\') . '/' . $image->URL;
+		if (!@is_file($file) || !($size = @getimagesize($file))) { // intentionally @
+			return;
+		}
+		if ($image->asMax) {
+			$ratio = 1;
+			if (is_int($image->width)) {
+				$ratio = min($ratio, $image->width / $size[0]);
+			}
+			if (is_int($image->height)) {
+				$ratio = min($ratio, $image->height / $size[1]);
+			}
+			$image->width = (int) round($ratio * $size[0]);
+			$image->height = (int) round($ratio * $size[1]);
+
+		} elseif (is_int($image->width)) {
+			$image->height = (int) round($size[1] / $size[0] * $image->width);
+
+		} elseif (is_int($image->height)) {
+			$image->width = (int) round($size[0] / $size[1] * $image->height);
+
+		} else {
+			$image->width = $size[0];
+			$image->height = $size[1];
+		}
 	}
 }
