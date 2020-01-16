@@ -17,12 +17,6 @@ use Texy;
  */
 final class ScriptModule extends Texy\Module
 {
-	/**
-	 * @var callback|object  script elements handler
-	 * function myFunc($parser, $cmd, $args, $raw)
-	 */
-	public $handler;
-
 
 	/** @var string  arguments separator */
 	public $separator = ',';
@@ -68,19 +62,6 @@ final class ScriptModule extends Texy\Module
 			}
 		}
 
-		// Texy 1.x way
-		if ($this->handler) {
-			if (is_callable([$this->handler, $cmd])) {
-				array_unshift($args, $parser);
-				return [$this->handler, $cmd](...$args);
-			}
-
-			if (is_callable($this->handler)) {
-				return $this->handler($parser, $cmd, $args, $raw);
-			}
-		}
-
-		// Texy 2 way
 		return $this->texy->invokeAroundHandlers('script', $parser, [$cmd, $args, $raw]);
 	}
 
