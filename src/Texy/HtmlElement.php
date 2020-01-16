@@ -400,45 +400,37 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 		$s = '<' . $this->name;
 
-		if (is_array($this->attrs)) {
-			foreach ($this->attrs as $key => $value) {
-				// skip nulls and false boolean attributes
-				if ($value === null || $value === false) {
-					continue;
-				}
+		foreach ($this->attrs as $key => $value) {
+			if ($value === null || $value === false) {
+				continue; // skip nulls and false boolean attributes
 
-				// true boolean attribute
-				if ($value === true) {
-					$s .= ' ' . $key;
-					continue;
+			} elseif ($value === true) {
+				$s .= ' ' . $key; // true boolean attribute
+				continue;
 
-				} elseif (is_array($value)) {
-					// prepare into temporary array
-					$tmp = null;
-					foreach ($value as $k => $v) {
-						// skip nulls & empty string; composite 'style' vs. 'others'
-						if ($v == null) {
-							continue;
-						} elseif (is_string($k)) {
-							$tmp[] = $k . ':' . $v;
-						} else {
-							$tmp[] = $v;
-						}
-					}
-
-					if (!$tmp) {
+			} elseif (is_array($value)) {
+				$tmp = null;
+				foreach ($value as $k => $v) {
+					if ($v == null) { // skip nulls & empty string; composite 'style' vs. 'others'
 						continue;
+					} elseif (is_string($k)) {
+						$tmp[] = $k . ':' . $v;
+					} else {
+						$tmp[] = $v;
 					}
-					$value = implode($key === 'style' ? ';' : ' ', $tmp);
-
-				} else {
-					$value = (string) $value;
 				}
+				if (!$tmp) {
+					continue;
+				}
+				$value = implode($key === 'style' ? ';' : ' ', $tmp);
 
-				// add new attribute
-				$value = str_replace(['&', '"', '<', '>', '@'], ['&amp;', '&quot;', '&lt;', '&gt;', '&#64;'], $value);
-				$s .= ' ' . $key . '="' . Helpers::freezeSpaces($value) . '"';
+			} else {
+				$value = (string) $value;
 			}
+
+			// add new attribute
+			$value = str_replace(['&', '"', '<', '>', '@'], ['&amp;', '&quot;', '&lt;', '&gt;', '&#64;'], $value);
+			$s .= ' ' . $key . '="' . Helpers::freezeSpaces($value) . '"';
 		}
 
 		return $s . '>';
@@ -472,23 +464,20 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	final public function getContentType(): string
 	{
-		if (!isset(self::$inlineElements[$this->name])) {
-			return Texy::CONTENT_BLOCK;
-		}
-
-		return self::$inlineElements[$this->name] ? Texy::CONTENT_REPLACED : Texy::CONTENT_MARKUP;
+		$inlineType = self::$inlineElements[$this->name] ?? null;
+		return $inlineType === null
+			? Texy::CONTENT_BLOCK
+			: ($inlineType ? Texy::CONTENT_REPLACED : Texy::CONTENT_MARKUP);
 	}
 
 
 	final public function validateAttrs(array $dtd): void
 	{
-		if (isset($dtd[$this->name])) {
-			$allowed = $dtd[$this->name][0];
-			if (is_array($allowed)) {
-				foreach ($this->attrs as $attr => $foo) {
-					if (!isset($allowed[$attr]) && (!isset($allowed['data-*']) || substr($attr, 0, 5) !== 'data-')) {
-						unset($this->attrs[$attr]);
-					}
+		$allowed = $dtd[$this->name][0] ?? null;
+		if (is_array($allowed)) {
+			foreach ($this->attrs as $attr => $foo) {
+				if (!isset($allowed[$attr]) && (!isset($allowed['data-*']) || substr($attr, 0, 5) !== 'data-')) {
+					unset($this->attrs[$attr]);
 				}
 			}
 		}
