@@ -486,10 +486,7 @@ class Texy
 	 */
 	final public function stringToText(string $s): string
 	{
-		$save = $this->htmlOutputModule->lineWrap;
-		$this->htmlOutputModule->lineWrap = false;
 		$s = $this->stringToHtml($s);
-		$this->htmlOutputModule->lineWrap = $save;
 
 		// remove tags
 		$s = Regexp::replace($s, '#<(script|style)(.*)</\1>#Uis', '');
