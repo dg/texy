@@ -57,7 +57,7 @@ final class TableModule extends Texy\Module
 	public function patternTable(Texy\BlockParser $parser, array $matches)
 	{
 		if ($this->disableTables) {
-			return;
+			return null;
 		}
 		[, $mMod] = $matches;
 		// [1] => .(title)[class]{style}<>_
@@ -219,7 +219,7 @@ final class TableModule extends Texy\Module
 
 		if ($elPart === null) {
 			// invalid table
-			return;
+			return null;
 		}
 
 		if ($elPart->getName() === 'thead') {

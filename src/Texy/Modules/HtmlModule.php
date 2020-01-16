@@ -76,13 +76,13 @@ final class HtmlModule extends Texy\Module
 
 		// error - can't close empty element
 		if ($isEmpty && !$isStart) {
-			return;
+			return null;
 		}
 
 		// error - end element with atttrs
 		$mAttr = trim(strtr($mAttr, "\n", ' '));
 		if ($mAttr && !$isStart) {
-			return;
+			return null;
 		}
 
 		$el = new HtmlElement($mTag);
@@ -131,7 +131,7 @@ final class HtmlModule extends Texy\Module
 		// tag & attibutes
 		$allowedTags = $texy->allowedTags; // speed-up
 		if (!$allowedTags) {
-			return; // all tags are disabled
+			return null; // all tags are disabled
 		}
 
 		// convert case
@@ -145,7 +145,7 @@ final class HtmlModule extends Texy\Module
 
 		if (is_array($allowedTags)) {
 			if (!isset($allowedTags[$name])) {
-				return;
+				return null;
 			}
 			$allowedAttrs = $allowedTags[$name]; // allowed attrs
 
@@ -208,9 +208,9 @@ final class HtmlModule extends Texy\Module
 		// apply allowedStyles
 		if (isset($elAttrs['style'])) {
 			if (is_array($styles)) {
-				$styles = explode(';', $elAttrs['style']);
+				$tmp = explode(';', $elAttrs['style']);
 				$elAttrs['style'] = null;
-				foreach ($styles as $value) {
+				foreach ($tmp as $value) {
 					$pair = explode(':', $value, 2);
 					$prop = trim($pair[0]);
 					if (isset($pair[1]) && isset($styles[strtolower($prop)])) { // CSS is case-insensitive
@@ -233,13 +233,13 @@ final class HtmlModule extends Texy\Module
 
 		if ($name === 'img') {
 			if (!isset($elAttrs['src']) || !$texy->checkURL($elAttrs['src'], $texy::FILTER_IMAGE)) {
-				return;
+				return null;
 			}
 			$texy->summary['images'][] = $elAttrs['src'];
 
 		} elseif ($name === 'a') {
 			if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) {
-				return;
+				return null;
 			}
 			if (isset($elAttrs['href'])) {
 				if ($texy->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== false) {
@@ -250,7 +250,7 @@ final class HtmlModule extends Texy\Module
 				}
 
 				if (!$texy->checkURL($elAttrs['href'], $texy::FILTER_ANCHOR)) {
-					return;
+					return null;
 				}
 
 				$texy->summary['links'][] = $elAttrs['href'];

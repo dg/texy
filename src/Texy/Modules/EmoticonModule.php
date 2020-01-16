@@ -86,6 +86,8 @@ final class EmoticonModule extends Texy\Module
 				return $this->texy->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
 			}
 		}
+
+		return null;
 	}
 
 

@@ -115,14 +115,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Changes element's name.
-	 * @throws \InvalidArgumentException
 	 */
 	final public function setName(?string $name, bool $empty = null): self
 	{
-		if ($name !== null && !is_string($name)) {
-			throw new \InvalidArgumentException('Name must be string or null.');
-		}
-
 		$this->name = $name;
 		$this->isEmpty = $empty === null ? isset(self::$emptyElements[$name]) : (bool) $empty;
 		return $this;
@@ -177,8 +172,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns element's attribute.
+	 * @return string|int|bool|string[]|null
 	 */
-	final public function getAttribute(string $name): self
+	final public function getAttribute(string $name)
 	{
 		return $this->attrs[$name] ?? null;
 	}
@@ -190,7 +186,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	final public function href(string $path, array $query = null): self
 	{
 		if ($query) {
-			$query = http_build_query($query, null, '&');
+			$query = http_build_query($query, '', '&');
 			if ($query !== '') {
 				$path .= '?' . $query;
 			}
@@ -205,12 +201,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 */
 	final public function setText(string $text): self
 	{
-		if (is_scalar($text)) {
-			$this->removeChildren();
-			$this->children = [$text];
-		} elseif ($text !== null) {
-			throw new \InvalidArgumentException('Content must be scalar.');
-		}
+		$this->removeChildren();
+		$this->children = [$text];
 		return $this;
 	}
 
@@ -255,22 +247,19 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Inserts child node.
 	 * @param  HtmlElement|string  $child node
-	 * @throws Exception
+	 * @throws \InvalidArgumentException
 	 */
 	public function insert(?int $index, $child, bool $replace = false): self
 	{
-		if ($child instanceof self || is_string($child)) {
-			if ($index === null) { // append
-				$this->children[] = $child;
-
-			} else { // insert or replace
-				array_splice($this->children, (int) $index, $replace ? 1 : 0, [$child]);
-			}
-
-		} else {
+		if (!$child instanceof self && !is_string($child)) {
 			throw new \InvalidArgumentException('Child node must be scalar or HtmlElement object.');
 		}
+		if ($index === null) { // append
+			$this->children[] = $child;
 
+		} else { // insert or replace
+			array_splice($this->children, (int) $index, $replace ? 1 : 0, [$child]);
+		}
 		return $this;
 	}
 

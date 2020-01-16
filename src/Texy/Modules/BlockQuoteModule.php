@@ -78,7 +78,7 @@ final class BlockQuoteModule extends Texy\Module
 
 		// no content?
 		if (!$el->count()) {
-			return;
+			return null;
 		}
 
 		// event listener

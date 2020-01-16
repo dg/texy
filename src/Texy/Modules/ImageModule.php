@@ -242,14 +242,14 @@ final class ImageModule extends Texy\Module
 							if (is_int($image->height)) {
 								$ratio = min($ratio, $image->height / $size[1]);
 							}
-							$image->width = round($ratio * $size[0]);
-							$image->height = round($ratio * $size[1]);
+							$image->width = (int) round($ratio * $size[0]);
+							$image->height = (int) round($ratio * $size[1]);
 
 						} elseif (is_int($image->width)) {
-							$image->height = round($size[1] / $size[0] * $image->width);
+							$image->height = (int) round($size[1] / $size[0] * $image->width);
 
 						} elseif (is_int($image->height)) {
-							$image->width = round($size[0] / $size[1] * $image->height);
+							$image->width = (int) round($size[0] / $size[1] * $image->height);
 
 						} else {
 							$image->width = $size[0];

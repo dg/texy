@@ -91,6 +91,7 @@ final class BlockModule extends Texy\Module
 	public function solve(Texy\HandlerInvocation $invocation, string $blocktype, string $s, $param, Texy\Modifier $mod)
 	{
 		$texy = $this->texy;
+		/** @var Texy\BlockParser $parser */
 		$parser = $invocation->getParser();
 
 		if ($blocktype === 'block/texy') {
@@ -100,7 +101,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		if (empty($texy->allowed[$blocktype])) {
-			return;
+			return null;
 		}
 
 		if ($blocktype === 'block/texysource') {
@@ -226,5 +227,7 @@ final class BlockModule extends Texy\Module
 			$el->parseBlock($texy, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
 			return $el;
 		}
+
+		return null;
 	}
 }

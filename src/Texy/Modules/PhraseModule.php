@@ -258,7 +258,7 @@ final class PhraseModule extends Texy\Module
 		if ($phrase === 'phrase/span' || $phrase === 'phrase/span-alt') {
 			if ($mLink == null) {
 				if (!$mMod) {
-					return; // means "..."
+					return null; // means "..."
 				}
 			} else {
 				$link = $texy->linkModule->factoryLink($mLink, $mMod, $mContent);

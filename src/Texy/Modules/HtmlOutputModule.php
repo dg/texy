@@ -125,7 +125,7 @@ final class HtmlOutputModule extends Texy\Module
 			$item = reset($this->tagStack);
 			if ($item && !isset($item['dtdContent'][HtmlElement::INNER_TEXT])) {  // text not allowed?
 
-			} elseif (array_intersect(array_keys($this->tagUsed, true), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
+			} elseif (array_intersect(array_keys($this->tagUsed, true, false), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
 				$s = Texy\Helpers::freezeSpaces($mText);
 
 			} else {
@@ -246,7 +246,7 @@ final class HtmlOutputModule extends Texy\Module
 					return $s;
 				}
 
-				$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, true), $this->preserveSpaces);
+				$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, true, false), $this->preserveSpaces);
 
 				if ($indent && $mTag === 'br') { // formatting exception
 					return rtrim($s) . '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";

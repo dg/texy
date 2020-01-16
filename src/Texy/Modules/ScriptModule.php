@@ -47,7 +47,7 @@ final class ScriptModule extends Texy\Module
 
 		$cmd = trim($mContent);
 		if ($cmd === '') {
-			return;
+			return null;
 		}
 
 		$raw = null;
@@ -71,11 +71,7 @@ final class ScriptModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, string $cmd, array $args = null, string $raw = null)
 	{
-		if ($cmd === 'texy') {
-			if (!$args) {
-				return;
-			}
-
+		if ($cmd === 'texy' && $args) {
 			switch ($args[0]) {
 				case 'nofollow':
 					$this->texy->linkModule->forceNoFollow = true;
@@ -83,5 +79,6 @@ final class ScriptModule extends Texy\Module
 			}
 			return '';
 		}
+		return null;
 	}
 }
