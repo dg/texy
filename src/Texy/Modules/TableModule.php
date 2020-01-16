@@ -111,114 +111,27 @@ final class TableModule extends Texy\Module
 					$elPart = $el->create('tbody');
 				}
 
-
-				// PARSE ROW
 				[, $mContent, $mMod] = $matches;
 				// [1] => ....
 				// [2] => .(title)[class]{style}<>_
 
-				$elRow = new HtmlElement('tr');
-				$mod = new Modifier($mMod);
-				$mod->decorate($texy, $elRow);
-
-				$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
-				if ($rowClass && !isset($mod->classes[$this->oddClass]) && !isset($mod->classes[$this->evenClass])) {
-					$elRow->attrs['class'][] = $rowClass;
-				}
-
-				$col = 0;
-				$elCell = null;
-
-				// special escape sequence \|
-				$mContent = str_replace('\|', "\x13", $mContent);
-				$mContent = Regexp::replace($mContent, '#(\[[^\]]*)\|#', "$1\x13"); // HACK: support for [..|..]
-
-				foreach (explode('|', $mContent) as $cell) {
-					$cell = strtr($cell, "\x13", '|');
-					// rowSpan
-					if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU'))) {
-						$prevRow[$col]->rowSpan++;
-						$cell = $matches[1] ?? '';
-						$prevRow[$col]->text .= "\n" . $cell;
-						$col += $prevRow[$col]->colSpan;
-						$elCell = null;
-						continue;
-					}
-
-					// colSpan
-					if ($cell === '' && $elCell) {
-						$elCell->colSpan++;
-						unset($prevRow[$col]);
-						$col++;
-						continue;
-					}
-
-					// common cell
-					$matches = Regexp::match($cell, '#(\*??)\ *' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?\ *()$#AU');
-					if (!$matches) {
-						continue;
-					}
-					[, $mHead, $mModCol, $mContent, $mMod] = $matches;
-					// [1] => * ^
-					// [2] => .(title)[class]{style}<>_
-					// [3] => ....
-					// [4] => .(title)[class]{style}<>_
-
-					if ($mModCol) {
-						$colModifier[$col] = new Modifier($mModCol);
-					}
-
-					if (isset($colModifier[$col])) {
-						$mod = clone $colModifier[$col];
-					} else {
-						$mod = new Modifier;
-					}
-
-					$mod->setProperties($mMod);
-
-					$elCell = new TableCellElement;
-					$elCell->setName($isHead || ($mHead === '*') ? 'th' : 'td');
-					$mod->decorate($texy, $elCell);
-					$elCell->text = $mContent;
-
-					$elRow->add($elCell);
-					$prevRow[$col] = $elCell;
-					$col++;
-				}
-
-
-				// even up with empty cells
-				while ($col < $colCounter) {
-					$elCell = new TableCellElement;
-					$elCell->setName($isHead ? 'th' : 'td');
-					if (isset($colModifier[$col])) {
-						$colModifier[$col]->decorate($texy, $elCell);
-					}
-					$elRow->add($elCell);
-					$prevRow[$col] = $elCell;
-					$col++;
-				}
-				$colCounter = $col;
-
+				$elRow = $this->processRow($mContent, $mMod, $isHead, $texy, $prevRow, $colModifier, $colCounter, $rowCounter);
 
 				if ($elRow->count()) {
 					$elPart->add($elRow);
 					$rowCounter++;
-				} else {
-					// redundant row
+				} else { // redundant row
 					foreach ($prevRow as $elCell) {
 						$elCell->rowSpan--;
 					}
 				}
-
 				continue;
 			}
 
 			break;
 		}
 
-		if ($elPart === null) {
-			// invalid table
+		if ($elPart === null) { // invalid table
 			return null;
 		}
 
@@ -229,11 +142,106 @@ final class TableModule extends Texy\Module
 
 		$this->finishPart($elPart);
 
-
 		// event listener
 		$texy->invokeHandlers('afterTable', [$parser, $el, $mod]);
 
 		return $el;
+	}
+
+
+	private function processRow(
+		string $content,
+		string $mMod,
+		bool $isHead,
+		Texy\Texy $texy,
+		array &$prevRow,
+		array &$colModifier,
+		int &$colCounter,
+		int $rowCounter
+	): HtmlElement {
+		$elRow = new HtmlElement('tr');
+		$mod = new Modifier($mMod);
+		$mod->decorate($texy, $elRow);
+
+		$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
+		if ($rowClass && !isset($mod->classes[$this->oddClass]) && !isset($mod->classes[$this->evenClass])) {
+			$elRow->attrs['class'][] = $rowClass;
+		}
+
+		$col = 0;
+		$elCell = null;
+
+		// special escape sequence \|
+		$content = str_replace('\|', "\x13", $content);
+		$content = Regexp::replace($content, '#(\[[^\]]*)\|#', "$1\x13"); // HACK: support for [..|..]
+
+		foreach (explode('|', $content) as $cell) {
+			$cell = strtr($cell, "\x13", '|');
+			// rowSpan
+			if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU'))) {
+				$prevRow[$col]->rowSpan++;
+				$cell = $matches[1] ?? '';
+				$prevRow[$col]->text .= "\n" . $cell;
+				$col += $prevRow[$col]->colSpan;
+				$elCell = null;
+				continue;
+			}
+
+			// colSpan
+			if ($cell === '' && $elCell) {
+				$elCell->colSpan++;
+				unset($prevRow[$col]);
+				$col++;
+				continue;
+			}
+
+			// common cell
+			if ($elCell = $this->processCell($cell, $colModifier[$col], $isHead, $texy)) {
+				$elRow->add($elCell);
+				$prevRow[$col] = $elCell;
+				$col++;
+			}
+		}
+
+		// even up with empty cells
+		while ($col < $colCounter) {
+			$elCell = new TableCellElement;
+			$elCell->setName($isHead ? 'th' : 'td');
+			if (isset($colModifier[$col])) {
+				$colModifier[$col]->decorate($texy, $elCell);
+			}
+			$elRow->add($elCell);
+			$prevRow[$col] = $elCell;
+			$col++;
+		}
+		$colCounter = $col;
+		return $elRow;
+	}
+
+
+	private function processCell(string $cell, ?Modifier &$cellModifier, bool $isHead, Texy\Texy $texy): ?TableCellElement
+	{
+		$matches = Regexp::match($cell, '#(\*??)\ *' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?\ *()$#AU');
+		if (!$matches) {
+			return null;
+		}
+		[, $mHead, $mModCol, $mContent, $mMod] = $matches;
+		// [1] => * ^
+		// [2] => .(title)[class]{style}<>_
+		// [3] => ....
+		// [4] => .(title)[class]{style}<>_
+
+		if ($mModCol) {
+			$cellModifier = new Modifier($mModCol);
+		}
+		$mod = $cellModifier ? clone $cellModifier : new Modifier;
+		$mod->setProperties($mMod);
+
+		$elCell = new TableCellElement;
+		$elCell->setName($isHead || ($mHead === '*') ? 'th' : 'td');
+		$mod->decorate($texy, $elCell);
+		$elCell->text = $mContent;
+		return $elCell;
 	}
 
 
