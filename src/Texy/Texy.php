@@ -342,7 +342,7 @@ class Texy
 		}
 
 		if ($this->removeSoftHyphens) {
-			$text = str_replace("\xC2\xAD", '', $text);
+			$text = str_replace("\u{AD}", '', $text);
 		}
 
 		// standardize line endings and spaces
@@ -498,8 +498,8 @@ class Texy
 
 		// convert nbsp to normal space and remove shy
 		$s = strtr($s, [
-			"\xC2\xAD" => '', // shy
-			"\xC2\xA0" => ' ', // nbsp
+			"\u{AD}" => '', // shy
+			"\u{A0}" => ' ', // nbsp
 		]);
 
 		return $s;

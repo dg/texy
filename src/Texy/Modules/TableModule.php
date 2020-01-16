@@ -264,7 +264,7 @@ final class TableModule extends Texy\Module
 				}
 
 				if ($elCell->getText() === '') {
-					$elCell->setText("\xC2\xA0"); // &nbsp;
+					$elCell->setText("\u{A0}"); // &nbsp;
 				}
 			}
 		}

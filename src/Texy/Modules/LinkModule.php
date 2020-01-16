@@ -329,7 +329,7 @@ final class LinkModule extends Texy\Module
 	private function checkLink(Link $link): void
 	{
 		// remove soft hyphens; if not removed by Texy\Texy::process()
-		$link->URL = str_replace("\xC2\xAD", '', $link->URL);
+		$link->URL = str_replace("\u{AD}", '', $link->URL);
 
 		if (strncasecmp($link->URL, 'www.', 4) === 0) {
 			// special supported case
@@ -375,13 +375,13 @@ final class LinkModule extends Texy\Module
 			}
 
 			if ($parts['path'] !== '') {
-				$res .= (iconv_strlen($parts['path'], 'UTF-8') > 16 ? ("/\xe2\x80\xa6" . iconv_substr($parts['path'], -12, 12, 'UTF-8')) : $parts['path']);
+				$res .= (iconv_strlen($parts['path'], 'UTF-8') > 16 ? ("/\u{2026}" . iconv_substr($parts['path'], -12, 12, 'UTF-8')) : $parts['path']);
 			}
 
 			if ($parts['query'] !== '') {
-				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4 ? "?\xe2\x80\xa6" : ('?' . $parts['query']);
+				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4 ? "?\u{2026}" : ('?' . $parts['query']);
 			} elseif ($parts['fragment'] !== '') {
-				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4 ? "#\xe2\x80\xa6" : ('#' . $parts['fragment']);
+				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4 ? "#\u{2026}" : ('#' . $parts['fragment']);
 			}
 			return $res;
 		}

@@ -29,22 +29,26 @@ final class LongWordsModule extends Texy\Module
 	private $consonants = [
 		'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z',
 		'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Z',
-		"\xc4\x8d", "\xc4\x8f", "\xc5\x88", "\xc5\x99", "\xc5\xa1", "\xc5\xa5", "\xc5\xbe", //czech utf-8
-		"\xc4\x8c", "\xc4\x8e", "\xc5\x87", "\xc5\x98", "\xc5\xa0", "\xc5\xa4", "\xc5\xbd", ];
+		"\u{10D}", "\u{10F}", "\u{148}", "\u{159}", "\u{161}", "\u{165}", "\u{17E}", // Czech UTF-8
+		"\u{10C}", "\u{10E}", "\u{147}", "\u{158}", "\u{160}", "\u{164}", "\u{17D}",
+	];
 
 	private $vowels = [
 		'a', 'e', 'i', 'o', 'u', 'y',
 		'A', 'E', 'I', 'O', 'U', 'Y',
-		"\xc3\xa1", "\xc3\xa9", "\xc4\x9b", "\xc3\xad", "\xc3\xb3", "\xc3\xba", "\xc5\xaf", "\xc3\xbd", //czech utf-8
-		"\xc3\x81", "\xc3\x89", "\xc4\x9a", "\xc3\x8d", "\xc3\x93", "\xc3\x9a", "\xc5\xae", "\xc3\x9d", ];
+		"\u{E1}", "\u{E9}", "\u{11B}", "\u{ED}", "\u{F3}", "\u{FA}", "\u{16F}", "\u{FD}", // Czech UTF-8
+		"\u{C1}", "\u{C9}", "\u{11A}", "\u{CD}", "\u{D3}", "\u{DA}", "\u{16E}", "\u{DD}",
+	];
 
 	private $before_r = [
 		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'p', 'P', 'r', 'R', 't', 'T', 'v', 'V',
-		"\xc4\x8d", "\xc4\x8c", "\xc4\x8f", "\xc4\x8e", "\xc5\x99", "\xc5\x98", "\xc5\xa5", "\xc5\xa4", ]; //czech utf-8
+		"\u{10D}", "\u{10C}", "\u{10F}", "\u{10E}", "\u{159}", "\u{158}", "\u{165}", "\u{164}", // Czech UTF-8
+	];
 
 	private $before_l = [
 		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'l', 'L', 'p', 'P', 't', 'T', 'v', 'V',
-		"\xc4\x8d", "\xc4\x8c", "\xc4\x8f", "\xc4\x8e", "\xc5\xa5", "\xc5\xa4", ]; //czech utf-8
+		"\u{10D}", "\u{10C}", "\u{10F}", "\u{10E}", "\u{165}", "\u{164}", // Czech UTF-8
+	];
 
 	private $before_h = ['c', 'C', 's', 'S'];
 
@@ -130,7 +134,7 @@ final class LongWordsModule extends Texy\Module
 		while (++$a < $len) {
 			$hyphen = self::DONT; // Do not hyphenate
 			do {
-				if ($s[$a] === "\xC2\xA0") {
+				if ($s[$a] === "\u{A0}") {
 					$a++;
 					continue 2;  // here and after never
 				}
@@ -214,6 +218,6 @@ final class LongWordsModule extends Texy\Module
 			}
 		}
 		$syllables[] = implode('', $chars);
-		return implode("\xC2\xAD", $syllables);
+		return implode("\u{AD}", $syllables);
 	}
 }

@@ -287,7 +287,7 @@ final class PhraseModule extends Texy\Module
 		[, $mContent] = $matches;
 		$mod = new Modifier();
 		$link = null;
-		$mContent = str_replace('-', "\xE2\x88\x92", $mContent); // &minus;
+		$mContent = str_replace('-', "\u{2212}", $mContent); // &minus;
 		return $this->texy->invokeAroundHandlers('phrase', $parser, [$phrase, $mContent, $mod, $link]);
 	}
 

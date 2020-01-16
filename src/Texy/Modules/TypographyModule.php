@@ -22,28 +22,28 @@ final class TypographyModule extends Texy\Module
 
 	public static $locales = [
 		'cs' => [
-			'singleQuotes' => ["\xe2\x80\x9a", "\xe2\x80\x98"], // U+201A, U+2018
-			'doubleQuotes' => ["\xe2\x80\x9e", "\xe2\x80\x9c"], // U+201E, U+201C
+			'singleQuotes' => ["\u{201A}", "\u{2018}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
 		],
 
 		'en' => [
-			'singleQuotes' => ["\xe2\x80\x98", "\xe2\x80\x99"], // U+2018, U+2019
-			'doubleQuotes' => ["\xe2\x80\x9c", "\xe2\x80\x9d"], // U+201C, U+201D
+			'singleQuotes' => ["\u{2018}", "\u{2019}"],
+			'doubleQuotes' => ["\u{201C}", "\u{201D}"],
 		],
 
 		'fr' => [
-			'singleQuotes' => ["\xe2\x80\xb9", "\xe2\x80\xba"], // U+2039, U+203A
-			'doubleQuotes' => ["\xc2\xab", "\xc2\xbb"],         // U+00AB, U+00BB
+			'singleQuotes' => ["\u{2039}", "\u{203A}"],
+			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
 		],
 
 		'de' => [
-			'singleQuotes' => ["\xe2\x80\x9a", "\xe2\x80\x98"], // U+201A, U+2018
-			'doubleQuotes' => ["\xe2\x80\x9e", "\xe2\x80\x9c"], // U+201E, U+201C
+			'singleQuotes' => ["\u{201A}", "\u{2018}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
 		],
 
 		'pl' => [
-			'singleQuotes' => ["\xe2\x80\x9a", "\xe2\x80\x99"], // U+201A, U+2019
-			'doubleQuotes' => ["\xe2\x80\x9e", "\xe2\x80\x9d"], // U+201E, U+201D
+			'singleQuotes' => ["\u{201A}", "\u{2019}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201D}"],
 		],
 	];
 
@@ -79,40 +79,40 @@ final class TypographyModule extends Texy\Module
 		}
 
 		$this->pattern = [
-			'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\xe2\x80\xa6",                // ellipsis  ...
-			'#(?<=[\d ]|^)-(?=[\d ]|$)#'              => "\xe2\x80\x93",                   // en dash 123-123
-			'#(?<=[^!*+,/:;<=>@\\\\_|-])--(?=[^!*+,/:;<=>@\\\\_|-])#' => "\xe2\x80\x93",   // en dash alphanum--alphanum
-			'#,-#'                                    => ",\xe2\x80\x93",                  // en dash ,-
-			'#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\xc2\xa0\$2\xc2\xa0\$3",      // date 23. 1. 1978
-			'#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\xc2\xa0\$2",                 // date 23. 1.
-			'# --- #'                                 => "\xc2\xa0\xe2\x80\x94 ",          // em dash ---
-			'# ([\x{2013}\x{2014}])#u'                => "\xc2\xa0\$1",                    // &nbsp; behind dash (dash stays at line end)
-			'# <-{1,2}> #'                            => " \xe2\x86\x94 ",                 // left right arrow <-->
-			'#-{1,}> #'                               => "\xe2\x86\x92 ",                  // right arrow -->
-			'# <-{1,}#'                               => " \xe2\x86\x90 ",                 // left arrow <--
-			'#={1,}> #'                               => "\xe2\x87\x92 ",                  // right arrow ==>
-			'#\+-#'                                   => "\xc2\xb1",                       // +-
-			'#(\d++) x (?=\d)#'                       => "\$1\xc2\xa0\xc3\x97\xc2\xa0",    // dimension sign 123 x 123...
-			'#(\d++)x(?=\d)#'                         => "\$1\xc3\x97",                    // dimension sign 123x123...
-			'#(?<=\d)x(?= |,|.|$)#m'                  => "\xc3\x97",                       // dimension sign 123x
-			'#(\S ?)\(TM\)#i'                         => "\$1\xe2\x84\xa2",                // trademark (TM)
-			'#(\S ?)\(R\)#i'                          => "\$1\xc2\xae",                    // registered (R)
-			'#\(C\)( ?\S)#i'                          => "\xc2\xa9\$1",                    // copyright (C)
-			'#\(EUR\)#'                               => "\xe2\x82\xac",                   // Euro (EUR)
-			'#(\d) (?=\d{3})#'                        => "\$1\xc2\xa0",                    // (phone) number 1 123 123 123...
+			'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\u{2026}",                // ellipsis  ...
+			'#(?<=[\d ]|^)-(?=[\d ]|$)#'              => "\u{2013}",                   // en dash 123-123
+			'#(?<=[^!*+,/:;<=>@\\\\_|-])--(?=[^!*+,/:;<=>@\\\\_|-])#' => "\u{2013}",   // en dash alphanum--alphanum
+			'#,-#'                                    => ",\u{2013}",                  // en dash ,-
+			'#(?<!\d)(\d{1,2}\.) (\d{1,2}\.) (\d\d)#' => "\$1\u{A0}\$2\u{A0}\$3",      // date 23. 1. 1978
+			'#(?<!\d)(\d{1,2}\.) (\d{1,2}\.)#'        => "\$1\u{A0}\$2",               // date 23. 1.
+			'# --- #'                                 => "\u{A0}\u{2014} ",            // em dash ---
+			'# ([\x{2013}\x{2014}])#u'                => "\u{A0}\$1",                  // &nbsp; behind dash (dash stays at line end)
+			'# <-{1,2}> #'                            => " \u{2194} ",                 // left right arrow <-->
+			'#-{1,}> #'                               => "\u{2192} ",                  // right arrow -->
+			'# <-{1,}#'                               => " \u{2190} ",                 // left arrow <--
+			'#={1,}> #'                               => "\u{21D2} ",                 // right arrow ==>
+			'#\+-#'                                   => "\u{B1}",                     // +-
+			'#(\d++) x (?=\d)#'                       => "\$1\u{A0}\u{D7}\u{A0}",      // dimension sign 123 x 123...
+			'#(\d++)x(?=\d)#'                         => "\$1\u{D7}",                  // dimension sign 123x123...
+			'#(?<=\d)x(?= |,|.|$)#m'                  => "\u{D7}",                     // dimension sign 123x
+			'#(\S ?)\(TM\)#i'                         => "\$1\u{2122}",                // trademark (TM)
+			'#(\S ?)\(R\)#i'                          => "\$1\u{AE}",                  // registered (R)
+			'#\(C\)( ?\S)#i'                          => "\u{A9}\$1",                  // copyright (C)
+			'#\(EUR\)#'                               => "\u{20AC}",                   // Euro (EUR)
+			'#(\d) (?=\d{3})#'                        => "\$1\u{A0}",                  // (phone) number 1 123 123 123...
 
-			'#(?<=[^\s\x17])\s++([\x17-\x1F]++)(?=\s)#u'=> "\$1",                            // remove intermarkup space phase 1
-			'#(?<=\s)([\x17-\x1F]++)\s++#u'             => "\$1",                            // remove intermarkup space phase 2
+			'#(?<=[^\s\x17])\s++([\x17-\x1F]++)(?=\s)#u'=> "\$1",                      // remove intermarkup space phase 1
+			'#(?<=\s)([\x17-\x1F]++)\s++#u'             => "\$1",                      // remove intermarkup space phase 2
 
-			'#(?<=.{50})\s++(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\xc2\xa0",         // space before last short word
+			'#(?<=.{50})\s++(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\u{A0}",      // space before last short word
 
 			// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
 			'#(?<=^| |\.|,|-|\+|\x16|\(|\d\x{A0})([\x17-\x1F]*\d++\.?[\x17-\x1F]*)\s++(?=[\x17-\x1F]*[%' . Patterns::CHAR . '\x{b0}-\x{be}\x{2020}-\x{214f}])#mu'
-													=> "\$1\xc2\xa0",
+													=> "\$1\u{A0}",
 
 			// space between preposition and word
 			'#(?<=^|[^0-9' . Patterns::CHAR . '])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9' . Patterns::CHAR . '])#mus'
-													=> "\$1\xc2\xa0",
+													=> "\$1\u{A0}",
 
 			'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["' . Patterns::CHAR . '])()#Uu' => $locale['doubleQuotes'][0] . '$1' . $locale['doubleQuotes'][1], // double ""
 			'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\'' . Patterns::CHAR . '])()#Uu' => $locale['singleQuotes'][0] . '$1' . $locale['singleQuotes'][1], // single ''
