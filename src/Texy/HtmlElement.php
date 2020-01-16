@@ -26,16 +26,16 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	public const INNER_TEXT = '%TEXT';
 	public const INNER_TRANSPARENT = '%TRANS';
 
-	/** @var array  element's attributes */
+	/** @var array<string, string|int|bool|string[]|null>  element's attributes */
 	public $attrs = [];
 
-	/** @var array  void elements */
+	/** @var array<string, int>  void elements */
 	public static $emptyElements = [
 		'area' => 1, 'base' => 1, 'br' => 1, 'col' => 1, 'embed' => 1, 'hr' => 1, 'img' => 1, 'input' => 1,
 		'link' => 1, 'meta' => 1, 'param' => 1, 'source' => 1, 'track' => 1, 'wbr' => 1,
 	];
 
-	/** @var array  phrasing elements; replaced elements + br have value 1 */
+	/** @var array<string, int>  phrasing elements; replaced elements + br have value 1 */
 	public static $inlineElements = [
 		'a' => 0, 'abbr' => 0, 'area' => 0, 'audio' => 0, 'b' => 0, 'bdi' => 0, 'bdo' => 0, 'br' => 1, 'button' => 1, 'canvas' => 1,
 		'cite' => 0, 'code' => 0, 'data' => 0, 'datalist' => 0, 'del' => 0, 'dfn' => 0, 'em' => 0, 'embed' => 1, 'i' => 0, 'iframe' => 1,
@@ -45,12 +45,13 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		'svg' => 1, 'template' => 0, 'textarea' => 1, 'time' => 0, 'u' => 0, 'var' => 0, 'video' => 1, 'wbr' => 0,
 	];
 
-	/** @var array  elements with optional end tag in HTML */
+	/** @var array<string, int>  elements with optional end tag in HTML */
 	public static $optionalEnds = [
 		'body' => 1, 'head' => 1, 'html' => 1, 'colgroup' => 1, 'dd' => 1, 'dt' => 1, 'li' => 1,
 		'option' => 1, 'p' => 1, 'tbody' => 1, 'td' => 1, 'tfoot' => 1, 'th' => 1, 'thead' => 1, 'tr' => 1,
 	];
 
+	/** @var array<string, array<int, string>> */
 	public static $prohibits = [
 		'a' => ['a', 'button'],
 		'button' => ['a', 'button'],
@@ -82,7 +83,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		'progress' => ['progress'],
 	];
 
-	/** @var array  of HtmlElement | string nodes */
+	/** @var array<int, HtmlElement|string> nodes */
 	protected $children = [];
 
 	/** @var string|null  element's name */
@@ -114,7 +115,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Changes element's name.
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	final public function setName(?string $name, bool $empty = null): self
 	{

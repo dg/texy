@@ -15,6 +15,9 @@ namespace Texy;
  */
 class BlockParser extends Parser
 {
+	/** @var array<string, array{handler: callable, pattern: string}> */
+	public $patterns;
+
 	/** @var string */
 	private $text;
 
@@ -47,6 +50,7 @@ class BlockParser extends Parser
 		if ($this->offset > strlen($this->text)) {
 			return false;
 		}
+		/** @var array<int, array{string, int}>|null $matches */
 		$matches = Regexp::match(
 			$this->text,
 			$pattern . 'Am', // anchored & multiline
@@ -89,9 +93,11 @@ class BlockParser extends Parser
 		$this->offset = 0;
 
 		// parse loop
+		/** @var array<int, array{int, string, array<int, string>, int}> $matches */
 		$matches = [];
 		$priority = 0;
 		foreach ($this->patterns as $name => $pattern) {
+			/** @var array<int, array<int, array{string, int}>>|null $ms */
 			$ms = Regexp::match(
 				$text,
 				$pattern['pattern'],

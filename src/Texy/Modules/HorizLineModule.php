@@ -17,7 +17,7 @@ use Texy;
  */
 final class HorizLineModule extends Texy\Module
 {
-	/** @var array  default CSS class */
+	/** @var array<string, ?string>  default CSS class */
 	public $classes = [
 		'-' => null,
 		'*' => null,

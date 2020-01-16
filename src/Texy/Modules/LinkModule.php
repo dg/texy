@@ -33,12 +33,13 @@ final class LinkModule extends Texy\Module
 	/** @var bool  shorten URLs to more readable form? */
 	public $shorten = true;
 
-	/** @var array link references */
+	/** @var array<string, Link> link references */
 	private $references = [];
 
-	/** @var array */
+	/** @var array<string, bool> */
 	private static $livelock;
 
+	/** @var string */
 	private static $EMAIL;
 
 

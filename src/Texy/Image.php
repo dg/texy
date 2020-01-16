@@ -17,7 +17,7 @@ final class Image
 {
 	use Strict;
 
-	/** @var string  base image URL */
+	/** @var string|null  base image URL */
 	public $URL;
 
 	/** @var string|null  anchored image URL */

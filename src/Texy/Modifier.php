@@ -28,13 +28,13 @@ final class Modifier
 	/** @var string|null */
 	public $id;
 
-	/** @var array of classes (as keys) */
+	/** @var array<string, bool> of classes (as keys) */
 	public $classes = [];
 
-	/** @var array of CSS styles */
+	/** @var array<string, string> of CSS styles */
 	public $styles = [];
 
-	/** @var array of HTML element attributes */
+	/** @var array<string, string|string[]> of HTML element attributes */
 	public $attrs = [];
 
 	/** @var string|null */
@@ -49,7 +49,7 @@ final class Modifier
 	/** @var string|null */
 	public $cite;
 
-	/** @var array  list of properties which are regarded as HTML element attributes */
+	/** @var array<string, int>  list of properties which are regarded as HTML element attributes */
 	public static $elAttrs = [
 		'abbr' => 1, 'accesskey' => 1, 'alt' => 1, 'cite' => 1, 'colspan' => 1, 'contenteditable' => 1, 'crossorigin' => 1,
 		'datetime' => 1, 'decoding' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1, 'hidden' => 1,

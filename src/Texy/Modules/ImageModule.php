@@ -38,7 +38,7 @@ final class ImageModule extends Texy\Module
 	/** @var string|null  default alternative text */
 	public $defaultAlt = '';
 
-	/** @var array image references */
+	/** @var array<string, Image> image references */
 	private $references = [];
 
 
@@ -148,8 +148,7 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Parses image's syntax.
-	 * @param  string  input: small.jpg 80x13 || linked.jpg
+	 * Parses image's syntax. Input: small.jpg 80x13 || linked.jpg
 	 */
 	public function factoryImage(string $content, string $mod, bool $tryRef = true): Image
 	{

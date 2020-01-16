@@ -23,7 +23,7 @@ final class Link
 		BRACKET = 2,
 		IMAGE = 3;
 
-	/** @var string  URL in resolved form */
+	/** @var string|null  URL in resolved form */
 	public $URL;
 
 	/** @var string  URL as written in text */

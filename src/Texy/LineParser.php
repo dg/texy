@@ -15,6 +15,9 @@ namespace Texy;
  */
 class LineParser extends Parser
 {
+	/** @var array<string, array{handler: callable, pattern: string, again: ?string}> */
+	public $patterns;
+
 	/** @var bool */
 	public $again;
 
@@ -39,6 +42,7 @@ class LineParser extends Parser
 
 		$offset = 0;
 		$names = array_keys($pl);
+		/** @var array<string, array<int, array{string, int}>> $arrMatches */
 		$arrMatches = $arrOffset = [];
 		foreach ($names as $name) {
 			$arrOffset[$name] = -1;

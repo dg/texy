@@ -25,7 +25,7 @@ final class HeadingModule extends Texy\Module
 	/** @var string|null  textual content of first heading */
 	public $title;
 
-	/** @var array  generated Table of Contents */
+	/** @var array<int, array{el: Texy\HtmlElement, level: int, type: string}>  generated Table of Contents */
 	public $TOC = [];
 
 	/** @var bool  autogenerate ID */
@@ -43,7 +43,7 @@ final class HeadingModule extends Texy\Module
 	/** @var int  balancing mode */
 	public $balancing = self::DYNAMIC;
 
-	/** @var array  when $balancing = HeadingModule::FIXED */
+	/** @var array<string, int>  when $balancing = HeadingModule::FIXED */
 	public $levels = [
 		'#' => 0, // # --> $levels['#'] + $top = 0 + 1 = 1 --> <h1> ... </h1>
 		'*' => 1,
@@ -51,7 +51,7 @@ final class HeadingModule extends Texy\Module
 		'-' => 3,
 	];
 
-	/** @var array  used ID's */
+	/** @var array<string, true>  used ID's */
 	private $usedID = [];
 
 

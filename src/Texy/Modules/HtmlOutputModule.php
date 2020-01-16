@@ -22,7 +22,7 @@ final class HtmlOutputModule extends Texy\Module
 	/** @var bool  indent HTML code? */
 	public $indent = true;
 
-	/** @var array */
+	/** @var string[] */
 	public $preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
 
 	/** @var int  base indent level */
@@ -37,13 +37,13 @@ final class HtmlOutputModule extends Texy\Module
 	/** @var int  indent space counter */
 	private $space = 0;
 
-	/** @var array */
+	/** @var array<string, int> */
 	private $tagUsed = [];
 
-	/** @var array */
+	/** @var array<int, array{tag: string, open: string, close: string, dtdContent: array<string, int>, indent: int}> */
 	private $tagStack = [];
 
-	/** @var array  content DTD used, when context is not defined */
+	/** @var array<string, int>  content DTD used, when context is not defined */
 	private $baseDTD = [];
 
 

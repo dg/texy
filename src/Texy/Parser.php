@@ -17,9 +17,6 @@ class Parser
 {
 	use Strict;
 
-	/** @var array */
-	public $patterns;
-
 	/** @var Texy */
 	protected $texy;
 
