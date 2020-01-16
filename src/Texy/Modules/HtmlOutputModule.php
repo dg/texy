@@ -133,176 +133,190 @@ final class HtmlOutputModule extends Texy\Module
 			}
 		}
 
-
 		// phase #2 - HTML comment
 		if ($mComment) {
 			return $s . '<' . Texy\Helpers::freezeSpaces($mComment) . '>';
 		}
 
-
 		// phase #3 - HTML tag
 		$mEmpty = $mEmpty || isset(HtmlElement::$emptyElements[$mTag]);
-		if ($mEmpty && $mEnd) {
-			return $s; // bad tag; /end/
+		if ($mEmpty && $mEnd) { // bad tag; /end/
+			return $s;
+		} elseif ($mEnd) {
+			return $s . $this->processEndTag($mTag);
+		} else {
+			return $this->processStartTag($mTag, $mEmpty, $mAttr, $s);
+		}
+	}
+
+
+	private function processStartTag(string $tag, bool $empty, string $attr, string $s): string
+	{
+		$dtdContent = $this->baseDTD;
+		$dtd = $this->texy->getDTD();
+
+		if (!isset($dtd[$tag])) {
+			// unknown (non-html) tag
+			$allowed = true;
+			$item = reset($this->tagStack);
+			if ($item) {
+				$dtdContent = $item['dtdContent'];
+			}
+
+		} else {
+			$s .= $this->closeOptionalTags($tag, $dtdContent);
+
+			// is tag allowed in this content?
+			$allowed = isset($dtdContent[$tag]);
+
+			// check deep element prohibitions
+			if ($allowed && isset(HtmlElement::$prohibits[$tag])) {
+				foreach (HtmlElement::$prohibits[$tag] as $pTag) {
+					if (!empty($this->tagUsed[$pTag])) {
+						$allowed = false;
+						break;
+					}
+				}
+			}
 		}
 
-
-		if ($mEnd) { // end tag
-
-			// has start tag?
-			if (empty($this->tagUsed[$mTag])) {
+		// empty elements se neukladaji do zasobniku
+		if ($empty) {
+			if (!$allowed) {
 				return $s;
 			}
 
-			// autoclose tags
-			$tmp = [];
-			$back = true;
-			foreach ($this->tagStack as $i => $item) {
-				$tag = $item['tag'];
-				$s .= $item['close'];
-				$this->space -= $item['indent'];
-				$this->tagUsed[$tag]--;
-				$back = $back && isset(HtmlElement::$inlineElements[$tag]);
-				unset($this->tagStack[$i]);
-				if ($tag === $mTag) {
-					break;
-				}
-				array_unshift($tmp, $item);
-			}
+			$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, true, false), $this->preserveSpaces);
 
-			if (!$back || !$tmp) {
-				return $s;
-			}
+			if ($indent && $tag === 'br') { // formatting exception
+				return rtrim($s) . '<' . $tag . $attr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-			// allowed-check (nejspis neni ani potreba)
-			$item = reset($this->tagStack);
-			$dtdContent = $item ? $item['dtdContent'] : $this->baseDTD;
-			if (!isset($dtdContent[$tmp[0]['tag']])) {
-				return $s;
-			}
-
-			// autoopen tags
-			foreach ($tmp as $item) {
-				$s .= $item['open'];
-				$this->space += $item['indent'];
-				$this->tagUsed[$item['tag']]++;
-				array_unshift($this->tagStack, $item);
-			}
-
-		} else { // start tag
-
-			$dtdContent = $this->baseDTD;
-
-			$dtd = $this->texy->getDTD();
-			if (!isset($dtd[$mTag])) {
-				// unknown (non-html) tag
-				$allowed = true;
-				$item = reset($this->tagStack);
-				if ($item) {
-					$dtdContent = $item['dtdContent'];
-				}
+			} elseif ($indent && !isset(HtmlElement::$inlineElements[$tag])) {
+				$space = "\r" . str_repeat("\t", $this->space);
+				return $s . $space . '<' . $tag . $attr . '>' . $space;
 
 			} else {
-				// optional end tag closing
-				foreach ($this->tagStack as $i => $item) {
-					// is tag allowed here?
-					$dtdContent = $item['dtdContent'];
-					if (isset($dtdContent[$mTag])) {
-						break;
-					}
-
-					$tag = $item['tag'];
-
-					// auto-close hidden, optional and inline tags
-					if ($item['close'] && (!isset(HtmlElement::$optionalEnds[$tag]) && !isset(HtmlElement::$inlineElements[$tag]))) {
-						break;
-					}
-
-					// close it
-					$s .= $item['close'];
-					$this->space -= $item['indent'];
-					$this->tagUsed[$tag]--;
-					unset($this->tagStack[$i]);
-					$dtdContent = $this->baseDTD;
-				}
-
-				// is tag allowed in this content?
-				$allowed = isset($dtdContent[$mTag]);
-
-				// check deep element prohibitions
-				if ($allowed && isset(HtmlElement::$prohibits[$mTag])) {
-					foreach (HtmlElement::$prohibits[$mTag] as $pTag) {
-						if (!empty($this->tagUsed[$pTag])) {
-							$allowed = false;
-							break;
-						}
-					}
-				}
+				return $s . '<' . $tag . $attr . '>';
 			}
-
-			// empty elements se neukladaji do zasobniku
-			if ($mEmpty) {
-				if (!$allowed) {
-					return $s;
-				}
-
-				$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, true, false), $this->preserveSpaces);
-
-				if ($indent && $mTag === 'br') { // formatting exception
-					return rtrim($s) . '<' . $mTag . $mAttr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
-
-				} elseif ($indent && !isset(HtmlElement::$inlineElements[$mTag])) {
-					$space = "\r" . str_repeat("\t", $this->space);
-					return $s . $space . '<' . $mTag . $mAttr . '>' . $space;
-
-				} else {
-					return $s . '<' . $mTag . $mAttr . '>';
-				}
-			}
-
-			$open = null;
-			$close = null;
-			$indent = 0;
-
-			if ($allowed) {
-				$open = '<' . $mTag . $mAttr . '>';
-
-				// receive new content
-				if ($tagDTD = $dtd[$mTag] ?? null) {
-					if (isset($tagDTD[1][HtmlElement::INNER_TRANSPARENT])) {
-						$dtdContent += $tagDTD[1];
-						unset($dtdContent[HtmlElement::INNER_TRANSPARENT]);
-					} else {
-						$dtdContent = $tagDTD[1];
-					}
-				}
-
-				// format output
-				if ($this->indent && !isset(HtmlElement::$inlineElements[$mTag])) {
-					$close = "\x08" . '</' . $mTag . '>' . "\n" . str_repeat("\t", $this->space);
-					$s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
-					$indent = 1;
-				} else {
-					$close = '</' . $mTag . '>';
-					$s .= $open;
-				}
-
-				// TODO: problematic formatting of select / options, object / params
-			}
-
-			// open tag, put to stack, increase counter
-			$item = [
-				'tag' => $mTag,
-				'open' => $open,
-				'close' => $close,
-				'dtdContent' => $dtdContent,
-				'indent' => $indent,
-			];
-			array_unshift($this->tagStack, $item);
-			$tmp = &$this->tagUsed[$mTag];
-			$tmp++;
 		}
 
+		$open = null;
+		$close = null;
+		$indent = 0;
+
+		if ($allowed) {
+			$open = '<' . $tag . $attr . '>';
+
+			// receive new content
+			if ($tagDTD = $dtd[$tag] ?? null) {
+				if (isset($tagDTD[1][HtmlElement::INNER_TRANSPARENT])) {
+					$dtdContent += $tagDTD[1];
+					unset($dtdContent[HtmlElement::INNER_TRANSPARENT]);
+				} else {
+					$dtdContent = $tagDTD[1];
+				}
+			}
+
+			// format output
+			if ($this->indent && !isset(HtmlElement::$inlineElements[$tag])) {
+				$close = "\x08" . '</' . $tag . '>' . "\n" . str_repeat("\t", $this->space);
+				$s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
+				$indent = 1;
+			} else {
+				$close = '</' . $tag . '>';
+				$s .= $open;
+			}
+
+			// TODO: problematic formatting of select / options, object / params
+		}
+
+		// open tag, put to stack, increase counter
+		$item = [
+			'tag' => $tag,
+			'open' => $open,
+			'close' => $close,
+			'dtdContent' => $dtdContent,
+			'indent' => $indent,
+		];
+		array_unshift($this->tagStack, $item);
+		$tmp = &$this->tagUsed[$tag];
+		$tmp++;
+
+		return $s;
+	}
+
+
+	private function processEndTag(string $tag): string
+	{
+		// has start tag?
+		if (empty($this->tagUsed[$tag])) {
+			return '';
+		}
+
+		// autoclose tags
+		$tmp = [];
+		$back = true;
+		$s = '';
+		foreach ($this->tagStack as $i => $item) {
+			$itemTag = $item['tag'];
+			$s .= $item['close'];
+			$this->space -= $item['indent'];
+			$this->tagUsed[$itemTag]--;
+			$back = $back && isset(HtmlElement::$inlineElements[$itemTag]);
+			unset($this->tagStack[$i]);
+			if ($itemTag === $tag) {
+				break;
+			}
+			array_unshift($tmp, $item);
+		}
+
+		if (!$back || !$tmp) {
+			return $s;
+		}
+
+		// allowed-check (nejspis neni ani potreba)
+		$item = reset($this->tagStack);
+		$dtdContent = $item ? $item['dtdContent'] : $this->baseDTD;
+		if (!isset($dtdContent[$tmp[0]['tag']])) {
+			return $s;
+		}
+
+		// autoopen tags
+		foreach ($tmp as $item) {
+			$s .= $item['open'];
+			$this->space += $item['indent'];
+			$this->tagUsed[$item['tag']]++;
+			array_unshift($this->tagStack, $item);
+		}
+
+		return $s;
+	}
+
+
+	private function closeOptionalTags(string $tag, array &$dtdContent): string
+	{
+		$s = '';
+		foreach ($this->tagStack as $i => $item) {
+			// is tag allowed here?
+			$dtdContent = $item['dtdContent'];
+			if (isset($dtdContent[$tag])) {
+				break;
+			}
+
+			$itemTag = $item['tag'];
+
+			// auto-close hidden, optional and inline tags
+			if ($item['close'] && (!isset(HtmlElement::$optionalEnds[$itemTag]) && !isset(HtmlElement::$inlineElements[$itemTag]))) {
+				break;
+			}
+
+			// close it
+			$s .= $item['close'];
+			$this->space -= $item['indent'];
+			$this->tagUsed[$itemTag]--;
+			unset($this->tagStack[$i]);
+			$dtdContent = $this->baseDTD;
+		}
 		return $s;
 	}
 
