@@ -86,28 +86,8 @@ final class HtmlModule extends Texy\Module
 		}
 
 		$el = new HtmlElement($mTag);
-
 		if ($isStart) {
-			// parse attributes
-			$matches2 = null;
-			preg_match_all(
-				'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
-				$mAttr,
-				$matches2,
-				PREG_SET_ORDER
-			);
-
-			foreach ($matches2 as $m) {
-				$key = strtolower($m[1]);
-				$value = $m[2];
-				if ($value == null) {
-					$el->attrs[$key] = true;
-				} elseif ($value[0] === '\'' || $value[0] === '"') {
-					$el->attrs[$key] = Texy\Helpers::unescapeHtml(substr($value, 1, -1));
-				} else {
-					$el->attrs[$key] = Texy\Helpers::unescapeHtml($value);
-				}
-			}
+			$el->attrs = $this->parseAttributes($mAttr);
 		}
 
 		$res = $this->texy->invokeAroundHandlers('htmlTag', $parser, [$el, $isStart, $isEmpty]);
@@ -147,14 +127,10 @@ final class HtmlModule extends Texy\Module
 			if (!isset($allowedTags[$name])) {
 				return null;
 			}
-			$allowedAttrs = $allowedTags[$name]; // allowed attrs
-
-		} else {
-			// allowedTags === Texy\Texy::ALL
+		} else { // allowedTags === Texy\Texy::ALL
 			if ($forceEmpty) {
 				$el->setName($name, true);
 			}
-			$allowedAttrs = $texy::ALL; // all attrs are allowed
 		}
 
 		// end tag? we are finished
@@ -162,108 +138,12 @@ final class HtmlModule extends Texy\Module
 			return $el;
 		}
 
-		$elAttrs = &$el->attrs;
-
-		// process attributes
-		if (!$allowedAttrs) {
-			$elAttrs = [];
-
-		} elseif (is_array($allowedAttrs)) {
-			// skip disabled
-			$allowedAttrs = array_flip($allowedAttrs);
-			foreach ($elAttrs as $key => $foo) {
-				if (!isset($allowedAttrs[$key])) {
-					unset($elAttrs[$key]);
-				}
-			}
+		$this->applyAttrs($el->attrs, is_array($allowedTags) ? $allowedTags[$name] : $texy::ALL);
+		$this->applyClasses($el->attrs, $texy->getAllowedProps()[0]);
+		$this->applyStyles($el->attrs, $texy->getAllowedProps()[1]);
+		if (!$this->validateAttrs($el, $texy)) {
+			return null;
 		}
-
-		// apply allowedClasses
-		[$classes, $styles] = $texy->getAllowedProps();
-		if (isset($elAttrs['class'])) {
-			if (is_array($classes)) {
-				$elAttrs['class'] = explode(' ', $elAttrs['class']);
-				foreach ($elAttrs['class'] as $key => $value) {
-					if (!isset($classes[$value])) {
-						unset($elAttrs['class'][$key]); // id & class are case-sensitive
-					}
-				}
-
-			} elseif ($classes !== $texy::ALL) {
-				$elAttrs['class'] = null;
-			}
-		}
-
-		// apply allowedClasses for ID
-		if (isset($elAttrs['id'])) {
-			if (is_array($classes)) {
-				if (!isset($classes['#' . $elAttrs['id']])) {
-					$elAttrs['id'] = null;
-				}
-			} elseif ($classes !== $texy::ALL) {
-				$elAttrs['id'] = null;
-			}
-		}
-
-		// apply allowedStyles
-		if (isset($elAttrs['style'])) {
-			if (is_array($styles)) {
-				$tmp = explode(';', $elAttrs['style']);
-				$elAttrs['style'] = null;
-				foreach ($tmp as $value) {
-					$pair = explode(':', $value, 2);
-					$prop = trim($pair[0]);
-					if (isset($pair[1]) && isset($styles[strtolower($prop)])) { // CSS is case-insensitive
-						$elAttrs['style'][$prop] = $pair[1];
-					}
-				}
-			} elseif ($styles !== $texy::ALL) {
-				$elAttrs['style'] = null;
-			}
-		}
-
-		foreach (['src', 'href', 'name', 'id'] as $attr) {
-			if (isset($elAttrs[$attr])) {
-				$elAttrs[$attr] = is_string($elAttrs[$attr]) ? trim($elAttrs[$attr]) : '';
-				if ($elAttrs[$attr] === '') {
-					unset($elAttrs[$attr]);
-				}
-			}
-		}
-
-		if ($name === 'img') {
-			if (!isset($elAttrs['src']) || !$texy->checkURL($elAttrs['src'], $texy::FILTER_IMAGE)) {
-				return null;
-			}
-			$texy->summary['images'][] = $elAttrs['src'];
-
-		} elseif ($name === 'a') {
-			if (!isset($elAttrs['href']) && !isset($elAttrs['name']) && !isset($elAttrs['id'])) {
-				return null;
-			}
-			if (isset($elAttrs['href'])) {
-				if ($texy->linkModule->forceNoFollow && strpos($elAttrs['href'], '//') !== false) {
-					if (isset($elAttrs['rel'])) {
-						$elAttrs['rel'] = (array) $elAttrs['rel'];
-					}
-					$elAttrs['rel'][] = 'nofollow';
-				}
-
-				if (!$texy->checkURL($elAttrs['href'], $texy::FILTER_ANCHOR)) {
-					return null;
-				}
-
-				$texy->summary['links'][] = $elAttrs['href'];
-			}
-
-		} elseif (preg_match('#^h[1-6]#i', $name)) {
-			$texy->headingModule->TOC[] = [
-				'el' => $el,
-				'level' => (int) substr($name, 1),
-				'type' => 'html',
-			];
-		}
-
 		$el->validateAttrs($texy->getDTD());
 
 		return $el;
@@ -284,5 +164,141 @@ final class HtmlModule extends Texy\Module
 		$content = trim($content, '-');
 
 		return $this->texy->protect('<!--' . $content . '-->', Texy\Texy::CONTENT_MARKUP);
+	}
+
+
+	private function applyAttrs(&$attrs, $allowedAttrs): void
+	{
+		if (!$allowedAttrs) {
+			$attrs = [];
+
+		} elseif (is_array($allowedAttrs)) {
+			// skip disabled
+			$allowedAttrs = array_flip($allowedAttrs);
+			foreach ($attrs as $key => $foo) {
+				if (!isset($allowedAttrs[$key])) {
+					unset($attrs[$key]);
+				}
+			}
+		}
+	}
+
+
+	private function applyClasses(&$attrs, $allowedClasses): void
+	{
+		if (!isset($attrs['class'])) {
+		} elseif (is_array($allowedClasses)) {
+			$attrs['class'] = explode(' ', $attrs['class']);
+			foreach ($attrs['class'] as $key => $value) {
+				if (!isset($allowedClasses[$value])) {
+					unset($attrs['class'][$key]); // id & class are case-sensitive
+				}
+			}
+
+		} elseif ($allowedClasses !== Texy\Texy::ALL) {
+			$attrs['class'] = null;
+		}
+
+		if (!isset($attrs['id'])) {
+		} elseif (is_array($allowedClasses)) {
+			if (!isset($allowedClasses['#' . $attrs['id']])) {
+				$attrs['id'] = null;
+			}
+		} elseif ($allowedClasses !== Texy\Texy::ALL) {
+			$attrs['id'] = null;
+		}
+	}
+
+
+	private function applyStyles(&$attrs, $allowedStyles): void
+	{
+		if (!isset($attrs['style'])) {
+		} elseif (is_array($allowedStyles)) {
+			$tmp = explode(';', $attrs['style']);
+			$attrs['style'] = null;
+			foreach ($tmp as $value) {
+				$pair = explode(':', $value, 2);
+				$prop = trim($pair[0]);
+				if (isset($pair[1]) && isset($allowedStyles[strtolower($prop)])) { // CSS is case-insensitive
+					$attrs['style'][$prop] = $pair[1];
+				}
+			}
+		} elseif ($allowedStyles !== Texy\Texy::ALL) {
+			$attrs['style'] = null;
+		}
+	}
+
+
+	private function validateAttrs(HtmlElement $el, Texy\Texy $texy): bool
+	{
+		foreach (['src', 'href', 'name', 'id'] as $attr) {
+			if (isset($el->attrs[$attr])) {
+				$el->attrs[$attr] = is_string($el->attrs[$attr]) ? trim($el->attrs[$attr]) : '';
+				if ($el->attrs[$attr] === '') {
+					unset($el->attrs[$attr]);
+				}
+			}
+		}
+
+		$name = $el->getName();
+		if ($name === 'img') {
+			if (!isset($el->attrs['src']) || !$texy->checkURL($el->attrs['src'], $texy::FILTER_IMAGE)) {
+				return false;
+			}
+			$texy->summary['images'][] = $el->attrs['src'];
+
+		} elseif ($name === 'a') {
+			if (!isset($el->attrs['href']) && !isset($el->attrs['name']) && !isset($el->attrs['id'])) {
+				return false;
+			}
+			if (isset($el->attrs['href'])) {
+				if ($texy->linkModule->forceNoFollow && strpos($el->attrs['href'], '//') !== false) {
+					if (isset($el->attrs['rel'])) {
+						$el->attrs['rel'] = (array) $el->attrs['rel'];
+					}
+					$el->attrs['rel'][] = 'nofollow';
+				}
+
+				if (!$texy->checkURL($el->attrs['href'], $texy::FILTER_ANCHOR)) {
+					return false;
+				}
+
+				$texy->summary['links'][] = $el->attrs['href'];
+			}
+
+		} elseif (preg_match('#^h[1-6]#i', $name)) {
+			$texy->headingModule->TOC[] = [
+				'el' => $el,
+				'level' => (int) substr($name, 1),
+				'type' => 'html',
+			];
+		}
+
+		return true;
+	}
+
+
+	private function parseAttributes(string $attrs): array
+	{
+		$matches = $res = [];
+		preg_match_all(
+			'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
+			$attrs,
+			$matches,
+			PREG_SET_ORDER
+		);
+
+		foreach ($matches as $m) {
+			$key = strtolower($m[1]);
+			$value = $m[2];
+			if ($value == null) {
+				$res[$key] = true;
+			} elseif ($value[0] === '\'' || $value[0] === '"') {
+				$res[$key] = Texy\Helpers::unescapeHtml(substr($value, 1, -1));
+			} else {
+				$res[$key] = Texy\Helpers::unescapeHtml($value);
+			}
+		}
+		return $res;
 	}
 }
