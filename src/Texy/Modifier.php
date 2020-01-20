@@ -198,8 +198,10 @@ final class Modifier
 		if ($this->hAlign) {
 			$class = $texy->alignClasses[$this->hAlign] ?? null;
 			if ($class) {
+				settype($attrs['class'], 'array');
 				$attrs['class'][] = $class;
 			} else {
+				settype($attrs['style'], 'array');
 				$attrs['style']['text-align'] = $this->hAlign;
 			}
 		}
@@ -207,8 +209,10 @@ final class Modifier
 		if ($this->vAlign) {
 			$class = $texy->alignClasses[$this->vAlign] ?? null;
 			if ($class) {
+				settype($attrs['class'], 'array');
 				$attrs['class'][] = $class;
 			} else {
+				settype($attrs['style'], 'array');
 				$attrs['style']['vertical-align'] = $this->vAlign;
 			}
 		}
