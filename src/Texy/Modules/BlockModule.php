@@ -90,64 +90,67 @@ final class BlockModule extends Texy\Module
 	 */
 	public function solve(Texy\HandlerInvocation $invocation, string $blocktype, string $s, $param, Texy\Modifier $mod)
 	{
+		$texy = $this->texy;
+
 		/** @var Texy\BlockParser $parser */
 		$parser = $invocation->getParser();
 
-		if (empty($this->texy->allowed[$blocktype])) {
+		if (empty($texy->allowed[$blocktype])) {
 			return null;
 		}
 
 		switch($blocktype) {
 			case 'block/texy':
-				return $this->blockTexy($s, $this->texy, $parser);
+				return $this->blockTexy($s, $texy, $parser);
 			break;
 
 			case 'block/texysource':
-				return $this->blockTexySource($s, $this->texy, $mod, $param);
+				return $this->blockTexySource($s, $texy, $mod, $param);
 			break;
 
 			case 'block/code':
-				return $this->blockCode($s, $this->texy, $mod, $param);
+				return $this->blockCode($s, $texy, $mod, $param);
 			break;
 
 			case 'block/default':
-				return $this->blockDefault($s, $this->texy, $mod, $param);
+				return $this->blockDefault($s, $texy, $mod, $param);
 			break;
 
 			case 'block/pre':
-				return $this->blockPre($s, $this->texy, $mod, $param);
+				return $this->blockPre($s, $texy, $mod);
 			break;
 
 			case 'block/html':
-				return $this->blockHtml($s, $this->texy, $mod, $param);
+				return $this->blockHtml($s, $texy);
 			break;
 
 			case 'block/text':
-				return $this->blockText($s, $this->texy, $mod, $param);
+				return $this->blockText($s, $texy);
 			break;
 
 			case 'block/comment':
-				return $this->blockComment($s, $this->texy, $mod, $param);
+				return $this->blockComment();
 			break;
 
 			case 'block/div':
-				return $this->blockDiv($s, $this->texy, $mod, $param);
+				return $this->blockDiv($s, $texy, $mod, $parser);
 			break;
 
 			default: 
 				return null;
 			break;
 		}
-		
 	}
 
 	private function isOutdentEqualEmptyString(string $s) 
 	{
-		$s = Helpers::outdent($s);
+		$outdent = Helpers::outdent($s);
 
-		if ($s === '') {
+		if ($outdent === '') {
 			return "\n";
 		}
+
+		return $outdent;
 	}
 
 
@@ -164,13 +167,17 @@ final class BlockModule extends Texy\Module
 	 */
 	private function blockTexySource(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param)
 	{
-		$s = $this->isOutdentEqualEmptyString($s);
+		$outdent = $this->isOutdentEqualEmptyString($s);
+
+		if ($outdent == "\n") {
+			return $outdent;
+		}
 		
 		$htmlElem = new HtmlElement;
 		if ($param === 'line') {
-			$htmlElem->parseLine($texy, $s);
+			$htmlElem->parseLine($texy, $outdent);
 		} else {
-			$htmlElem->parseBlock($texy, $s);
+			$htmlElem->parseBlock($texy, $outdent);
 		}
 		$s = $htmlElem->toHtml($texy);
 		return $this->blockCode($s, $texy, $mod, 'html');
@@ -182,9 +189,13 @@ final class BlockModule extends Texy\Module
 	 */
 	private function blockCode(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param)
 	{
-		$s = $this->isOutdentEqualEmptyString($s);
+		$outdent = $this->isOutdentEqualEmptyString($s);
 
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
+		if ($outdent == "\n") {
+			return $outdent;
+		}
+
+		$s = htmlspecialchars($outdent, ENT_NOQUOTES, 'UTF-8');
 		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 		$htmlElem = new HtmlElement('pre');
 		$mod->decorate($texy, $htmlElem);
@@ -199,12 +210,16 @@ final class BlockModule extends Texy\Module
 	 */
 	private function blockDefault(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param)
 	{
-		$s = $this->isOutdentEqualEmptyString($s); 
+		$outdent = $this->isOutdentEqualEmptyString($s);
+		
+		if ($outdent == "\n") {
+			return $outdent;
+		}
 
 		$htmlElem = new HtmlElement('pre');
 		$mod->decorate($texy, $htmlElem);
 		$htmlElem->attrs['class'][] = $param; // lang
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
+		$s = htmlspecialchars($outdent, ENT_NOQUOTES, 'UTF-8');
 		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 		$htmlElem->setText($s);
 		return $htmlElem;
@@ -216,7 +231,11 @@ final class BlockModule extends Texy\Module
 	 */
 	private function blockPre(string $s, Texy\Texy $texy, Texy\Modifier $mod)
 	{
-		$s = $this->isOutdentEqualEmptyString($s);
+		$outdent = $this->isOutdentEqualEmptyString($s);
+
+		if ($outdent == "\n") {
+			return $outdent;
+		}
 
 		$htmlElem = new HtmlElement('pre');
 		$mod->decorate($texy, $htmlElem);
@@ -232,7 +251,7 @@ final class BlockModule extends Texy\Module
 		}
 		unset($tmp);
 
-		$lineParser->parse($s);
+		$lineParser->parse($outdent);
 		$s = $htmlElem->getText();
 		$s = Helpers::unescapeHtml($s);
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
@@ -291,11 +310,15 @@ final class BlockModule extends Texy\Module
 
 	private function blockDiv(string $s, Texy\Texy $texy, Texy\Modifier $mod, Texy\BlockParser $parser)
 	{
-		$s = $this->isOutdentEqualEmptyString($s);
+		$outdent = $this->isOutdentEqualEmptyString($s);
+
+		if ($outdent == "\n") {
+			return $outdent;
+		}
 
 		$htmlElem = new HtmlElement('div');
 		$mod->decorate($texy, $htmlElem);
-		$htmlElem->parseBlock($texy, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
+		$htmlElem->parseBlock($texy, $outdent, $parser->isIndented()); // TODO: INDENT or NORMAL ?
 		return $htmlElem;
 	}
 }
