@@ -476,7 +476,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		$allowed = $dtd[$this->name][0] ?? null;
 		if (is_array($allowed)) {
 			foreach ($this->attrs as $attr => $foo) {
-				if (!isset($allowed[$attr]) && (!isset($allowed['data-*']) || substr($attr, 0, 5) !== 'data-')) {
+				if (!isset($allowed[$attr]) && (!isset($allowed['data-*']) || substr((string) $attr, 0, 5) !== 'data-')) {
 					unset($this->attrs[$attr]);
 				}
 			}
