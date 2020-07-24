@@ -12,6 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 
 
 $texy = new Texy\Texy;
+$texy->tabWidth = 0;
 $texy->imageModule->root = '../images/';
 $texy->imageModule->leftClass = 'left';
 $texy->allowed['phrase/ins'] = true;

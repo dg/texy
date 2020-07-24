@@ -307,9 +307,9 @@ and with modifiers:
 
 .{color:red}
 PHP:   .{color:blue}
-    - PHP: Hypertext Preprocessor .{color:green}
-    - A scripting language
-    - Personal Home Pages
+	- PHP: Hypertext Preprocessor .{color:green}
+	- A scripting language
+	- Personal Home Pages
 
 
 
