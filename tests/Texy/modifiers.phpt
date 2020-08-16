@@ -11,7 +11,7 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-test(function () {
+test('', function () {
 	$texy = new Texy\Texy;
 	$texy->allowedClasses = false;
 	$texy->allowedStyles = false;
@@ -28,7 +28,7 @@ test(function () {
 });
 
 
-test(function () {
+test('', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutputModule->lineWrap = 180;
 	$texy->allowedClasses = ['one', '#id'];
