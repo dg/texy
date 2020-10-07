@@ -27,4 +27,10 @@ Documentation and Examples
 Refer to the 'examples' directory for examples. Texy documentation is
 available on the homepage https://texy.info.
 
-If you like Texy, **[please make a donation now](https://nette.org/make-donation?to=texy)**. Thank you!
+
+Support Project
+---------------
+
+Do you like Texy? Are you looking forward to the new features?
+
+[![Donate](https://files.nette.org/icons/donation-1.svg?)](https://nette.org/make-donation?to=texy)
