@@ -54,11 +54,9 @@ class Regexp
 			return $empty;
 		}
 		$reFlags = ($flags & self::OFFSET_CAPTURE) ? PREG_OFFSET_CAPTURE : 0;
-		if ($flags & self::ALL) {
-			$res = preg_match_all($pattern, $subject, $m, $reFlags | PREG_SET_ORDER, $offset);
-		} else {
-			$res = preg_match($pattern, $subject, $m, $reFlags, $offset);
-		}
+		$res = $flags & self::ALL
+			? preg_match_all($pattern, $subject, $m, $reFlags | PREG_SET_ORDER, $offset)
+			: preg_match($pattern, $subject, $m, $reFlags, $offset);
 		if (preg_last_error()) { // run-time error
 			trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
 		} elseif ($res) {

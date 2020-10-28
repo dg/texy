@@ -233,7 +233,7 @@ final class LinkModule extends Texy\Module
 			$dest = trim(substr($dest, 2, -2));
 			$image = $texy->imageModule->getReference($dest);
 			if ($image) {
-				$link = new Link($image->linkedURL === null ? $image->URL : $image->linkedURL);
+				$link = new Link($image->linkedURL ?? $image->URL);
 				$link->modifier = $image->modifier;
 			}
 		}
@@ -359,7 +359,9 @@ final class LinkModule extends Texy\Module
 		}
 
 		if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#i', $link->raw)) {
-			$raw = strncasecmp($link->raw, 'www.', 4) === 0 ? 'none://' . $link->raw : $link->raw;
+			$raw = strncasecmp($link->raw, 'www.', 4) === 0
+				? 'none://' . $link->raw
+				: $link->raw;
 
 			// parse_url() in PHP damages UTF-8 - use regular expression
 			if (!preg_match('~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~', $raw, $parts)) {
@@ -380,9 +382,13 @@ final class LinkModule extends Texy\Module
 			}
 
 			if ($parts['query'] !== '') {
-				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4 ? "?\u{2026}" : ('?' . $parts['query']);
+				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4
+					? "?\u{2026}"
+					: ('?' . $parts['query']);
 			} elseif ($parts['fragment'] !== '') {
-				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4 ? "#\u{2026}" : ('#' . $parts['fragment']);
+				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4
+					? "#\u{2026}"
+					: ('#' . $parts['fragment']);
 			}
 			return $res;
 		}

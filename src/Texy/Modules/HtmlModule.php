@@ -104,8 +104,12 @@ final class HtmlModule extends Texy\Module
 	 * Finish invocation.
 	 * @return HtmlElement|string|null
 	 */
-	public function solveTag(Texy\HandlerInvocation $invocation, HtmlElement $el, bool $isStart, bool $forceEmpty = null)
-	{
+	public function solveTag(
+		Texy\HandlerInvocation $invocation,
+		HtmlElement $el,
+		bool $isStart,
+		bool $forceEmpty = null
+	) {
 		$texy = $this->texy;
 
 		// tag & attibutes
@@ -219,7 +223,7 @@ final class HtmlModule extends Texy\Module
 			foreach ($tmp as $value) {
 				$pair = explode(':', $value, 2);
 				$prop = trim($pair[0]);
-				if (isset($pair[1]) && isset($allowedStyles[strtolower($prop)])) { // CSS is case-insensitive
+				if (isset($pair[1], $allowedStyles[strtolower($prop)])) { // CSS is case-insensitive
 					$attrs['style'][$prop] = $pair[1];
 				}
 			}
@@ -233,7 +237,9 @@ final class HtmlModule extends Texy\Module
 	{
 		foreach (['src', 'href', 'name', 'id'] as $attr) {
 			if (isset($el->attrs[$attr])) {
-				$el->attrs[$attr] = is_string($el->attrs[$attr]) ? trim($el->attrs[$attr]) : '';
+				$el->attrs[$attr] = is_string($el->attrs[$attr])
+					? trim($el->attrs[$attr])
+					: '';
 				if ($el->attrs[$attr] === '') {
 					unset($el->attrs[$attr]);
 				}

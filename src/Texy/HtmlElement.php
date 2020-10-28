@@ -119,7 +119,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	final public function setName(?string $name, bool $empty = null): self
 	{
 		$this->name = $name;
-		$this->isEmpty = $empty === null ? isset(self::$emptyElements[$name]) : (bool) $empty;
+		$this->isEmpty = $empty === null
+			? isset(self::$emptyElements[$name])
+			: (bool) $empty;
 		return $this;
 	}
 
@@ -476,7 +478,11 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		$allowed = $dtd[$this->name][0] ?? null;
 		if (is_array($allowed)) {
 			foreach ($this->attrs as $attr => $foo) {
-				if (!isset($allowed[$attr]) && (!isset($allowed['data-*']) || substr((string) $attr, 0, 5) !== 'data-')) {
+				if (
+					!isset($allowed[$attr])
+					&& (!isset($allowed['data-*'])
+						|| substr((string) $attr, 0, 5) !== 'data-')
+				) {
 					unset($this->attrs[$attr]);
 				}
 			}

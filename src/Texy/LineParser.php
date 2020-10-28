@@ -104,7 +104,11 @@ class LineParser extends Parser
 				if ($offsets[$name] === -2) {
 					do {
 						$delta++;
-					} while (isset($text[$offset + $delta]) && $text[$offset + $delta] >= "\x80" && $text[$offset + $delta] < "\xC0");
+					} while (
+						isset($text[$offset + $delta])
+						&& $text[$offset + $delta] >= "\x80"
+						&& $text[$offset + $delta] < "\xC0"
+					);
 				}
 
 				if ($offset + $delta > strlen($text)) {
@@ -128,7 +132,10 @@ class LineParser extends Parser
 
 				} else {
 					// try next time?
-					if (!$this->patterns[$name]['again'] || !Regexp::match($text, $this->patterns[$name]['again'], 0, $offset + $delta)) {
+					if (
+						!$this->patterns[$name]['again']
+						|| !Regexp::match($text, $this->patterns[$name]['again'], 0, $offset + $delta)
+					) {
 						unset($names[$index]);
 					}
 					continue;

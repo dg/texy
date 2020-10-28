@@ -37,7 +37,7 @@ $texy->imageModule->root = 'imagesdir/';       // "in-line" images root
 $texy->imageModule->linkedRoot = 'imagesdir/big/';   // "linked" images root
 $texy->imageModule->leftClass = 'my-left-class';    // left-floated image modifier
 $texy->imageModule->rightClass = 'my-right-class';   // right-floated image modifier
-$texy->imageModule->defaultAlt = 'default alt. text';// default image alternative text
+$texy->imageModule->defaultAlt = 'default alt. text'; // default image alternative text
 
 
 // processing

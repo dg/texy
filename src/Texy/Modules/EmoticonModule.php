@@ -103,12 +103,12 @@ final class EmoticonModule extends Texy\Module
 			return $file;
 		}
 		$el = new Texy\HtmlElement('img');
-		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root === null ? $texy->imageModule->root : $this->root);
+		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root ?? $texy->imageModule->root);
 		$el->attrs['alt'] = $raw;
 		$el->attrs['class'][] = $this->class;
 
 		// file path
-		$file = rtrim($this->fileRoot === null ? (string) $texy->imageModule->fileRoot : $this->fileRoot, '/\\') . '/' . $file;
+		$file = rtrim($this->fileRoot ?? (string) $texy->imageModule->fileRoot, '/\\') . '/' . $file;
 		if (@is_file($file)) { // intentionally @
 			$size = @getimagesize($file); // intentionally @
 			if (is_array($size)) {

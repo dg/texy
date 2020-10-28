@@ -78,8 +78,13 @@ class myHandler
 
 
 	/** @return Texy\HtmlElement|string|null */
-	public function phrase(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = null)
-	{
+	public function phrase(
+		Texy\HandlerInvocation $invocation,
+		$phrase,
+		$content,
+		Texy\Modifier $modifier,
+		Texy\Link $link = null
+	) {
 		return $invocation->proceed();
 	}
 
@@ -115,24 +120,34 @@ class myHandler
 	/** Blocks */
 
 	/** @return Texy\HtmlElement|string|null */
-/*
+	/*
 	function paragraph(Texy\HandlerInvocation $invocation, $content, Texy\Modifier $modifier)
 	{
 		return $invocation->proceed();
 	}
-*/
+	*/
 
 
 	/** @return Texy\HtmlElement|string|null */
-	public function figure(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, $content, Texy\Modifier $modifier)
-	{
+	public function figure(
+		Texy\HandlerInvocation $invocation,
+		Texy\Image $image,
+		Texy\Link $link = null,
+		$content,
+		Texy\Modifier $modifier
+	) {
 		return $invocation->proceed();
 	}
 
 
 	/** @return Texy\HtmlElement|string|null */
-	public function heading(Texy\HandlerInvocation $invocation, /*int*/ $level, $content, Texy\Modifier $modifier, $isSurrounded)
-	{
+	public function heading(
+		Texy\HandlerInvocation $invocation,
+		$level,
+		$content,
+		Texy\Modifier $modifier,
+		$isSurrounded
+	) {
 		return $invocation->proceed();
 	}
 
@@ -156,8 +171,11 @@ class myHandler
 	}
 
 
-	public function afterDefinitionList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
-	{
+	public function afterDefinitionList(
+		Texy\BlockParser $parser,
+		Texy\HtmlElement $element,
+		Texy\Modifier $modifier
+	): void {
 	}
 
 

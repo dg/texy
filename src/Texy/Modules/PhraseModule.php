@@ -41,7 +41,6 @@ final class PhraseModule extends Texy\Module
 		'phrase/quicklink' => 'a',
 	];
 
-
 	/** @var bool  are links allowed? */
 	public $linksAllowed = true;
 
@@ -52,14 +51,14 @@ final class PhraseModule extends Texy\Module
 
 		$texy->addHandler('phrase', [$this, 'solve']);
 
-/*
+		/*
 		// UNIVERSAL
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
 			'#((?>([*+/^_"~`-])+?))(?!\s)(.*(?!\2).)'.Texy\Patterns::MODIFIER.'?(?<!\s)\1(?!\2)(?::('.Texy\Patterns::LINK_URL.'))??()#Uus',
 			'phrase/strong'
 		);
-*/
+		*/
 
 		// ***strong+emphasis***
 		$texy->registerLinePattern(
@@ -285,7 +284,7 @@ final class PhraseModule extends Texy\Module
 	public function patternSupSub(LineParser $parser, array $matches, string $phrase)
 	{
 		[, $mContent] = $matches;
-		$mod = new Modifier();
+		$mod = new Modifier;
 		$link = null;
 		$mContent = str_replace('-', "\u{2212}", $mContent); // &minus;
 		return $this->texy->invokeAroundHandlers('phrase', $parser, [$phrase, $mContent, $mod, $link]);
@@ -303,8 +302,13 @@ final class PhraseModule extends Texy\Module
 	 * Finish invocation.
 	 * @return Texy\HtmlElement|string|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, string $phrase, string $content, Modifier $mod, Texy\Link $link = null)
-	{
+	public function solve(
+		Texy\HandlerInvocation $invocation,
+		string $phrase,
+		string $content,
+		Modifier $mod,
+		Texy\Link $link = null
+	) {
 		$texy = $this->texy;
 		$tag = $this->tags[$phrase] ?? null;
 

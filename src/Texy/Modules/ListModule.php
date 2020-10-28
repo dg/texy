@@ -208,9 +208,9 @@ final class ListModule extends Texy\Module
 		}
 
 		[, $mIndent, $mContent, $mMod] = $matches;
-			// [1] => indent
-			// [2] => ...
-			// [3] => .(title)[class]{style}<>
+		// [1] => indent
+		// [2] => ...
+		// [3] => .(title)[class]{style}<>
 
 		$elItem = new HtmlElement($tag);
 		$mod = new Modifier($mMod);

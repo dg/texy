@@ -306,7 +306,12 @@ final class HtmlOutputModule extends Texy\Module
 			$itemTag = $item['tag'];
 
 			// auto-close hidden, optional and inline tags
-			if ($item['close'] && (!isset(HtmlElement::$optionalEnds[$itemTag]) && !isset(HtmlElement::$inlineElements[$itemTag]))) {
+			if (
+				$item['close']
+				&& (!isset(HtmlElement::$optionalEnds[$itemTag])
+					&& !isset(HtmlElement::$inlineElements[$itemTag])
+				)
+			) {
 				break;
 			}
 

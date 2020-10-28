@@ -219,8 +219,12 @@ final class TableModule extends Texy\Module
 	}
 
 
-	private function processCell(string $cell, ?Modifier &$cellModifier, bool $isHead, Texy\Texy $texy): ?TableCellElement
-	{
+	private function processCell(
+		string $cell,
+		?Modifier &$cellModifier,
+		bool $isHead,
+		Texy\Texy $texy
+	): ?TableCellElement {
 		$matches = Regexp::match($cell, '#(\*??)\ *' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?\ *()$#AU');
 		if (!$matches) {
 			return null;

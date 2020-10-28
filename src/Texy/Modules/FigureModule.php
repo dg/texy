@@ -67,7 +67,7 @@ final class FigureModule extends Texy\Module
 
 		if ($mLink) {
 			if ($mLink === ':') {
-				$link = new Texy\Link($image->linkedURL === null ? $image->URL : $image->linkedURL);
+				$link = new Texy\Link($image->linkedURL ?? $image->URL);
 				$link->raw = ':';
 				$link->type = $link::IMAGE;
 			} else {
@@ -84,8 +84,13 @@ final class FigureModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, string $content, Texy\Modifier $mod): ?Texy\HtmlElement
-	{
+	public function solve(
+		Texy\HandlerInvocation $invocation,
+		Texy\Image $image,
+		Texy\Link $link = null,
+		string $content,
+		Texy\Modifier $mod
+	): ?Texy\HtmlElement {
 		$texy = $this->texy;
 
 		$hAlign = $image->modifier->hAlign;

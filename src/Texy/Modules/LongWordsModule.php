@@ -171,7 +171,7 @@ final class LongWordsModule extends Texy\Module
 			} elseif (($ch === 's') && ($prev === 'n') && isset($this->consonants[$next])) {
 				return self::AFTER;
 
-			} elseif (isset($this->consonants[$next]) && isset($this->vowels[$prev])) {
+			} elseif (isset($this->consonants[$next], $this->vowels[$prev])) {
 				if ($next === 'r') {
 					return isset($this->before_r[$ch]) ? self::HERE : self::AFTER;
 
@@ -179,7 +179,9 @@ final class LongWordsModule extends Texy\Module
 					return isset($this->before_l[$ch]) ? self::HERE : self::AFTER;
 
 				} elseif ($next === 'h') { // CH
-					return isset($this->before_h[$ch]) ? self::DONT : self::AFTER;
+					return isset($this->before_h[$ch])
+						? self::DONT
+						: self::AFTER;
 				}
 				return self::AFTER;
 			}
@@ -188,7 +190,7 @@ final class LongWordsModule extends Texy\Module
 		} elseif (($ch === 'u') && isset($this->doubleVowels[$prev])) {
 			return self::AFTER;
 
-		} elseif (isset($this->vowels[$ch]) && isset($this->vowels[$prev])) {
+		} elseif (isset($this->vowels[$ch], $this->vowels[$prev])) {
 			return self::HERE;
 		}
 

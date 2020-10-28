@@ -27,11 +27,9 @@ final class ParagraphModule extends Texy\Module
 
 	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
 	{
-		if ($parser->isIndented()) {
-			$parts = preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
-		} else {
-			$parts = preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
-		}
+		$parts = $parser->isIndented()
+			? preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY)
+			: preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
 
 		foreach ($parts as $s) {
 			$s = trim($s);
@@ -62,18 +60,19 @@ final class ParagraphModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, string $content, Texy\Modifier $mod = null): ?Texy\HtmlElement
-	{
+	public function solve(
+		Texy\HandlerInvocation $invocation,
+		string $content,
+		Texy\Modifier $mod = null
+	): ?Texy\HtmlElement {
 		$texy = $this->texy;
 
 		// find hard linebreaks
-		if ($texy->mergeLines) {
+		$content = $texy->mergeLines
 			// ....
 			// ... => \r means break line
-			$content = Regexp::replace($content, '#\n +(?=\S)#', "\r");
-		} else {
-			$content = Regexp::replace($content, '#\n#', "\r");
-		}
+			? Regexp::replace($content, '#\n +(?=\S)#', "\r")
+			: Regexp::replace($content, '#\n#', "\r");
 
 		$el = new Texy\HtmlElement('p');
 		$el->parseLine($texy, $content);
@@ -100,7 +99,7 @@ final class ParagraphModule extends Texy\Module
 				$el->setName($texy->nontextParagraph);
 			}
 
-		// block contains only markup tags or spaces or nothing
+			// block contains only markup tags or spaces or nothing
 		} else {
 			// if {ignoreEmptyStuff} return null;
 			if (!$mod) {

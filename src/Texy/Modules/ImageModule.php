@@ -110,7 +110,7 @@ final class ImageModule extends Texy\Module
 
 		if ($mLink) {
 			if ($mLink === ':') {
-				$link = new Texy\Link($image->linkedURL === null ? $image->URL : $image->linkedURL);
+				$link = new Texy\Link($image->linkedURL ?? $image->URL);
 				$link->raw = ':';
 				$link->type = $link::IMAGE;
 			} else {
@@ -191,8 +191,11 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(Texy\HandlerInvocation $invocation = null, Image $image, Texy\Link $link = null): ?Texy\HtmlElement
-	{
+	public function solve(
+		Texy\HandlerInvocation $invocation = null,
+		Image $image,
+		Texy\Link $link = null
+	): ?Texy\HtmlElement {
 		if ($image->URL == null) {
 			return null;
 		}
@@ -210,7 +213,9 @@ final class ImageModule extends Texy\Module
 		$mod->decorate($texy, $el);
 		$el->attrs['src'] = Helpers::prependRoot($image->URL, $this->root);
 		if (!isset($el->attrs['alt'])) {
-			$el->attrs['alt'] = $alt === null ? $this->defaultAlt : $texy->typographyModule->postLine($alt);
+			$el->attrs['alt'] = $alt === null
+				? $this->defaultAlt
+				: $texy->typographyModule->postLine($alt);
 		}
 
 		if ($hAlign) {

@@ -28,7 +28,6 @@ class Patterns
 	// CONTENT_BLOCK mark:    \x14-\x1F
 	public const MARK = '\x14-\x1F';
 
-
 	// modifier .(title)[class]{style}
 	public const MODIFIER = '(?: *+(?<= |^)\.((?:\((?:\\\\\)|[^)\n])++\)|\[[^\]\n]++\]|\{[^}\n]++\}){1,3}?))';
 
@@ -37,7 +36,6 @@ class Patterns
 
 	// modifier .(title)[class]{style}<>^
 	public const MODIFIER_HV = '(?: *+(?<= |^)\.((?:\((?:\\\\\)|[^)\n])++\)|\[[^\]\n]++\]|\{[^}\n]++\}|<>|>|=|<|\^|\-|\_){1,5}?))';
-
 
 	// images   [* urls .(title)[class]{style} >]   '\[\* *+([^\n'.MARK.']{1,1000})'.MODIFIER.'? *+(\*|(?<!<)>|<)\]'
 	public const IMAGE = '\[\* *+([^\n\x14-\x1F]{1,1000})(?: *+(?<= |^)\.((?:\([^)\n]++\)|\[[^\]\n]++\]|\{[^}\n]++\}){1,3}?))? *+(\*|(?<!<)>|<)\]';

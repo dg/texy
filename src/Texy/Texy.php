@@ -150,7 +150,6 @@ class Texy
 	/** @var Modules\HtmlOutputModule */
 	public $htmlOutputModule;
 
-
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
 	 * @var array<string, array{handler: callable, pattern: string, again: ?string}>
@@ -204,7 +203,11 @@ class Texy
 
 	public function __construct()
 	{
-		if (extension_loaded('mbstring') && mb_get_info('func_overload') & 2 && substr(mb_get_info('internal_encoding'), 0, 1) === 'U') {
+		if (
+			extension_loaded('mbstring')
+			&& mb_get_info('func_overload') & 2
+			&& substr(mb_get_info('internal_encoding'), 0, 1) === 'U'
+		) {
 			mb_internal_encoding('pass');
 			trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
 		}
@@ -287,8 +290,12 @@ class Texy
 	}
 
 
-	final public function registerLinePattern(callable $handler, string $pattern, string $name, string $againTest = null): void
-	{
+	final public function registerLinePattern(
+		callable $handler,
+		string $pattern,
+		string $name,
+		string $againTest = null
+	): void {
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = true;
 		}
@@ -339,16 +346,12 @@ class Texy
 		$this->processing = true;
 
 		// speed-up
-		if (is_array($this->allowedClasses)) {
-			$this->_classes = array_flip($this->allowedClasses);
-		} else {
-			$this->_classes = $this->allowedClasses;
-		}
-		if (is_array($this->allowedStyles)) {
-			$this->_styles = array_flip($this->allowedStyles);
-		} else {
-			$this->_styles = $this->allowedStyles;
-		}
+		$this->_classes = is_array($this->allowedClasses)
+			? array_flip($this->allowedClasses)
+			: $this->allowedClasses;
+		$this->_styles = is_array($this->allowedStyles)
+			? array_flip($this->allowedStyles)
+			: $this->allowedStyles;
 
 		if ($this->removeSoftHyphens) {
 			$text = str_replace("\u{AD}", '', $text);

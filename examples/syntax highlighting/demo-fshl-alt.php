@@ -69,7 +69,9 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name)
 {
 	[$content] = $matches;
-	$langClass = $name === 'phpBlockSyntax' ? FSHL\Lexer\Php::class : FSHL\Lexer\Html::class;
+	$langClass = $name === 'phpBlockSyntax'
+		? FSHL\Lexer\Php::class
+		: FSHL\Lexer\Html::class;
 
 	$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
 	$texy = $parser->getTexy();
