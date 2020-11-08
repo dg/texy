@@ -559,7 +559,7 @@ class Texy
 		}
 
 		$key = $contentType
-			. strtr(base_convert(count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
+			. strtr(base_convert((string) count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
 			. $contentType;
 
 		$this->marks[$key] = $child;
