@@ -69,7 +69,7 @@ final class ImageModule extends Texy\Module
 			// [*image*]: urls .(title)[class]{style}
 			$text = Texy\Regexp::replace(
 				$text,
-				'#^\[\*([^\n]{1,100})\*\]:\ +(.{1,1000})\ *' . Patterns::MODIFIER . '?\s*()$#mUu',
+				'#^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$#mUu',
 				[$this, 'patternReferenceDef']
 			);
 		}

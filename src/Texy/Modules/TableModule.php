@@ -96,7 +96,7 @@ final class TableModule extends Texy\Module
 				continue;
 			}
 
-			if ($parser->next('#^\|(.*)(?:|\|\ *' . Patterns::MODIFIER_HV . '?)()$#U', $matches)) {
+			if ($parser->next('#^\|(.*)(?:|\|[\ \t]*' . Patterns::MODIFIER_HV . '?)()$#U', $matches)) {
 				// smarter head detection
 				if ($rowCounter === 0 && !$isHead && $parser->next('#^\|[=-][+|=-]{2,}$#Um', $foo)) {
 					$isHead = true;
@@ -178,7 +178,7 @@ final class TableModule extends Texy\Module
 		foreach (explode('|', $content) as $cell) {
 			$cell = strtr($cell, "\x13", '|');
 			// rowSpan
-			if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '#\^\ *$|\*??(.*)\ +\^$#AU'))) {
+			if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '#\^[\ \t]*$|\*??(.*)[\ \t]+\^$#AU'))) {
 				$prevRow[$col]->rowSpan++;
 				$cell = $matches[1] ?? '';
 				$prevRow[$col]->text .= "\n" . $cell;
@@ -225,7 +225,7 @@ final class TableModule extends Texy\Module
 		bool $isHead,
 		Texy\Texy $texy
 	): ?TableCellElement {
-		$matches = Regexp::match($cell, '#(\*??)\ *' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?\ *()$#AU');
+		$matches = Regexp::match($cell, '#(\*??)[\ \t]*' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?[\ \t]*()$#AU');
 		if (!$matches) {
 			return null;
 		}
