@@ -28,9 +28,11 @@ Refer to the 'examples' directory for examples. Texy documentation is
 available on the homepage https://texy.info.
 
 
-Support Project
----------------
+[Support Me](https://github.com/sponsors/dg)
+--------------------------------------------
 
 Do you like Texy? Are you looking forward to the new features?
 
-[![Donate](https://files.nette.org/icons/donation-1.svg?)](https://nette.org/make-donation?to=texy)
+[![Buy me a coffee](https://files.nette.org/icons/donation-3.svg)](https://github.com/sponsors/dg)
+
+Thank you!
