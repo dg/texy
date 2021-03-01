@@ -27,7 +27,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 		return $invocation->proceed();
 	}
 
-	static $lexers = [
+	static array $lexers = [
 		'html' => FSHL\Lexer\Html::class,
 		'javascript' => FSHL\Lexer\Javascript::class,
 		'php' => FSHL\Lexer\Php::class,

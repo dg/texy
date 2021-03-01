@@ -18,8 +18,7 @@ use Texy\Texy;
  */
 class TexyMacro extends Latte\Macros\MacroSet
 {
-	/** @var Texy */
-	private $texy;
+	private Texy $texy;
 
 
 	public function __construct(Latte\Engine $engine, Texy $texy)

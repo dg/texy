@@ -64,17 +64,17 @@ class Texy
 	/** @var bool|array<int, string>  Allowed inline CSS style */
 	public $allowedStyles = self::ALL;  // all inline styles are allowed
 
-	/** @var int  TAB width (for converting tabs to spaces) */
-	public $tabWidth = 8;
+	/** TAB width (for converting tabs to spaces) */
+	public int $tabWidth = 8;
 
-	/** @var bool  Do obfuscate e-mail addresses? */
-	public $obfuscateEmail = true;
+	/** Do obfuscate e-mail addresses? */
+	public bool $obfuscateEmail = true;
 
 	/** @var array<string|string>  regexps to check URL schemes */
 	public $urlSchemeFilters; // disable URL scheme filter
 
-	/** @var bool  Paragraph merging mode */
-	public $mergeLines = true;
+	/** Paragraph merging mode */
+	public bool $mergeLines = true;
 
 	/** @var array<string, string[]>  Parsing summary */
 	public $summary = [
@@ -93,62 +93,44 @@ class Texy
 		'bottom' => null,
 	];
 
-	/** @var bool  remove soft hyphens (SHY)? */
-	public $removeSoftHyphens = true;
+	/** remove soft hyphens (SHY)? */
+	public bool $removeSoftHyphens = true;
 
-	/** @var string|HtmlElement */
-	public $nontextParagraph = 'div';
+	public string|HtmlElement $nontextParagraph = 'div';
 
-	/** @var Modules\ScriptModule */
-	public $scriptModule;
+	public Modules\ScriptModule $scriptModule;
 
-	/** @var Modules\ParagraphModule */
-	public $paragraphModule;
+	public Modules\ParagraphModule $paragraphModule;
 
-	/** @var Modules\HtmlModule */
-	public $htmlModule;
+	public Modules\HtmlModule $htmlModule;
 
-	/** @var Modules\ImageModule */
-	public $imageModule;
+	public Modules\ImageModule $imageModule;
 
-	/** @var Modules\LinkModule */
-	public $linkModule;
+	public Modules\LinkModule $linkModule;
 
-	/** @var Modules\PhraseModule */
-	public $phraseModule;
+	public Modules\PhraseModule $phraseModule;
 
-	/** @var Modules\EmoticonModule */
-	public $emoticonModule;
+	public Modules\EmoticonModule $emoticonModule;
 
-	/** @var Modules\BlockModule */
-	public $blockModule;
+	public Modules\BlockModule $blockModule;
 
-	/** @var Modules\HeadingModule */
-	public $headingModule;
+	public Modules\HeadingModule $headingModule;
 
-	/** @var Modules\HorizLineModule */
-	public $horizLineModule;
+	public Modules\HorizLineModule $horizLineModule;
 
-	/** @var Modules\BlockQuoteModule */
-	public $blockQuoteModule;
+	public Modules\BlockQuoteModule $blockQuoteModule;
 
-	/** @var Modules\ListModule */
-	public $listModule;
+	public Modules\ListModule $listModule;
 
-	/** @var Modules\TableModule */
-	public $tableModule;
+	public Modules\TableModule $tableModule;
 
-	/** @var Modules\FigureModule */
-	public $figureModule;
+	public Modules\FigureModule $figureModule;
 
-	/** @var Modules\TypographyModule */
-	public $typographyModule;
+	public Modules\TypographyModule $typographyModule;
 
-	/** @var Modules\LongWordsModule */
-	public $longWordsModule;
+	public Modules\LongWordsModule $longWordsModule;
 
-	/** @var Modules\HtmlOutputModule */
-	public $htmlOutputModule;
+	public Modules\HtmlOutputModule $htmlOutputModule;
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
@@ -171,20 +153,19 @@ class Texy
 	/** @var array<string, callable> */
 	private $postHandlers = [];
 
-	/** @var HtmlElement|null  DOM structure for parsed text */
-	private $DOM;
+	/** DOM structure for parsed text */
+	private ?HtmlElement $DOM;
 
-	/** @var array  Texy protect markup table */
-	private $marks = [];
+	/** Texy protect markup table */
+	private array $marks = [];
 
-	/** @var bool|array  for internal usage */
-	private $_classes;
+	/** for internal usage */
+	private bool|array $_classes;
 
-	/** @var bool|array  for internal usage */
-	private $_styles;
+	/** for internal usage */
+	private bool|array $_styles;
 
-	/** @var bool */
-	private $processing = false;
+	private bool $processing = false;
 
 	/** @var array<string, array<int, callable>> of events and registered handlers */
 	private $handlers = [];

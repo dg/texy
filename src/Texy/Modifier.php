@@ -25,8 +25,7 @@ final class Modifier
 {
 	use Strict;
 
-	/** @var string|null */
-	public $id;
+	public ?string $id = null;
 
 	/** @var array<string, bool> of classes (as keys) */
 	public $classes = [];
@@ -37,17 +36,13 @@ final class Modifier
 	/** @var array<string, string|string[]> of HTML element attributes */
 	public $attrs = [];
 
-	/** @var string|null */
-	public $hAlign;
+	public ?string $hAlign = null;
 
-	/** @var string|null */
-	public $vAlign;
+	public ?string $vAlign = null;
 
-	/** @var string|null */
-	public $title;
+	public ?string $title = null;
 
-	/** @var string|null */
-	public $cite;
+	public ?string $cite = null;
 
 	/** @var array<string, int>  list of properties which are regarded as HTML element attributes */
 	public static $elAttrs = [

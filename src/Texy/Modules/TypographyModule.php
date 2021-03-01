@@ -19,7 +19,7 @@ use Texy\Patterns;
 final class TypographyModule extends Texy\Module
 {
 	// @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
-	public static $locales = [
+	public static array $locales = [
 		'cs' => [
 			'singleQuotes' => ["\u{201A}", "\u{2018}"],
 			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
@@ -46,10 +46,9 @@ final class TypographyModule extends Texy\Module
 		],
 	];
 
-	/** @var string */
-	public $locale = 'cs';
+	public string $locale = 'cs';
 
-	private static $patterns = [
+	private static array $patterns = [
 		'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\u{2026}",                // ellipsis  ...
 		'#(?<=[\d ]|^)-(?=[\d ]|$)#' /*.          */ => "\u{2013}",                // en dash 123-123
 		'#(?<=[^!*+,/:;<=>@\\\\_|-])--(?=[^!*+,/:;<=>@\\\\_|-])#' => "\u{2013}",   // en dash alphanum--alphanum
@@ -89,8 +88,7 @@ final class TypographyModule extends Texy\Module
 		'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\'' . Patterns::CHAR . '])()#Uu' => ':lsq:$1:rsq:',
 	];
 
-	/** @var array */
-	private $pattern = [];
+	private array $pattern = [];
 
 
 	public function __construct(Texy\Texy $texy)

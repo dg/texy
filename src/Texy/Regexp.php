@@ -17,7 +17,7 @@ class Regexp
 	public const ALL = 1;
 	public const OFFSET_CAPTURE = 2;
 
-	private static $messages = [
+	private static array $messages = [
 		PREG_INTERNAL_ERROR => 'Internal error',
 		PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit was exhausted',
 		PREG_RECURSION_LIMIT_ERROR => 'Recursion limit was exhausted',

@@ -19,8 +19,8 @@ use Texy\Patterns;
  */
 final class HtmlModule extends Texy\Module
 {
-	/** @var bool   pass HTML comments to output? */
-	public $passComment = true;
+	/** pass HTML comments to output? */
+	public bool $passComment = true;
 
 
 	public function __construct(Texy\Texy $texy)
