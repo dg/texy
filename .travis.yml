@@ -1,10 +1,6 @@
 language: php
 php:
-    - 7.1
-    - 7.2
-    - 7.3
-    - 7.4
-    - 8.0snapshot
+    - 8.0
 
 before_install:
     # turn off XDebug
@@ -30,7 +26,7 @@ jobs:
 
 
         -   name: Nette Coding Standard
-            php: 7.4
+            php: 8.0
             install:
                 - travis_retry composer create-project nette/coding-standard temp/coding-standard ^3 --no-progress
             script:
@@ -38,13 +34,13 @@ jobs:
 
 
         -   stage: Static Analysis (informative)
-            php: 7.4
+            php: 8.0
             script:
                 - composer phpstan -- --no-progress
 
 
         -   stage: Code Coverage
-            php: 7.4
+            php: 8.0
             script:
                 - vendor/bin/tester -p phpdbg tests -s --coverage ./coverage.xml --coverage-src ./src
             after_script:
