@@ -17,11 +17,9 @@ class Parser
 {
 	use Strict;
 
-	/** @var Texy */
-	protected $texy;
+	protected Texy $texy;
 
-	/** @var HtmlElement */
-	protected $element;
+	protected HtmlElement $element;
 
 
 	public function getTexy(): Texy

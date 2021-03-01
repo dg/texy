@@ -17,8 +17,8 @@ use Texy;
  */
 final class ScriptModule extends Texy\Module
 {
-	/** @var string  arguments separator */
-	public $separator = ',';
+	/** arguments separator */
+	public string $separator = ',';
 
 
 	public function __construct(Texy\Texy $texy)

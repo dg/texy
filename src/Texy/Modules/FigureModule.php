@@ -18,17 +18,17 @@ use Texy\Patterns;
  */
 final class FigureModule extends Texy\Module
 {
-	/** @var string|null  non-floated box CSS class */
-	public $class = 'figure';
+	/** non-floated box CSS class */
+	public ?string $class = 'figure';
 
-	/** @var string|null  left-floated box CSS class */
-	public $leftClass;
+	/** left-floated box CSS class */
+	public ?string $leftClass = null;
 
-	/** @var string|null  right-floated box CSS class */
-	public $rightClass;
+	/** right-floated box CSS class */
+	public ?string $rightClass = null;
 
-	/** @var int|false  how calculate div's width */
-	public $widthDelta = 10;
+	/** how calculate div's width */
+	public int|false $widthDelta = 10;
 
 
 	public function __construct(Texy\Texy $texy)

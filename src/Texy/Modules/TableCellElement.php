@@ -17,12 +17,9 @@ use Texy;
  */
 class TableCellElement extends Texy\HtmlElement
 {
-	/** @var int */
-	public $colSpan = 1;
+	public int $colSpan = 1;
 
-	/** @var int */
-	public $rowSpan = 1;
+	public int $rowSpan = 1;
 
-	/** @var string|null */
-	public $text;
+	public ?string $text = null;
 }

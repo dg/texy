@@ -20,14 +20,12 @@ final class HandlerInvocation
 	/** @var array<int, callable> */
 	private $handlers;
 
-	/** @var int  callback counter */
-	private $pos;
+	/** callback counter */
+	private int $pos;
 
-	/** @var array */
-	private $args;
+	private array $args;
 
-	/** @var Parser */
-	private $parser;
+	private Parser $parser;
 
 
 	public function __construct(array $handlers, Parser $parser, array $args)

@@ -21,17 +21,17 @@ use Texy\Patterns;
  */
 final class LinkModule extends Texy\Module
 {
-	/** @var string  root of relative links */
-	public $root = '';
+	/** root of relative links */
+	public string $root = '';
 
-	/** @var string|null linked image class */
-	public $imageClass;
+	/** linked image class */
+	public ?string $imageClass = null;
 
-	/** @var bool  always use rel="nofollow" for absolute links? */
-	public $forceNoFollow = false;
+	/** always use rel="nofollow" for absolute links? */
+	public bool $forceNoFollow = false;
 
-	/** @var bool  shorten URLs to more readable form? */
-	public $shorten = true;
+	/** shorten URLs to more readable form? */
+	public bool $shorten = true;
 
 	/** @var array<string, Link> link references */
 	private $references = [];
@@ -39,8 +39,7 @@ final class LinkModule extends Texy\Module
 	/** @var array<string, bool> */
 	private static $livelock;
 
-	/** @var string */
-	private static $EMAIL;
+	private static string $EMAIL;
 
 
 	public function __construct(Texy\Texy $texy)

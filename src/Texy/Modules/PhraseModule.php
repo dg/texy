@@ -20,7 +20,7 @@ use Texy\Patterns;
  */
 final class PhraseModule extends Texy\Module
 {
-	public $tags = [
+	public array $tags = [
 		'phrase/strong' => 'strong', // or 'b'
 		'phrase/em' => 'em', // or 'i'
 		'phrase/em-alt' => 'em',
@@ -41,8 +41,7 @@ final class PhraseModule extends Texy\Module
 		'phrase/quicklink' => 'a',
 	];
 
-	/** @var bool  are links allowed? */
-	public $linksAllowed = true;
+	public bool $linksAllowed = true;
 
 
 	public function __construct(Texy\Texy $texy)

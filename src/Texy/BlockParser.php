@@ -18,14 +18,11 @@ class BlockParser extends Parser
 	/** @var array<string, array{handler: callable, pattern: string}> */
 	public $patterns;
 
-	/** @var string */
-	private $text;
+	private string $text;
 
-	/** @var int */
-	private $offset;
+	private int $offset;
 
-	/** @var bool */
-	private $indented;
+	private bool $indented;
 
 
 	public function __construct(Texy $texy, HtmlElement $element, bool $indented)

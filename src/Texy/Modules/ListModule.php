@@ -21,7 +21,7 @@ use Texy\Patterns;
  */
 final class ListModule extends Texy\Module
 {
-	public $bullets = [
+	public array $bullets = [
 		// first-rexexp ordered? list-style-type next-regexp
 		'*' => ['\*[\ \t]', 0, ''],
 		'-' => ['[\x{2013}-](?![>-])', 0, ''],
