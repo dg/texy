@@ -14,8 +14,8 @@
 		"php": ">=8.0 <8.3"
 	},
 	"require-dev": {
-		"nette/tester": "^2.0",
-		"tracy/tracy": "^2.4",
+		"nette/tester": "^2.4",
+		"tracy/tracy": "^2.8",
 		"latte/latte": "^2.6 || ^3.0.2",
 		"phpstan/phpstan": "^0.12"
 	},
