@@ -16,10 +16,8 @@ namespace Texy;
 class LineParser extends Parser
 {
 	/** @var array<string, array{handler: callable, pattern: string, again: ?string}> */
-	public $patterns;
-
-	/** @var bool */
-	public $again;
+	public array $patterns;
+	public bool $again;
 
 
 	public function __construct(Texy $texy, HtmlElement $element)

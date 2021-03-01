@@ -23,23 +23,22 @@ final class Link
 		BRACKET = 2,
 		IMAGE = 3;
 
-	/** @var string|null  URL in resolved form */
-	public $URL;
+	/** URL in resolved form */
+	public ?string $URL;
 
-	/** @var string  URL as written in text */
-	public $raw;
+	/** URL as written in text */
+	public string $raw;
 
-	/** @var Modifier|null */
-	public $modifier;
+	public Modifier $modifier;
 
-	/** @var int  how was link created? */
-	public $type = self::COMMON;
+	/** how was link created? */
+	public int $type = self::COMMON;
 
-	/** @var string|null  optional label, used by references */
-	public $label;
+	/** optional label, used by references */
+	public ?string $label = null;
 
-	/** @var string|null  reference name (if is stored as reference) */
-	public $name;
+	/** reference name (if is stored as reference) */
+	public ?string $name = null;
 
 
 	public function __construct(string $URL)

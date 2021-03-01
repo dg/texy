@@ -18,16 +18,10 @@ final class HandlerInvocation
 	use Strict;
 
 	/** @var array<int, callable> */
-	private $handlers;
-
-	/** @var int  callback counter */
-	private $pos;
-
-	/** @var array */
-	private $args;
-
-	/** @var Parser */
-	private $parser;
+	private array  $handlers;
+	private int $pos;
+	private array $args;
+	private Parser $parser;
 
 
 	public function __construct(array $handlers, Parser $parser, array $args)

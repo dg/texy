@@ -53,37 +53,37 @@ class Texy
 		XML = 2;
 
 	/** @var array<string, bool>  Texy! syntax configuration */
-	public $allowed = [];
+	public array $allowed = [];
 
 	/** @var bool|array<string, bool|array<int, string>>  Allowed HTML tags */
-	public $allowedTags;
+	public bool|array $allowedTags;
 
 	/** @var bool|array<int, string>  Allowed classes */
-	public $allowedClasses = self::ALL; // all classes and id are allowed
+	public bool|array $allowedClasses = self::ALL; // all classes and id are allowed
 
 	/** @var bool|array<int, string>  Allowed inline CSS style */
-	public $allowedStyles = self::ALL;  // all inline styles are allowed
+	public bool|array $allowedStyles = self::ALL;  // all inline styles are allowed
 
-	/** @var int  TAB width (for converting tabs to spaces) */
-	public $tabWidth = 8;
+	/** TAB width (for converting tabs to spaces) */
+	public int $tabWidth = 8;
 
-	/** @var bool  Do obfuscate e-mail addresses? */
-	public $obfuscateEmail = true;
+	/** Do obfuscate e-mail addresses? */
+	public bool $obfuscateEmail = true;
 
 	/** @var array<string|string>  regexps to check URL schemes */
-	public $urlSchemeFilters; // disable URL scheme filter
+	public array $urlSchemeFilters; // disable URL scheme filter
 
-	/** @var bool  Paragraph merging mode */
-	public $mergeLines = true;
+	/** Paragraph merging mode */
+	public bool $mergeLines = true;
 
 	/** @var array<string, string[]>  Parsing summary */
-	public $summary = [
+	public array $summary = [
 		'images' => [],
 		'links' => [],
 	];
 
 	/** @var array<string, ?string>  CSS classes for align modifiers */
-	public $alignClasses = [
+	public array $alignClasses = [
 		'left' => null,
 		'right' => null,
 		'center' => null,
@@ -93,101 +93,63 @@ class Texy
 		'bottom' => null,
 	];
 
-	/** @var bool  remove soft hyphens (SHY)? */
-	public $removeSoftHyphens = true;
-
-	/** @var string|HtmlElement */
-	public $nontextParagraph = 'div';
-
-	/** @var Modules\ScriptModule */
-	public $scriptModule;
-
-	/** @var Modules\ParagraphModule */
-	public $paragraphModule;
-
-	/** @var Modules\HtmlModule */
-	public $htmlModule;
-
-	/** @var Modules\ImageModule */
-	public $imageModule;
-
-	/** @var Modules\LinkModule */
-	public $linkModule;
-
-	/** @var Modules\PhraseModule */
-	public $phraseModule;
-
-	/** @var Modules\EmoticonModule */
-	public $emoticonModule;
-
-	/** @var Modules\BlockModule */
-	public $blockModule;
-
-	/** @var Modules\HeadingModule */
-	public $headingModule;
-
-	/** @var Modules\HorizLineModule */
-	public $horizLineModule;
-
-	/** @var Modules\BlockQuoteModule */
-	public $blockQuoteModule;
-
-	/** @var Modules\ListModule */
-	public $listModule;
-
-	/** @var Modules\TableModule */
-	public $tableModule;
-
-	/** @var Modules\FigureModule */
-	public $figureModule;
-
-	/** @var Modules\TypographyModule */
-	public $typographyModule;
-
-	/** @var Modules\LongWordsModule */
-	public $longWordsModule;
-
-	/** @var Modules\HtmlOutputModule */
-	public $htmlOutputModule;
+	public bool $removeSoftHyphens = true;
+	public string|HtmlElement $nontextParagraph = 'div';
+	public Modules\ScriptModule $scriptModule;
+	public Modules\ParagraphModule $paragraphModule;
+	public Modules\HtmlModule $htmlModule;
+	public Modules\ImageModule $imageModule;
+	public Modules\LinkModule $linkModule;
+	public Modules\PhraseModule $phraseModule;
+	public Modules\EmoticonModule $emoticonModule;
+	public Modules\BlockModule $blockModule;
+	public Modules\HeadingModule $headingModule;
+	public Modules\HorizLineModule $horizLineModule;
+	public Modules\BlockQuoteModule $blockQuoteModule;
+	public Modules\ListModule $listModule;
+	public Modules\TableModule $tableModule;
+	public Modules\FigureModule $figureModule;
+	public Modules\TypographyModule $typographyModule;
+	public Modules\LongWordsModule $longWordsModule;
+	public Modules\HtmlOutputModule $htmlOutputModule;
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
 	 * @var array<string, array{handler: callable, pattern: string, again: ?string}>
 	 */
-	private $linePatterns = [];
+	private array $linePatterns = [];
 
 	/** @var array<string, array{handler: callable, pattern: string, again: ?string}> */
-	private $_linePatterns;
+	private array $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
 	 * @var array<string, array{handler: callable, pattern: string}>
 	 */
-	private $blockPatterns = [];
+	private array $blockPatterns = [];
 
 	/** @var array<string, array{handler: callable, pattern: string}> */
-	private $_blockPatterns;
+	private array $_blockPatterns;
 
 	/** @var array<string, callable> */
-	private $postHandlers = [];
+	private array $postHandlers = [];
 
-	/** @var HtmlElement|null  DOM structure for parsed text */
-	private $DOM;
+	/** DOM structure for parsed text */
+	private ?HtmlElement $DOM;
 
-	/** @var array  Texy protect markup table */
-	private $marks = [];
+	/** Texy protect markup table */
+	private array $marks = [];
 
-	/** @var bool|array  for internal usage */
-	private $_classes;
+	/** for internal usage */
+	private bool|array $_classes;
 
-	/** @var bool|array  for internal usage */
-	private $_styles;
+	/** for internal usage */
+	private bool|array $_styles;
 
-	/** @var bool */
-	private $processing = false;
+	private bool $processing = false;
 
 	/** @var array<string, array<int, callable>> of events and registered handlers */
-	private $handlers = [];
+	private array $handlers = [];
 
 	/**
 	 * DTD descriptor.
@@ -198,7 +160,7 @@ class Texy
 	 *                    - 0 - transparent
 	 * @var array<string, array{array<string, int>, array<string, int>}>
 	 */
-	private static $dtd;
+	private static array $dtd;
 
 
 	public function __construct()
@@ -232,7 +194,7 @@ class Texy
 
 	private function initDTD(): void
 	{
-		if (!self::$dtd) {
+		if (empty(self::$dtd)) {
 			self::$dtd = require __DIR__ . '/DTD.php';
 		}
 

@@ -25,32 +25,23 @@ final class Modifier
 {
 	use Strict;
 
-	/** @var string|null */
-	public $id;
+	public ?string $id = null;
 
 	/** @var array<string, bool> of classes (as keys) */
-	public $classes = [];
+	public array $classes = [];
 
 	/** @var array<string, string> of CSS styles */
-	public $styles = [];
+	public array $styles = [];
 
 	/** @var array<string, string|string[]> of HTML element attributes */
-	public $attrs = [];
-
-	/** @var string|null */
-	public $hAlign;
-
-	/** @var string|null */
-	public $vAlign;
-
-	/** @var string|null */
-	public $title;
-
-	/** @var string|null */
-	public $cite;
+	public array $attrs = [];
+	public ?string $hAlign = null;
+	public ?string $vAlign = null;
+	public ?string $title = null;
+	public ?string $cite = null;
 
 	/** @var array<string, int>  list of properties which are regarded as HTML element attributes */
-	public static $elAttrs = [
+	public static array $elAttrs = [
 		'abbr' => 1, 'accesskey' => 1, 'alt' => 1, 'cite' => 1, 'colspan' => 1, 'contenteditable' => 1, 'crossorigin' => 1,
 		'datetime' => 1, 'decoding' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1, 'hidden' => 1,
 		'href' => 1, 'hreflang' => 1, 'id' => 1, 'itemid' => 1, 'itemprop' => 1, 'itemref' => 1, 'itemscope' => 1, 'itemtype' => 1,
@@ -127,13 +118,13 @@ final class Modifier
 			$attrs = $this->attrs;
 
 		} elseif (is_array($texy->allowedTags)) {
-			$attrs = $texy->allowedTags[$name] ?? [];
+			$tmp = $texy->allowedTags[$name] ?? [];
 
-			if ($attrs === $texy::ALL) {
+			if ($tmp === $texy::ALL) {
 				$attrs = $this->attrs;
 
-			} elseif (is_array($attrs) && count($attrs)) {
-				$attrs = array_flip($attrs);
+			} elseif (is_array($tmp)) {
+				$attrs = array_flip($tmp);
 				foreach ($this->attrs as $key => $value) {
 					if (isset($attrs[$key])) {
 						$attrs[$key] = $value;

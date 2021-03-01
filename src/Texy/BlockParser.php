@@ -16,16 +16,10 @@ namespace Texy;
 class BlockParser extends Parser
 {
 	/** @var array<string, array{handler: callable, pattern: string}> */
-	public $patterns;
-
-	/** @var string */
-	private $text;
-
-	/** @var int */
-	private $offset;
-
-	/** @var bool */
-	private $indented;
+	public array $patterns;
+	private string $text;
+	private int $offset;
+	private bool $indented;
 
 
 	public function __construct(Texy $texy, HtmlElement $element, bool $indented)

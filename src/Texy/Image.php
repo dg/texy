@@ -17,26 +17,25 @@ final class Image
 {
 	use Strict;
 
-	/** @var string|null  base image URL */
-	public $URL;
+	/** base image URL */
+	public ?string $URL = null;
 
-	/** @var string|null  anchored image URL */
-	public $linkedURL;
+	/** anchored image URL */
+	public ?string $linkedURL = null;
 
-	/** @var int|null  optional image width */
-	public $width;
+	/** optional image width */
+	public ?int $width = null;
 
-	/** @var int|null  optional image height */
-	public $height;
+	/** optional image height */
+	public ?int $height = null;
 
-	/** @var bool  image width and height are maximal */
-	public $asMax;
+	/** image width and height are maximal */
+	public bool $asMax = false;
 
-	/** @var Modifier|null */
-	public $modifier;
+	public ?Modifier $modifier;
 
-	/** @var string|null  reference name (if is stored as reference) */
-	public $name;
+	/** reference name (if is stored as reference) */
+	public ?string $name;
 
 
 	public function __construct()

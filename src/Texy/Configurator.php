@@ -22,7 +22,7 @@ class Configurator
 {
 	use Strict;
 
-	public static $safeTags = [
+	public static array $safeTags = [
 		'a' => ['href', 'title'],
 		'abbr' => ['title'],
 		'b' => [],

@@ -18,7 +18,7 @@ use Texy;
 final class EmoticonModule extends Texy\Module
 {
 	/** @var array<string, string>  supported emoticons and image files / chars */
-	public $icons = [
+	public array $icons = [
 		':-)' => '🙂',
 		':-(' => '☹',
 		';-)' => '😉',
@@ -32,13 +32,13 @@ final class EmoticonModule extends Texy\Module
 	];
 
 	/** @deprecated */
-	public $class;
+	public ?string $class = null;
 
 	/** @deprecated */
-	public $root;
+	public ?string $root = null;
 
 	/** @deprecated */
-	public $fileRoot;
+	public ?string $fileRoot = null;
 
 
 	public function __construct(Texy\Texy $texy)

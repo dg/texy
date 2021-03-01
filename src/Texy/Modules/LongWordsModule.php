@@ -24,35 +24,35 @@ final class LongWordsModule extends Texy\Module
 
 	private const SafeLimit = 1000;
 
-	public $wordLimit = 20;
+	public int $wordLimit = 20;
 
-	private $consonants = [
+	private array $consonants = [
 		'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z',
 		'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Z',
 		"\u{10D}", "\u{10F}", "\u{148}", "\u{159}", "\u{161}", "\u{165}", "\u{17E}", // Czech UTF-8
 		"\u{10C}", "\u{10E}", "\u{147}", "\u{158}", "\u{160}", "\u{164}", "\u{17D}",
 	];
 
-	private $vowels = [
+	private array $vowels = [
 		'a', 'e', 'i', 'o', 'u', 'y',
 		'A', 'E', 'I', 'O', 'U', 'Y',
 		"\u{E1}", "\u{E9}", "\u{11B}", "\u{ED}", "\u{F3}", "\u{FA}", "\u{16F}", "\u{FD}", // Czech UTF-8
 		"\u{C1}", "\u{C9}", "\u{11A}", "\u{CD}", "\u{D3}", "\u{DA}", "\u{16E}", "\u{DD}",
 	];
 
-	private $before_r = [
+	private array $before_r = [
 		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'p', 'P', 'r', 'R', 't', 'T', 'v', 'V',
 		"\u{10D}", "\u{10C}", "\u{10F}", "\u{10E}", "\u{159}", "\u{158}", "\u{165}", "\u{164}", // Czech UTF-8
 	];
 
-	private $before_l = [
+	private array $before_l = [
 		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'l', 'L', 'p', 'P', 't', 'T', 'v', 'V',
 		"\u{10D}", "\u{10C}", "\u{10F}", "\u{10E}", "\u{165}", "\u{164}", // Czech UTF-8
 	];
 
-	private $before_h = ['c', 'C', 's', 'S'];
+	private array $before_h = ['c', 'C', 's', 'S'];
 
-	private $doubleVowels = ['a', 'A', 'o', 'O'];
+	private array $doubleVowels = ['a', 'A', 'o', 'O'];
 
 
 	public function __construct(Texy\Texy $texy)

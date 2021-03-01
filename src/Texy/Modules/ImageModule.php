@@ -20,26 +20,26 @@ use Texy\Patterns;
  */
 final class ImageModule extends Texy\Module
 {
-	/** @var string|null  root of relative images (http) */
-	public $root = 'images/';
+	/** root of relative images (http) */
+	public ?string $root = 'images/';
 
-	/** @var string|null  root of linked images (http) */
-	public $linkedRoot = 'images/';
+	/** root of linked images (http) */
+	public ?string $linkedRoot = 'images/';
 
-	/** @var string|null  physical location of images on server */
-	public $fileRoot;
+	/** physical location of images on server */
+	public ?string $fileRoot = null;
 
-	/** @var string|null  left-floated images CSS class */
-	public $leftClass;
+	/** left-floated images CSS class */
+	public ?string $leftClass = null;
 
-	/** @var string|null  right-floated images CSS class */
-	public $rightClass;
+	/** right-floated images CSS class */
+	public ?string $rightClass = null;
 
-	/** @var string|null  default alternative text */
-	public $defaultAlt = '';
+	/** default alternative text */
+	public ?string $defaultAlt = '';
 
 	/** @var array<string, Image> image references */
-	private $references = [];
+	private array $references = [];
 
 
 	public function __construct(Texy\Texy $texy)

@@ -22,12 +22,11 @@ use Texy\Regexp;
 final class TableModule extends Texy\Module
 {
 	/** @deprecated */
-	public $oddClass;
+	public ?string $oddClass = null;
 
 	/** @deprecated */
-	public $evenClass;
-
-	private $disableTables;
+	public ?string $evenClass = null;
+	private ?bool $disableTables = null;
 
 
 	public function __construct(Texy\Texy $texy)
