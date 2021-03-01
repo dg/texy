@@ -69,7 +69,7 @@ class LineParser extends Parser
 				$text,
 				(string) $res,
 				$start,
-				$len
+				$len,
 			);
 
 			$delta = strlen($res) - $len;
@@ -119,7 +119,7 @@ class LineParser extends Parser
 					$text,
 					$this->patterns[$name]['pattern'],
 					Regexp::OFFSET_CAPTURE,
-					$offset + $delta
+					$offset + $delta,
 				)) {
 					$m = &$matches[$name];
 					if (!strlen($m[0][0])) {

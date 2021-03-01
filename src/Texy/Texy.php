@@ -363,9 +363,11 @@ class Texy
 		// replace tabs with spaces
 		if ($this->tabWidth) {
 			while (strpos($text, "\t") !== false) {
-				$text = Regexp::replace($text, '#^([^\t\n]*+)\t#mU', function ($m) {
-					return $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth);
-				});
+				$text = Regexp::replace(
+					$text,
+					'#^([^\t\n]*+)\t#mU',
+					fn($m) => $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth),
+				);
 			}
 		}
 

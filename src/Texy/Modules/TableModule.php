@@ -38,7 +38,7 @@ final class TableModule extends Texy\Module
 			[$this, 'patternTable'],
 			'#^(?:' . Patterns::MODIFIER_HV . '\n)?' // .{color: red}
 			. '\|.*()$#mU', // | ....
-			'table'
+			'table',
 		);
 	}
 

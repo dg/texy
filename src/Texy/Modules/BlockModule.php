@@ -39,7 +39,7 @@ final class BlockModule extends Texy\Module
 		$texy->registerBlockPattern(
 			[$this, 'pattern'],
 			'#^/--++ *+(.*)' . Texy\Patterns::MODIFIER_H . '?$((?:\n(?0)|\n.*+)*)(?:\n\\\\--.*$|\z)#mUi',
-			'blocks'
+			'blocks',
 		);
 	}
 
@@ -53,7 +53,7 @@ final class BlockModule extends Texy\Module
 		$text = Texy\Regexp::replace(
 			$text,
 			'#^(/--++ *+(?!div|texysource).*)$((?:\n.*+)*?)(?:\n\\\\--.*$|(?=(\n/--.*$)))#mi',
-			"\$1\$2\n\\--"
+			"\$1\$2\n\\--",
 		);
 	}
 

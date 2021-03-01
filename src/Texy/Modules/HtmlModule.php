@@ -33,13 +33,13 @@ final class HtmlModule extends Texy\Module
 		$texy->registerLinePattern(
 			[$this, 'patternTag'],
 			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9\_:-]++|=\s*+"[^"' . Patterns::MARK . ']*+"|=\s*+\'[^\'' . Patterns::MARK . ']*+\'|=[^\s>' . Patterns::MARK . ']++)*)\s*+(/?)>#isu',
-			'html/tag'
+			'html/tag',
 		);
 
 		$texy->registerLinePattern(
 			[$this, 'patternComment'],
 			'#<!--([^' . Patterns::MARK . ']*?)-->#is',
-			'html/comment'
+			'html/comment',
 		);
 	}
 
@@ -291,7 +291,7 @@ final class HtmlModule extends Texy\Module
 			'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
 			$attrs,
 			$matches,
-			PREG_SET_ORDER
+			PREG_SET_ORDER,
 		);
 
 		foreach ($matches as $m) {

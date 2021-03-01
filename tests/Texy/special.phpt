@@ -22,5 +22,5 @@ $texy->typographyModule->locale = 'en';
 
 Assert::matchFile(
 	__DIR__ . '/expected/special.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/special.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/special.texy')),
 );

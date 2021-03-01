@@ -26,7 +26,7 @@ function createTexy()
 $texy = createTexy();
 Assert::matchFile(
 	__DIR__ . '/expected/links-images1.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy')),
 );
 
 $texy = createTexy();
@@ -34,7 +34,7 @@ Texy\Configurator::safeMode($texy);
 $texy->allowedTags['a'][] = 'rel';
 Assert::matchFile(
 	__DIR__ . '/expected/links-images2.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy')),
 );
 
 $texy = createTexy();
@@ -42,5 +42,5 @@ $texy->allowedClasses = ['#nofollow'];
 $texy->allowedStyles = false;
 Assert::matchFile(
 	__DIR__ . '/expected/links-images3.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/links-images.texy')),
 );

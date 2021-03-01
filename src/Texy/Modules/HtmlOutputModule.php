@@ -72,7 +72,7 @@ final class HtmlOutputModule extends Texy\Module
 		$s = Regexp::replace(
 			$s . '</end/>',
 			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
-			[$this, 'cb']
+			[$this, 'cb'],
 		);
 
 		// empty out stack
@@ -97,7 +97,7 @@ final class HtmlOutputModule extends Texy\Module
 			$s = Regexp::replace(
 				$s,
 				'#^(\t*)(.*)$#m',
-				[$this, 'wrap']
+				[$this, 'wrap'],
 			);
 		}
 	}

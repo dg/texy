@@ -67,7 +67,7 @@ final class EmoticonModule extends Texy\Module
 			[$this, 'pattern'],
 			'#(?<=^|[\x00-\x20])(' . implode('|', $pattern) . ')#',
 			'emoticon',
-			'#' . implode('|', $pattern) . '#'
+			'#' . implode('|', $pattern) . '#',
 		);
 	}
 
