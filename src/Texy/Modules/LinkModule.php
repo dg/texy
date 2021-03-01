@@ -120,9 +120,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [ref].
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function patternReference(LineParser $parser, array $matches)
+	public function patternReference(LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mRef] = $matches;
 		// [1] => [ref]
@@ -160,9 +159,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: http://davidgrudl.com david@grudl.com.
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function patternUrlEmail(LineParser $parser, array $matches, string $name)
+	public function patternUrlEmail(LineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 	{
 		[$mURL] = $matches;
 		// [0] => URL
@@ -253,12 +251,12 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 *
-	 * @param  Texy\HtmlElement|string $content
-	 * @return Texy\HtmlElement|string
 	 */
-	public function solve(HandlerInvocation $invocation = null, Link $link, $content = null)
-	{
+	public function solve(
+		HandlerInvocation $invocation = null,
+		Link $link,
+		Texy\HtmlElement|string $content = null,
+	): Texy\HtmlElement|string {
 		if ($link->URL == null) {
 			return $content;
 		}
@@ -304,9 +302,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|string
 	 */
-	public function solveUrlEmail(HandlerInvocation $invocation, Link $link)
+	public function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string
 	{
 		$content = $this->textualUrl($link);
 		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);

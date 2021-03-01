@@ -15,9 +15,8 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 
 /**
  * User handler for images
- * @return Texy\HtmlElement|string|null
  */
-function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null)
+function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null): Texy\HtmlElement|string|null
 {
 	if ($image->URL == 'user') { // accepts only [* user *]
 		$image->URL = 'image.gif'; // image URL

@@ -61,12 +61,8 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 
 /**
  * Pattern handler for PHP & JavaScript block syntaxes
- *
- * @param  array $matches      regexp matches
- * @param  string $name     pattern name
- * @return Texy\HtmlElement|string|null
  */
-function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name)
+function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 {
 	[$content] = $matches;
 	$langClass = $name === 'phpBlockSyntax'
