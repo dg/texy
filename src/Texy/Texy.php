@@ -187,7 +187,7 @@ class Texy
 		if (
 			extension_loaded('mbstring')
 			&& mb_get_info('func_overload') & 2
-			&& substr(mb_get_info('internal_encoding'), 0, 1) === 'U'
+			&& str_starts_with(mb_get_info('internal_encoding'), 'U')
 		) {
 			mb_internal_encoding('pass');
 			trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
@@ -344,7 +344,7 @@ class Texy
 
 		// replace tabs with spaces
 		if ($this->tabWidth) {
-			while (strpos($text, "\t") !== false) {
+			while (str_contains($text, "\t")) {
 				$text = Regexp::replace(
 					$text,
 					'#^([^\t\n]*+)\t#mU',

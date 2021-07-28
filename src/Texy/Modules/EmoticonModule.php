@@ -97,7 +97,7 @@ final class EmoticonModule extends Texy\Module
 	{
 		$texy = $this->texy;
 		$file = $this->icons[$emoticon];
-		if (strpos($file, '.') === false) {
+		if (!str_contains($file, '.')) {
 			return $file;
 		}
 

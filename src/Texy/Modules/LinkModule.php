@@ -242,7 +242,7 @@ final class LinkModule extends Texy\Module
 			$this->checkLink($link);
 		}
 
-		if (strpos((string) $link->URL, '%s') !== false) {
+		if (str_contains((string) $link->URL, '%s')) {
 			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
 		}
 
@@ -288,7 +288,7 @@ final class LinkModule extends Texy\Module
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $this->root);
 
 			// rel="nofollow"
-			if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== false)) {
+			if ($nofollow || ($this->forceNoFollow && str_contains($el->attrs['href'], '//'))) {
 				$el->attrs['rel'] = 'nofollow';
 			}
 		}

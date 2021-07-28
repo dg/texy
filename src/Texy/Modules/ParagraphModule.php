@@ -82,11 +82,11 @@ final class ParagraphModule extends Texy\Module
 
 		// check content type
 		// block contains block tag
-		if (strpos($content, $texy::CONTENT_BLOCK) !== false) {
+		if (str_contains($content, $texy::CONTENT_BLOCK)) {
 			$el->setName(null); // ignores modifier!
 
 		// block contains text (protected)
-		} elseif (strpos($content, $texy::CONTENT_TEXTUAL) !== false) {
+		} elseif (str_contains($content, $texy::CONTENT_TEXTUAL)) {
 			// leave element p
 
 		// block contains text
@@ -94,7 +94,7 @@ final class ParagraphModule extends Texy\Module
 			// leave element p
 
 		// block contains only replaced element
-		} elseif (strpos($content, $texy::CONTENT_REPLACED) !== false) {
+		} elseif (str_contains($content, $texy::CONTENT_REPLACED)) {
 			if ($texy->nontextParagraph instanceof Texy\HtmlElement) {
 				$el = (clone $texy->nontextParagraph)->setText($content);
 			} else {
@@ -116,7 +116,7 @@ final class ParagraphModule extends Texy\Module
 			}
 
 			// add <br>
-			if (strpos($content, "\r") !== false) {
+			if (str_contains($content, "\r")) {
 				$key = $texy->protect('<br>', $texy::CONTENT_REPLACED);
 				$content = str_replace("\r", $key, $content);
 			}

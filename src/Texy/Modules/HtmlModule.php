@@ -67,7 +67,7 @@ final class HtmlModule extends Texy\Module
 
 		$isStart = $mEnd !== '/';
 		$isEmpty = $mEmpty === '/';
-		if (!$isEmpty && substr($mAttr, -1) === '/') { // uvizlo v $mAttr?
+		if (!$isEmpty && str_ends_with($mAttr, '/')) { // uvizlo v $mAttr?
 			$mAttr = substr($mAttr, 0, -1);
 			$isEmpty = true;
 		}
@@ -258,7 +258,7 @@ final class HtmlModule extends Texy\Module
 			}
 
 			if (isset($el->attrs['href'])) {
-				if ($texy->linkModule->forceNoFollow && strpos($el->attrs['href'], '//') !== false) {
+				if ($texy->linkModule->forceNoFollow && str_contains($el->attrs['href'], '//')) {
 					if (isset($el->attrs['rel'])) {
 						$el->attrs['rel'] = (array) $el->attrs['rel'];
 					}

@@ -252,7 +252,7 @@ final class ImageModule extends Texy\Module
 	private function detectDimensions(Image $image): void
 	{
 		// absolute URL & security check for double dot
-		if (!Helpers::isRelative($image->URL) || strpos($image->URL, '..') !== false) {
+		if (!Helpers::isRelative($image->URL) || str_contains($image->URL, '..')) {
 			return;
 		}
 
