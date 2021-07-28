@@ -58,26 +58,26 @@ final class HeadingModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('heading', [$this, 'solve']);
-		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
-		$texy->addHandler('afterParse', [$this, 'afterParse']);
+		$texy->addHandler('heading', $this->solve(...));
+		$texy->addHandler('beforeParse', $this->beforeParse(...));
+		$texy->addHandler('afterParse', $this->afterParse(...));
 
 		$texy->registerBlockPattern(
-			[$this, 'patternUnderline'],
+			$this->patternUnderline(...),
 			'#^(\S.{0,1000})' . Texy\Patterns::MODIFIER_H . '?\n'
 			. '(\#{3,}+|\*{3,}+|={3,}+|-{3,}+)$#mU',
 			'heading/underlined',
 		);
 
 		$texy->registerBlockPattern(
-			[$this, 'patternSurround'],
+			$this->patternSurround(...),
 			'#^(\#{2,}+|={2,}+)(.+)' . Texy\Patterns::MODIFIER_H . '?()$#mU',
 			'heading/surrounded',
 		);
 	}
 
 
-	public function beforeParse(): void
+	private function beforeParse(): void
 	{
 		$this->title = null;
 		$this->usedID = [];
@@ -85,7 +85,7 @@ final class HeadingModule extends Texy\Module
 	}
 
 
-	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, bool $isSingleLine): void
+	private function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, bool $isSingleLine): void
 	{
 		if ($isSingleLine) {
 			return;
@@ -204,7 +204,7 @@ final class HeadingModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(
+	private function solve(
 		Texy\HandlerInvocation $invocation,
 		int $level,
 		string $content,

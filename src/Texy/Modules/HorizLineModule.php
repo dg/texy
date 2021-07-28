@@ -28,10 +28,10 @@ final class HorizLineModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('horizline', [$this, 'solve']);
+		$texy->addHandler('horizline', $this->solve(...));
 
 		$texy->registerBlockPattern(
-			[$this, 'pattern'],
+			$this->pattern(...),
 			'#^(\*{3,}+|-{3,}+)[\ \t]*' . Texy\Patterns::MODIFIER . '?()$#mU',
 			'horizline',
 		);
@@ -55,7 +55,7 @@ final class HorizLineModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
+	private function solve(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
 	{
 		$el = new Texy\HtmlElement('hr');
 		$modifier->decorate($invocation->getTexy(), $el);

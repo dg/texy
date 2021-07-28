@@ -48,7 +48,7 @@ class TexyExtension extends Latte\Extension
 	public function getFilters(): array
 	{
 		return [
-			'texy' => [$this, 'texyFilter'],
+			'texy' => $this->texyFilter(...),
 		];
 	}
 

@@ -93,8 +93,8 @@ final class TypographyModule extends Texy\Module
 	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
-		$texy->registerPostLine([$this, 'postLine'], 'typography');
-		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
+		$texy->registerPostLine($this->postLine(...), 'typography');
+		$texy->addHandler('beforeParse', $this->beforeParse(...));
 	}
 
 

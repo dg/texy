@@ -50,7 +50,7 @@ final class HtmlOutputModule extends Texy\Module
 	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
-		$texy->addHandler('postProcess', [$this, 'postProcess']);
+		$texy->addHandler('postProcess', $this->postProcess(...));
 	}
 
 
@@ -58,7 +58,7 @@ final class HtmlOutputModule extends Texy\Module
 	 * Converts <strong><em> ... </strong> ... </em>.
 	 * into <strong><em> ... </em></strong><em> ... </em>
 	 */
-	public function postProcess(Texy\Texy $texy, string &$s): void
+	private function postProcess(Texy\Texy $texy, string &$s): void
 	{
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
@@ -72,7 +72,7 @@ final class HtmlOutputModule extends Texy\Module
 		$s = Regexp::replace(
 			$s . '</end/>',
 			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
-			[$this, 'cb'],
+			$this->cb(...),
 		);
 
 		// empty out stack
@@ -97,7 +97,7 @@ final class HtmlOutputModule extends Texy\Module
 			$s = Regexp::replace(
 				$s,
 				'#^(\t*)(.*)$#m',
-				[$this, 'wrap'],
+				$this->wrap(...),
 			);
 		}
 	}
@@ -105,9 +105,8 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: <tag> | </tag> | ....
-	 * @internal
 	 */
-	public function cb(array $matches): string
+	private function cb(array $matches): string
 	{
 		// html tag
 		[, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
@@ -330,9 +329,8 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: wrap lines.
-	 * @internal
 	 */
-	public function wrap(array $m): string
+	private function wrap(array $m): string
 	{
 		[, $space, $s] = $m;
 		return $space . wordwrap($s, $this->lineWrap, "\n" . $space);

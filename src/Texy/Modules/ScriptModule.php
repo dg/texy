@@ -25,10 +25,10 @@ final class ScriptModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('script', [$this, 'solve']);
+		$texy->addHandler('script', $this->solve(...));
 
 		$texy->registerLinePattern(
-			[$this, 'pattern'],
+			$this->pattern(...),
 			'#\{\{((?:[^' . Texy\Patterns::MARK . '}]++|[}])+)\}\}()#U',
 			'script',
 		);
@@ -66,7 +66,7 @@ final class ScriptModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(
+	private function solve(
 		Texy\HandlerInvocation $invocation,
 		string $cmd,
 		?array $args = null,

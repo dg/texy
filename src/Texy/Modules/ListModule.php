@@ -39,13 +39,13 @@ final class ListModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
+		$texy->addHandler('beforeParse', $this->beforeParse(...));
 		$texy->allowed['list'] = true;
 		$texy->allowed['list/definition'] = true;
 	}
 
 
-	public function beforeParse(): void
+	private function beforeParse(): void
 	{
 		$RE = $REul = [];
 		foreach ($this->bullets as $desc) {
@@ -56,14 +56,14 @@ final class ListModule extends Texy\Module
 		}
 
 		$this->texy->registerBlockPattern(
-			[$this, 'patternList'],
+			$this->patternList(...),
 			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color: red}
 			. '(' . implode('|', $RE) . ')[\ \t]*+\S.*$#mUu', // item (unmatched)
 			'list',
 		);
 
 		$this->texy->registerBlockPattern(
-			[$this, 'patternDefList'],
+			$this->patternDefList(...),
 			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color:red}
 			. '(\S.{0,2000})\:[\ \t]*' . Patterns::MODIFIER_H . '?\n' // Term:
 			. '([\ \t]++)(' . implode('|', $REul) . ')[\ \t]*+\S.*$#mUu', // - description
@@ -197,7 +197,7 @@ final class ListModule extends Texy\Module
 	/**
 	 * Callback for single list item.
 	 */
-	public function patternItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
+	private function patternItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
 	{
 		$spacesBase = $indented ? ('[\ \t]{1,}') : '';
 		$patternItem = "#^\n?($spacesBase){$bullet}[ \\t]*(\\S.*)?" . Patterns::MODIFIER_H . '?()$#mAUu';

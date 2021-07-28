@@ -34,7 +34,7 @@ final class TableModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->registerBlockPattern(
-			[$this, 'patternTable'],
+			$this->patternTable(...),
 			'#^(?:' . Patterns::MODIFIER_HV . '\n)?' // .{color: red}
 			. '\|.*()$#mU', // | ....
 			'table',
@@ -270,7 +270,7 @@ final class TableModule extends Texy\Module
 				}
 
 				$text = rtrim((string) $elCell->text);
-				if (strpos($text, "\n") !== false) {
+				if (str_contains($text, "\n")) {
 					// multiline parse as block
 					// HACK: disable tables
 					$this->disableTables = true;

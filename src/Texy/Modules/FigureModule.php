@@ -35,10 +35,10 @@ final class FigureModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('figure', [$this, 'solve']);
+		$texy->addHandler('figure', $this->solve(...));
 
 		$texy->registerBlockPattern(
-			[$this, 'pattern'],
+			$this->pattern(...),
 			'#^\[\* *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
 			. '(?::(' . Patterns::LINK_URL . '|:))?? ++\*\*\* ++(.{0,2000})' . Patterns::MODIFIER_H . '?()$#mUu',
 			'figure',
@@ -83,7 +83,7 @@ final class FigureModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(
+	private function solve(
 		Texy\HandlerInvocation $invocation,
 		Texy\Image $image,
 		?Texy\Link $link,

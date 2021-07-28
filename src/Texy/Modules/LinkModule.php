@@ -47,22 +47,22 @@ final class LinkModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->allowed['link/definition'] = true;
-		$texy->addHandler('newReference', [$this, 'solveNewReference']);
-		$texy->addHandler('linkReference', [$this, 'solve']);
-		$texy->addHandler('linkEmail', [$this, 'solveUrlEmail']);
-		$texy->addHandler('linkURL', [$this, 'solveUrlEmail']);
-		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
+		$texy->addHandler('newReference', $this->solveNewReference(...));
+		$texy->addHandler('linkReference', $this->solve(...));
+		$texy->addHandler('linkEmail', $this->solveUrlEmail(...));
+		$texy->addHandler('linkURL', $this->solveUrlEmail(...));
+		$texy->addHandler('beforeParse', $this->beforeParse(...));
 
 		// [reference]
 		$texy->registerLinePattern(
-			[$this, 'patternReference'],
+			$this->patternReference(...),
 			'#(\[[^\[\]\*\n' . Patterns::MARK . ']++\])#U',
 			'link/reference',
 		);
 
 		// direct url; charaters not allowed in URL <>[\]^`{|}
 		$texy->registerLinePattern(
-			[$this, 'patternUrlEmail'],
+			$this->patternUrlEmail(...),
 			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.' . Patterns::CHAR . '-][/\d' . Patterns::CHAR . '+\.~%&?@=_:;\#$!,*()\x{ad}-]{1,1000}[/\d' . Patterns::CHAR . '+~?@=_\#$*]#u',
 			'link/url',
 			'#(?:https?://|www\.|ftp://)#u',
@@ -71,7 +71,7 @@ final class LinkModule extends Texy\Module
 		// direct email
 		self::$EMAIL = '[' . Patterns::CHAR . '][0-9.+_' . Patterns::CHAR . '-]{0,63}@[0-9.+_' . Patterns::CHAR . '\x{ad}-]{1,252}\.[' . Patterns::CHAR . '\x{ad}]{2,19}';
 		$texy->registerLinePattern(
-			[$this, 'patternUrlEmail'],
+			$this->patternUrlEmail(...),
 			'#(?<=^|[\s([<\x17])' . self::$EMAIL . '#u',
 			'link/email',
 			'#' . self::$EMAIL . '#u',
@@ -82,7 +82,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Text pre-processing.
 	 */
-	public function beforeParse(Texy\Texy $texy, &$text): void
+	private function beforeParse(Texy\Texy $texy, &$text): void
 	{
 		self::$livelock = [];
 
@@ -91,7 +91,7 @@ final class LinkModule extends Texy\Module
 			$text = Texy\Regexp::replace(
 				$text,
 				'#^\[([^\[\]\#\?\*\n]{1,100})\]: ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$#mUu',
-				[$this, 'patternReferenceDef'],
+				$this->patternReferenceDef(...),
 			);
 		}
 	}
@@ -99,9 +99,8 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}.
-	 * @internal
 	 */
-	public function patternReferenceDef(array $matches): string
+	private function patternReferenceDef(array $matches): string
 	{
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		// [1] => [ (reference) ]
@@ -242,7 +241,7 @@ final class LinkModule extends Texy\Module
 			$this->checkLink($link);
 		}
 
-		if (strpos((string) $link->URL, '%s') !== false) {
+		if (str_contains((string) $link->URL, '%s')) {
 			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
 		}
 
@@ -288,7 +287,7 @@ final class LinkModule extends Texy\Module
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $this->root);
 
 			// rel="nofollow"
-			if ($nofollow || ($this->forceNoFollow && strpos($el->attrs['href'], '//') !== false)) {
+			if ($nofollow || ($this->forceNoFollow && str_contains($el->attrs['href'], '//'))) {
 				$el->attrs['rel'] = 'nofollow';
 			}
 		}
@@ -306,7 +305,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string
+	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string
 	{
 		$content = $this->textualUrl($link);
 		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
@@ -317,7 +316,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solveNewReference(HandlerInvocation $invocation, string $name)
+	private function solveNewReference(HandlerInvocation $invocation, string $name)
 	{
 		// no change
 	}

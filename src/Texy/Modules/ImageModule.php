@@ -47,12 +47,12 @@ final class ImageModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->allowed['image/definition'] = true;
-		$texy->addHandler('image', [$this, 'solve']);
-		$texy->addHandler('beforeParse', [$this, 'beforeParse']);
+		$texy->addHandler('image', $this->solve(...));
+		$texy->addHandler('beforeParse', $this->beforeParse(...));
 
 		// [*image*]:LINK
 		$texy->registerLinePattern(
-			[$this, 'patternImage'],
+			$this->patternImage(...),
 			'#\[\* *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
 			. '(?::(' . Patterns::LINK_URL . '|:))??()#Uu',
 			'image',
@@ -63,14 +63,14 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Text pre-processing.
 	 */
-	public function beforeParse(Texy\Texy $texy, &$text): void
+	private function beforeParse(Texy\Texy $texy, &$text): void
 	{
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
 			$text = Texy\Regexp::replace(
 				$text,
 				'#^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$#mUu',
-				[$this, 'patternReferenceDef'],
+				$this->patternReferenceDef(...),
 			);
 		}
 	}
@@ -78,10 +78,8 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Callback for: [*image*]: urls .(title)[class]{style}.
-	 *
-	 * @internal
 	 */
-	public function patternReferenceDef(array $matches): string
+	private function patternReferenceDef(array $matches): string
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		// [1] => [* (reference) *]
@@ -252,7 +250,7 @@ final class ImageModule extends Texy\Module
 	private function detectDimensions(Image $image): void
 	{
 		// absolute URL & security check for double dot
-		if (!Helpers::isRelative($image->URL) || strpos($image->URL, '..') !== false) {
+		if (!Helpers::isRelative($image->URL) || str_contains($image->URL, '..')) {
 			return;
 		}
 

@@ -33,11 +33,11 @@ final class BlockModule extends Texy\Module
 		$texy->allowed['block/comment'] = true;
 		$texy->allowed['block/div'] = true;
 
-		$texy->addHandler('block', [$this, 'solve']);
-		$texy->addHandler('beforeBlockParse', [$this, 'beforeBlockParse']);
+		$texy->addHandler('block', $this->solve(...));
+		$texy->addHandler('beforeBlockParse', $this->beforeBlockParse(...));
 
 		$texy->registerBlockPattern(
-			[$this, 'pattern'],
+			$this->pattern(...),
 			'#^/--++ *+(.*)' . Texy\Patterns::MODIFIER_H . '?$((?:\n(?0)|\n.*+)*)(?:\n\\\\--.*$|\z)#mUi',
 			'blocks',
 		);
@@ -47,7 +47,7 @@ final class BlockModule extends Texy\Module
 	/**
 	 * Single block pre-processing.
 	 */
-	public function beforeBlockParse(Texy\BlockParser $parser, string &$text): void
+	private function beforeBlockParse(Texy\BlockParser $parser, string &$text): void
 	{
 		// autoclose exclusive blocks
 		$text = Texy\Regexp::replace(
@@ -85,7 +85,7 @@ final class BlockModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solve(
+	private function solve(
 		Texy\HandlerInvocation $invocation,
 		string $blocktype,
 		string $s,

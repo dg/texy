@@ -222,7 +222,7 @@ final class Modifier
 
 			$value = trim($pair[1]);
 
-			if (isset(self::$elAttrs[$prop]) || substr($prop, 0, 5) === 'data-') { // attribute
+			if (isset(self::$elAttrs[$prop]) || str_starts_with($prop, 'data-')) { // attribute
 				$this->attrs[$prop] = $value;
 			} elseif ($value !== '') { // style
 				$this->styles[$prop] = $value;

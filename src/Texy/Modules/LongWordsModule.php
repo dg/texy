@@ -66,7 +66,7 @@ final class LongWordsModule extends Texy\Module
 		$this->before_h = array_flip($this->before_h);
 		$this->doubleVowels = array_flip($this->doubleVowels);
 
-		$texy->registerPostLine([$this, 'postLine'], 'longwords');
+		$texy->registerPostLine($this->postLine(...), 'longwords');
 	}
 
 
@@ -75,16 +75,15 @@ final class LongWordsModule extends Texy\Module
 		return Texy\Regexp::replace(
 			$text,
 			'#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}#u',
-			[$this, 'pattern'],
+			$this->pattern(...),
 		);
 	}
 
 
 	/**
 	 * Callback for long words.
-	 * @internal
 	 */
-	public function pattern(array $matches): string
+	private function pattern(array $matches): string
 	{
 		[$mWord] = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd

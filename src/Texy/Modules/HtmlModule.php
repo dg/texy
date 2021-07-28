@@ -27,17 +27,17 @@ final class HtmlModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('htmlComment', [$this, 'solveComment']);
-		$texy->addHandler('htmlTag', [$this, 'solveTag']);
+		$texy->addHandler('htmlComment', $this->solveComment(...));
+		$texy->addHandler('htmlTag', $this->solveTag(...));
 
 		$texy->registerLinePattern(
-			[$this, 'patternTag'],
+			$this->patternTag(...),
 			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9\_:-]++|=\s*+"[^"' . Patterns::MARK . ']*+"|=\s*+\'[^\'' . Patterns::MARK . ']*+\'|=[^\s>' . Patterns::MARK . ']++)*)\s*+(/?)>#isu',
 			'html/tag',
 		);
 
 		$texy->registerLinePattern(
-			[$this, 'patternComment'],
+			$this->patternComment(...),
 			'#<!--([^' . Patterns::MARK . ']*?)-->#is',
 			'html/comment',
 		);
@@ -67,7 +67,7 @@ final class HtmlModule extends Texy\Module
 
 		$isStart = $mEnd !== '/';
 		$isEmpty = $mEmpty === '/';
-		if (!$isEmpty && substr($mAttr, -1) === '/') { // uvizlo v $mAttr?
+		if (!$isEmpty && str_ends_with($mAttr, '/')) { // uvizlo v $mAttr?
 			$mAttr = substr($mAttr, 0, -1);
 			$isEmpty = true;
 		}
@@ -101,7 +101,7 @@ final class HtmlModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solveTag(
+	private function solveTag(
 		Texy\HandlerInvocation $invocation,
 		HtmlElement $el,
 		bool $isStart,
@@ -156,7 +156,7 @@ final class HtmlModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	public function solveComment(Texy\HandlerInvocation $invocation, string $content): string
+	private function solveComment(Texy\HandlerInvocation $invocation, string $content): string
 	{
 		if (!$this->passComment) {
 			return '';
@@ -258,7 +258,7 @@ final class HtmlModule extends Texy\Module
 			}
 
 			if (isset($el->attrs['href'])) {
-				if ($texy->linkModule->forceNoFollow && strpos($el->attrs['href'], '//') !== false) {
+				if ($texy->linkModule->forceNoFollow && str_contains($el->attrs['href'], '//')) {
 					if (isset($el->attrs['rel'])) {
 						$el->attrs['rel'] = (array) $el->attrs['rel'];
 					}
