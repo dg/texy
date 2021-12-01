@@ -127,7 +127,7 @@ final class Modifier
 			$attrs = $this->attrs;
 
 		} elseif (is_array($texy->allowedTags)) {
-			$attrs = $texy->allowedTags[$name] ?? null;
+			$attrs = $texy->allowedTags[$name] ?? [];
 
 			if ($attrs === $texy::ALL) {
 				$attrs = $this->attrs;

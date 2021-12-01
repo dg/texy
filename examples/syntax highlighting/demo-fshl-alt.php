@@ -79,8 +79,6 @@ function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name
 	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
 
 	$elPre = new Texy\HtmlElement('pre');
-	$elPre->attrs['class'] = strtolower($lang);
-
 	$elCode = $elPre->create('code', $content);
 
 	return $elPre;
