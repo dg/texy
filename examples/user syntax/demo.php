@@ -28,14 +28,14 @@ $texy->allowed['phrase/em-alt2'] = false;
 $texy->registerLinePattern(
 	'userInlineHandler',  // callback function or method
 	'#(?<!\*)\*(?!\ |\*)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |\*)\*(?!\*)()#U', // regular expression
-	'myInlineSyntax1' // any syntax name
+	'myInlineSyntax1', // any syntax name
 );
 
 // add new syntax: _italic_
 $texy->registerLinePattern(
 	'userInlineHandler',
 	'#(?<!_)_(?!\ |_)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |_)_(?!_)()#U',
-	'myInlineSyntax2'
+	'myInlineSyntax2',
 );
 
 
@@ -43,7 +43,7 @@ $texy->registerLinePattern(
 $texy->registerBlockPattern(
 	'userBlockHandler',
 	'#^\.([a-z0-9]+)\n(.+)$#m', // block patterns must be multiline and line-anchored
-	'myBlockSyntax1'
+	'myBlockSyntax1',
 );
 
 

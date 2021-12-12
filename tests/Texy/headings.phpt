@@ -16,14 +16,14 @@ $texy->htmlOutputModule->lineWrap = 180;
 
 Assert::matchFile(
 	__DIR__ . '/expected/headings1.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/headings1.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/headings1.texy')),
 );
 
 $texy->headingModule->generateID = true;
 
 Assert::matchFile(
 	__DIR__ . '/expected/headings2.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/headings2.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/headings2.texy')),
 );
 
 

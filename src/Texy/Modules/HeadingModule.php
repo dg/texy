@@ -67,13 +67,13 @@ final class HeadingModule extends Texy\Module
 			[$this, 'patternUnderline'],
 			'#^(\S.{0,1000})' . Texy\Patterns::MODIFIER_H . '?\n'
 			. '(\#{3,}+|\*{3,}+|={3,}+|-{3,}+)$#mU',
-			'heading/underlined'
+			'heading/underlined',
 		);
 
 		$texy->registerBlockPattern(
 			[$this, 'patternSurround'],
 			'#^(\#{2,}+|={2,}+)(.+)' . Texy\Patterns::MODIFIER_H . '?()$#mU',
-			'heading/surrounded'
+			'heading/surrounded',
 		);
 	}
 
@@ -212,7 +212,7 @@ final class HeadingModule extends Texy\Module
 		int $level,
 		string $content,
 		Modifier $mod,
-		bool $isSurrounded
+		bool $isSurrounded,
 	): Texy\HtmlElement
 	{
 		// as fixed balancing, for block/texysource & correct decorating

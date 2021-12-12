@@ -41,7 +41,7 @@ final class FigureModule extends Texy\Module
 			[$this, 'pattern'],
 			'#^\[\* *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
 			. '(?::(' . Patterns::LINK_URL . '|:))?? ++\*\*\* ++(.{0,2000})' . Patterns::MODIFIER_H . '?()$#mUu',
-			'figure'
+			'figure',
 		);
 	}
 
@@ -89,7 +89,7 @@ final class FigureModule extends Texy\Module
 		Texy\Image $image,
 		?Texy\Link $link,
 		string $content,
-		Texy\Modifier $mod
+		Texy\Modifier $mod,
 	): ?Texy\HtmlElement
 	{
 		$texy = $this->texy;

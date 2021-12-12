@@ -15,5 +15,5 @@ $texy = new Texy\Texy;
 
 Assert::matchFile(
 	__DIR__ . '/expected/comments.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/comments.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/comments.texy')),
 );

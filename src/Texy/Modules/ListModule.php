@@ -59,7 +59,7 @@ final class ListModule extends Texy\Module
 			[$this, 'patternList'],
 			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color: red}
 			. '(' . implode('|', $RE) . ')[\ \t]*+\S.*$#mUu', // item (unmatched)
-			'list'
+			'list',
 		);
 
 		$this->texy->registerBlockPattern(
@@ -67,7 +67,7 @@ final class ListModule extends Texy\Module
 			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color:red}
 			. '(\S.{0,2000})\:[\ \t]*' . Patterns::MODIFIER_H . '?\n' // Term:
 			. '([\ \t]++)(' . implode('|', $REul) . ')[\ \t]*+\S.*$#mUu', // - description
-			'list/definition'
+			'list/definition',
 		);
 	}
 

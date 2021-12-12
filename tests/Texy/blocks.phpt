@@ -18,10 +18,10 @@ $texy->htmlOutputModule->lineWrap = 180;
 
 Assert::matchFile(
 	__DIR__ . '/expected/blocks1.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/blocks1.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/blocks1.texy')),
 );
 
 Assert::matchFile(
 	__DIR__ . '/expected/blocks2.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/blocks2.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/blocks2.texy')),
 );

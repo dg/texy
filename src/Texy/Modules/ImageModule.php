@@ -55,7 +55,7 @@ final class ImageModule extends Texy\Module
 			[$this, 'patternImage'],
 			'#\[\* *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
 			. '(?::(' . Patterns::LINK_URL . '|:))??()#Uu',
-			'image'
+			'image',
 		);
 	}
 
@@ -70,7 +70,7 @@ final class ImageModule extends Texy\Module
 			$text = Texy\Regexp::replace(
 				$text,
 				'#^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$#mUu',
-				[$this, 'patternReferenceDef']
+				[$this, 'patternReferenceDef'],
 			);
 		}
 	}
@@ -195,7 +195,7 @@ final class ImageModule extends Texy\Module
 	public function solve(
 		?Texy\HandlerInvocation $invocation,
 		Image $image,
-		?Texy\Link $link = null
+		?Texy\Link $link = null,
 	): ?Texy\HtmlElement
 	{
 		if ($image->URL == null) {

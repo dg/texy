@@ -19,26 +19,25 @@ $macro = new Texy\Bridges\Latte\TexyMacro($latte, $texy);
 $macro->install();
 
 $template = <<<'XX'
-{texy}
-static
------
-{/texy}
-XX;
+	{texy}
+	static
+	-----
+	{/texy}
+	XX;
 
 
 Assert::match(
 	<<<'XX'
-%A%
-		echo '<h1>static</h1>
-';
-	%A%
-XX
-	,
-	$latte->compile($template)
+		%A%
+				echo '<h1>static</h1>
+		';
+		%A%
+		XX,
+	$latte->compile($template),
 );
 
 
 Assert::match(
 	'<h1>static</h1>',
-	$latte->renderToString($template)
+	$latte->renderToString($template),
 );

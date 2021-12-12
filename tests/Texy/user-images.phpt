@@ -36,5 +36,5 @@ $texy->addHandler('image', 'imageHandler');
 
 Assert::matchFile(
 	__DIR__ . '/expected/user-images.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/user-images.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/user-images.texy')),
 );

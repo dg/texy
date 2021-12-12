@@ -25,10 +25,10 @@ $texy->horizLineModule->classes['*'] = 'hidden';
 
 Assert::matchFile(
 	__DIR__ . '/expected/syntax.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/syntax.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/syntax.texy')),
 );
 
 Assert::matchFile(
 	__DIR__ . '/expected/syntax.txt',
-	$texy->toText()
+	$texy->toText(),
 );

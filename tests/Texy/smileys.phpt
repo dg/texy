@@ -16,7 +16,7 @@ $texy->allowed['emoticon'] = true;
 
 Assert::matchFile(
 	__DIR__ . '/expected/smileys.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/smileys.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/smileys.texy')),
 );
 
 
@@ -31,5 +31,5 @@ $texy->emoticonModule->icons = [
 
 Assert::matchFile(
 	__DIR__ . '/expected/smileys-old.html',
-	$texy->process(file_get_contents(__DIR__ . '/sources/smileys.texy'))
+	$texy->process(file_get_contents(__DIR__ . '/sources/smileys.texy')),
 );
