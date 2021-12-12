@@ -306,7 +306,7 @@ final class PhraseModule extends Texy\Module
 		string $phrase,
 		string $content,
 		Modifier $mod,
-		Texy\Link $link = null
+		?Texy\Link $link = null
 	) {
 		$texy = $this->texy;
 		$tag = $this->tags[$phrase] ?? null;

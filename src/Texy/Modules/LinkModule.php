@@ -261,7 +261,7 @@ final class LinkModule extends Texy\Module
 	 * @param  Texy\HtmlElement|string $content
 	 * @return Texy\HtmlElement|string
 	 */
-	public function solve(HandlerInvocation $invocation = null, Link $link, $content = null)
+	public function solve(?HandlerInvocation $invocation, Link $link, $content = null)
 	{
 		if ($link->URL == null) {
 			return $content;

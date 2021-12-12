@@ -59,7 +59,7 @@ final class Modifier
 	];
 
 
-	public function __construct(string $s = null)
+	public function __construct(?string $s = null)
 	{
 		$this->setProperties($s);
 	}

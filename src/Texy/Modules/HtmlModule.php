@@ -108,7 +108,7 @@ final class HtmlModule extends Texy\Module
 		Texy\HandlerInvocation $invocation,
 		HtmlElement $el,
 		bool $isStart,
-		bool $forceEmpty = null
+		?bool $forceEmpty = null
 	) {
 		$texy = $this->texy;
 

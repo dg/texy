@@ -87,7 +87,7 @@ final class FigureModule extends Texy\Module
 	public function solve(
 		Texy\HandlerInvocation $invocation,
 		Texy\Image $image,
-		Texy\Link $link = null,
+		?Texy\Link $link,
 		string $content,
 		Texy\Modifier $mod
 	): ?Texy\HtmlElement {

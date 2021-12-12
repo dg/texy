@@ -193,9 +193,9 @@ final class ImageModule extends Texy\Module
 	 * Finish invocation.
 	 */
 	public function solve(
-		Texy\HandlerInvocation $invocation = null,
+		?Texy\HandlerInvocation $invocation,
 		Image $image,
-		Texy\Link $link = null
+		?Texy\Link $link = null
 	): ?Texy\HtmlElement {
 		if ($image->URL == null) {
 			return null;

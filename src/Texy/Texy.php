@@ -294,7 +294,7 @@ class Texy
 		callable $handler,
 		string $pattern,
 		string $name,
-		string $againTest = null
+		?string $againTest = null
 	): void {
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = true;

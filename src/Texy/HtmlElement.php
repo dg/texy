@@ -96,7 +96,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * @param  array|string  $attrs  element's attributes (or textual content)
 	 */
-	public function __construct(string $name = null, $attrs = null)
+	public function __construct(?string $name = null, $attrs = null)
 	{
 		$this->setName($name);
 		if (is_array($attrs)) {
@@ -107,7 +107,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	public static function el(string $name = null, $attrs = null): self
+	public static function el(?string $name = null, $attrs = null): self
 	{
 		return new self($name, $attrs);
 	}
@@ -116,7 +116,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Changes element's name.
 	 */
-	final public function setName(?string $name, bool $empty = null): self
+	final public function setName(?string $name, ?bool $empty = null): self
 	{
 		$this->name = $name;
 		$this->isEmpty = $empty === null
@@ -185,7 +185,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Special setter for element's attribute.
 	 */
-	final public function href(string $path, array $query = null): self
+	final public function href(string $path, ?array $query = null): self
 	{
 		if ($query) {
 			$query = http_build_query($query, '', '&');
