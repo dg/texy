@@ -58,7 +58,7 @@ final class LinkModule extends Texy\Module
 		$texy->registerLinePattern(
 			[$this, 'patternReference'],
 			'#(\[[^\[\]\*\n' . Patterns::MARK . ']++\])#U',
-			'link/reference'
+			'link/reference',
 		);
 
 		// direct url; charaters not allowed in URL <>[\]^`{|}
@@ -66,7 +66,7 @@ final class LinkModule extends Texy\Module
 			[$this, 'patternUrlEmail'],
 			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.' . Patterns::CHAR . '-][/\d' . Patterns::CHAR . '+\.~%&?@=_:;\#$!,*()\x{ad}-]{1,1000}[/\d' . Patterns::CHAR . '+~?@=_\#$*]#u',
 			'link/url',
-			'#(?:https?://|www\.|ftp://)#u'
+			'#(?:https?://|www\.|ftp://)#u',
 		);
 
 		// direct email
@@ -75,7 +75,7 @@ final class LinkModule extends Texy\Module
 			[$this, 'patternUrlEmail'],
 			'#(?<=^|[\s([<\x17])' . self::$EMAIL . '#u',
 			'link/email',
-			'#' . self::$EMAIL . '#u'
+			'#' . self::$EMAIL . '#u',
 		);
 	}
 
@@ -92,7 +92,7 @@ final class LinkModule extends Texy\Module
 			$text = Texy\Regexp::replace(
 				$text,
 				'#^\[([^\[\]\#\?\*\n]{1,100})\]: ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$#mUu',
-				[$this, 'patternReferenceDef']
+				[$this, 'patternReferenceDef'],
 			);
 		}
 	}
@@ -174,7 +174,7 @@ final class LinkModule extends Texy\Module
 		return $this->texy->invokeAroundHandlers(
 			$name === 'link/email' ? 'linkEmail' : 'linkURL',
 			$parser,
-			[$link]
+			[$link],
 		);
 	}
 

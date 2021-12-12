@@ -82,7 +82,7 @@ class myHandler
 		$phrase,
 		$content,
 		Texy\Modifier $modifier,
-		Texy\Link $link = null
+		Texy\Link $link = null,
 	) {
 		return $invocation->proceed();
 	}
@@ -133,7 +133,7 @@ class myHandler
 		Texy\Image $image,
 		Texy\Link $link = null,
 		$content,
-		Texy\Modifier $modifier
+		Texy\Modifier $modifier,
 	) {
 		return $invocation->proceed();
 	}
@@ -145,7 +145,7 @@ class myHandler
 		$level,
 		$content,
 		Texy\Modifier $modifier,
-		$isSurrounded
+		$isSurrounded,
 	) {
 		return $invocation->proceed();
 	}
@@ -173,7 +173,7 @@ class myHandler
 	public function afterDefinitionList(
 		Texy\BlockParser $parser,
 		Texy\HtmlElement $element,
-		Texy\Modifier $modifier
+		Texy\Modifier $modifier,
 	): void
 	{
 	}

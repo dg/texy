@@ -20,5 +20,5 @@ Assert::match(
 	'<div class="figure note"><img src="images/image.gif" alt=""></div>',
 	$texy->process('
 [* image.gif *] .[note]
-')
+'),
 );

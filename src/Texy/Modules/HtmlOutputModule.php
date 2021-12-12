@@ -72,7 +72,7 @@ final class HtmlOutputModule extends Texy\Module
 		$s = Regexp::replace(
 			$s . '</end/>',
 			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
-			[$this, 'cb']
+			[$this, 'cb'],
 		);
 
 		// empty out stack
@@ -97,7 +97,7 @@ final class HtmlOutputModule extends Texy\Module
 			$s = Regexp::replace(
 				$s,
 				'#^(\t*)(.*)$#m',
-				[$this, 'wrap']
+				[$this, 'wrap'],
 			);
 		}
 	}
@@ -308,7 +308,8 @@ final class HtmlOutputModule extends Texy\Module
 			// auto-close hidden, optional and inline tags
 			if (
 				$item['close']
-				&& (!isset(HtmlElement::$optionalEnds[$itemTag])
+				&& (
+					!isset(HtmlElement::$optionalEnds[$itemTag])
 					&& !isset(HtmlElement::$inlineElements[$itemTag])
 				)
 			) {

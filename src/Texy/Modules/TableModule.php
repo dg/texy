@@ -38,7 +38,7 @@ final class TableModule extends Texy\Module
 			[$this, 'patternTable'],
 			'#^(?:' . Patterns::MODIFIER_HV . '\n)?' // .{color: red}
 			. '\|.*()$#mU', // | ....
-			'table'
+			'table',
 		);
 	}
 
@@ -159,7 +159,7 @@ final class TableModule extends Texy\Module
 		array &$prevRow,
 		array &$colModifier,
 		int &$colCounter,
-		int $rowCounter
+		int $rowCounter,
 	): HtmlElement
 	{
 		$elRow = new HtmlElement('tr');
@@ -228,7 +228,7 @@ final class TableModule extends Texy\Module
 		string $cell,
 		?Modifier &$cellModifier,
 		bool $isHead,
-		Texy\Texy $texy
+		Texy\Texy $texy,
 	): ?TableCellElement
 	{
 		$matches = Regexp::match($cell, '#(\*??)[\ \t]*' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?[\ \t]*()$#AU');

@@ -24,7 +24,7 @@ final class BlockQuoteModule extends Texy\Module
 		$texy->registerBlockPattern(
 			[$this, 'pattern'],
 			'#^(?:' . Texy\Patterns::MODIFIER_H . '\n)?\>([\ \t]++|:)(\S.*+)$#mU', // original
-			'blockquote'
+			'blockquote',
 		);
 	}
 

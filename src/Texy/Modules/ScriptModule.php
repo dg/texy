@@ -30,7 +30,7 @@ final class ScriptModule extends Texy\Module
 		$texy->registerLinePattern(
 			[$this, 'pattern'],
 			'#\{\{((?:[^' . Texy\Patterns::MARK . '}]++|[}])+)\}\}()#U',
-			'script'
+			'script',
 		);
 	}
 
