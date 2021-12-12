@@ -64,10 +64,8 @@ final class BlockModule extends Texy\Module
 	 * ....
 	 * ....
 	 * \----
-	 *
-	 * @return HtmlElement|string|null
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
 	{
 		[, $mParam, $mMod, $mContent] = $matches;
 		// [1] => code | text | ...
@@ -86,9 +84,14 @@ final class BlockModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return HtmlElement|string|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, string $blocktype, string $s, $param, Texy\Modifier $mod)
+	public function solve(
+		Texy\HandlerInvocation $invocation,
+		string $blocktype,
+		string $s,
+		$param,
+		Texy\Modifier $mod,
+	): HtmlElement|string|null
 	{
 		$texy = $this->texy;
 		$parser = $invocation->getParser();
@@ -128,10 +131,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	/**
-	 * @return string|HtmlElement
-	 */
-	private function blockTexySource(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param)
+	private function blockTexySource(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param): string|HtmlElement
 	{
 		$s = Helpers::outdent($s);
 		if ($s === '') {
@@ -150,10 +150,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	/**
-	 * @return string|HtmlElement
-	 */
-	private function blockCode(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param)
+	private function blockCode(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param): string|HtmlElement
 	{
 		$s = Helpers::outdent($s);
 		if ($s === '') {
@@ -170,10 +167,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	/**
-	 * @return string|HtmlElement
-	 */
-	private function blockDefault(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param)
+	private function blockDefault(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param): string|HtmlElement
 	{
 		$s = Helpers::outdent($s);
 		if ($s === '') {
@@ -190,10 +184,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	/**
-	 * @return string|HtmlElement
-	 */
-	private function blockPre(string $s, Texy\Texy $texy, Texy\Modifier $mod)
+	private function blockPre(string $s, Texy\Texy $texy, Texy\Modifier $mod): string|HtmlElement
 	{
 		$s = Helpers::outdent($s);
 		if ($s === '') {

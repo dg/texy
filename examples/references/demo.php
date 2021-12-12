@@ -17,14 +17,13 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 
 /**
  * User handler for unknown reference
- * @return Texy\HtmlElement|string|null
  */
-function newReferenceHandler(Texy\HandlerInvocation $parser, $refName)
+function newReferenceHandler(Texy\HandlerInvocation $parser, $refName): Texy\HtmlElement|string|null
 {
 	$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
 
 	if (!isset($names[$refName])) {
-		return; // it's not my job
+		return null; // it's not my job
 	}
 
 	$name = $names[$refName];

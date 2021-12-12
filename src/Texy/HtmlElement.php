@@ -95,7 +95,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * @param  array|string  $attrs  element's attributes (or textual content)
 	 */
-	public function __construct(?string $name = null, $attrs = null)
+	public function __construct(?string $name = null, array|string|null $attrs = null)
 	{
 		$this->setName($name);
 		if (is_array($attrs)) {
@@ -106,7 +106,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	public static function el(?string $name = null, $attrs = null): self
+	public static function el(?string $name = null, $attrs = null): static
 	{
 		return new self($name, $attrs);
 	}
@@ -115,7 +115,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Changes element's name.
 	 */
-	final public function setName(?string $name, ?bool $empty = null): self
+	final public function setName(?string $name, ?bool $empty = null): static
 	{
 		$this->name = $name;
 		$this->isEmpty = $empty === null
@@ -164,7 +164,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Sets element's attribute.
 	 */
-	final public function setAttribute(string $name, $value): self
+	final public function setAttribute(string $name, $value): static
 	{
 		$this->attrs[$name] = $value;
 		return $this;
@@ -184,7 +184,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Special setter for element's attribute.
 	 */
-	final public function href(string $path, ?array $query = null): self
+	final public function href(string $path, ?array $query = null): static
 	{
 		if ($query) {
 			$query = http_build_query($query, '', '&');
@@ -201,7 +201,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Sets element's textual content.
 	 */
-	final public function setText(string $text): self
+	final public function setText(string $text): static
 	{
 		$this->removeChildren();
 		$this->children = [$text];
@@ -229,9 +229,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Adds new element's child.
-	 * @param  HtmlElement|string  $child node
 	 */
-	final public function add($child): self
+	final public function add(self|string $child): static
 	{
 		return $this->insert(null, $child);
 	}
@@ -239,9 +238,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Creates and adds a new HtmlElement child.
-	 * @param  array|string  $attrs element's attributes (or textual content)
 	 */
-	final public function create(string $name, $attrs = null): self
+	final public function create(string $name, array|string|null $attrs = null): static
 	{
 		$this->insert(null, $child = new self($name, $attrs));
 		return $child;
@@ -250,15 +248,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Inserts child node.
-	 * @param  HtmlElement|string  $child node
-	 * @throws \InvalidArgumentException
 	 */
-	public function insert(?int $index, $child, bool $replace = false): self
+	public function insert(?int $index, self|string $child, bool $replace = false): static
 	{
-		if (!$child instanceof self && !is_string($child)) {
-			throw new \InvalidArgumentException('Child node must be scalar or HtmlElement object.');
-		}
-
 		if ($index === null) { // append
 			$this->children[] = $child;
 
@@ -284,10 +276,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Returns child node (ArrayAccess implementation).
 	 * @param  int  $index
-	 * @return mixed
 	 */
-	#[\ReturnTypeWillChange]
-	final public function offsetGet($index)
+	final public function offsetGet($index): mixed
 	{
 		return $this->children[$index];
 	}

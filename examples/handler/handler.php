@@ -53,11 +53,7 @@ class myHandler
 	}
 
 
-	/**
-	 * @param  Texy\HandlerInvocation  handler invocation
-	 * @return Texy\HtmlElement|string|null
-	 */
-	public function linkReference(Texy\HandlerInvocation $invocation, Texy\Link $link, string $content)
+	public function linkReference(Texy\HandlerInvocation $invocation, Texy\Link $link, string $content): Texy\HtmlElement|string|null
 	{
 		return $invocation->proceed();
 	}
