@@ -105,6 +105,7 @@ final class ListModule extends Texy\Module
 						$el->attrs['start'] = ord($mBullet[0]) - 64;
 					}
 				}
+
 				break;
 			}
 		}
@@ -228,6 +229,7 @@ final class ListModule extends Texy\Module
 			if ($spaces === '') {
 				$spaces = strlen($mSpaces);
 			}
+
 			$content .= "\n" . $mBlank . $mContent;
 		}
 

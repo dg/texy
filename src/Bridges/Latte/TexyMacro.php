@@ -62,6 +62,7 @@ class TexyMacro extends Latte\Macros\MacroSet
 			if ($tokens->isNext()) {
 				$tokens->consumeValue(',');
 			}
+
 			$restore[] = [&$this->texy->$module->$prop, $this->texy->$module->$prop];
 			$this->texy->$module->$prop = $value;
 		}

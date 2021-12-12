@@ -60,6 +60,7 @@ final class HandlerInvocation
 		} elseif ($res !== null && !is_string($res) && !$res instanceof HtmlElement) {
 			throw new \UnexpectedValueException("Invalid value returned from handler '" . get_class($this->handlers[$this->pos][0]) . "'.");
 		}
+
 		return $res;
 	}
 

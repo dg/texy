@@ -115,6 +115,7 @@ final class BlockModule extends Texy\Module
 		} elseif ($blocktype === 'block/div') {
 			return $this->blockDiv($s, $texy, $mod, $parser);
 		}
+
 		return null;
 	}
 
@@ -136,12 +137,14 @@ final class BlockModule extends Texy\Module
 		if ($s === '') {
 			return "\n";
 		}
+
 		$el = new HtmlElement;
 		if ($param === 'line') {
 			$el->parseLine($texy, $s);
 		} else {
 			$el->parseBlock($texy, $s);
 		}
+
 		$s = $el->toHtml($texy);
 		return $this->blockCode($s, $texy, $mod, 'html');
 	}
@@ -156,6 +159,7 @@ final class BlockModule extends Texy\Module
 		if ($s === '') {
 			return "\n";
 		}
+
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 		$el = new HtmlElement('pre');
@@ -175,6 +179,7 @@ final class BlockModule extends Texy\Module
 		if ($s === '') {
 			return "\n";
 		}
+
 		$el = new HtmlElement('pre');
 		$mod->decorate($texy, $el);
 		$el->attrs['class'][] = $param; // lang
@@ -194,6 +199,7 @@ final class BlockModule extends Texy\Module
 		if ($s === '') {
 			return "\n";
 		}
+
 		$el = new HtmlElement('pre');
 		$mod->decorate($texy, $el);
 		$lineParser = new Texy\LineParser($texy, $el);
@@ -203,9 +209,11 @@ final class BlockModule extends Texy\Module
 		if (isset($tmp['html/tag'])) {
 			$lineParser->patterns['html/tag'] = $tmp['html/tag'];
 		}
+
 		if (isset($tmp['html/comment'])) {
 			$lineParser->patterns['html/comment'] = $tmp['html/comment'];
 		}
+
 		unset($tmp);
 
 		$lineParser->parse($s);
@@ -225,6 +233,7 @@ final class BlockModule extends Texy\Module
 		if ($s === '') {
 			return "\n";
 		}
+
 		$el = new HtmlElement;
 		$lineParser = new Texy\LineParser($texy, $el);
 		// special mode - parse only html tags
@@ -233,9 +242,11 @@ final class BlockModule extends Texy\Module
 		if (isset($tmp['html/tag'])) {
 			$lineParser->patterns['html/tag'] = $tmp['html/tag'];
 		}
+
 		if (isset($tmp['html/comment'])) {
 			$lineParser->patterns['html/comment'] = $tmp['html/comment'];
 		}
+
 		unset($tmp);
 
 		$lineParser->parse($s);
@@ -253,6 +264,7 @@ final class BlockModule extends Texy\Module
 		if ($s === '') {
 			return "\n";
 		}
+
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 		$s = str_replace("\n", (new HtmlElement('br'))->startTag(), $s); // nl2br
 		return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
@@ -271,6 +283,7 @@ final class BlockModule extends Texy\Module
 		if ($s === '') {
 			return "\n";
 		}
+
 		$el = new HtmlElement('div');
 		$mod->decorate($texy, $el);
 		$el->parseBlock($texy, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?

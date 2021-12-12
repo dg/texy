@@ -37,6 +37,7 @@ class Regexp
 		if (preg_last_error()) { // run-time error
 			trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
 		}
+
 		return $res;
 	}
 
@@ -53,6 +54,7 @@ class Regexp
 		if ($offset > strlen($subject)) {
 			return $empty;
 		}
+
 		$reFlags = ($flags & self::OFFSET_CAPTURE) ? PREG_OFFSET_CAPTURE : 0;
 		$res = $flags & self::ALL
 			? preg_match_all($pattern, $subject, $m, $reFlags | PREG_SET_ORDER, $offset)
@@ -62,6 +64,7 @@ class Regexp
 		} elseif ($res) {
 			return $m;
 		}
+
 		return $empty;
 	}
 
@@ -78,6 +81,7 @@ class Regexp
 			if ($res === null && preg_last_error()) { // run-time error
 				trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
 			}
+
 			return $res;
 
 		} elseif ($replacement === null && is_array($pattern)) {
@@ -89,6 +93,7 @@ class Regexp
 		if (preg_last_error()) { // run-time error
 			trigger_error(@self::$messages[preg_last_error()], E_USER_WARNING);
 		}
+
 		return $res;
 	}
 }

@@ -105,6 +105,7 @@ final class FigureModule extends Texy\Module
 		if (!empty($image->width) && $this->widthDelta !== false) {
 			$el->attrs['style']['max-width'] = ($image->width + $this->widthDelta) . 'px';
 		}
+
 		$mod->decorate($texy, $el);
 
 		$el[0] = $elImg;
@@ -124,6 +125,7 @@ final class FigureModule extends Texy\Module
 				$class .= '-' . $texy->alignClasses[$hAlign];
 			}
 		}
+
 		$el->attrs['class'][] = $class;
 
 		return $el;

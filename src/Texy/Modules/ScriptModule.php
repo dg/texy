@@ -77,8 +77,10 @@ final class ScriptModule extends Texy\Module
 					$this->texy->linkModule->forceNoFollow = true;
 					break;
 			}
+
 			return '';
 		}
+
 		return null;
 	}
 }

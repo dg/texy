@@ -63,6 +63,7 @@ final class BlockQuoteModule extends Texy\Module
 				if ($spaces === '') {
 					$spaces = max(1, strlen($mPrefix));
 				}
+
 				$content .= $mContent . "\n";
 			}
 

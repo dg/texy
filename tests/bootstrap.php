@@ -11,7 +11,6 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 	exit(1);
 }
 
-
 Tester\Environment::setup();
 date_default_timezone_set('Europe/Prague');
 $_GET = $_POST = $_COOKIE = [];

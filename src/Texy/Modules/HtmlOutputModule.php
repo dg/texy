@@ -162,7 +162,6 @@ final class HtmlOutputModule extends Texy\Module
 			if ($item) {
 				$dtdContent = $item['dtdContent'];
 			}
-
 		} else {
 			$s .= $this->closeOptionalTags($tag, $dtdContent);
 
@@ -267,6 +266,7 @@ final class HtmlOutputModule extends Texy\Module
 			if ($itemTag === $tag) {
 				break;
 			}
+
 			array_unshift($tmp, $item);
 		}
 
@@ -322,6 +322,7 @@ final class HtmlOutputModule extends Texy\Module
 			unset($this->tagStack[$i]);
 			$dtdContent = $this->baseDTD;
 		}
+
 		return $s;
 	}
 

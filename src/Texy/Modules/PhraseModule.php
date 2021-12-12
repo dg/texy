@@ -262,7 +262,6 @@ final class PhraseModule extends Texy\Module
 			} else {
 				$link = $texy->linkModule->factoryLink($mLink, $mMod, $mContent);
 			}
-
 		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
 			$mod->title = trim(Texy\Helpers::unescapeHtml($mLink));
 

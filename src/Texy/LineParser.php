@@ -125,11 +125,11 @@ class LineParser extends Parser
 					if (!strlen($m[0][0])) {
 						continue;
 					}
+
 					$offsets[$name] = $m[0][1];
 					foreach ($m as $keyx => $value) {
 						$m[$keyx] = $value[0];
 					}
-
 				} else {
 					// try next time?
 					if (
@@ -138,6 +138,7 @@ class LineParser extends Parser
 					) {
 						unset($names[$index]);
 					}
+
 					continue;
 				}
 			}

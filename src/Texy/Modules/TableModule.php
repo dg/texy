@@ -59,6 +59,7 @@ final class TableModule extends Texy\Module
 		if ($this->disableTables) {
 			return null;
 		}
+
 		[, $mMod] = $matches;
 		// [1] => .(title)[class]{style}<>_
 
@@ -125,6 +126,7 @@ final class TableModule extends Texy\Module
 						$elCell->rowSpan--;
 					}
 				}
+
 				continue;
 			}
 
@@ -210,10 +212,12 @@ final class TableModule extends Texy\Module
 			if (isset($colModifier[$col])) {
 				$colModifier[$col]->decorate($texy, $elCell);
 			}
+
 			$elRow->add($elCell);
 			$prevRow[$col] = $elCell;
 			$col++;
 		}
+
 		$colCounter = $col;
 		return $elRow;
 	}
@@ -229,6 +233,7 @@ final class TableModule extends Texy\Module
 		if (!$matches) {
 			return null;
 		}
+
 		[, $mHead, $mModCol, $mContent, $mMod] = $matches;
 		// [1] => * ^
 		// [2] => .(title)[class]{style}<>_
@@ -238,6 +243,7 @@ final class TableModule extends Texy\Module
 		if ($mModCol) {
 			$cellModifier = new Modifier($mModCol);
 		}
+
 		$mod = $cellModifier ? clone $cellModifier : new Modifier;
 		$mod->setProperties($mMod);
 

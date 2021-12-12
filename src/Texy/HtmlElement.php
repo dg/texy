@@ -193,6 +193,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 				$path .= '?' . $query;
 			}
 		}
+
 		$this->attrs['href'] = $path;
 		return $this;
 	}
@@ -219,8 +220,10 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 			if (is_object($child)) {
 				return null;
 			}
+
 			$s .= $child;
 		}
+
 		return $s;
 	}
 
@@ -256,12 +259,14 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		if (!$child instanceof self && !is_string($child)) {
 			throw new \InvalidArgumentException('Child node must be scalar or HtmlElement object.');
 		}
+
 		if ($index === null) { // append
 			$this->children[] = $child;
 
 		} else { // insert or replace
 			array_splice($this->children, (int) $index, $replace ? 1 : 0, [$child]);
 		}
+
 		return $this;
 	}
 
@@ -422,9 +427,11 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 						$tmp[] = $v;
 					}
 				}
+
 				if (!$tmp) {
 					continue;
 				}
+
 				$value = implode($key === 'style' ? ';' : ' ', $tmp);
 
 			} else {
@@ -448,6 +455,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		if ($this->name && !$this->isEmpty) {
 			return '</' . $this->name . '>';
 		}
+
 		return '';
 	}
 
@@ -497,6 +505,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 			if ($child instanceof self) {
 				$child = $child->name;
 			}
+
 			return isset($dtd[$this->name][1][$child]);
 		} else {
 			return true; // unknown element

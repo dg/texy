@@ -143,6 +143,7 @@ final class ImageModule extends Texy\Module
 		if (isset($this->references[$name])) {
 			return clone $this->references[$name];
 		}
+
 		return null;
 	}
 
@@ -254,18 +255,22 @@ final class ImageModule extends Texy\Module
 		if (!Helpers::isRelative($image->URL) || strpos($image->URL, '..') !== false) {
 			return;
 		}
+
 		$file = rtrim((string) $this->fileRoot, '/\\') . '/' . $image->URL;
 		if (!@is_file($file) || !($size = @getimagesize($file))) { // intentionally @
 			return;
 		}
+
 		if ($image->asMax) {
 			$ratio = 1;
 			if (is_int($image->width)) {
 				$ratio = min($ratio, $image->width / $size[0]);
 			}
+
 			if (is_int($image->height)) {
 				$ratio = min($ratio, $image->height / $size[1]);
 			}
+
 			$image->width = (int) round($ratio * $size[0]);
 			$image->height = (int) round($ratio * $size[1]);
 

@@ -380,6 +380,7 @@ class Texy
 				unset($this->_linePatterns[$name]);
 			}
 		}
+
 		foreach ($this->_blockPatterns as $name => $foo) {
 			if (empty($this->allowed[$name])) {
 				unset($this->_blockPatterns[$name]);
@@ -463,12 +464,14 @@ class Texy
 			if (empty($this->allowed[$name])) {
 				continue;
 			}
+
 			foreach ($blocks as $n => $s) {
 				if ($n % 2 === 0 && $s !== '') {
 					$blocks[$n] = $handler($s);
 				}
 			}
 		}
+
 		$s = implode(self::CONTENT_BLOCK, $blocks);
 
 		// encode < > &

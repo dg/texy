@@ -120,6 +120,7 @@ final class TypographyModule extends Texy\Module
 		if (!$preserveSpaces) {
 			$text = Texy\Regexp::replace($text, '# {2,}#', ' ');
 		}
+
 		return Texy\Regexp::replace($text, $this->pattern);
 	}
 }

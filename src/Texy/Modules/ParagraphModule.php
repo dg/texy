@@ -45,6 +45,7 @@ final class ParagraphModule extends Texy\Module
 				if ($s === '') {
 					continue;
 				}
+
 				$mod = new Texy\Modifier;
 				$mod->setProperties($mMod);
 			}

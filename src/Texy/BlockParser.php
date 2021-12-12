@@ -50,6 +50,7 @@ class BlockParser extends Parser
 		if ($this->offset > strlen($this->text)) {
 			return false;
 		}
+
 		/** @var array<int, array{string, int}>|null $matches */
 		$matches = Regexp::match(
 			$this->text,
@@ -63,8 +64,10 @@ class BlockParser extends Parser
 			foreach ($matches as $key => $value) {
 				$matches[$key] = $value[0];
 			}
+
 			return true;
 		}
+
 		return false;
 	}
 
@@ -152,19 +155,24 @@ class BlockParser extends Parser
 				foreach ($m as $k => $v) {
 					$m[$k] = $v[0];
 				}
+
 				$matches[] = [$offset, $name, $m, $priority];
 			}
+
 			$priority++;
 		}
+
 		unset($name, $pattern, $ms, $m, $k, $v);
 
 		usort($matches, function ($a, $b): int {
 			if ($a[0] === $b[0]) {
 				return $a[3] < $b[3] ? -1 : 1;
 			}
+
 			if ($a[0] < $b[0]) {
 				return -1;
 			}
+
 			return 1;
 		});
 

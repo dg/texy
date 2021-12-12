@@ -99,6 +99,7 @@ final class Helpers
 		} else {
 			$s = (string) @iconv('UTF-8', 'ASCII//TRANSLIT', $s); // intentionally @
 		}
+
 		$s = str_replace(['`', "'", '"', '^', '~'], '', $s);
 		return $s;
 	}
@@ -131,9 +132,11 @@ final class Helpers
 				$min = min($min, strlen($m[0]) - 1);
 			}
 		}
+
 		if ($min) {
 			$s = Regexp::replace($s, "#^ {1,$min}#m", '');
 		}
+
 		return $s;
 	}
 
@@ -156,6 +159,7 @@ final class Helpers
 		if ($root == null || !self::isRelative($URL)) {
 			return $URL;
 		}
+
 		return rtrim($root, '/\\') . '/' . $URL;
 	}
 }

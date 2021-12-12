@@ -203,6 +203,7 @@ final class LinkModule extends Texy\Module
 			if ($pos === false) {
 				$pos = strpos($name, '#');
 			}
+
 			if ($pos !== false) { // try to extract ?... #... part
 				$name2 = substr($name, 0, $pos);
 				if (isset($this->references[$name2])) {
@@ -212,6 +213,7 @@ final class LinkModule extends Texy\Module
 				}
 			}
 		}
+
 		return null;
 	}
 
@@ -246,6 +248,7 @@ final class LinkModule extends Texy\Module
 		if (strpos((string) $link->URL, '%s') !== false) {
 			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
 		}
+
 		$link->modifier->setProperties($mMod);
 		$link->type = $type;
 		return $link;
@@ -283,7 +286,6 @@ final class LinkModule extends Texy\Module
 			if ($this->imageClass) {
 				$el->attrs['class'][] = $this->imageClass;
 			}
-
 		} else {
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $this->root);
 
@@ -390,6 +392,7 @@ final class LinkModule extends Texy\Module
 					? "#\u{2026}"
 					: ('#' . $parts['fragment']);
 			}
+
 			return $res;
 		}
 

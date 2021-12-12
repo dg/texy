@@ -111,9 +111,11 @@ final class LongWordsModule extends Texy\Module
 			if (ord($char[0]) < 32) {
 				continue;
 			}
+
 			$s[] = $char;
 			$trans[] = $key;
 		}
+
 		$s[] = '';
 		$len = count($s) - 2;
 
@@ -132,9 +134,11 @@ final class LongWordsModule extends Texy\Module
 			if ($hyphen === self::DONT && ($a - $last > $this->wordLimit * 0.6)) {
 				$positions[] = $last = $a - 1; // Hyphenate here
 			}
+
 			if ($hyphen === self::HERE) {
 				$positions[] = $last = $a - 1; // Hyphenate here
 			}
+
 			if ($hyphen === self::AFTER) {
 				$positions[] = $last = $a;
 				$a++; // Hyphenate after
@@ -154,6 +158,7 @@ final class LongWordsModule extends Texy\Module
 				$last = $pos;
 			}
 		}
+
 		$syllables[] = implode('', $chars);
 		return implode("\u{AD}", $syllables);
 	}
@@ -183,8 +188,10 @@ final class LongWordsModule extends Texy\Module
 						? self::DONT
 						: self::AFTER;
 				}
+
 				return self::AFTER;
 			}
+
 			return self::DONT;
 
 		} elseif (($ch === 'u') && isset($this->doubleVowels[$prev])) {

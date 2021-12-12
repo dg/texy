@@ -157,6 +157,7 @@ final class Modifier
 				foreach ($this->classes as $value => $foo) {
 					$attrs['class'][] = $value;
 				}
+
 				$attrs['id'] = $this->id;
 			} elseif (is_array($allowedClasses)) {
 				foreach ($this->classes as $value => $foo) {
@@ -227,6 +228,7 @@ final class Modifier
 			if ($prop === '' || !isset($pair[1])) {
 				continue;
 			}
+
 			$value = trim($pair[1]);
 
 			if (isset(self::$elAttrs[$prop]) || substr($prop, 0, 5) === 'data-') { // attribute

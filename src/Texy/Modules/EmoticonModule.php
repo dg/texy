@@ -102,6 +102,7 @@ final class EmoticonModule extends Texy\Module
 		if (strpos($file, '.') === false) {
 			return $file;
 		}
+
 		$el = new Texy\HtmlElement('img');
 		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root ?? $texy->imageModule->root);
 		$el->attrs['alt'] = $raw;
@@ -116,6 +117,7 @@ final class EmoticonModule extends Texy\Module
 				$el->attrs['height'] = $size[1];
 			}
 		}
+
 		$texy->summary['images'][] = $el->attrs['src'];
 		return $el;
 	}

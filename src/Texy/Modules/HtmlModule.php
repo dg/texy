@@ -148,6 +148,7 @@ final class HtmlModule extends Texy\Module
 		if (!$this->validateAttrs($el, $texy)) {
 			return null;
 		}
+
 		$el->validateAttrs($texy->getDTD());
 
 		return $el;
@@ -198,7 +199,6 @@ final class HtmlModule extends Texy\Module
 					unset($attrs['class'][$key]); // id & class are case-sensitive
 				}
 			}
-
 		} elseif ($allowedClasses !== Texy\Texy::ALL) {
 			$attrs['class'] = null;
 		}
@@ -251,17 +251,20 @@ final class HtmlModule extends Texy\Module
 			if (!isset($el->attrs['src']) || !$texy->checkURL($el->attrs['src'], $texy::FILTER_IMAGE)) {
 				return false;
 			}
+
 			$texy->summary['images'][] = $el->attrs['src'];
 
 		} elseif ($name === 'a') {
 			if (!isset($el->attrs['href']) && !isset($el->attrs['name']) && !isset($el->attrs['id'])) {
 				return false;
 			}
+
 			if (isset($el->attrs['href'])) {
 				if ($texy->linkModule->forceNoFollow && strpos($el->attrs['href'], '//') !== false) {
 					if (isset($el->attrs['rel'])) {
 						$el->attrs['rel'] = (array) $el->attrs['rel'];
 					}
+
 					$el->attrs['rel'][] = 'nofollow';
 				}
 
@@ -271,7 +274,6 @@ final class HtmlModule extends Texy\Module
 
 				$texy->summary['links'][] = $el->attrs['href'];
 			}
-
 		} elseif (preg_match('#^h[1-6]#i', $name)) {
 			$texy->headingModule->TOC[] = [
 				'el' => $el,
@@ -305,6 +307,7 @@ final class HtmlModule extends Texy\Module
 				$res[$key] = Texy\Helpers::unescapeHtml($value);
 			}
 		}
+
 		return $res;
 	}
 }

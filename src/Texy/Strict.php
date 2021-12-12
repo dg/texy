@@ -59,6 +59,7 @@ trait Strict
 			$ret = $this->$m();
 			return $ret;
 		}
+
 		$rc = new ReflectionClass($this);
 		$items = array_filter($rc->getProperties(ReflectionProperty::IS_PUBLIC), function ($p) { return !$p->isStatic(); });
 		$hint = ($t = self::getSuggestion($items, $name))
@@ -114,6 +115,7 @@ trait Strict
 				$best = $item;
 			}
 		}
+
 		return $best;
 	}
 }

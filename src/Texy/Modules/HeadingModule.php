@@ -134,6 +134,7 @@ final class HeadingModule extends Texy\Module
 				} else {
 					$title = trim($item['el']->toText($this->texy));
 				}
+
 				$this->TOC[$key]['title'] = $title;
 				if (empty($item['el']->attrs['id'])) {
 					$id = $this->idPrefix . Texy\Helpers::webalize($title);
@@ -143,8 +144,10 @@ final class HeadingModule extends Texy\Module
 						while (isset($this->usedID[$id . '-' . $counter])) {
 							$counter++;
 						}
+
 						$id .= '-' . $counter;
 					}
+
 					$this->usedID[$id] = true;
 					$item['el']->attrs['id'] = $id;
 				}
