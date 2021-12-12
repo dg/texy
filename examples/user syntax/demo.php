@@ -49,12 +49,8 @@ $texy->registerBlockPattern(
 
 /**
  * Pattern handler for inline syntaxes
- *
- * @param  array $matches   reg-exp matches
- * @param  string $name  pattern name (myInlineSyntax1 or myInlineSyntax2)
- * @return Texy\HtmlElement|string
  */
-function userInlineHandler(Texy\LineParser $parser, array $matches, string $name)
+function userInlineHandler(Texy\LineParser $parser, array $matches, string $name): Texy\HtmlElement|string
 {
 	[, $mContent, $mMod] = $matches;
 
@@ -83,9 +79,8 @@ function userInlineHandler(Texy\LineParser $parser, array $matches, string $name
  *
  * @param  array $matches      regexp matches
  * @param  string $name     pattern name (myBlockSyntax1)
- * @return Texy\HtmlElement|string|null
  */
-function userBlockHandler(Texy\BlockParser $parser, array $matches, string $name)
+function userBlockHandler(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 {
 	[, $mTag, $mText] = $matches;
 

@@ -37,10 +37,8 @@ final class BlockQuoteModule extends Texy\Module
 	 * swath of the marching Orcs tramped its ugly slot; the sweet grass
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
-	 *
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mMod, $mPrefix, $mContent] = $matches;
 		// [1] => .(title)[class]{style}<>

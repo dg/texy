@@ -48,9 +48,8 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches)
+	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 		// [1] => URLs

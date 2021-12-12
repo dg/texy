@@ -231,10 +231,8 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: **.... .(title)[class]{style}**:LINK.
-	 *
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function patternPhrase(LineParser $parser, array $matches, string $phrase)
+	public function patternPhrase(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
 		[, $mContent, $mMod, $mLink] = $matches;
 		// [1] => **
@@ -277,9 +275,8 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: any^2 any_2.
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function patternSupSub(LineParser $parser, array $matches, string $phrase)
+	public function patternSupSub(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
 		[, $mContent] = $matches;
 		$mod = new Modifier;
@@ -298,7 +295,6 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|string|null
 	 */
 	public function solve(
 		Texy\HandlerInvocation $invocation,
@@ -306,7 +302,8 @@ final class PhraseModule extends Texy\Module
 		string $content,
 		Modifier $mod,
 		?Texy\Link $link = null,
-	) {
+	): Texy\HtmlElement|string|null
+	{
 		$texy = $this->texy;
 		$tag = $this->tags[$phrase] ?? null;
 

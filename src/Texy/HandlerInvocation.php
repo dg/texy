@@ -18,7 +18,7 @@ final class HandlerInvocation
 	use Strict;
 
 	/** @var array<int, callable> */
-	private array  $handlers;
+	private array $handlers;
 	private int $pos;
 	private array $args;
 	private Parser $parser;

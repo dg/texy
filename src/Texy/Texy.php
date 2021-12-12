@@ -492,12 +492,11 @@ class Texy
 
 	/**
 	 * Invoke registered around-handlers.
-	 * @return mixed
 	 */
-	final public function invokeAroundHandlers(string $event, Parser $parser, array $args)
+	final public function invokeAroundHandlers(string $event, Parser $parser, array $args): mixed
 	{
 		if (!isset($this->handlers[$event])) {
-			return;
+			return null;
 		}
 
 		$invocation = new HandlerInvocation($this->handlers[$event], $parser, $args);

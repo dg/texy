@@ -37,10 +37,8 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Callback for: {{...}}.
-	 *
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function pattern(Texy\LineParser $parser, array $matches)
+	public function pattern(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mContent] = $matches;
 		// [1] => ...
@@ -67,9 +65,13 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
-	 * @return Texy\HtmlElement|string|null
 	 */
-	public function solve(Texy\HandlerInvocation $invocation, string $cmd, ?array $args = null, ?string $raw = null)
+	public function solve(
+		Texy\HandlerInvocation $invocation,
+		string $cmd,
+		?array $args = null,
+		?string $raw = null,
+	): Texy\HtmlElement|string|null
 	{
 		if ($cmd === 'texy' && $args) {
 			switch ($args[0]) {

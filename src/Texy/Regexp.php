@@ -45,10 +45,8 @@ class Regexp
 	/**
 	 * Performs a regular expression match.
 	 * @param  int $flags  OFFSET_CAPTURE, ALL
-	 * @param  int $offset  offset in bytes
-	 * @return mixed
 	 */
-	public static function match(string $subject, string $pattern, int $flags = 0, int $offset = 0)
+	public static function match(string $subject, string $pattern, int $flags = 0, int $offset = 0): mixed
 	{
 		$empty = $flags & self::ALL ? [] : null;
 		if ($offset > strlen($subject)) {
@@ -71,10 +69,12 @@ class Regexp
 
 	/**
 	 * Perform a regular expression search and replace.
-	 * @param  string|array $pattern
-	 * @param  string|callable $replacement
 	 */
-	public static function replace(string $subject, $pattern, $replacement = null): string
+	public static function replace(
+		string $subject,
+		string|array $pattern,
+		string|callable|null $replacement = null,
+	): string
 	{
 		if (is_object($replacement) || is_array($replacement)) {
 			$res = preg_replace_callback($pattern, $replacement, $subject);
