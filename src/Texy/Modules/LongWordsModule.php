@@ -17,12 +17,12 @@ use Texy;
  */
 final class LongWordsModule extends Texy\Module
 {
-	public const
-		DONT = 0, // don't hyphenate
-		HERE = 1, // hyphenate here
-		AFTER = 2; // hyphenate after
+	private const
+		Dont = 0, // don't hyphenate
+		Here = 1, // hyphenate here
+		After = 2; // hyphenate after
 
-	public const SAFE_LIMIT = 1000;
+	private const SafeLimit = 1000;
 
 	public $wordLimit = 20;
 
@@ -89,7 +89,7 @@ final class LongWordsModule extends Texy\Module
 		[$mWord] = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd
 
-		if (iconv_strlen($mWord, 'UTF-8') > self::SAFE_LIMIT) {
+		if (iconv_strlen($mWord, 'UTF-8') > self::SafeLimit) {
 			return $mWord;
 		}
 
@@ -131,15 +131,15 @@ final class LongWordsModule extends Texy\Module
 
 			$hyphen = $this->getHyphen($s[$a], $s[$a - 1], $s[$a + 1]);
 
-			if ($hyphen === self::DONT && ($a - $last > $this->wordLimit * 0.6)) {
+			if ($hyphen === self::Dont && ($a - $last > $this->wordLimit * 0.6)) {
 				$positions[] = $last = $a - 1; // Hyphenate here
 			}
 
-			if ($hyphen === self::HERE) {
+			if ($hyphen === self::Here) {
 				$positions[] = $last = $a - 1; // Hyphenate here
 			}
 
-			if ($hyphen === self::AFTER) {
+			if ($hyphen === self::After) {
 				$positions[] = $last = $a;
 				$a++; // Hyphenate after
 			}
@@ -167,40 +167,40 @@ final class LongWordsModule extends Texy\Module
 	private function getHyphen(string $ch, string $prev, string $next): int
 	{
 		if ($ch === '.') {
-			return self::HERE;
+			return self::Here;
 
 		} elseif (isset($this->consonants[$ch])) { // consonants
 			if (isset($this->vowels[$next])) {
-				return isset($this->vowels[$prev]) ? self::HERE : self::DONT;
+				return isset($this->vowels[$prev]) ? self::Here : self::Dont;
 
 			} elseif (($ch === 's') && ($prev === 'n') && isset($this->consonants[$next])) {
-				return self::AFTER;
+				return self::After;
 
 			} elseif (isset($this->consonants[$next], $this->vowels[$prev])) {
 				if ($next === 'r') {
-					return isset($this->before_r[$ch]) ? self::HERE : self::AFTER;
+					return isset($this->before_r[$ch]) ? self::Here : self::After;
 
 				} elseif ($next === 'l') {
-					return isset($this->before_l[$ch]) ? self::HERE : self::AFTER;
+					return isset($this->before_l[$ch]) ? self::Here : self::After;
 
 				} elseif ($next === 'h') { // CH
 					return isset($this->before_h[$ch])
-						? self::DONT
-						: self::AFTER;
+						? self::Dont
+						: self::After;
 				}
 
-				return self::AFTER;
+				return self::After;
 			}
 
-			return self::DONT;
+			return self::Dont;
 
 		} elseif (($ch === 'u') && isset($this->doubleVowels[$prev])) {
-			return self::AFTER;
+			return self::After;
 
 		} elseif (isset($this->vowels[$ch], $this->vowels[$prev])) {
-			return self::HERE;
+			return self::Here;
 		}
 
-		return self::DONT; // Do not hyphenate
+		return self::Dont; // Do not hyphenate
 	}
 }

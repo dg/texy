@@ -208,7 +208,7 @@ $flowContent = array_fill_keys([
 	'var',
 	'video',
 	'wbr',
-	HtmlElement::INNER_TEXT,
+	HtmlElement::InnerText,
 ], 1);
 
 
@@ -269,7 +269,7 @@ $phrasingContent = array_fill_keys([
 	'var',
 	'video',
 	'wbr',
-	HtmlElement::INNER_TEXT,
+	HtmlElement::InnerText,
 ], 1);
 
 
@@ -286,7 +286,7 @@ return [/*
 	],*/
 	'a' => [
 		$globalAttrs + array_fill_keys(['href', 'target', 'download', 'ping', 'rel', 'hreflang', 'type', 'referrerpolicy'], 1),
-		[HtmlElement::INNER_TRANSPARENT => 1],
+		[HtmlElement::InnerTransparent => 1],
 	],
 	'abbr' => [
 		$globalAttrs,
@@ -310,7 +310,7 @@ return [/*
 	],
 	'audio' => [
 		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'preload', 'autoplay', 'loop', 'muted', 'controls'], 1),
-		['source' => 1, 'track' => 1, HtmlElement::INNER_TRANSPARENT => 1],
+		['source' => 1, 'track' => 1, HtmlElement::InnerTransparent => 1],
 	],
 	'b' => [
 		$globalAttrs,
@@ -346,7 +346,7 @@ return [/*
 	],
 	'canvas' => [
 		$globalAttrs + ['width' => 1, 'height' => 1],
-		[HtmlElement::INNER_TRANSPARENT => 1],
+		[HtmlElement::InnerTransparent => 1],
 	],
 	'caption' => [
 		$globalAttrs,
@@ -382,7 +382,7 @@ return [/*
 	],
 	'del' => [
 		$globalAttrs + ['cite' => 1, 'datetime' => 1],
-		[HtmlElement::INNER_TRANSPARENT => 1],
+		[HtmlElement::InnerTransparent => 1],
 	],
 	'details' => [
 		$globalAttrs + ['open' => 1],
@@ -498,7 +498,7 @@ return [/*
 	],
 	'ins' => [
 		$globalAttrs + ['cite' => 1, 'datetime' => 1],
-		[HtmlElement::INNER_TRANSPARENT => 1],
+		[HtmlElement::InnerTransparent => 1],
 	],
 	'kbd' => [
 		$globalAttrs,
@@ -526,7 +526,7 @@ return [/*
 	],
 	'map' => [
 		$globalAttrs + ['name' => 1],
-		[HtmlElement::INNER_TRANSPARENT => 1, 'area' => 1],
+		[HtmlElement::InnerTransparent => 1, 'area' => 1],
 	],
 	'mark' => [
 		$globalAttrs,
@@ -550,11 +550,11 @@ return [/*
 	],
 	'noscript' => [
 		$globalAttrs,
-		[HtmlElement::INNER_TRANSPARENT => 1],
+		[HtmlElement::InnerTransparent => 1],
 	],
 	'object' => [
 		$globalAttrs + array_fill_keys(['data', 'type', 'name', 'usemap', 'form', 'width', 'height'], 1),
-		['param' => 1, HtmlElement::INNER_TRANSPARENT => 1],
+		['param' => 1, HtmlElement::InnerTransparent => 1],
 	],
 	'ol' => [
 		$globalAttrs + ['reversed' => 1, 'start' => 1, 'type' => 1],
@@ -566,7 +566,7 @@ return [/*
 	],
 	'option' => [
 		$globalAttrs + ['disabled' => 1, 'label' => 1, 'selected' => 1, 'value' => 1],
-		[HtmlElement::INNER_TEXT => 1],
+		[HtmlElement::InnerText => 1],
 	],
 	'output' => [
 		$globalAttrs + ['for' => 1, 'form' => 1, 'name' => 1],
@@ -598,7 +598,7 @@ return [/*
 	],
 	'rp' => [
 		$globalAttrs,
-		[HtmlElement::INNER_TEXT => 1],
+		[HtmlElement::InnerText => 1],
 	],
 	'rt' => [
 		$globalAttrs,
@@ -618,7 +618,7 @@ return [/*
 	],
 	'script' => [
 		$globalAttrs + array_fill_keys(['src', 'type', 'async', 'defer', 'crossorigin', 'integrity', 'referrerpolicy'], 1),
-		[HtmlElement::INNER_TEXT => 1],
+		[HtmlElement::InnerText => 1],
 	],
 	'section' => [
 		$globalAttrs,
@@ -630,7 +630,7 @@ return [/*
 	],
 	'slot' => [
 		$globalAttrs + ['name' => 1],
-		[HtmlElement::INNER_TRANSPARENT => 1],
+		[HtmlElement::InnerTransparent => 1],
 	],
 	'small' => [
 		$globalAttrs,
@@ -650,7 +650,7 @@ return [/*
 	],
 	'style' => [
 		$globalAttrs + ['media' => 1],
-		[HtmlElement::INNER_TEXT => 1],
+		[HtmlElement::InnerText => 1],
 	],
 	'sub' => [
 		$globalAttrs,
@@ -682,7 +682,7 @@ return [/*
 	],
 	'textarea' => [
 		$globalAttrs + array_fill_keys(['cols', 'dirname', 'disabled', 'form', 'maxlength', 'minlength', 'name', 'placeholder', 'readonly', 'required', 'rows', 'wrap'], 1),
-		[HtmlElement::INNER_TEXT => 1],
+		[HtmlElement::InnerText => 1],
 	],
 	'tfoot' => [
 		$globalAttrs,
@@ -702,7 +702,7 @@ return [/*
 	],
 	'title' => [
 		$globalAttrs,
-		[HtmlElement::INNER_TEXT => 1],
+		[HtmlElement::InnerText => 1],
 	],
 	'tr' => [
 		$globalAttrs,
@@ -726,7 +726,7 @@ return [/*
 	],
 	'video' => [
 		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'poster', 'preload', 'autoplay', 'playsinline', 'loop', 'muted', 'controls', 'width', 'height'], 1),
-		['source' => 1, 'track' => 1, HtmlElement::INNER_TRANSPARENT => 1],
+		['source' => 1, 'track' => 1, HtmlElement::InnerTransparent => 1],
 	],
 	'wbr' => [
 		$globalAttrs,
