@@ -14,7 +14,7 @@ use Texy\Texy;
 
 
 /**
- * Macro {texy} ... {/texy}
+ * Macro {texy} ... {/texy} for Latte v2
  */
 class TexyMacro extends Latte\Macros\MacroSet
 {

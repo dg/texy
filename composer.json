@@ -16,7 +16,7 @@
 	"require-dev": {
 		"nette/tester": "^2.0",
 		"tracy/tracy": "^2.4",
-		"latte/latte": "^2.6",
+		"latte/latte": "^2.6 || ^3.0",
 		"phpstan/phpstan": "^0.12"
 	},
 	"replace": {
