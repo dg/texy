@@ -13,6 +13,7 @@ use Latte;
 use Latte\Compiler\NodeHelpers;
 use Latte\Compiler\Nodes\AreaNode;
 use Latte\Compiler\Nodes\Php\Expression\ArrayNode;
+use Latte\Compiler\Nodes\Php\IdentifierNode;
 use Latte\Compiler\Nodes\StatementNode;
 use Latte\Compiler\PrintContext;
 use Latte\Compiler\Tag;
@@ -31,13 +32,31 @@ class TexyNode extends StatementNode
 	/** @return \Generator<int, ?array, array{AreaNode, ?Tag}, static> */
 	public static function create(Tag $tag, TemplateParser $parser, callable $processor): \Generator
 	{
+		if ($tag->isNAttribute()) {
+			throw new \LogicException('The n:texy is not supported');
+		}
+
+		$lexer = $parser->getLexer();
+		$savedC = $parser->getContentType();
+		$savedD = [$lexer->openDelimiter, $lexer->closeDelimiter];
+
 		$node = new static;
 		$node->args = $tag->parser->parseArguments();
 
-		$saved = $parser->getContentType();
+		foreach ($node->args->items as $i => $arg) {
+			if ($arg->key instanceof IdentifierNode && $arg->key->name === 'syntax') {
+				array_splice($node->args->items, $i, 1);
+				$lexer->setSyntax(NodeHelpers::toValue($arg->value), $tag->name);
+				break;
+			}
+		}
+
 		$parser->setContentType(Latte\ContentType::Text);
+
 		[$node->content] = yield;
-		$parser->setContentType($saved);
+
+		$parser->setContentType($savedC);
+		[$lexer->openDelimiter, $lexer->closeDelimiter] = $savedD;
 
 		$text = NodeHelpers::toText($node->content);
 		if ($text !== null) {

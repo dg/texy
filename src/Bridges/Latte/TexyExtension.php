@@ -38,7 +38,7 @@ class TexyExtension extends Latte\Extension
 	public function getTags(): array
 	{
 		return [
-			'texy' => fn(Tag $tag, TemplateParser $parser): \Generator => TexyNode::create($tag, $parser, $this->processor),
+			'texy' => fn(Tag $tag, TemplateParser $parser) => yield from TexyNode::create($tag, $parser, $this->processor),
 		];
 	}
 
