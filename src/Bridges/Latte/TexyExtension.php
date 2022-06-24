@@ -12,6 +12,8 @@ namespace Texy\Bridges\Latte;
 use Latte;
 use Latte\Compiler\Tag;
 use Latte\Compiler\TemplateParser;
+use Latte\ContentType;
+use Latte\Runtime\FilterInfo;
 use Texy\Helpers;
 use Texy\Texy;
 
@@ -43,10 +45,25 @@ class TexyExtension extends Latte\Extension
 	}
 
 
+	public function getFilters(): array
+	{
+		return [
+			'texy' => [$this, 'texyFilter'],
+		];
+	}
+
+
 	public function getProviders(): array
 	{
 		return [
 			'texy' => $this->processor,
 		];
+	}
+
+
+	public function texyFilter(FilterInfo $info, string $text, ...$args): string
+	{
+		$info->contentType ??= ContentType::Html;
+		return ($this->processor)($text, ...$args);
 	}
 }

@@ -84,3 +84,9 @@ Assert::match(
 	'<p>hello {$x}</p>',
 	$latte->renderToString('{texy syntax: off} hello {$x} {/texy}'),
 );
+
+
+Assert::match(
+	'<p>hello</p>',
+	$latte->renderToString('{="hello"|texy}'),
+);

@@ -54,3 +54,9 @@ Assert::match(
 		XX,
 	$latte->renderToString($template),
 );
+
+
+Assert::match(
+	'<h2>hello</h2>',
+	$latte->renderToString('{="hello\n----"|texy: heading: 2}'),
+);
