@@ -295,7 +295,8 @@ class Texy
 		string $pattern,
 		string $name,
 		?string $againTest = null
-	): void {
+	): void
+	{
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = true;
 		}

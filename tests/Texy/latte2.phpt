@@ -33,7 +33,7 @@ Assert::match(
 ';
 	%A%
 XX
-,
+	,
 	$latte->compile($template)
 );
 

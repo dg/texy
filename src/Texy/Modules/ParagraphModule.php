@@ -65,7 +65,8 @@ final class ParagraphModule extends Texy\Module
 		Texy\HandlerInvocation $invocation,
 		string $content,
 		?Texy\Modifier $mod = null
-	): ?Texy\HtmlElement {
+	): ?Texy\HtmlElement
+	{
 		$texy = $this->texy;
 
 		// find hard linebreaks
@@ -100,7 +101,7 @@ final class ParagraphModule extends Texy\Module
 				$el->setName($texy->nontextParagraph);
 			}
 
-			// block contains only markup tags or spaces or nothing
+		// block contains only markup tags or spaces or nothing
 		} else {
 			// if {ignoreEmptyStuff} return null;
 			if (!$mod) {
