@@ -282,12 +282,12 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	#[\ReturnTypeWillChange]
 	/**
 	 * Returns child node (ArrayAccess implementation).
 	 * @param  int  $index
 	 * @return mixed
 	 */
+	#[\ReturnTypeWillChange]
 	final public function offsetGet($index)
 	{
 		return $this->children[$index];

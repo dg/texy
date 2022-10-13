@@ -18,7 +18,6 @@ use Texy\Patterns;
  */
 final class TypographyModule extends Texy\Module
 {
-	// @see http://www.unicode.org/cldr/data/charts/by_type/misc.delimiters.html
 	public static $locales = [
 		'cs' => [
 			'singleQuotes' => ["\u{201A}", "\u{2018}"],

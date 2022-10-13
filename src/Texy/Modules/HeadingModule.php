@@ -213,7 +213,8 @@ final class HeadingModule extends Texy\Module
 		string $content,
 		Modifier $mod,
 		bool $isSurrounded
-	): Texy\HtmlElement {
+	): Texy\HtmlElement
+	{
 		// as fixed balancing, for block/texysource & correct decorating
 		$el = new Texy\HtmlElement('h' . min(6, max(1, $level + $this->top)));
 		$mod->decorate($this->texy, $el);

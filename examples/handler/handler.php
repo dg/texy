@@ -35,7 +35,6 @@ $texy->addHandler('afterParse', [$handler, 'afterParse']);
 
 class myHandler
 {
-
 	/** Line parsing */
 
 
@@ -175,7 +174,8 @@ class myHandler
 		Texy\BlockParser $parser,
 		Texy\HtmlElement $element,
 		Texy\Modifier $modifier
-	): void {
+	): void
+	{
 	}
 
 

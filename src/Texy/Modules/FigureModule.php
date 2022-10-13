@@ -90,7 +90,8 @@ final class FigureModule extends Texy\Module
 		?Texy\Link $link,
 		string $content,
 		Texy\Modifier $mod
-	): ?Texy\HtmlElement {
+	): ?Texy\HtmlElement
+	{
 		$texy = $this->texy;
 
 		$hAlign = $image->modifier->hAlign;

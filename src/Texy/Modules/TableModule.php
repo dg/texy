@@ -160,7 +160,8 @@ final class TableModule extends Texy\Module
 		array &$colModifier,
 		int &$colCounter,
 		int $rowCounter
-	): HtmlElement {
+	): HtmlElement
+	{
 		$elRow = new HtmlElement('tr');
 		$mod = new Modifier($mMod);
 		$mod->decorate($texy, $elRow);
@@ -228,7 +229,8 @@ final class TableModule extends Texy\Module
 		?Modifier &$cellModifier,
 		bool $isHead,
 		Texy\Texy $texy
-	): ?TableCellElement {
+	): ?TableCellElement
+	{
 		$matches = Regexp::match($cell, '#(\*??)[\ \t]*' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?[\ \t]*()$#AU');
 		if (!$matches) {
 			return null;

@@ -24,12 +24,12 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Tex
 	}
 
 	switch ($parts[0]) {
-	case 'youtube':
-		$code = '<iframe width="' . ($image->width ?: 425) . '" height="' . ($image->height ?: 350) . '" '
-			. 'src="https://www.youtube.com/embed/' . htmlspecialchars($parts[1]) . '" frameborder="0" allow="autoplay" allowfullscreen></iframe>';
+		case 'youtube':
+			$code = '<iframe width="' . ($image->width ?: 425) . '" height="' . ($image->height ?: 350) . '" '
+				. 'src="https://www.youtube.com/embed/' . htmlspecialchars($parts[1]) . '" frameborder="0" allow="autoplay" allowfullscreen></iframe>';
 
-		$texy = $invocation->getTexy();
-		return $texy->protect($code, $texy::CONTENT_BLOCK);
+			$texy = $invocation->getTexy();
+			return $texy->protect($code, $texy::CONTENT_BLOCK);
 	}
 
 	return $invocation->proceed();

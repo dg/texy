@@ -91,8 +91,8 @@ final class BlockModule extends Texy\Module
 	public function solve(Texy\HandlerInvocation $invocation, string $blocktype, string $s, $param, Texy\Modifier $mod)
 	{
 		$texy = $this->texy;
-		/** @var Texy\BlockParser $parser */
 		$parser = $invocation->getParser();
+		\assert($parser instanceof Texy\BlockParser);
 
 		if ($blocktype === 'block/texy') {
 			return $this->blockTexy($s, $texy, $parser);
