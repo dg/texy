@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use Nette\Utils\Strings;
+
 
 /**
  * Helpers.
@@ -81,10 +83,12 @@ final class Helpers
 
 	/**
 	 * Converts UTF-8 to ASCII.
-	 * iconv('UTF-8', 'ASCII//TRANSLIT', ...) has problem with glibc!
 	 */
 	public static function toAscii(string $s): string
 	{
+		if (class_exists(Strings::class)) {
+			return Strings::toAscii($s);
+		}
 		$s = strtr($s, '`\'"^~', '-----');
 		if (ICONV_IMPL === 'glibc') {
 			$s = (string) @iconv('UTF-8', 'WINDOWS-1250//TRANSLIT', $s); // intentionally @
