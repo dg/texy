@@ -80,7 +80,7 @@ final class TypographyModule extends Texy\Module
 		// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
 		'#(?<=^| |\.|,|-|\+|\x16|\(|\d\x{A0})([\x17-\x1F]*\d++\.?[\x17-\x1F]*)\s++(?=[\x17-\x1F]*[%' . Patterns::CHAR . '\x{b0}-\x{be}\x{2020}-\x{214f}])#mu' => "\$1\u{A0}",
 		// space between preposition and word
-		'#(?<=^|[^0-9' . Patterns::CHAR . '])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9' . Patterns::CHAR . '])#mus' => "\$1\u{A0}",
+		'#(?<=^|[^0-9' . Patterns::CHAR . '])([\x17-\x1F]*[ksvzouiaKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9' . Patterns::CHAR . '])#mus' => "\$1\u{A0}",
 
 		// double ""
 		'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["' . Patterns::CHAR . '])()#Uu' => ':ldq:$1:rdq:',
