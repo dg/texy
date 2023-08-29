@@ -15,8 +15,6 @@ namespace Texy;
  */
 final class Image
 {
-	use Strict;
-
 	/** base image URL */
 	public ?string $URL = null;
 

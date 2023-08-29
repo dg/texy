@@ -15,8 +15,6 @@ namespace Texy;
  */
 class Parser
 {
-	use Strict;
-
 	protected Texy $texy;
 	protected HtmlElement $element;
 

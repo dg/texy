@@ -15,8 +15,6 @@ namespace Texy;
  */
 final class Link
 {
-	use Strict;
-
 	/** @see $type */
 	public const
 		COMMON = 1,

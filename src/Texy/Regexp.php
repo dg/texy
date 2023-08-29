@@ -12,8 +12,6 @@ namespace Texy;
 
 class Regexp
 {
-	use Strict;
-
 	public const ALL = 1;
 	public const OFFSET_CAPTURE = 2;
 

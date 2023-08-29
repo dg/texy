@@ -23,8 +23,6 @@ namespace Texy;
  */
 final class Modifier
 {
-	use Strict;
-
 	public ?string $id = null;
 
 	/** @var array<string, bool> of classes (as keys) */

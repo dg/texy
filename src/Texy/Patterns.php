@@ -15,8 +15,6 @@ namespace Texy;
  */
 class Patterns
 {
-	use Strict;
-
 	// Unicode character classes
 	public const CHAR = 'A-Za-z\x{C0}-\x{2FF}\x{370}-\x{1EFF}';
 

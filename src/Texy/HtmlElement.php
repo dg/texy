@@ -21,8 +21,6 @@ namespace Texy;
  */
 class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 {
-	use Strict;
-
 	public const InnerText = '%TEXT';
 	public const InnerTransparent = '%TRANS';
 

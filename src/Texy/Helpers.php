@@ -15,8 +15,6 @@ namespace Texy;
  */
 final class Helpers
 {
-	use Strict;
-
 	public function __construct()
 	{
 		throw new \LogicException('Cannot instantiate static class ' . self::class);

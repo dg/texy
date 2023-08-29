@@ -20,8 +20,6 @@ namespace Texy;
  */
 class Configurator
 {
-	use Strict;
-
 	public static array $safeTags = [
 		'a' => ['href', 'title'],
 		'abbr' => ['title'],

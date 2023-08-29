@@ -20,8 +20,6 @@ namespace Texy;
  */
 class Texy
 {
-	use Strict;
-
 	// Texy version
 	public const VERSION = '3.1.7';
 

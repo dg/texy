@@ -15,8 +15,6 @@ namespace Texy;
  */
 final class HandlerInvocation
 {
-	use Strict;
-
 	/** @var array<int, callable> */
 	private array $handlers;
 	private int $pos;
