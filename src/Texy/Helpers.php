@@ -154,7 +154,7 @@ final class Helpers
 	/**
 	 * Prepends root to URL, if possible.
 	 */
-	public static function prependRoot(string $URL, string $root): string
+	public static function prependRoot(string $URL, ?string $root): string
 	{
 		if ($root == null || !self::isRelative($URL)) {
 			return $URL;

@@ -21,7 +21,7 @@ use Texy\Patterns;
  */
 final class LinkModule extends Texy\Module
 {
-	/** @var string  root of relative links */
+	/** @var string|null  root of relative links */
 	public $root = '';
 
 	/** @var string|null linked image class */

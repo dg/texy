@@ -702,7 +702,7 @@ class Texy
 
 
 	/** @deprecated */
-	final public static function prependRoot(string $URL, string $root): string
+	final public static function prependRoot(string $URL, ?string $root): string
 	{
 		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::prependRoot()', E_USER_DEPRECATED);
 		return Helpers::prependRoot($URL, $root);

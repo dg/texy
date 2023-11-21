@@ -20,10 +20,10 @@ use Texy\Patterns;
  */
 final class ImageModule extends Texy\Module
 {
-	/** @var string  root of relative images (http) */
+	/** @var string|null  root of relative images (http) */
 	public $root = 'images/';
 
-	/** @var string  root of linked images (http) */
+	/** @var string|null  root of linked images (http) */
 	public $linkedRoot = 'images/';
 
 	/** @var string|null  physical location of images on server */
