@@ -38,7 +38,7 @@ class TexyNode extends StatementNode
 
 		$lexer = $parser->getLexer();
 		$savedC = $parser->getContentType();
-		$savedD = [$lexer->openDelimiter, $lexer->closeDelimiter];
+		$syntax = false;
 
 		$node = new static;
 		$node->args = $tag->parser->parseArguments();
@@ -47,6 +47,7 @@ class TexyNode extends StatementNode
 			if ($arg->key instanceof IdentifierNode && $arg->key->name === 'syntax') {
 				array_splice($node->args->items, $i, 1);
 				$lexer->setSyntax(NodeHelpers::toValue($arg->value), $tag->name);
+				$syntax = true;
 				break;
 			}
 		}
@@ -56,7 +57,9 @@ class TexyNode extends StatementNode
 		[$node->content] = yield;
 
 		$parser->setContentType($savedC);
-		[$lexer->openDelimiter, $lexer->closeDelimiter] = $savedD;
+		if ($syntax) {
+			$lexer->popSyntax();
+		}
 
 		$text = NodeHelpers::toText($node->content);
 		if ($text !== null) {
