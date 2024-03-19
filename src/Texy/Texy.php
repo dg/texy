@@ -23,7 +23,7 @@ class Texy
 	use Strict;
 
 	// Texy version
-	public const VERSION = '3.1.7';
+	public const VERSION = '3.1.8';
 
 	// configuration directives
 	public const
