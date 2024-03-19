@@ -21,7 +21,7 @@ namespace Texy;
 class Texy
 {
 	// Texy version
-	public const VERSION = '3.1.7';
+	public const VERSION = '3.2.1';
 
 	// configuration directives
 	public const
