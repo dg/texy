@@ -63,7 +63,7 @@ final class TypographyModule extends Texy\Module
 		'#\+-#' /*.                               */ => "\u{B1}",                  // +-
 		'#(\d++) x (?=\d)#' /*.                   */ => "\$1\u{A0}\u{D7}\u{A0}",   // dimension sign 123 x 123...
 		'#(\d++)x(?=\d)#' /*.                     */ => "\$1\u{D7}",               // dimension sign 123x123...
-		'#(?<=\d)x(?= |,|.|$)#m' /*.              */ => "\u{D7}",                  // dimension sign 123x
+		'#(?<=\d)x(?= |,|\.|$)#m' /*.             */ => "\u{D7}",                  // dimension sign 123x
 		'#(\S ?)\(TM\)#i' /*.                     */ => "\$1\u{2122}",             // trademark (TM)
 		'#(\S ?)\(R\)#i' /*.                      */ => "\$1\u{AE}",               // registered (R)
 		'#\(C\)( ?\S)#i' /*.                      */ => "\u{A9}\$1",               // copyright (C)
