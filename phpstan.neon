@@ -27,6 +27,12 @@ parameters:
 			path: src/Texy/Modules/FigureModule.php
 
 		-
+			message: '#^Parameter \#1 \$string of function substr expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Modules/HtmlModule.php
+
+		-
 			message: '#^Empty array passed to foreach\.$#'
 			identifier: foreach.emptyArray
 			count: 1
