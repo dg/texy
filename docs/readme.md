@@ -30,8 +30,3 @@ chain-of-responsibility handlers, and DTD validation — so it is split by seam:
   of the built-in modules, and how they cooperate.
 - **[html-element.md](html-element.md)** — the `HtmlElement` DOM tree and DTD validation.
 - **[modifiers.md](modifiers.md)** — the `.(…)[…]{…}<>` modifier system and `decorate()`.
-
-> **Version scope.** This describes the current **Texy 3.2** line. Texy 4.0 will be
-> AST-based (a tree of typed node classes instead of `HtmlElement`, HTML generation as a
-> separate phase, and no user-visible protection marks) and will change most of the
-> mechanisms below; treat this as the 3.x source of truth until then.
