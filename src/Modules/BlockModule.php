@@ -263,7 +263,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-		$s = str_replace("\n", (new HtmlElement('br'))->startTag(), $s); // nl2br
+		$s = str_replace("\n", new HtmlElement('br')->startTag(), $s); // nl2br
 		return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
 	}
 
