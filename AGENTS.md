@@ -26,7 +26,7 @@ Texy is a mature text-to-HTML converter: it turns plain text in Texy syntax into
 valid (X)HTML with typography, images, links, tables, and lists, and integrates
 with Latte.
 
-- **PHP Version**: 8.1 - 8.6
+- **PHP Version**: 8.2 - 8.6
 - **Package**: `texy/texy`
 
 ## Essential Commands
