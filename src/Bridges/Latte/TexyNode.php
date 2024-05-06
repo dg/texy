@@ -43,7 +43,7 @@ class TexyNode extends StatementNode
 		foreach ($node->args->items as $i => $arg) {
 			if ($arg->key instanceof IdentifierNode && $arg->key->name === 'syntax') {
 				array_splice($node->args->items, $i, 1);
-				$lexer->setSyntax(NodeHelpers::toValue($arg->value), $tag->name);
+				$lexer->setSyntax($arg->value->toValue(), $tag->name);
 				$syntax = true;
 				break;
 			}
@@ -61,7 +61,7 @@ class TexyNode extends StatementNode
 		$text = NodeHelpers::toText($node->content);
 		if ($text !== null) {
 			try {
-				$text = $processor($text, ...NodeHelpers::toValue($node->args));
+				$text = $processor($text, ...$node->args->toValue());
 				return new Latte\Compiler\Nodes\TextNode($text);
 			} catch (\Throwable) {
 			}
