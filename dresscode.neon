@@ -49,7 +49,3 @@ overrides:
 			- src/Modules/LinkModule.php
 			- src/Modules/TableModule.php
 		upgrading: {declarations: {deprecatedMember: keep}}
-
-	- # the replacement does not exist in the oldest supported Latte
-		paths: [src/Bridges/Latte/TexyNode.php]
-		upgrading: {api: {forbiddenMembers: {'Latte\Compiler\NodeHelpers::toValue($node, ...)': keep}}}
