@@ -82,9 +82,9 @@ final class HtmlOutputModule extends Texy\Module
 		$s = strtr($s, "\r", "\n");
 
 		// greedy chars
-		$s = Regexp::replace($s, '#\x07 *#', '');
+		$s = Regexp::replace($s, '#\x07 *#');
 		// back-tabs
-		$s = Regexp::replace($s, '#\t? *\x08#', '');
+		$s = Regexp::replace($s, '#\t? *\x08#');
 
 		// line wrap
 		if ($this->lineWrap > 0) {

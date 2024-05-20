@@ -69,10 +69,10 @@ final class Helpers
 		$s = strtr($s, "\r", "\n"); // Mac
 
 		// remove special chars; leave \t + \n
-		$s = Regexp::replace($s, '#[\x00-\x08\x0B-\x1F]+#', '');
+		$s = Regexp::replace($s, '#[\x00-\x08\x0B-\x1F]+#');
 
 		// right trim
-		$s = Regexp::replace($s, "#[\t ]+$#m", '');
+		$s = Regexp::replace($s, "#[\t ]+$#m");
 
 		// trailing spaces
 		$s = trim($s, "\n");
@@ -130,13 +130,13 @@ final class Helpers
 			$min = strspn($s, ' ');
 		} else {
 			$min = strlen($s);
-			foreach (Regexp::match($s, '#^ *\S#m', Regexp::ALL) as $m) {
+			foreach (Regexp::matchAll($s, '#^ *\S#m') as $m) {
 				$min = min($min, strlen($m[0]) - 1);
 			}
 		}
 
 		if ($min) {
-			$s = Regexp::replace($s, "#^ {1,$min}#m", '');
+			$s = Regexp::replace($s, "#^ {1,$min}#m");
 		}
 
 		return $s;

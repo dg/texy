@@ -434,7 +434,7 @@ class Texy
 		$s = $this->stringToHtml($s);
 
 		// remove tags
-		$s = Regexp::replace($s, '#<(script|style)(.*)</\1>#Uis', '');
+		$s = Regexp::replace($s, '#<(script|style)(.*)</\1>#Uis');
 		$s = strip_tags($s);
 		$s = Regexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
 
