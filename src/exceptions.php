@@ -14,3 +14,11 @@ namespace Texy;
 class Exception extends \Exception
 {
 }
+
+
+/**
+ * Matching the text exhausted a limit of PCRE; a pattern that does not compile is a \LogicException.
+ */
+class RegexpException extends Exception
+{
+}
