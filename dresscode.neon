@@ -29,7 +29,6 @@ overrides:
 			- src/Link.php
 			- src/Modules/HeadingModule.php
 			- src/Patterns.php
-			- src/Regexp.php
 			- src/Texy.php
 		naming: {constant: keep, property: keep}
 
