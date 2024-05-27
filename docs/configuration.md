@@ -215,11 +215,9 @@ $texy->emoticonModule->icons = [         // emoticon => replacement
     '8-O' => '😮', '8-)' => '😄', ':-?' => '😕', ':-x' => '😶',
     ':-P' => '😛', ':-|' => '😐',
 ];
-$texy->emoticonModule->root = null;      // (deprecated) URL root for image emoticons
-$texy->emoticonModule->fileRoot = null;  // (deprecated) filesystem root for image sizes
 ```
 
-A replacement ending in a known image extension produces an `<img>`; otherwise the text is used verbatim.
+Replacements are rendered as text (wrapped in a `<span>` when `$class` is set). Image-file emoticons are no longer supported – a replacement containing `.` triggers a deprecation notice.
 
 ### HtmlModule
 
