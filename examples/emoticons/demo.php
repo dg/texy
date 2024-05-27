@@ -13,8 +13,6 @@
  *
  * BUILT-IN EMOTICONS are rendered as Unicode characters:
  * :-)  🙂    :-(  ☹    ;-)  😉    :-D  😁    :-P  😛    and more...
- *
- * An emoticon mapped to a file name is rendered as an <img> instead.
  */
 
 
@@ -34,8 +32,8 @@ $texy->allowed['emoticon'] = true;
 $texy->emoticonModule->class = 'smiley';
 
 // Add your own custom emoticon
-// When someone types :oops: in the text, it will show images/redface.gif
-$texy->emoticonModule->icons[':oops:'] = 'redface.gif';
+// When someone types :oops: in the text, it will show this emoji
+$texy->emoticonModule->icons[':oops:'] = '🙈';
 
 
 // Process the text
