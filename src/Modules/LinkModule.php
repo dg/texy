@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{HandlerInvocation, LineParser, Link, Patterns};
+use Texy\{HandlerInvocation, LineParser, Link, Patterns, Regexp};
 use function strlen;
 
 
@@ -351,7 +351,7 @@ final class LinkModule extends Texy\Module
 			// special supported case
 			$link->URL = 'http://' . $link->URL;
 
-		} elseif (preg_match('#' . self::$emailPattern . '$#Au', $link->URL)) {
+		} elseif (Regexp::match($link->URL, '#' . self::$emailPattern . '$#Au')) {
 			// email
 			$link->URL = 'mailto:' . $link->URL;
 
@@ -369,21 +369,20 @@ final class LinkModule extends Texy\Module
 	 */
 	private function textualUrl(Link $link): string
 	{
-		if ($this->texy->obfuscateEmail && preg_match('#^' . self::$emailPattern . '$#u', $link->raw)) { // email
+		if ($this->texy->obfuscateEmail && Regexp::match($link->raw, '#^' . self::$emailPattern . '$#u')) { // email
 			return str_replace('@', '&#64;<!-- -->', $link->raw);
 		}
 
-		if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#i', $link->raw)) {
+		if ($this->shorten && Regexp::match($link->raw, '#^(https?://|ftp://|www\.|/)#i')) {
 			$raw = strncasecmp($link->raw, 'www.', 4) === 0
 				? 'none://' . $link->raw
 				: $link->raw;
 
 			// parse_url() in PHP damages UTF-8 - use regular expression
-			if (!preg_match(
-				'~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~',
+			if (!($parts = Regexp::match(
 				$raw,
-				$parts,
-			)) {
+				'~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~',
+			))) {
 				return $link->raw;
 			}
 
