@@ -110,6 +110,12 @@ class Regexp
 	}
 
 
+	public static function quote(string $s): string
+	{
+		return preg_quote($s, '#');
+	}
+
+
 	/**
 	 * @internal
 	 * @param  array<mixed>  $args
