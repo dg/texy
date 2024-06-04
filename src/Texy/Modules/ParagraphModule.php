@@ -27,8 +27,8 @@ final class ParagraphModule extends Texy\Module
 	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
 	{
 		$parts = $parser->isIndented()
-			? preg_split('#(\n(?!\ )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY)
-			: preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
+			? Regexp::split($content, '#(\n(?!\ )|\n{2,})#', skipEmpty: true)
+			: Regexp::split($content, '#(\n{2,})#', skipEmpty: true);
 
 		foreach ($parts ?: [] as $s) {
 			$s = trim($s);
@@ -87,7 +87,7 @@ final class ParagraphModule extends Texy\Module
 		} elseif (str_contains($content, $texy::CONTENT_TEXTUAL)) { // block contains text (protected)
 			// leave element p
 
-		} elseif (preg_match('#[^\s' . Texy\Patterns::MARK . ']#u', $content)) { // block contains text
+		} elseif (Regexp::match($content, '#[^\s' . Texy\Patterns::MARK . ']#u')) { // block contains text
 			// leave element p
 
 		} elseif (str_contains($content, $texy::CONTENT_REPLACED)) { // block contains only replaced element
