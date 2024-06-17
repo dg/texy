@@ -36,7 +36,7 @@ final class HtmlModule extends Texy\Module
 			. Patterns::MARK
 			. ']*+\'|=[^\s>'
 			. Patterns::MARK
-			. ']++)*)\s*+(/?)>#isu',
+			. ']++)*)\s*+(/?)>#is',
 			'html/tag',
 		);
 
@@ -322,7 +322,7 @@ final class HtmlModule extends Texy\Module
 		$res = [];
 		$matches = Regexp::matchAll(
 			$attrs,
-			'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
+			'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#is',
 		);
 
 		foreach ($matches as $m) {
