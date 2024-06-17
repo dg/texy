@@ -435,8 +435,6 @@ colspan & rowspans
 
 			50
 
-
-
 			52
 
 			Beam

@@ -65,9 +65,9 @@ final class LinkModule extends Texy\Module
 			. Patterns::CHAR
 			. '+\.~%&?@=_:;\#$!,*()\x{ad}-]{1,1000}[/\d'
 			. Patterns::CHAR
-			. '+~?@=_\#$*]#u',
+			. '+~?@=_\#$*]#',
 			'link/url',
-			'#(?:https?://|www\.|ftp://)#u',
+			'#(?:https?://|www\.|ftp://)#',
 		);
 
 		// direct email
@@ -82,9 +82,9 @@ final class LinkModule extends Texy\Module
 			. '\x{ad}]{2,19}';
 		$texy->registerLinePattern(
 			$this->patternUrlEmail(...),
-			'#(?<=^|[\s([<\x17])' . self::$emailPattern . '#u',
+			'#(?<=^|[\s([<\x17])' . self::$emailPattern . '#',
 			'link/email',
-			'#' . self::$emailPattern . '#u',
+			'#' . self::$emailPattern . '#',
 		);
 	}
 
@@ -100,7 +100,7 @@ final class LinkModule extends Texy\Module
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = Texy\Regexp::replace(
 				$text,
-				'#^\[([^\[\]\#\?\*\n]{1,100})\]:\ ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$#mUu',
+				'#^\[([^\[\]\#\?\*\n]{1,100})\]:\ ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$#mU',
 				$this->patternReferenceDef(...),
 			);
 		}
@@ -351,7 +351,7 @@ final class LinkModule extends Texy\Module
 			// special supported case
 			$link->URL = 'http://' . $link->URL;
 
-		} elseif (Regexp::match($link->URL, '#' . self::$emailPattern . '$#Au')) {
+		} elseif (Regexp::match($link->URL, '#' . self::$emailPattern . '$#A')) {
 			// email
 			$link->URL = 'mailto:' . $link->URL;
 
@@ -369,7 +369,7 @@ final class LinkModule extends Texy\Module
 	 */
 	private function textualUrl(Link $link): string
 	{
-		if ($this->texy->obfuscateEmail && Regexp::match($link->raw, '#^' . self::$emailPattern . '$#u')) { // email
+		if ($this->texy->obfuscateEmail && Regexp::match($link->raw, '#^' . self::$emailPattern . '$#')) { // email
 			return str_replace('@', '&#64;<!-- -->', $link->raw);
 		}
 
