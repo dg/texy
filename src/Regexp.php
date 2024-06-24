@@ -117,7 +117,7 @@ final class Regexp
 
 	public static function quote(string $s): string
 	{
-		return preg_quote($s, '#');
+		return preg_quote($s, '~');
 	}
 
 
