@@ -55,8 +55,8 @@ class Configurator
 		$texy->allowedClasses = $texy::NONE; // no class or ID are allowed
 		$texy->allowedStyles = $texy::NONE; // style modifiers are disabled
 		$texy->allowedTags = self::$safeTags; // only some "safe" HTML tags and attributes are allowed
-		$texy->urlSchemeFilters[$texy::FILTER_ANCHOR] = '#https?:|ftp:|mailto:#A';
-		$texy->urlSchemeFilters[$texy::FILTER_IMAGE] = '#https?:#A';
+		$texy->urlSchemeFilters[$texy::FILTER_ANCHOR] = '~https?:|ftp:|mailto:~A';
+		$texy->urlSchemeFilters[$texy::FILTER_IMAGE] = '~https?:~A';
 		$texy->allowed['image'] = false; // disable images
 		$texy->allowed['link/definition'] = false; // disable [ref]: URL reference definitions
 		$texy->allowed['html/comment'] = false; // disable HTML comments
