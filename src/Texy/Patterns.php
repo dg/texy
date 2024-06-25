@@ -37,5 +37,5 @@ class Patterns
 	public const IMAGE = '\[\*\ *+([^\n\x14-\x1F]{1,1000})(?:\ *+(?<=\ |^)\.((?:\([^)\n]++\)|\[[^\]\n]++\]|\{[^}\n]++\}){1,3}?))?\ *+(\*|(?<!<)>|<)\]';
 
 	// links, url - doesn't end by :).,!?
-	public const LINK_URL = '(?:\[[^\]\n]++\]|(?=[\w/+.~%&?@=_\#$])[^\s\x14-\x1F]{0,1000}?[^:);,.!?\s\x14-\x1F])'; // any url - doesn't end by :).,!?
+	public const LINK_URL = '(?:\[[^\]\n]++\]|(?=[\w/+.\~%&?@=_#$])[^\s\x14-\x1F]{0,1000}?[^:);,.!?\s\x14-\x1F])'; // any url - doesn't end by :).,!?
 }
