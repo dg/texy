@@ -7,6 +7,7 @@
 
 namespace Texy;
 
+use JetBrains\PhpStorm\Language;
 use function count, is_array, strlen;
 
 
@@ -220,6 +221,7 @@ class Texy
 	 */
 	final public function registerLinePattern(
 		callable $handler,
+		#[Language('RegExp')]
 		string $pattern,
 		string $name,
 		?string $againTest = null,
@@ -240,7 +242,12 @@ class Texy
 	/**
 	 * @param  callable(BlockParser, string[], string): (HtmlElement|string|null)  $handler
 	 */
-	final public function registerBlockPattern(callable $handler, string $pattern, string $name): void
+	final public function registerBlockPattern(
+		callable $handler,
+		#[Language('RegExp')]
+		string $pattern,
+		string $name,
+	): void
 	{
 		// if (!Regexp::match($pattern, '~(.)\^.*\$\1[a-z]*~is')) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {
