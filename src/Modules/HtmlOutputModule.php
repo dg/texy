@@ -9,6 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\{HtmlElement, Regexp};
+use function is_string;
 
 
 /**
@@ -68,7 +69,7 @@ final class HtmlOutputModule extends Texy\Module
 			'~
 				( [^<]*+ )
 				< (?: (!--.*--) | (/?) ([a-z][a-z0-9._:-]*) (|[ \n].*) \s* (/?) ) >
-			()~Uisx',
+			~Uisx',
 			$this->cb(...),
 		);
 
@@ -102,11 +103,12 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: <tag> | </tag> | ....
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	private function cb(array $matches): string
 	{
 		// html tag
+		/** @var array{string, string, ?string, ?string, ?string, ?string, ?string} $matches */
 		[, $mText, $mComment, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 		// [1] => text
 		// [1] => !-- comment --
@@ -136,6 +138,7 @@ final class HtmlOutputModule extends Texy\Module
 		}
 
 		// phase #3 - HTML tag
+		assert(is_string($mTag) && is_string($mAttr));
 		$mEmpty = $mEmpty || isset(HtmlElement::$emptyElements[$mTag]);
 		if ($mEmpty && $mEnd) { // bad tag; /end/
 			return $s;
@@ -328,10 +331,11 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: wrap lines.
-	 * @param  string[]  $m
+	 * @param  array<?string>  $m
 	 */
 	private function wrap(array $m): string
 	{
+		/** @var array{string, string, string} $m */
 		[, $space, $s] = $m;
 		return $space . wordwrap($s, $this->lineWrap, "\n" . $space);
 	}

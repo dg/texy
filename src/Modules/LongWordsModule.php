@@ -87,10 +87,11 @@ final class LongWordsModule extends Texy\Module
 
 	/**
 	 * Callback for long words.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	private function pattern(array $matches): string
 	{
+		/** @var array{string} $matches */
 		[$mWord] = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd
 
@@ -103,6 +104,7 @@ final class LongWordsModule extends Texy\Module
 			'~[' . Texy\Patterns::MARK . ']+|.~',
 		);
 
+		/** @var list<string> */
 		$chars = array_column($chars, 0);
 		if (count($chars) < $this->wordLimit) {
 			return $mWord;
