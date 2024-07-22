@@ -89,10 +89,11 @@ final class ListModule extends Texy\Module
 	 *   + ...
 	 *   + ...
 	 * 3) ....
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternList(BlockParser $parser, array $matches): ?HtmlElement
 	{
+		/** @var array{string, ?string, string} $matches */
 		[, $mMod, $mBullet] = $matches;
 		// [1] => .(title)[class]{style}<>
 		// [2] => bullet * + - 1) a) A) IV)
@@ -149,10 +150,11 @@ final class ListModule extends Texy\Module
 	 * - description 1
 	 * - description 2
 	 * - description 3
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternDefList(BlockParser $parser, array $matches): HtmlElement
 	{
+		/** @var array{string, ?string, string, ?string, string, string} $matches */
 		[, $mMod, , , , $mBullet] = $matches;
 		// [1] => .(title)[class]{style}<>
 		// [2] => ...
@@ -181,7 +183,7 @@ final class ListModule extends Texy\Module
 			( \S .* )                       # term content
 			: [ \t]*                        # colon separator
 			' . Patterns::MODIFIER_H . '?
-		()$~mUAx';
+		$~mUAx';
 
 		while (true) {
 			if ($elItem = $this->patternItem($parser, $bullet, true, 'dd')) {
@@ -190,6 +192,7 @@ final class ListModule extends Texy\Module
 			}
 
 			if ($parser->next($patternTerm, $matches)) {
+				/** @var array{string, string, ?string} $matches */
 				[, $mContent, $mMod] = $matches;
 				// [1] => ...
 				// [2] => .(title)[class]{style}<>
@@ -226,7 +229,7 @@ final class ListModule extends Texy\Module
 			[ \\t]*
 			( \\S .* )?                              # content
 			" . Patterns::MODIFIER_H . '?
-		()$~mAUx';
+		$~mAUx';
 
 		// first line with bullet
 		$matches = null;
@@ -234,6 +237,7 @@ final class ListModule extends Texy\Module
 			return null;
 		}
 
+		/** @var array{string, string, ?string, ?string} $matches */
 		[, $mIndent, $mContent, $mMod] = $matches;
 		// [1] => indent
 		// [2] => ...
@@ -251,7 +255,8 @@ final class ListModule extends Texy\Module
 			' . Regexp::quote($mIndent) . '
 			([ \t]{1,' . $spaces . '})
 			(.*)
-		()$~Amx', $matches)) {
+		$~Amx', $matches)) {
+			/** @var array{string, string, string, string} $matches */
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 			// [1] => blank line?
 			// [2] => spaces

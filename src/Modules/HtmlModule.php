@@ -62,7 +62,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <!-- comment -->.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternComment(Texy\LineParser $parser, array $matches): HtmlElement|string|null
 	{
@@ -73,10 +73,11 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <tag attr="...">.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternTag(Texy\LineParser $parser, array $matches): ?string
 	{
+		/** @var array{string, string, string, string, string} $matches */
 		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 		// [1] => /
 		// [2] => tag
@@ -346,14 +347,15 @@ final class HtmlModule extends Texy\Module
 						[^'"\s]+               # unquoted value
 					)
 				)?
-				()~isx
+				~isx
 				X,
 		);
 
+		/** @var array{string, string, ?string} $m */
 		foreach ($matches as $m) {
 			$key = strtolower($m[1]);
 			$value = $m[2];
-			if ($value === '') {
+			if ($value === null) {
 				$res[$key] = true;
 			} elseif ($value[0] === '\'' || $value[0] === '"') {
 				$res[$key] = Texy\Helpers::unescapeHtml(substr($value, 1, -1));
