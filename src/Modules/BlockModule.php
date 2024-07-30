@@ -219,7 +219,7 @@ final class BlockModule extends Texy\Module
 
 		$el = new HtmlElement('pre');
 		$mod->decorate($texy, $el);
-		$lineParser = new Texy\LineParser($texy, $el);
+		$lineParser = new Texy\Parsing\InlineParser($texy, $el);
 		// special mode - parse only html tags
 		$tmp = $lineParser->patterns;
 		$lineParser->patterns = [];
@@ -253,7 +253,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		$el = new HtmlElement;
-		$lineParser = new Texy\LineParser($texy, $el);
+		$lineParser = new Texy\Parsing\InlineParser($texy, $el);
 		// special mode - parse only html tags
 		$tmp = $lineParser->patterns;
 		$lineParser->patterns = [];

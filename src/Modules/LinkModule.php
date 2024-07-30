@@ -8,7 +8,8 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{HandlerInvocation, LineParser, Link, Patterns, Regexp};
+use Texy\{HandlerInvocation, Link, Patterns, Regexp};
+use Texy\Parsing\InlineParser;
 use function strlen;
 
 
@@ -147,7 +148,7 @@ final class LinkModule extends Texy\Module
 	 * Callback for: [ref].
 	 * @param  array<?string>  $matches
 	 */
-	public function patternReference(LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function patternReference(InlineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string} $matches */
 		[, $mRef] = $matches;
@@ -171,7 +172,7 @@ final class LinkModule extends Texy\Module
 			} else {
 				self::$livelock[$link->name] = true;
 				$el = new Texy\HtmlElement;
-				$lineParser = new LineParser($texy, $el);
+				$lineParser = new InlineParser($texy, $el);
 				$lineParser->parse($link->label);
 				$content = $el->toString($texy);
 				unset(self::$livelock[$link->name]);
@@ -189,7 +190,7 @@ final class LinkModule extends Texy\Module
 	 * Callback for: http://davidgrudl.com david@grudl.com.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternUrlEmail(LineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+	public function patternUrlEmail(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 	{
 		/** @var array{string} $matches */
 		[$mURL] = $matches;
