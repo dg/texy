@@ -25,6 +25,7 @@
  * Text               ? <div class="perex">Text</div>
  */
 
+use Texy\Parsing\InlineParser;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -95,7 +96,7 @@ $texy->registerBlockPattern(
  * @param array $matches           Regex matches [full, content, modifier]
  * @param string $name             Which syntax matched (myInlineSyntax1 or 2)
  */
-function userInlineHandler(Texy\LineParser $parser, array $matches, string $name): Texy\HtmlElement|string
+function userInlineHandler(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string
 {
 	[, $mContent, $mMod] = $matches;
 
