@@ -88,9 +88,9 @@ final class TypographyModule extends Texy\Module
 		. '])~msx' => "\$1\u{A0}",
 
 		// double ""
-		'~(?<! "|\w) " (?! \ | " ) ( (?: [^"]++ | ")+ ) (?<! \ | " ) " (?! ["' . Patterns::CHAR . '])()~Ux' => ':ldq:$1:rdq:',
+		'~(?<! "|\w) " (?! \ | " ) ( (?: [^"]++ | ")+ ) (?<! \ | " ) " (?! ["' . Patterns::CHAR . '])~Ux' => ':ldq:$1:rdq:',
 		// single ''
-		'~(?<! \'|\w) \' (?! \ | \' ) ( (?: [^\']++ | \')+ ) (?<! \ |\') \' (?! [\'' . Patterns::CHAR . '])()~Ux' => ':lsq:$1:rsq:',
+		'~(?<! \'|\w) \' (?! \ | \' ) ( (?: [^\']++ | \')+ ) (?<! \ |\') \' (?! [\'' . Patterns::CHAR . '])~Ux' => ':lsq:$1:rsq:',
 	];
 
 	/** @var array<string, string> */

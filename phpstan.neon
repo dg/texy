@@ -49,3 +49,4 @@ parameters:
 			identifier: missingType.callable
 			count: 1
 			path: src/Texy/Texy.php
+
