@@ -8,7 +8,7 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use Texy\Parsing\InlineParser;
+use Texy\Parsing\{BlockParser, InlineParser};
 use function count, is_array, strlen;
 
 
