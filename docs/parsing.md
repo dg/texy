@@ -3,7 +3,7 @@
 Texy has two parsers, both extending the abstract `Texy\Parser` (`src/Parser.php`), which only carries the reference to the `Texy` instance (`getTexy()`) and the target `HtmlElement`:
 
 - **`InlineParser`** (`src/Parsing/InlineParser.php`) – inline syntaxes inside lines,
-- **`BlockParser`** (`src/BlockParser.php`) – multi-line block constructs.
+- **`BlockParser`** (`src/Parsing/BlockParser.php`) – multi-line block constructs.
 
 They are not called directly; instead, `HtmlElement::parseLine()` and `HtmlElement::parseBlock()` create a parser with the element as the container and run it on given text. This makes parsing recursive: any syntax handler can create an element and parse its inner content the same way the main document is parsed.
 

@@ -75,7 +75,7 @@ The result replaces the matched text in the parsed string. An `HtmlElement` is s
 ### For block syntaxes
 
 ```php
-function(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+function(\Texy\Parsing\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 ```
 
 `BlockParser` adds an API for multi-line structures:
@@ -111,7 +111,7 @@ Check out the profile of @@johndoe.
 
 ```php
 $texy->registerBlockPattern(
-    function(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement {
+    function(\Texy\Parsing\BlockParser $parser, array $matches, string $name): Texy\HtmlElement {
         [, $type, $content] = $matches;
         $el = new Texy\HtmlElement('div');
         $el->attrs['class'][] = 'alert';
@@ -174,7 +174,7 @@ $texy->registerLinePattern(
 
 ```php
 $texy->registerBlockPattern(
-    function(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement {
+    function(\Texy\Parsing\BlockParser $parser, array $matches, string $name): Texy\HtmlElement {
         $parser->moveBackward();   // pattern matched the first line; re-read from it
 
         $content = '';
