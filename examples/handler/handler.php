@@ -17,6 +17,7 @@
  * You can modify the input before calling proceed(), or modify the output after.
  */
 
+use Texy\Parsing\BlockParser;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -337,7 +338,7 @@ class MyHandler
 	/**
 	 * Called after a list is created (<ul> or <ol>)
 	 */
-	public function afterList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
+	public function afterList(BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
@@ -346,7 +347,7 @@ class MyHandler
 	 * Called after a definition list is created (<dl>)
 	 */
 	public function afterDefinitionList(
-		Texy\BlockParser $parser,
+		BlockParser $parser,
 		Texy\HtmlElement $element,
 		Texy\Modifier $modifier,
 	): void
@@ -357,7 +358,7 @@ class MyHandler
 	/**
 	 * Called after a table is created (<table>)
 	 */
-	public function afterTable(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
+	public function afterTable(BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
@@ -365,7 +366,7 @@ class MyHandler
 	/**
 	 * Called after a blockquote is created (<blockquote>)
 	 */
-	public function afterBlockquote(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
+	public function afterBlockquote(BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 

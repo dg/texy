@@ -43,7 +43,7 @@ final class BlockQuoteModule extends Texy\Module
 	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): ?Texy\HtmlElement
+	public function pattern(Texy\Parsing\BlockParser $parser, array $matches): ?Texy\HtmlElement
 	{
 		/** @var array{string, ?string, string, string} $matches */
 		[, $mMod, $mPrefix, $mContent] = $matches;
