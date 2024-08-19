@@ -47,7 +47,7 @@ Three methods convert an element (sub)tree to a string; the distinction matters:
 
 An element can recursively parse its own content, which is how the DOM tree grows:
 
-- **`parseLine(Texy $texy, string $s): InlineParser`** – creates an `InlineParser` with this element as the container and parses the string's inline syntaxes; results become the element's children. Returns the parser (some callers inspect it afterwards).
+- **`parseLine(Texy $texy, string $s): void`** – creates an `InlineParser` with this element as the container and parses the string's inline syntaxes; results become the element's children.
 - **`parseBlock(Texy $texy, string $s, bool $indented = false): void`** – creates a `BlockParser` and parses the string as block content; `$indented` signals that the text comes from an indented context (affects paragraph handling in list items etc.).
 
 A typical syntax handler creates an element, sets its attributes, and calls one of these to process the inner text through the standard pipeline – including nested syntax recognition and handler invocation.
