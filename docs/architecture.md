@@ -19,7 +19,7 @@ All classes live in the `Texy` namespace (so `HtmlElement` means `Texy\HtmlEleme
 
 **[Modules](modules.md)** are functional units responsible for specific areas of the markup language. Each module registers, in its constructor, the syntaxes it recognizes and the element handlers that process them. For example `PhraseModule` handles inline formatting such as bold or italic text, while `TableModule` handles tables. Modules are designed as self-contained, reusable units with their own configuration exposed as public properties.
 
-**[Parsers](parsing.md)** come in two variants by content type. `BlockParser` processes block structures such as paragraphs, headings, lists, or tables: it walks the text line by line, looks for the beginnings of block constructs, and passes them to *syntax handlers*. `LineParser` handles inline syntaxes within lines – links, images, text formatting. Unlike `BlockParser`, it supports nesting of syntaxes and their gradual unwrapping.
+**[Parsers](parsing.md)** come in two variants by content type. `BlockParser` processes block structures such as paragraphs, headings, lists, or tables: it walks the text line by line, looks for the beginnings of block constructs, and passes them to *syntax handlers*. `InlineParser` handles inline syntaxes within lines – links, images, text formatting. Unlike `BlockParser`, it supports nesting of syntaxes and their gradual unwrapping.
 
 ## Terminology
 
@@ -47,7 +47,7 @@ When `Texy::process()` receives input text, the following happens (`src/Texy/Tex
 
 2. **Pattern selection.** The registered line and block patterns are filtered by the `$allowed` array. This happens once per `process()` call, so changing `$allowed` during processing has no effect.
 
-3. **Parsing.** A root `HtmlElement` representing the document is created. For a full document, `parseBlock()` creates a `BlockParser` that walks the text and identifies block constructs; text between blocks is handled by `ParagraphModule`, which internally uses `LineParser` for the inline content. For `processLine()`, only `parseLine()`/`LineParser` is used. Parsing incrementally builds the DOM tree.
+3. **Parsing.** A root `HtmlElement` representing the document is created. For a full document, `parseBlock()` creates a `BlockParser` that walks the text and identifies block constructs; text between blocks is handled by `ParagraphModule`, which internally uses `InlineParser` for the inline content. For `processLine()`, only `parseLine()`/`InlineParser` is used. Parsing incrementally builds the DOM tree.
 
 4. **afterParse.** After parsing completes, `afterParse` notification handlers are invoked with the root element. They can perform final tree adjustments, e.g. `HeadingModule` assigns final heading levels, generates IDs and builds the TOC here.
 
@@ -68,7 +68,7 @@ Naming follows two conventions. Simple syntaxes have a one-word name matching th
 
 There are three kinds of syntaxes, each with its own registration method on `Texy`:
 
-- **Line syntaxes** (`registerLinePattern()`) recognize inline items within lines of text – formatting, links, images, inline code. They may nest inside each other and [`LineParser`](parsing.md#lineparser) unwraps them gradually. Their patterns are searched for anywhere in the text, so they must not be anchored.
+- **Line syntaxes** (`registerLinePattern()`) recognize inline items within lines of text – formatting, links, images, inline code. They may nest inside each other and [`InlineParser`](parsing.md#inlineparser) unwraps them gradually. Their patterns are searched for anywhere in the text, so they must not be anchored.
 - **Block syntaxes** (`registerBlockPattern()`) recognize multi-line block constructs: headings, lists, tables, quotes, special blocks. Unlike line syntaxes, block syntaxes never overlap – every line of text belongs to at most one block construct, and [`BlockParser`](parsing.md#blockparser) processes them without interleaving. Their patterns are anchored to the start of a line (the `m` modifier is added automatically).
 - **Post-line syntaxes** (`registerPostLine()`) do not parse markup at all; they transform the final textual content between block-level protection marks just before HTML entities are encoded. Two modules use it: `TypographyModule` (name `typography`) and `LongWordsModule` (name `longwords`).
 
