@@ -104,11 +104,11 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
+	 * @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
 	 */
 	private array $linePatterns = [];
 
-	/** @var array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	private array $activeLinePatterns;
 
 	/**
@@ -217,7 +217,7 @@ class Texy
 
 
 	/**
-	 * @param  callable(LineParser, array<?string>, string): (HtmlElement|string|null)  $handler
+	 * @param  callable(InlineParser, array<?string>, string): (HtmlElement|string|null)  $handler
 	 */
 	final public function registerLinePattern(
 		callable $handler,
@@ -536,7 +536,7 @@ class Texy
 	}
 
 
-	/** @return array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @return array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	final public function getLinePatterns(): array
 	{
 		return $this->activeLinePatterns;

@@ -2,20 +2,20 @@
 
 Texy has two parsers, both extending the abstract `Texy\Parser` (`src/Texy/Parser.php`), which only carries the reference to the `Texy` instance (`getTexy()`) and the target `HtmlElement`:
 
-- **`LineParser`** (`src/Texy/LineParser.php`) – inline syntaxes inside lines,
+- **`InlineParser`** (`src/Texy/InlineParser.php`) – inline syntaxes inside lines,
 - **`BlockParser`** (`src/Texy/BlockParser.php`) – multi-line block constructs.
 
 They are not called directly; instead, `HtmlElement::parseLine()` and `HtmlElement::parseBlock()` create a parser with the element as the container and run it on given text. This makes parsing recursive: any syntax handler can create an element and parse its inner content the same way the main document is parsed.
 
-## LineParser
+## InlineParser
 
-`LineParser` processes inline syntaxes with an incremental algorithm that supports nesting and complex interactions between syntaxes.
+`InlineParser` processes inline syntaxes with an incremental algorithm that supports nesting and complex interactions between syntaxes.
 
 **Basic principle:** find the *first* occurrence of *any* syntax. In each iteration the parser tries all registered (and allowed) line patterns and determines which one matches closest to the current position. That syntax "wins" and gets processed. If several syntaxes match at the same position, the one registered **earlier wins** – priority follows registration order.
 
 When the nearest match is found, the parser calls its syntax handler. The handler returns an `HtmlElement` or a string, and this result **replaces the matched text** in the parsed string. The parser then continues searching from the current position. Because the replacement may itself contain text with further syntaxes, those are found in subsequent iterations – this is what enables gradual unwrapping of nested constructs.
 
-The public property `LineParser::$again` gives fine control over whether the just-matched syntax should be searched for again at the same position after processing the current match. The default is `false` ("no point looking for this same syntax here again, move on"). A syntax handler sets `$parser->again = true` when it produces an element whose textual content may contain further occurrences of the same syntax.
+The public property `InlineParser::$again` gives fine control over whether the just-matched syntax should be searched for again at the same position after processing the current match. The default is `false` ("no point looking for this same syntax here again, move on"). A syntax handler sets `$parser->again = true` when it produces an element whose textual content may contain further occurrences of the same syntax.
 
 The pass ends when the parser reaches the end of the text or no syntax has any further match. The result is a string in which all recognizable syntaxes have been replaced by their results (masked, see below), ready to be attached to the container element.
 
@@ -99,7 +99,7 @@ Besides `\x14`–`\x1F`, Texy reserves a few more control bytes for internal tri
 
 ## BlockParser
 
-`BlockParser` uses a fundamentally different approach reflecting the nature of block constructs. The key difference is the **absence of interleaving**: while `LineParser` lets syntaxes nest and unwrap, `BlockParser` assumes each block is a standalone unit. A line or group of lines belongs to at most one block; blocks do not overlap, cross, or nest at the `BlockParser` level. (Nesting of block content happens through recursion – a handler calls `parseBlock()` on the extracted inner text.)
+`BlockParser` uses a fundamentally different approach reflecting the nature of block constructs. The key difference is the **absence of interleaving**: while `InlineParser` lets syntaxes nest and unwrap, `BlockParser` assumes each block is a standalone unit. A line or group of lines belongs to at most one block; blocks do not overlap, cross, or nest at the `BlockParser` level. (Nesting of block content happens through recursion – a handler calls `parseBlock()` on the extracted inner text.)
 
 `BlockParser::parse()` first fires the `beforeBlockParse` notification event (with the parser and the text by reference – `BlockModule` uses this to normalize `/--` block fences). Then it locates the beginnings of all registered block syntaxes in the text. When several match at the same position, registration order decides – earlier registration wins. Text between matched blocks is handed to `ParagraphModule`, which splits it into paragraphs and invokes the `paragraph` element handler for each.
 
