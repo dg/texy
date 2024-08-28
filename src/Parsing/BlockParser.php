@@ -17,18 +17,16 @@ use function is_array, is_string, strlen;
  */
 class BlockParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}> */
-	public array $patterns;
 	private string $text;
 	private int $offset;
 
 
 	public function __construct(
-		Texy $texy,
-		private readonly bool $indented,
+		protected Texy $texy,
+		private bool $indented,
+		/** @var array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}> */
+		public array $patterns,
 	) {
-		$this->texy = $texy;
-		$this->patterns = $texy->getBlockPatterns();
 	}
 
 
