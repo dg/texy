@@ -28,6 +28,7 @@
  * Install FSHL: composer require kukulich/fshl
  */
 
+use Texy\Parsing\BlockParser;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -82,7 +83,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
  *
  * This is called when our custom patterns match in the text.
  */
-function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+function codeBlockHandler(BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 {
 	[$content] = $matches;
 

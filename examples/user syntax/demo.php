@@ -25,7 +25,7 @@
  * Text               ? <div class="perex">Text</div>
  */
 
-use Texy\Parsing\InlineParser;
+use Texy\Parsing\{BlockParser, InlineParser};
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -127,11 +127,11 @@ function userInlineHandler(InlineParser $parser, array $matches, string $name): 
 /**
  * Handler for our block syntax (.h1, .perex, etc.)
  *
- * @param Texy\BlockParser $parser  The parser instance
+ * @param \Texy\Parsing\BlockParser $parser  The parser instance
  * @param array $matches            Regex matches [full, tagname, content]
  * @param string $name              Syntax name (myBlockSyntax1)
  */
-function userBlockHandler(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+function userBlockHandler(BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 {
 	[, $mTag, $mText] = $matches;
 

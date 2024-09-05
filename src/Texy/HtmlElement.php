@@ -7,7 +7,7 @@
 
 namespace Texy;
 
-use Texy\Parsing\InlineParser;
+use Texy\Parsing\{BlockParser, InlineParser};
 use function count, is_array, is_object, is_string;
 
 

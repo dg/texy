@@ -24,7 +24,7 @@ final class ParagraphModule extends Texy\Module
 	}
 
 
-	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
+	public function process(Texy\Parsing\BlockParser $parser, string $content, Texy\HtmlElement $el): void
 	{
 		$parts = $parser->isIndented()
 			? Regexp::split($content, '~(\n (?! \ ) | \n{2,})~x', skipEmpty: true)
