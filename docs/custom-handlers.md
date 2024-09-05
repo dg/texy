@@ -159,11 +159,11 @@ Registered with the same `addHandler()`, but invoked via `invokeHandlers()`: all
 |---|---|---|
 | `beforeParse` | `function(Texy\Texy $texy, string &$text, bool $isSingleLine): void` | after preprocessing, before parsing; `$text` is by reference and may be modified |
 | `afterParse` | `function(Texy\Texy $texy, Texy\HtmlElement $dom, bool $isSingleLine): void` | after parsing, before serialization; `$dom` is the document root |
-| `beforeBlockParse` | `function(Texy\BlockParser $parser, string &$text): void` | before each block-level parse (including nested ones) |
-| `afterList` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<ul>`/`<ol>` is built |
-| `afterDefinitionList` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<dl>` is built |
-| `afterTable` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<table>` is built |
-| `afterBlockquote` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<blockquote>` is built |
+| `beforeBlockParse` | `function(\Texy\Parsing\BlockParser $parser, string &$text): void` | before each block-level parse (including nested ones) |
+| `afterList` | `function(\Texy\Parsing\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<ul>`/`<ol>` is built |
+| `afterDefinitionList` | `function(\Texy\Parsing\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<dl>` is built |
+| `afterTable` | `function(\Texy\Parsing\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<table>` is built |
+| `afterBlockquote` | `function(\Texy\Parsing\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<blockquote>` is built |
 | `postProcess` | `function(Texy\Texy $texy, string &$s): void` | on the final HTML string (this is where `HtmlOutputModule` well-forms the output) |
 
 ## Practical examples

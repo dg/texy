@@ -44,7 +44,7 @@ final class HorizLineModule extends Texy\Module
 	 * Callback for: -------.
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
+	public function pattern(Texy\Parsing\BlockParser $parser, array $matches): Texy\HtmlElement
 	{
 		[, $mType, $mMod] = $matches;
 		// [1] => ---
