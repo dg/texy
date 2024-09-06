@@ -27,7 +27,7 @@ final class ScriptModule extends Texy\Module
 		$texy->addHandler('script', $this->solve(...));
 
 		$texy->registerLinePattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~
 				\{\{
 				((?:
@@ -42,10 +42,10 @@ final class ScriptModule extends Texy\Module
 
 
 	/**
-	 * Callback for: {{...}}.
+	 * Parses {{...}}
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\Parsing\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\Parsing\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string} $matches */
 		[, $mContent] = $matches;
