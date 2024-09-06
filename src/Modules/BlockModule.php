@@ -34,7 +34,7 @@ final class BlockModule extends Texy\Module
 		$texy->addHandler('beforeBlockParse', $this->beforeBlockParse(...));
 
 		$texy->registerBlockPattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~^
 				/--++ \ *+                    # opening tag /--
 				(.*)                          # content type (1)
@@ -77,14 +77,10 @@ final class BlockModule extends Texy\Module
 
 
 	/**
-	 * Callback for:.
-	 * /-----code html .(title)[class]{style}
-	 * ....
-	 * ....
-	 * \----
+	 * Parses blocks /--foo
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\Parsing\BlockParser $parser, array $matches): HtmlElement|string|null
+	public function parse(Texy\Parsing\BlockParser $parser, array $matches): HtmlElement|string|null
 	{
 		/** @var array{string, string, ?string, string} $matches */
 		[, $mParam, $mMod, $mContent] = $matches;
