@@ -8,7 +8,7 @@
 namespace Texy\Parsing;
 
 use JetBrains\PhpStorm\Language;
-use Texy\{HtmlElement, Parser, Regexp, Texy};
+use Texy\{Parser, Regexp, Texy};
 use function is_array, is_string, strlen;
 
 
@@ -25,11 +25,9 @@ class BlockParser extends Parser
 
 	public function __construct(
 		Texy $texy,
-		HtmlElement $element,
 		private readonly bool $indented,
 	) {
 		$this->texy = $texy;
-		$this->element = $element;
 		$this->patterns = $texy->getBlockPatterns();
 	}
 
@@ -97,10 +95,8 @@ class BlockParser extends Parser
 	}
 
 
-	/**
-	 * Parses text and appends results to parent element.
-	 */
-	public function parse(string $text): void
+	/** @return list<HtmlElement|string> */
+	public function parse(string $text): array
 	{
 		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
 
@@ -109,6 +105,7 @@ class BlockParser extends Parser
 		$matches = $this->match($text);
 		$matches[] = [strlen($text), null, null]; // terminal sentinel
 		$cursor = 0;
+		$res = [];
 
 		do {
 			do {
@@ -123,7 +120,7 @@ class BlockParser extends Parser
 			if ($mOffset > $this->offset) {
 				$s = trim(substr($text, $this->offset, $mOffset - $this->offset));
 				if ($s !== '') {
-					$this->texy->paragraphModule->process($this, $s, $this->element);
+					$res = [...$res, ...$this->texy->paragraphModule->process($this, $s)];
 				}
 			}
 
@@ -134,18 +131,20 @@ class BlockParser extends Parser
 			assert(is_array($mMatches) && is_string($mMatches[0]));
 			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
 
-			$res = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
+			$el = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
 
-			if ($res === null || $this->offset <= $mOffset) { // module rejects text
+			if ($el === null || $this->offset <= $mOffset) { // module rejects text
 				// asi by se nemelo stat, rozdeli generic block
 				$this->offset = $mOffset; // turn offset back
 				continue;
 
 			} else {
-				$this->element->insert(null, $res);
+				$res[] = $el;
 			}
 
 		} while (1);
+
+		return $res;
 	}
 
 
