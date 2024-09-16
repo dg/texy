@@ -50,7 +50,7 @@ final class HorizLineModule extends Texy\Module
 		// [1] => ---
 		// [2] => .(title)[class]{style}<>
 
-		$mod = new Texy\Modifier($mMod);
+		$mod = Texy\Modifier::parse($mMod);
 		return $this->texy->invokeAroundHandlers('horizline', $parser, [$mType, $mod]);
 	}
 

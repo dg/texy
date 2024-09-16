@@ -47,12 +47,20 @@ final class Modifier
 	];
 
 
-	public function __construct(?string $s = null)
+	/**
+	 * Parses modifier string and returns new instance.
+	 */
+	public static function parse(?string $s): self
 	{
-		$this->setProperties($s);
+		$modifier = new self;
+		if ($s !== null) {
+			$modifier->setProperties($s);
+		}
+		return $modifier;
 	}
 
 
+	/** @deprecated  use Modifier::parse() */
 	public function setProperties(?string $s): void
 	{
 		$p = 0;
