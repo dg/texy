@@ -182,7 +182,7 @@ final class HeadingModule extends Texy\Module
 		// [2] => .(title)[class]{style}<>
 		// [3] => ...
 
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$level = $this->levels[$mLine[0]];
 		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, false]);
 	}
@@ -200,7 +200,7 @@ final class HeadingModule extends Texy\Module
 		// [2] => ...
 		// [3] => .(title)[class]{style}<>
 
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$level = min(7, max(2, strlen($mLine)));
 		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
