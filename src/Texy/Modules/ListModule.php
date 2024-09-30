@@ -54,7 +54,7 @@ final class ListModule extends Texy\Module
 		}
 
 		$this->texy->registerBlockPattern(
-			$this->patternList(...),
+			$this->parseList(...),
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)? # modifier (1)
 				(' . implode('|', $re) . ')         # list marker (2)
@@ -65,7 +65,7 @@ final class ListModule extends Texy\Module
 		);
 
 		$this->texy->registerBlockPattern(
-			$this->patternDefList(...),
+			$this->parseDefList(...),
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)?   # modifier (1)
 				( \S .{0,2000} )                      # definition term (2)
@@ -83,16 +83,10 @@ final class ListModule extends Texy\Module
 
 
 	/**
-	 * Callback for:.
-	 *
-	 * 1) .... .(title)[class]{style}>
-	 * 2) ....
-	 *   + ...
-	 *   + ...
-	 * 3) ....
+	 * Parses list.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternList(BlockParser $parser, array $matches): ?HtmlElement
+	public function parseList(BlockParser $parser, array $matches): ?HtmlElement
 	{
 		/** @var array{string, ?string, string} $matches */
 		[, $mMod, $mBullet] = $matches;
@@ -129,7 +123,7 @@ final class ListModule extends Texy\Module
 
 		$parser->moveBackward();
 
-		while ($elItem = $this->patternItem($parser, $bullet, false, 'li')) {
+		while ($elItem = $this->parseItem($parser, $bullet, false, 'li')) {
 			$el->add($elItem);
 		}
 
@@ -145,15 +139,10 @@ final class ListModule extends Texy\Module
 
 
 	/**
-	 * Callback for:.
-	 *
-	 * Term: .(title)[class]{style}>
-	 * - description 1
-	 * - description 2
-	 * - description 3
+	 * Parses definition list.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternDefList(BlockParser $parser, array $matches): HtmlElement
+	public function parseDefList(BlockParser $parser, array $matches): HtmlElement
 	{
 		/** @var array{string, ?string, string, ?string, string, string} $matches */
 		[, $mMod, , , , $mBullet] = $matches;
@@ -187,7 +176,7 @@ final class ListModule extends Texy\Module
 		$~mUAx';
 
 		while (true) {
-			if ($elItem = $this->patternItem($parser, $bullet, true, 'dd')) {
+			if ($elItem = $this->parseItem($parser, $bullet, true, 'dd')) {
 				$el->add($elItem);
 				continue;
 			}
@@ -218,9 +207,9 @@ final class ListModule extends Texy\Module
 
 
 	/**
-	 * Callback for single list item.
+	 * Parses single list item.
 	 */
-	private function patternItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
+	private function parseItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
 	{
 		$spacesBase = $indented ? ('[\ \t]{1,}') : '';
 		$patternItem = "~^
