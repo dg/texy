@@ -29,7 +29,7 @@ final class FooModule extends Texy\Module
         $texy->addHandler('beforeParse', $this->beforeParse(...)); // optional
 
         $texy->registerLinePattern(
-            $this->patternFoo(...),   // syntax handler
+            $this->parseFoo(...),   // syntax handler
             '#...#U',                 // pattern
             'foo',                    // syntax name
         );
@@ -37,7 +37,7 @@ final class FooModule extends Texy\Module
 }
 ```
 
-- **Syntax handlers** (`patternFoo()`) are called by the parser on a match. They extract data from the regex groups, build helper objects (`Link`, `Image`, `Modifier`), and invoke the element handler chain via `Texy::invokeAroundHandlers()`.
+- **Syntax handlers** (`parseFoo()`) are called by the parser on a match. They extract data from the regex groups, build helper objects (`Link`, `Image`, `Modifier`), and invoke the element handler chain via `Texy::invokeAroundHandlers()`.
 - **Element handlers** (`solve()`) do the actual work: create the `HtmlElement`, apply the modifier with `Modifier::decorate()`, process content, and return the result.
 - **Public properties** are the configuration interface – typically primitive types or arrays.
 
