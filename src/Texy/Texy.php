@@ -163,17 +163,7 @@ class Texy
 
 	public function __construct()
 	{
-		if (
-			extension_loaded('mbstring')
-			&& mb_get_info('func_overload') & 2
-			&& str_starts_with(mb_get_info('internal_encoding'), 'U')
-		) {
-			mb_internal_encoding('pass');
-			trigger_error("Texy: mb_internal_encoding changed to 'pass'", E_USER_WARNING);
-		}
-
 		$this->loadModules();
-
 		$this->initDTD();
 
 		// examples of link references ;-)
@@ -201,21 +191,6 @@ class Texy
 		foreach (self::$dtd as $tag => $dtd) {
 			$this->allowedTags[$tag] = self::ALL;
 		}
-	}
-
-
-	/** @deprecated */
-	public function setOutputMode(int $mode): void
-	{
-		trigger_error('Texy::setOutputMode() is deprecated, only HTML5 mode is supported.', E_USER_DEPRECATED);
-	}
-
-
-	/** @deprecated */
-	public function getOutputMode(): int
-	{
-		trigger_error('Texy::getOutputMode() is deprecated, only HTML5 mode is supported.', E_USER_DEPRECATED);
-		return self::HTML5;
 	}
 
 
@@ -595,78 +570,6 @@ class Texy
 	final public function __clone()
 	{
 		throw new \Exception('Clone is not supported.');
-	}
-
-
-	/** @deprecated */
-	final public static function freezeSpaces(string $s): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::freezeSpaces()', E_USER_DEPRECATED);
-		return Helpers::freezeSpaces($s);
-	}
-
-
-	/** @deprecated */
-	final public static function unfreezeSpaces(string $s): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::unfreezeSpaces()', E_USER_DEPRECATED);
-		return Helpers::unfreezeSpaces($s);
-	}
-
-
-	/** @deprecated */
-	final public static function normalize(string $s): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::normalize()', E_USER_DEPRECATED);
-		return Helpers::normalize($s);
-	}
-
-
-	/** @deprecated */
-	final public static function webalize(string $s, string $charlist = ''): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::webalize()', E_USER_DEPRECATED);
-		return Helpers::webalize($s, $charlist);
-	}
-
-
-	/** @deprecated */
-	final public static function escapeHtml(string $s): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use htmlspecialchars()', E_USER_DEPRECATED);
-		return htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-	}
-
-
-	/** @deprecated */
-	final public static function unescapeHtml(string $s): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::unescapeHtml()', E_USER_DEPRECATED);
-		return Helpers::unescapeHtml($s);
-	}
-
-
-	/** @deprecated */
-	final public static function outdent(string $s): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::outdent()', E_USER_DEPRECATED);
-		return Helpers::outdent($s);
-	}
-
-
-	/** @deprecated */
-	final public static function isRelative(string $URL): bool
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::isRelative()', E_USER_DEPRECATED);
-		return Helpers::isRelative($URL);
-	}
-
-
-	/** @deprecated */
-	final public static function prependRoot(string $URL, ?string $root): string
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use Texy\Helpers::prependRoot()', E_USER_DEPRECATED);
-		return Helpers::prependRoot($URL, $root);
 	}
 }
 

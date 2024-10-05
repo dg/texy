@@ -31,9 +31,6 @@ final class HtmlOutputModule extends Texy\Module
 	/** wrap width, doesn't include indent space */
 	public int $lineWrap = 80;
 
-	/** @deprecated */
-	public bool $removeOptional = false;
-
 	/** indent space counter */
 	private int $space = 0;
 
