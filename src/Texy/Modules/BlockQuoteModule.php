@@ -48,7 +48,7 @@ final class BlockQuoteModule extends Texy\Module
 		$texy = $this->texy;
 
 		$el = new Texy\HtmlElement('blockquote');
-		$mod = new Texy\Modifier($mMod);
+		$mod = Texy\Modifier::parse($mMod);
 		$mod->decorate($texy, $el);
 
 		$content = '';
