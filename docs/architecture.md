@@ -4,7 +4,7 @@ Texy converts text written in its own markup language to HTML. Unlike simple con
 
 Processing runs in four main phases:
 
-1. **Preprocessing** – normalization of line endings and spaces, tab expansion, removal of soft hyphens, invocation of `beforeParse` notification handlers.
+1. **Preprocessing** – normalization of line endings and spaces, tab expansion, removal of soft hyphens, invocation of each module's `beforeParse()` method.
 2. **Parsing** – recognition of syntaxes using regular expressions and incremental building of a DOM tree of `HtmlElement` objects.
 3. **Post-processing** – typographic corrections, long-word hyphenation, HTML well-forming.
 4. **Final assembly** – conversion of the DOM tree into the resulting HTML string.
@@ -43,7 +43,7 @@ The distinction is crucial: a syntax handler is tightly coupled to the parser an
 
 When `Texy::process()` receives input text, the following happens (`src/Texy/Texy.php`, method `process()`):
 
-1. **Preprocessing.** Soft hyphens (U+00AD) are removed (if `$removeSoftHyphens` is on), line endings and spaces are normalized (`Helpers::normalize()`), and tabs are expanded to spaces according to `$tabWidth`. Then the `beforeParse` notification handlers are invoked with the text passed by reference – they can preprocess data, e.g. `LinkModule` and `ImageModule` extract reference definitions here and `TypographyModule` prepares locale-specific patterns.
+1. **Preprocessing.** Soft hyphens (U+00AD) are removed (if `$removeSoftHyphens` is on), line endings and spaces are normalized (`Helpers::normalize()`), and tabs are expanded to spaces according to `$tabWidth`. Then each module's `beforeParse()` method is invoked with the text passed by reference – modules register their line and block patterns here and can preprocess data, e.g. `LinkModule` and `ImageModule` extract reference definitions and `TypographyModule` prepares locale-specific patterns.
 
 2. **Pattern selection.** The registered line and block patterns are filtered by the `$allowed` array. This happens once per `process()` call, so changing `$allowed` during processing has no effect.
 
@@ -104,7 +104,7 @@ See the custom-handlers guide (user manual) for the exact `proceed()` semantics,
 
 Notification handlers use the same registration method, `Texy::addHandler($eventName, $callback)`, but are invoked with `Texy::invokeHandlers()`, which simply calls all registered handlers in registration order and ignores their return values. Handlers receive the invocation arguments but cannot change them for the following handlers (except for parameters explicitly passed by reference, such as the text in `beforeParse`).
 
-The events are: `beforeParse`, `afterParse`, `beforeBlockParse`, `afterTable`, `afterList`, `afterDefinitionList`, `afterBlockquote`, and `postProcess`. Signatures are listed in the custom-handlers guide (user manual).
+The events are: `afterParse`, `beforeBlockParse`, `afterTable`, `afterList`, `afterDefinitionList`, `afterBlockquote`, and `postProcess`. Per-module preprocessing before parsing is not an event but the `Module::beforeParse()` method. Signatures are listed in the custom-handlers guide (user manual).
 
 Unlike element handlers, notification handlers cannot prevent further processing – all registered handlers always run. That is intentional: notifications are about side effects, not flow control.
 
