@@ -138,15 +138,10 @@ final class HtmlModule extends Texy\Module
 			return null; // all tags are disabled
 		}
 
-		// convert case
 		$name = $el->getName();
 		assert($name !== null);
-		$lower = strtolower($name);
-		if (isset($texy->getDTD()[$lower]) || $name === strtoupper($name)) {
-			// complete UPPER convert to lower
-			$name = $lower;
-			$el->setName($name);
-		}
+		$name = strtolower($name);
+		$el->setName($name);
 
 		if (is_array($allowedTags)) {
 			if (!isset($allowedTags[$name])) {
@@ -169,8 +164,6 @@ final class HtmlModule extends Texy\Module
 		if (!$this->validateAttrs($el, $texy)) {
 			return null;
 		}
-
-		$el->validateAttrs($texy->getDTD());
 
 		return $el;
 	}

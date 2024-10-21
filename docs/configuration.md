@@ -26,7 +26,7 @@ The array is consulted once at the start of `process()`; changing it during proc
 
 ### $allowedTags
 
-Controls which HTML tags may appear in the output (and be written in the input). Default: an array whitelist built from the DTD – **every valid HTML tag with all its attributes**.
+Controls which HTML tags may appear in the output (and be written in the input). Default: an array whitelist built by `Texy::initAllowedTags()` – **the common HTML tags (inline, void, and block) each with all their attributes**.
 
 ```php
 $texy->allowedTags = Texy\Texy::ALL;    // any tag whatsoever
