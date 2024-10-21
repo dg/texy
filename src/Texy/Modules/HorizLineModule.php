@@ -22,13 +22,16 @@ final class HorizLineModule extends Texy\Module
 	];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('horizline', $this->solve(...));
+	}
 
-		$texy->registerBlockPattern(
+
+	public function beforeParse(string &$text): void
+	{
+		$this->texy->registerBlockPattern(
 			$this->parse(...),
 			'~^
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)

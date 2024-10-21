@@ -62,8 +62,6 @@ final class LongWordsModule extends Texy\Module
 
 	public function __construct(Texy\Texy $texy)
 	{
-		$this->texy = $texy;
-
 		$this->consonants = array_flip($this->consonants);
 		$this->vowels = array_flip($this->vowels);
 		$this->beforeR = array_flip($this->beforeR);
