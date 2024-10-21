@@ -39,9 +39,9 @@ test('table: tr allowed inside table', function () {
 
 
 test('table: td/th only allowed inside tr', function () {
-	// td outside tr is rejected (tag and content removed)
+	// td outside tr is rejected
 	Assert::same(
-		'<table></table>',
+		'<table>cell</table>',
 		processHtml('<table><td>cell</td></table>'),
 	);
 });
@@ -95,6 +95,53 @@ test('list: nested lists', function () {
 	Assert::same(
 		'<ul><li>A<ul><li>B</li></ul></li></ul>',
 		processHtml('<ul><li>A<ul><li>B</li></ul></li></ul>'),
+	);
+});
+
+
+// =============================================================================
+// SELECT, MEDIA AND DETAILS CONTENT MODEL
+// =============================================================================
+
+test('select: option and optgroup allowed inside select', function () {
+	Assert::same(
+		'<select><option value="a">A</option><optgroup label="g"><option>B</option></optgroup></select>',
+		processHtml('<select><option value=a>A</option><optgroup label=g><option>B</option></optgroup></select>'),
+	);
+});
+
+test('select: block element closes select', function () {
+	Assert::same(
+		'<select></select><div>x</div>',
+		processHtml('<select><div>x</div></select>'),
+	);
+});
+
+test('audio: source is kept inside audio', function () {
+	Assert::same(
+		'<audio controls><source src="a.mp3"></audio>',
+		processHtml('<audio controls><source src="a.mp3"></audio>'),
+	);
+});
+
+test('video: source, track and fallback content are kept', function () {
+	Assert::same(
+		'<video controls><source src="a.mp4"><track kind="captions" src="c.vtt">fallback</video>',
+		processHtml('<video controls><source src="a.mp4"><track kind="captions" src="c.vtt">fallback</video>'),
+	);
+});
+
+test('details: summary and flow content allowed', function () {
+	Assert::same(
+		'<details><summary>More</summary>text</details>',
+		processHtml('<details><summary>More</summary>text</details>'),
+	);
+});
+
+test('details: summary outside details is suppressed, content kept', function () {
+	Assert::same(
+		'orphan',
+		processHtml('<summary>orphan</summary>'),
 	);
 });
 
@@ -357,10 +404,9 @@ test('edge: deeply nested', function () {
 // TAGS NOT IN DEFAULT ALLOWED TAGS
 // =============================================================================
 
-test('head: allowed by default', function () {
-	// head is now allowed by default
+test('not-allowed: head escaped', function () {
 	$html = processHtml('<head><title>T</title></head>');
-	Assert::same('<head><title>T</title></head>', $html);
+	Assert::contains('&lt;head&gt;', $html);
 });
 
 
