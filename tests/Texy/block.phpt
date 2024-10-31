@@ -28,10 +28,7 @@ test('block type variants', function () {
 	$texy->imageModule->root = '../images/';
 	$texy->htmlOutputModule->lineWrap = 180;
 
-	$link = new Texy\Link('https://texy.deegee.dev/');
-	$link->modifier->title = 'The best text -> HTML converter and formatter';
-	$link->label = 'Texy!';
-	$texy->linkModule->addReference('texy', $link);
+	$texy->linkModule->addDefinition('texy', 'https://texy.deegee.dev/', 'Texy!', 'The best text -> HTML converter and formatter');
 
 	Assert::matchFile(
 		__DIR__ . '/expected/block-types.html',
