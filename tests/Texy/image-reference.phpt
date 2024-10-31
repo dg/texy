@@ -311,18 +311,13 @@ test('direct figure works', function () {
 
 
 // =============================================================================
-// User-defined definitions via addReference()
+// User-defined definitions via addDefinition()
 // =============================================================================
 
 test('user-defined image definition works', function () {
 	$texy = new Texy\Texy;
-	$image = new Texy\Image;
-	$image->URL = 'logo.png';
-	$image->width = 100;
-	$image->height = 50;
-	$image->modifier->title = 'Company Logo';
-	$texy->imageModule->addReference('logo', $image);
-	// modifier->title is used as alt text for images
+	$texy->imageModule->addDefinition('logo', 'logo.png', 100, 50, 'Company Logo');
+	// alt parameter is used as alt text for images
 	Assert::match(
 		'<div><img src="images/logo.png" alt="Company Logo" width="100"
 height="50"></div>
@@ -334,9 +329,7 @@ height="50"></div>
 
 test('user-defined image definition persists across process() calls', function () {
 	$texy = new Texy\Texy;
-	$image = new Texy\Image;
-	$image->URL = 'logo.png';
-	$texy->imageModule->addReference('logo', $image);
+	$texy->imageModule->addDefinition('logo', 'logo.png');
 
 	// First process()
 	Assert::match(
@@ -372,10 +365,7 @@ test('document-defined image reference leaks to next process() [BUG]', function 
 
 test('user-defined image definition is overwritten by document definition', function () {
 	$texy = new Texy\Texy;
-	$image = new Texy\Image;
-	$image->URL = 'user-logo.png';
-	$image->width = 100;
-	$texy->imageModule->addReference('logo', $image);
+	$texy->imageModule->addDefinition('logo', 'user-logo.png', 100);
 
 	// Document defines same reference - it overwrites user-defined one
 	Assert::match(
