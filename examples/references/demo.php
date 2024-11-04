@@ -82,18 +82,6 @@ echo '<link rel="stylesheet" href="../style.css">';
 echo $html;
 
 
-// Simple spam detection example
-// Check if any links contain suspicious words
-$spam = false;
-foreach ($texy->summary['links'] as $link) {
-	if (strpos($link, 'casino')) {
-		$spam = true;
-		break;
-	}
-}
-// In a real application, you would reject or flag the comment if $spam is true
-
-
 // Show the generated HTML source code
 echo '<hr>';
 echo '<pre>';
