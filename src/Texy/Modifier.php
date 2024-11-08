@@ -110,7 +110,6 @@ final class Modifier
 	public function decorate(Texy $texy, HtmlElement $el): HtmlElement
 	{
 		$this->decorateAttrs($texy, $el->attrs, $el->getName() ?? '');
-		$el->validateAttrs($texy->getDTD());
 		$this->decorateClasses($texy, $el->attrs);
 		$this->decorateStyles($texy, $el->attrs);
 		$this->decorateAligns($texy, $el->attrs);

@@ -52,17 +52,14 @@ An element can recursively parse its own content, which is how the DOM tree grow
 
 A typical syntax handler creates an element, sets its attributes, and calls one of these to process the inner text through the standard pipeline – including nested syntax recognition and handler invocation.
 
-## DTD validation
+## Content model and output well-forming
 
-Texy validates output against an HTML DTD table loaded from `src/Texy/DTD.php` into `Texy::$dtd` (accessible via `Texy::getDTD()`). The structure maps each tag name to a pair:
+Texy has no standalone DTD table; the HTML vocabulary lives in the declarative `Schema` class (`src/Texy/Output/Html/Schema.php`): one authoritative per-element table (category, void-ness, optional end tag, content model, nesting prohibitions) from which every view is derived:
 
-```php
-$dtd[$element][0]  // allowed attributes (as array keys)
-$dtd[$element][1]  // content model: allowed child elements as keys,
-                   // or false = empty element, or 0 = transparent
-```
+- `Schema::voidElements()` – void elements (`img`, `br`, `hr`, `input`…); drives `HtmlElement::isEmpty()`,
+- `Schema::inlineElements()` – phrasing elements (value `1` marks replaced elements such as `img`); drives `HtmlElement::getContentType()`,
+- `Schema::hasOptionalEnd()`, `Schema::prohibitedAncestors()`, `Schema::childContent()` – used by `HtmlOutputModule` to well-form the output: auto-close optional-end tags, forbid illegal nesting (e.g. `<a>` inside `<a>`), and check which children a tag may contain.
 
-- **`validateAttrs(array $dtd): void`** – removes attributes not allowed for the element's tag. Wildcard entries `data-*` and `aria-*` in the DTD permit any attribute with that prefix. Called when modifiers are applied (`Modifier::decorate()`), so an invalid attribute never reaches the output – important for both correctness and security.
-- **`validateChild(HtmlElement|string $child, array $dtd): bool`** – checks whether the child may appear inside this element according to the content model. Used mainly by `HtmlOutputModule` when fixing nesting; module-generated structure is usually correct by design.
+`HtmlElement` no longer validates itself. Fixing nesting and auto-closing tags against the content model happens in `HtmlOutputModule` during the `postProcess` phase (see [modules.md](modules.md)). Attribute filtering against the `$allowedTags` whitelist happens when modifiers are applied (`Modifier::decorate()`, see [modifiers.md](modifiers.md)) and when raw HTML tags from the input are processed (`HtmlModule`) – important for both correctness and security.
 
-The DTD is also what `$texy->allowedTags` defaults are derived from: on construction, every tag known to the DTD is allowed with all its attributes (see the configuration reference (user manual)).
+The `$texy->allowedTags` default is built by `Texy::initAllowedTags()` from the inline and empty element lists plus a fixed set of block elements, each allowed with all its attributes (see the configuration reference (user manual)).
