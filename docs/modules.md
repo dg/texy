@@ -86,7 +86,7 @@ Although modules are independent, some cooperation is necessary:
 
 **Shared value objects** are the main mechanism. A `Texy\Link` created by `LinkModule` can be handed to `ImageModule` to build a clickable image; a `Texy\Image` created by `ImageModule` is passed to `FigureModule` for a captioned figure. The objects carry the URL, modifier, and metadata, and expose a common interface.
 
-**The reference system** separates definition from use. `LinkModule::addReference()` / `getReference()` manage the dictionary of named links; `ImageModule` has the same pair for images. Factory methods (`factoryLink()`, `factoryImage()`) check whether the given value is a reference name or a direct value.
+**The reference system** separates definition from use. `LinkModule::addDefinition()` / `getReference()` manage the dictionary of named links; `ImageModule` has the same pair for images. Factory methods (`factoryLink()`, `factoryImage()`) check whether the given value is a reference name or a direct value.
 
 **Element handler delegation.** `PhraseModule`, when processing e.g. `"text":url` (`phrase/span` with a link), creates a `Link` object and calls `LinkModule`'s handler to build the `<a>` element, delegating responsibility to the specialized module.
 

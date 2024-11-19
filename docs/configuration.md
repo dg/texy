@@ -134,10 +134,7 @@ $texy->linkModule->imageClass = null;     // (deprecated) class for image links
 References:
 
 ```php
-$link = new Texy\Link('https://example.com');
-$link->modifier->title = 'Example site';
-$link->label = 'Example';
-$texy->linkModule->addReference('example', $link);
+$texy->linkModule->addDefinition('example', 'https://example.com');
 $texy->linkModule->getReference('example');   // ?Link
 ```
 
@@ -152,7 +149,7 @@ $texy->imageModule->linkedRoot = 'images/'; // (deprecated) URL prefix for linke
 $texy->imageModule->defaultAlt = '';        // (deprecated) default alt text
 ```
 
-References work like in LinkModule with `Texy\Image` objects (`addReference()`, `getReference()`).
+References work like in LinkModule via `addDefinition()` / `getReference()`.
 
 ### FigureModule
 
