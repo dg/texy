@@ -18,15 +18,10 @@ use function explode, ltrim, rtrim, str_contains, str_replace, strtr;
 
 
 /**
- * Processes table syntax with headers, colspan, and rowspan support.
+ * Table module.
  */
 final class TableModule extends Texy\Module
 {
-	/** @deprecated */
-	public ?string $oddClass = null;
-
-	/** @deprecated */
-	public ?string $evenClass = null;
 	private ?bool $disableTables = null;
 
 
@@ -168,12 +163,6 @@ final class TableModule extends Texy\Module
 		$elRow = new HtmlElement('tr');
 		$mod = new Modifier($mMod);
 		$mod->decorate($texy, $elRow);
-
-		$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
-		if ($rowClass && !isset($mod->classes[$this->oddClass ?? '']) && !isset($mod->classes[$this->evenClass ?? ''])) {
-			$elRow->attrs['class'] = (array) ($elRow->attrs['class'] ?? []);
-			$elRow->attrs['class'][] = $rowClass;
-		}
 
 		$col = 0;
 		$elCell = null;
