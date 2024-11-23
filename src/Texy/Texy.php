@@ -41,16 +41,6 @@ class Texy
 		FILTER_ANCHOR = 'anchor',
 		FILTER_IMAGE = 'image';
 
-	#[\Deprecated]
-	public const
-		HTML4_TRANSITIONAL = 0,
-		HTML4_STRICT = 1,
-		HTML5 = 4,
-		XHTML1_TRANSITIONAL = 2,
-		XHTML1_STRICT = 3,
-		XHTML5 = 6,
-		XML = 2;
-
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
