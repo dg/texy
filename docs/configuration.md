@@ -90,8 +90,6 @@ After `process()`:
 ```php
 $texy->headingModule->title;   // first heading text (for <title>)
 $texy->headingModule->TOC;     // table of contents: [{el, level, type, title}]
-$texy->summary['links'];       // list of used link URLs
-$texy->summary['images'];      // list of used image URLs
 $texy->getDOM();               // the parsed HtmlElement tree
 $texy->toText();               // plain-text rendition
 ```
