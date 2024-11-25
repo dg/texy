@@ -177,7 +177,7 @@ $texy->tableModule->oddClass = null;    // (deprecated) class for odd rows
 $texy->tableModule->evenClass = null;   // (deprecated) class for even rows
 ```
 
-### HorizLineModule
+### HorizontalRuleModule
 
 ```php
 $texy->horizLineModule->classes = ['-' => null, '*' => null];  // CSS class per rule type
@@ -191,7 +191,7 @@ $texy->typographyModule->locale = 'cs';   // 'cs', 'en', 'fr', 'de', 'pl'
 
 The locale determines quote characters (see `TypographyModule::$locales`): cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Unknown locales fall back to `en`.
 
-### LongWordsModule
+### HyphenationModule
 
 ```php
 $texy->longWordsModule->wordLimit = 20;   // minimal length of a word to hyphenate
@@ -227,7 +227,7 @@ $texy->htmlOutputModule->lineWrap = 80;      // maximum line width
 $texy->htmlOutputModule->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
 ```
 
-### ScriptModule
+### DirectiveModule
 
 ```php
 $texy->scriptModule->separator = ',';   // argument separator in {{command: a, b}}

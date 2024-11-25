@@ -247,7 +247,7 @@ Continuation lines may also use `>:` instead of `> ` as the prefix. After the qu
 
 ## Horizontal rules
 
-*(`horizline` – HorizLineModule)*
+*(`horizline` – HorizontalRuleModule)*
 
 Three or more `-` or `*` on a separate line (a blank line must precede, otherwise it would be an underlined heading):
 
@@ -259,7 +259,7 @@ Each character type may get its own CSS class via `$texy->horizLineModule->class
 
 ## Fenced blocks
 
-*(`blocks` + `block/*` subtypes – BlockModule)*
+*(`blocks` + `block/*` subtypes – DelimitedBlockModule)*
 
 A block starts with `/--type` and ends with `\--`. Blocks of type `div` may nest. The optional parameter after the type (e.g. language) is passed to handlers.
 
@@ -309,7 +309,7 @@ A `<script>` or `<style>` written in the text is read inside a paragraph, so its
 
 ## Scripts / macros
 
-*(`script` – ScriptModule)*
+*(`script` – DirectiveModule)*
 
 ```texy
 {{command: arg1, arg2}}
@@ -341,7 +341,7 @@ Applied automatically to all running text (never inside code or other protected 
 
 ## Long-word hyphenation
 
-*(`longwords` – LongWordsModule; post-processing)*
+*(`longwords` – HyphenationModule; post-processing)*
 
 Inserts invisible soft hyphens (`&shy;`) into words longer than `$texy->longWordsModule->wordLimit` (default 20) so browsers can break them. Uses Czech-oriented syllable heuristics. Enabled by default; disable with `$texy->allowed['longwords'] = false`.
 
@@ -365,7 +365,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 
 | Syntax ID | Default | Markup | Module |
 |---|---|---|---|
-| `script` | ✅ on | `{{command: args}}` | ScriptModule |
+| `script` | ✅ on | `{{command: args}}` | DirectiveModule |
 | `html/tag` | ✅ on | `<strong>`, `<div class=…>` | HtmlModule |
 | `html/comment` | ✅ on | `<!-- comment -->` | HtmlModule |
 | `image` | ✅ on | `[* image.jpg *]` | ImageModule |
@@ -400,17 +400,17 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 
 | Syntax ID | Default | Markup | Module |
 |---|---|---|---|
-| `blocks` | ✅ on | `/-- type … \--` fenced blocks | BlockModule |
-| `block/code` | ✅ on | subtype `/--code lang` | BlockModule |
-| `block/html` | ✅ on | subtype `/--html` | BlockModule |
-| `block/text` | ✅ on | subtype `/--text` | BlockModule |
-| `block/texysource` | ✅ on | subtype `/--texysource` | BlockModule |
-| `block/comment` | ✅ on | subtype `/--comment` | BlockModule |
-| `block/div` | ✅ on | subtype `/--div` | BlockModule |
-| `block/pre` | ✅ on | subtype `/--pre` | BlockModule |
-| `block/default` | ✅ on | plain `/--` block | BlockModule |
+| `blocks` | ✅ on | `/-- type … \--` fenced blocks | DelimitedBlockModule |
+| `block/code` | ✅ on | subtype `/--code lang` | DelimitedBlockModule |
+| `block/html` | ✅ on | subtype `/--html` | DelimitedBlockModule |
+| `block/text` | ✅ on | subtype `/--text` | DelimitedBlockModule |
+| `block/texysource` | ✅ on | subtype `/--texysource` | DelimitedBlockModule |
+| `block/comment` | ✅ on | subtype `/--comment` | DelimitedBlockModule |
+| `block/div` | ✅ on | subtype `/--div` | DelimitedBlockModule |
+| `block/pre` | ✅ on | subtype `/--pre` | DelimitedBlockModule |
+| `block/default` | ✅ on | plain `/--` block | DelimitedBlockModule |
 | `figure` | ✅ on | `[* img.jpg *] *** caption` | FigureModule |
-| `horizline` | ✅ on | `---` or `***` on its own line | HorizLineModule |
+| `horizline` | ✅ on | `---` or `***` on its own line | HorizontalRuleModule |
 | `blockquote` | ✅ on | `> quoted text` | BlockQuoteModule |
 | `table` | ✅ on | `| cell | cell |` | TableModule |
 | `heading/underlined` | ✅ on | heading underlined by `###`/`***`/`===`/`---` | HeadingModule |
@@ -425,7 +425,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `link/definition` | ✅ on | `[name]: url .(title)` reference definitions, extracted in `beforeParse` | LinkModule |
 | `image/definition` | ✅ on | `[*name*]: url .(alt)` image reference definitions, extracted in `beforeParse` | ImageModule |
 | `typography` | ✅ on | post-line typographic corrections (quotes, dashes, nbsp, symbols) | TypographyModule |
-| `longwords` | ✅ on | post-line insertion of `&shy;` soft hyphens into long words | LongWordsModule |
+| `longwords` | ✅ on | post-line insertion of `&shy;` soft hyphens into long words | HyphenationModule |
 
 Paragraphs themselves have no syntax ID – text between recognized blocks is always handled by **ParagraphModule** (configurable via `$texy->mergeLines` and the `paragraph` element handler).
 

@@ -13,7 +13,7 @@ use Texy;
 /**
  * Processes horizontal line syntax (---, ***).
  */
-final class HorizLineModule extends Texy\Module
+final class HorizontalRuleModule extends Texy\Module
 {
 	/** @var array<string, ?string>  default CSS class */
 	public array $classes = [
@@ -34,8 +34,8 @@ final class HorizLineModule extends Texy\Module
 		$this->texy->registerBlockPattern(
 			$this->parse(...),
 			'~^
-				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
-				[ \t]*                       # optional spaces
+				( \*{3,}+ | -{3,}+ )             # three or more * or - (1)
+				[ \t]*                           # optional spaces
 				' . Texy\Patterns::MODIFIER . '? # modifier (2)
 			$~mUx',
 			'horizline',

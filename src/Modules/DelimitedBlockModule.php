@@ -14,7 +14,7 @@ use Texy\{Helpers, HtmlElement};
 /**
  * Processes special blocks (/-- code, html, text, div, etc.).
  */
-final class BlockModule extends Texy\Module
+final class DelimitedBlockModule extends Texy\Module
 {
 	public function __construct(
 		private Texy\Texy $texy,
@@ -40,7 +40,7 @@ final class BlockModule extends Texy\Module
 			$this->parse(...),
 			'~^
 				/--++ \ *+                    # opening tag /--
-				(.*)                          # content type (1)
+				(.*)                         # content type (1)
 				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
 				$
 				((?:                         # content (3)
