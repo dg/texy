@@ -143,7 +143,6 @@ $texy->imageModule->root = 'images/';       // URL prefix for images
 $texy->imageModule->fileRoot = null;        // filesystem path for size autodetection
 $texy->imageModule->leftClass = null;       // class for left-floating images
 $texy->imageModule->rightClass = null;      // class for right-floating images
-$texy->imageModule->linkedRoot = 'images/'; // (deprecated) URL prefix for linked big images (`::` shortcut)
 ```
 
 References work like in LinkModule via `addDefinition()` / `getReference()`.
