@@ -23,28 +23,12 @@ test('figure with caption', function () {
 });
 
 
-test('figure without required caption', function () {
-	$texy = new Texy\Texy;
-	$texy->tabWidth = 0;
-	$texy->htmlOutputModule->lineWrap = 180;
-	$texy->imageModule->root = '../images/';
-	$texy->imageModule->leftClass = 'left';
-	$texy->figureModule->requireCaption = false;
-
-	Assert::matchFile(
-		__DIR__ . '/expected/figure-nocaption.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/figure.texy')),
-	);
-});
-
-
 test('figure with HTML5 figure tag', function () {
 	$texy = new Texy\Texy;
 	$texy->tabWidth = 0;
 	$texy->htmlOutputModule->lineWrap = 180;
 	$texy->imageModule->root = '../images/';
 	$texy->imageModule->leftClass = 'left';
-	$texy->figureModule->requireCaption = false;
 	$texy->figureModule->tagName = 'figure';
 	$texy->figureModule->class = null;
 	$texy->figureModule->leftClass = 'aside-left';
