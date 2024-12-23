@@ -52,7 +52,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 
 | Module | Purpose |
 |---|---|
-| **ScriptModule** | `{{command: args}}` macro calls; delegates entirely to user handlers of the `script` element. |
+| **DirectiveModule** | `{{command: args}}` macro calls; delegates entirely to user handlers of the `script` element. |
 | **HtmlModule** | HTML tags (`html/tag`) and comments (`html/comment`) written directly in the input; validates them against `$allowedTags` and the content model. |
 | **ImageModule** | Images `[* url *]` including dimensions and alignment; maintains image reference definitions (`image/definition`, collected in `beforeParse`); invokes the `image` element. |
 | **PhraseModule** | All inline formatting – bold, italic, code, spans, acronyms, sub/sup, quotes, and the alternative link syntaxes (wikilink, markdown, quicklink). Maps syntax names to HTML tags via its `$tags` property; a single `phrase` element handler serves all of them. |
@@ -66,7 +66,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 | **ParagraphModule** | Not pattern-based: `BlockParser` hands it the text between recognized blocks and it produces paragraphs, invoking the `paragraph` element. Chooses the wrapper by the content's protection marks – `<p>` for text, `$texy->nontextParagraph` for replaced-only content, no wrapper around blocks (see [parsing.md](parsing.md#how-content-types-drive-behavior)). Honors `$texy->mergeLines`; converts hard line breaks to `<br>`. |
 | **BlockModule** | Special fenced blocks `/-- type ... \--` (`blocks` syntax) with subtypes `block/code`, `block/html`, `block/text`, `block/texy`, `block/texysource`, `block/comment`, `block/div`, `block/pre`, `block/default`; normalizes fences in `beforeBlockParse`; invokes the `block` element. |
 | **FigureModule** | Image with a visible caption `[* img *] *** caption` (`figure`); combines an `Image`, optional `Link`, and caption; invokes the `figure` element. |
-| **HorizLineModule** | Horizontal rules `---` / `***` (`horizline`); type-specific CSS classes via `$classes`. |
+| **HorizontalRuleModule** | Horizontal rules `---` / `***` (`horizline`); type-specific CSS classes via `$classes`. |
 | **BlockQuoteModule** | Quotations introduced by `>` (`blockquote`), including nested quotes and link citation; fires `afterBlockquote`. |
 | **TableModule** | Tables (`table`) with head/body detection, row headers, colspan/rowspan (helper class `TableCellElement`), odd/even classes; fires `afterTable`. One of the most complex modules. |
 | **HeadingModule** | Underlined (`heading/underlined`) and surrounded (`heading/surrounded`) headings; assigns levels in `afterParse` according to the balancing mode (`DYNAMIC`/`FIXED`), generates IDs, collects `$TOC` and `$title`; invokes the `heading` element. |
@@ -77,7 +77,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 | Module | Purpose |
 |---|---|
 | **TypographyModule** | Post-line handler `typography`: locale-aware quotes, en/em dashes, ellipsis, non-breaking spaces, arrows, ©®™, multiplication sign. Prepares locale patterns in `beforeParse`. |
-| **LongWordsModule** | Post-line handler `longwords`: inserts `&shy;` soft hyphens into words longer than `$wordLimit`, using Czech-oriented syllable heuristics. |
+| **HyphenationModule** | Post-line handler `longwords`: inserts `&shy;` soft hyphens into words longer than `$wordLimit`, using Czech-oriented syllable heuristics. |
 | **HtmlOutputModule** | `postProcess` handler: makes the output well-formed (auto-closes tags, fixes nesting against the content model), indents, and wraps long lines. |
 
 ## Interactions between modules

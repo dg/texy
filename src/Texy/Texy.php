@@ -79,7 +79,7 @@ class Texy
 
 	public bool $removeSoftHyphens = true;
 	public string|HtmlElement $nontextParagraph = 'div';
-	public Modules\ScriptModule $scriptModule;
+	public Modules\DirectiveModule $scriptModule;
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\HtmlModule $htmlModule;
 	public Modules\ImageModule $imageModule;
@@ -88,13 +88,13 @@ class Texy
 	public Modules\EmoticonModule $emoticonModule;
 	public Modules\BlockModule $blockModule;
 	public Modules\HeadingModule $headingModule;
-	public Modules\HorizLineModule $horizLineModule;
+	public Modules\HorizontalRuleModule $horizLineModule;
 	public Modules\BlockQuoteModule $blockQuoteModule;
 	public Modules\ListModule $listModule;
 	public Modules\TableModule $tableModule;
 	public Modules\FigureModule $figureModule;
 	public Modules\TypographyModule $typographyModule;
-	public Modules\LongWordsModule $longWordsModule;
+	public Modules\HyphenationModule $longWordsModule;
 	public Modules\HtmlOutputModule $htmlOutputModule;
 
 	/** @var Module[] */
@@ -160,7 +160,7 @@ class Texy
 	protected function loadModules(): void
 	{
 		// line parsing
-		$this->addModule($this->scriptModule = new Modules\ScriptModule($this));
+		$this->addModule($this->scriptModule = new Modules\DirectiveModule($this));
 		$this->addModule($this->htmlModule = new Modules\HtmlModule($this));
 		$this->addModule($this->imageModule = new Modules\ImageModule($this));
 		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));
@@ -171,7 +171,7 @@ class Texy
 		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
 		$this->addModule($this->blockModule = new Modules\BlockModule($this));
 		$this->addModule($this->figureModule = new Modules\FigureModule($this));
-		$this->addModule($this->horizLineModule = new Modules\HorizLineModule($this));
+		$this->addModule($this->horizLineModule = new Modules\HorizontalRuleModule($this));
 		$this->addModule($this->blockQuoteModule = new Modules\BlockQuoteModule($this));
 		$this->addModule($this->tableModule = new Modules\TableModule($this));
 		$this->addModule($this->headingModule = new Modules\HeadingModule($this));
@@ -179,7 +179,7 @@ class Texy
 
 		// post process
 		$this->addModule($this->typographyModule = new Modules\TypographyModule($this));
-		$this->addModule($this->longWordsModule = new Modules\LongWordsModule($this));
+		$this->addModule($this->longWordsModule = new Modules\HyphenationModule($this));
 		$this->addModule($this->htmlOutputModule = new Modules\HtmlOutputModule($this));
 	}
 

@@ -70,7 +70,7 @@ There are three kinds of syntaxes, each with its own registration method on `Tex
 
 - **Line syntaxes** (`registerLinePattern()`) recognize inline items within lines of text – formatting, links, images, inline code. They may nest inside each other and [`InlineParser`](parsing.md#inlineparser) unwraps them gradually. Their patterns are searched for anywhere in the text, so they must not be anchored.
 - **Block syntaxes** (`registerBlockPattern()`) recognize multi-line block constructs: headings, lists, tables, quotes, special blocks. Unlike line syntaxes, block syntaxes never overlap – every line of text belongs to at most one block construct, and [`BlockParser`](parsing.md#blockparser) processes them without interleaving. Their patterns are anchored to the start of a line (the `m` modifier is added automatically).
-- **Post-line syntaxes** (`registerPostLine()`) do not parse markup at all; they transform the final textual content between block-level protection marks just before HTML entities are encoded. Two modules use it: `TypographyModule` (name `typography`) and `LongWordsModule` (name `longwords`).
+- **Post-line syntaxes** (`registerPostLine()`) do not parse markup at all; they transform the final textual content between block-level protection marks just before HTML entities are encoded. Two modules use it: `TypographyModule` (name `typography`) and `HyphenationModule` (name `longwords`).
 
 In all three cases the registered *syntax handler* returns an `HtmlElement`, a string, or `null` to refuse processing (post-line handlers return the transformed string). Registration parameters and handler signatures are documented in detail in the custom-syntax guide (user manual).
 
