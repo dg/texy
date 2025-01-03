@@ -110,12 +110,12 @@ function codeBlockHandler(BlockParser $parser, array $matches, string $name): Te
 $texy = new Texy;
 
 // Register the standard block handler for /--code syntax
-$texy->addHandler('block', 'blockHandler');
+$texy->addHandler('block', blockHandler(...));
 
 // Register NEW syntax: recognize blocks starting with <?php
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
 $texy->registerBlockPattern(
-	'codeBlockHandler',
+	codeBlockHandler(...),
 	'~^
 		<\?php \n .+? \n \?>
 	$~ms', // Must be multiline (m) and single-line mode (s)
@@ -124,7 +124,7 @@ $texy->registerBlockPattern(
 
 // Register NEW syntax: recognize <script> ... </script> blocks
 $texy->registerBlockPattern(
-	'codeBlockHandler',
+	codeBlockHandler(...),
 	'~^
 		<script (?: type=.?text/javascript.?)? > \n
 		.+? \n

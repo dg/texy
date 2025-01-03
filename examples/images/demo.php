@@ -58,7 +58,7 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Te
 $texy = new Texy;
 
 // Register our custom image handler
-$texy->addHandler('image', 'imageHandler');
+$texy->addHandler('image', imageHandler(...));
 
 // Configure image paths
 $texy->imageModule->root = 'imagesdir/';           // Base folder for images
