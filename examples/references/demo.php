@@ -56,7 +56,7 @@ function newReferenceHandler(Texy\HandlerInvocation $parser, $refName): Texy\Htm
 $texy = new Texy;
 
 // Register our reference handler
-$texy->addHandler('newReference', 'newReferenceHandler');
+$texy->addHandler('newReference', newReferenceHandler(...));
 
 // IMPORTANT: Use safe mode for user-submitted content!
 // This prevents XSS attacks by:

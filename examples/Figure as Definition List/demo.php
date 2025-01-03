@@ -67,7 +67,7 @@ function figureHandler(
 $texy = new Texy;
 
 // Register our custom handler for figures
-$texy->addHandler('figure', 'figureHandler');
+$texy->addHandler('figure', figureHandler(...));
 
 // You can also set CSS classes for figures (optional)
 // $texy->figureModule->class = 'figure';

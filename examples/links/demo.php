@@ -68,7 +68,7 @@ function phraseHandler(
 $texy = new Texy;
 
 // Register our custom link handler
-$texy->addHandler('phrase', 'phraseHandler');
+$texy->addHandler('phrase', phraseHandler(...));
 
 
 // Process the text

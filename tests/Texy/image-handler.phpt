@@ -29,7 +29,7 @@ test('custom image handler', function () {
 	$texy->imageModule->root = '../images/';
 	$texy->imageModule->linkedRoot = '../images/big/';
 	$texy->htmlOutputModule->lineWrap = 180;
-	$texy->addHandler('image', 'imageHandler');
+	$texy->addHandler('image', imageHandler(...));
 
 	Assert::matchFile(
 		__DIR__ . '/expected/image-handler.html',

@@ -50,7 +50,7 @@ $texy->allowed['phrase/em-alt2'] = false;    // Disables *text*
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks
 $texy->registerLinePattern(
-	'userInlineHandler',  // Handler function to call
+	userInlineHandler(...),  // Handler function to call
 	'~
 		(?<! \* ) \* (?! [ *] )
 		(.+)
@@ -62,7 +62,7 @@ $texy->registerLinePattern(
 
 // Add new syntax: _italic_
 $texy->registerLinePattern(
-	'userInlineHandler',                      // Same handler, different name
+	userInlineHandler(...),                   // Same handler, different name
 	'~
 		(?<! _ ) _ (?! [ _] )
 		(.+)
@@ -80,7 +80,7 @@ $texy->registerLinePattern(
 // Add new syntax: .tagname followed by content on next line
 // Examples: .h1, .h2, .perex, etc.
 $texy->registerBlockPattern(
-	'userBlockHandler',
+	userBlockHandler(...),
 	'~^
 		\. ([a-z0-9]+) \n
 		(.+)
