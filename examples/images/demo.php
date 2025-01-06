@@ -68,9 +68,6 @@ $texy->imageModule->linkedRoot = 'imagesdir/big/'; // Folder for linked/full-siz
 $texy->imageModule->leftClass = 'my-left-class';   // Class for [*< ... *] (left-aligned)
 $texy->imageModule->rightClass = 'my-right-class'; // Class for [*> ... *] (right-aligned)
 
-// Default alt text when none is specified
-$texy->imageModule->defaultAlt = 'default alt. text';
-
 
 // Process the text
 $text = file_get_contents(__DIR__ . '/sample.texy');
