@@ -119,7 +119,7 @@ Dimensions – detected automatically for local files when `$texy->imageModule->
 [* img.jpg ?x100 *]      // height, width keeps ratio
 ```
 
-Clickable images – append `:URL`; the `::` shortcut links to the same file under `$texy->imageModule->linkedRoot`:
+Clickable images – append `:URL`; the `::` shortcut links the image to its own URL (the full-size file itself):
 
 ```texy
 [* thumb.jpg *]:big.jpg

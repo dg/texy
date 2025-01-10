@@ -27,7 +27,6 @@ function imageHandler($invocation, $image, $link)
 test('custom image handler', function () {
 	$texy = new Texy\Texy;
 	$texy->imageModule->root = '../images/';
-	$texy->imageModule->linkedRoot = '../images/big/';
 	$texy->htmlOutputModule->lineWrap = 180;
 	$texy->addHandler('image', imageHandler(...));
 
