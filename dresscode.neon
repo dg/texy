@@ -47,6 +47,6 @@ overrides:
 		paths:
 			- src/Modifier.php
 			- src/Modules/ImageModule.php
-			- src/Modules/LinkModule.php
+			- src/Modules/LinkReferenceModule.php
 			- src/Modules/TableModule.php
 		upgrading: {declarations: {deprecatedMember: keep}}

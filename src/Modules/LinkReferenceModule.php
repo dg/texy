@@ -14,9 +14,9 @@ use function strlen;
 
 
 /**
- * Processes links, email addresses, and URL references.
+ * Processes link references and generates link elements.
  */
-final class LinkModule extends Texy\Module
+final class LinkReferenceModule extends Texy\Module
 {
 	/** root of relative links */
 	public ?string $root = null;
@@ -24,16 +24,11 @@ final class LinkModule extends Texy\Module
 	/** always use rel="nofollow" for absolute links? */
 	public bool $forceNoFollow = false;
 
-	/** shorten URLs to more readable form? */
-	public bool $shorten = true;
-
 	/** @var array<string, Link> link references */
 	private array $references = [];
 
 	/** @var array<string, true> */
 	private static array $livelock;
-
-	private static string $emailPattern;
 
 
 	public function __construct(
@@ -42,8 +37,6 @@ final class LinkModule extends Texy\Module
 		$texy->allowed['link/definition'] = true;
 		$texy->addHandler('newReference', $this->solveNewReference(...));
 		$texy->addHandler('linkReference', $this->solve(...));
-		$texy->addHandler('linkEmail', $this->solveUrlEmail(...));
-		$texy->addHandler('linkURL', $this->solveUrlEmail(...));
 	}
 
 
@@ -58,39 +51,6 @@ final class LinkModule extends Texy\Module
 				]
 			)~Ux',
 			'link/reference',
-		);
-
-		// direct url; characters not allowed in URL <>[\]^`{|}
-		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
-			'~
-				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
-				(?: https?:// | www\. | ftp:// )   # protocol or www
-				[0-9.' . Patterns::CHAR . '-]      # first char
-				[/\d' . Patterns::CHAR . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
-				[/\d' . Patterns::CHAR . '+\~?@=_#$*]  # last char
-			~x',
-			'link/url',
-			'~(?: https?:// | www\. | ftp://)~x',
-		);
-
-		// direct email
-		self::$emailPattern = '(?x:
-			[' . Patterns::CHAR . ']                 # first char
-			[0-9.+_' . Patterns::CHAR . '-]{0,63}    # local part
-			@
-			[0-9.+_' . Patterns::CHAR . '\x{ad}-]{1,252} # domain
-			\.
-			[' . Patterns::CHAR . '\x{ad}]{2,19}     # TLD
-		)';
-		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
-			'~
-				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
-				' . self::$emailPattern . '
-			~x',
-			'link/email',
-			'~' . self::$emailPattern . '~',
 		);
 
 		self::$livelock = [];
@@ -170,32 +130,11 @@ final class LinkModule extends Texy\Module
 				unset(self::$livelock[$link->name]);
 			}
 		} else {
-			$content = $this->textualUrl($link);
-			$content = $this->texy->protect($content, $texy::CONTENT_TEXTUAL);
+			$content = $texy->autolinkModule->textualUrl($link);
+			$content = $texy->protect($content, $texy::CONTENT_TEXTUAL);
 		}
 
 		return $texy->invokeAroundHandlers('linkReference', $parser, [$link, $content]);
-	}
-
-
-	/**
-	 * Parses http://davidgrudl.com david@grudl.com
-	 * @param  array<?string>  $matches
-	 */
-	public function parseUrlEmail(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
-	{
-		/** @var array{string} $matches */
-		[$mURL] = $matches;
-		// [0] => URL
-
-		$link = new Link($mURL);
-		$this->checkLink($link);
-
-		return $this->texy->invokeAroundHandlers(
-			$name === 'link/email' ? 'linkEmail' : 'linkURL',
-			$parser,
-			[$link],
-		);
 	}
 
 
@@ -279,7 +218,7 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Finish invocation.
+	 * Finish invocation - generates <a> element.
 	 */
 	public function solve(
 		?HandlerInvocation $invocation,
@@ -324,18 +263,7 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Finish invocation.
-	 */
-	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string|null
-	{
-		$content = $this->textualUrl($link);
-		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
-		return $this->solve(null, $link, $content);
-	}
-
-
-	/**
-	 * Finish invocation.
+	 * Handler for undefined references.
 	 */
 	private function solveNewReference(HandlerInvocation $invocation, string $name): void
 	{
@@ -344,9 +272,9 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Checks and corrects $URL.
+	 * Checks and corrects URL in Link.
 	 */
-	private function checkLink(Link $link): void
+	public function checkLink(Link $link): void
 	{
 		if ($link->URL === null) {
 			return;
@@ -359,7 +287,7 @@ final class LinkModule extends Texy\Module
 			// special supported case
 			$link->URL = 'http://' . $link->URL;
 
-		} elseif (Regexp::match($link->URL, '~' . self::$emailPattern . '$~A')) {
+		} elseif (Regexp::match($link->URL, '~' . Patterns::Email . '$~A')) {
 			// email
 			$link->URL = 'mailto:' . $link->URL;
 
@@ -369,64 +297,5 @@ final class LinkModule extends Texy\Module
 		} else {
 			$link->URL = str_replace('&amp;', '&', $link->URL); // replace unwanted &amp;
 		}
-	}
-
-
-	/**
-	 * Returns textual representation of URL.
-	 */
-	private function textualUrl(Link $link): string
-	{
-		if ($this->texy->obfuscateEmail && Regexp::match($link->raw, '~^' . self::$emailPattern . '$~')) { // email
-			return str_replace('@', '&#64;<!-- -->', $link->raw);
-		}
-
-		if ($this->shorten && Regexp::match($link->raw, '~^(https?://|ftp://|www\.|/)~i')) {
-			$raw = strncasecmp($link->raw, 'www.', 4) === 0
-				? 'none://' . $link->raw
-				: $link->raw;
-
-			// parse_url() in PHP damages UTF-8 - use regular expression
-			if (!($parts = Regexp::match($raw, '~^
-				(?: (?P<scheme> [a-z]+ ) : )?
-				(?: // (?P<host> [^/?#]+ ) )?
-				(?P<path> (?: / | ^ ) (?! / ) [^?#]* )?
-				(?: \? (?P<query> [^#]* ) )?
-				(?: \# (?P<fragment> .* ) )?
-				$
-			~x'))) {
-				return $link->raw;
-			}
-
-			/** @var array{0: string, scheme: ?string, host: ?string, path: ?string, query: ?string, fragment: ?string} $parts */
-			$res = '';
-			if ($parts['scheme'] !== null && $parts['scheme'] !== 'none') {
-				$res .= $parts['scheme'] . '://';
-			}
-
-			if ($parts['host'] !== null) {
-				$res .= $parts['host'];
-			}
-
-			if ($parts['path'] !== null) {
-				$res .= (iconv_strlen($parts['path'], 'UTF-8') > 16
-					? ("/\u{2026}" . iconv_substr($parts['path'], -12, 12, 'UTF-8'))
-					: $parts['path']);
-			}
-
-			if ($parts['query'] !== null && $parts['query'] !== '') {
-				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4
-					? "?\u{2026}"
-					: ('?' . $parts['query']);
-			} elseif ($parts['fragment'] !== null && $parts['fragment'] !== '') {
-				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4
-					? "#\u{2026}"
-					: ('#' . $parts['fragment']);
-			}
-
-			return $res;
-		}
-
-		return $link->raw;
 	}
 }
