@@ -130,13 +130,13 @@ final class Helpers
 			$min = strspn($s, ' ');
 		} else {
 			$min = strlen($s);
-			foreach (Regexp::matchAll($s, '~^ *\S~m') as $m) {
+			foreach (Regexp::matchAll($s, '~^\ *\S~m') as $m) {
 				$min = min($min, strlen($m[0]) - 1);
 			}
 		}
 
 		if ($min) {
-			$s = Regexp::replace($s, "~^ {1,$min}~m", '');
+			$s = Regexp::replace($s, "~^\\ {1,$min}~m", '');
 		}
 
 		return $s;
