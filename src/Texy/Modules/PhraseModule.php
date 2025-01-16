@@ -61,14 +61,14 @@ final class PhraseModule extends Texy\Module
 		// ***strong+emphasis***
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'#(?<![*\\\\])\*\*\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\\])\*\*\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()#Uus',
+			'#(?<![*\\\])\*\*\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*\*\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()#Uus',
 			'phrase/strong+em',
 		);
 
 		// **strong**
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'#(?<![*\\\\])\*\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\\])\*\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()#Uus',
+			'#(?<![*\\\])\*\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()#Uus',
 			'phrase/strong',
 		);
 
@@ -82,14 +82,14 @@ final class PhraseModule extends Texy\Module
 		// *emphasisAlt*
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'#(?<![*\\\\])\*(?![\s*])((?:[^\s*]++|[*])+)' . Patterns::MODIFIER . '?(?<![\s*\\\\])\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()#Uus',
+			'#(?<![*\\\])\*(?![\s*])((?:[^\s*]++|[*])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()#Uus',
 			'phrase/em-alt',
 		);
 
 		// *emphasisAlt2*
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'#(?<![^\s.,;:<>()"\'' . Patterns::MARK . '-])\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\\])\*(?![^\s.,;:<>()"?!\'-])(?::(' . Patterns::LINK_URL . '))??()#Uus',
+			'#(?<![^\s.,;:<>()"\'' . Patterns::MARK . '-])\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*(?![^\s.,;:<>()"?!\'-])(?::(' . Patterns::LINK_URL . '))??()#Uus',
 			'phrase/em-alt2',
 		);
 
