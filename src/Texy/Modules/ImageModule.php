@@ -53,7 +53,7 @@ final class ImageModule extends Texy\Module
 		$texy->registerLinePattern(
 			$this->patternImage(...),
 			'#\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::(' . Patterns::LINK_URL . '|:))??()#Uu',
+			. '(?::(' . Patterns::LINK_URL . '|:))??()#U',
 			'image',
 		);
 	}
@@ -68,7 +68,7 @@ final class ImageModule extends Texy\Module
 			// [*image*]: urls .(title)[class]{style}
 			$text = Texy\Regexp::replace(
 				$text,
-				'#^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$#mUu',
+				'#^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$#mU',
 				$this->patternReferenceDef(...),
 			);
 		}
