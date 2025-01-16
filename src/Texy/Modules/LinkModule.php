@@ -56,14 +56,14 @@ final class LinkModule extends Texy\Module
 		// [reference]
 		$texy->registerLinePattern(
 			$this->patternReference(...),
-			'~(\[[^\[\]\*\n' . Patterns::MARK . ']++\])~U',
+			'~(\[[^\[\]\*\n' . Patterns::MARK . ']++\])~Ux',
 			'link/reference',
 		);
 
 		// direct url; charaters not allowed in URL <>[\]^`{|}
 		$texy->registerLinePattern(
 			$this->patternUrlEmail(...),
-			'~(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.' . Patterns::CHAR . '-][/\d' . Patterns::CHAR . '+\.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}[/\d' . Patterns::CHAR . '+\~?@=_#$*]~',
+			'~(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.' . Patterns::CHAR . '-][/\d' . Patterns::CHAR . '+\.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}[/\d' . Patterns::CHAR . '+\~?@=_#$*]~x',
 			'link/url',
 			'~(?:https?://|www\.|ftp://)~',
 		);
@@ -72,7 +72,7 @@ final class LinkModule extends Texy\Module
 		self::$EMAIL = '[' . Patterns::CHAR . '][0-9.+_' . Patterns::CHAR . '-]{0,63}@[0-9.+_' . Patterns::CHAR . '\x{ad}-]{1,252}\.[' . Patterns::CHAR . '\x{ad}]{2,19}';
 		$texy->registerLinePattern(
 			$this->patternUrlEmail(...),
-			'~(?<=^|[\s([<\x17])' . self::$EMAIL . '~',
+			'~(?<=^|[\s([<\x17])' . self::$EMAIL . '~x',
 			'link/email',
 			'~' . self::$EMAIL . '~',
 		);
@@ -90,7 +90,7 @@ final class LinkModule extends Texy\Module
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = Texy\Regexp::replace(
 				$text,
-				'~^\[([^\[\]#\?\*\n]{1,100})\]:\ ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$~mU',
+				'~^\[([^\[\]#\?\*\n]{1,100})\]:\ ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$~mUx',
 				$this->patternReferenceDef(...),
 			);
 		}
@@ -362,7 +362,7 @@ final class LinkModule extends Texy\Module
 				: $link->raw;
 
 			// parse_url() in PHP damages UTF-8 - use regular expression
-			if (!preg_match('~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~u', $raw, $parts)) {
+			if (!preg_match('~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:\#(?P<fragment>.*))?()$~ux', $raw, $parts)) {
 				return $link->raw;
 			}
 
