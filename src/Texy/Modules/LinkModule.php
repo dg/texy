@@ -371,7 +371,7 @@ final class LinkModule extends Texy\Module
 				: $link->raw;
 
 			// parse_url() in PHP damages UTF-8 - use regular expression
-			if (!($parts = Regexp::match($raw, '~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~'))) {
+			if (!($parts = Regexp::match($raw, '~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:\#(?P<fragment>.*))?()$~'))) {
 				return $link->raw;
 			}
 

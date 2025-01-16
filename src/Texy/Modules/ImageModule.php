@@ -160,7 +160,7 @@ final class ImageModule extends Texy\Module
 
 			// dimensions
 			$matches = null;
-			if ($matches = Texy\Regexp::match($content[0], '~^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$~U')) {
+			if ($matches = Texy\Regexp::match($content[0], '~^(.*)\ (\d+|\?)\ *(X|x)\ *(\d+|\?)\ *()$~U')) {
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';
 				$image->width = $matches[2] === '?' ? null : (int) $matches[2];

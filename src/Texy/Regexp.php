@@ -14,16 +14,18 @@ use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SP
 
 /**
  * Regular expression utilities with error handling.
+ * Patterns run with 'ux' flags. Use Regexp::quote() instead of preg_quote().
  */
 class Regexp
 {
 	/**
 	 * Splits string by a regular expression. Subpatterns in parentheses will be captured and returned as well.
+	 * Pattern runs with 'ux' flags.
 	 * @return ($captureOffset is true ? list<array{string, int}> : list<string>)
 	 */
 	public static function split(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		bool $captureOffset = false,
 		bool $skipEmpty = false,
@@ -31,18 +33,19 @@ class Regexp
 	): array
 	{
 		$flags = ($captureOffset ? PREG_SPLIT_OFFSET_CAPTURE : 0) | ($skipEmpty ? PREG_SPLIT_NO_EMPTY : 0);
-		return self::pcre('preg_split', [$pattern . 'u', $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
+		return self::pcre('preg_split', [$pattern . 'ux', $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
 	}
 
 
 	/**
 	 * Searches the string for the part matching the regular expression and returns
 	 * an array with the found expression and individual subexpressions, or null.
+	 * Pattern runs with 'ux' flags.
 	 * @return ($captureOffset is true ? array<int|string, array{string, int}> : array<int|string, string>)|null
 	 */
 	public static function match(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		bool $captureOffset = false,
 		int $offset = 0,
@@ -54,7 +57,7 @@ class Regexp
 		}
 
 		$m = [];
-		return self::pcre('preg_match', [$pattern . 'u', $subject, &$m, $flags, $offset])
+		return self::pcre('preg_match', [$pattern . 'ux', $subject, &$m, $flags, $offset])
 			? $m
 			: null;
 	}
@@ -63,11 +66,12 @@ class Regexp
 	/**
 	 * Searches the string for all occurrences matching the regular expression and
 	 * returns an array of arrays containing the found expression and each subexpression.
+	 * Pattern runs with 'ux' flags.
 	 * @return ($captureOffset is true ? list<array<int|string, array{string, int}>> : list<array<int|string, string>>)
 	 */
 	public static function matchAll(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		bool $captureOffset = false,
 		int $offset = 0,
@@ -79,19 +83,20 @@ class Regexp
 
 		$m = [];
 		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_SET_ORDER;
-		self::pcre('preg_match_all', [$pattern . 'u', $subject, &$m, $flags, $offset]);
+		self::pcre('preg_match_all', [$pattern . 'ux', $subject, &$m, $flags, $offset]);
 		return $m;
 	}
 
 
 	/**
 	 * Replaces all occurrences matching regular expression $pattern which can be string or array in the form `pattern => replacement`.
+	 * Pattern runs with 'ux' flags.
 	 * @param  string|string[]  $pattern
 	 * @param  string|\Closure(string[]): string  $replacement
 	 */
 	public static function replace(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string|array $pattern,
 		string|\Closure $replacement = '',
 		int $limit = -1,
@@ -99,13 +104,13 @@ class Regexp
 	): string
 	{
 		if (is_array($pattern) && is_string(key($pattern))) {
-			$patterns = array_map(static fn($p) => $p . 'u', array_keys($pattern));
+			$patterns = array_map(static fn($p) => $p . 'ux', array_keys($pattern));
 			return self::pcre('preg_replace', [$patterns, array_values($pattern), $subject, $limit]);
 		}
 
 		$pattern = is_array($pattern)
-			? array_map(static fn($p) => $p . 'u', $pattern)
-			: $pattern . 'u';
+			? array_map(static fn($p) => $p . 'ux', $pattern)
+			: $pattern . 'ux';
 
 		if ($replacement instanceof \Closure) {
 			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
@@ -116,9 +121,12 @@ class Regexp
 	}
 
 
+	/**
+	 * Escapes string for use in a regular expression. Unlike preg_quote(), also escapes spaces and '#' for extended mode.
+	 */
 	public static function quote(string $s): string
 	{
-		return preg_quote($s, '~');
+		return addcslashes($s, "\x00..\x20-.\\+*?[^]$(){}=!<>|:-#");
 	}
 
 

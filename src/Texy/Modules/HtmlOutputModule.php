@@ -77,16 +77,16 @@ final class HtmlOutputModule extends Texy\Module
 		}
 
 		// right trim
-		$s = Regexp::replace($s, "~[\t ]+(\n|\r|$)~", '$1'); // right trim
+		$s = Regexp::replace($s, '~[\t ]+(\n|\r|$)~', '$1'); // right trim
 
 		// join double \r to single \n
 		$s = str_replace("\r\r", "\n", $s);
 		$s = strtr($s, "\r", "\n");
 
 		// greedy chars
-		$s = Regexp::replace($s, '~\x07 *~', '');
+		$s = Regexp::replace($s, '~\x07\ *~', '');
 		// back-tabs
-		$s = Regexp::replace($s, '~\t? *\x08~', '');
+		$s = Regexp::replace($s, '~\t?\ *\x08~', '');
 
 		// line wrap
 		if ($this->lineWrap > 0) {

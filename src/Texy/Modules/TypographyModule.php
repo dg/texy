@@ -57,8 +57,8 @@ final class TypographyModule extends Texy\Module
 		'~(?<!\d)(\d{1,2}\.)\ (\d{1,2}\.)~' /*.   */ => "\$1\u{A0}\$2",            // date 23. 1.
 		'~\ ---\ ~' /*.                           */ => "\u{A0}\u{2014} ",         // em dash ---
 		'~\ ([\x{2013}\x{2014}])~' /*.            */ => "\u{A0}\$1",               // &nbsp; behind dash (dash stays at line end)
-		'~\ <-{1,2}> ~' /*.                       */ => " \u{2194} ",              // left right arrow <-->
-		'~-{1,}> ~' /*.                           */ => "\u{2192} ",               // right arrow -->
+		'~\ <-{1,2}>\ ~' /*.                      */ => " \u{2194} ",              // left right arrow <-->
+		'~-{1,}>\ ~' /*.                          */ => "\u{2192} ",               // right arrow -->
 		'~\ <-{1,}~' /*.                          */ => " \u{2190} ",              // left arrow <--
 		'~={1,}>\ ~' /*.                          */ => "\u{21D2} ",              // right arrow ==>
 		'~\+-~' /*.                               */ => "\u{B1}",                  // +-
@@ -117,7 +117,7 @@ final class TypographyModule extends Texy\Module
 	public function postLine(string $text, bool $preserveSpaces = false): string
 	{
 		if (!$preserveSpaces) {
-			$text = Texy\Regexp::replace($text, '~ {2,}~', ' ');
+			$text = Texy\Regexp::replace($text, '~\ {2,}~', ' ');
 		}
 
 		return Texy\Regexp::replace($text, $this->pattern);

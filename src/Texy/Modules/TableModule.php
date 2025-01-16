@@ -68,7 +68,7 @@ final class TableModule extends Texy\Module
 
 		$parser->moveBackward();
 
-		if ($parser->next('~^\|(#|\=){2,}(?![|#=+])(.+)\1*\|?\ *' . Patterns::MODIFIER_H . '?()$~Um', $matches)) {
+		if ($parser->next('~^\|(\#|\=){2,}(?![|#=+])(.+)\1*\|?\ *' . Patterns::MODIFIER_H . '?()$~Um', $matches)) {
 			[, , $mContent, $mMod] = $matches;
 			// [1] => # / =
 			// [2] => ....
