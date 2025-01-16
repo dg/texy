@@ -25,7 +25,7 @@ class Regexp
 	 */
 	public static function split(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		bool $captureOffset = false,
 		bool $skipEmpty = false,
@@ -33,7 +33,7 @@ class Regexp
 	): array
 	{
 		$flags = ($captureOffset ? PREG_SPLIT_OFFSET_CAPTURE : 0) | ($skipEmpty ? PREG_SPLIT_NO_EMPTY : 0);
-		return self::pcre('preg_split', [$pattern . 'u', $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
+		return self::pcre('preg_split', [$pattern . 'ux', $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
 	}
 
 
@@ -44,7 +44,7 @@ class Regexp
 	 */
 	public static function match(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		bool $captureOffset = false,
 		int $offset = 0,
@@ -56,7 +56,7 @@ class Regexp
 		}
 
 		$m = [];
-		return self::pcre('preg_match', [$pattern . 'u', $subject, &$m, $flags, $offset])
+		return self::pcre('preg_match', [$pattern . 'ux', $subject, &$m, $flags, $offset])
 			? $m
 			: null;
 	}
@@ -69,7 +69,7 @@ class Regexp
 	 */
 	public static function matchAll(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		bool $captureOffset = false,
 		int $offset = 0,
@@ -81,7 +81,7 @@ class Regexp
 
 		$m = [];
 		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_SET_ORDER;
-		self::pcre('preg_match_all', [$pattern . 'u', $subject, &$m, $flags, $offset]);
+		self::pcre('preg_match_all', [$pattern . 'ux', $subject, &$m, $flags, $offset]);
 		return $m;
 	}
 
@@ -93,7 +93,7 @@ class Regexp
 	 */
 	public static function replace(
 		string $subject,
-		#[Language('RegExp')]
+		#[Language('PhpRegExpXTCommentMode')]
 		string|array $pattern,
 		string|\Closure $replacement = '',
 		int $limit = -1,
@@ -101,13 +101,13 @@ class Regexp
 	): string
 	{
 		if (is_array($pattern) && is_string(key($pattern))) {
-			$patterns = array_map(static fn($p) => $p . 'u', array_keys($pattern));
+			$patterns = array_map(static fn($p) => $p . 'ux', array_keys($pattern));
 			return self::pcre('preg_replace', [$patterns, array_values($pattern), $subject, $limit]);
 		}
 
 		$pattern = is_array($pattern)
-			? array_map(static fn($p) => $p . 'u', $pattern)
-			: $pattern . 'u';
+			? array_map(static fn($p) => $p . 'ux', $pattern)
+			: $pattern . 'ux';
 
 		if ($replacement instanceof \Closure) {
 			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
@@ -120,7 +120,7 @@ class Regexp
 
 	public static function quote(string $s): string
 	{
-		return preg_quote($s, '~');
+		return addcslashes($s, "\x00..\x20-.\\+*?[^]$(){}=!<>|:-#");
 	}
 
 
