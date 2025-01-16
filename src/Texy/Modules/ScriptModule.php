@@ -51,7 +51,7 @@ final class ScriptModule extends Texy\Module
 		$raw = null;
 		$args = [];
 		// function (arg, arg, ...) or function: arg, arg
-		if ($matches = Texy\Regexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
+		if ($matches = Texy\Regexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#i')) {
 			$cmd = $matches[1];
 			$raw = trim($matches[3] ?? $matches[2]);
 			if ($raw !== '') {

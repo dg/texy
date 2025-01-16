@@ -22,6 +22,7 @@ class Regexp
 	 */
 	public static function split(string $subject, string $pattern, int $flags = 0): array
 	{
+		$pattern .= 'u';
 		$reFlags = (($flags & self::OFFSET_CAPTURE) ? PREG_SPLIT_OFFSET_CAPTURE : 0) | PREG_SPLIT_DELIM_CAPTURE;
 		$res = preg_split($pattern, $subject, -1, $reFlags);
 		if (preg_last_error()) { // run-time error
@@ -38,6 +39,7 @@ class Regexp
 	 */
 	public static function match(string $subject, string $pattern, int $flags = 0, int $offset = 0): mixed
 	{
+		$pattern .= 'u';
 		$empty = $flags & self::ALL ? [] : null;
 		if ($offset > strlen($subject)) {
 			return $empty;
@@ -67,7 +69,7 @@ class Regexp
 	): string
 	{
 		if (is_object($replacement) || is_array($replacement)) {
-			$res = preg_replace_callback($pattern, $replacement, $subject);
+			$res = preg_replace_callback($pattern . 'u', $replacement, $subject);
 			if ($res === null && preg_last_error()) { // run-time error
 				trigger_error(preg_last_error_msg(), E_USER_WARNING);
 			}
@@ -76,7 +78,9 @@ class Regexp
 
 		} elseif ($replacement === null && is_array($pattern)) {
 			$replacement = array_values($pattern);
-			$pattern = array_keys($pattern);
+			$pattern = array_map(static fn($p) => $p . 'u', array_keys($pattern));
+		} else {
+			$pattern .= 'u';
 		}
 
 		$res = preg_replace($pattern, $replacement, $subject);

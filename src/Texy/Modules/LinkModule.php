@@ -63,18 +63,18 @@ final class LinkModule extends Texy\Module
 		// direct url; charaters not allowed in URL <>[\]^`{|}
 		$texy->registerLinePattern(
 			$this->patternUrlEmail(...),
-			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.' . Patterns::CHAR . '-][/\d' . Patterns::CHAR . '+\.~%&?@=_:;\#$!,*()\x{ad}-]{1,1000}[/\d' . Patterns::CHAR . '+~?@=_\#$*]#u',
+			'#(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.' . Patterns::CHAR . '-][/\d' . Patterns::CHAR . '+\.~%&?@=_:;\#$!,*()\x{ad}-]{1,1000}[/\d' . Patterns::CHAR . '+~?@=_\#$*]#',
 			'link/url',
-			'#(?:https?://|www\.|ftp://)#u',
+			'#(?:https?://|www\.|ftp://)#',
 		);
 
 		// direct email
 		self::$EMAIL = '[' . Patterns::CHAR . '][0-9.+_' . Patterns::CHAR . '-]{0,63}@[0-9.+_' . Patterns::CHAR . '\x{ad}-]{1,252}\.[' . Patterns::CHAR . '\x{ad}]{2,19}';
 		$texy->registerLinePattern(
 			$this->patternUrlEmail(...),
-			'#(?<=^|[\s([<\x17])' . self::$EMAIL . '#u',
+			'#(?<=^|[\s([<\x17])' . self::$EMAIL . '#',
 			'link/email',
-			'#' . self::$EMAIL . '#u',
+			'#' . self::$EMAIL . '#',
 		);
 	}
 
@@ -90,7 +90,7 @@ final class LinkModule extends Texy\Module
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = Texy\Regexp::replace(
 				$text,
-				'#^\[([^\[\]\#\?\*\n]{1,100})\]:\ ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$#mUu',
+				'#^\[([^\[\]\#\?\*\n]{1,100})\]:\ ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$#mU',
 				$this->patternReferenceDef(...),
 			);
 		}
@@ -356,13 +356,13 @@ final class LinkModule extends Texy\Module
 			return str_replace('@', '&#64;<!-- -->', $link->raw);
 		}
 
-		if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#i', $link->raw)) {
+		if ($this->shorten && preg_match('#^(https?://|ftp://|www\.|/)#iu', $link->raw)) {
 			$raw = strncasecmp($link->raw, 'www.', 4) === 0
 				? 'none://' . $link->raw
 				: $link->raw;
 
 			// parse_url() in PHP damages UTF-8 - use regular expression
-			if (!preg_match('~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~', $raw, $parts)) {
+			if (!preg_match('~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?()$~u', $raw, $parts)) {
 				return $link->raw;
 			}
 
