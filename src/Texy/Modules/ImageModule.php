@@ -53,7 +53,7 @@ final class ImageModule extends Texy\Module
 		// [*image*]:LINK
 		$texy->registerLinePattern(
 			$this->patternImage(...),
-			'#\[\* *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '? *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
+			'#\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
 			. '(?::(' . Patterns::LINK_URL . '|:))??()#Uu',
 			'image',
 		);
