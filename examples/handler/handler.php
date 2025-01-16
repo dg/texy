@@ -46,7 +46,7 @@ class myHandler
 
 
 	/** @return Texy\HtmlElement|string|null */
-	public function image(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null)
+	public function image(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null)
 	{
 		return $invocation->proceed();
 	}
@@ -55,7 +55,7 @@ class myHandler
 	public function linkReference(
 		Texy\HandlerInvocation $invocation,
 		Texy\Link $link,
-		string $content
+		string $content,
 	): Texy\HtmlElement|string|null
 	{
 		return $invocation->proceed();
@@ -82,7 +82,7 @@ class myHandler
 		$phrase,
 		$content,
 		Texy\Modifier $modifier,
-		Texy\Link $link = null,
+		?Texy\Link $link = null,
 	) {
 		return $invocation->proceed();
 	}
@@ -131,7 +131,7 @@ class myHandler
 	public function figure(
 		Texy\HandlerInvocation $invocation,
 		Texy\Image $image,
-		Texy\Link $link = null,
+		?Texy\Link $link,
 		$content,
 		Texy\Modifier $modifier,
 	) {

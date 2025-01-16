@@ -87,15 +87,15 @@ $texy->addHandler('block', 'blockHandler');
 // add new syntax: <?php ... ? >
 $texy->registerBlockPattern(
 	'codeBlockHandler',
-	'#^<\\?php\n.+?\n\\?>$#ms', // block patterns must be multiline and line-anchored
-	'phpBlockSyntax'
+	'#^<\?php\n.+?\n\?>$#ms', // block patterns must be multiline and line-anchored
+	'phpBlockSyntax',
 );
 
 // add new syntax: <script ...> ... </script>
 $texy->registerBlockPattern(
 	'codeBlockHandler',
 	'#^<script(?: type=.?text/javascript.?)?>\n.+?\n</script>$#ms', // block patterns must be multiline and line-anchored
-	'scriptBlockSyntax'
+	'scriptBlockSyntax',
 );
 
 // processing

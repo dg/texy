@@ -12,7 +12,7 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 }
 
 
-function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, Texy\Link $link = null): Texy\HtmlElement|string|null
+function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, ?Texy\Link $link = null): Texy\HtmlElement|string|null
 {
 	// is there link?
 	if (!$link) {

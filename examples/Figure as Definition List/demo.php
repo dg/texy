@@ -12,7 +12,7 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 }
 
 
-function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null, $content, Texy\Modifier $modifier): Texy\HtmlElement|string|null
+function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link, $content, Texy\Modifier $modifier): Texy\HtmlElement|string|null
 {
 	// finish invocation by default way
 	$el = $invocation->proceed();

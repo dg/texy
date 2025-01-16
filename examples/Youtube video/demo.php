@@ -15,7 +15,7 @@ if (@!include __DIR__ . '/../vendor/autoload.php') {
 /**
  * User handler for images
  */
-function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, Texy\Link $link = null): Texy\HtmlElement|string|null
+function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null): Texy\HtmlElement|string|null
 {
 	$parts = explode(':', $image->URL);
 	if (count($parts) !== 2) {
