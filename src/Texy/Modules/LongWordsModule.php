@@ -75,7 +75,7 @@ final class LongWordsModule extends Texy\Module
 	{
 		return Texy\Regexp::replace(
 			$text,
-			'#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}#u',
+			'#[^\ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}#',
 			$this->pattern(...),
 		);
 	}
@@ -95,7 +95,7 @@ final class LongWordsModule extends Texy\Module
 
 		$chars = Texy\Regexp::matchAll(
 			$mWord,
-			'#[' . Texy\Patterns::MARK . ']+|.#u',
+			'#[' . Texy\Patterns::MARK . ']+|.#',
 		);
 
 		$chars = array_column($chars, 0);
