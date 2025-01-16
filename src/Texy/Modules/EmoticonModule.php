@@ -60,14 +60,14 @@ final class EmoticonModule extends Texy\Module
 
 		$pattern = [];
 		foreach ($this->icons as $key => $foo) {
-			$pattern[] = preg_quote($key, '#') . '+'; // last char can be repeated
+			$pattern[] = preg_quote($key, '~') . '+'; // last char can be repeated
 		}
 
 		$this->texy->registerLinePattern(
 			$this->pattern(...),
-			'#(?<=^|[\x00-\x20])(' . implode('|', $pattern) . ')#',
+			'~(?<=^|[\x00-\x20])(' . implode('|', $pattern) . ')~',
 			'emoticon',
-			'#' . implode('|', $pattern) . '#',
+			'~' . implode('|', $pattern) . '~',
 		);
 	}
 

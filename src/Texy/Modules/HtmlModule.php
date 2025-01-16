@@ -32,13 +32,13 @@ final class HtmlModule extends Texy\Module
 
 		$texy->registerLinePattern(
 			$this->patternTag(...),
-			'#<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9\_:-]++|=\s*+"[^"' . Patterns::MARK . ']*+"|=\s*+\'[^\'' . Patterns::MARK . ']*+\'|=[^\s>' . Patterns::MARK . ']++)*)\s*+(/?)>#is',
+			'~<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9\_:-]++|=\s*+"[^"' . Patterns::MARK . ']*+"|=\s*+\'[^\'' . Patterns::MARK . ']*+\'|=[^\s>' . Patterns::MARK . ']++)*)\s*+(/?)>~is',
 			'html/tag',
 		);
 
 		$texy->registerLinePattern(
 			$this->patternComment(...),
-			'#<!--([^' . Patterns::MARK . ']*?)-->#is',
+			'~<!--([^' . Patterns::MARK . ']*?)-->~is',
 			'html/comment',
 		);
 	}
@@ -163,7 +163,7 @@ final class HtmlModule extends Texy\Module
 		}
 
 		// sanitize comment
-		$content = Texy\Regexp::replace($content, '#-{2,}#', ' - ');
+		$content = Texy\Regexp::replace($content, '~-{2,}~', ' - ');
 		$content = trim($content, '-');
 
 		return $this->texy->protect('<!--' . $content . '-->', Texy\Texy::CONTENT_MARKUP);
@@ -272,7 +272,7 @@ final class HtmlModule extends Texy\Module
 
 				$texy->summary['links'][] = $el->attrs['href'];
 			}
-		} elseif (preg_match('#^h[1-6]#i', $name)) {
+		} elseif (preg_match('~^h[1-6]~i', $name)) {
 			$texy->headingModule->TOC[] = [
 				'el' => $el,
 				'level' => (int) substr($name, 1),
@@ -288,7 +288,7 @@ final class HtmlModule extends Texy\Module
 	{
 		$matches = $res = [];
 		preg_match_all(
-			'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
+			'~([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()~isu',
 			$attrs,
 			$matches,
 			PREG_SET_ORDER,

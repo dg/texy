@@ -45,7 +45,7 @@ class TexyMacro extends Latte\Macros\MacroSet
 	public function texyClosed(Latte\MacroNode $node)
 	{
 		$text = $node->content;
-		if (preg_match('#^([\t ]*)\S#m', $text, $m)) { // remove & restore indentation
+		if (preg_match('~^([\t ]*)\S~m', $text, $m)) { // remove & restore indentation
 			$text = str_replace(["\r", "\n" . $m[1]], ['', "\n"], $text);
 			$this->texy->htmlOutputModule->baseIndent = strlen($m[1]);
 		}
