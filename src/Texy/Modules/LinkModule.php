@@ -225,7 +225,7 @@ final class LinkModule extends Texy\Module
 			$dest = substr($dest, 1, -1);
 			$link = $this->getReference($dest);
 
-		// [* image *]
+			// [* image *]
 		} elseif (strlen($dest) > 1 && $dest[0] === '[' && $dest[1] === '*') {
 			$type = Link::IMAGE;
 			$dest = trim(substr($dest, 2, -2));
