@@ -50,7 +50,7 @@ final class FigureModule extends Texy\Module
 			'#^(?>\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\])' // [* urls .(title)[class]{style} >]
 			. '(?::(' . Patterns::LINK_URL . '|:))??'
 			. '(?:\ ++\*\*\*\ ++(.{0,2000}))' . ($this->requireCaption ? '' : '?')
-			. Patterns::MODIFIER_H . '?()$#mUu',
+			. Patterns::MODIFIER_H . '?()$#mU',
 			'figure',
 		);
 	}

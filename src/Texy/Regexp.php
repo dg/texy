@@ -31,7 +31,7 @@ class Regexp
 	): array
 	{
 		$flags = ($captureOffset ? PREG_SPLIT_OFFSET_CAPTURE : 0) | ($skipEmpty ? PREG_SPLIT_NO_EMPTY : 0);
-		return self::pcre('preg_split', [$pattern, $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
+		return self::pcre('preg_split', [$pattern . 'u', $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
 	}
 
 
@@ -54,7 +54,7 @@ class Regexp
 		}
 
 		$m = [];
-		return self::pcre('preg_match', [$pattern, $subject, &$m, $flags, $offset])
+		return self::pcre('preg_match', [$pattern . 'u', $subject, &$m, $flags, $offset])
 			? $m
 			: null;
 	}
@@ -79,7 +79,7 @@ class Regexp
 
 		$m = [];
 		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_SET_ORDER;
-		self::pcre('preg_match_all', [$pattern, $subject, &$m, $flags, $offset]);
+		self::pcre('preg_match_all', [$pattern . 'u', $subject, &$m, $flags, $offset]);
 		return $m;
 	}
 
@@ -98,13 +98,18 @@ class Regexp
 		bool $captureOffset = false,
 	): string
 	{
+		if (is_array($pattern) && is_string(key($pattern))) {
+			$patterns = array_map(static fn($p) => $p . 'u', array_keys($pattern));
+			return self::pcre('preg_replace', [$patterns, array_values($pattern), $subject, $limit]);
+		}
+
+		$pattern = is_array($pattern)
+			? array_map(static fn($p) => $p . 'u', $pattern)
+			: $pattern . 'u';
+
 		if ($replacement instanceof \Closure) {
 			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
 			return self::pcre('preg_replace_callback', [$pattern, $replacement, $subject, $limit, 0, $flags]);
-
-		} elseif (is_array($pattern) && is_string(key($pattern))) {
-			return self::pcre('preg_replace', [array_keys($pattern), array_values($pattern), $subject, $limit]);
-
 		} else {
 			return self::pcre('preg_replace', [$pattern, $replacement, $subject, $limit]);
 		}

@@ -49,14 +49,14 @@ final class TypographyModule extends Texy\Module
 
 	/** @var array<string, string> */
 	private static array $patterns = [
-		'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\u{2026}",                // ellipsis  ...
+		'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#m'  => "\u{2026}",                // ellipsis  ...
 		'#(?<=[\d ]|^)-(?=[\d ]|$)#' /*.          */ => "\u{2013}",                // en dash 123-123
 		'#(?<=[^!*+,/:;<=>@\\\_|-])--(?=[^!*+,/:;<=>@\\\_|-])#' => "\u{2013}",   // en dash alphanum--alphanum
 		'#,-#' /*.                                */ => ",\u{2013}",               // en dash ,-
 		'#(?<!\d)(\d{1,2}\.)\ (\d{1,2}\.)\ (\d\d)#' => "\$1\u{A0}\$2\u{A0}\$3",      // date 23. 1. 1978
 		'#(?<!\d)(\d{1,2}\.)\ (\d{1,2}\.)#' /*.   */ => "\$1\u{A0}\$2",            // date 23. 1.
 		'#\ ---\ #' /*.                           */ => "\u{A0}\u{2014} ",         // em dash ---
-		'#\ ([\x{2013}\x{2014}])#u' /*.           */ => "\u{A0}\$1",               // &nbsp; behind dash (dash stays at line end)
+		'#\ ([\x{2013}\x{2014}])#' /*.            */ => "\u{A0}\$1",               // &nbsp; behind dash (dash stays at line end)
 		'#\ <-{1,2}> #' /*.                       */ => " \u{2194} ",              // left right arrow <-->
 		'#-{1,}> #' /*.                           */ => "\u{2192} ",               // right arrow -->
 		'#\ <-{1,}#' /*.                          */ => " \u{2190} ",              // left arrow <--
@@ -72,20 +72,20 @@ final class TypographyModule extends Texy\Module
 		'#(\d)\ (?=\d{3})#' /*.                   */ => "\$1\u{A0}",               // (phone) number 1 123 123 123...
 
 		// CONTENT_MARKUP mark: \x17-\x1F, CONTENT_REPLACED mark: \x16, CONTENT_TEXTUAL mark: \x17
-		'#(?<=[^\s\x17])\s++([\x17-\x1F]++)(?=\s)#u' => '$1',                      // remove intermarkup space phase 1
-		'#(?<=\s)([\x17-\x1F]++)\s++#u' /*.       */ => '$1',                      // remove intermarkup space phase 2
+		'#(?<=[^\s\x17])\s++([\x17-\x1F]++)(?=\s)#'  => '$1',                      // remove intermarkup space phase 1
+		'#(?<=\s)([\x17-\x1F]++)\s++#' /*.        */ => '$1',                      // remove intermarkup space phase 2
 
-		'#(?<=.{50})\s++(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#us' => "\u{A0}",      // space before last short word
+		'#(?<=.{50})\s++(?=[\x17-\x1F]*\S{1,6}[\x17-\x1F]*$)#s' => "\u{A0}",      // space before last short word
 
 		// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-		'#(?<=^|\ |\.|,|-|\+|\x16|\(|\d\x{A0})([\x17-\x1F]*\d++\.?[\x17-\x1F]*)\s++(?=[\x17-\x1F]*[%' . Patterns::CHAR . '\x{b0}-\x{be}\x{2020}-\x{214f}])#mu' => "\$1\u{A0}",
+		'#(?<=^|\ |\.|,|-|\+|\x16|\(|\d\x{A0})([\x17-\x1F]*\d++\.?[\x17-\x1F]*)\s++(?=[\x17-\x1F]*[%' . Patterns::CHAR . '\x{b0}-\x{be}\x{2020}-\x{214f}])#m' => "\$1\u{A0}",
 		// space between preposition and word
-		'#(?<=^|[^0-9' . Patterns::CHAR . '])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9' . Patterns::CHAR . '])#mus' => "\$1\u{A0}",
+		'#(?<=^|[^0-9' . Patterns::CHAR . '])([\x17-\x1F]*[ksvzouiKSVZOUIA][\x17-\x1F]*)\s++(?=[\x17-\x1F]*[0-9' . Patterns::CHAR . '])#ms' => "\$1\u{A0}",
 
 		// double ""
-		'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["' . Patterns::CHAR . '])()#Uu' => ':ldq:$1:rdq:',
+		'#(?<!"|\w)"(?!\ |")((?:[^"]++|")+)(?<!\ |")"(?!["' . Patterns::CHAR . '])()#U' => ':ldq:$1:rdq:',
 		// single ''
-		'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\'' . Patterns::CHAR . '])()#Uu' => ':lsq:$1:rsq:',
+		'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\'' . Patterns::CHAR . '])()#U' => ':lsq:$1:rsq:',
 	];
 
 	/** @var array<string, string> */

@@ -90,7 +90,7 @@ final class ParagraphModule extends Texy\Module
 			// leave element p
 
 		// block contains text
-		} elseif (Regexp::match($content, '#[^\s' . Texy\Patterns::MARK . ']#u')) {
+		} elseif (Regexp::match($content, '#[^\s' . Texy\Patterns::MARK . ']#')) {
 			// leave element p
 
 		// block contains only replaced element
