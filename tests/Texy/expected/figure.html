@@ -8,13 +8,13 @@
 	<p>any description</p>
 </div>
 
-<div class="foo"><img alt="alternative" title="title text" src="../images/obr.jpg"></div>
+<div class="foo figure"><img alt="alternative" title="title text" src="../images/obr.jpg"></div>
 
 <div class="foo figure" style="float:left"><img src="../images/obr.jpg" alt="">
 	<p>any description</p>
 </div>
 
-<div class="foo"><img src="../images/obr.jpg" alt="" class="left"></div>
+<div class="foo figure" style="float:left"><img src="../images/obr.jpg" alt=""></div>
 
 <h1>Links</h1>
 
@@ -30,11 +30,11 @@
 	<p>image link</p>
 </div>
 
-<div><a href="../images/obr.jpg"><img src="../images/obr.jpg" alt=""></a></div>
+<div class="figure"><a href="../images/obr.jpg"><img src="../images/obr.jpg" alt=""></a></div>
 
-<div><a href="link"><img src="../images/obr.jpg" alt=""></a></div>
+<div class="figure"><a href="link"><img src="../images/obr.jpg" alt=""></a></div>
 
-<div><a href="../images/popup.php?img=obr-big.jpg"><img src="../images/obr.jpg" alt=""></a></div>
+<div class="figure"><a href="../images/popup.php?img=obr-big.jpg"><img src="../images/obr.jpg" alt=""></a></div>
 
 <h1>Align</h1>
 
@@ -46,9 +46,9 @@
 	<p>any description</p>
 </div>
 
-<div><img src="../images/obr.jpg" alt="" class="left"></div>
+<div style="float:left" class="figure"><img src="../images/obr.jpg" alt=""></div>
 
-<div><img src="../images/obr.jpg" alt="" style="float:right"></div>
+<div style="float:right" class="figure"><img src="../images/obr.jpg" alt=""></div>
 
 <h1>Multiple</h1>
 
@@ -60,7 +60,9 @@
 	<p>any description</p>
 </div>
 
-<div><img src="../images/obr.jpg" alt=""> <img src="../images/obr.jpg" alt=""></div>
+<div class="figure"><img src="../images/obr.jpg" alt=""></div>
+
+<div class="figure"><img src="../images/obr.jpg" alt=""></div>
 
 <h1>Part of text</h1>
 
@@ -70,11 +72,15 @@
 
 <p>hello</p>
 
-<p><img src="../images/obr.jpg" alt=""> hello</p>
+<div class="figure"><img src="../images/obr.jpg" alt=""></div>
 
-<div class="foo"><img src="../images/image" alt=""></div>
+<p>hello</p>
 
-<p>hello <img src="../images/obr.jpg" alt=""></p>
+<div class="figure"><img src="../images/image" alt=""></div>
+
+<p>hello</p>
+
+<div class="figure"><img src="../images/obr.jpg" alt=""></div>
 
 <div><img src="../images/nikon-curve-1.jpg" alt="Nikon bez uživatelské křivky"> <img src="../images/nikon-curve-2.jpg"
 alt="Nikon s uživatelskou křivkou Point and Shoot v4.1"></div>

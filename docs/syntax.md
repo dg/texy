@@ -145,7 +145,7 @@ An image followed by ` *** ` and caption text on the same block:
 [* photo.jpg *] *** The caption. It may contain **formatting**.
 ```
 
-Renders `<div class="figure">` by default; set `$texy->figureModule->tagName = 'figure'` for semantic `<figure>`/`<figcaption>`. The pattern requires the caption unless `requireCaption` is disabled.
+Renders `<div class="figure">` by default; set `$texy->figureModule->tagName = 'figure'` for semantic `<figure>`/`<figcaption>`. The caption is optional – an image alone on its own block line also becomes a figure (without a `<figcaption>`).
 
 ## Headings
 
