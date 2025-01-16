@@ -53,10 +53,20 @@ final class ImageModule extends Texy\Module
 		// [*image*]:LINK
 		$texy->registerLinePattern(
 			$this->patternImage(...),
-			'~\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::(' . Patterns::LINK_URL . '|:))??()~Ux',
+			'~
+		   		\[\* \ *+                         # opening bracket with asterisk
+		   		([^\n' . Patterns::MARK . ']{1,1000}) # URLs
+		   		' . Patterns::MODIFIER . '?
+		   		\ *+
+		   		(\*|(?<!<)>|<)                    # alignment
+		   		\]
+		   		(?:
+		   			:(' . Patterns::LINK_URL . ' | : ) # link or just colon
+		   		)??
+	   		()~Ux',
 			'image',
 		);
+
 	}
 
 
@@ -69,7 +79,16 @@ final class ImageModule extends Texy\Module
 			// [*image*]: urls .(title)[class]{style}
 			$text = Texy\Regexp::replace(
 				$text,
-				'~^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$~mUx',
+				'~^
+			   		\[\*                              # opening [*
+			   		( [^\n]{1,100} )                  # URL
+			   		\*\]                              # closing *]
+			   		: [\ \t]+
+			   		(.{1,1000})                       # URL
+			   		[\ \t]*
+			   		' . Patterns::MODIFIER . '?
+			   		\s*
+		   		()$~mUx',
 				$this->patternReferenceDef(...),
 			);
 		}

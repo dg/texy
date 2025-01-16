@@ -27,17 +27,64 @@ class Patterns
 	public const MARK = '\x14-\x1F';
 
 	// modifier .(title)[class]{style}
-	public const MODIFIER = '(?:\ *+(?<=\ |^)\.((?:\((?:\\\\\)|[^)\n])++\)|\[[^\]\n]++\]|\{[^}\n]++\}){1,3}?))';
+	public const MODIFIER = '(?:
+		\ *+ (?<=\ |^)
+		\.
+		((?:
+			\( (?:\\\\\)|[^)\n])++ \) |  # title
+			\[ [^]\n]++ \] |             # class
+			\{ [^}\n]++ \}               # style
+		){1,3}?)
+	)';
 
 	// modifier .(title)[class]{style}<>
-	public const MODIFIER_H = '(?:\ *+(?<=\ |^)\.((?:\((?:\\\\\)|[^)\n])++\)|\[[^\]\n]++\]|\{[^}\n]++\}|<>|>|=|<){1,4}?))';
+	public const MODIFIER_H = '(?:
+		\ *+ (?<=\ |^)
+		\.
+		((?:
+			\( (?:\\\\\)|[^)\n])++ \) |  # title
+			\[ [^]\n]++ \] |             # class
+			\{ [^}\n]++ \} |             # style
+			<>|>|=|<                     # horizontal alignment
+		){1,4}?)
+	)';
 
 	// modifier .(title)[class]{style}<>^
-	public const MODIFIER_HV = '(?:\ *+(?<=\ |^)\.((?:\((?:\\\\\)|[^)\n])++\)|\[[^\]\n]++\]|\{[^}\n]++\}|<>|>|=|<|\^|\-|\_){1,5}?))';
+	public const MODIFIER_HV = '(?:
+		\ *+ (?<=\ |^)
+		\.
+		((?:
+			\( (?:\\\\\)|[^)\n])++ \) |  # title
+			\[ [^]\n]++ \] |             # class
+			\{[^}\n]++ \} |              # style
+			<>|>|=|< |                   # horizontal alignment
+			\^|\-|\_                     # vertical alignment
+		){1,5}?)
+	)';
 
 	// images   [* urls .(title)[class]{style} >]   '\[\* *+([^\n'.MARK.']{1,1000})'.MODIFIER.'? *+(\*|(?<!<)>|<)\]'
-	public const IMAGE = '\[\*\ *+([^\n\x14-\x1F]{1,1000})(?:\ *+(?<=\ |^)\.((?:\([^)\n]++\)|\[[^\]\n]++\]|\{[^}\n]++\}){1,3}?))?\ *+(\*|(?<!<)>|<)\]';
+	public const IMAGE = '
+		\[\* \ *+
+		( [^\n\x14-\x1F]{1,1000} )       # URL
+		(?:
+			\ *+ (?<= \ |^)
+			\.
+			((?:
+				\( [^)\n]++ \) |         # title
+				\[ [^\]\n]++ \] |        # class
+				\{ [^}\n]++ \}           # style
+			){1,3}?)
+		)?
+		\ *+
+		( \* | (?<!<) > | <)             # alignment
+		\]';
 
 	// links, url - doesn't end by :).,!?
-	public const LINK_URL = '(?:\[[^\]\n]++\]|(?=[\w/+.\~%&?@=_#$])[^\s\x14-\x1F]{0,1000}?[^:);,.!?\s\x14-\x1F])'; // any url - doesn't end by :).,!?
+	public const LINK_URL = '(?:
+		\[ [^\]\n]++ \]                  # link text in brackets
+		|
+		(?= [\w/+.\~%&?@=_#$] )          # URL must start with these chars
+		[^\s\x14-\x1F]{0,1000}?          # URL body
+		[^:);,.!?\s\x14-\x1F]            # URL must not end with these chars
+	)';
 }

@@ -38,7 +38,20 @@ final class BlockModule extends Texy\Module
 
 		$texy->registerBlockPattern(
 			$this->pattern(...),
-			'~^/--++\ *+(.*)' . Texy\Patterns::MODIFIER_H . '?$((?:\n(?0)|\n.*+)*)(?:\n\\\--.*$|\z)~mUix',
+			'~^
+				/--++ \ *+                    # opening tag /--
+				(.*)                          # content type
+				' . Texy\Patterns::MODIFIER_H . '?
+				$
+				((?:
+					\n (?0) |                # recursive nested blocks
+					\n.*+                    # or any content
+				)*)
+				(?:
+					\n \\\--.* $ |           # closing tag \--
+					\z                       # or end of input
+				)
+			~mUix',
 			'blocks',
 		);
 	}
@@ -52,8 +65,16 @@ final class BlockModule extends Texy\Module
 		// autoclose exclusive blocks
 		$text = Texy\Regexp::replace(
 			$text,
-			'~^(/--++\ *+(?!div|texysource).*)$((?:\n.*+)*?)(?:\n\\\--.*$|(?=(\n/--.*$)))~mi',
-			"\$1\$2\n\\--",
+			'~^
+				( /--++ \ *+ (?!div|texysource) .* )  # opening tag except div/texysource
+				$
+				((?: \n.*+ )*?)                 # content
+				(?:
+					\n \\\--.* $ |              # closing tag
+					(?= (\n /--.* $))           # or next block starts
+				)
+			~mi',
+			"\$1\$2\n\\--",                 // add closing tag
 		);
 	}
 

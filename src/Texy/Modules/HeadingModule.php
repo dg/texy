@@ -64,14 +64,22 @@ final class HeadingModule extends Texy\Module
 
 		$texy->registerBlockPattern(
 			$this->patternUnderline(...),
-			'~^(\S.{0,1000})' . Texy\Patterns::MODIFIER_H . '?\n'
-			. '(\#{3,}+|\*{3,}+|={3,}+|-{3,}+)$~mUx',
+			'~^
+				( \S .{0,1000} )                 # heading text
+				' . Texy\Patterns::MODIFIER_H . '?
+				\n
+				( \#{3,}+ | \*{3,}+ | ={3,}+ | -{3,}+ )  # underline characters
+			$~mUx',
 			'heading/underlined',
 		);
 
 		$texy->registerBlockPattern(
 			$this->patternSurround(...),
-			'~^(\#{2,}+|={2,}+)(.+)' . Texy\Patterns::MODIFIER_H . '?()$~mUx',
+			'~^
+				( \#{2,}+ | ={2,}+ )             # opening characters
+				(.+)                             # heading text
+				' . Texy\Patterns::MODIFIER_H . '?
+			()$~mUx',
 			'heading/surrounded',
 		);
 	}

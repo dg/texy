@@ -35,8 +35,11 @@ final class TableModule extends Texy\Module
 
 		$texy->registerBlockPattern(
 			$this->patternTable(...),
-			'~^(?:' . Patterns::MODIFIER_HV . '\n)?' // .{color: red}
-			. '\|.*()$~mUx', // | ....
+			'~^
+				(?:' . Patterns::MODIFIER_HV . '\n)?
+				\|                           # table start
+				.*                           # content
+			()$~mUx',
 			'table',
 		);
 	}
@@ -68,7 +71,18 @@ final class TableModule extends Texy\Module
 
 		$parser->moveBackward();
 
-		if ($parser->next('~^\|(\#|\=){2,}(?![|#=+])(.+)\1*\|?\ *' . Patterns::MODIFIER_H . '?()$~Umx', $matches)) {
+		if ($parser->next(
+			'~^
+				\|                               # opening pipe
+				( \# | \= ){2,}  (?![|#=+])
+				(.+)                             # content
+				\1*                              # matching closing characters
+				\|?                              # optional closing pipe
+				\ *                              # optional spaces
+				' . Patterns::MODIFIER_H . '?
+			()$~Umx',
+			$matches,
+		)) {
 			[, , $mContent, $mMod] = $matches;
 			// [1] => # / =
 			// [2] => ....

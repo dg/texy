@@ -65,7 +65,10 @@ final class EmoticonModule extends Texy\Module
 
 		$this->texy->registerLinePattern(
 			$this->pattern(...),
-			'~(?<=^|[\x00-\x20])(' . implode('|', $pattern) . ')~',
+			'~
+				(?<= ^ | [\x00-\x20] )
+				(' . implode('|', $pattern) . ')
+			~x',
 			'emoticon',
 			'~' . implode('|', $pattern) . '~',
 		);

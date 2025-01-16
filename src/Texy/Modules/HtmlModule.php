@@ -32,13 +32,31 @@ final class HtmlModule extends Texy\Module
 
 		$texy->registerLinePattern(
 			$this->patternTag(...),
-			'~<(/?)([a-z][a-z0-9_:-]{0,50})((?:\s++[a-z0-9\_:-]++|=\s*+"[^"' . Patterns::MARK . ']*+"|=\s*+\'[^\'' . Patterns::MARK . ']*+\'|=[^\s>' . Patterns::MARK . ']++)*)\s*+(/?)>~isx',
+			'~
+		   		< (/?)                          # tag begin
+		   		([a-z][a-z0-9_:-]{0,50})        # tag name
+		   		(
+		   			(?:
+		   				\s++ [a-z0-9\_:-]++ |   # attribute name
+		   				= \s*+ " [^"' . Patterns::MARK . ']*+ " |     # attribute value in double quotes
+		   				= \s*+ \' [^\'' . Patterns::MARK . ']*+ \' |  # attribute value in single quotes
+		   				= [^\s>' . Patterns::MARK . ']++              # attribute value without quotes
+		   			)*
+		   		)
+		   		\s*+
+		   		(/?)                             # self-closing slash
+		   		>
+	   		~isx',
 			'html/tag',
 		);
 
 		$texy->registerLinePattern(
 			$this->patternComment(...),
-			'~<!--([^' . Patterns::MARK . ']*?)-->~isx',
+			'~
+		   		<!--
+		   		( [^' . Patterns::MARK . ']*? )
+		   		-->
+	   		~isx',
 			'html/comment',
 		);
 	}
@@ -288,12 +306,22 @@ final class HtmlModule extends Texy\Module
 	{
 		$matches = $res = [];
 		preg_match_all(
-			'~([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()~isux',
+			'~
+	   		([a-z0-9\_:-]+)                # attribute name
+	   		\s*
+	   		(?:
+	   			= \s*                      # equals sign
+	   			(
+	   				\' [^\']* \' |         # single quoted value
+	   				" [^"]* " |            # double quoted value
+	   				[^\'"\s]+              # unquoted value
+	   			)
+	   		)?
+	   		()~isux',
 			$attrs,
 			$matches,
 			PREG_SET_ORDER,
 		);
-
 		foreach ($matches as $m) {
 			$key = strtolower($m[1]);
 			$value = $m[2];

@@ -32,7 +32,11 @@ final class HorizLineModule extends Texy\Module
 
 		$texy->registerBlockPattern(
 			$this->pattern(...),
-			'~^(\*{3,}+|-{3,}+)[\ \t]*' . Texy\Patterns::MODIFIER . '?()$~mUx',
+			'~^
+	   			( \*{3,}+ | -{3,}+ )          # three or more * or -
+	   			[\ \t]*                       # optional spaces
+	   			' . Texy\Patterns::MODIFIER . '?
+	   		()$~mUx',
 			'horizline',
 		);
 	}
