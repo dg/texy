@@ -28,7 +28,7 @@ final class ParagraphModule extends Texy\Module
 	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
 	{
 		$parts = $parser->isIndented()
-			? preg_split('#(\n(?! )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY)
+			? preg_split('#(\n(?!\ )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY)
 			: preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
 
 		foreach ($parts as $s) {
@@ -73,7 +73,7 @@ final class ParagraphModule extends Texy\Module
 		$content = $texy->mergeLines
 			// ....
 			// ... => \r means break line
-			? Regexp::replace($content, '#\n +(?=\S)#', "\r")
+			? Regexp::replace($content, '#\n\ +(?=\S)#', "\r")
 			: Regexp::replace($content, '#\n#', "\r");
 
 		$el = new Texy\HtmlElement('p');
