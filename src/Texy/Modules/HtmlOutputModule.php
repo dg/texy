@@ -68,7 +68,10 @@ final class HtmlOutputModule extends Texy\Module
 		// wellform and reformat
 		$s = Regexp::replace(
 			$s . '</end/>',
-			'~([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()~Uis',
+			'~
+				( [^<]*+ )
+				< (?: (!--.*--) | (/?) ([a-z][a-z0-9._:-]*) (|[ \n].*) \s* (/?) ) >
+			()~Uis',
 			$this->cb(...),
 		);
 

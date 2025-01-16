@@ -37,10 +37,23 @@ final class FigureModule extends Texy\Module
 
 		$texy->addHandler('figure', $this->solve(...));
 
+		// [* urls .(title)[class]{style} >]
 		$texy->registerBlockPattern(
 			$this->pattern(...),
-			'~^\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::(' . Patterns::LINK_URL . '|:))??\ ++\*\*\*\ ++(.{0,2000})' . Patterns::MODIFIER_H . '?()$~mU',
+			'~^
+				\[\*\ *+                          # opening bracket with asterisk
+				([^\n' . Patterns::MARK . ']{1,1000}) # URLs (1)
+				' . Patterns::MODIFIER . '?       # modifier (2)
+				\ *+
+				( \* | (?<! < ) > | < )           # alignment (3)
+				]
+				(?:
+					:(' . Patterns::LINK_URL . ' | : ) # link or colon (4)
+				)??
+				\ ++ \*\*\* \ ++                  # separator
+				(.{0,2000})                       # figure content (5)
+				' . Patterns::MODIFIER_H . '?     # modifier (6)
+			()$~mU',
 			'figure',
 		);
 	}
