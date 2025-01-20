@@ -126,7 +126,6 @@ Default `$tags` map: `phrase/strong` → `strong`, `phrase/em`, `phrase/em-alt`,
 $texy->linkModule->root = null;           // prefix for relative link URLs
 $texy->linkModule->forceNoFollow = false; // add rel="nofollow" to external links
 $texy->linkModule->shorten = true;        // shorten displayed URLs (autolinks)
-$texy->linkModule->imageClass = null;     // (deprecated) class for image links
 ```
 
 References:
