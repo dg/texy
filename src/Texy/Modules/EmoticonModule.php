@@ -61,7 +61,7 @@ final class EmoticonModule extends Texy\Module
 
 		$pattern = [];
 		foreach ($this->icons as $key => $foo) {
-			$pattern[] = preg_quote($key, '#') . '+'; // last char can be repeated
+			$pattern[] = Texy\Regexp::quote($key) . '+'; // last char can be repeated
 		}
 
 		$this->texy->registerLinePattern(
