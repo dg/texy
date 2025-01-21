@@ -93,14 +93,12 @@ final class LongWordsModule extends Texy\Module
 			return $mWord;
 		}
 
-		$chars = [];
-		preg_match_all(
-			'#[' . Texy\Patterns::MARK . ']+|.#u',
+		$chars = Texy\Regexp::matchAll(
 			$mWord,
-			$chars,
+			'#[' . Texy\Patterns::MARK . ']+|.#u',
 		);
 
-		$chars = $chars[0];
+		$chars = array_column($chars, 0);
 		if (count($chars) < $this->wordLimit) {
 			return $mWord;
 		}
