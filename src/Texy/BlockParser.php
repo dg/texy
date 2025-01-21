@@ -51,8 +51,8 @@ class BlockParser extends Parser
 		$matches = Regexp::match(
 			$this->text,
 			$pattern . 'Am', // anchored & multiline
-			Regexp::OFFSET_CAPTURE,
-			$this->offset,
+			captureOffset: true,
+			offset: $this->offset,
 		);
 
 		if ($matches) {
@@ -140,10 +140,10 @@ class BlockParser extends Parser
 		$priority = 0;
 		foreach ($this->patterns as $name => $pattern) {
 			/** @var array<int, array<int, array{string, int}>>|null $ms */
-			$ms = Regexp::match(
+			$ms = Regexp::matchAll(
 				$text,
 				$pattern['pattern'],
-				Regexp::OFFSET_CAPTURE | Regexp::ALL,
+				captureOffset: true,
 			);
 
 			foreach ((array) $ms as $m) {
