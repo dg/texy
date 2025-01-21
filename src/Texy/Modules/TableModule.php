@@ -34,7 +34,7 @@ final class TableModule extends Texy\Module
 				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)
 				\|                                   # table start
 				.*                                   # content
-			()$~mU',
+			$~mU',
 			'table',
 		);
 	}
@@ -74,7 +74,7 @@ final class TableModule extends Texy\Module
 				\1*                              # matching closing chars
 				\|? \ *                              # optional closing pipe and spaces
 				' . Patterns::MODIFIER_H . '?    # modifier (3)
-			()$~Um',
+			$~Um',
 			$matches,
 		)) {
 			[, , $mContent, $mMod] = $matches;
@@ -102,7 +102,7 @@ final class TableModule extends Texy\Module
 				continue;
 			}
 
-			if ($parser->next('~^ \| (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)()$~U', $matches)) {
+			if ($parser->next('~^ \| (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)$~U', $matches)) {
 				// smarter head detection
 				if ($rowCounter === 0 && !$isHead && $parser->next('~^ \| [=-] [+|=-]{2,} $~Um', $foo)) {
 					$isHead = true;
@@ -158,7 +158,7 @@ final class TableModule extends Texy\Module
 
 	private function processRow(
 		string $content,
-		string $mMod,
+		?string $mMod,
 		bool $isHead,
 		Texy\Texy $texy,
 		array &$prevRow,
@@ -238,7 +238,7 @@ final class TableModule extends Texy\Module
 			(.*)                              # content (3)
 			' . Patterns::MODIFIER_HV . '?    # modifier (4)
 			[ \t]*
-		()$~AU');
+		$~AU');
 		if (!$matches) {
 			return null;
 		}

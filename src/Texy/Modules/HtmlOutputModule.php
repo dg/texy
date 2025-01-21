@@ -71,7 +71,7 @@ final class HtmlOutputModule extends Texy\Module
 			'~
 				( [^<]*+ )
 				< (?: (!--.*--) | (/?) ([a-z][a-z0-9._:-]*) (|[ \n].*) \s* (/?) ) >
-			()~Uis',
+			~Uis',
 			$this->cb(...),
 		);
 

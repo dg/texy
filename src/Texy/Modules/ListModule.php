@@ -180,7 +180,7 @@ final class ListModule extends Texy\Module
 			( \S .* )                       # term content
 			: [ \t]*                        # colon separator
 			' . Patterns::MODIFIER_H . '?
-		()$~mUA';
+		$~mUA';
 
 		while (true) {
 			if ($elItem = $this->patternItem($parser, $bullet, true, 'dd')) {
@@ -225,7 +225,7 @@ final class ListModule extends Texy\Module
 			[ \\t]*
 			( \\S .* )?                              # content
 			" . Patterns::MODIFIER_H . '?
-		()$~mAU';
+		$~mAU';
 
 		// first line with bullet
 		$matches = null;
@@ -250,7 +250,7 @@ final class ListModule extends Texy\Module
 			' . Regexp::quote($mIndent) . '
 			([ \t]{1,' . $spaces . '})
 			(.*)
-		()$~Am', $matches)) {
+		$~Am', $matches)) {
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 			// [1] => blank line?
 			// [2] => spaces

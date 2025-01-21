@@ -36,7 +36,7 @@ final class HorizLineModule extends Texy\Module
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
 				[ \t]*                       # optional spaces
 				' . Texy\Patterns::MODIFIER . '? # modifier (2)
-			()$~mU',
+			$~mU',
 			'horizline',
 		);
 	}

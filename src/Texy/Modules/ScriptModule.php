@@ -37,7 +37,7 @@ final class ScriptModule extends Texy\Module
 					}                                    # or single }
 				)+)
 				}}
-			()~U',
+			~U',
 			'script',
 		);
 	}

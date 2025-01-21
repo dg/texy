@@ -119,7 +119,7 @@ final class LinkModule extends Texy\Module
 					( [ \t] .{1,1000} )?              # optional description (3)
 					' . Patterns::MODIFIER . '?       # modifier (4)
 					\s*
-				()$~mU',
+				$~mU',
 				$this->patternReferenceDef(...),
 			);
 		}
@@ -138,7 +138,7 @@ final class LinkModule extends Texy\Module
 		// [4] => .(title)[class]{style}
 
 		$link = new Link($mLink);
-		$link->label = trim($mLabel);
+		$link->label = trim($mLabel ?? '');
 		$link->modifier->setProperties($mMod);
 		$this->checkLink($link);
 		$this->addReference($mRef, $link);
@@ -397,29 +397,29 @@ final class LinkModule extends Texy\Module
 				(?P<path> (?: / | ^ ) (?! / ) [^?#]* )?
 				(?: \? (?P<query> [^#]* ) )?
 				(?: \# (?P<fragment> .* ) )?
-				()$
+				$
 			~'))) {
 				return $link->raw;
 			}
 
 			$res = '';
-			if ($parts['scheme'] !== '' && $parts['scheme'] !== 'none') {
+			if ($parts['scheme'] !== null && $parts['scheme'] !== 'none') {
 				$res .= $parts['scheme'] . '://';
 			}
 
-			if ($parts['host'] !== '') {
+			if ($parts['host'] !== null) {
 				$res .= $parts['host'];
 			}
 
-			if ($parts['path'] !== '') {
+			if ($parts['path'] !== null) {
 				$res .= (iconv_strlen($parts['path'], 'UTF-8') > 16 ? ("/\u{2026}" . iconv_substr($parts['path'], -12, 12, 'UTF-8')) : $parts['path']);
 			}
 
-			if ($parts['query'] !== '') {
+			if ($parts['query'] > '') {
 				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4
 					? "?\u{2026}"
 					: ('?' . $parts['query']);
-			} elseif ($parts['fragment'] !== '') {
+			} elseif ($parts['fragment'] > '') {
 				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4
 					? "#\u{2026}"
 					: ('#' . $parts['fragment']);
