@@ -66,7 +66,7 @@ final class FigureModule extends Texy\Module
 					(.{0,2000})                   # caption (5)
 				)' . ($this->requireCaption ? '' : '?') . ' 
 				' . Patterns::MODIFIER_H . '?     # modifier (6)
-			()$~mU',
+			$~mU',
 			'figure',
 		);
 	}
