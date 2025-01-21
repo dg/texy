@@ -264,7 +264,7 @@ class Texy
 	public function process(string $text, bool $singleLine = false): string
 	{
 		if ($this->processing) {
-			throw new \RuntimeException('Processing is in progress yet.');
+			throw new Exception('Processing is in progress yet.');
 		}
 
 		// initialization
@@ -371,7 +371,7 @@ class Texy
 	public function toText(): string
 	{
 		if (!$this->DOM) {
-			throw new \RuntimeException('Call $texy->process() first.');
+			throw new Exception('Call $texy->process() first.');
 		}
 
 		return $this->DOM->toText($this);
@@ -559,7 +559,7 @@ class Texy
 
 	final public function __clone()
 	{
-		throw new \Exception('Clone is not supported.');
+		throw new \LogicException('Clone is not supported.');
 	}
 }
 
