@@ -39,7 +39,7 @@ final class HandlerInvocation
 	public function proceed(...$args): string|HtmlElement|null
 	{
 		if ($this->pos === 0) {
-			throw new \RuntimeException('No more handlers.');
+			throw new Exception('No more handlers.');
 		}
 
 		if ($args) {
@@ -50,7 +50,7 @@ final class HandlerInvocation
 		$this->pos--;
 		$res = $this->handlers[$this->pos](...$this->args);
 		if ($res !== null && !is_string($res) && !$res instanceof HtmlElement) {
-			throw new \UnexpectedValueException("Invalid value returned from handler '" . $this->handlers[$this->pos][0]::class . "'.");
+			throw new Exception("Invalid value returned from handler '" . $this->handlers[$this->pos][0]::class . "'.");
 		}
 
 		return $res;
