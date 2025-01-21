@@ -80,7 +80,7 @@ final class HeadingModule extends Texy\Module
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
 				(.+)                             # heading text (2)
 				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
-			()$~mU',
+			$~mU',
 			'heading/surrounded',
 		);
 	}
