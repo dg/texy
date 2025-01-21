@@ -26,7 +26,7 @@ The callback always receives a `Texy\HandlerInvocation` first, followed by eleme
 - **replace processing entirely** – return its own result without calling `proceed()`,
 - **refuse** – return `null` (the construct is left unprocessed).
 
-Valid return values are `Texy\HtmlElement`, `string`, or `null`; anything else throws `UnexpectedValueException`. Calling `proceed()` when no handler remains in the chain throws `RuntimeException` (the module's default handler never calls `proceed()`, so this happens only if you invoke an element that has no default handler). Useful accessors on the invocation: `getTexy()`, `getParser()`.
+Valid return values are `Texy\HtmlElement`, `string`, or `null`; anything else throws `UnexpectedValueException`. Calling `proceed()` when no handler remains in the chain throws `Texy\Exception` (the module's default handler never calls `proceed()`, so this happens only if you invoke an element that has no default handler). Useful accessors on the invocation: `getTexy()`, `getParser()`.
 
 ```php
 $texy->addHandler('image', function($invocation, Texy\Image $image, ?Texy\Link $link) {
