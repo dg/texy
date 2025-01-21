@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Regexp;
 use function preg_quote, preg_split, trim;
 
 
@@ -52,11 +53,11 @@ final class ScriptModule extends Texy\Module
 		$raw = null;
 		$args = [];
 		// function (arg, arg, ...) or function: arg, arg
-		if ($matches = Texy\Regexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
+		if ($matches = Regexp::match($cmd, '#^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$#iu')) {
 			$cmd = $matches[1];
 			$raw = trim($matches[3] ?? $matches[2]);
 			if ($raw !== '') {
-				$args = preg_split('#\s*' . preg_quote($this->separator, '#') . '\s*#u', $raw);
+				$args = Regexp::split($raw, '#\s*' . Regexp::quote($this->separator) . '\s*#u');
 			}
 		}
 
