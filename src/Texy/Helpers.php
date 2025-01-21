@@ -114,7 +114,7 @@ final class Helpers
 	{
 		$s = self::toAscii($s);
 		$s = strtolower($s);
-		$s = Regexp::replace($s, '#[^a-z0-9' . preg_quote($charlist, '#') . ']+#', '-');
+		$s = Regexp::replace($s, '#[^a-z0-9' . Regexp::quote($charlist) . ']+#', '-');
 		$s = trim($s, '-');
 		return $s;
 	}
@@ -149,7 +149,7 @@ final class Helpers
 	public static function isRelative(string $URL): bool
 	{
 		// check for scheme, or absolute path, or absolute URL
-		return !preg_match('#[a-z][a-z0-9+.-]{0,20}:|[\#/?]#Ai', $URL);
+		return !Regexp::match($URL, '#[a-z][a-z0-9+.-]{0,20}:|[\#/?]#Ai');
 	}
 
 
