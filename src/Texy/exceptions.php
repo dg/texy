@@ -13,3 +13,11 @@ namespace Texy;
 class Exception extends \Exception
 {
 }
+
+
+/**
+ * Regular expression pattern or execution failed.
+ */
+class RegexpException extends Exception
+{
+}

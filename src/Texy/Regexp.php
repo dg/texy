@@ -9,79 +9,110 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use JetBrains\PhpStorm\Language;
+
 
 class Regexp
 {
-	public const ALL = 1;
-	public const OFFSET_CAPTURE = 2;
-
-
 	/**
-	 * Splits string by a regular expression.
-	 * @param  int $flags  OFFSET_CAPTURE
+	 * Divides the string into arrays according to the regular expression. Expressions in parentheses will be captured and returned as well.
 	 */
-	public static function split(string $subject, string $pattern, int $flags = 0): array
+	public static function split(
+		string $subject,
+		#[Language('RegExp')]
+		string $pattern,
+		bool $captureOffset = false,
+		bool $skipEmpty = false,
+		int $limit = -1,
+	): array
 	{
-		$reFlags = (($flags & self::OFFSET_CAPTURE) ? PREG_SPLIT_OFFSET_CAPTURE : 0) | PREG_SPLIT_DELIM_CAPTURE;
-		$res = preg_split($pattern, $subject, -1, $reFlags);
-		if (preg_last_error()) { // run-time error
-			trigger_error(preg_last_error_msg(), E_USER_WARNING);
-		}
-
-		return $res;
+		$flags = ($captureOffset ? PREG_SPLIT_OFFSET_CAPTURE : 0) | ($skipEmpty ? PREG_SPLIT_NO_EMPTY : 0);
+		return self::pcre('preg_split', [$pattern, $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
 	}
 
 
 	/**
-	 * Performs a regular expression match.
-	 * @param  int $flags  OFFSET_CAPTURE, ALL
+	 * Searches the string for the part matching the regular expression and returns
+	 * an array with the found expression and individual subexpressions, or `null`.
 	 */
-	public static function match(string $subject, string $pattern, int $flags = 0, int $offset = 0): mixed
+	public static function match(
+		string $subject,
+		#[Language('RegExp')]
+		string $pattern,
+		bool $captureOffset = false,
+		int $offset = 0,
+	): ?array
 	{
-		$empty = $flags & self::ALL ? [] : null;
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
 		if ($offset > strlen($subject)) {
-			return $empty;
-		}
-
-		$reFlags = ($flags & self::OFFSET_CAPTURE) ? PREG_OFFSET_CAPTURE : 0;
-		$res = $flags & self::ALL
-			? preg_match_all($pattern, $subject, $m, $reFlags | PREG_SET_ORDER, $offset)
-			: preg_match($pattern, $subject, $m, $reFlags, $offset);
-		if (preg_last_error()) { // run-time error
-			trigger_error(preg_last_error_msg(), E_USER_WARNING);
-		} elseif ($res) {
+			return null;
+		} elseif (!self::pcre('preg_match', [$pattern, $subject, &$m, $flags, $offset])) {
+			return null;
+		} else {
 			return $m;
 		}
-
-		return $empty;
 	}
 
 
 	/**
-	 * Perform a regular expression search and replace.
+	 * Searches the string for all occurrences matching the regular expression and
+	 * returns an array of arrays containing the found expression and each subexpression.
+	 * @return array[]
+	 */
+	public static function matchAll(
+		string $subject,
+		#[Language('RegExp')]
+		string $pattern,
+		bool $captureOffset = false,
+		int $offset = 0,
+	): array
+	{
+		if ($offset > strlen($subject)) {
+			return [];
+		}
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_SET_ORDER;
+		self::pcre('preg_match_all', [$pattern, $subject, &$m, $flags, $offset]);
+		return $m;
+	}
+
+
+	/**
+	 * Replaces all occurrences matching regular expression $pattern which can be string or array in the form `pattern => replacement`.
 	 */
 	public static function replace(
 		string $subject,
+		#[Language('RegExp')]
 		string|array $pattern,
-		string|callable|null $replacement = null,
+		string|callable $replacement = '',
+		int $limit = -1,
+		bool $captureOffset = false,
 	): string
 	{
 		if (is_object($replacement) || is_array($replacement)) {
-			$res = preg_replace_callback($pattern, $replacement, $subject);
-			if ($res === null && preg_last_error()) { // run-time error
-				trigger_error(preg_last_error_msg(), E_USER_WARNING);
+			if (!is_callable($replacement, false, $textual)) {
+				throw new Exception("Callback '$textual' is not callable.");
 			}
 
-			return $res;
+			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
+			return self::pcre('preg_replace_callback', [$pattern, $replacement, $subject, $limit, 0, $flags]);
 
-		} elseif ($replacement === null && is_array($pattern)) {
-			$replacement = array_values($pattern);
-			$pattern = array_keys($pattern);
+		} elseif (is_array($pattern) && is_string(key($pattern))) {
+			return self::pcre('preg_replace', [array_keys($pattern), array_values($pattern), $subject, $limit]);
+
+		} else {
+			return self::pcre('preg_replace', [$pattern, $replacement, $subject, $limit]);
 		}
+	}
 
-		$res = preg_replace($pattern, $replacement, $subject);
-		if (preg_last_error()) { // run-time error
-			trigger_error(preg_last_error_msg(), E_USER_WARNING);
+
+	/** @internal */
+	public static function pcre(string $func, array $args)
+	{
+		$res = @$func(...$args);
+		if (($code = preg_last_error()) // run-time error, but preg_last_error & return code are liars
+			&& ($res === null || !in_array($func, ['preg_replace_callback', 'preg_replace'], true))
+		) {
+			throw new RegexpException(preg_last_error_msg() . ' (pattern: ' . implode(' or ', (array) $args[0]) . ')', $code);
 		}
 
 		return $res;
