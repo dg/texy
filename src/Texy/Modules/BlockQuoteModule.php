@@ -64,7 +64,7 @@ final class BlockQuoteModule extends Texy\Module
 			}
 			$content .= $mContent . "\n";
 
-			if (!$parser->next("~^>(?: | ([ \\t]{1,$spaces} | :) (.*))()$~mA", $matches)) {
+			if (!$parser->next("~^>(?: | ([ \\t]{1,$spaces} | :) (.*))$~mA", $matches)) {
 				break;
 			}
 

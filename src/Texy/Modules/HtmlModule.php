@@ -320,7 +320,7 @@ final class HtmlModule extends Texy\Module
 						[^'"\s]+               # unquoted value
 					)
 				)?
-				()~is
+				~is
 				X,
 		);
 

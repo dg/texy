@@ -53,7 +53,7 @@ final class FigureModule extends Texy\Module
 				\ ++ \*\*\* \ ++                  # separator
 				(.{0,2000})                       # figure content (5)
 				' . Patterns::MODIFIER_H . '?     # modifier (6)
-			()$~mU',
+			$~mU',
 			'figure',
 		);
 	}

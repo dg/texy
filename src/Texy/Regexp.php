@@ -43,7 +43,7 @@ class Regexp
 		int $offset = 0,
 	): ?array
 	{
-		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_UNMATCHED_AS_NULL;
 		if ($offset > strlen($subject)) {
 			return null;
 		} elseif (!self::pcre('preg_match', [$pattern . 'ux', $subject, &$m, $flags, $offset])) {
@@ -70,7 +70,7 @@ class Regexp
 		if ($offset > strlen($subject)) {
 			return [];
 		}
-		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_SET_ORDER;
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_UNMATCHED_AS_NULL | PREG_SET_ORDER;
 		self::pcre('preg_match_all', [$pattern . 'ux', $subject, &$m, $flags, $offset]);
 		return $m;
 	}
@@ -93,7 +93,7 @@ class Regexp
 				throw new Exception("Callback '$textual' is not callable.");
 			}
 
-			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
+			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_UNMATCHED_AS_NULL;
 			return self::pcre('preg_replace_callback', [$pattern . 'ux', $replacement, $subject, $limit, 0, $flags]);
 
 		} elseif (is_array($pattern) && is_string(key($pattern))) {
