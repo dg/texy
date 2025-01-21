@@ -40,7 +40,7 @@ final class HandlerInvocation
 	public function proceed(mixed ...$args): string|HtmlElement|null
 	{
 		if ($this->pos === 0) {
-			throw new \RuntimeException('No more handlers.');
+			throw new Exception('No more handlers.');
 		}
 
 		if ($args) {
