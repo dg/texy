@@ -10,8 +10,8 @@ declare(strict_types=1);
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use function array_keys, array_values, is_array, preg_last_error, preg_last_error_msg, preg_match, preg_match_all, preg_replace, preg_replace_callback, preg_split, strlen;
-use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SPLIT_OFFSET_CAPTURE;
+use function array_keys, array_values, in_array, is_array, is_string, preg_last_error, preg_last_error_msg, strlen;
+use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SPLIT_NO_EMPTY, PREG_SPLIT_OFFSET_CAPTURE;
 
 
 /**
@@ -110,6 +110,12 @@ class Regexp
 		} else {
 			return self::pcre('preg_replace', [$pattern, $replacement, $subject, $limit]);
 		}
+	}
+
+
+	public static function quote(string $s): string
+	{
+		return preg_quote($s, '#');
 	}
 
 
