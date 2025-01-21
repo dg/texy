@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Texy;
 
-use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, link, ltrim, preg_match, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
+use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, link, ltrim, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
 use const ENT_NOQUOTES;
 
 
@@ -245,7 +245,7 @@ class Texy
 	 */
 	final public function registerBlockPattern(callable $handler, string $pattern, string $name): void
 	{
-		// if (!preg_match('#(.)\^.*\$\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
+		// if (!Regexp::match($pattern, '#(.)\^.*\$\1[a-z]*#is')) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = true;
 		}
@@ -521,8 +521,8 @@ class Texy
 	{
 		// absolute URL with scheme? check scheme!
 		return empty($this->urlSchemeFilters[$type])
-			|| !preg_match('#\s*[a-z][a-z0-9+.-]{0,20}:#Ai', $URL) // http: | mailto:
-			|| preg_match($this->urlSchemeFilters[$type], $URL);
+			|| !Regexp::match($URL, '#\s*[a-z][a-z0-9+.-]{0,20}:#Ai') // http: | mailto:
+			|| Regexp::match($URL, $this->urlSchemeFilters[$type]);
 	}
 
 
