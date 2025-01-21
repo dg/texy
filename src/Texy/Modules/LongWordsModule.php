@@ -75,7 +75,7 @@ final class LongWordsModule extends Texy\Module
 		return Texy\Regexp::replace(
 			$text,
 			'~[^ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}~',
-			$this->pattern(...),
+			$this->parse(...),
 		);
 	}
 
@@ -83,7 +83,7 @@ final class LongWordsModule extends Texy\Module
 	/**
 	 * Callback for long words.
 	 */
-	private function pattern(array $matches): string
+	private function parse(array $matches): string
 	{
 		[$mWord] = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd

@@ -28,11 +28,11 @@ final class HtmlModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('htmlComment', $this->solveComment(...));
-		$texy->addHandler('htmlTag', $this->solveTag(...));
+		$texy->addHandler('htmlComment', $this->commentToElement(...));
+		$texy->addHandler('htmlTag', $this->tagToElement(...));
 
 		$texy->registerLinePattern(
-			$this->patternTag(...),
+			$this->parseTag(...),
 			'~
 				< (/?)                          # tag begin
 				([a-z][a-z0-9_:-]{0,50})        # tag name
@@ -52,7 +52,7 @@ final class HtmlModule extends Texy\Module
 		);
 
 		$texy->registerLinePattern(
-			$this->patternComment(...),
+			$this->parseComment(...),
 			'~
 				<!--
 				( [^' . Patterns::MARK . ']*? )
@@ -66,7 +66,7 @@ final class HtmlModule extends Texy\Module
 	/**
 	 * Callback for: <!-- comment -->.
 	 */
-	public function patternComment(Texy\LineParser $parser, array $matches): HtmlElement|string|null
+	public function parseComment(Texy\LineParser $parser, array $matches): HtmlElement|string|null
 	{
 		[, $mComment] = $matches;
 		return $this->texy->invokeAroundHandlers('htmlComment', $parser, [$mComment]);
@@ -76,7 +76,7 @@ final class HtmlModule extends Texy\Module
 	/**
 	 * Callback for: <tag attr="...">.
 	 */
-	public function patternTag(Texy\LineParser $parser, array $matches): HtmlElement|string|null
+	public function parseTag(Texy\LineParser $parser, array $matches): HtmlElement|string|null
 	{
 		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 		// [1] => /
@@ -117,10 +117,7 @@ final class HtmlModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solveTag(
+	public function tagToElement(
 		Texy\HandlerInvocation $invocation,
 		HtmlElement $el,
 		bool $isStart,
@@ -172,10 +169,7 @@ final class HtmlModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solveComment(Texy\HandlerInvocation $invocation, string $content): string
+	public function commentToElement(Texy\HandlerInvocation $invocation, string $content): string
 	{
 		if (!$this->passComment) {
 			return '';

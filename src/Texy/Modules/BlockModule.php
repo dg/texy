@@ -33,11 +33,11 @@ final class BlockModule extends Texy\Module
 		$texy->allowed['block/comment'] = true;
 		$texy->allowed['block/div'] = true;
 
-		$texy->addHandler('block', $this->solve(...));
+		$texy->addHandler('block', $this->toElement(...));
 		$texy->addHandler('beforeBlockParse', $this->beforeBlockParse(...));
 
 		$texy->registerBlockPattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~^
 				/--++ \ *+                    # opening tag /--
 				(.*)                          # content type (1)
@@ -86,7 +86,7 @@ final class BlockModule extends Texy\Module
 	 * ....
 	 * \----
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
+	public function parse(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
 	{
 		[, $mParam, $mMod, $mContent] = $matches;
 		// [1] => code | text | ...
@@ -103,10 +103,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
+	public function toElement(
 		Texy\HandlerInvocation $invocation,
 		string $blocktype,
 		string $s,
