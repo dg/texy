@@ -120,7 +120,7 @@ final class FigureModule extends Texy\Module
 
 		$el[0] = $elImg;
 		$el[1] = new Texy\HtmlElement('p');
-		$el[1]->parseLine($texy, ltrim($content));
+		$el[1]->inject($texy->parseLine(ltrim($content)));
 
 		$class = $this->class;
 		if ($hAlign) {

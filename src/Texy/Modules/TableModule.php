@@ -85,7 +85,7 @@ final class TableModule extends Texy\Module
 			$caption = $el->create('caption');
 			$mod = new Modifier($mMod);
 			$mod->decorate($texy, $caption);
-			$caption->parseLine($texy, $mContent);
+			$caption->inject($texy->parseLine($mContent));
 		}
 
 		$isHead = false;
@@ -284,10 +284,10 @@ final class TableModule extends Texy\Module
 					// multiline parse as block
 					// HACK: disable tables
 					$this->disableTables = true;
-					$elCell->parseBlock($this->texy, Texy\Helpers::outdent($text));
+					$elCell->inject($this->texy->parseBlock(Texy\Helpers::outdent($text)));
 					$this->disableTables = false;
 				} else {
-					$elCell->parseLine($this->texy, ltrim($text));
+					$elCell->inject($this->texy->parseLine(ltrim($text)));
 				}
 
 				if ($elCell->getText() === '') {
