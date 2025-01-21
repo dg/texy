@@ -64,7 +64,7 @@ final class ImageModule extends Texy\Module
 				(?:
 					:(' . Patterns::LINK_URL . ' | : ) # link or just colon (4)
 				)??
-			()~U',
+			~U',
 			'image',
 		);
 
@@ -89,7 +89,7 @@ final class ImageModule extends Texy\Module
 					[ \t]*
 					' . Patterns::MODIFIER . '?       # modifier (3)
 					\s*
-				()$~mU',
+				$~mU',
 				$this->patternReferenceDef(...),
 			);
 		}
@@ -168,7 +168,7 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Parses image's syntax. Input: small.jpg 80x13 || linked.jpg
 	 */
-	public function factoryImage(string $content, string $mod, bool $tryRef = true): Image
+	public function factoryImage(string $content, ?string $mod, bool $tryRef = true): Image
 	{
 		$image = $tryRef ? $this->getReference(trim($content)) : null;
 
@@ -179,7 +179,7 @@ final class ImageModule extends Texy\Module
 
 			// dimensions
 			$matches = null;
-			if ($matches = Texy\Regexp::match($content[0], '~^(.*)\ (\d+|\?)\ *([Xx])\ *(\d+|\?)\ *()$~U')) {
+			if ($matches = Texy\Regexp::match($content[0], '~^(.*)\ (\d+|\?)\ *([Xx])\ *(\d+|\?)\ *$~U')) {
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';
 				$image->width = $matches[2] === '?' ? null : (int) $matches[2];
