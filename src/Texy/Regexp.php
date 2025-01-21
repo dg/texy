@@ -105,6 +105,12 @@ class Regexp
 	}
 
 
+	public static function quote(string $s): string
+	{
+		return preg_quote($s, '#');
+	}
+
+
 	/** @internal */
 	public static function pcre(string $func, array $args)
 	{

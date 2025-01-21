@@ -14,6 +14,7 @@ use Texy\BlockParser;
 use Texy\HtmlElement;
 use Texy\Modifier;
 use Texy\Patterns;
+use Texy\Regexp;
 
 
 /**
@@ -91,7 +92,7 @@ final class ListModule extends Texy\Module
 
 		$bullet = $min = null;
 		foreach ($this->bullets as $type => $desc) {
-			if (preg_match('#' . $desc[0] . '#Au', $mBullet)) {
+			if (Regexp::match($mBullet, '#' . $desc[0] . '#Au')) {
 				$bullet = $desc[3] ?? $desc[0];
 				$min = isset($desc[3]) ? 2 : 1;
 				$el->setName($desc[1] ? 'ol' : 'ul');
@@ -151,7 +152,7 @@ final class ListModule extends Texy\Module
 
 		$bullet = null;
 		foreach ($this->bullets as $desc) {
-			if (preg_match('#' . $desc[0] . '#Au', $mBullet)) {
+			if (Regexp::match($mBullet, '#' . $desc[0] . '#Au')) {
 				$bullet = $desc[3] ?? $desc[0];
 				break;
 			}
