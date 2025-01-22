@@ -48,6 +48,7 @@ final class PhraseModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->addHandler('phrase', $this->toElement(...));
+		$texy->addHandler(Texy\Nodes\PhraseNode::class, $this->toElement(...));
 
 		/*
 		// UNIVERSAL

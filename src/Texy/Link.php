@@ -13,7 +13,7 @@ namespace Texy;
 /**
  * Link.
  */
-final class Link
+final class Link // TODO: LinkNode
 {
 	/** @see $type */
 	public const

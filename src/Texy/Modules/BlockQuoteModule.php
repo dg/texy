@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes\BlockQuoteNode;
 
 
 /**
@@ -21,6 +22,7 @@ final class BlockQuoteModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
+		$texy->addHandler(BlockQuoteNode::class, $this->toElement(...));
 		$texy->registerBlockPattern(
 			$this->parse(...),
 			'~^
@@ -43,18 +45,12 @@ final class BlockQuoteModule extends Texy\Module
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\BlockParser $parser, array $matches): BlockQuoteNode
 	{
 		[, $mMod, $mPrefix, $mContent] = $matches;
 		// [1] => .(title)[class]{style}<>
 		// [2] => spaces |
 		// [3] => ... / LINK
-
-		$texy = $this->texy;
-
-		$el = new Texy\HtmlElement('blockquote');
-		$mod = new Texy\Modifier($mMod);
-		$mod->decorate($texy, $el);
 
 		$content = '';
 		$spaces = '';
@@ -71,16 +67,17 @@ final class BlockQuoteModule extends Texy\Module
 			[, $mPrefix, $mContent] = $matches;
 		} while (true);
 
-		$el->inject($texy->parseBlock($content, $parser->isIndented()));
+		return new BlockQuoteNode(
+			$parser->getTexy()->parseBlock($content, $parser->isIndented()),
+			$mMod ? new Texy\Modifier($mMod) : null,
+		);
+	}
 
-		// no content?
-		if (!$el->count()) {
-			return null;
-		}
 
-		// event listener
-		$texy->invokeHandlers('afterBlockquote', [$parser, $el, $mod]);
-
-		return $el;
+	public function toElement(BlockQuoteNode $node, Texy\Texy $texy): ?Texy\HtmlElement
+	{
+		$el = new Texy\HtmlElement('blockquote');
+		$el->inject($texy, $node->content, $node->modifier);
+		return $el->getChildren() ? $el : null;
 	}
 }

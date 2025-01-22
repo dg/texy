@@ -48,10 +48,13 @@ final class LinkModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->allowed['link/definition'] = true;
-		$texy->addHandler('newReference', $this->newReferenceToElement(...));
+		$texy->addHandler('newReference', $this->newReferenceToElement(...)); // TODO
 		$texy->addHandler('linkReference', $this->linkToElement(...));
 		$texy->addHandler('linkEmail', $this->urlEmailToElement(...));
 		$texy->addHandler('linkURL', $this->urlEmailToElement(...));
+		$texy->addHandler(Texy\Nodes\UrlNode::class, $this->urlEmailToElement(...));
+		$texy->addHandler(Texy\Nodes\EmailNode::class, $this->urlEmailToElement(...));
+		$texy->addHandler(Texy\Nodes\LinkReferenceNode::class, $this->linkToElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 
 		// [reference]
@@ -172,7 +175,7 @@ final class LinkModule extends Texy\Module
 				self::$livelock[$link->name] = true;
 				$el = new Texy\HtmlElement;
 				$lineParser = new LineParser($texy);
-				$el->inject($lineParser->parse($link->label));
+				$el->inject($texy, $lineParser->parse($link->label));
 				$content = $texy->elemToMaskedString($el);
 				unset(self::$livelock[$link->name]);
 			}

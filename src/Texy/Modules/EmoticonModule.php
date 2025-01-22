@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\HtmlElement;
+use Texy\Nodes\EmoticonNode;
 
 
 /**
@@ -45,7 +47,7 @@ final class EmoticonModule extends Texy\Module
 	{
 		$this->texy = $texy;
 		$texy->allowed['emoticon'] = false;
-		$texy->addHandler('emoticon', $this->toElement(...));
+		$texy->addHandler(EmoticonNode::class, $this->toElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 	}
 
@@ -78,42 +80,37 @@ final class EmoticonModule extends Texy\Module
 	/**
 	 * Callback for: :-))).
 	 */
-	public function parse(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\LineParser $parser, array $matches): EmoticonNode
 	{
-		$match = $matches[0];
-
-		// find the closest match
-		foreach ($this->icons as $emoticon => $foo) {
-			if (strncmp($match, $emoticon, strlen($emoticon)) === 0) {
-				return $this->texy->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
-			}
-		}
-
-		return null;
+		return new EmoticonNode($matches[0]);
 	}
 
 
-	public function toElement(
-		Texy\HandlerInvocation $invocation,
-		string $emoticon,
-		string $raw,
-	): Texy\HtmlElement|string
+	public function toElement(EmoticonNode $node, Texy\Texy $texy): HtmlElement
 	{
-		$texy = $this->texy;
-		$file = $this->icons[$emoticon];
-		if (!str_contains($file, '.')) {
-			return $file;
+		$found = null;
+		foreach ($this->icons as $emoticon => $replacement) {
+			if (strncmp($node->emoticon, $emoticon, strlen($emoticon)) === 0) {
+				$found = $replacement;
+				break;
+			}
 		}
 
-		$el = new Texy\HtmlElement('img');
-		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root ?? $texy->imageModule->root);
-		$el->attrs['alt'] = $raw;
+		if ($found === null) {
+			return (new HtmlElement)->setText($node->emoticon);
+		} elseif (!str_contains($found, '.')) {
+			return (new HtmlElement)->setText($found);
+		}
+
+		$el = new HtmlElement('img');
+		$el->attrs['src'] = Texy\Helpers::prependRoot($found, $this->root ?? $texy->imageModule->root);
+		$el->attrs['alt'] = $node->emoticon;
 		$el->attrs['class'][] = $this->class;
 
 		// file path
-		$file = rtrim($this->fileRoot ?? (string) $texy->imageModule->fileRoot, '/\\') . '/' . $file;
-		if (@is_file($file)) { // intentionally @
-			$size = @getimagesize($file); // intentionally @
+		$found = rtrim($this->fileRoot ?? (string) $texy->imageModule->fileRoot, '/\\') . '/' . $found;
+		if (@is_file($found)) { // intentionally @
+			$size = @getimagesize($found); // intentionally @
 			if (is_array($size)) {
 				$el->attrs['width'] = $size[0];
 				$el->attrs['height'] = $size[1];

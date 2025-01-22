@@ -11,6 +11,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Modifier;
+use Texy\Nodes\HeadingNode;
 
 
 /**
@@ -58,7 +59,7 @@ final class HeadingModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('heading', $this->toElement(...));
+		$texy->addHandler(HeadingNode::class, $this->toElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 		$texy->addHandler('afterParse', $this->afterParse(...));
 
@@ -139,7 +140,7 @@ final class HeadingModule extends Texy\Module
 					$title = $item['el']->attrs['style']['toc'];
 					unset($item['el']->attrs['style']['toc']);
 				} else {
-					$title = trim($this->texy->maskedStringToText($this->texy->elemToMaskedString($item['el'])));
+					$title = trim($this->texy->maskedStringToText($item['el']->getText()));
 				}
 
 				$this->TOC[$key]['title'] = $title;
@@ -164,7 +165,7 @@ final class HeadingModule extends Texy\Module
 		// document title
 		if ($this->title === null && count($this->TOC)) {
 			$item = reset($this->TOC);
-			$this->title = $item['title'] ?? trim($this->texy->maskedStringToText($this->texy->elemToMaskedString($item['el'])));
+			$this->title = $item['title'] ?? trim($this->texy->maskedStringToText($item['el']->getText()));
 		}
 	}
 
@@ -175,7 +176,7 @@ final class HeadingModule extends Texy\Module
 	 * Heading .(title)[class]{style}>
 	 * -------------------------------
 	 */
-	public function parseUnderline(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseUnderline(Texy\BlockParser $parser, array $matches): HeadingNode
 	{
 		[, $mContent, $mMod, $mLine] = $matches;
 		// $matches:
@@ -183,9 +184,12 @@ final class HeadingModule extends Texy\Module
 		// [2] => .(title)[class]{style}<>
 		// [3] => ...
 
-		$mod = new Modifier($mMod);
-		$level = $this->levels[$mLine[0]];
-		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, false]);
+		return new HeadingNode(
+			$this->texy->parseLine(trim($mContent)),
+			$this->levels[$mLine[0]],
+			HeadingNode::Underlined,
+			$mMod ? new Modifier($mMod) : null,
+		);
 	}
 
 
@@ -194,39 +198,37 @@ final class HeadingModule extends Texy\Module
 	 *
 	 * ### Heading .(title)[class]{style}>
 	 */
-	public function parseSurround(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseSurround(Texy\BlockParser $parser, array $matches): HeadingNode
 	{
 		[, $mLine, $mContent, $mMod] = $matches;
 		// [1] => ###
 		// [2] => ...
 		// [3] => .(title)[class]{style}<>
 
-		$mod = new Modifier($mMod);
-		$level = min(7, max(2, strlen($mLine)));
-		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
-		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, true]);
+		$level = min(7, max(2, strlen($mLine)));
+		return new HeadingNode(
+			$this->texy->parseLine(trim($mContent)),
+			$this->moreMeansHigher ? 7 - $level : $level - 2,
+			HeadingNode::Surrounded,
+			$mMod ? new Modifier($mMod) : null,
+		);
 	}
 
 
-	public function toElement(
-		Texy\HandlerInvocation $invocation,
-		int $level,
-		string $content,
-		Modifier $mod,
-		bool $isSurrounded,
-	): Texy\HtmlElement
+	public function toElement(HeadingNode $node, Texy\Texy $texy): Texy\HtmlElement
 	{
-		// as fixed balancing, for block/texysource & correct decorating
-		$el = new Texy\HtmlElement('h' . min(6, max(1, $level + $this->top)));
-		$mod->decorate($this->texy, $el);
+		// TODO: problem s block/texysource
+		// TODO: upravit jak se generuje TOC
 
-		$el->inject($this->texy->parseLine(trim($content)));
+		// as fixed balancing, for block/texysource & correct decorating
+		$el = new Texy\HtmlElement('h' . min(6, max(1, $node->level + $this->top)));
+		$el->inject($texy, $node->content, $node->modifier);
 
 		$this->TOC[] = [
 			'el' => $el,
-			'level' => $level,
-			'type' => $isSurrounded ? 'surrounded' : 'underlined',
+			'level' => $node->level,
+			'type' => $node->type === $node::Surrounded ? 'surrounded' : 'underlined',
 		];
 
 		return $el;

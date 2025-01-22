@@ -144,7 +144,7 @@ final class BlockModule extends Texy\Module
 	private function blockTexy(string $s, Texy\Texy $texy, Texy\BlockParser $parser): HtmlElement
 	{
 		$el = new HtmlElement;
-		$el->inject($texy->parseBlock($s, $parser->isIndented()));
+		$el->inject($texy, $texy->parseBlock($s, $parser->isIndented()));
 		return $el;
 	}
 
@@ -157,12 +157,7 @@ final class BlockModule extends Texy\Module
 		}
 
 		$el = new HtmlElement;
-		if ($param === 'line') {
-			$el->inject($texy->parseLine($s));
-		} else {
-			$el->inject($texy->parseBlock($s));
-		}
-
+		$el->inject($texy, $param === 'line' ? $texy->parseLine($s) : $texy->parseBlock($s));
 		$s = $texy->maskedStringToHtml($texy->elemToMaskedString($el));
 		return $this->blockCode($s, $texy, $mod, 'html');
 	}
@@ -225,7 +220,7 @@ final class BlockModule extends Texy\Module
 
 		unset($tmp);
 
-		$el->inject($lineParser->parse($s));
+		$el->inject($texy, $lineParser->parse($s));
 		$s = $el->getText();
 		$s = Helpers::unescapeHtml($s);
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
@@ -258,7 +253,7 @@ final class BlockModule extends Texy\Module
 
 		unset($tmp);
 
-		$el->inject($lineParser->parse($s));
+		$el->inject($texy, $lineParser->parse($s));
 		$s = $el->getText();
 		$s = Helpers::unescapeHtml($s);
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
@@ -295,7 +290,7 @@ final class BlockModule extends Texy\Module
 
 		$el = new HtmlElement('div');
 		$mod->decorate($texy, $el);
-		$el->inject($texy->parseBlock($s, $parser->isIndented())); // TODO: INDENT or NORMAL ?
+		$el->inject($texy, $texy->parseBlock($s, $parser->isIndented())); // TODO: INDENT or NORMAL ?
 		return $el;
 	}
 }

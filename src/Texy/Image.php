@@ -13,7 +13,7 @@ namespace Texy;
 /**
  * Image.
  */
-final class Image
+final class Image // TODO: ImageNode
 {
 	/** base image URL */
 	public ?string $URL = null;

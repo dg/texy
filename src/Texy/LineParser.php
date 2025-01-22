@@ -30,7 +30,7 @@ class LineParser extends Parser
 	public function parse(string $text): array
 	{
 		if (!$this->patterns) { // nothing to do
-			return [$text];
+			return [new Nodes\TextNode($text)];
 		}
 
 		$offset = 0;
@@ -53,20 +53,19 @@ class LineParser extends Parser
 			$this->again = false;
 			$res = $px['handler']($this, $matches[$first], $first);
 
-			if ($res instanceof HtmlElement) {
+			if ($res instanceof HtmlElement) { // TODO: remove
 				$res = $this->texy->elemToMaskedString($res);
+			} elseif ($res instanceof Node) {
+				$res = $this->texy?->elemToMaskedString($this->texy->solveNode($res)); // TODO: nevim co s tim!
 			} elseif ($res === null) {
 				$offsets[$first] = -2;
 				continue;
+			} elseif (!is_string($res)) {
+				throw new \LogicException('Handler must return Node or null, ' . get_debug_type($res) . ' given.');
 			}
 
 			$len = strlen($matches[$first][0]);
-			$text = substr_replace(
-				$text,
-				(string) $res,
-				$start,
-				$len,
-			);
+			$text = substr_replace($text, $res, $start, $len);
 
 			$delta = strlen($res) - $len;
 			foreach ($names as $name) {
@@ -85,7 +84,7 @@ class LineParser extends Parser
 			}
 		} while (1);
 
-		return [$text];
+		return [new Nodes\TextNode($text)];
 	}
 
 

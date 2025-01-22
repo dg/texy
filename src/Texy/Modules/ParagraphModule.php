@@ -22,6 +22,7 @@ final class ParagraphModule extends Texy\Module
 	{
 		$this->texy = $texy;
 		$texy->addHandler('paragraph', $this->toElement(...));
+		$texy->addHandler(Texy\Nodes\ParagraphNode::class, $this->toElement(...));
 	}
 
 
@@ -53,7 +54,7 @@ final class ParagraphModule extends Texy\Module
 
 			$res = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
 			if ($res) {
-				$children[] = $res;
+				$children[] = new Texy\Nodes\FooNode($res);
 			}
 		}
 
@@ -77,7 +78,7 @@ final class ParagraphModule extends Texy\Module
 			: Regexp::replace($content, '~\n~', "\r");
 
 		$el = new Texy\HtmlElement('p');
-		$el->inject($texy->parseLine($content));
+		$el->inject($texy, $texy->parseLine($content));
 		$content = $el->getText(); // string
 
 		// check content type

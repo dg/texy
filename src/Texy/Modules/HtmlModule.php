@@ -29,7 +29,9 @@ final class HtmlModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->addHandler('htmlComment', $this->commentToElement(...));
+		$texy->addHandler(Texy\Nodes\HtmlCommentNode::class, $this->commentToElement(...));
 		$texy->addHandler('htmlTag', $this->tagToElement(...));
+		$texy->addHandler(Texy\Nodes\HtmlTagNode::class, $this->tagToElement(...));
 
 		$texy->registerLinePattern(
 			$this->parseTag(...),

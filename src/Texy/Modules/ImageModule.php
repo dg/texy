@@ -48,6 +48,7 @@ final class ImageModule extends Texy\Module
 
 		$texy->allowed['image/definition'] = true;
 		$texy->addHandler('image', $this->toElement(...));
+		$texy->addHandler(Texy\Nodes\ImageNode::class, $this->toElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 
 		// [*image*]:LINK

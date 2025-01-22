@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes\HorizontalRuleNode;
 
 
 /**
@@ -29,6 +30,7 @@ final class HorizLineModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->addHandler('horizline', $this->toElement(...));
+		$texy->addHandler(HorizontalRuleNode::class, $this->toElement(...));
 
 		$texy->registerBlockPattern(
 			$this->parse(...),
@@ -45,27 +47,22 @@ final class HorizLineModule extends Texy\Module
 	/**
 	 * Callback for: -------.
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
+	public function parse(Texy\BlockParser $parser, array $matches): HorizontalRuleNode
 	{
 		[, $mType, $mMod] = $matches;
 		// [1] => ---
 		// [2] => .(title)[class]{style}<>
 
-		$mod = new Texy\Modifier($mMod);
-		return $this->texy->invokeAroundHandlers('horizline', $parser, [$mType, $mod]);
+		return new HorizontalRuleNode($mType, $mMod ? new Texy\Modifier($mMod) : null);
 	}
 
 
-	public function toElement(
-		Texy\HandlerInvocation $invocation,
-		string $type,
-		Texy\Modifier $modifier,
-	): Texy\HtmlElement
+	private function toElement(HorizontalRuleNode $node, Texy\Texy $texy): Texy\HtmlElement
 	{
 		$el = new Texy\HtmlElement('hr');
-		$modifier->decorate($invocation->getTexy(), $el);
+		$node->modifier?->decorate($texy, $el);
 
-		$class = $this->classes[$type[0]];
+		$class = $this->classes[$node->type[0]];
 		if ($class && !isset($modifier->classes[$class])) {
 			$el->attrs['class'][] = $class;
 		}

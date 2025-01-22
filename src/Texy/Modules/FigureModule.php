@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes\FigureNode;
 use Texy\Patterns;
 
 
@@ -33,9 +34,7 @@ final class FigureModule extends Texy\Module
 
 	public function __construct(Texy\Texy $texy)
 	{
-		$this->texy = $texy;
-
-		$texy->addHandler('figure', $this->toElement(...));
+		$texy->addHandler(FigureNode::class, $this->toElement(...));
 
 		// [* urls .(title)[class]{style} >]
 		$texy->registerBlockPattern(
@@ -62,7 +61,7 @@ final class FigureModule extends Texy\Module
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\BlockParser $parser, array $matches): FigureNode
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 		// [1] => URLs
@@ -72,55 +71,43 @@ final class FigureModule extends Texy\Module
 		// [5] => ...
 		// [6] => .(title)[class]{style}<>
 
-		$texy = $this->texy;
+		$texy = $parser->getTexy();
 		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
-		$mod = new Texy\Modifier($mMod);
-		$mContent = ltrim($mContent);
-
-		if ($mLink) {
-			if ($mLink === ':') {
-				$link = new Texy\Link($image->linkedURL ?? $image->URL);
-				$link->raw = ':';
-				$link->type = $link::IMAGE;
-			} else {
-				$link = $texy->linkModule->factoryLink($mLink, null, null);
-			}
-		} else {
-			$link = null;
+		$link = null;
+		if ($mLink === ':') {
+			$link = new Texy\Link($image->linkedURL ?? $image->URL);
+			$link->raw = ':';
+			$link->type = $link::IMAGE;
+		} elseif ($mLink) {
+			$link = $texy->linkModule->factoryLink($mLink, null, null);
 		}
 
-		return $texy->invokeAroundHandlers('figure', $parser, [$image, $link, $mContent, $mod]);
+		return new FigureNode(
+			$texy->parseBlock(ltrim($mContent)),
+			$image,
+			$mMod ? new Texy\Modifier($mMod) : null,
+			$link,
+		);
 	}
 
 
-	public function toElement(
-		Texy\HandlerInvocation $invocation,
-		Texy\Image $image,
-		?Texy\Link $link,
-		string $content,
-		Texy\Modifier $mod,
-	): ?Texy\HtmlElement
+	private function toElement(FigureNode $figure, Texy\Texy $texy): ?Texy\HtmlElement
 	{
-		$texy = $this->texy;
+		$hAlign = $figure->image->modifier->hAlign;
+		$figure->image->modifier->hAlign = null;
 
-		$hAlign = $image->modifier->hAlign;
-		$image->modifier->hAlign = null;
-
-		$elImg = $texy->imageModule->toElement(null, $image, $link); // returns Texy\HtmlElement or null!
+		$elImg = $texy->imageModule->toElement(null, $figure->image, $figure->link); // returns Texy\HtmlElement or null!
 		if (!$elImg) {
 			return null;
 		}
 
 		$el = new Texy\HtmlElement('div');
-		if (!empty($image->width) && $this->widthDelta !== false) {
-			$el->attrs['style']['max-width'] = ($image->width + $this->widthDelta) . 'px';
+		if (!empty($figure->image->width) && $this->widthDelta !== false) {
+			$el->attrs['style']['max-width'] = ($figure->image->width + $this->widthDelta) . 'px';
 		}
 
-		$mod->decorate($texy, $el);
-
-		$el[0] = $elImg;
-		$el[1] = new Texy\HtmlElement('p');
-		$el[1]->inject($texy->parseLine(ltrim($content)));
+		$el->add($elImg);
+		$el->inject($texy, $figure->content, $figure->modifier);
 
 		$class = $this->class;
 		if ($hAlign) {

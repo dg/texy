@@ -13,6 +13,7 @@ use Texy;
 use Texy\BlockParser;
 use Texy\HtmlElement;
 use Texy\Modifier;
+use Texy\Nodes\ListNode;
 use Texy\Patterns;
 use Texy\Regexp;
 
@@ -41,6 +42,8 @@ final class ListModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
+		$texy->addHandler(ListNode::class, $this->toElement(...));
+		$texy->addHandler(Texy\Nodes\ListItemNode::class, $this->itemToElement(...));
 		$texy->allowed['list'] = true;
 		$texy->allowed['list/definition'] = true;
 	}
@@ -101,6 +104,8 @@ final class ListModule extends Texy\Module
 		// [2] => bullet * + - 1) a) A) IV)
 
 		$el = new HtmlElement;
+		$node = new ListNode;
+		$node->modifier = new Modifier($mMod);
 
 		$bullet = $min = null;
 		foreach ($this->bullets as $type => $desc) {
@@ -194,10 +199,7 @@ final class ListModule extends Texy\Module
 				// [2] => .(title)[class]{style}<>
 
 				$elItem = new HtmlElement('dt');
-				$modItem = new Modifier($mMod);
-				$modItem->decorate($texy, $elItem);
-
-				$elItem->inject($texy->parseLine($mContent));
+				$elItem->inject($texy, $texy->parseLine($mContent), new Modifier($mMod));
 				$el->add($elItem);
 				continue;
 			}
@@ -264,12 +266,24 @@ final class ListModule extends Texy\Module
 		}
 
 		// parse content
-		$elItem->inject($this->texy->parseBlock($content, true));
+		$elItem->inject($this->texy, $this->texy->parseBlock($content, true));
 
 		if (isset($elItem[0]) && $elItem[0] instanceof HtmlElement) {
 			$elItem[0]->setName(null);
 		}
 
 		return $elItem;
+	}
+
+
+	public function toElement()
+	{
+
+	}
+
+
+	public function itemToElement()
+	{
+
 	}
 }

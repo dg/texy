@@ -192,6 +192,9 @@ class Texy
 	 */
 	protected function loadModules(): void
 	{
+		$this->addHandler(Nodes\FooNode::class, fn($node) => $node->el);
+		$this->addHandler(Nodes\TextNode::class, fn($node) => (new HtmlElement)->setText($node->content));
+
 		// line parsing
 		$this->scriptModule = new Modules\ScriptModule($this);
 		$this->htmlModule = new Modules\HtmlModule($this);
@@ -325,7 +328,7 @@ class Texy
 
 		// parse Texy! document into internal DOM structure
 		$this->DOM = new HtmlElement;
-		$this->DOM->inject($singleLine ? $this->parseLine($text) : $this->parseBlock($text));
+		$this->DOM->inject($this, $singleLine ? $this->parseLine($text) : $this->parseBlock($text));
 
 		// user after handler
 		$this->invokeHandlers('afterParse', [$this, $this->DOM, $singleLine]);
@@ -526,6 +529,39 @@ class Texy
 	}
 
 
+	public function solveNode(Node $node): ?HtmlElement
+	{
+		$handlers = $this->handlers[$node::class] ?? throw new Exception('No handler for ' . $node::class);
+		return $this->invokeAroundHandlers2($node, $handlers);
+	}
+
+
+	private function invokeAroundHandlers2(Node $node, array $handlers): ?HtmlElement
+	{
+		$handler = array_pop($handlers) ?: throw new Exception('No more handlers.');
+		$res = $handler($node, $this);
+
+		if ($res instanceof \Generator) {
+			if ($res->valid()) { // yielded
+				$newNode = $res->current() ?? $node;
+				if (!$newNode instanceof $node) {
+					throw new Exception('Invalid value returned from handler, expected ' . $node::class . ', ' . get_debug_type($newNode) . ' given.');
+				}
+				$elem = $this->invokeAroundHandlers2($newNode, $handlers);
+				$res->send($elem);
+			}
+			$elem = $res->getReturn();
+		} else {
+			$elem = $res;
+		}
+
+		if (!$elem instanceof HtmlElement && $elem !== null) {
+			throw new Exception('Invalid value returned from handler, expected ' . HtmlElement::class . ', ' . get_debug_type($elem) . ' given.');
+		}
+		return $elem;
+	}
+
+
 	/**
 	 * Generate unique mark - useful for freezing (folding) some substrings.
 	 */
@@ -609,3 +645,39 @@ class Texy
 
 
 class_exists(\Texy::class);
+
+
+class_exists(Nodes\AnnotationNode::class);
+class_exists(Nodes\BlockNode::class);
+class_exists(Nodes\BlockQuoteNode::class);
+class_exists(Nodes\CodeBlockNode::class);
+class_exists(Nodes\CommentNode::class);
+class_exists(Nodes\DefinitionItemNode::class);
+class_exists(Nodes\DefinitionListNode::class);
+class_exists(Nodes\DirectiveNode::class);
+class_exists(Nodes\DocumentNode::class);
+class_exists(Nodes\EmailNode::class);
+class_exists(Nodes\EmoticonNode::class);
+class_exists(Nodes\FigureNode::class);
+class_exists(Nodes\FootnoteDefinitionNode::class);
+class_exists(Nodes\FootnoteReferenceNode::class);
+class_exists(Nodes\HeadingNode::class);
+class_exists(Nodes\HorizontalRuleNode::class);
+class_exists(Nodes\HtmlCommentNode::class);
+class_exists(Nodes\HtmlTagNode::class);
+class_exists(Nodes\ImageNode::class);
+class_exists(Nodes\InlineNode::class);
+class_exists(Nodes\LineBreakNode::class);
+class_exists(Nodes\LinkNode::class);
+class_exists(Nodes\LinkReferenceNode::class);
+class_exists(Nodes\ListItemNode::class);
+class_exists(Nodes\ListNode::class);
+class_exists(Nodes\ParagraphNode::class);
+class_exists(Nodes\PhraseNode::class);
+class_exists(Nodes\RawTextNode::class);
+class_exists(Nodes\SectionNode::class);
+class_exists(Nodes\TableCellNode::class);
+class_exists(Nodes\TableNode::class);
+class_exists(Nodes\TableRowNode::class);
+class_exists(Nodes\TextNode::class);
+class_exists(Nodes\UrlNode::class);

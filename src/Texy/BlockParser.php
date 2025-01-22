@@ -125,11 +125,16 @@ class BlockParser extends Parser
 				$this->offset = $mOffset; // turn offset back
 				continue;
 
-			} elseif ($res instanceof HtmlElement) {
+			} elseif ($res instanceof Node) {
 				$children[] = $res;
 
-			} elseif (is_string($res)) {
-				$children[] = $res;
+			} elseif ($res instanceof HtmlElement) { // TODO: remove
+				$children[] = new Nodes\FooNode($res);
+
+			} elseif (is_string($res)) { // TODO: remove
+				$children[] = new Nodes\TextNode($res);
+			} else {
+				throw new Exception('Block handler must return Node or string, ' . get_debug_type($res) . ' given.');
 			}
 		} while (1);
 	}

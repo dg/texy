@@ -27,6 +27,7 @@ final class ScriptModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->addHandler('script', $this->toElement(...));
+		$texy->addHandler(Texy\Nodes\ScriptNode::class, $this->toElement(...));
 
 		$texy->registerLinePattern(
 			$this->parse(...),

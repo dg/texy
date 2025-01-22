@@ -211,8 +211,10 @@ class HtmlElement implements \ArrayAccess, \IteratorAggregate
 	{
 		$s = '';
 		foreach ($this->children as $child) {
-			if (is_object($child)) {
-				return null;
+			if ($child instanceof self) {
+				if ($child->name || ($child = $child->getText()) === null) {
+					return null;
+				}
 			}
 
 			$s .= $child;
@@ -335,12 +337,16 @@ class HtmlElement implements \ArrayAccess, \IteratorAggregate
 
 
 	/**
-	 * @param  array<self|string>  $children
+	 * @param  Node[]  $nodes
 	 */
-	public function inject(array $children): void
+	public function inject(Texy $texy, array $nodes, ?Modifier $modifier = null): void
 	{
-		(function (self|string ...$children) {})(...$children);
-		$this->children = $children;
+		$modifier?->decorate($texy, $this);
+		foreach ($nodes as $node) {
+			if ($el = $texy->solveNode($node)) {
+				$this->add($el);
+			}
+		}
 	}
 
 
