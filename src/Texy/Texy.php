@@ -331,7 +331,7 @@ class Texy
 		$this->invokeHandlers('afterParse', [$this, $this->DOM, $singleLine]);
 
 		// converts internal DOM structure to final HTML code
-		$html = $this->DOM->toHtml($this);
+		$html = $this->maskedStringToHtml($this->elemToMaskedString($this->DOM));
 
 		// created by ParagraphModule and then protected
 		$html = str_replace("\r", "\n", $html);
@@ -378,7 +378,7 @@ class Texy
 			throw new Exception('Call $texy->process() first.');
 		}
 
-		return $this->DOM->toText($this);
+		return $this->maskedStringToText($this->elemToMaskedString($this->DOM));
 	}
 
 
@@ -406,7 +406,7 @@ class Texy
 	/**
 	 * Converts internal string representation to final HTML code.
 	 */
-	final public function stringToHtml(string $s): string
+	final public function maskedStringToHtml(string $s): string
 	{
 		// decode HTML entities to UTF-8
 		$s = Helpers::unescapeHtml($s);
@@ -447,9 +447,9 @@ class Texy
 	/**
 	 * Converts internal string representation to final HTML code.
 	 */
-	final public function stringToText(string $s): string
+	final public function maskedStringToText(string $s): string
 	{
-		$s = $this->stringToHtml($s);
+		$s = $this->maskedStringToHtml($s);
 
 		// remove tags
 		$s = Regexp::replace($s, '~<(script|style)(.*)</\1>~Uis', '');
@@ -466,6 +466,25 @@ class Texy
 		]);
 
 		return $s;
+	}
+
+
+	/**
+	 * Renders element's start tag, content and end tag to internal string representation.
+	 */
+	public function elemToMaskedString(HtmlElement $elem): string
+	{
+		$ct = $elem->getContentType();
+		$s = $this->protect($elem->startTag(), $ct);
+		if ($elem->isEmpty()) {
+			return $s;
+		}
+
+		foreach ($elem->getChildren() as $child) {
+			$s .= $child instanceof HtmlElement ? $this->elemToMaskedString($child) : $child;
+		}
+
+		return $s . $this->protect($elem->endTag(), $ct);
 	}
 
 

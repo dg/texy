@@ -173,7 +173,7 @@ final class LinkModule extends Texy\Module
 				$el = new Texy\HtmlElement;
 				$lineParser = new LineParser($texy);
 				$el->inject($lineParser->parse($link->label));
-				$content = $el->toString($texy);
+				$content = $texy->elemToMaskedString($el);
 				unset(self::$livelock[$link->name]);
 			}
 		} else {
@@ -271,7 +271,7 @@ final class LinkModule extends Texy\Module
 		}
 
 		if (str_contains((string) $link->URL, '%s')) {
-			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
+			$link->URL = str_replace('%s', urlencode($texy->maskedStringToText($label)), $link->URL);
 		}
 
 		$link->modifier->setProperties($mMod);
