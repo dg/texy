@@ -165,13 +165,6 @@ $texy->listModule->bullets;   // definitions of bullet/numbering styles
 
 Default keys: `*`, `-`, `+` (unordered), `1.`, `1)`, `I.`, `I)`, `a)`, `A)` (ordered; roman and alpha variants set `list-style-type`). Each value is `[first-item regexp, ordered?, list-style-type, (optional) next-item regexp]`.
 
-### TableModule
-
-```php
-$texy->tableModule->oddClass = null;    // (deprecated) class for odd rows
-$texy->tableModule->evenClass = null;   // (deprecated) class for even rows
-```
-
 ### HorizontalRuleModule
 
 ```php
