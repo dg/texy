@@ -160,20 +160,7 @@ class BlockParser extends Parser
 			$priority++;
 		}
 
-		unset($name, $pattern, $ms, $m, $k, $v);
-
-		usort($matches, function ($a, $b): int {
-			if ($a[0] === $b[0]) {
-				return $a[3] < $b[3] ? -1 : 1;
-			}
-
-			if ($a[0] < $b[0]) {
-				return -1;
-			}
-
-			return 1;
-		});
-
+		usort($matches, fn($a, $b): int => $a[0] === $b[0] ? $a[3] <=> $b[3] : $a[0] <=> $b[0]);
 		return $matches;
 	}
 }

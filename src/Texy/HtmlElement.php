@@ -19,7 +19,7 @@ namespace Texy;
  *
  * echo $el->startTag(), $el->endTag();
  */
-class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
+class HtmlElement implements \ArrayAccess, \IteratorAggregate
 {
 	public const InnerText = '%TEXT';
 	public const InnerTransparent = '%TRANS';
@@ -327,9 +327,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
-	/**
-	 * Returns all of children.
-	 */
+	/** @return array<self|string> */
 	final public function getChildren(): array
 	{
 		return $this->children;
