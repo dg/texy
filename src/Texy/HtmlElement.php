@@ -350,51 +350,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
-	 * Renders element's start tag, content and end tag to internal string representation.
-	 */
-	final public function toString(Texy $texy): string
-	{
-		$ct = $this->getContentType();
-		$s = $texy->protect($this->startTag(), $ct);
-
-		// empty elements are finished now
-		if ($this->isEmpty) {
-			return $s;
-		}
-
-		// add content
-		foreach ($this->children as $child) {
-			if (is_object($child)) {
-				$s .= $child->toString($texy);
-			} else {
-				$s .= $child;
-			}
-		}
-
-		// add end tag
-		return $s . $texy->protect($this->endTag(), $ct);
-	}
-
-
-	/**
-	 * Renders to final HTML.
-	 */
-	final public function toHtml(Texy $texy): string
-	{
-		return $texy->stringToHtml($this->toString($texy));
-	}
-
-
-	/**
-	 * Renders to final text.
-	 */
-	final public function toText(Texy $texy): string
-	{
-		return $texy->stringToText($this->toString($texy));
-	}
-
-
-	/**
 	 * Returns element's start tag.
 	 */
 	public function startTag(): string
