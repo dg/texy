@@ -139,7 +139,7 @@ final class HeadingModule extends Texy\Module
 					$title = $item['el']->attrs['style']['toc'];
 					unset($item['el']->attrs['style']['toc']);
 				} else {
-					$title = trim($item['el']->toText($this->texy));
+					$title = trim($this->texy->maskedStringToText($this->texy->elemToMaskedString($item['el'])));
 				}
 
 				$this->TOC[$key]['title'] = $title;
@@ -164,7 +164,7 @@ final class HeadingModule extends Texy\Module
 		// document title
 		if ($this->title === null && count($this->TOC)) {
 			$item = reset($this->TOC);
-			$this->title = $item['title'] ?? trim($item['el']->toText($this->texy));
+			$this->title = $item['title'] ?? trim($this->texy->maskedStringToText($this->texy->elemToMaskedString($item['el'])));
 		}
 	}
 

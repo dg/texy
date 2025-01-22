@@ -54,7 +54,7 @@ class LineParser extends Parser
 			$res = $px['handler']($this, $matches[$first], $first);
 
 			if ($res instanceof HtmlElement) {
-				$res = $res->toString($this->texy);
+				$res = $this->texy->elemToMaskedString($res);
 			} elseif ($res === null) {
 				$offsets[$first] = -2;
 				continue;

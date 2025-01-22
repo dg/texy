@@ -163,7 +163,7 @@ final class BlockModule extends Texy\Module
 			$el->inject($texy->parseBlock($s));
 		}
 
-		$s = $el->toHtml($texy);
+		$s = $texy->maskedStringToHtml($texy->elemToMaskedString($el));
 		return $this->blockCode($s, $texy, $mod, 'html');
 	}
 
