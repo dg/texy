@@ -68,7 +68,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 | **FigureModule** | Image with a visible caption `[* img *] *** caption` (`figure`); combines an `Image`, optional `Link`, and caption; invokes the `figure` element. |
 | **HorizontalRuleModule** | Horizontal rules `---` / `***` (`horizline`); type-specific CSS classes via `$classes`. |
 | **BlockQuoteModule** | Quotations introduced by `>` (`blockquote`), including nested quotes and link citation; fires `afterBlockquote`. |
-| **TableModule** | Tables (`table`) with head/body detection, row headers, colspan/rowspan (helper class `TableCellElement`), odd/even classes; fires `afterTable`. One of the most complex modules. |
+| **TableModule** | Tables (`table`) with head/body detection, row headers, colspan/rowspan (helper class `TableCellElement`); fires `afterTable`. One of the most complex modules. |
 | **HeadingModule** | Underlined (`heading/underlined`) and surrounded (`heading/surrounded`) headings; assigns levels in `afterParse` according to the balancing mode (`DYNAMIC`/`FIXED`), generates IDs, collects `$TOC` and `$title`; invokes the `heading` element. |
 | **ListModule** | Bulleted, numbered (`list`) and definition (`list/definition`) lists; bullet styles configured via `$bullets`; registers its patterns in `beforeParse` (they depend on `$bullets`); fires `afterList` / `afterDefinitionList`. |
 
