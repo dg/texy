@@ -1,0 +1,76 @@
+Modifier
+-----
+
+[* obr.jpg .{alt:alternative; title:title text }*] *** any description
+
+[* obr.jpg .{alt:alternative; title:title text }*] *** any description .[foo]
+
+[* obr.jpg .{alt:alternative; title:title text} *] .[foo]
+
+[* obr.jpg <] *** any description .[foo]
+
+[* obr.jpg <] .[foo]
+
+
+Links
+----
+
+[* obr.jpg *]:: *** auto link
+
+[* obr.jpg *]:link *** link
+
+[* obr.jpg *]:[* popup.php?img=obr-big.jpg *] *** image link
+
+
+[* obr.jpg *]::
+
+[* obr.jpg *]:link
+
+[* obr.jpg *]:[* popup.php?img=obr-big.jpg *]
+
+
+Align
+---
+
+[* obr.jpg >] *** any description
+
+[* obr.jpg <] *** any description
+
+[* obr.jpg <]
+
+[* obr.jpg >]
+
+
+Multiple
+----
+
+[* obr.jpg *] *** any description
+[* obr.jpg *] *** any description
+
+
+[* obr.jpg *]
+[* obr.jpg *]
+
+
+Part of text
+----
+
+[* obr.jpg *] *** any description
+hello
+
+
+[* obr.jpg *]
+hello
+
+
+.[foo]
+[* image *]
+
+
+hello
+[* obr.jpg *]
+
+
+[* nikon-curve-1.jpg .(Nikon bez uživatelské křivky) *] [* nikon-curve-2.jpg .(Nikon s uživatelskou křivkou Point and Shoot v4.1) *]
+
+---

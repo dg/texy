@@ -18,6 +18,8 @@ use Texy\Patterns;
  */
 final class FigureModule extends Texy\Module
 {
+	public string $tagName = 'div';
+
 	/** non-floated box CSS class */
 	public ?string $class = 'figure';
 
@@ -30,17 +32,26 @@ final class FigureModule extends Texy\Module
 	/** how calculate div's width */
 	public int|false $widthDelta = 10;
 
+	/** caption after *** is required */
+	public bool $requireCaption = true;
+
 
 	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
-
 		$texy->addHandler('figure', $this->solve(...));
+		$texy->addHandler('beforeParse', $this->beforeParse(...));
+	}
 
-		$texy->registerBlockPattern(
+
+	private function beforeParse(): void
+	{
+		$this->texy->registerBlockPattern(
 			$this->pattern(...),
-			'#^\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::(' . Patterns::LINK_URL . '|:))??\ ++\*\*\*\ ++(.{0,2000})' . Patterns::MODIFIER_H . '?()$#mUu',
+			'#^(?>\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\])' // [* urls .(title)[class]{style} >]
+			. '(?::(' . Patterns::LINK_URL . '|:))??'
+			. '(?:\ ++\*\*\*\ ++(.{0,2000}))' . ($this->requireCaption ? '' : '?')
+			. Patterns::MODIFIER_H . '?()$#mUu',
 			'figure',
 		);
 	}
@@ -62,7 +73,7 @@ final class FigureModule extends Texy\Module
 		$texy = $this->texy;
 		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
 		$mod = new Texy\Modifier($mMod);
-		$mContent = ltrim($mContent);
+		$mContent = trim($mContent);
 
 		if ($mLink) {
 			if ($mLink === ':') {
@@ -101,7 +112,7 @@ final class FigureModule extends Texy\Module
 			return null;
 		}
 
-		$el = new Texy\HtmlElement('div');
+		$el = new Texy\HtmlElement($this->tagName);
 		if (!empty($image->width) && $this->widthDelta !== false) {
 			$el->attrs['style']['max-width'] = ($image->width + $this->widthDelta) . 'px';
 		}
@@ -109,8 +120,11 @@ final class FigureModule extends Texy\Module
 		$mod->decorate($texy, $el);
 
 		$el[0] = $elImg;
-		$el[1] = new Texy\HtmlElement('p');
-		$el[1]->parseLine($texy, ltrim($content));
+
+		if ($content !== '') {
+			$el[1] = new Texy\HtmlElement($this->tagName === 'figure' ? 'figcaption' : 'p');
+			$el[1]->parseLine($texy, $content);
+		}
 
 		$class = $this->class;
 		if ($hAlign) {
