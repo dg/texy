@@ -221,7 +221,7 @@ final class HeadingModule extends Texy\Module
 		$el = new Texy\HtmlElement('h' . min(6, max(1, $level + $this->top)));
 		$mod->decorate($this->texy, $el);
 
-		$el->parseLine($this->texy, trim($content));
+		$el->inject($this->texy->parseLine(trim($content)));
 
 		$this->TOC[] = [
 			'el' => $el,

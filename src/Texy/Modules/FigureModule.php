@@ -134,7 +134,7 @@ final class FigureModule extends Texy\Module
 
 		if ($content !== '') {
 			$el[1] = new Texy\HtmlElement($this->tagName === 'figure' ? 'figcaption' : 'p');
-			$el[1]->parseLine($texy, $content);
+			$el[1]->inject($texy->parseLine($content));
 		}
 
 		$class = $this->class;

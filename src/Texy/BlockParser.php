@@ -24,10 +24,9 @@ class BlockParser extends Parser
 	private bool $indented;
 
 
-	public function __construct(Texy $texy, HtmlElement $element, bool $indented)
+	public function __construct(Texy $texy, bool $indented)
 	{
 		$this->texy = $texy;
-		$this->element = $element;
 		$this->indented = $indented;
 		$this->patterns = $texy->getBlockPatterns();
 	}
@@ -87,15 +86,14 @@ class BlockParser extends Parser
 	}
 
 
-	public function parse(string $text): void
+	public function parse(string $text): array
 	{
-		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
-
 		$this->text = $text;
 		$this->offset = 0;
 		$matches = $this->match($text);
 		$matches[] = [strlen($text), null, null]; // terminal sentinel
 		$cursor = 0;
+		$children = [];
 
 		do {
 			do {
@@ -110,12 +108,12 @@ class BlockParser extends Parser
 			if ($mOffset > $this->offset) {
 				$s = trim(substr($text, $this->offset, $mOffset - $this->offset));
 				if ($s !== '') {
-					$this->texy->paragraphModule->process($this, $s, $this->element);
+					$children = array_merge($children, $this->texy->paragraphModule->process($this, $s));
 				}
 			}
 
 			if ($mName === null) {
-				break; // finito
+				return $children;
 			}
 
 			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
@@ -128,10 +126,10 @@ class BlockParser extends Parser
 				continue;
 
 			} elseif ($res instanceof HtmlElement) {
-				$this->element->insert(null, $res);
+				$children[] = $res;
 
 			} elseif (is_string($res)) {
-				$this->element->insert(null, $res);
+				$children[] = $res;
 			}
 		} while (1);
 	}
