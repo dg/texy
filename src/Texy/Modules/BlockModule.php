@@ -40,7 +40,7 @@ final class BlockModule extends Texy\Module
 
 		$texy->registerBlockPattern(
 			$this->pattern(...),
-			'#^/--++\ *+(.*)' . Texy\Patterns::MODIFIER_H . '?$((?:\n(?0)|\n.*+)*)(?:\n\\\--.*$|\z)#mUi',
+			'~^/--++\ *+(.*)' . Texy\Patterns::MODIFIER_H . '?$((?:\n(?0)|\n.*+)*)(?:\n\\\--.*$|\z)~mUi',
 			'blocks',
 		);
 	}
@@ -54,7 +54,7 @@ final class BlockModule extends Texy\Module
 		// autoclose exclusive blocks
 		$text = Texy\Regexp::replace(
 			$text,
-			'#^(/--++\ *+(?!div|texysource).*)$((?:\n.*+)*?)(?:\n\\\--.*$|(?=(\n/--.*$)))#mi',
+			'~^(/--++\ *+(?!div|texysource).*)$((?:\n.*+)*?)(?:\n\\\--.*$|(?=(\n/--.*$)))~mi',
 			"\$1\$2\n\\--",
 		);
 	}
@@ -76,7 +76,7 @@ final class BlockModule extends Texy\Module
 		// [4] => ... content
 
 		$mod = new Texy\Modifier($mMod);
-		$parts = Texy\Regexp::split($mParam, '#\s+#', limit: 2);
+		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
 		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];
 

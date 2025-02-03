@@ -69,7 +69,7 @@ final class HtmlOutputModule extends Texy\Module
 		// wellform and reformat
 		$s = Regexp::replace(
 			$s . '</end/>',
-			'#([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()#Uis',
+			'~([^<]*+)<(?:(!--.*--)|(/?)([a-z][a-z0-9._:-]*)(|[ \n].*)\s*(/?))>()~Uis',
 			$this->cb(...),
 		);
 
@@ -79,22 +79,22 @@ final class HtmlOutputModule extends Texy\Module
 		}
 
 		// right trim
-		$s = Regexp::replace($s, "#[\t ]+(\n|\r|$)#", '$1'); // right trim
+		$s = Regexp::replace($s, "~[\t ]+(\n|\r|$)~", '$1'); // right trim
 
 		// join double \r to single \n
 		$s = str_replace("\r\r", "\n", $s);
 		$s = strtr($s, "\r", "\n");
 
 		// greedy chars
-		$s = Regexp::replace($s, '#\x07 *#', '');
+		$s = Regexp::replace($s, '~\x07 *~', '');
 		// back-tabs
-		$s = Regexp::replace($s, '#\t? *\x08#', '');
+		$s = Regexp::replace($s, '~\t? *\x08~', '');
 
 		// line wrap
 		if ($this->lineWrap > 0) {
 			$s = Regexp::replace(
 				$s,
-				'#^(\t*)(.*)$#m',
+				'~^(\t*)(.*)$~m',
 				$this->wrap(...),
 			);
 		}
@@ -126,7 +126,7 @@ final class HtmlOutputModule extends Texy\Module
 				$s = Texy\Helpers::freezeSpaces($mText);
 
 			} else {
-				$s = Regexp::replace($mText, '#[ \n]+#', ' '); // otherwise shrink multiple spaces
+				$s = Regexp::replace($mText, '~[ \n]+~', ' '); // otherwise shrink multiple spaces
 			}
 		}
 
