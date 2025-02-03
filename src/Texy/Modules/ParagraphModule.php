@@ -23,7 +23,7 @@ final class ParagraphModule extends Texy\Module
 	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
-		$texy->addHandler('paragraph', $this->solve(...));
+		$texy->addHandler('paragraph', $this->toElement(...));
 	}
 
 
@@ -60,10 +60,7 @@ final class ParagraphModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
+	public function toElement(
 		Texy\HandlerInvocation $invocation,
 		string $content,
 		?Texy\Modifier $mod = null,

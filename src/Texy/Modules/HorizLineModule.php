@@ -28,10 +28,10 @@ final class HorizLineModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('horizline', $this->solve(...));
+		$texy->addHandler('horizline', $this->toElement(...));
 
 		$texy->registerBlockPattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~^
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
 				[ \t]*                       # optional spaces
@@ -45,7 +45,7 @@ final class HorizLineModule extends Texy\Module
 	/**
 	 * Callback for: -------.
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
+	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
 	{
 		[, $mType, $mMod] = $matches;
 		// [1] => ---
@@ -56,10 +56,7 @@ final class HorizLineModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
+	public function toElement(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
 	{
 		$el = new Texy\HtmlElement('hr');
 		$modifier->decorate($invocation->getTexy(), $el);

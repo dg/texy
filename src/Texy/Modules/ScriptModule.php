@@ -27,10 +27,10 @@ final class ScriptModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		$texy->addHandler('script', $this->solve(...));
+		$texy->addHandler('script', $this->toElement(...));
 
 		$texy->registerLinePattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~
 				\{\{
 				((?:
@@ -47,7 +47,7 @@ final class ScriptModule extends Texy\Module
 	/**
 	 * Callback for: {{...}}.
 	 */
-	public function pattern(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mContent] = $matches;
 		// [1] => ...
@@ -72,10 +72,7 @@ final class ScriptModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
+	public function toElement(
 		Texy\HandlerInvocation $invocation,
 		string $cmd,
 		?array $args = null,
