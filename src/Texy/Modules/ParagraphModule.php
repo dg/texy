@@ -27,7 +27,7 @@ final class ParagraphModule extends Texy\Module
 	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
 	{
 		$parts = $parser->isIndented()
-			? Regexp::split($content, '~(\n(?!\ )|\n{2,})~', skipEmpty: true)
+			? Regexp::split($content, '~(\n (?! \ ) | \n{2,})~', skipEmpty: true)
 			: Regexp::split($content, '~(\n{2,})~', skipEmpty: true);
 
 		foreach ($parts ?: [] as $s) {
@@ -38,7 +38,7 @@ final class ParagraphModule extends Texy\Module
 
 			// try to find modifier
 			$mod = null;
-			if ($mx = Regexp::match($s, '~' . Texy\Patterns::MODIFIER_H . '(?=\n|\z)~sUm', captureOffset: true)) {
+			if ($mx = Regexp::match($s, '~' . Texy\Patterns::MODIFIER_H . '(?= \n | \z)~sUm', captureOffset: true)) {
 				[$mMod] = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
 				if ($s === '') {
@@ -72,7 +72,7 @@ final class ParagraphModule extends Texy\Module
 		$content = $texy->mergeLines
 			// ....
 			// ... => \r means break line
-			? Regexp::replace($content, '~\n\ +(?=\S)~', "\r")
+			? Regexp::replace($content, '~\n\ +(?= \S)~', "\r")
 			: Regexp::replace($content, '~\n~', "\r");
 
 		$el = new Texy\HtmlElement('p');

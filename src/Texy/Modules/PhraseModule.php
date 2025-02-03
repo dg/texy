@@ -62,157 +62,343 @@ final class PhraseModule extends Texy\Module
 		// ***strong+emphasis***
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![*\\\])\*\*\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*\*\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()~Us',
+			'~
+				(?<! [*\\\] )                     # not preceded by * or \
+				\*\*\*
+				(?! [\s*] )                       # not followed by space or *
+				( (?: [^ *]++ | [ *] )+ )         # content (1)
+				' . Patterns::MODIFIER . '?       # modifier (2)
+				(?<! [\s*\\\] )                   # not preceded by space, * or \
+				\*\*\*
+				(?! \* )                          # not followed by *
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~Us',
 			'phrase/strong+em',
 		);
 
 		// **strong**
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![*\\\])\*\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()~Us',
+			'~
+				(?<! [*\\\] )                     # not preceded by * or \
+				\*\*
+				(?! [\s*] )                       # not followed by space or *
+				( (?: [^ *]++ | [ *] )+ )         # content (1)
+				' . Patterns::MODIFIER . '?       # modifier (2)
+				(?<! [\s*\\\] )                   # not preceded by space, * or \
+				\*\*
+				(?! \* )                          # not followed by *
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~Us',
 			'phrase/strong',
 		);
 
 		// //emphasis//
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![/:])\/\/(?![\s/])((?:[^ /]++|[ /])+)' . Patterns::MODIFIER . '?(?<![\s/:])\/\/(?!\/)(?::(' . Patterns::LINK_URL . '))??()~Us',
+			'~
+				(?<! [/:] )                       # not preceded by / or :
+				//
+				(?! [\s/] )                       # not followed by space or /
+				( (?: [^ /]++ | [ /] )+ )         # content (1)
+				' . Patterns::MODIFIER . '?       # modifier (2)
+				(?<! [\s/:] )                     # not preceded by space, / or :
+				//
+				(?! / )                           # not followed by /
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~Us',
 			'phrase/em',
 		);
 
 		// *emphasisAlt*
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![*\\\])\*(?![\s*])((?:[^\s*]++|[*])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*(?!\*)(?::(' . Patterns::LINK_URL . '))??()~Us',
+			'~
+				(?<! [*\\\] )                    # not preceded by * or \
+				\*
+				(?! [\s*] )                      # not followed by space or *
+				( (?: [^\s*]++ | [*] )+ )        # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! [\s*\\\] )                  # not preceded by space, * or \
+				\*
+				(?! \* )                         # not followed by *
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~Us',
 			'phrase/em-alt',
 		);
 
 		// *emphasisAlt2*
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![^\s.,;:<>()"\'' . Patterns::MARK . '-])\*(?![\s*])((?:[^ *]++|[ *])+)' . Patterns::MODIFIER . '?(?<![\s*\\\])\*(?![^\s.,;:<>()"?!\'-])(?::(' . Patterns::LINK_URL . '))??()~Us',
+			'~
+				(?<! [^\s.,;:<>()"\'' . Patterns::MARK . '-] )  # must be preceded by these chars
+				\*
+				(?! [\s*] )                      # not followed by space or *
+				( (?: [^ *]++ | [ *] )+ )        # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! [\s*\\\] )                  # not preceded by space, * or \
+				\*
+				(?! [^\s.,;:<>()"?!\'-] )        # must be followed by these chars
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~Us',
 			'phrase/em-alt2',
 		);
 
 		// ++inserted++
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\+)\+\+(?![\s+])((?:[^\r\n +]++|[ +])+)' . Patterns::MODIFIER . '?(?<![\s+])\+\+(?!\+)()~U',
+			'~
+				(?<! \+ )                        # not preceded by +
+				\+\+
+				(?! [\s+] )                      # not followed by space or +
+				( (?: [^\r\n +]++ | [ +] )+ )    # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! [\s+] )                     # not preceded by space or +
+				\+\+
+				(?! \+ )                         # not followed by +
+			()~U',
 			'phrase/ins',
 		);
 
 		// --deleted--
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![<-])\-\-(?![\s>-])((?:[^\r\n -]++|[ -])+)' . Patterns::MODIFIER . '?(?<![\s<-])\-\-(?![>-])()~U',
+			'~
+				(?<! [<-] )                      # not preceded by < or -
+				--
+				(?! [\s>-] )                     # not followed by space, > or -
+				( (?: [^\r\n -]++ | [ -] )+ )    # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! [\s<-] )                    # not preceded by space, < or -
+				--
+				(?! [>-] )                       # not followed by > or -
+			()~U',
 			'phrase/del',
 		);
 
 		// ^^superscript^^
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\^)\^\^(?![\s^])((?:[^\r\n ^]++|[ ^])+)' . Patterns::MODIFIER . '?(?<![\s^])\^\^(?!\^)()~U',
+			'~
+				(?<! \^ )                        # not preceded by ^
+				\^\^
+				(?! [\s^] )                      # not followed by space or ^
+				( (?: [^\r\n ^]++ | [ ^] )+ )    # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! [\s^] )                     # not preceded by space or ^
+				\^\^
+				(?! \^ )                         # not followed by ^
+			()~U',
 			'phrase/sup',
 		);
 
 		// m^2 alternative superscript
 		$texy->registerLinePattern(
 			$this->patternSupSub(...),
-			'~(?<=[a-z0-9])\^([n0-9+-]{1,4}?)(?![a-z0-9])~Ui',
+			'~
+				(?<= [a-z0-9] )                  # preceded by letter or number
+				\^
+				( [n0-9+-]{1,4}? )               # 1-4 digits, n, + or - (1)
+				(?! [a-z0-9] )                   # not followed by letter or number
+			~Ui',
 			'phrase/sup-alt',
 		);
 
 		// __subscript__
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\_)\_\_(?![\s_])((?:[^\r\n _]++|[ _])+)' . Patterns::MODIFIER . '?(?<![\s_])\_\_(?!\_)()~U',
+			'~
+				(?<! _ )                         # not preceded by _
+				__
+				(?! [\s_] )                      # not followed by space or _
+				( (?: [^\r\n _]++ | [ _] )+ )    # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! [\s_] )                     # not preceded by space or _
+				__
+				(?! _ )                          # not followed by _
+			()~U',
 			'phrase/sub',
 		);
 
 		// m_2 alternative subscript
 		$texy->registerLinePattern(
 			$this->patternSupSub(...),
-			'~(?<=[a-z])\_([n0-9]{1,3})(?![a-z0-9])~Ui',
+			'~
+				(?<= [a-z] )                     # preceded by letter
+				_
+				( [n0-9]{1,3} )                  # 1-3 digits or n (1)
+				(?! [a-z0-9] )                   # not followed by letter or number
+			~Ui',
 			'phrase/sub-alt',
 		);
 
 		// "span"
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\")\"(?!\s)((?:[^\r "]++|[ ])+)' . Patterns::MODIFIER . '?(?<!\s)\"(?!\")(?::(' . Patterns::LINK_URL . '))??()~U',
+			'~
+				(?<! " )                         # not preceded by "
+				"
+				(?! \s )                         # not followed by space
+				( (?: [^\r "]++ | [ ] )+ )       # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! \s )                        # not preceded by space
+				"
+				(?! " )                          # not followed by "
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~U',
 			'phrase/span',
 		);
 
 		// ~alternative span~
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\~)\~(?!\s)((?:[^\r \~]++|[ ])+)' . Patterns::MODIFIER . '?(?<!\s)\~(?!\~)(?::(' . Patterns::LINK_URL . '))??()~U',
+			'~
+				(?<! \~ )
+				\~
+				(?! \s )                         # not followed by space
+				( (?: [^\r \~]++ | [ ] )+ )      # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! \s )                        # not preceded by space
+				\~
+				(?! \~ )
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~U',
 			'phrase/span-alt',
 		);
 
-		// >>quote<<
+		// >>quote
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\>)\>\>(?![\s>])((?:[^\r\n <]++|[ <])+)' . Patterns::MODIFIER . '?(?<![\s<])\<\<(?!\<)(?::(' . Patterns::LINK_URL . '))??()~U',
+			'~
+				(?<! > )                         # not preceded by >
+				>>
+				(?! [\s>] )                      # not followed by space or >
+				( (?: [^\r\n <]++ | [ <] )+ )    # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! [\s<] )                     # not preceded by space or
+				<<
+				(?! < )                          # not followed by <
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~U',
 			'phrase/quote',
 		);
 
 		// acronym/abbr "et al."((and others))
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\")\"(?!\s)((?:[^\r\n "]++|[ ])+)' . Patterns::MODIFIER . '?(?<!\s)\"(?!\")\(\((.+)\)\)()~U',
+			'~
+				(?<! " )                         # not preceded by "
+				"
+				(?! \s )                         # not followed by space
+				( (?: [^\r\n "]++ | [ ] )+ )     # content (1)
+				' . Patterns::MODIFIER . '?      # modifier (2)
+				(?<! \s )                        # not preceded by space
+				"
+				(?! " )                          # not followed by "
+				\(\(
+				( .+ )                           # explanation (3)
+				\)\)
+			()~U',
 			'phrase/acronym',
 		);
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![' . Patterns::CHAR . '])([' . Patterns::CHAR . ']{2,})()\(\(((?:[^\n )]++|[ )])+)\)\)~U',
+			'~
+				(?<! [' . Patterns::CHAR . '] )  # not preceded by char
+				( [' . Patterns::CHAR . ']{2,} ) # at least 2 chars (1)
+				()                               # modifier placeholder (2)
+				\(\(
+				( (?: [^\n )]++ | [ )] )+ )      # explanation (3)
+				\)\)
+			~U',
 			'phrase/acronym-alt',
 		);
 
 		// ''notexy''
 		$texy->registerLinePattern(
 			$this->patternNoTexy(...),
-			'~(?<!\')\'\'(?![\s\'])((?:[^' . Patterns::MARK . '\r\n\']++|[\'])+)(?<![\s\'])\'\'(?!\')()~U',
+			'~
+				(?<! \' )                         # not preceded by quote
+				\'\'
+				(?! [\s\'] )                      # not followed by space or quote
+				( (?: [^' . Patterns::MARK . '\r\n\']++ | \' )+ )  # content (1)
+				(?<! [\s\'] )                     # not preceded by space or quote
+				\'\'
+				(?! \' )                          # not followed by quote
+			()~U',
 			'phrase/notexy',
 		);
 
 		// `code`
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~\`(\S(?:[^' . Patterns::MARK . '\r\n `]++|[ `])*)' . Patterns::MODIFIER . '?(?<!\s)\`(?::(' . Patterns::LINK_URL . '))??()~U',
+			'~
+				`
+				( \S (?: [^' . Patterns::MARK . '\r\n `]++ | [ `] )* )  # content (1)
+				' . Patterns::MODIFIER . '?             # modifier (2)
+				(?<! \s )                               # not preceded by space
+				`
+				(?: : (' . Patterns::LINK_URL . ') )??  # optional link (3)
+			()~U',
 			'phrase/code',
 		);
 
 		// ....:LINK
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~([' . Patterns::CHAR . '0-9@#$%&.,_-]++)()(?=:\[)(?::(' . Patterns::LINK_URL . '))()~U',
+			'~
+				( [' . Patterns::CHAR . '0-9@#$%&.,_-]++ )  # allowed chars (1)
+				()                                    # modifier placeholder (2)
+				: (?= \[ )                            # followed by :[
+				(' . Patterns::LINK_URL . ')          # link (3)
+			()~U',
 			'phrase/quicklink',
 		);
 
 		// [text |link]
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<!\[)\[(?![\s*])([^|\r\n\]]++)\|((?:[^' . Patterns::MARK . '|\r\n \]]++|[ ])+)' . Patterns::MODIFIER . '?(?<!\s)\](?!\])()~U',
+			'~
+				(?<! \[ )                        # not preceded by [
+				\[
+				(?! [\s*] )                      # not followed by space or *
+				( [^|\r\n\]]++ )                 # text (1)
+				\|
+				( (?: [^' . Patterns::MARK . '|\r\n \]]++ | [ ] )+ )  # link (2)
+				' . Patterns::MODIFIER . '?      # modifier (3)
+				(?<! \s )                        # not preceded by space
+				]
+				(?! ] )                          # not followed by ]
+			()~U',
 			'phrase/wikilink',
 		);
 
 		// [text](link)
 		$texy->registerLinePattern(
 			$this->patternPhrase(...),
-			'~(?<![[.])\[(?![\s*])((?:[^|\r\n \]]++|[ ])+)' . Patterns::MODIFIER . '?(?<!\s)\]\(((?:[^' . Patterns::MARK . '\r )]++|[ ])+)\)()~U',
+			'~
+				(?<! [[.] )                     # not preceded by [ or .
+				\[
+				(?! [\s*] )                     # not followed by space or *
+				( (?: [^|\r\n \]]++ | [ ] )+ )  # text (1)
+				' . Patterns::MODIFIER . '?     # modifier (2)
+				(?<! \s )                       # not preceded by space
+				]
+				\(
+				( (?: [^' . Patterns::MARK . '\r )]++ | [ ] )+ )  # link (3)
+				\)
+			()~U',
 			'phrase/markdown',
 		);
 
 		// \* escaped asterix
 		$texy->registerLinePattern(
 			fn() => '*',
-			'~\\\\\*~',
+			'~\\\\\*~',                      // \* -> *
 			'phrase/escaped-asterix',
 		);
-
 
 		$texy->allowed['phrase/ins'] = false;
 		$texy->allowed['phrase/del'] = false;

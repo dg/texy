@@ -7,6 +7,7 @@
 
 namespace Texy;
 
+use JetBrains\PhpStorm\Language;
 use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, link, ltrim, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
 use const ENT_NOQUOTES;
 
@@ -221,6 +222,7 @@ class Texy
 	 */
 	final public function registerLinePattern(
 		callable $handler,
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		string $name,
 		?string $againTest = null,
@@ -241,7 +243,12 @@ class Texy
 	/**
 	 * @param  callable(BlockParser, string[], string): (HtmlElement|string|null)  $handler
 	 */
-	final public function registerBlockPattern(callable $handler, string $pattern, string $name): void
+	final public function registerBlockPattern(
+		callable $handler,
+		#[Language('PhpRegExpXTCommentMode')]
+		string $pattern,
+		string $name,
+	): void
 	{
 		// if (!Regexp::match($pattern, '~(.)\^.*\$\1[a-z]*~is')) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {

@@ -34,8 +34,11 @@ final class TableModule extends Texy\Module
 
 		$texy->registerBlockPattern(
 			$this->patternTable(...),
-			'~^(?:' . Patterns::MODIFIER_HV . '\n)?' // .{color: red}
-			. '\|.*()$~mU', // | ....
+			'~^
+				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)
+				\|                                   # table start
+				.*                                   # content
+			()$~mU',
 			'table',
 		);
 	}
@@ -68,7 +71,17 @@ final class TableModule extends Texy\Module
 
 		$parser->moveBackward();
 
-		if ($parser->next('~^\|(\#|\=){2,}(?![|#=+])(.+)\1*\|?\ *' . Patterns::MODIFIER_H . '?()$~Um', $matches)) {
+		if ($parser->next(
+			'~^
+				\|                               # opening pipe
+				( [\#=] ){2,}  (?! [|#=+] )      # opening chars (1)
+				(.+)                             # caption (2)
+				\1*                              # matching closing chars
+				\|? \ *                              # optional closing pipe and spaces
+				' . Patterns::MODIFIER_H . '?    # modifier (3)
+			()$~Um',
+			$matches,
+		)) {
 			[, , $mContent, $mMod] = $matches;
 			// [1] => # / =
 			// [2] => ....
@@ -88,15 +101,15 @@ final class TableModule extends Texy\Module
 		$elPart = null;
 
 		while (true) {
-			if ($parser->next('~^\|([=-])[+|=-]{2,}$~Um', $matches)) { // line
+			if ($parser->next('~^ \| ([=-]) [+|=-]{2,} $~Um', $matches)) { // line
 				$isHead = !$isHead;
 				$prevRow = [];
 				continue;
 			}
 
-			if ($parser->next('~^\|(.*)(?:|\|[\ \t]*' . Patterns::MODIFIER_HV . '?)()$~U', $matches)) {
+			if ($parser->next('~^ \| (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)()$~U', $matches)) {
 				// smarter head detection
-				if ($rowCounter === 0 && !$isHead && $parser->next('~^\|[=-][+|=-]{2,}$~Um', $foo)) {
+				if ($rowCounter === 0 && !$isHead && $parser->next('~^ \| [=-] [+|=-]{2,} $~Um', $foo)) {
 					$isHead = true;
 					$parser->moveBackward();
 				}
@@ -178,12 +191,12 @@ final class TableModule extends Texy\Module
 
 		// special escape sequence \|
 		$content = str_replace('\|', "\x13", $content);
-		$content = Regexp::replace($content, '~(\[[^\]]*)\|~', "$1\x13"); // HACK: support for [..|..]
+		$content = Regexp::replace($content, '~(\[[^]]*)\|~', "$1\x13"); // HACK: support for [..|..]
 
 		foreach (explode('|', $content) as $cell) {
 			$cell = strtr($cell, "\x13", '|');
 			// rowSpan
-			if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '~\^[\ \t]*$|\*??(.*)[\ \t]+\^$~AU'))) {
+			if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '~\^[ \t]*$|\*??(.*)[ \t]+\^$~AU'))) {
 				$prevRow[$col]->rowSpan++;
 				$cell = $matches[1] ?? '';
 				$prevRow[$col]->text .= "\n" . $cell;
@@ -233,7 +246,14 @@ final class TableModule extends Texy\Module
 		Texy\Texy $texy,
 	): ?TableCellElement
 	{
-		$matches = Regexp::match($cell, '~(\*??)[\ \t]*' . Patterns::MODIFIER_HV . '??(.*)' . Patterns::MODIFIER_HV . '?[\ \t]*()$~AU');
+		$matches = Regexp::match($cell, '~
+			( \*?? )                          # head mark (1)
+			[ \t]*
+			' . Patterns::MODIFIER_HV . '??   # modifier (2)
+			(.*)                              # content (3)
+			' . Patterns::MODIFIER_HV . '?    # modifier (4)
+			[ \t]*
+		()$~AU');
 		if (!$matches) {
 			return null;
 		}

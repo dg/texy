@@ -24,15 +24,15 @@ final class ListModule extends Texy\Module
 	/** @var array<string, array{string, int, string, 3?: string}> [regex, ordered?, list-style-type, next-regex?] */
 	public array $bullets = [
 		// first-rexexp ordered? list-style-type next-regexp
-		'*' => ['\*[\ \t]', 0, ''],
-		'-' => ['[\x{2013}-](?![>-])', 0, ''],
-		'+' => ['\+[\ \t]', 0, ''],
-		'1.' => ['1\.[\ \t]', /* not \d !*/ 1, '', '\d{1,3}\.[\ \t]'],
-		'1)' => ['\d{1,3}\)[\ \t]', 1, ''],
-		'I.' => ['I\.[\ \t]', 1, 'upper-roman', '[IVX]{1,4}\.[\ \t]'],
-		'I)' => ['[IVX]+\)[\ \t]', 1, 'upper-roman'], // before A) !
-		'a)' => ['[a-z]\)[\ \t]', 1, 'lower-alpha'],
-		'A)' => ['[A-Z]\)[\ \t]', 1, 'upper-alpha'],
+		'*' => ['\* [ \t]', 0, ''],
+		'-' => ['[\x{2013}-] (?! [>-] )', 0, ''],
+		'+' => ['\+ [ \t]', 0, ''],
+		'1.' => ['1 \. [ \t]', /* not \d !*/ 1, '', '\d{1,3} \. [ \t]'],
+		'1)' => ['\d{1,3} \) [ \t]', 1, ''],
+		'I.' => ['I \. [ \t]', 1, 'upper-roman', '[IVX]{1,4} \. [ \t]'],
+		'I)' => ['[IVX]+ \) [ \t]', 1, 'upper-roman'], // before A) !
+		'a)' => ['[a-z] \) [ \t]', 1, 'lower-alpha'],
+		'A)' => ['[A-Z] \) [ \t]', 1, 'upper-alpha'],
 	];
 
 
@@ -58,16 +58,28 @@ final class ListModule extends Texy\Module
 
 		$this->texy->registerBlockPattern(
 			$this->patternList(...),
-			'~^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color: red}
-			. '(' . implode('|', $RE) . ')[\ \t]*+\S.*$~mU', // item (unmatched)
+			'~^
+				(?:' . Patterns::MODIFIER_H . '\n)? # modifier (1)
+				(' . implode('|', $RE) . ')         # list marker (2)
+				[ \t]*+
+				\S .*                               # content
+			$~mU',
 			'list',
 		);
 
 		$this->texy->registerBlockPattern(
 			$this->patternDefList(...),
-			'~^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color:red}
-			. '(\S.{0,2000})\:[\ \t]*' . Patterns::MODIFIER_H . '?\n' // Term:
-			. '([\ \t]++)(' . implode('|', $REul) . ')[\ \t]*+\S.*$~mU', // - description
+			'~^
+				(?:' . Patterns::MODIFIER_H . '\n)?   # modifier (1)
+				( \S .{0,2000} )                      # definition term (2)
+				: [ \t]*                              # colon separator
+				' . Patterns::MODIFIER_H . '?         # modifier (3)
+				\n
+				([ \t]++)                             # indentation (4)
+				(' . implode('|', $REul) . ')         # description marker (5)
+				[ \t]*+
+				\S .*                                 # content
+			$~mU',
 			'list/definition',
 		);
 	}
@@ -168,7 +180,12 @@ final class ListModule extends Texy\Module
 		$mod->decorate($texy, $el);
 		$parser->moveBackward(2);
 
-		$patternTerm = '~^\n?(\S.*)\:[\ \t]*' . Patterns::MODIFIER_H . '?()$~mUA';
+		$patternTerm = '~^
+			\n?
+			( \S .* )                       # term content
+			: [ \t]*                        # colon separator
+			' . Patterns::MODIFIER_H . '?
+		()$~mUA';
 
 		while (true) {
 			if ($elItem = $this->patternItem($parser, $bullet, true, 'dd')) {
@@ -206,7 +223,14 @@ final class ListModule extends Texy\Module
 	private function patternItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
 	{
 		$spacesBase = $indented ? ('[\ \t]{1,}') : '';
-		$patternItem = "~^\\n?($spacesBase){$bullet}[ \\t]*(\\S.*)?" . Patterns::MODIFIER_H . '?()$~mAU';
+		$patternItem = "~^
+			\\n?
+			($spacesBase)                            # base indentation
+			{$bullet}                                # bullet character
+			[ \\t]*
+			( \\S .* )?                              # content
+			" . Patterns::MODIFIER_H . '?
+		()$~mAU';
 
 		// first line with bullet
 		$matches = null;
@@ -226,7 +250,12 @@ final class ListModule extends Texy\Module
 		// next lines
 		$spaces = '';
 		$content = ' ' . $mContent; // trick
-		while ($parser->next('~^(\n*)' . Regexp::quote($mIndent) . '([\ \t]{1,' . $spaces . '})(.*)()$~Am', $matches)) {
+		while ($parser->next('~^
+			(\n*)
+			' . Regexp::quote($mIndent) . '
+			([ \t]{1,' . $spaces . '})
+			(.*)
+		()$~Am', $matches)) {
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 			// [1] => blank line?
 			// [2] => spaces

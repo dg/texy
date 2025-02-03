@@ -7,7 +7,8 @@
 
 namespace Texy;
 
-use function is_array, strlen;
+use JetBrains\PhpStorm\Language;
+use function is_array, max, strlen, substr, trim, usort;
 
 
 
@@ -44,7 +45,11 @@ class BlockParser extends Parser
 	 * @param  ?array<string>  $matches
 	 * @param-out array<string> $matches
 	 */
-	public function next(string $pattern, ?array &$matches): bool
+	public function next(
+		#[Language('PhpRegExpXTCommentMode')]
+		string $pattern,
+		?array &$matches,
+	): bool
 	{
 		if ($this->offset > strlen($this->text)) {
 			return false;

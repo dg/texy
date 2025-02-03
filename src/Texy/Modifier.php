@@ -62,7 +62,7 @@ final class Modifier
 			$ch = $s[$p];
 
 			if ($ch === '(') { // title
-				$m = Regexp::match($s, '~(?:\\\\\)|[^)\n])++\)~', offset: $p);
+				$m = Regexp::match($s, '~(?: \\\\\) | [^)\n] )++\)~', offset: $p);
 				if (isset($m[0])) {
 					$this->title = Helpers::unescapeHtml(str_replace('\)', ')', trim(substr($m[0], 1, -1))));
 					$p += strlen($m[0]);

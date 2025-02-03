@@ -56,23 +56,43 @@ final class LinkModule extends Texy\Module
 		// [reference]
 		$texy->registerLinePattern(
 			$this->patternReference(...),
-			'~(\[[^\[\]\*\n' . Patterns::MARK . ']++\])~U',
+			'~(
+				\[
+				[^\[\]*\n' . Patterns::MARK . ']++  # reference
+				]
+			)~U',
 			'link/reference',
 		);
 
-		// direct url; charaters not allowed in URL <>[\]^`{|}
+		// direct url; characters not allowed in URL <>[\]^`{|}
 		$texy->registerLinePattern(
 			$this->patternUrlEmail(...),
-			'~(?<=^|[\s([<:\x17])(?:https?://|www\.|ftp://)[0-9.' . Patterns::CHAR . '-][/\d' . Patterns::CHAR . '+\.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}[/\d' . Patterns::CHAR . '+\~?@=_#$*]~',
+			'~
+				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
+				(?: https?:// | www\. | ftp:// )   # protocol or www
+				[0-9.' . Patterns::CHAR . '-]      # first char
+				[/\d' . Patterns::CHAR . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
+				[/\d' . Patterns::CHAR . '+\~?@=_#$*]  # last char
+			~',
 			'link/url',
-			'~(?:https?://|www\.|ftp://)~',
+			'~(?: https?:// | www\. | ftp://)~',
 		);
 
 		// direct email
-		self::$EMAIL = '[' . Patterns::CHAR . '][0-9.+_' . Patterns::CHAR . '-]{0,63}@[0-9.+_' . Patterns::CHAR . '\x{ad}-]{1,252}\.[' . Patterns::CHAR . '\x{ad}]{2,19}';
+		self::$EMAIL = '
+			[' . Patterns::CHAR . ']                 # first char
+			[0-9.+_' . Patterns::CHAR . '-]{0,63}    # local part
+			@
+			[0-9.+_' . Patterns::CHAR . '\x{ad}-]{1,252} # domain
+			\.
+			[' . Patterns::CHAR . '\x{ad}]{2,19}     # TLD
+		';
 		$texy->registerLinePattern(
 			$this->patternUrlEmail(...),
-			'~(?<=^|[\s([<\x17])' . self::$EMAIL . '~',
+			'~
+				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
+				' . self::$EMAIL . '
+			~',
 			'link/email',
 			'~' . self::$EMAIL . '~',
 		);
@@ -90,7 +110,15 @@ final class LinkModule extends Texy\Module
 		if (!empty($texy->allowed['link/definition'])) {
 			$text = Texy\Regexp::replace(
 				$text,
-				'~^\[([^\[\]#\?\*\n]{1,100})\]:\ ++(\S{1,1000})([\ \t].{1,1000})?' . Patterns::MODIFIER . '?\s*()$~mU',
+				'~^
+					\[
+					( [^\[\]#?*\n]{1,100} )           # reference (1)
+					] : \ ++
+					( \S{1,1000} )                    # URL (2)
+					( [ \t] .{1,1000} )?              # optional description (3)
+					' . Patterns::MODIFIER . '?       # modifier (4)
+					\s*
+				()$~mU',
 				$this->patternReferenceDef(...),
 			);
 		}
@@ -371,7 +399,14 @@ final class LinkModule extends Texy\Module
 				: $link->raw;
 
 			// parse_url() in PHP damages UTF-8 - use regular expression
-			if (!($parts = Regexp::match($raw, '~^(?:(?P<scheme>[a-z]+):)?(?://(?P<host>[^/?#]+))?(?P<path>(?:/|^)(?!/)[^?#]*)?(?:\?(?P<query>[^#]*))?(?:\#(?P<fragment>.*))?()$~'))) {
+			if (!($parts = Regexp::match($raw, '~^
+				(?: (?P<scheme> [a-z]+ ) : )?
+				(?: // (?P<host> [^/?#]+ ) )?
+				(?P<path> (?: / | ^ ) (?! / ) [^?#]* )?
+				(?: \? (?P<query> [^#]* ) )?
+				(?: \# (?P<fragment> .* ) )?
+				()$
+			~'))) {
 				return $link->raw;
 			}
 
