@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use JetBrains\PhpStorm\Language;
 use function is_string, max, strlen, substr, trim, usort;
 
 
@@ -41,7 +42,11 @@ class BlockParser extends Parser
 
 	// match current line against RE.
 	// if succesfull, increments current position and returns true
-	public function next(string $pattern, &$matches): bool
+	public function next(
+		#[Language('PhpRegExpXTCommentMode')]
+		string $pattern,
+		&$matches,
+	): bool
 	{
 		if ($this->offset > strlen($this->text)) {
 			return false;
