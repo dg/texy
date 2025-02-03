@@ -72,7 +72,7 @@ final class BlockQuoteModule extends Texy\Module
 			[, $mPrefix, $mContent] = $matches;
 		} while (true);
 
-		$el->parseBlock($texy, $content, $parser->isIndented());
+		$el->inject($texy->parseBlock($content, $parser->isIndented()));
 
 		// no content?
 		if (!$el->count()) {

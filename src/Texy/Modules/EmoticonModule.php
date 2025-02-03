@@ -94,7 +94,11 @@ final class EmoticonModule extends Texy\Module
 	}
 
 
-	public function toElement(Texy\HandlerInvocation $invocation, string $emoticon, string $raw): Texy\HtmlElement|string
+	public function toElement(
+		Texy\HandlerInvocation $invocation,
+		string $emoticon,
+		string $raw,
+	): Texy\HtmlElement|string
 	{
 		$texy = $this->texy;
 		$file = $this->icons[$emoticon];
