@@ -40,7 +40,7 @@ final class FigureModule extends Texy\Module
 	public function __construct(Texy\Texy $texy)
 	{
 		$this->texy = $texy;
-		$texy->addHandler('figure', $this->solve(...));
+		$texy->addHandler('figure', $this->toElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 	}
 
@@ -48,7 +48,7 @@ final class FigureModule extends Texy\Module
 	private function beforeParse(): void
 	{
 		$this->texy->registerBlockPattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~^
 				(?>
 					\[\*\ *+                      # opening bracket with asterisk
@@ -75,7 +75,7 @@ final class FigureModule extends Texy\Module
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 		// [1] => URLs
@@ -88,7 +88,7 @@ final class FigureModule extends Texy\Module
 		$texy = $this->texy;
 		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
 		$mod = new Texy\Modifier($mMod);
-		$mContent = trim($mContent);
+		$mContent = trim($mContent ?? '');
 
 		if ($mLink) {
 			if ($mLink === ':') {
@@ -106,10 +106,7 @@ final class FigureModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
+	public function toElement(
 		Texy\HandlerInvocation $invocation,
 		Texy\Image $image,
 		?Texy\Link $link,
@@ -122,7 +119,7 @@ final class FigureModule extends Texy\Module
 		$hAlign = $image->modifier->hAlign;
 		$image->modifier->hAlign = null;
 
-		$elImg = $texy->imageModule->solve(null, $image, $link); // returns Texy\HtmlElement or null!
+		$elImg = $texy->imageModule->toElement(null, $image, $link); // returns Texy\HtmlElement or null!
 		if (!$elImg) {
 			return null;
 		}
