@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use JetBrains\PhpStorm\Language;
+
 
 /**
  * Texy! - Convert plain text to HTML format using {@link process()}.
@@ -217,6 +219,7 @@ class Texy
 
 	final public function registerLinePattern(
 		callable $handler,
+		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		string $name,
 		?string $againTest = null,
@@ -234,7 +237,12 @@ class Texy
 	}
 
 
-	final public function registerBlockPattern(callable $handler, string $pattern, string $name): void
+	final public function registerBlockPattern(
+		callable $handler,
+		#[Language('PhpRegExpXTCommentMode')]
+		string $pattern,
+		string $name,
+	): void
 	{
 		// if (!Regexp::match($pattern, '~(.)\^.*\$\1[a-z]*~is')) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {
