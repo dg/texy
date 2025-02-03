@@ -47,12 +47,12 @@ final class ImageModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->allowed['image/definition'] = true;
-		$texy->addHandler('image', $this->solve(...));
+		$texy->addHandler('image', $this->toElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 
 		// [*image*]:LINK
 		$texy->registerLinePattern(
-			$this->patternImage(...),
+			$this->parseImage(...),
 			'~
 				\[\* \ *+                         # opening bracket with asterisk
 				([^\n' . Patterns::MARK . ']{1,1000}) # URLs (1)
@@ -89,7 +89,7 @@ final class ImageModule extends Texy\Module
 					' . Patterns::MODIFIER . '?       # modifier (3)
 					\s*
 				$~mU',
-				$this->patternReferenceDef(...),
+				$this->parseReferenceDef(...),
 			);
 		}
 	}
@@ -98,7 +98,7 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Callback for: [*image*]: urls .(title)[class]{style}.
 	 */
-	private function patternReferenceDef(array $matches): string
+	private function parseReferenceDef(array $matches): string
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		// [1] => [* (reference) *]
@@ -114,7 +114,7 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Callback for [* small.jpg 80x13 || big.jpg .(alternative text)[class]{style}>]:LINK.
 	 */
-	public function patternImage(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseImage(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		// [1] => URLs
@@ -205,10 +205,7 @@ final class ImageModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	public function solve(
+	public function toElement(
 		?Texy\HandlerInvocation $invocation,
 		Image $image,
 		?Texy\Link $link = null,
@@ -259,7 +256,7 @@ final class ImageModule extends Texy\Module
 		$texy->summary['images'][] = $el->attrs['src'];
 
 		if ($link) {
-			return $texy->linkModule->solve(null, $link, $el);
+			return $texy->linkModule->linkToElement(null, $link, $el);
 		}
 
 		return $el;

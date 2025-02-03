@@ -22,7 +22,7 @@ final class BlockQuoteModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->registerBlockPattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~^
 				(?: ' . Texy\Patterns::MODIFIER_H . '\n)? # modifier (1)
 				>                                      # blockquote char
@@ -43,7 +43,7 @@ final class BlockQuoteModule extends Texy\Module
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mMod, $mPrefix, $mContent] = $matches;
 		// [1] => .(title)[class]{style}<>
