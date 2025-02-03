@@ -22,19 +22,17 @@ class LineParser extends Parser
 	public bool $again;
 
 
-	public function __construct(Texy $texy, HtmlElement $element)
+	public function __construct(Texy $texy)
 	{
 		$this->texy = $texy;
-		$this->element = $element;
 		$this->patterns = $texy->getLinePatterns();
 	}
 
 
-	public function parse(string $text): void
+	public function parse(string $text): array
 	{
 		if (!$this->patterns) { // nothing to do
-			$this->element->insert(null, $text);
-			return;
+			return [$text];
 		}
 
 		$offset = 0;
@@ -89,7 +87,7 @@ class LineParser extends Parser
 			}
 		} while (1);
 
-		$this->element->insert(null, $text);
+		return [$text];
 	}
 
 
