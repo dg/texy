@@ -172,8 +172,8 @@ final class LinkModule extends Texy\Module
 			} else {
 				self::$livelock[$link->name] = true;
 				$el = new Texy\HtmlElement;
-				$lineParser = new LineParser($texy, $el);
-				$lineParser->parse($link->label);
+				$lineParser = new LineParser($texy);
+				$el->inject($lineParser->parse($link->label));
 				$content = $el->toString($texy);
 				unset(self::$livelock[$link->name]);
 			}
