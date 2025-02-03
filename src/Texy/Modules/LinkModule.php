@@ -49,15 +49,15 @@ final class LinkModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->allowed['link/definition'] = true;
-		$texy->addHandler('newReference', $this->solveNewReference(...));
-		$texy->addHandler('linkReference', $this->solve(...));
-		$texy->addHandler('linkEmail', $this->solveUrlEmail(...));
-		$texy->addHandler('linkURL', $this->solveUrlEmail(...));
+		$texy->addHandler('newReference', $this->newReferenceToElement(...));
+		$texy->addHandler('linkReference', $this->linkToElement(...));
+		$texy->addHandler('linkEmail', $this->urlEmailToElement(...));
+		$texy->addHandler('linkURL', $this->urlEmailToElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 
 		// [reference]
 		$texy->registerLinePattern(
-			$this->patternReference(...),
+			$this->parseReference(...),
 			'~(
 				\[
 				[^\[\]*\n' . Patterns::MARK . ']++  # reference
@@ -68,7 +68,7 @@ final class LinkModule extends Texy\Module
 
 		// direct url; characters not allowed in URL <>[\]^`{|}
 		$texy->registerLinePattern(
-			$this->patternUrlEmail(...),
+			$this->parseUrlEmail(...),
 			'~
 				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
 				(?: https?:// | www\. | ftp:// )   # protocol or www
@@ -90,7 +90,7 @@ final class LinkModule extends Texy\Module
 			[' . Patterns::CHAR . '\x{ad}]{2,19}     # TLD
 		';
 		$texy->registerLinePattern(
-			$this->patternUrlEmail(...),
+			$this->parseUrlEmail(...),
 			'~
 				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
 				' . self::$EMAIL . '
@@ -121,7 +121,7 @@ final class LinkModule extends Texy\Module
 					' . Patterns::MODIFIER . '?       # modifier (4)
 					\s*
 				$~mU',
-				$this->patternReferenceDef(...),
+				$this->parseReferenceDef(...),
 			);
 		}
 	}
@@ -130,7 +130,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Callback for: [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}.
 	 */
-	private function patternReferenceDef(array $matches): string
+	private function parseReferenceDef(array $matches): string
 	{
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		// [1] => [ (reference) ]
@@ -150,7 +150,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Callback for: [ref].
 	 */
-	public function patternReference(LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseReference(LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mRef] = $matches;
 		// [1] => [ref]
@@ -189,7 +189,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Callback for: http://davidgrudl.com david@grudl.com.
 	 */
-	public function patternUrlEmail(LineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+	public function parseUrlEmail(LineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 	{
 		[$mURL] = $matches;
 		// [0] => URL
@@ -281,10 +281,7 @@ final class LinkModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	public function solve(
+	public function linkToElement(
 		?HandlerInvocation $invocation,
 		Link $link,
 		Texy\HtmlElement|string|null $content = null,
@@ -332,21 +329,15 @@ final class LinkModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string
+	public function urlEmailToElement(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string
 	{
 		$content = $this->textualUrl($link);
 		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
-		return $this->solve(null, $link, $content);
+		return $this->linkToElement(null, $link, $content);
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solveNewReference(HandlerInvocation $invocation, string $name): void
+	public function newReferenceToElement(HandlerInvocation $invocation, string $name)
 	{
 		// no change
 	}

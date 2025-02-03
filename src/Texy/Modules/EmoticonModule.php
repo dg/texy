@@ -46,7 +46,7 @@ final class EmoticonModule extends Texy\Module
 	{
 		$this->texy = $texy;
 		$texy->allowed['emoticon'] = false;
-		$texy->addHandler('emoticon', $this->solve(...));
+		$texy->addHandler('emoticon', $this->toElement(...));
 		$texy->addHandler('beforeParse', $this->beforeParse(...));
 	}
 
@@ -65,7 +65,7 @@ final class EmoticonModule extends Texy\Module
 		}
 
 		$this->texy->registerLinePattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~
 				(?<= ^ | [\x00-\x20] )
 				(' . implode('|', $pattern) . ')
@@ -79,7 +79,7 @@ final class EmoticonModule extends Texy\Module
 	/**
 	 * Callback for: :-))).
 	 */
-	public function pattern(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		$match = $matches[0];
 
@@ -94,10 +94,7 @@ final class EmoticonModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(Texy\HandlerInvocation $invocation, string $emoticon, string $raw): Texy\HtmlElement|string
+	public function toElement(Texy\HandlerInvocation $invocation, string $emoticon, string $raw): Texy\HtmlElement|string
 	{
 		$texy = $this->texy;
 		$file = $this->icons[$emoticon];
