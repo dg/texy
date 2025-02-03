@@ -31,7 +31,14 @@ final class ScriptModule extends Texy\Module
 
 		$texy->registerLinePattern(
 			$this->pattern(...),
-			'~\{\{((?:[^' . Texy\Patterns::MARK . '}]++|[}])+)\}\}()~U',
+			'~
+				\{\{
+				((?:
+					[^' . Texy\Patterns::MARK . '}]++ |  # content not containing }
+					}                                    # or single }
+				)+)
+				}}
+			()~U',
 			'script',
 		);
 	}
@@ -54,7 +61,7 @@ final class ScriptModule extends Texy\Module
 		$raw = null;
 		$args = [];
 		// function (arg, arg, ...) or function: arg, arg
-		if ($matches = Regexp::match($cmd, '~^([a-z_][a-z0-9_-]*)\s*(?:\(([^()]*)\)|:(.*))$~i')) {
+		if ($matches = Regexp::match($cmd, '~^ ([a-z_][a-z0-9_-]*) \s* (?: \( ([^()]*) \) | : (.*) )$~i')) {
 			$cmd = $matches[1];
 			$raw = trim($matches[3] ?? $matches[2]);
 			if ($raw !== '') {
