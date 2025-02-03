@@ -327,11 +327,7 @@ class Texy
 
 		// parse Texy! document into internal DOM structure
 		$this->DOM = new HtmlElement;
-		if ($singleLine) {
-			$this->DOM->parseLine($this, $text);
-		} else {
-			$this->DOM->parseBlock($this, $text);
-		}
+		$this->DOM->inject($singleLine ? $this->parseLine($text) : $this->parseBlock($text));
 
 		// user after handler
 		$this->invokeHandlers('afterParse', [$this, $this->DOM, $singleLine]);
@@ -385,6 +381,27 @@ class Texy
 		}
 
 		return $this->DOM->toText($this);
+	}
+
+
+	/**
+	 * Parses text as single line.
+	 */
+	public function parseLine(string $text): array
+	{
+		$parser = new LineParser($this);
+		return $parser->parse($text);
+	}
+
+
+	/**
+	 * Parses text as block.
+	 */
+	public function parseBlock(string $text, bool $indented = false): array
+	{
+		$parser = new BlockParser($this, $indented);
+		$this->invokeHandlers('beforeBlockParse', [$parser, &$text]);
+		return $parser->parse($text);
 	}
 
 

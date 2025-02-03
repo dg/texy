@@ -198,7 +198,7 @@ final class ListModule extends Texy\Module
 				$modItem = new Modifier($mMod);
 				$modItem->decorate($texy, $elItem);
 
-				$elItem->parseLine($texy, $mContent);
+				$elItem->inject($texy->parseLine($mContent));
 				$el->add($elItem);
 				continue;
 			}
@@ -265,7 +265,7 @@ final class ListModule extends Texy\Module
 		}
 
 		// parse content
-		$elItem->parseBlock($this->texy, $content, true);
+		$elItem->inject($this->texy->parseBlock($content, true));
 
 		if (isset($elItem[0]) && $elItem[0] instanceof HtmlElement) {
 			$elItem[0]->setName(null);

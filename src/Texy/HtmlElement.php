@@ -339,6 +339,16 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
+	 * @param  array<self|string>  $children
+	 */
+	public function inject(array $children): void
+	{
+		(function (self|string ...$children) {})(...$children);
+		$this->children = $children;
+	}
+
+
+	/**
 	 * Renders element's start tag, content and end tag to internal string representation.
 	 */
 	final public function toString(Texy $texy): string
@@ -496,26 +506,5 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		} else {
 			return true; // unknown element
 		}
-	}
-
-
-	/**
-	 * Parses text as single line.
-	 */
-	final public function parseLine(Texy $texy, string $s): LineParser
-	{
-		$parser = new LineParser($texy, $this);
-		$parser->parse($s);
-		return $parser;
-	}
-
-
-	/**
-	 * Parses text as block.
-	 */
-	final public function parseBlock(Texy $texy, string $s, bool $indented = false): void
-	{
-		$parser = new BlockParser($texy, $this, $indented);
-		$parser->parse($s);
 	}
 }
