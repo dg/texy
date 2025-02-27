@@ -66,7 +66,7 @@ Rules:
 
 ## Links
 
-*(LinkModule + PhraseModule)*
+*(LinkReferenceModule + PhraseModule)*
 
 The primary syntax attaches a URL to a phrase with a colon:
 
@@ -75,7 +75,7 @@ Visit "Nette Framework":https://nette.org or "write to us":info@example.com.
 "Article":[https://example.com/news?id=1&x=y]   // brackets delimit tricky URLs
 ```
 
-*Syntax IDs `phrase/span` (quotes) etc. + LinkModule for URL handling.*
+*Syntax IDs `phrase/span` (quotes) etc. + LinkReferenceModule for URL handling.*
 
 Alternative link syntaxes *(PhraseModule)*:
 
@@ -85,7 +85,7 @@ Alternative link syntaxes *(PhraseModule)*:
 word:[url-or-reference]               // single-word link   – phrase/quicklink
 ```
 
-**Reference links** *(`link/reference`, definitions `link/definition`, LinkModule)* keep long URLs out of the text:
+**Reference links** *(`link/reference`, definitions `link/definition`, LinkReferenceModule)* keep long URLs out of the text:
 
 ```texy
 See the "documentation":[doc] and use [Nette].
@@ -96,7 +96,7 @@ See the "documentation":[doc] and use [Nette].
 
 References can also be added programmatically with `$texy->linkModule->addDefinition()`. An unresolved `[ref]` triggers the `newReference` element handler.
 
-**Automatic links** *(`link/url`, `link/email`, LinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. Displayed URLs are shortened when `$texy->linkModule->shorten` is on; e-mails are obfuscated against bots when `$texy->obfuscateEmail` is on. A URL rejected by `$texy->urlSchemeFilters` produces no link.
+**Automatic links** *(`link/url`, `link/email`, AutolinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. Displayed URLs are shortened when `$texy->autolinkModule->shorten` is on; e-mails are obfuscated against bots when `$texy->obfuscateEmail` is on. A URL rejected by `$texy->urlSchemeFilters` produces no link.
 
 A `.[nofollow]` class on a link converts to `rel="nofollow"`.
 
@@ -389,9 +389,9 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `phrase/wikilink` | ✅ on | `[text | url]` | PhraseModule |
 | `phrase/markdown` | ✅ on | `[text](url)` | PhraseModule |
 | `phrase/escaped-asterix` | ✅ on | `\*` (literal asterisk) | PhraseModule |
-| `link/reference` | ✅ on | `[ref]` | LinkModule |
-| `link/url` | ✅ on | autodetected `https://…`, `www.…`, `ftp://…` | LinkModule |
-| `link/email` | ✅ on | autodetected e-mail address | LinkModule |
+| `link/reference` | ✅ on | `[ref]` | LinkReferenceModule |
+| `link/url` | ✅ on | autodetected `https://…`, `www.…`, `ftp://…` | AutolinkModule |
+| `link/email` | ✅ on | autodetected e-mail address | AutolinkModule |
 | `emoticon` | ❌ off | `:-)`, `:-D`, `;-)` … | EmoticonModule |
 
 ### Block syntaxes
@@ -420,7 +420,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 
 | Syntax ID | Default | What it does | Module |
 |---|---|---|---|
-| `link/definition` | ✅ on | `[name]: url .(title)` reference definitions, extracted in `beforeParse` | LinkModule |
+| `link/definition` | ✅ on | `[name]: url .(title)` reference definitions, extracted in `beforeParse` | LinkReferenceModule |
 | `image/definition` | ✅ on | `[*name*]: url .(alt)` image reference definitions, extracted in `beforeParse` | ImageModule |
 | `typography` | ✅ on | post-line typographic corrections (quotes, dashes, nbsp, symbols) | TypographyModule |
 | `longwords` | ✅ on | post-line insertion of `&shy;` soft hyphens into long words | HyphenationModule |

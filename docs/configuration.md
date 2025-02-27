@@ -120,12 +120,11 @@ $texy->phraseModule->tags['phrase/strong'] = 'b';   // change generated tag
 
 Default `$tags` map: `phrase/strong` → `strong`, `phrase/em`, `phrase/em-alt`, `phrase/em-alt2` → `em`, `phrase/ins` → `ins`, `phrase/del` → `del`, `phrase/sup`, `phrase/sup-alt` → `sup`, `phrase/sub`, `phrase/sub-alt` → `sub`, `phrase/span`, `phrase/span-alt`, `phrase/quicklink` → `a`, `phrase/acronym`, `phrase/acronym-alt` → `abbr`, `phrase/code` → `code`, `phrase/quote` → `q`.
 
-### LinkModule
+### LinkReferenceModule
 
 ```php
 $texy->linkModule->root = null;           // prefix for relative link URLs
 $texy->linkModule->forceNoFollow = false; // add rel="nofollow" to external links
-$texy->linkModule->shorten = true;        // shorten displayed URLs (autolinks)
 ```
 
 References:
@@ -133,6 +132,14 @@ References:
 ```php
 $texy->linkModule->addDefinition('example', 'https://example.com');
 $texy->linkModule->getReference('example');   // ?Link
+```
+
+### AutolinkModule
+
+Autodetection of bare URLs and e-mail addresses (`link/url`, `link/email`), split out from the former `LinkModule`.
+
+```php
+$texy->autolinkModule->shorten = true;   // shorten displayed URLs
 ```
 
 ### ImageModule
@@ -144,7 +151,7 @@ $texy->imageModule->leftClass = null;       // class for left-floating images
 $texy->imageModule->rightClass = null;      // class for right-floating images
 ```
 
-References work like in LinkModule via `addDefinition()` / `getReference()`.
+References work like in LinkReferenceModule via `addDefinition()` / `getReference()`.
 
 ### FigureModule
 
