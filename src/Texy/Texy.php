@@ -83,7 +83,8 @@ class Texy
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\HtmlModule $htmlModule;
 	public Modules\ImageModule $imageModule;
-	public Modules\LinkModule $linkModule;
+	public Modules\LinkReferenceModule $linkModule;
+	public Modules\AutolinkModule $autolinkModule;
 	public Modules\PhraseModule $phraseModule;
 	public Modules\EmoticonModule $emoticonModule;
 	public Modules\BlockModule $blockModule;
@@ -164,7 +165,8 @@ class Texy
 		$this->addModule($this->htmlModule = new Modules\HtmlModule($this));
 		$this->addModule($this->imageModule = new Modules\ImageModule($this));
 		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));
-		$this->addModule($this->linkModule = new Modules\LinkModule($this));
+		$this->addModule($this->linkModule = new Modules\LinkReferenceModule($this));
+		$this->addModule($this->autolinkModule = new Modules\AutolinkModule($this));
 		$this->addModule($this->emoticonModule = new Modules\EmoticonModule($this));
 
 		// block parsing

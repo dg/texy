@@ -44,6 +44,6 @@ overrides:
 		paths:
 			- src/Texy/Modifier.php
 			- src/Texy/Modules/ImageModule.php
-			- src/Texy/Modules/LinkModule.php
+			- src/Texy/Modules/LinkReferenceModule.php
 			- src/Texy/Modules/TableModule.php
 		upgrading: {declarations: {deprecatedMember: keep}}
