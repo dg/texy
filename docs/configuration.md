@@ -79,7 +79,7 @@ $texy->urlSchemeFilters[Texy\Texy::FILTER_IMAGE] = '#https?:#A';
 $texy->mergeLines = true;          // join consecutive lines into one paragraph
 $texy->tabWidth = 8;               // tab → spaces conversion width
 $texy->obfuscateEmail = true;      // obfuscate e-mail addresses against bots
-$texy->removeSoftHyphens = true;   // strip U+00AD from input
+$texy->removeSoftHyphens = true;   // strip U+00AD from input (deprecated)
 $texy->nontextParagraph = 'div';   // element for paragraphs without text (e.g. image-only); string or HtmlElement
 ```
 
@@ -216,10 +216,10 @@ $texy->htmlModule->passComment = true;   // keep HTML comments in output
 ### HtmlOutputModule
 
 ```php
-$texy->htmlOutputModule->indent = true;      // indent output
-$texy->htmlOutputModule->baseIndent = 0;     // base indentation level
-$texy->htmlOutputModule->lineWrap = 80;      // maximum line width
-$texy->htmlOutputModule->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
+$texy->htmlOutput->indent = true;      // indent output
+$texy->htmlOutput->baseIndent = 0;     // base indentation level
+$texy->htmlOutput->lineWrap = 80;      // maximum line width
+$texy->htmlOutput->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
 ```
 
 ### DirectiveModule

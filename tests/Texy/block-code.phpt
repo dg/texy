@@ -22,7 +22,7 @@ test('code block', function () {
 });
 
 
-test('default block', function () {
+test('default block is preformatted text', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
 		'<pre>preformatted</pre>',

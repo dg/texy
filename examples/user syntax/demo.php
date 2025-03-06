@@ -10,65 +10,90 @@
  * - .h1 and .perex block syntax
  *
  * WHAT YOU'LL LEARN:
- * - How to register inline (line) patterns with registerLinePattern()
+ * - How to register inline patterns with registerLinePattern()
  * - How to register block patterns with registerBlockPattern()
  * - How to disable conflicting default syntax
  * - How to parse content inside your custom elements
  * - How to apply modifiers to your elements
  *
  * CUSTOM SYNTAX WE CREATE:
- * *bold text*        ? <b class="myclass">bold text</b>
- * _italic text_      ? <i class="myclass">italic text</i>
+ * *bold text*        → <b class="myclass">bold text</b>
+ * _italic text_      → <i class="myclass">italic text</i>
  * .h1
- * Title              ? <h1>Title</h1>
+ * Title              → <h1>Title</h1>
  * .perex
- * Text               ? <div class="perex">Text</div>
+ * Text               → <div class="perex">Text</div>
  */
 
-use Texy\Parsing\{BlockParser, InlineParser};
+use Texy\Modifier;
+use Texy\Nodes\{ParagraphNode, PhraseNode, PhraseType};
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
 
-$texy = new Texy;
+$texy = new Texy\Texy;
 
 // IMPORTANT: Disable conflicting default syntax
 // We want to use * for bold, but Texy uses it for emphasis
 // We must disable the default * patterns first
-$texy->allowed['phrase/strong+em'] = false;  // Disables ***text***
-$texy->allowed['phrase/strong'] = false;     // Disables **text**
-$texy->allowed['phrase/em-alt'] = false;     // Disables *text*
-$texy->allowed['phrase/em-alt2'] = false;    // Disables *text*
+$texy->allowed[Texy\Syntax::StrongEmphasis] = false;         // Disables ***text***
+$texy->allowed[Texy\Syntax::Strong] = false;                  // Disables **text**
+$texy->allowed[Texy\Syntax::EmphasisSingleAsterisk] = false;  // Disables *text*
+$texy->allowed[Texy\Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 
 
 // ============================================================
-// REGISTER INLINE (LINE) PATTERNS
+// REGISTER INLINE PATTERNS
 // ============================================================
 
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks
 $texy->registerLinePattern(
-	'userInlineHandler',  // Handler function to call
+	function (Texy\Parsing\ParseContext $context, array $matches, string $name): PhraseNode {
+		[, $mContent, $mMod] = $matches;
+
+		// Parse the content recursively (allows nesting like *bold _and italic_ text*)
+		$content = $context->parseInline(trim($mContent));
+
+		return new PhraseNode(
+			$content,
+			PhraseType::Strong,
+			Modifier::parse($mMod),
+			$name, // 'myInlineSyntax1' or 'myInlineSyntax2'
+		);
+	},
 	'~
 		(?<! \* ) \* (?! [ *] )
 		(.+)
 		' . Texy\Patterns::MODIFIER . '?
 		(?<! [ *] ) \* (?! \* )
-	~U', // regular expression
+	~Ux', // regular expression
 	'myInlineSyntax1', // Unique name for this syntax
 );
 
 // Add new syntax: _italic_
 $texy->registerLinePattern(
-	'userInlineHandler',                      // Same handler, different name
+	function (Texy\Parsing\ParseContext $context, array $matches, string $name): PhraseNode {
+		[, $mContent, $mMod] = $matches;
+
+		$content = $context->parseInline(trim($mContent));
+
+		return new PhraseNode(
+			$content,
+			PhraseType::Emphasis,
+			Modifier::parse($mMod),
+			$name,
+		);
+	},
 	'~
 		(?<! _ ) _ (?! [ _] )
 		(.+)
 		' . Texy\Patterns::MODIFIER . '?
 		(?<! [ _] ) _ (?! _ )
-	~U',
+	~Ux',
 	'myInlineSyntax2',
 );
 
@@ -80,77 +105,78 @@ $texy->registerLinePattern(
 // Add new syntax: .tagname followed by content on next line
 // Examples: .h1, .h2, .perex, etc.
 $texy->registerBlockPattern(
-	'userBlockHandler',
+	function (Texy\Parsing\ParseContext $context, array $matches): ParagraphNode {
+		[, $mTag, $mText] = $matches;
+
+		// Parse the content with inline parser
+		$content = $context->parseInline($mText);
+
+		// Create a paragraph node with modifier containing our tag info
+		$modifier = new Modifier;
+		$modifier->attrs['data-tag'] = $mTag;
+
+		return new ParagraphNode($content, $modifier);
+	},
 	'~^
 		\. ([a-z0-9]+) \n
 		(.+)
-	$~m', // Match .tagname\ncontent
+	$~x', // Match .tagname\ncontent
 	'myBlockSyntax1',
 );
 
 
-/**
- * Handler for our inline syntax (*bold* and _italic_)
- *
- * @param Texy\LineParser $parser  The parser instance
- * @param array $matches           Regex matches [full, content, modifier]
- * @param string $name             Which syntax matched (myInlineSyntax1 or 2)
- */
-function userInlineHandler(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string
-{
-	[, $mContent, $mMod] = $matches;
+// ============================================================
+// REGISTER HTML HANDLERS FOR CUSTOM NODE TYPES
+// ============================================================
 
-	$texy = $parser->getTexy();
+// Handler for our custom phrase types (myInlineSyntax1 and myInlineSyntax2)
+$texy->htmlOutput->addRenderer(
+	function (PhraseNode $node, Html\Renderer $gen): ?Html\Element {
+		// Only handle phrases written in our custom syntaxes
+		if ($node->syntax !== 'myInlineSyntax1' && $node->syntax !== 'myInlineSyntax2') {
+			return null; // Let default handler process it
+		}
 
-	// Decide which tag to use based on which syntax matched
-	$tag = $name === 'myInlineSyntax1' ? 'b' : 'i';
-	$el = new Texy\HtmlElement($tag);
+		// Decide which tag to use based on which syntax matched
+		$tag = $node->syntax === 'myInlineSyntax1' ? 'b' : 'i';
+		$el = new Html\Element($tag);
 
-	// If a modifier was used (like *text*.[class]), apply it
-	$mod = new Texy\Modifier($mMod);
-	$mod->decorate($texy, $el);
+		// If a modifier was used (like *text*.[class]), apply it
+		$gen->decorateElement($node->modifier, $el);
 
-	// Add our own class to all elements
-	$el->attrs['class'] = 'myclass';
+		// Add our own class to all elements
+		$el->addClass('myclass');
 
-	// Set the text content
-	$el->setText($mContent);
+		// Generate content
+		$el->children = $gen->renderNodes($node->content->children);
 
-	// IMPORTANT: Tell Texy to look for more patterns inside this element
-	// This allows nesting like *bold _and italic_ text*
-	$parser->again = true;
+		return $el;
+	},
+);
 
-	return $el;
-}
+// Handler for our custom block syntax
+$texy->htmlOutput->addRenderer(
+	function (ParagraphNode $node, Html\Renderer $gen): ?Html\Element {
+		// Only handle paragraphs with our data-tag attribute
+		$tag = $node->modifier?->attrs['data-tag'] ?? null;
+		if ($tag === null) {
+			return null; // Let default handler process it
+		}
 
+		// Handle special case: .perex creates a <div class="perex">
+		if ($tag === 'perex') {
+			$el = new Html\Element('div')->addClass('perex');
+		} else {
+			// Otherwise, use the tag name directly (.h1 → <h1>)
+			$el = new Html\Element($tag);
+		}
 
-/**
- * Handler for our block syntax (.h1, .perex, etc.)
- *
- * @param BlockParser $parser  The parser instance
- * @param array $matches            Regex matches [full, tagname, content]
- * @param string $name              Syntax name (myBlockSyntax1)
- */
-function userBlockHandler(BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
-{
-	[, $mTag, $mText] = $matches;
+		// Generate content
+		$el->children = $gen->renderNodes($node->content->children);
 
-	$texy = $parser->getTexy();
-
-	// Handle special case: .perex creates a <div class="perex">
-	if ($mTag === 'perex') {
-		$el = new Texy\HtmlElement('div');
-		$el->attrs['class'][] = 'perex';
-	} else {
-		// Otherwise, use the tag name directly (.h1 ? <h1>)
-		$el = new Texy\HtmlElement($mTag);
-	}
-
-	// Parse the content with Texy (allows inline formatting inside)
-	$el->parseLine($texy, $mText);
-
-	return $el;
-}
+		return $el;
+	},
+);
 
 
 // Process the text

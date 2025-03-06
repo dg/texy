@@ -15,9 +15,6 @@ fileExtensions:
 
 imports: {grouping: {class: grouped}}
 
-# the package uses its own deprecated API, which the attribute would report
-upgrading: {phpdoc: {deprecated: keep}}
-
 overrides:
 	-
 		paths: [src]
@@ -27,26 +24,13 @@ overrides:
 			- deprecations
 
 	- # the public constants and properties of the 3.x API keep their names
-		paths:
-			- src/Image.php
-			- src/Link.php
-			- src/Modules/HeadingModule.php
-			- src/Patterns.php
-			- src/Texy.php
+		paths: [src/Modules/HeadingModule.php, src/Patterns.php, src/Texy.php]
 		naming: {constant: keep, property: keep}
 
 	- # renaming the parameters $URL would break calls naming them
-		paths: [src/Helpers.php, src/Link.php, src/Texy.php]
+		paths: [src/Helpers.php]
 		naming: {variable: keep}
 
-	- # renaming the parameters would break calls naming index: or child:
-		paths: [src/HtmlElement.php]
-		classes: {overridingMethod: {parameterName: keep}}
-
 	- # the package keeps its own deprecated API working, so it uses it
-		paths:
-			- src/Modifier.php
-			- src/Modules/ImageModule.php
-			- src/Modules/LinkReferenceModule.php
-			- src/Modules/TableModule.php
+		paths: [src/Texy.php]
 		upgrading: {declarations: {deprecatedMember: keep}}

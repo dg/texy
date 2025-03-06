@@ -8,8 +8,10 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{HandlerInvocation, Helpers, Link, Patterns, Regexp};
-use Texy\Parsing\InlineParser;
+use Texy\Nodes\{EmailNode, UrlNode};
+use Texy\Output\Html;
+use Texy\Parsing\ParseContext;
+use Texy\{Patterns, Syntax};
 
 
 /**
@@ -24,83 +26,73 @@ final class AutolinkModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('linkEmail', $this->solveUrlEmail(...));
-		$texy->addHandler('linkURL', $this->solveUrlEmail(...));
+		$texy->htmlOutput->addRenderer($this->renderUrl(...));
+		$texy->htmlOutput->addRenderer($this->renderEmail(...));
 	}
 
 
-	public function beforeParse(string &$text): void
+	public function beforeParse(): void
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
-		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
+		$this->texy->addInline(
+			Syntax::AutolinkUrl,
 			'~
-				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
+				(?<= ^ | [\s([<:>] )               # must be preceded by these chars, > ends a tag
 				(?: https?:// | www\. | ftp:// )   # protocol or www
 				[0-9.' . Patterns::CHAR . '-]      # first char
 				[/\d' . Patterns::CHAR . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
 				[/\d' . Patterns::CHAR . '+\~?@=_#$*]  # last char
 			~x',
-			'link/url',
-			'~(?: https?:// | www\. | ftp://)~x',
+			$this->parseUrl(...),
 		);
 
 		// direct email
-		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
+		$this->texy->addInline(
+			Syntax::AutolinkEmail,
 			'~
-				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
+				(?<= ^ | [\s([<>] )                 # must be preceded by these chars, > ends a tag
 				' . Patterns::Email . '
 			~x',
-			'link/email',
-			'~' . Patterns::Email . '~',
+			$this->parseEmail(...),
 		);
 	}
 
 
-	/**
-	 * Parses http://davidgrudl.com david@grudl.com
-	 * @param  array<?string>  $matches
-	 */
-	public function parseUrlEmail(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+	/** @param  array{string}  $matches */
+	public function parseUrl(ParseContext $context, array $matches): UrlNode
 	{
-		/** @var array{string} $matches */
-		[$mURL] = $matches;
-		// [0] => URL
-
-		$link = new Link($mURL);
-		$this->texy->linkModule->checkLink($link);
-
-		return $this->texy->invokeAroundHandlers(
-			$name === 'link/email' ? 'linkEmail' : 'linkURL',
-			$parser,
-			[$link],
-		);
+		return new UrlNode(Texy\Helpers::decodeEntities($matches[0]));
 	}
 
 
-	/**
-	 * Handler for URL/email - creates textual content and link element.
-	 */
-	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string|null
+	/** @param  array{string}  $matches */
+	public function parseEmail(ParseContext $context, array $matches): EmailNode
 	{
-		$content = $this->textualUrl($link);
-		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
-		return $this->texy->linkModule->solve(null, $link, $content);
+		return new EmailNode(Texy\Helpers::decodeEntities($matches[0]));
 	}
 
 
-	/**
-	 * Returns textual representation of URL.
-	 */
-	public function textualUrl(Link $link): string
+	public function renderUrl(UrlNode $node, Html\Renderer $renderer): Html\Element
 	{
-		if ($this->texy->obfuscateEmail && Regexp::match($link->raw, '~^' . Patterns::Email . '$~')) { // email
-			return str_replace('@', '&#64;<!-- -->', $link->raw);
-		} elseif ($this->shorten && Regexp::match($link->raw, '~^(https?://|ftp://|www\.|/)~i')) {
-			return Helpers::shortenUrl($link->raw);
+		$url = Texy\Helpers::normalizeWww($node->url);
+
+		$el = new Html\Element('a', ['href' => $url]);
+		if ($this->texy->linkModule->forceNoFollow && str_contains($url, '//')) {
+			$el->attrs['rel'] = 'nofollow';
 		}
 
-		return $link->raw;
+		// Protect URL text from typography/longwords processing
+		$textualUrl = $this->shorten ? Texy\Helpers::shortenUrl($node->url) : $node->url;
+		return $el->add($renderer->protect($textualUrl, $renderer::ContentTextual));
+	}
+
+
+	public function renderEmail(EmailNode $node, Html\Renderer $renderer): Html\Element
+	{
+		$el = new Html\Element('a', ['href' => 'mailto:' . $node->email]);
+		$text = $this->texy->obfuscateEmail
+			? $renderer->protect(str_replace('@', '&#64;<!-- -->', $node->email), $renderer::ContentTextual)
+			: $node->email;
+		return $el->add($text);
 	}
 }

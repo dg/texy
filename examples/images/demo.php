@@ -10,62 +10,56 @@
  * - Transform special image names (like "user" -> "profile.jpg")
  *
  * WHAT YOU'LL LEARN:
- * - How to intercept and modify images using a handler
+ * - How to define images by name, as a CMS would
+ * - How to modify the HTML of images using an HTML handler
  * - How to set image folder paths
- * - How to add CSS classes for left/right aligned images
- * - How to set a default alt text
- * - How to get a list of all images used in the document
+ * - How to add CSS classes for left/right floated images
  *
  * TEXY IMAGE SYNTAX:
  * [* image.gif *]           - simple image
  * [* image.gif *]:link.html - image as a link
- * [*< image.gif *]          - left-aligned image
- * [*> image.gif *]          - right-aligned image
+ * [* image.gif *]::         - image linking to itself
+ * [* image.gif <]           - left-floated image
+ * [* image.gif >]           - right-floated image
  */
 
+use Texy\Nodes\ImageNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Custom handler for images
- *
- * This handler intercepts the special image name "user" and transforms it
- * into an actual image file. This allows you to use shortcut names in your
- * Texy text that get expanded to real paths.
- */
-function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null): Texy\HtmlElement|string|null
-{
-	// Check if the image URL is our special keyword "user"
-	if ($image->URL === 'user') {
-		// Transform it to an actual image file
-		$image->URL = 'image.gif';
-		$image->modifier->title = 'Texy! logo';
-
-		// If the image is a link, set the link destination too
-		if ($link) {
-			$link->URL = 'big.gif';
-		}
-	}
-
-	// Let Texy continue with the (possibly modified) image
-	return $invocation->proceed($image, $link);
-}
-
-
-$texy = new Texy;
-
-// Register our custom image handler
-$texy->addHandler('image', 'imageHandler');
+$texy = new Texy\Texy;
 
 // Configure image paths
 $texy->imageModule->root = 'imagesdir/';  // Base folder for images
 
-// CSS classes for aligned images
-$texy->imageModule->leftClass = 'my-left-class';   // Class for [*< ... *] (left-aligned)
-$texy->imageModule->rightClass = 'my-right-class'; // Class for [*> ... *] (right-aligned)
+// CSS classes for floated images
+$texy->imageModule->leftClass = 'my-left-class';   // Class for [* ... <] (left-floated)
+$texy->imageModule->rightClass = 'my-right-class'; // Class for [* ... >] (right-floated)
+
+
+// The special keyword "user" stands for an actual image file with its alternative text,
+// both in [* user *] and in the link of [* user *]::
+$texy->imageModule->addDefinition('user', 'image.gif', alt: 'Texy! logo');
+
+
+// Register our custom image handler
+// The first parameter type (ImageNode) determines which node class the handler processes
+$texy->htmlOutput->addRenderer(
+	function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|string|null {
+		// Call the previous handler (default or another custom one) to build the image
+		$el = $previous ? $previous($node) : null;
+
+		// and add an attribute to the <img> it has built
+		if ($el instanceof Html\Element && $el->name === 'img') {
+			$el->attrs['loading'] = 'lazy';
+		}
+		return $el;
+	},
+);
 
 
 // Process the text

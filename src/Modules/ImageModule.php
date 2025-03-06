@@ -8,12 +8,15 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Helpers, Image, Patterns};
-use function count, is_int;
+use Texy\{Helpers, Modifier, Node, NodeTraverser, Patterns, Regexp, Syntax, TraverseAction};
+use Texy\Nodes\{ContentNode, DocumentNode, ImageDefinitionNode, ImageNode, LinkNode};
+use Texy\Output\Html;
+use Texy\Parsing\ParseContext;
+use function array_key_exists, count, in_array, is_array;
 
 
 /**
- * Processes image syntax and detects image dimensions.
+ * Processes image syntax.
  */
 final class ImageModule extends Texy\Module
 {
@@ -29,23 +32,29 @@ final class ImageModule extends Texy\Module
 	/** right-floated images CSS class */
 	public ?string $rightClass = null;
 
-	/** @var array<string, Image> image references */
-	private array $references = [];
+	/** @var array<string, ImageDefinitionNode> collected image definitions */
+	private array $definitions = [];
+
+	/** @var array<string, ImageDefinitionNode> user-defined definitions (persist across process() calls) */
+	private array $userDefinitions = [];
+
+	/** @var array<string, array{int, int}|null>  getimagesize() results cached per file path */
+	private array $sizes = [];
 
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['image/definition'] = true;
-		$texy->addHandler('image', $this->solve(...));
+		$texy->htmlOutput->addRenderer($this->render(...));
+		$texy->htmlOutput->addRenderer(fn(ImageDefinitionNode $node) => '');
 	}
 
 
-	public function beforeParse(string &$text): void
+	public function beforeParse(): void
 	{
 		// [*image*]:LINK
-		$this->texy->registerLinePattern(
-			$this->parseImage(...),
+		$this->texy->addInline(
+			Syntax::Image,
 			'~
 				\[\* \ *+                         # opening bracket with asterisk
 				([^\n' . Patterns::MARK . ']{1,1000}) # URLs (1)
@@ -57,76 +66,146 @@ final class ImageModule extends Texy\Module
 					:(' . Patterns::LINK_URL . ' | : ) # link or just colon (4)
 				)??
 			~Ux',
-			'image',
+			$this->parseImage(...),
 		);
 
-		if (!empty($this->texy->allowed['image/definition'])) {
-			// [*image*]: urls .(title)[class]{style}
-			$text = Texy\Regexp::replace(
-				$text,
-				'~^
-					\[\*                              # opening [*
-					( [^\n]{1,100} )                  # reference (1)
-					\*]                               # closing *]
-					: [ \t]+
-					(.{1,1000})                       # URL (2)
-					[ \t]*
-					' . Patterns::MODIFIER . '?       # modifier (3)
-					\s*
-				$~mUx',
-				$this->parseDefinition(...),
-			);
-		}
+		// [*ref*]: url .(title)[class]{style}
+		$this->texy->addBlock(
+			Syntax::ImageDefinition,
+			'~^
+				\[\*                              # opening [*
+				( [^\n]{1,100} )                  # reference (1)
+				\*]                               # closing *]
+				: [ \t]+
+				(.{1,1000})                       # URL (2)
+				[ \t]*
+				' . Patterns::MODIFIER . '?       # modifier (3)
+				\s*
+			$~mUx',
+			$this->parseDefinition(...),
+		);
 	}
 
 
 	/**
 	 * Parses [*image*]: urls .(title)[class]{style}
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, string, ?string}  $matches
 	 */
-	private function parseDefinition(array $matches): string
+	public function parseDefinition(ParseContext $context, array $matches): ImageDefinitionNode
 	{
-		/** @var array{string, string, string, ?string} $matches */
 		[, $mRef, $mURLs, $mMod] = $matches;
-		// [1] => [* (reference) *]
-		// [2] => urls
-		// [3] => .(title)[class]{style}<>
+		$parsed = $this->parseImageContent($mURLs);
+		$modifier = Modifier::parse($mMod);
 
-		$image = $this->factoryImage($mURLs, $mMod, tryRef: false);
-		$image->name = Helpers::toLower($mRef);
-		$this->references[$image->name] = $image;
-		return '';
+		return new ImageDefinitionNode(
+			trim($mRef),
+			$parsed['url'],
+			self::takeAlt($modifier),
+			$parsed['width'],
+			$parsed['height'],
+			$modifier,
+		);
 	}
 
 
 	/**
 	 * Parses [* small.jpg 80x13 .(alternative text)[class]{style}>]:LINK
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, ?string, string, ?string}  $matches
 	 */
-	public function parseImage(Texy\Parsing\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseImage(ParseContext $context, array $matches): ImageNode|LinkNode
 	{
-		/** @var array{string, string, ?string, string, ?string} $matches */
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
-		// [1] => URLs
-		// [2] => .(title)[class]{style}<>
-		// [3] => * < >
-		// [4] => url | [ref] | [*image*]
+		$imageNode = $this->createImage($mURLs, $mMod . $mAlign);
+		return $mLink
+			? $this->wrapInLink($imageNode, $mLink)
+			: $imageNode;
+	}
 
-		$image = $this->factoryImage($mURLs, $mMod . $mAlign);
 
-		if ($mLink) {
-			if ($mLink === ':') {
-				$link = new Texy\Link($image->linkedURL ?? $image->URL);
-				$link->raw = ':';
-				$link->type = $link::IMAGE;
-			} else {
-				$link = $this->texy->linkModule->factoryLink($mLink, null, null);
-			}
-		} else {
-			$link = null;
+	/**
+	 * Creates the image written as [* $mURLs $mMod *].
+	 */
+	private function createImage(string $mURLs, string $mMod): ImageNode
+	{
+		$parsed = $this->parseImageContent($mURLs);
+		$modifier = Modifier::parse($mMod);
+		$float = $modifier !== null && in_array($modifier->hAlign, ['left', 'right'], true) ? $modifier->hAlign : null;
+		if ($float !== null) {
+			$modifier->hAlign = null;
 		}
 
-		return $this->texy->invokeAroundHandlers('image', $parser, [$image, $link]);
+		return new ImageNode(
+			$parsed['url'],
+			self::takeAlt($modifier),
+			$parsed['width'],
+			$parsed['height'],
+			$float,
+			$modifier,
+		);
+	}
+
+
+	/**
+	 * Takes the alternative text out of the modifier, which writes it as .(text); {alt: text} wins.
+	 */
+	private static function takeAlt(?Modifier $modifier): ?string
+	{
+		if ($modifier === null) {
+			return null;
+		}
+
+		$alt = $modifier->attrs['alt'] ?? $modifier->title;
+		unset($modifier->attrs['alt']);
+		$modifier->title = null;
+		return is_array($alt) ? implode(' ', $alt) : $alt;
+	}
+
+
+	/** Wraps the image in the link written after it. */
+	private function wrapInLink(ImageNode $imageNode, string $mLink): LinkNode
+	{
+		// ':' links to the image itself; a reference like [ref] or [*img*] is recognized by LinkReferenceModule
+		$isSelf = $mLink === ':';
+		return new LinkNode(
+			url: $isSelf ? $imageNode->url : Helpers::decodeEntities($mLink),
+			content: new ContentNode([$imageNode]),
+			isImageLink: $isSelf,
+		);
+	}
+
+
+	/**
+	 * Parse image content: "image.jpg 100x200"
+	 * @return array{url: string, width: ?int, height: ?int}
+	 */
+	public function parseImageContent(string $content): array
+	{
+		$parts = explode('|', $content);
+		$main = trim($parts[0]);
+
+		if (count($parts) > 1) {
+			trigger_error(
+				"Image syntax with '|' or '||' inside brackets is deprecated. Use [* image *]:url for linked images.",
+				E_USER_DEPRECATED,
+			);
+		}
+
+		$url = Helpers::decodeEntities($main);
+		$width = $height = null;
+
+		// Parse dimensions: "image.jpg 100x200" or "image.jpg 100X200" (asMax)
+		if ($m = Regexp::match($main, '~^(.*)\ (\d+|\?)\ *[xX]\ *(\d+|\?)\ *$~U')) {
+			/** @var array{string, string, string, string} $m */
+			$url = trim($m[1]);
+			$width = $m[2] === '?' ? null : (int) $m[2];
+			$height = $m[3] === '?' ? null : (int) $m[3];
+		}
+
+		return [
+			'url' => $url,
+			'width' => $width,
+			'height' => $height,
+		];
 	}
 
 
@@ -141,166 +220,150 @@ final class ImageModule extends Texy\Module
 		?string $alt = null,
 	): void
 	{
-		$image = new Image;
-		$image->URL = $url;
-		$image->width = $width;
-		$image->height = $height;
-		if ($alt !== null) {
-			$image->modifier->title = $alt;
-		}
-		$image->name = Helpers::toLower($name);
-		$this->references[$image->name] = $image;
+		$this->userDefinitions[Helpers::toLower($name)] = new ImageDefinitionNode($name, $url, $alt, $width, $height);
 	}
 
 
 	/**
-	 * Returns named reference.
+	 * Resolve image references in the document.
 	 */
-	public function getReference(string $name): ?Image
+	public function resolveReferences(DocumentNode $doc): void
 	{
-		$name = Helpers::toLower($name);
-		if (isset($this->references[$name])) {
-			return clone $this->references[$name];
+		// Start with user-defined definitions
+		$this->definitions = $this->userDefinitions;
+
+		// Pass 1: Collect document definitions (overwrites user-defined)
+		foreach ($doc->find(ImageDefinitionNode::class) as $node) {
+			$this->definitions[Helpers::toLower($node->reference)] = $node;
 		}
 
-		return null;
-	}
+		// Pass 2: Resolve ImageNode references (NodeTraverser visits all nodes including FigureNode.image)
+		(new NodeTraverser)->traverse($doc, function (Node $node): ?TraverseAction {
+			if ($node instanceof ImageNode) {
+				$this->resolveImageNode($node);
+			} elseif (
+				$node instanceof LinkNode
+				&& ($imageNode = $node->content->children[0] ?? null) instanceof ImageNode
+			) {
+				// LinkNode wrapping ImageNode - resolve image and possibly the link URL
+				$imageKey = $imageNode->url !== null ? Helpers::toLower(trim($imageNode->url)) : null;
+				$linkKey = $node->url !== null ? Helpers::toLower(trim($node->url)) : null;
 
+				// Resolve the image
+				$this->resolveImageNode($imageNode);
 
-	/**
-	 * Parses image's syntax. Input: small.jpg 80x13
-	 */
-	public function factoryImage(string $content, ?string $mod, bool $tryRef = true): Image
-	{
-		$image = $tryRef ? $this->getReference(trim($content)) : null;
-
-		if (!$image) {
-			$texy = $this->texy;
-			$parts = explode('|', $content);
-			$image = new Image;
-
-			if (count($parts) > 1) {
-				trigger_error(
-					"Image syntax with '|' or '||' inside brackets is deprecated. Use [* image *]:url for linked images.",
-					E_USER_DEPRECATED,
-				);
+				// If link URL matches the original image reference (from :: syntax), resolve it too
+				if ($imageKey !== null && $linkKey === $imageKey && isset($this->definitions[$imageKey])) {
+					$node->url = $this->definitions[$imageKey]->url;
+				}
 			}
-
-			// dimensions
-			if ($matches = Texy\Regexp::match($parts[0], '~^(.*)\ (\d+|\?)\ *([Xx])\ *(\d+|\?)\ *$~U')) {
-				/** @var array{string, string, string, string, string} $matches */
-				$image->URL = trim($matches[1]);
-				$image->asMax = $matches[3] === 'X';
-				$image->width = $matches[2] === '?' ? null : (int) $matches[2];
-				$image->height = $matches[4] === '?' ? null : (int) $matches[4];
-			} else {
-				$image->URL = trim($parts[0]);
-			}
-
-			if (!$texy->checkURL($image->URL, $texy::FILTER_IMAGE)) {
-				$image->URL = null;
-			}
-		}
-
-		$image->modifier->setProperties($mod);
-		return $image;
-	}
-
-
-	/**
-	 * Finish invocation.
-	 */
-	public function solve(
-		?Texy\HandlerInvocation $invocation,
-		Image $image,
-		?Texy\Link $link = null,
-	): Texy\HtmlElement|string|null
-	{
-		if ($image->URL === null) {
 			return null;
+		});
+	}
+
+
+	private function resolveImageNode(ImageNode $node): void
+	{
+		if ($node->url === null) {
+			return;
 		}
 
-		$texy = $this->texy;
-
-		$mod = $image->modifier;
-		$alt = $mod->title;
-		$mod->title = null;
-		$hAlign = $mod->hAlign;
-		$mod->hAlign = null;
-
-		$el = new Texy\HtmlElement('img');
-		$el->attrs['src'] = null; // trick - move to front
-		$mod->decorate($texy, $el);
-		$el->attrs['src'] = Helpers::prependRoot($image->URL, $this->root);
-		if (!isset($el->attrs['alt'])) {
-			$el->attrs['alt'] = $alt === null ? '' : $texy->typographyModule->postLine($alt);
+		$key = Helpers::toLower(trim($node->url));
+		if (!isset($this->definitions[$key])) {
+			return;
 		}
 
-		if ($hAlign) {
-			$var = $hAlign . 'Class'; // leftClass, rightClass
-			if (!empty($this->$var)) {
-				settype($el->attrs['class'], 'array');
-				$el->attrs['class'][] = $this->$var;
+		$def = $this->definitions[$key];
 
-			} elseif (empty($texy->alignClasses[$hAlign])) {
-				settype($el->attrs['style'], 'array');
-				$el->attrs['style']['float'] = $hAlign;
+		$node->ref = trim($node->url); // keep the written reference name for analyzers
+		$node->url = $def->url;
+		$node->alt ??= $def->alt;
+		$node->width ??= $def->width;
+		$node->height ??= $def->height;
 
-			} else {
-				settype($el->attrs['class'], 'array');
-				$el->attrs['class'][] = $texy->alignClasses[$hAlign];
-			}
+		// Use modifier from definition if node doesn't have one
+		if ($def->modifier && !$node->modifier) {
+			$node->modifier = clone $def->modifier;
+		}
+	}
+
+
+	/**
+	 * Get image definition by name (for LinkReferenceModule to resolve [*img*] links).
+	 */
+	public function getDefinition(string $name): ?ImageDefinitionNode
+	{
+		return $this->definitions[Helpers::toLower($name)] ?? null;
+	}
+
+
+	public function render(ImageNode $node, Html\Renderer $renderer): Html\Element
+	{
+		// Check URL scheme (security - filter dangerous schemes like javascript:)
+		if ($node->url === null || !$this->texy->checkURL($node->url, Texy\Texy::FILTER_IMAGE)) {
+			// URL is missing or fails scheme filter, return just the alternative text
+			return $renderer->wrapChildren([$node->alt ?? '']);
 		}
 
-		if (!is_int($image->width) || !is_int($image->height) || $image->asMax) {
-			$this->detectDimensions($image);
-		}
+		// Detect dimensions from file system
+		[$width, $height] = $this->detectDimensions($node);
 
-		$el->attrs['width'] = $image->width;
-		$el->attrs['height'] = $image->height;
+		$el = new Html\Element('img');
+		$renderer->decorateElement($node->modifier, $el);
+		$el->attrs = [
+			'src' => Helpers::prependRoot($node->url, $this->root),
+			'alt' => $renderer->postLineText($node->alt ?? ''),
+		] + $el->attrs;
+		$renderer->applyFloat($el, $node->float);
 
-		if ($link) {
-			return $texy->linkModule->solve(null, $link, $el);
-		}
+		// dimensions
+		$el->attrs['width'] = $width;
+		$el->attrs['height'] = $height;
 
 		return $el;
 	}
 
 
-	private function detectDimensions(Image $image): void
+	/**
+	 * Detects image dimensions from file system. Does not modify the node.
+	 * @return array{?int, ?int}  [width, height]
+	 */
+	private function detectDimensions(ImageNode $node): array
 	{
-		// absolute URL & security check for double dot
-		if ($image->URL === null || !Helpers::isRelative($image->URL) || str_contains($image->URL, '..')) {
-			return;
+		$width = $node->width;
+		$height = $node->height;
+
+		if (
+			$node->url === null || !Helpers::isRelative($node->url) || str_contains($node->url, '..')
+			|| ($directory = $this->fileRoot) === null
+			|| !($size = $this->getSize(rtrim($directory, '/\\') . '/' . $node->url))
+		) {
+			return [$width, $height];
 		}
 
-		$file = rtrim((string) $this->fileRoot, '/\\') . '/' . $image->URL;
-		if (!@is_file($file) || !($size = @getimagesize($file))) { // @ the path may be outside open_basedir, the image unreadable
-			return;
+		if ($width === null && $height === null) {
+			[$width, $height] = $size;
+		} elseif ($height === null) {
+			$height = (int) round($size[1] / $size[0] * $width);
+		} elseif ($width === null) {
+			$width = (int) round($size[0] / $size[1] * $height);
 		}
 
-		if ($image->asMax) {
-			$ratio = 1;
-			if (is_int($image->width)) {
-				$ratio = min($ratio, $image->width / $size[0]);
-			}
+		return [$width, $height];
+	}
 
-			if (is_int($image->height)) {
-				$ratio = min($ratio, $image->height / $size[1]);
-			}
 
-			$image->width = (int) round($ratio * $size[0]);
-			$image->height = (int) round($ratio * $size[1]);
-
-		} elseif (is_int($image->width)) {
-			$image->height = (int) round($size[1] / $size[0] * $image->width);
-
-		} elseif (is_int($image->height)) {
-			$image->width = (int) round($size[0] / $size[1] * $image->height);
-
-		} else {
-			$image->width = $size[0];
-			$image->height = $size[1];
+	/**
+	 * Returns [width, height] of an image file, cached.
+	 * @return array{int, int}|null
+	 */
+	private function getSize(string $file): ?array
+	{
+		if (!array_key_exists($file, $this->sizes)) {
+			$size = @is_file($file) ? @getimagesize($file) : false; // @ the path may be outside open_basedir, the image unreadable
+			$this->sizes[$file] = $size ? [$size[0], $size[1]] : null;
 		}
+
+		return $this->sizes[$file];
 	}
 }

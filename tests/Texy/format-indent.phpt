@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('output indentation', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlOutputModule->baseIndent = 1;
+	$texy->htmlOutput->baseIndent = 1;
 
 	Assert::matchFile(
 		__DIR__ . '/expected/formatter-indent.html',

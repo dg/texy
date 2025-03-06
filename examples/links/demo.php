@@ -10,65 +10,53 @@
  * - Add tracking parameters to external links
  *
  * WHAT YOU'LL LEARN:
- * - How to intercept and modify links using a handler
+ * - How to change the document in a transform pass
+ * - How to find all links of the document
  * - How to detect relative vs. absolute URLs
  * - How to handle custom URL schemes
- * - How to get a list of all links in the document
+ *
+ * Where a link points is the meaning of the document, not its look, so it is changed
+ * in a pass rather than in a renderer: every output then
+ * gets the new URL, and the renderer of links stays the default one.
  *
  * TEXY LINK SYNTAX:
  * "link text":url           - basic link
- * "link text":relative-page - relative link (transformed by our handler)
- * "link text":wiki:topic    - custom scheme (transformed to Wikipedia)
+ * "link text":relative-page - relative link (transformed by our pass)
+ * "link text":[wiki:topic]  - custom scheme (transformed to Wikipedia)
  */
 
+use Texy\Helpers;
+use Texy\Nodes\{DocumentNode, LinkNode};
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Custom handler for links
- *
- * This handler transforms links based on their URL:
- * - Relative links (like "page-name") become "index?page=page-name"
- * - Links starting with "wiki:" become Wikipedia search URLs
- */
-function phraseHandler(
-	Texy\HandlerInvocation $invocation,
-	$phrase,
-	$content,
-	Texy\Modifier $modifier,
-	?Texy\Link $link = null,
-): Texy\HtmlElement|string|null
+$texy = new Texy\Texy;
+
+
+// The pass runs in transform(), after references like [wiki:topic] are resolved
+$texy->addHandler(function (DocumentNode $document): void {
+	foreach ($document->find(LinkNode::class, fn(LinkNode $link) => $link->url !== null) as $link) {
+		$link->url = rewriteUrl($link->url);
+	}
+});
+
+
+function rewriteUrl(string $url): string
 {
-	// Only process if there's actually a link
-	if (!$link) {
-		return $invocation->proceed();
-	}
-
-	// Check if this is a relative link (doesn't contain "://")
-	if (Texy\Helpers::isRelative($link->URL)) {
-		// Transform relative links to your CMS URL format
-		// "my-page" becomes "index?page=my-page"
-		$link->URL = 'index?page=' . urlencode($link->URL);
-
-	} elseif (str_starts_with($link->URL, 'wiki:')) {
-		// Handle our custom "wiki:" URL scheme
+	if (str_starts_with($url, 'wiki:')) {
 		// "wiki:texy" becomes a Wikipedia search link
-		$searchTerm = substr($link->URL, 5);  // Remove "wiki:" prefix
-		$link->URL = 'https://en.wikipedia.org/wiki/Special:Search?search=' . urlencode($searchTerm);
+		return 'https://en.wikipedia.org/wiki/Special:Search?search=' . urlencode(substr($url, 5));
+
+	} elseif (Helpers::isRelative($url)) {
+		// "my-page" becomes "index?page=my-page", the URL format of your CMS
+		return 'index?page=' . urlencode($url);
 	}
 
-	// Continue processing with the modified link
-	return $invocation->proceed();
+	return $url;
 }
-
-
-$texy = new Texy;
-
-// Register our custom link handler
-$texy->addHandler('phrase', 'phraseHandler');
 
 
 // Process the text

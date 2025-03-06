@@ -7,8 +7,8 @@
  * using the FSHL library.
  *
  * WHAT YOU'LL LEARN:
- * - How to intercept code blocks using a handler
- * - How to detect the programming language from the block type
+ * - How to intercept code blocks using an HTML handler
+ * - How to detect the programming language from the node
  * - How to integrate a syntax highlighting library
  *
  * TEXY CODE BLOCK SYNTAX:
@@ -22,6 +22,8 @@
  * Install FSHL: composer require kukulich/fshl
  */
 
+use Texy\Nodes\CodeBlockNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -32,74 +34,59 @@ if (@!include __DIR__ . '/vendor/autoload.php') { // @ dependencies may not be i
 }
 
 
-/**
- * Custom handler for code blocks
- *
- * This handler intercepts /--code blocks and applies syntax highlighting
- * based on the specified language.
- */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): ?Texy\HtmlElement
-{
-	// Only handle code blocks, let other blocks pass through
-	if ($blocktype !== 'block/code') {
-		return $invocation->proceed();
-	}
-
-	// Map of supported languages to FSHL lexer classes
-	static $lexers = [
-		'html' => FSHL\Lexer\Html::class,
-		'javascript' => FSHL\Lexer\Javascript::class,
-		'php' => FSHL\Lexer\Php::class,
-		'sql' => FSHL\Lexer\Sql::class,
-	];
-
-	// If we don't support this language, skip highlighting
-	if (!isset($lexers[$lang])) {
-		return null;
-	}
-
-	$langClass = $lexers[$lang];
-	$texy = $invocation->getTexy();
-
-	// Remove common indentation from the code
-	$content = Texy\Helpers::outdent($content);
-
-	// Apply syntax highlighting
-	$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
-	$content = $fshl->highlight($content, new $langClass);
-
-	// Tell Texy not to process the highlighted HTML further
-	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
-
-	// Build the HTML structure: <pre class="php"><code>...</code></pre>
-	$elPre = new Texy\HtmlElement('pre');
-	if ($modifier) {
-		$modifier->decorate($texy, $elPre);
-	}
-	$elPre->attrs['class'] = strtolower($lang);
-
-	$elPre->create('code', $content);
-
-	return $elPre;
-}
-
-
-$texy = new Texy;
+$texy = new Texy\Texy;
 
 // Register our code block handler
-$texy->addHandler('block', 'blockHandler');
+// The first parameter type (CodeBlockNode) determines which node class the handler processes
+$texy->htmlOutput->addRenderer(
+	function (CodeBlockNode $node, Html\Renderer $gen): Html\Element|string|null {
+		// Map of supported languages to FSHL lexer classes
+		static $lexers = [
+			'html' => FSHL\Lexer\Html::class,
+			'javascript' => FSHL\Lexer\Javascript::class,
+			'php' => FSHL\Lexer\Php::class,
+			'sql' => FSHL\Lexer\Sql::class,
+		];
+
+		$lang = $node->language;
+
+		// If we don't support this language, delegate to default handler
+		if ($lang === null || !isset($lexers[$lang])) {
+			return null;
+		}
+
+		$langClass = $lexers[$lang];
+
+		// Apply syntax highlighting
+		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
+		$content = $fshl->highlight($node->code, new $langClass);
+
+		// Tell Texy not to process the highlighted HTML further
+		$content = $gen->protect($content, $gen::ContentBlock);
+
+		// Build the HTML structure: <pre class="php"><code>...</code></pre>
+		$elPre = new Html\Element('pre');
+		$gen->decorateElement($node->modifier, $elPre);
+		$elPre->addClass(strtolower($lang));
+
+		$elPre->create('code', $content);
+
+		return $elPre;
+	},
+);
 
 
 // Process the text
 $text = file_get_contents(__DIR__ . '/sample.texy');
-$html = $texy->process($text);
+$document = $texy->transform($texy->parse($text));
+$html = $texy->createHtmlRenderer()->render($document);
 
 
 // Display the result with stylesheets
 header('Content-type: text/html; charset=utf-8');
 echo '<link rel="stylesheet" href="style.css">';
 echo '<link rel="stylesheet" href="fshl.css">';
-echo '<title>' . $texy->headingModule->title . '</title>';
+echo '<title>' . ($document->getHeadings()[0] ?? null)?->getTitle() . '</title>';
 echo $html;
 
 

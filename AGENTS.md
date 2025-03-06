@@ -11,8 +11,8 @@ public manual is distilled.
 
 The core is non-trivial - a two-parser pipeline, a protection-mark hierarchy,
 chain-of-responsibility handlers, and content-model well-forming. Read the relevant
-`docs/` seam before editing. Note the internals describe the current
-**4.0-dev** line (still the two-parser design); the eventual AST rewrite will change most of it.
+`docs/` seam before editing. Note the internals still describe the string pipeline
+of Texy 3; the AST rewrite of the **4.0-dev** line replaced most of it.
 
 `docs/upgrading.md` records, per released version, every change visible to
 users of the package (renames, removals, deprecations, signatures, behavior,
@@ -34,9 +34,9 @@ with Latte.
 ```bash
 # Run all tests
 vendor/bin/tester tests -s        # or: composer tester
-vendor/bin/tester tests/Texy/blocks.phpt -s
+vendor/bin/tester tests/Texy/block.phpt -s
 
-# Static analysis (PHPStan level 5, informative)
+# Static analysis (PHPStan level 8)
 composer phpstan
 ```
 
@@ -69,6 +69,6 @@ composer phpstan
 - **Security: always run `Configurator::safeMode($texy)` for untrusted input** - it
   restricts HTML to a safe subset, disables classes/IDs/styles and images, filters
   URL schemes, and adds `rel="nofollow"`.
-- User- and extender-facing how-to (Texy syntax, configuration, custom handlers,
-  custom syntax registration, the modifier catalog) is manual material and lives in
-  the public web docs, not here.
+- User- and extender-facing reference (Texy syntax, configuration, custom handlers,
+  custom syntax registration, the modifier catalog) lives in `docs/` as well, indexed
+  by `docs/readme.md`; the public web manual is distilled from it.

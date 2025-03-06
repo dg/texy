@@ -11,12 +11,11 @@ require __DIR__ . '/../bootstrap.php';
 
 test('nontext paragraph', function () {
 	$texy = new Texy\Texy;
-	$texy->nontextParagraph = new Texy\HtmlElement('div', ['class' => 'figure']);
+	$texy->nontextParagraph = 'section';
+	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::match(
-		'<div class="note figure"><img src="images/image.gif" alt=""></div>',
-		$texy->process('
-[* image.gif *] .[note]
-'),
+		'<section class="n"><img src="images/a" alt=""> <img src="images/b" alt=""></section>',
+		$texy->process('[* a *] [* b *] .[n]'),
 	);
 });

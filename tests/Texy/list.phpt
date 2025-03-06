@@ -70,3 +70,58 @@ test('ordered list with letter bullets', function () {
 			XX),
 	);
 });
+
+
+test('a bullet opening an item is text, a nested list starts on the next line', function () {
+	$texy = new Texy\Texy;
+	Assert::same("<ul>\n\t<li>* enzym</li>\n\n\t<li>1) text</li>\n</ul>", trim($texy->process("- * enzym\n- 1) text")));
+	Assert::same("<ol>\n\t<li>– 3.\u{A0}září</li>\n\n\t<li>text</li>\n</ol>", trim($texy->process("1. – 3. září\n2. text")));
+	Assert::same("<ul>\n\t<li>a\n\t\t<ul>\n\t\t\t<li>b</li>\n\t\t</ul>\n\t</li>\n</ul>", trim($texy->process("- a\n  * b")));
+});
+
+
+test('a description has no <p> around its opening paragraph, like an item', function () {
+	$texy = new Texy\Texy;
+	Assert::same(
+		"<dl>\n\t<dt>Term</dt>\n\n\t<dd>a\n\t\t<p>b</p>\n\t</dd>\n</dl>",
+		trim($texy->process("Term:\n  - a\n\n    b")),
+	);
+});
+
+
+test('a lone image is not wrapped in a figure inside an item', function () {
+	// the item is a block container itself, so the wrapper would add nothing
+	$texy = new Texy\Texy;
+
+	Assert::match(
+		<<<'HTML'
+			<ul>
+				<li class="img"><img src="images/logo.webp" alt=""></li>
+
+				<li>text</li>
+			</ul>
+			HTML,
+		$texy->process(<<<'XX'
+			- [* logo.webp *] .[img]
+			- text
+			XX),
+	);
+});
+
+
+test('an image with a caption keeps its figure inside an item', function () {
+	$texy = new Texy\Texy;
+
+	Assert::match(
+		<<<'HTML'
+			<ul>
+				<li>
+					<div class="figure"><img src="images/logo.webp" alt="">
+						<p>Caption</p>
+					</div>
+				</li>
+			</ul>
+			HTML,
+		$texy->process('- [* logo.webp *] *** Caption'),
+	);
+});

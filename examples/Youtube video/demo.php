@@ -22,60 +22,37 @@
  * You can extend this pattern for other services like Vimeo, Spotify, etc.
  */
 
+use Texy\Nodes\ImageNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Custom handler for images
- *
- * Checks if the image URL uses our custom "youtube:" scheme.
- * If so, creates a YouTube embed iframe instead of an <img> tag.
- */
-function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null): Texy\HtmlElement|string|null
-{
-	// Check if the URL has a custom scheme (like "youtube:VIDEO_ID")
-	$parts = explode(':', $image->URL);
-	if (count($parts) !== 2) {
-		// Not a custom scheme, let Texy handle it normally
-		return $invocation->proceed();
-	}
+$texy = new Texy\Texy;
 
-	$scheme = $parts[0];
-	$videoId = $parts[1];
-
-	// Handle YouTube videos
-	if ($scheme === 'youtube') {
-		// Use the image dimensions for the video size, or defaults
-		$width = $image->width ?: 425;
-		$height = $image->height ?: 350;
-
-		// Create the YouTube embed iframe
-		$code = '<iframe'
-			. ' width="' . $width . '"'
-			. ' height="' . $height . '"'
-			. ' src="https://www.youtube.com/embed/' . htmlspecialchars($videoId) . '"'
-			. ' frameborder="0"'
-			. ' allow="autoplay"'
-			. ' allowfullscreen>'
-			. '</iframe>';
-
-		// Tell Texy this is ready-to-use HTML (don't process it further)
-		$texy = $invocation->getTexy();
-		return $texy->protect($code, $texy::CONTENT_BLOCK);
-	}
-
-	// Unknown scheme, let Texy handle it normally
-	return $invocation->proceed();
-}
-
-
-$texy = new Texy;
 
 // Register our custom image handler
-$texy->addHandler('image', 'imageHandler');
+// This works for both inline images AND images in figures,
+// because a figure renders its ImageNode through the same renderer.
+$texy->htmlOutput->addRenderer(
+	function (ImageNode $node): ?Html\Element {
+		// Check if the URL has our custom "youtube:" scheme
+		if (!str_starts_with((string) $node->url, 'youtube:')) {
+			return null; // not a YouTube video, the default renderer takes it
+		}
+
+		// the element escapes its attributes itself
+		return new Html\Element('iframe', [
+			'width' => $node->width ?? 425,
+			'height' => $node->height ?? 350,
+			'src' => 'https://www.youtube.com/embed/' . substr((string) $node->url, 8),
+			'allow' => 'autoplay',
+			'allowfullscreen' => true,
+		]);
+	},
+);
 
 
 // Process the text

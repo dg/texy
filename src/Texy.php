@@ -8,8 +8,8 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use Texy\Parsing\{BlockParser, InlineParser};
-use function count, is_array, strlen;
+use Texy\Parsing\{BlockParser, InlineParser, ParseContext};
+use function strlen;
 
 
 /**
@@ -30,13 +30,6 @@ class Texy
 		ALL = true,
 		NONE = false;
 
-	// types of protection marks
-	public const
-		CONTENT_MARKUP = "\x17",
-		CONTENT_REPLACED = "\x16",
-		CONTENT_TEXTUAL = "\x15",
-		CONTENT_BLOCK = "\x14";
-
 	// url filters
 	public const
 		FILTER_ANCHOR = 'anchor',
@@ -45,28 +38,27 @@ class Texy
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
-	/** @var bool|array<string, bool|array<int, string>>  Allowed HTML tags */
+	/** @var bool|array<string, bool|array<int, string>>  allowed HTML tags and their attributes */
 	public bool|array $allowedTags;
 
-	/** @var bool|array<int, string>  Allowed classes */
-	public bool|array $allowedClasses = self::ALL; // all classes and id are allowed
+	/** @var bool|array<int, string>  allowed classes and IDs */
+	public bool|array $allowedClasses = self::ALL;
 
-	/** @var bool|array<int, string>  Allowed inline CSS style */
-	public bool|array $allowedStyles = self::ALL;  // all inline styles are allowed
+	/** @var bool|array<int, string>  allowed inline CSS styles */
+	public bool|array $allowedStyles = self::ALL;
+
+	public Output\Html\Config $htmlOutput;
 
 	/** TAB width (for converting tabs to spaces) */
 	public int $tabWidth = 8;
 
+	/** join consecutive lines into one paragraph? false makes every newline a line break */
+	public bool $mergeLines = true;
+
 	/** Do obfuscate e-mail addresses? */
 	public bool $obfuscateEmail = true;
 
-	/** @var array<string, string>  regexps to check URL schemes */
-	public array $urlSchemeFilters; // disable URL scheme filter
-
-	/** Paragraph merging mode */
-	public bool $mergeLines = true;
-
-	/** @var array<string, ?string>  CSS classes for align modifiers */
+	/** @var array<string, ?string>  classes in place of style="text-align" and "vertical-align", null keeps the style */
 	public array $alignClasses = [
 		'left' => null,
 		'right' => null,
@@ -77,147 +69,179 @@ class Texy
 		'bottom' => null,
 	];
 
+	/** element in place of <p> for a paragraph holding images only */
+	public string $nontextParagraph = 'div';
+
+	/** @deprecated */
 	public bool $removeSoftHyphens = true;
-	public string|HtmlElement $nontextParagraph = 'div';
-	public Modules\DirectiveModule $scriptModule;
-	public Modules\ParagraphModule $paragraphModule;
+
+	/** @var array<string, string>  regexps checking URL schemes, keyed by FILTER_ANCHOR and FILTER_IMAGE */
+	public array $urlSchemeFilters = [];
+
 	public Modules\HtmlModule $htmlModule;
 	public Modules\ImageModule $imageModule;
 	public Modules\LinkReferenceModule $linkModule;
 	public Modules\AutolinkModule $autolinkModule;
 	public Modules\PhraseModule $phraseModule;
 	public Modules\EmoticonModule $emoticonModule;
-	public Modules\BlockModule $blockModule;
-	public Modules\HeadingModule $headingModule;
-	public Modules\HorizontalRuleModule $horizLineModule;
-	public Modules\BlockQuoteModule $blockQuoteModule;
-	public Modules\ListModule $listModule;
-	public Modules\TableModule $tableModule;
 	public Modules\FigureModule $figureModule;
+	public Modules\HorizontalRuleModule $horizLineModule;
+	public Modules\HeadingModule $headingModule;
+	public Modules\ListModule $listModule;
 	public Modules\TypographyModule $typographyModule;
 	public Modules\HyphenationModule $longWordsModule;
-	public Modules\HtmlOutputModule $htmlOutputModule;
-
-	/** @var Module[] */
-	private array $modules;
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>
 	 */
-	private array $linePatterns = [];
-
-	/** @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
-	private array $activeLinePatterns;
+	private array $inlinePatterns = [];
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
-	/** @var array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}> */
-	private array $activeBlockPatterns;
+	/** @var array<string, true>  names of the syntaxes registered by the application */
+	private array $applicationSyntaxes = [];
+
+	/** @var \Closure(ParseContext, string): array<Nodes\BlockNode>  takes the text between block syntaxes */
+	private \Closure $gapHandler;
+
+	/** @var array<string, list<\Closure(Nodes\DocumentNode): void>>  stage name => passes in registration order */
+	private array $passes = [];
+
+	/** @var list<Module>  in the order that decides ties between syntaxes */
+	private array $modules;
 
 	/** @var array<string, \Closure(string): string> */
 	private array $postHandlers = [];
 
-	/** DOM structure for parsed text */
-	private HtmlElement $dom;
-
-	/** @var array<string, string>  Texy protect markup table */
-	private array $marks = [];
-
-	/** @var array<string, int>|bool  for internal usage */
-	private bool|array $classes;
-
-	/** @var array<string, int>|bool  for internal usage */
-	private bool|array $styles;
-
-	private bool $processing = false;
-
-	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
-	private array $handlers = [];
-
 
 	public function __construct()
 	{
-		$this->loadModules();
-		$this->initAllowedTags();
+		$this->allowedTags = Output\Html\Schema::defaultAllowedTags(); // accept all valid HTML tags and attributes by default
+		$this->htmlOutput = new Output\Html\Config;
+		$this->createModules();
 	}
 
 
-	private function initAllowedTags(): void
+	private function createModules(): void
 	{
-		// accept all valid HTML tags and attributes by default
-		$this->allowedTags = Output\Html\Schema::defaultAllowedTags();
+		$this->imageModule = new Modules\ImageModule($this);
+		$this->linkModule = new Modules\LinkReferenceModule($this);
+		$this->headingModule = new Modules\HeadingModule($this);
+
+		$this->modules = [
+			// inline
+			new Modules\DirectiveModule($this),
+			$this->htmlModule = new Modules\HtmlModule($this),
+			$this->imageModule,
+			$this->phraseModule = new Modules\PhraseModule($this),
+			$this->linkModule,
+			$this->autolinkModule = new Modules\AutolinkModule($this),
+			$this->emoticonModule = new Modules\EmoticonModule($this),
+
+			// block
+			new Modules\ParagraphModule($this),
+			new Modules\BlockModule($this),
+			$this->figureModule = new Modules\FigureModule($this),
+			$this->horizLineModule = new Modules\HorizontalRuleModule($this),
+			new Modules\BlockQuoteModule($this),
+			new Modules\TableModule($this),
+			$this->headingModule,
+			$this->listModule = new Modules\ListModule($this),
+		];
+
+		$this->typographyModule = new Modules\TypographyModule($this);
+		$this->longWordsModule = new Modules\HyphenationModule($this);
+
+		$this->addHandler($this->linkModule->recognizeReferences(...), Stage::Syntax);
+
+		$this->addHandler($this->imageModule->resolveReferences(...));
+		$this->addHandler($this->linkModule->resolveReferences(...));
+		$this->addHandler($this->headingModule->processHeadings(...));
+	}
+
+
+	/** Lets modules register their patterns, which depend on the current configuration. */
+	private function registerModules(): void
+	{
+		foreach ($this->modules as $module) {
+			$module->beforeParse();
+		}
 	}
 
 
 	/**
-	 * Create array of all used modules ($this->modules).
-	 * This array can be changed by overriding this method (by subclasses)
+	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\InlineNode
 	 */
-	protected function loadModules(): void
+	public function addInline(
+		string $name,
+		#[Language('RegExp')]
+		string $pattern,
+		callable $handler,
+	): void
 	{
-		// line parsing
-		$this->addModule($this->scriptModule = new Modules\DirectiveModule($this));
-		$this->addModule($this->htmlModule = new Modules\HtmlModule($this));
-		$this->addModule($this->imageModule = new Modules\ImageModule($this));
-		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));
-		$this->addModule($this->linkModule = new Modules\LinkReferenceModule($this));
-		$this->addModule($this->autolinkModule = new Modules\AutolinkModule($this));
-		$this->addModule($this->emoticonModule = new Modules\EmoticonModule($this));
+		if (!isset($this->applicationSyntaxes[$name])) { // a syntax of the application is never replaced by a module
+			$this->inlinePatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern];
+		}
 
-		// block parsing
-		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
-		$this->addModule($this->blockModule = new Modules\BlockModule($this));
-		$this->addModule($this->figureModule = new Modules\FigureModule($this));
-		$this->addModule($this->horizLineModule = new Modules\HorizontalRuleModule($this));
-		$this->addModule($this->blockQuoteModule = new Modules\BlockQuoteModule($this));
-		$this->addModule($this->tableModule = new Modules\TableModule($this));
-		$this->addModule($this->headingModule = new Modules\HeadingModule($this));
-		$this->addModule($this->listModule = new Modules\ListModule($this));
-
-		// post process
-		$this->addModule($this->typographyModule = new Modules\TypographyModule($this));
-		$this->addModule($this->longWordsModule = new Modules\HyphenationModule($this));
-		$this->addModule($this->htmlOutputModule = new Modules\HtmlOutputModule($this));
-	}
-
-
-	public function addModule(Module $module): static
-	{
-		$this->modules[] = $module;
-		return $this;
+		$this->declare($name);
 	}
 
 
 	/**
-	 * @param  callable(InlineParser, array<?string>, string): (HtmlElement|string|null)  $handler
+	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\BlockNode
+	 */
+	public function addBlock(
+		string $name,
+		#[Language('RegExp')]
+		string $pattern,
+		callable $handler,
+	): void
+	{
+		if (!isset($this->applicationSyntaxes[$name])) { // a syntax of the application is never replaced by a module
+			$this->blockPatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
+		}
+
+		$this->declare($name);
+	}
+
+
+	/** Declares a syntax name, also one without a pattern of its own. */
+	public function declare(string $name, bool $enabled = true): void
+	{
+		$this->allowed[$name] ??= $enabled;
+	}
+
+
+	/** @param  callable(ParseContext, string): array<Nodes\BlockNode>  $handler */
+	public function setGapHandler(callable $handler): void
+	{
+		$this->gapHandler = $handler(...);
+	}
+
+
+	/**
+	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\InlineNode
 	 */
 	final public function registerLinePattern(
 		callable $handler,
 		#[Language('RegExp')]
 		string $pattern,
 		string $name,
-		?string $againTest = null,
 	): void
 	{
-		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = true;
-		}
-
-		$this->linePatterns[$name] = [
-			'handler' => $handler(...),
-			'pattern' => $pattern,
-			'again' => $againTest,
-		];
+		$this->applicationSyntaxes[$name] = true;
+		$this->inlinePatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern];
+		$this->allowed[$name] ??= true;
 	}
 
 
 	/**
-	 * @param  callable(BlockParser, array<?string>, string): (HtmlElement|string|null)  $handler
+	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\BlockNode
 	 */
 	final public function registerBlockPattern(
 		callable $handler,
@@ -226,43 +250,118 @@ class Texy
 		string $name,
 	): void
 	{
-		// if (!Regexp::match($pattern, '~(.)\^.*\$\1[a-z]*~is')) die("Texy: Not a block pattern $name");
-		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = true;
-		}
-
-		$this->blockPatterns[$name] = [
-			'handler' => $handler(...),
-			'pattern' => $pattern . 'm', // force multiline
-		];
+		$this->applicationSyntaxes[$name] = true;
+		$this->blockPatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
+		$this->allowed[$name] ??= true;
 	}
 
 
 	/** @param  callable(string): string  $handler */
 	final public function registerPostLine(callable $handler, string $name): void
 	{
-		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = true;
-		}
-
 		$this->postHandlers[$name] = $handler(...);
+		$this->allowed[$name] ??= true;
 	}
 
 
 	/**
-	 * Converts document in Texy! to (X)HTML code.
+	 * Converts Texy text to HTML.
 	 */
-	public function process(string $text, bool $singleLine = false): string
+	public function process(string $text): string
 	{
-		if ($this->processing) {
-			throw new Exception('Processing is in progress yet.');
+		return $this->createHtmlRenderer()->render($this->transform($this->parse($text)));
+	}
+
+
+	/**
+	 * Converts one line of Texy text to HTML: inline markup only, no paragraph around it.
+	 */
+	public function processLine(string $text): string
+	{
+		return $this->createHtmlRenderer()->render($this->transform($this->parseInline($text)));
+	}
+
+
+	/**
+	 * Creates an HTML renderer wired to the current configuration.
+	 */
+	public function createHtmlRenderer(): Output\Html\Renderer
+	{
+		$typography = !empty($this->allowed[Syntax::Typography]) ? $this->typographyModule->postLine(...) : null;
+		$hyphenation = !empty($this->allowed[Syntax::Hyphenation]) ? $this->longWordsModule->postLine(...) : null;
+		$postHandlers = array_filter($this->postHandlers, fn(string $name): bool => !empty($this->allowed[$name]), ARRAY_FILTER_USE_KEY);
+		return new Output\Html\Renderer(
+			$this->htmlOutput,
+			$this,
+			$typography,
+			[...array_filter([$typography, $hyphenation]), ...array_values($postHandlers)],
+		);
+	}
+
+
+	/**
+	 * Parses text to the syntax tree: nothing of its meaning is applied yet (see
+	 * transform()). The text is preprocessed first (idempotent).
+	 */
+	public function parse(string $text): Nodes\DocumentNode
+	{
+		$this->registerModules();
+		$document = new Nodes\DocumentNode($this->createParseContext()->parseBlock($this->preprocess($text)));
+		$this->runPasses($document, Stage::Syntax);
+		return $document;
+	}
+
+
+	/**
+	 * Parses one line of text to the syntax tree: inline syntaxes only, no blocks.
+	 */
+	public function parseInline(string $text): Nodes\DocumentNode
+	{
+		$this->registerModules();
+		$document = new Nodes\DocumentNode($this->createParseContext()->parseInline($this->preprocess($text)));
+		$this->runPasses($document, Stage::Syntax);
+		return $document;
+	}
+
+
+	/**
+	 * Turns the syntax tree into the document: resolves references, balances
+	 * headings and applies the consumer's passes.
+	 * Changes the tree in place and returns it; a second call for one document throws.
+	 */
+	public function transform(Nodes\DocumentNode $document): Nodes\DocumentNode
+	{
+		if ($document->transformState !== Nodes\TransformState::Pending) {
+			throw new \LogicException("A document is transformed only once, this one is {$document->transformState->name}.");
 		}
 
-		// initialization
-		$this->marks = [];
-		$this->processing = true;
-		unset($this->classes, $this->styles, $this->activeLinePatterns, $this->activeBlockPatterns);
+		$document->transformState = Nodes\TransformState::Running;
+		try {
+			$this->runPasses($document, Stage::Transform);
+			$this->runPasses($document, Stage::Finalize);
+		} catch (\Throwable $e) {
+			$document->transformState = Nodes\TransformState::Failed;
+			throw $e;
+		}
 
+		$document->transformState = Nodes\TransformState::Done;
+		return $document;
+	}
+
+
+	private function runPasses(Nodes\DocumentNode $document, Stage $stage): void
+	{
+		foreach ($this->passes[$stage->name] ?? [] as $pass) {
+			$pass($document);
+		}
+	}
+
+
+	/**
+	 * Preprocesses text (normalizes line endings, replaces tabs, removes soft hyphens).
+	 */
+	public function preprocess(string $text): string
+	{
 		if ($this->removeSoftHyphens) {
 			$text = str_replace("\u{AD}", '', $text);
 		}
@@ -281,37 +380,7 @@ class Texy
 			}
 		}
 
-		foreach ($this->modules as $module) {
-			$module->beforeParse($text);
-		}
-
-		// parse Texy! document into internal DOM structure
-		$this->dom = new HtmlElement;
-		if ($singleLine) {
-			$this->dom->parseLine($this, $text);
-		} else {
-			$this->dom->parseBlock($this, $text);
-		}
-
-		$this->invokeHandlers('afterParse', [$this->dom, $singleLine]);
-
-		// converts internal DOM structure to final HTML code
-		$html = $this->dom->toHtml($this);
-
-		// created by ParagraphModule and then protected
-		$html = str_replace("\r", "\n", $html);
-
-		$this->processing = false;
-		return $html;
-	}
-
-
-	/**
-	 * Converts single line in Texy! to (X)HTML code.
-	 */
-	public function processLine(string $text): string
-	{
-		return $this->process($text, singleLine: true);
+		return $text;
 	}
 
 
@@ -323,10 +392,9 @@ class Texy
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
 
-		$this->typographyModule->beforeParse($text);
 		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
 
-		if (!empty($this->allowed['longwords'])) {
+		if (!empty($this->allowed[Syntax::Hyphenation])) {
 			$text = $this->longWordsModule->postLine($text);
 		}
 
@@ -335,203 +403,70 @@ class Texy
 
 
 	/**
-	 * Converts DOM structure to pure text.
+	 * Registers a pass: fn(Nodes\DocumentNode): void, called with the whole document.
+	 * The AST may be freely modified there; return values are ignored. A Transform pass
+	 * (the default) runs in transform(), a Syntax pass already in parse(), where it may
+	 * only finish recognizing the source.
+	 *
+	 * Passes of a stage run in registration order, so the ones registered by modules
+	 * run first and a consumer cannot get in front of them. Where that matters, call
+	 * parse(), do the work, and then transform().
+	 * @param  callable(Nodes\DocumentNode): void  $pass
 	 */
-	public function toText(): string
+	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
 	{
-		if (!isset($this->dom)) {
-			throw new Exception('Call $texy->process() first.');
-		}
-
-		return $this->dom->toText($this);
+		$this->passes[$stage->name][] = $pass(...);
 	}
 
 
 	/**
-	 * Converts internal string representation to final HTML code.
-	 */
-	final public function stringToHtml(string $s): string
-	{
-		// decode HTML entities to UTF-8
-		$s = Helpers::unescapeHtml($s);
-
-		// line-postprocessing
-		$blocks = explode(self::CONTENT_BLOCK, $s);
-		foreach ($this->postHandlers as $name => $handler) {
-			if (empty($this->allowed[$name])) {
-				continue;
-			}
-
-			foreach ($blocks as $n => $s) {
-				if ($n % 2 === 0 && $s !== '') {
-					$blocks[$n] = $handler($s);
-				}
-			}
-		}
-
-		$s = implode(self::CONTENT_BLOCK, $blocks);
-
-		// encode < > &
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-
-		// replace protected marks
-		$s = $this->unprotect($s);
-
-		// wellform and reformat HTML
-		$this->invokeHandlers('postProcess', [&$s]);
-
-		// unfreeze spaces
-		$s = Helpers::unfreezeSpaces($s);
-		$s = ltrim($s, "\n");
-
-		return $s;
-	}
-
-
-	/**
-	 * Converts internal string representation to final HTML code.
-	 */
-	final public function stringToText(string $s): string
-	{
-		$s = $this->stringToHtml($s);
-
-		// remove tags
-		$s = Regexp::replace($s, '~<(script|style)(.*)</\1>~Uis');
-		$s = strip_tags($s);
-		$s = Regexp::replace($s, '~\n\s*\n\s*\n[\n\s]*\n~', "\n\n");
-
-		// entities -> chars
-		$s = Helpers::unescapeHtml($s);
-
-		// convert nbsp to normal space and remove shy
-		$s = strtr($s, [
-			"\u{AD}" => '', // shy
-			"\u{A0}" => ' ', // nbsp
-		]);
-
-		return $s;
-	}
-
-
-	/**
-	 * Add new event handler.
-	 */
-	final public function addHandler(string $event, callable $callback): void
-	{
-		$this->handlers[$event][] = $callback(...);
-	}
-
-
-	/**
-	 * Invoke registered around-handlers.
-	 * @param  mixed[]  $args
-	 */
-	final public function invokeAroundHandlers(string $event, Parser $parser, array $args): mixed
-	{
-		if (!isset($this->handlers[$event])) {
-			return null;
-		}
-
-		$invocation = new HandlerInvocation($this->handlers[$event], $parser, $args);
-		return $invocation->proceed();
-	}
-
-
-	/**
-	 * Invoke registered after-handlers.
-	 * @param  mixed[]  $args
-	 */
-	final public function invokeHandlers(string $event, array $args): void
-	{
-		if (!isset($this->handlers[$event])) {
-			return;
-		}
-
-		foreach ($this->handlers[$event] as $handler) {
-			$handler(...$args);
-		}
-	}
-
-
-	/**
-	 * Generate unique mark - useful for freezing (folding) some substrings.
-	 */
-	final public function protect(string $child, string $contentType): string
-	{
-		if ($child === '') {
-			return '';
-		}
-
-		$key = $contentType
-			. strtr(base_convert((string) count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
-			. $contentType;
-
-		$this->marks[$key] = $child;
-
-		return $key;
-	}
-
-
-	/**
-	 * Filters bad URLs.
+	 * Filters bad URLs: a URL with a scheme must match the filter of its type; relative URLs always pass.
 	 * @param  string  $type  Texy::FILTER_ANCHOR | Texy::FILTER_IMAGE
 	 */
-	final public function checkURL(string $URL, string $type): bool
+	final public function checkURL(string $url, string $type): bool
 	{
-		// absolute URL with scheme? check scheme!
+		$url = str_replace(["\t", "\n", "\r"], '', $url); // a browser drops them from a URL before reading its scheme
 		return empty($this->urlSchemeFilters[$type])
-			|| !Regexp::match($URL, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // http: | mailto:
-			|| Regexp::match($URL, $this->urlSchemeFilters[$type]);
-	}
-
-
-	final public function unprotect(string $html): string
-	{
-		return strtr($html, $this->marks);
-	}
-
-
-	public function createBlockParser(bool $indented): BlockParser
-	{
-		$this->activeBlockPatterns ??= array_filter(
-			$this->blockPatterns,
-			fn($pattern, $name) => !empty($this->allowed[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-		return new BlockParser($this, $indented, $this->activeBlockPatterns);
-	}
-
-
-	public function createInlineParser(): InlineParser
-	{
-		$this->activeLinePatterns ??= array_filter(
-			$this->linePatterns,
-			fn($pattern, $name) => !empty($this->allowed[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-		return new InlineParser($this, $this->activeLinePatterns);
-	}
-
-
-	final public function getDOM(): HtmlElement
-	{
-		return $this->dom;
+			|| !Regexp::match($url, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // no scheme (relative URL)
+			|| (bool) Regexp::match($url, $this->urlSchemeFilters[$type]);
 	}
 
 
 	/**
+	 * Creates parse context. Modules must be initialized via parse() first
+	 * for patterns to be available.
 	 * @internal
-	 * @return array{array<string, int>|bool, array<string, int>|bool}
 	 */
-	final public function getAllowedProps(): array
+	public function createParseContext(): ParseContext
 	{
-		$this->classes ??= is_array($this->allowedClasses)
-			? array_flip($this->allowedClasses)
-			: $this->allowedClasses;
-		$this->styles ??= is_array($this->allowedStyles)
-			? array_flip($this->allowedStyles)
-			: $this->allowedStyles;
-		return [$this->classes, $this->styles];
+		return new ParseContext(
+			$this->createInlineParser(),
+			$this->createBlockParser(),
+		);
+	}
+
+
+	private function createBlockParser(): BlockParser
+	{
+		$patterns = array_filter(
+			$this->blockPatterns,
+			fn($_, $name) => !empty($this->allowed[$name]),
+			ARRAY_FILTER_USE_BOTH,
+		);
+
+		return new BlockParser($patterns, $this->gapHandler);
+	}
+
+
+	private function createInlineParser(): InlineParser
+	{
+		$patterns = array_filter(
+			$this->inlinePatterns,
+			fn($_, $name) => !empty($this->allowed[$name]),
+			ARRAY_FILTER_USE_BOTH,
+		);
+
+		return new InlineParser($patterns);
 	}
 
 
@@ -540,6 +475,3 @@ class Texy
 		throw new \LogicException('Clone is not supported.');
 	}
 }
-
-
-class_exists(\Texy::class);

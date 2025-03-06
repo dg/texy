@@ -29,8 +29,8 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 }
 
 
-$texy = new Texy;
-$texy->htmlOutputModule->baseIndent = 1;
+$texy = new Texy\Texy;
+$texy->htmlOutput->baseIndent = 1;
 
 
 /**

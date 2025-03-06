@@ -8,33 +8,39 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{HtmlElement, Modifier, Patterns, Regexp};
+use Texy\{Modifier, Patterns, Regexp, Syntax};
+use Texy\Nodes\{ContentNode, TableCellNode, TableNode, TableRowNode};
+use Texy\Output\Html;
+use Texy\Parsing\ParseContext;
 
 
 /**
- * Processes table syntax with headers, colspan, and rowspan support.
+ * Table module.
  */
 final class TableModule extends Texy\Module
 {
-	private ?bool $disableTables = null;
+	private bool $disableTables = false;
 
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
+		$texy->htmlOutput->addRenderer($this->renderTable(...));
+		$texy->htmlOutput->addRenderer($this->renderRow(...));
+		$texy->htmlOutput->addRenderer($this->renderCell(...));
 	}
 
 
-	public function beforeParse(string &$text): void
+	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parseTable(...),
+		$this->texy->addBlock(
+			Syntax::Table,
 			'~^
 				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)
 				\|                                   # table start
 				.*                                   # content
 			$~mUx',
-			'table',
+			$this->parseTable(...),
 		);
 	}
 
@@ -43,88 +49,126 @@ final class TableModule extends Texy\Module
 	 * Parses tables.
 	 * @param  array<?string>  $matches
 	 */
-	public function parseTable(Texy\Parsing\BlockParser $parser, array $matches): ?HtmlElement
+	public function parseTable(ParseContext $context, array $matches): ?TableNode
 	{
 		if ($this->disableTables) {
 			return null;
 		}
 
 		[, $mMod] = $matches;
-		// [1] => .(title)[class]{style}<>_
 
-		$texy = $this->texy;
+		$context->getBlockParser()->moveBackward();
 
-		$el = new HtmlElement('table');
-		$mod = Modifier::parse($mMod);
-		$mod->decorate($texy, $el);
+		$caption = $this->parseCaption($context);
 
-		$parser->moveBackward();
-
-		if ($parser->next(
-			'~^
-				\|                               # opening pipe
-				( [\#=] ){2,}  (?! [|#=+] )      # opening chars (1)
-				(.+)                             # caption (2)
-				\1*                              # matching closing chars
-				\|? \ *                              # optional closing pipe and spaces
-				' . Patterns::MODIFIER_H . '?    # modifier (3)
-			$~Umx',
-			$matches,
-		)) {
-			/** @var array{string, string, string, ?string} $matches */
-			[, , $mContent, $mMod] = $matches;
-			// [1] => # / =
-			// [2] => ....
-			// [3] => .(title)[class]{style}<>
-
-			$caption = $el->create('caption');
-			$mod = Modifier::parse($mMod);
-			$mod->decorate($texy, $caption);
-			$caption->parseLine($texy, $mContent);
-		}
-
+		$rows = [];
 		$isHead = false;
+		/** @var array<int, array{node: TableCellNode, text: string}> $prevRow */
+		$prevRow = [];
 		$colModifier = [];
-		$prevRow = []; // rowSpan building helper
-		$rowCounter = 0;
 		$colCounter = 0;
-		$elPart = null;
+		/** @var \SplObjectStorage<TableCellNode, string> $cellTexts */
+		$cellTexts = new \SplObjectStorage;
 
 		while (true) {
-			if ($parser->next('~^ \| ([=-]) [+|=-]{2,} $~Umx', $matches)) { // line
+			$lineMatches = null;
+			if ($context->getBlockParser()->next('~^ \| ([=-]) [+|=-]{2,} $~Umx', $lineMatches)) {
 				$isHead = !$isHead;
 				$prevRow = [];
 				continue;
 			}
 
-			if ($parser->next('~^ \| (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)$~Ux', $matches)) {
-				// smarter head detection
-				if ($rowCounter === 0 && !$isHead && $parser->next('~^ \| [=-] [+|=-]{2,} $~Umx', $foo)) {
+			if ($context->getBlockParser()->next('~^ ( \| ) (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)$~Ux', $lineMatches)) {
+				// smarter head detection: if first row is followed by separator line, it's a head row
+				if ($rows === [] && !$isHead && $context->getBlockParser()->next('~^ \| [=-] [+|=-]{2,} $~Umx', $foo)) {
 					$isHead = true;
-					$parser->moveBackward();
+					$context->getBlockParser()->moveBackward();
 				}
 
-				if ($elPart === null) {
-					$elPart = $el->create($isHead ? 'thead' : 'tbody');
+				[, , $mContent, $mRowMod] = $lineMatches;
 
-				} elseif (!$isHead && $elPart->getName() === 'thead') {
-					$this->finishPart($elPart);
-					$elPart = $el->create('tbody');
+				$cells = [];
+				$content = str_replace('\|', "\x13", (string) $mContent);
+				$content = Regexp::replace($content, '~(\[[^]]*)\|~', "$1\x13");
+
+				$col = 0;
+				$lastCell = null;
+
+				foreach (explode('|', $content) as $cell) {
+					$cell = strtr($cell, "\x13", '|');
+
+					// rowSpan: ^ at end of cell or cell is just ^
+					if (isset($prevRow[$col]) && ($m = Regexp::match($cell, '~\^[ \t]*$|\*??(.*)[ \t]+\^$~AU'))) {
+						$prevRow[$col]['node']->rowspan++;
+						$cellText = $m[1] ?? '';
+						// Append text to the cell above
+						$cellTexts[$prevRow[$col]['node']] .= "\n" . $cellText;
+						$col += $prevRow[$col]['node']->colspan;
+						$lastCell = null;
+						continue;
+					}
+
+					// colSpan: empty cell extends previous cell
+					if ($cell === '' && $lastCell !== null) {
+						$lastCell->colspan++;
+						unset($prevRow[$col]);
+						$col++;
+						continue;
+					}
+
+					// common cell
+					$cellMatches = Regexp::match($cell, '~
+						( \*?? )                          # head mark (1)
+						[ \t]*
+						' . Patterns::MODIFIER_HV . '??   # modifier (2)
+						(.*)                              # content (3)
+						' . Patterns::MODIFIER_HV . '?    # modifier (4)
+						[ \t]*
+					$~AUx');
+
+					if ($cellMatches) {
+						$mHead = $cellMatches[1];
+						$mModCol = $cellMatches[2];
+						$mCellContent = $cellMatches[3];
+						$mCellMod = $cellMatches[4];
+
+						$cellIsHeader = $isHead || ($mHead === '*');
+
+						// column modifier inheritance
+						if ($mModCol) {
+							$colModifier[$col] = Modifier::parse($mModCol);
+						}
+						$cellMod = isset($colModifier[$col]) ? clone $colModifier[$col] : new Modifier;
+						$cellMod->setProperties($mCellMod);
+
+						// Create cell node - text will be parsed later
+						$lastCell = new TableCellNode(new ContentNode, 1, 1, $cellIsHeader, $cellMod);
+						$cells[] = $lastCell;
+						$cellTexts[$lastCell] = $mCellContent ?? '';
+						$prevRow[$col] = ['node' => $lastCell, 'text' => $mCellContent];
+						$col++;
+					}
 				}
 
-				/** @var array{string, string, ?string} $matches */
-				[, $mContent, $mMod] = $matches;
-				// [1] => ....
-				// [2] => .(title)[class]{style}<>_
+				// even up with empty cells
+				while ($col < $colCounter) {
+					$cellMod = isset($colModifier[$col]) ? clone $colModifier[$col] : new Modifier;
+					$emptyCell = new TableCellNode(new ContentNode, 1, 1, $isHead, $cellMod);
+					$cells[] = $emptyCell;
+					$cellTexts[$emptyCell] = '';
+					$prevRow[$col] = ['node' => $emptyCell, 'text' => ''];
+					$col++;
+				}
 
-				$elRow = $this->processRow($mContent, $mMod, $isHead, $texy, $prevRow, $colModifier, $colCounter);
+				$colCounter = $col;
 
-				if ($elRow->count()) {
-					$elPart->add($elRow);
-					$rowCounter++;
-				} else { // redundant row
-					foreach ($prevRow as $elCell) {
-						$elCell->rowSpan--;
+				if ($cells) {
+					$rowMod = Modifier::parse($mRowMod);
+					$rows[] = new TableRowNode($cells, $isHead, $rowMod);
+				} else {
+					// redundant row - decrement rowspan
+					foreach ($prevRow as $item) {
+						$item['node']->rowspan--;
 					}
 				}
 
@@ -134,167 +178,121 @@ final class TableModule extends Texy\Module
 			break;
 		}
 
-		if ($elPart === null) { // invalid table
+		if (!$rows) {
 			return null;
 		}
 
-		if ($elPart->getName() === 'thead') {
-			// thead is optional, tbody is required
-			$elPart->setName('tbody');
+		// Parse cell text content after rowspan/colspan is determined
+		foreach ($rows as $row) {
+			foreach ($row->cells as $cell) {
+				if (isset($cellTexts[$cell])) {
+					$text = rtrim((string) $cellTexts[$cell]);
+
+					if (str_contains($text, "\n")) {
+						// multiline - parse as block (disable nested tables)
+						$this->disableTables = true;
+						$cell->content->children = $context->parseBlock(Texy\Helpers::outdent($text))->children;
+						$this->disableTables = false;
+					} else {
+						// single line - parse as inline
+						$cell->content->children = $context->parseInline(ltrim($text))->children;
+					}
+
+					// empty cell gets &nbsp;
+					if ($cell->content->children === []) {
+						$cell->content->children = [new Texy\Nodes\TextNode("\u{A0}")];
+					}
+				}
+			}
 		}
 
-		$this->finishPart($elPart);
+		return new TableNode(
+			$rows,
+			Modifier::parse($mMod),
+			$caption,
+		);
+	}
 
-		// event listener
-		$texy->invokeHandlers('afterTable', [$parser, $el, $mod]);
+
+	/** Parses the optional caption line |## Text preceding the first row. */
+	private function parseCaption(ParseContext $context): ?ContentNode
+	{
+		$matches = null;
+		$context->getBlockParser()->next(
+			'~^
+				\|                            # opening pipe
+				( [\#=] ){2,}  (?! [|\#=+] )  # opening chars (1)
+				(.+)                          # caption (2)
+				\1*                           # matching closing chars
+				\|? \ *                       # optional closing pipe and spaces
+			$~Umx',
+			$matches,
+		);
+
+		if (!isset($matches[2])) {
+			return null;
+		}
+
+		return $context->parseInline(trim($matches[2]));
+	}
+
+
+	public function renderTable(TableNode $node, Html\Renderer $renderer): Html\Element
+	{
+		$el = new Html\Element('table');
+		$renderer->decorateElement($node->modifier, $el);
+
+		if ($node->caption !== null) {
+			$el->create('caption')->children = $renderer->renderNodes($node->caption->children);
+		}
+
+		$elPart = null;
+		foreach ($node->rows as $row) {
+			if ($elPart === null) {
+				$elPart = new Html\Element($row->header ? 'thead' : 'tbody');
+				$el->add($elPart);
+			} elseif (!$row->header && $elPart->name === 'thead') {
+				// switch from thead to tbody
+				$elPart = new Html\Element('tbody');
+				$el->add($elPart);
+			}
+			$elPart->add($this->renderRow($row, $renderer));
+		}
+
+		// if only thead without tbody, rename to tbody (tbody is required, thead is optional)
+		if ($elPart !== null && $elPart->name === 'thead') {
+			$elPart->name = 'tbody';
+		}
 
 		return $el;
 	}
 
 
-	/**
-	 * @param  array<int, TableCellElement>  $prevRow
-	 * @param  array<int, Modifier|null>  $colModifier
-	 */
-	private function processRow(
-		string $content,
-		?string $mMod,
-		bool $isHead,
-		Texy\Texy $texy,
-		array &$prevRow,
-		array &$colModifier,
-		int &$colCounter,
-	): HtmlElement
+	public function renderRow(TableRowNode $node, Html\Renderer $renderer): Html\Element
 	{
-		$elRow = new HtmlElement('tr');
-		$mod = Modifier::parse($mMod);
-		$mod->decorate($texy, $elRow);
-
-		$col = 0;
-		$elCell = null;
-
-		// special escape sequence \|
-		$content = str_replace('\|', "\x13", $content);
-		$content = Regexp::replace($content, '~(\[[^]]*)\|~', "$1\x13"); // HACK: support for [..|..]
-
-		foreach (explode('|', $content) as $cell) {
-			$cell = strtr($cell, "\x13", '|');
-			// rowSpan
-			if (isset($prevRow[$col]) && ($matches = Regexp::match($cell, '~\^[ \t]*$|\*??(.*)[ \t]+\^$~AU'))) {
-				$prevRow[$col]->rowSpan++;
-				$cell = $matches[1] ?? '';
-				$prevRow[$col]->text .= "\n" . $cell;
-				$col += $prevRow[$col]->colSpan;
-				$elCell = null;
-				continue;
-			}
-
-			// colSpan
-			if ($cell === '' && $elCell) {
-				$elCell->colSpan++;
-				unset($prevRow[$col]);
-				$col++;
-				continue;
-			}
-
-			// common cell
-			if ($elCell = $this->processCell($cell, $colModifier[$col], $isHead, $texy)) {
-				$elRow->add($elCell);
-				$prevRow[$col] = $elCell;
-				$col++;
-			}
+		$el = new Html\Element('tr');
+		$renderer->decorateElement($node->modifier, $el);
+		foreach ($node->cells as $cell) {
+			$el->add($this->renderCell($cell, $renderer));
 		}
 
-		// even up with empty cells
-		while ($col < $colCounter) {
-			$elCell = new TableCellElement;
-			$elCell->setName($isHead ? 'th' : 'td');
-			if (isset($colModifier[$col])) {
-				$colModifier[$col]->decorate($texy, $elCell);
-			}
-
-			$elRow->add($elCell);
-			$prevRow[$col] = $elCell;
-			$col++;
-		}
-
-		$colCounter = $col;
-		return $elRow;
+		return $el;
 	}
 
 
-	private function processCell(
-		string $cell,
-		?Modifier &$cellModifier,
-		bool $isHead,
-		Texy\Texy $texy,
-	): ?TableCellElement
+	public function renderCell(TableCellNode $node, Html\Renderer $renderer): Html\Element
 	{
-		$matches = Regexp::match($cell, '~
-			( \*?? )                          # head mark (1)
-			[ \t]*
-			' . Patterns::MODIFIER_HV . '??   # modifier (2)
-			(.*)                              # content (3)
-			' . Patterns::MODIFIER_HV . '?    # modifier (4)
-			[ \t]*
-		$~AUx');
-		if (!$matches) {
-			return null;
+		$el = new Html\Element($node->header ? 'th' : 'td');
+		$renderer->decorateElement($node->modifier, $el);
+
+		if ($node->colspan > 1) {
+			$el->attrs['colspan'] = $node->colspan;
+		}
+		if ($node->rowspan > 1) {
+			$el->attrs['rowspan'] = $node->rowspan;
 		}
 
-		[, $mHead, $mModCol, $mContent, $mMod] = $matches;
-		// [1] => * ^
-		// [2] => .(title)[class]{style}<>_
-		// [3] => ....
-		// [4] => .(title)[class]{style}<>_
-
-		if ($mModCol) {
-			$cellModifier = Modifier::parse($mModCol);
-		}
-
-		$mod = $cellModifier ? clone $cellModifier : new Modifier;
-		$mod->setProperties($mMod);
-
-		$elCell = new TableCellElement;
-		$elCell->setName($isHead || ($mHead === '*') ? 'th' : 'td');
-		$mod->decorate($texy, $elCell);
-		$elCell->text = $mContent;
-		return $elCell;
-	}
-
-
-	/**
-	 * Parse text in all cells.
-	 */
-	private function finishPart(HtmlElement $elPart): void
-	{
-		foreach ($elPart->getChildren() as $elRow) {
-			assert($elRow instanceof HtmlElement);
-			foreach ($elRow->getChildren() as $elCell) {
-				assert($elCell instanceof TableCellElement);
-				if ($elCell->colSpan > 1) {
-					$elCell->attrs['colspan'] = $elCell->colSpan;
-				}
-
-				if ($elCell->rowSpan > 1) {
-					$elCell->attrs['rowspan'] = $elCell->rowSpan;
-				}
-
-				$text = rtrim((string) $elCell->text);
-				if (str_contains($text, "\n")) {
-					// multiline parse as block
-					// HACK: disable tables
-					$this->disableTables = true;
-					$elCell->parseBlock($this->texy, Texy\Helpers::outdent($text));
-					$this->disableTables = false;
-				} else {
-					$elCell->parseLine($this->texy, ltrim($text));
-				}
-
-				if ($elCell->getText() === '') {
-					$elCell->setText("\u{A0}"); // &nbsp;
-				}
-			}
-		}
+		$el->children = $renderer->renderNodes($node->content->children);
+		return $el;
 	}
 }

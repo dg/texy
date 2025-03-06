@@ -8,6 +8,10 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes\HorizontalRuleNode;
+use Texy\Output\Html;
+use Texy\Parsing\ParseContext;
+use Texy\Syntax;
 
 
 /**
@@ -25,51 +29,36 @@ final class HorizontalRuleModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('horizline', $this->solve(...));
+		$texy->htmlOutput->addRenderer($this->render(...));
 	}
 
 
-	public function beforeParse(string &$text): void
+	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parse(...),
+		$this->texy->addBlock(
+			Syntax::HorizontalRule,
 			'~^
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
 				[ \t]*                       # optional spaces
 				' . Texy\Patterns::MODIFIER . '? # modifier (2)
 			$~mUx',
-			'horizline',
+			fn(ParseContext $context, array $matches) => new HorizontalRuleNode(
+				((string) $matches[1])[0],
+				Texy\Modifier::parse($matches[2]),
+			),
 		);
 	}
 
 
-	/**
-	 * Parses -------
-	 * @param  array<?string>  $matches
-	 */
-	public function parse(Texy\Parsing\BlockParser $parser, array $matches): Texy\HtmlElement
+	public function render(HorizontalRuleNode $node, Html\Renderer $renderer): Html\Element
 	{
-		[, $mType, $mMod] = $matches;
-		// [1] => ---
-		// [2] => .(title)[class]{style}<>
+		$el = new Html\Element('hr');
+		$renderer->decorateElement($node->modifier, $el);
 
-		$mod = Texy\Modifier::parse($mMod);
-		return $this->texy->invokeAroundHandlers('horizline', $parser, [$mType, $mod]);
-	}
-
-
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
-	{
-		$el = new Texy\HtmlElement('hr');
-		$modifier->decorate($invocation->getTexy(), $el);
-
-		$class = $this->classes[$type[0]];
-		settype($el->attrs['class'], 'array');
-		if ($class && !isset($modifier->classes[$class])) {
-			$el->attrs['class'][] = $class;
+		// Add default class if not already set via modifier
+		$class = $this->classes[$node->type] ?? null;
+		if ($class && empty($node->modifier?->classes[$class])) {
+			$el->addClass($class);
 		}
 
 		return $el;

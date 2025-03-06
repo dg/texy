@@ -27,10 +27,11 @@ test('link forceNoFollow', function () {
 test('link forceNoFollow does not affect relative URLs', function () {
 	$texy = new Texy\Texy;
 	$texy->linkModule->forceNoFollow = true;
+	$texy->allowed[Texy\Syntax::LinkReference] = true;
 	$texy->linkModule->addDefinition('test', '/local/page');
 	// Relative URL should not get nofollow
 	Assert::match(
-		'<p><a href="/local/page">/local/page</a></p>
+		'<p><a href="/local/page">test</a></p>
 ',
 		$texy->process('[test]'),
 	);
@@ -43,8 +44,9 @@ test('link forceNoFollow does not affect relative URLs', function () {
 
 test('url shortening', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlOutputModule->lineWrap = 500; // disable line wrapping for this test
+	$texy->htmlOutput->lineWrap = 500; // disable line wrapping for this test
 	// Long path should be shortened (keeps last 12 chars of path)
+	// For non-www URLs, scheme is kept
 	Assert::match(
 		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/…me/page.html</a></p>
 ',
@@ -56,7 +58,7 @@ test('url shortening', function () {
 test('url shortening disabled', function () {
 	$texy = new Texy\Texy;
 	$texy->autolinkModule->shorten = false;
-	$texy->htmlOutputModule->lineWrap = 500;
+	$texy->htmlOutput->lineWrap = 500;
 	Assert::match(
 		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/very/long/path/to/some/page.html</a></p>
 ',
@@ -67,7 +69,7 @@ test('url shortening disabled', function () {
 
 test('url shortening short path', function () {
 	$texy = new Texy\Texy;
-	// Short path should not be shortened
+	// Short path should not be shortened, scheme is kept for non-www
 	Assert::match(
 		'<p><a href="https://example.com/page">https://example.com/page</a></p>
 ',
@@ -78,7 +80,7 @@ test('url shortening short path', function () {
 
 test('url shortening with query', function () {
 	$texy = new Texy\Texy;
-	// Long query should be shortened to ?…
+	// Long query should be shortened to ?…, scheme kept for non-www
 	Assert::match(
 		'<p><a href="https://example.com/?query=long">https://example.com/?…</a></p>
 ',
@@ -94,4 +96,21 @@ test('url shortening www prefix', function () {
 ',
 		$texy->process('www.example.com/page'),
 	);
+});
+
+
+test('entities in link targets are decoded once', function () {
+	$texy = new Texy\Texy;
+	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->process('"x":http://a.cz/?a=1&amp;b=2')));
+	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->process("\"x\":[r]\n\n[r]: http://a.cz/?a=1&amp;b=2")));
+	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">http://a.cz/?…</a></p>', trim($texy->process('http://a.cz/?a=1&amp;b=2')));
+	Assert::same('<p>x <img src="images/a.png?x=1&amp;y=2" alt=""></p>', trim($texy->process('x [* a.png?x=1&amp;y=2 *]')));
+});
+
+
+test('autolinks right after an HTML tag, an e-mail inside a link is obfuscated text', function () {
+	$texy = new Texy\Texy;
+	Assert::same('<p><b><a href="http://x.cz">http://x.cz</a></b></p>', trim($texy->process('<b>http://x.cz</b>')));
+	Assert::same('<p><b><a href="mailto:c&#64;x.cz">c&#64;<!-- -->x.cz</a></b></p>', trim($texy->process('<b>c@x.cz</b>')));
+	Assert::same('<p><a href="mailto:a&#64;x.cz">a&#64;<!-- -->x.cz</a></p>', trim($texy->process('<a href="mailto:a@x.cz">a@x.cz</a>')));
 });
