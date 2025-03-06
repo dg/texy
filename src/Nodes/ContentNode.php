@@ -1,0 +1,39 @@
+<?php declare(strict_types=1);
+
+/**
+ * This file is part of the Texy! (https://texy.deegee.dev)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
+ */
+
+namespace Texy\Nodes;
+
+use Texy;
+
+
+/**
+ * Container for node content (inline or block children).
+ */
+class ContentNode extends Texy\Node
+{
+	public function __construct(
+		/** @var array<InlineNode|BlockNode> */
+		public array $children = [],
+	) {
+	}
+
+
+	/** Content of a single plain text, not parsed as Texy; typography treats it like any other text. */
+	public static function fromText(string $text): self
+	{
+		return new self([new TextNode($text)]);
+	}
+
+
+	/** @return \Generator<InlineNode|BlockNode> */
+	public function &getChildren(): \Generator
+	{
+		foreach (self::walk($this->children, fn(InlineNode|BlockNode ...$children) => null) as &$child) {
+			yield $child;
+		}
+	}
+}

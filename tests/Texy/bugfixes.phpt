@@ -13,7 +13,7 @@ require __DIR__ . '/../bootstrap.php';
 test('fixed Offset didn\'t correspond to the begin of a valid UTF-8 code point', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	Assert::truthy($texy->process('"š":xxx://')); // i.e. triggers no error
+	Assert::same("<p>š</p>\n", $texy->process('"š":xxx://'));
 });
 
 
@@ -26,7 +26,10 @@ test('"label":@link', function () {
 test('allowed XSS for URLs #31', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	Assert::same("<p>&lt;a href=„jAvascrip­t://“&gt;click</p>\n", $texy->process('<a href="jAvascript://">click</a>'));
+	Assert::same(
+		"<p>&lt;a href=„jAvascrip\u{AD}t://“&gt;click</p>\n",
+		$texy->process('<a href="jAvascript://">click</a>'),
+	);
 });
 
 
@@ -40,5 +43,21 @@ test('allowed XSS for URLs #31 link', function () {
 test('allowed XSS for URLs #34', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	Assert::same("<p>&lt;a href=\" javascript:\"&gt;click</p>\n", $texy->process('<a href=" javascript:">click</a>'));
+	$result = $texy->process('<a href=" javascript:">click</a>');
+	// XSS protection: javascript URLs must be neutralized (tag escaped as text)
+	Assert::notContains('<a href=', $result); // no active <a> tag
+	Assert::contains('&lt;a href=', $result); // escaped as text
+	Assert::contains('click', $result);
+});
+
+
+test('rejected inline match must not duplicate preceding text', function () {
+	// span syntax "..." without modifier/link is rejected by the handler;
+	// the parser must not emit the preceding text twice
+	$texy = new Texy;
+	Assert::same("<p>řekl „ahoj“ a šel</p>\n", $texy->process('řekl "ahoj" a šel'));
+	Assert::same(
+		"<p>A „quote <strong>b</strong>“ c</p>\n",
+		$texy->process('A "quote **b**" c'),
+	);
 });

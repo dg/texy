@@ -27,7 +27,7 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 }
 
 
-$texy = new Texy;
+$texy = new Texy\Texy;
 $text = <<<'TEXY'
 	First level (underlined)
 	========================
@@ -58,13 +58,14 @@ $texy->headingModule->balancing = Texy\Modules\HeadingModule::DYNAMIC;
 // This allows linking to specific sections: page.html#toc-heading-text
 $texy->headingModule->generateID = true;
 
-$html = $texy->process($text);
+$document = $texy->transform($texy->parse($text));
+$html = $texy->createHtmlRenderer()->render($document);
 
 echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';
 
 // You can use the first heading as the page title
-echo '<title>' . $texy->headingModule->title . '</title>';
+echo '<title>' . $document->findFirst(Texy\Nodes\HeadingNode::class)?->getPlainText() . '</title>';
 
 echo '<strong>Dynamic method:</strong>';
 echo '<pre>';
@@ -100,10 +101,10 @@ $texy->headingModule->top = 1;
 $texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
 
 // Define your own mapping:
-// '=' underline produces level 0 + top (1) = h1
-// '-' underline produces level 1 + top (1) = h2
-$texy->headingModule->levels['='] = 0;
-$texy->headingModule->levels['-'] = 1;
+// '=' underline produces level 1, with top 1 it is h1
+// '-' underline produces level 2, with top 1 it is h2
+$texy->headingModule->levels['='] = 1;
+$texy->headingModule->levels['-'] = 2;
 
 $html = $texy->process($text);
 
@@ -122,7 +123,7 @@ echo '<hr>';
 
 echo '<h2>Table of contents</h2>';
 echo '<pre>';
-foreach ($texy->headingModule->TOC as $item) {
-	echo $item['el']->getName() . ': ' . htmlspecialchars($item['title'] ?? '') . "\n";
+foreach ($document->find(Texy\Nodes\HeadingNode::class) as $heading) {
+	echo str_repeat('  ', $heading->level - 1), htmlspecialchars(trim($heading->getPlainText())), ' #', $heading->modifier?->id, "\n";
 }
 echo '</pre>';

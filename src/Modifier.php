@@ -50,17 +50,18 @@ final class Modifier
 	/**
 	 * Parses modifier string and returns new instance.
 	 */
-	public static function parse(?string $s): self
+	public static function parse(?string $s): ?self
 	{
-		$modifier = new self;
-		if ($s !== null) {
-			$modifier->setProperties($s);
+		if ($s === null) {
+			return null;
 		}
+		$modifier = new self;
+		$modifier->setProperties($s);
 		return $modifier;
 	}
 
 
-	/** @deprecated  use Modifier::parse() */
+	/** @internal  adds the parts of a modifier string to this one */
 	public function setProperties(?string $s): void
 	{
 		$p = 0;
@@ -105,54 +106,62 @@ final class Modifier
 
 
 	/**
-	 * Decorates HtmlElement element.
+	 * Decorates the element with the attributes, classes and styles of the modifier, as far as
+	 * $allowedTags, $allowedClasses and $allowedStyles of Texy let them through.
 	 */
-	public function decorate(Texy $texy, HtmlElement $el): HtmlElement
+	public function decorate(Texy $texy, Output\Html\Element $el): Output\Html\Element
 	{
-		$this->decorateAttrs($texy, $el->attrs, $el->getName() ?? '');
-		$this->decorateClasses($texy, $el->attrs);
-		$this->decorateStyles($texy, $el->attrs);
-		$this->decorateAligns($texy, $el->attrs);
+		if ($this->attrs) {
+			$el->attrs = $this->filterAttrs($texy->allowedTags, $el->name ?? '');
+		}
+
+		if ($this->title !== null) {
+			$el->attrs['title'] = empty($texy->allowed[Syntax::Typography])
+				? $this->title
+				: $texy->typographyModule->postLine($this->title);
+		}
+
+		$this->decorateClasses($texy->allowedClasses, $el->attrs);
+		$this->decorateStyles($texy->allowedStyles, $el->attrs);
+
+		if ($this->hAlign) {
+			self::applyClassOrStyle($el->attrs, $texy->alignClasses[$this->hAlign] ?? null, 'text-align', $this->hAlign);
+		}
+
+		if ($this->vAlign) {
+			self::applyClassOrStyle($el->attrs, $texy->alignClasses[$this->vAlign] ?? null, 'vertical-align', $this->vAlign);
+		}
+
 		return $el;
 	}
 
 
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateAttrs(Texy $texy, array &$attrs, string $name): void
+	/**
+	 * The attributes which $allowedTags allows for the tag.
+	 * @param  bool|array<string, bool|array<int, string>>  $allowedTags
+	 * @return array<string, string|string[]>
+	 */
+	private function filterAttrs(bool|array $allowedTags, string $tagName): array
 	{
-		if (!$this->attrs) {
-		} elseif ($texy->allowedTags === $texy::ALL) {
-			$attrs = $this->attrs;
-
-		} elseif (is_array($texy->allowedTags)) {
-			$tmp = $texy->allowedTags[$name] ?? [];
-
-			if ($tmp === $texy::ALL) {
-				$attrs = $this->attrs;
-
-			} elseif (is_array($tmp)) {
-				$attrs = array_flip($tmp);
-				foreach ($this->attrs as $key => $value) {
-					if (isset($attrs[$key])) {
-						$attrs[$key] = $value;
-					}
-				}
-			}
-		}
-
-		if ($this->title !== null) {
-			$attrs['title'] = $texy->typographyModule->postLine($this->title);
-		}
+		$allowed = is_array($allowedTags) ? $allowedTags[$tagName] ?? [] : $allowedTags;
+		return match (true) {
+			$allowed === Texy::ALL => $this->attrs,
+			is_array($allowed) => array_intersect_key($this->attrs, array_flip($allowed)),
+			default => [],
+		};
 	}
 
 
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateClasses(Texy $texy, array &$attrs): void
+	/**
+	 * @param  bool|array<int, string>  $allowedClasses
+	 * @param  array<string, mixed>  $attrs
+	 */
+	private function decorateClasses(bool|array $allowedClasses, array &$attrs): void
 	{
 		if ($this->classes || $this->id !== null) {
-			[$allowedClasses] = $texy->getAllowedProps();
+			$allowedClasses = is_array($allowedClasses) ? array_flip($allowedClasses) : $allowedClasses;
 			settype($attrs['class'], 'array');
-			if ($allowedClasses === $texy::ALL) {
+			if ($allowedClasses === true) {
 				foreach ($this->classes as $value => $foo) {
 					$attrs['class'][] = $value;
 				}
@@ -174,13 +183,16 @@ final class Modifier
 	}
 
 
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateStyles(Texy $texy, array &$attrs): void
+	/**
+	 * @param  bool|array<int, string>  $allowedStyles
+	 * @param  array<string, mixed>  $attrs
+	 */
+	private function decorateStyles(bool|array $allowedStyles, array &$attrs): void
 	{
 		if ($this->styles) {
-			[, $allowedStyles] = $texy->getAllowedProps();
+			$allowedStyles = is_array($allowedStyles) ? array_flip($allowedStyles) : $allowedStyles;
 			settype($attrs['style'], 'array');
-			if ($allowedStyles === $texy::ALL) {
+			if ($allowedStyles === true) {
 				foreach ($this->styles as $prop => $value) {
 					$attrs['style'][$prop] = $value;
 				}
@@ -195,29 +207,19 @@ final class Modifier
 	}
 
 
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateAligns(Texy $texy, array &$attrs): void
+	/**
+	 * Applies an alignment or a float as its class, or as the inline style when there is no class for it.
+	 * @param  array<string, mixed>  $attrs
+	 * @internal
+	 */
+	public static function applyClassOrStyle(array &$attrs, ?string $class, string $property, string $value): void
 	{
-		if ($this->hAlign) {
-			$class = $texy->alignClasses[$this->hAlign] ?? null;
-			if ($class) {
-				settype($attrs['class'], 'array');
-				$attrs['class'][] = $class;
-			} else {
-				settype($attrs['style'], 'array');
-				$attrs['style']['text-align'] = $this->hAlign;
-			}
-		}
-
-		if ($this->vAlign) {
-			$class = $texy->alignClasses[$this->vAlign] ?? null;
-			if ($class) {
-				settype($attrs['class'], 'array');
-				$attrs['class'][] = $class;
-			} else {
-				settype($attrs['style'], 'array');
-				$attrs['style']['vertical-align'] = $this->vAlign;
-			}
+		if ($class) {
+			$attrs['class'] = (array) ($attrs['class'] ?? []);
+			$attrs['class'][] = $class;
+		} else {
+			$attrs['style'] = (array) ($attrs['style'] ?? []);
+			$attrs['style'][$property] = $value;
 		}
 	}
 

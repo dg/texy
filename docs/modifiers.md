@@ -30,7 +30,7 @@ Not every construct accepts every part. Three pattern building blocks in `src/Pa
 
 ## The Modifier class
 
-`Texy\Modifier` (`src/Modifier.php`) parses a modifier string and stores its parts. Instances are created by syntax handlers through the static factory `Modifier::parse($s)`, passing the modifier text captured by the pattern's regex group. (The instance method `setProperties()` does the same but is deprecated.)
+`Texy\Modifier` (`src/Modifier.php`) parses a modifier string and stores its parts. Instances are created by syntax handlers through the static factory `Modifier::parse($s)`, passing the modifier text captured by the pattern's regex group.
 
 Public properties:
 

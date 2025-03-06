@@ -28,10 +28,10 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 }
 
 
-$texy = new Texy;
+$texy = new Texy\Texy;
 
 // Long words get soft hyphens for better text wrapping (on by default)
-// $texy->allowed['longwords'] = false;
+// $texy->allowed[Texy\Syntax::Hyphenation] = false;
 
 // Optional: Change the locale for typography rules
 // $texy->typographyModule->locale = 'en';  // English quotes: "text"

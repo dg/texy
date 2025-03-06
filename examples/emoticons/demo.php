@@ -21,15 +21,15 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 }
 
 
-$texy = new Texy;
+$texy = new Texy\Texy;
 
 
 // IMPORTANT: Emoticons are disabled by default!
 // You must enable them like this:
-$texy->allowed['emoticon'] = true;
+$texy->allowed[Texy\Syntax::Emoticon] = true;
 
 // Set a CSS class that will be added to all emoticon images
-$texy->emoticonModule->class = 'smiley';
+$texy->emoticonModule->class = 'smilie';
 
 // Add your own custom emoticon
 // When someone types :oops: in the text, it will show this emoji
@@ -52,7 +52,7 @@ $html = $texy->process($text);
 // Display the result
 echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';
-echo '<style type="text/css"> .smiley { vertical-align: middle; } </style>';
+echo '<style type="text/css"> .smilie { vertical-align: middle; } </style>';
 echo $html;
 
 

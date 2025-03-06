@@ -23,12 +23,12 @@ class TexyExtension extends Latte\Extension
 	private readonly \Closure $processor;
 
 
-	/** @param  Texy|callable(string, mixed...): string  $texy */
-	public function __construct(Texy|callable $texy)
+	/** @param  Texy|\Closure(string, mixed...): string  $texy */
+	public function __construct(Texy|\Closure $texy)
 	{
 		$this->processor = $texy instanceof Texy
 			? fn(string $text): string => $texy->process(Helpers::outdent(str_replace("\t", '    ', $text)))
-			: $texy(...);
+			: $texy;
 	}
 
 

@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Patterns;
+use Texy\{Patterns, Regexp, Syntax};
 
 
 /**
@@ -17,8 +17,13 @@ use Texy\Patterns;
 final class TypographyModule extends Texy\Module
 {
 	/** @var array<string, array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}}> */
-	public static array $locales = [
+	public array $locales = [
 		'cs' => [
+			'singleQuotes' => ["\u{201A}", "\u{2018}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
+		],
+
+		'de' => [
 			'singleQuotes' => ["\u{201A}", "\u{2018}"],
 			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
 		],
@@ -33,11 +38,6 @@ final class TypographyModule extends Texy\Module
 			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
 		],
 
-		'de' => [
-			'singleQuotes' => ["\u{201A}", "\u{2018}"],
-			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
-		],
-
 		'pl' => [
 			'singleQuotes' => ["\u{201A}", "\u{2019}"],
 			'doubleQuotes' => ["\u{201E}", "\u{201D}"],
@@ -46,8 +46,11 @@ final class TypographyModule extends Texy\Module
 
 	public string $locale = 'cs';
 
-	/** @var array<string, string> */
-	private static array $patterns = [
+	/**
+	 * search => replacement; :ldq:/:rdq:/:lsq:/:rsq: are placeholders for locale quotes
+	 * @var array<string, string>
+	 */
+	private array $replacements = [
 		'~(?<! [.\x{2026}] ) \.{3,4} (?! [.\x{2026}] )~mx'  => "\u{2026}",                // ellipsis  ...
 		'~(?<= [\d ] | ^ ) - (?= [\d ] | $)~x' /* .         */ => "\u{2013}",                // en dash 123-123
 		'~(?<= [^!*+,/:;<=>@\\\_|-] ) -- (?= [^!*+,/:;<=>@\\\_|-] )~x' => "\u{2013}",   // en dash alphanum--alphanum
@@ -94,32 +97,42 @@ final class TypographyModule extends Texy\Module
 	];
 
 	/** @var array<string, string> */
-	private array $pattern = [];
+	private array $localizedReplacements = [];
+
+	/** @var ?array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}} */
+	private ?array $compiledQuotes = null;
 
 
 	public function __construct(Texy\Texy $texy)
 	{
-		$texy->registerPostLine($this->postLine(...), 'typography');
-	}
-
-
-	public function beforeParse(string &$text): void
-	{
-		$locale = self::$locales[$this->locale] ?? self::$locales['en'];
-		$dq = $locale['doubleQuotes'];
-		$sq = $locale['singleQuotes'];
-		foreach (self::$patterns as $k => $v) {
-			$this->pattern[$k] = strtr($v, [':ldq:' => $dq[0], ':rdq:' => $dq[1], ':lsq:' => $sq[0], ':rsq:' => $sq[1]]);
-		}
+		$texy->allowed[Syntax::Typography] ??= true;
 	}
 
 
 	public function postLine(string $text, bool $preserveSpaces = false): string
 	{
 		if (!$preserveSpaces) {
-			$text = Texy\Regexp::replace($text, '~\ {2,}~', ' ');
+			$text = Regexp::replace($text, '~\ {2,}~', ' ');
 		}
 
-		return Texy\Regexp::replace($text, $this->pattern);
+		return Regexp::replace($text, $this->getReplacements());
+	}
+
+
+	/** @return array<string, string> */
+	private function getReplacements(): array
+	{
+		// compared by value, so both changing $locale and mutating $locales invalidate the cache
+		$quotes = $this->locales[$this->locale] ?? $this->locales['en'];
+		if ($quotes !== $this->compiledQuotes) {
+			$this->compiledQuotes = $quotes;
+			$dq = $quotes['doubleQuotes'];
+			$sq = $quotes['singleQuotes'];
+			foreach ($this->replacements as $k => $v) {
+				$this->localizedReplacements[$k] = strtr($v, [':ldq:' => $dq[0], ':rdq:' => $dq[1], ':lsq:' => $sq[0], ':rsq:' => $sq[1]]);
+			}
+		}
+
+		return $this->localizedReplacements;
 	}
 }

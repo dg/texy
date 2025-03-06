@@ -9,14 +9,14 @@
  * WHAT YOU'LL LEARN:
  * - Different security levels from permissive to strict
  * - safeMode() - the recommended setting for user-submitted content
- * - How to disable all links or images
+ * - How to disable all links
  * - How to create a custom whitelist of allowed tags
  *
  * SECURITY LEVELS (from most to least permissive):
- * 1. Texy::ALL - allows ALL HTML tags (dangerous for user input!)
- * 2. Default - allows most valid HTML5 tags
+ * 1. true - allows ALL HTML tags (dangerous for user input!)
+ * 2. Default - allows the common HTML tags with any attributes (dangerous for user input too)
  * 3. safeMode() - allows only safe tags (recommended for comments/forums)
- * 4. Texy::NONE - allows NO HTML tags at all
+ * 4. false - allows NO HTML tags at all
  * 5. Custom whitelist - you specify exactly which tags are allowed
  */
 
@@ -26,18 +26,22 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 }
 
 
-$texy = new Texy;
-
-
 /**
- * Helper function to process and display the text
+ * Processes the sample with a fresh Texy set up by $configure, so that each mode is shown on its own.
+ * @param  ?Closure(Texy\Texy): mixed  $configure
  */
-function processAndShow(Texy $texy): void
+function show(string $title, ?Closure $configure = null): void
 {
+	$texy = new Texy\Texy;
+	if ($configure) {
+		$configure($texy);
+	}
 	$text = <<<'TEXY'
 		This <strong>example</strong> shows how <a href=https://texy.deegee.dev title='Texy! excellent text-to-html converter & formatter'>Texy!</a> handle HTML tags.
 
-		Dangerous <span onmouseover="alert('onmouseover')">span</span>
+		Dangerous <span onmouseover="alert('onmouseover')">span</span> and <a href="https://texy.deegee.dev" onclick="alert('onclick')">link</a>
+
+		An image [* image.gif .(an image) *]
 
 		<div id="page">
 		 Hello!
@@ -46,19 +50,16 @@ function processAndShow(Texy $texy): void
 
 		<my-extraTag attr1="10">
 
-		"Homepage .{target: _blank}":texy.deegee.dev
+		"Homepage .{target: _blank}":https://texy.deegee.dev
 
 		</my-extraTag>
 		TEXY;
 	$html = $texy->process($text);
 
-	// Show the rendered output
+	// Show the rendered output and its HTML source code
+	echo "<h2>$title</h2>";
 	echo $html;
-
-	// Show the HTML source code
-	echo '<pre>';
-	echo htmlspecialchars($html);
-	echo '</pre>';
+	echo '<pre>', htmlspecialchars($html), '</pre>';
 	echo '<hr>';
 }
 
@@ -69,21 +70,18 @@ echo '<link rel="stylesheet" href="../style.css">';
 
 // ============================================================
 // DEFAULT MODE
-// Most valid HTML5 tags are allowed, but dangerous attributes
-// like onclick are removed.
+// The common HTML tags are allowed with all their attributes, event
+// handlers like onmouseover included. Fine for trusted text only.
 // ============================================================
-echo '<h2>Enable nearly all valid tags</h2>';
-processAndShow($texy);
+show('Enable nearly all valid tags');
 
 
 // ============================================================
-// Texy::ALL
+// ALL TAGS
 // Allows ALL HTML tags, including custom elements.
 // WARNING: Only use this if you trust the input completely!
 // ============================================================
-echo '<h2>Texy::ALL - enables all tags</h2>';
-$texy->allowedTags = $texy::ALL;
-processAndShow($texy);
+show('allowedTags = true - enables all tags', fn(Texy\Texy $texy) => $texy->allowedTags = true);
 
 
 // ============================================================
@@ -91,28 +89,22 @@ processAndShow($texy);
 // Only allows safe tags like <strong>, <em>, <a>, <code>, etc.
 // Removes images, scripts, styles, and dangerous attributes.
 // ============================================================
-echo '<h2>safeMode() - enables only some "safe" tags</h2>';
-Texy\Configurator::safeMode($texy);
-processAndShow($texy);
+show('safeMode() - enables only some "safe" tags', fn(Texy\Texy $texy) => Texy\Configurator::safeMode($texy));
 
 
 // ============================================================
 // DISABLE LINKS
 // Use this if you don't want users to include any links.
 // ============================================================
-echo '<h2>disableLinks() - disable all links</h2>';
-Texy\Configurator::disableLinks($texy);
-processAndShow($texy);
+show('disableLinks() - disable all links', fn(Texy\Texy $texy) => Texy\Configurator::disableLinks($texy));
 
 
 // ============================================================
-// Texy::NONE
+// NO TAGS
 // Completely disables all HTML tags.
 // Tags in input will be escaped and shown as text.
 // ============================================================
-echo '<h2>Texy::NONE - disables all tags</h2>';
-$texy->allowedTags = $texy::NONE;
-processAndShow($texy);
+show('allowedTags = false - disables all tags', fn(Texy\Texy $texy) => $texy->allowedTags = false);
 
 
 // ============================================================
@@ -121,9 +113,7 @@ processAndShow($texy);
 // Format: 'tag-name' => ['allowed', 'attributes']
 // Empty array [] means no attributes are allowed.
 // ============================================================
-echo '<h2>Enable custom tags</h2>';
-$texy->allowedTags = [
+show('Enable custom tags', fn(Texy\Texy $texy) => $texy->allowedTags = [
 	'my-extraTag' => ['attr1'],  // Allow <my-extraTag attr1="...">
 	'strong' => [],              // Allow <strong> with no attributes
-];
-processAndShow($texy);
+]);

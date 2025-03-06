@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('open block syntax', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlOutputModule->lineWrap = 180;
+	$texy->htmlOutput->lineWrap = 180;
 
 	Assert::matchFile(
 		__DIR__ . '/expected/block-unclosed.html',

@@ -15,7 +15,7 @@ function createTexy()
 	$texy->linkModule->root = 'xxx/';
 	$texy->imageModule->root = '../images/';
 	$texy->imageModule->leftClass = 'left';
-	$texy->htmlOutputModule->lineWrap = 180;
+	$texy->htmlOutput->lineWrap = 180;
 	return $texy;
 }
 

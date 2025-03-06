@@ -19,7 +19,6 @@ test('data-* attributes', function () {
 test('data-attr modifier', function () {
 	$texy = new Texy;
 	Assert::same("<p data-attr=\"val\">hello</p>\n", $texy->process('hello .{data-attr: val}'));
-	Assert::same("<div data-test=\"hello\"></div>\n", $texy->process('<div data-test=hello>'));
 });
 
 

@@ -7,7 +7,6 @@
 
 namespace Texy\Output\Html;
 
-use Texy\Texy;
 use function is_array;
 
 
@@ -180,7 +179,7 @@ final class Schema
 
 	/**
 	 * Phrasing elements; replaced elements have value 1, others 0.
-	 * @return array<string, int>
+	 * @return array<string, 0|1>
 	 */
 	public static function inlineElements(): array
 	{
@@ -306,7 +305,7 @@ final class Schema
 	{
 		static $cache;
 		if ($cache === null) {
-			$cache = array_fill_keys(array_keys(self::Elements), Texy::ALL);
+			$cache = array_fill_keys(array_keys(self::Elements), true);
 			unset($cache['html'], $cache['head'], $cache['body'], $cache['style']);
 		}
 

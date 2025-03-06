@@ -29,13 +29,14 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 }
 
 
-$texy = new Texy;
+$texy = new Texy\Texy;
+$texy->htmlOutput->baseIndent = 1;
 
 
 /**
  * Helper function to process and display the text
  */
-function processAndShow(Texy $texy): void
+function processAndShow(Texy\Texy $texy): void
 {
 	$text = <<<'TEXY'
 		This **text is formatted .{color:silver; background: blue;}** with *style .{font-weight: bold}* modifiers.

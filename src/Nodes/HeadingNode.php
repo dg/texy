@@ -1,0 +1,44 @@
+<?php declare(strict_types=1);
+
+/**
+ * This file is part of the Texy! (https://texy.deegee.dev)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
+ */
+
+namespace Texy\Nodes;
+
+use Texy;
+use Texy\HasModifier;
+
+
+/**
+ * Heading.
+ * -------
+ *
+ * # Heading 1
+ */
+class HeadingNode extends BlockNode implements HasModifier
+{
+	public function __construct(
+		public ContentNode $content,
+		/** 1..6, by the notation in the syntax tree and the real one in a transformed document */
+		public int $level,
+		public HeadingType $type,
+		public ?Texy\Modifier $modifier = null,
+		/** the underline character or the opening sequence as written, e.g. '-' or '###' */
+		public ?string $marker = null,
+	) {
+	}
+
+
+	public function &getChildren(): \Generator
+	{
+		yield $this->content;
+	}
+
+
+	public function getModifier(): ?Texy\Modifier
+	{
+		return $this->modifier;
+	}
+}

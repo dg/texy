@@ -68,7 +68,7 @@ test('nested div blocks', function () {
 });
 
 
-test('html block - raw output', function () {
+test('html block escapes a tag that is not allowed', function () {
 	Assert::match(
 		'&lt;custom-element&gt;content&lt;/custom-element&gt;',
 		process(<<<'XX'
@@ -95,8 +95,8 @@ test('text block with line breaks', function () {
 
 
 test('texysource block', function () {
-	Assert::match(
-		'<pre%A%class="html"><code>%a%</code></pre>',
+	Assert::same(
+		"<pre\nclass=\"html\"><code>&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt;&lt;/p&gt;</code></pre>\n",
 		process(<<<'XX'
 			/--texysource
 			**bold** and //italic//
@@ -150,4 +150,11 @@ test('pre block', function () {
 			\--
 			XX),
 	);
+});
+
+
+test('a disallowed block type stays as text', function () {
+	$texy = new Texy\Texy;
+	$texy->allowed[Texy\Syntax::DelimitedHtml] = false;
+	Assert::same('<p>/--html <b>x</b> \--</p>', trim($texy->process("/--html\n<b>x</b>\n\\--")));
 });

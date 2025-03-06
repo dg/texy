@@ -18,7 +18,7 @@ test('long line wrapping', function () {
 });
 
 
-test('long line wrapping (variant)', function () {
+test('a large document of long unbreakable lines', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		normalizeNewlines(file_get_contents(__DIR__ . '/expected/formatter-linewrap-alt.html')),

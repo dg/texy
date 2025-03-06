@@ -161,7 +161,7 @@ Second-level heading
 ********************
 ```
 
-**Surrounded** – the text is prefixed (and optionally suffixed) by 2–7 `#` or `=` characters; by default more characters mean a *higher* heading (`$moreMeansHigher`, applies to `DYNAMIC` balancing):
+**Surrounded** – the text is prefixed (and optionally suffixed) by 2–7 `#` or `=` characters; by default more characters mean a *higher* heading (`$moreMeansHigher`, applies to `Dynamic` balancing):
 
 ```texy
 ==== Top-level heading
@@ -169,11 +169,11 @@ Second-level heading
 === Lower level
 ```
 
-Final `<h1>`–`<h6>` levels are computed in `afterParse` according to `$texy->headingModule->balancing` (`DYNAMIC` auto-levels relative to `$top`; `FIXED` maps characters via `$levels`). Optional automatic `id` attributes: `$generateID`, `$idPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the text used for the generated ID and the TOC entry. The first heading is exposed as `$texy->headingModule->title` and all of them in `$texy->headingModule->TOC`.
+Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->config->headingBalancing` (`Dynamic` orders the heading styles of the document, `Fixed` maps the underline characters `#` `*` `=` `-` to levels 1–4), then shifted by `$headingTop`; a level beyond 6 is `<h6>`. Optional automatic `id` attributes: `$headingIds`, `$headingIdPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the title used in the table of contents, and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `$document->find(HeadingNode::class)` returns them in document order, each carrying `$level`, `getTitle()` and `$id` (the anchor, explicit or generated; an explicit ID that `allowedClasses` rejects is replaced by a generated one); the document title is `$document->findFirst(HeadingNode::class)?->getTitle()`. Without the modifier the title comes from the heading's own content, so unlike the ID it reflects typography.
 
 ## Lists
 
-*(`list`, `list/definition` – ListModule)*
+*(`list`, `list/decimal`, `list/roman`, `list/alpha`, `list/definition` – ListModule)*
 
 **Bulleted** – lines starting with `-`, `*`, or `+` followed by a space:
 
@@ -215,6 +215,7 @@ Rows start with `|`, cells are separated by `|`:
 | Eva  | Nova  | Brno
 ```
 
+- **Caption:** a line `|## Caption text` above the first row becomes `<caption>`. `=` works like `#`, the opening chars may be repeated after the text (`|## Caption ##|`), and the text may contain inline markup.
 - **Header row(s):** separate the head with a dashed line `|---…`.
 - **Row headers:** start the cell with `|*` to produce `<th>`.
 - **Colspan:** end the cell with `||` (empty following cell merges left).
@@ -224,6 +225,7 @@ Rows start with `|`, cells are separated by `|`:
 
 ```texy
 .[data-table]
+|## Price list
 | Name       | .> Price | In stock
 |------------|----------|---------
 | Product A  | $12      | yes
@@ -257,11 +259,11 @@ Three or more `-` or `*` on a separate line (a blank line must precede, otherwis
 
 Each character type may get its own CSS class via `$texy->horizLineModule->classes`.
 
-## Fenced blocks
+## Delimited blocks
 
 *(`blocks` + `block/*` subtypes – DelimitedBlockModule)*
 
-A block starts with `/--type` and ends with `\--`. Blocks of type `div` may nest. The optional parameter after the type (e.g. language) is passed to handlers.
+A delimited block starts with `/--type` and ends with `\--`. Blocks of type `div` may nest. The optional parameter after the type (e.g. language) is passed to handlers.
 
 ```texy
 /--code php
@@ -287,19 +289,21 @@ Displayed literally, both Texy and HTML markup escaped.
 | `block/pre` | `<pre>`; content is escaped, but HTML tags written inside are recognized and validated |
 | `block/html` | content parsed as HTML (tags validated against `$allowedTags`), Texy markup off, no wrapper element |
 | `block/text` | content escaped literally, line breaks become `<br>` |
-| `block/texy` | content parsed as regular Texy – restores full processing, e.g. inside a `div` block; handled before the `$allowed` check, so it cannot be disabled |
-| `block/texysource` | content processed by Texy and the *resulting HTML source* displayed in a code block (parameter `line` switches to inline parsing) |
+| `block/texy` | content parsed as regular Texy – restores full processing, e.g. inside a `div` block; handled before the `$allowedSyntax` check, so it cannot be disabled |
+| `block/texysource` | off by default (`$allowedSyntax['block/texysource'] = true`); content processed by Texy and the *resulting HTML source* displayed in a code block (parameter `line` switches to inline parsing) |
 | `block/comment` | content discarded entirely |
 | `block/div` | `<div>`, content parsed as Texy blocks; may nest |
 | `block/default` | plain `/--` without a type; escaped `<pre>`, the parameter (if any) becomes a CSS class |
 
-Each subtype (except `block/texy`) is individually switchable in `$allowed`; the whole feature via `blocks`.
+Each subtype (except `block/texy`) is individually switchable in `$allowedSyntax`; the whole feature via `blocks`.
 
 ## Direct HTML
 
-*(`html/tag`, `html/comment` – HtmlModule)*
+*(`html/tag`, `html/comment`, `html/entity` – HtmlModule)*
 
 HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->allowedTags` and the content model; disallowed tags/attributes are removed, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlModule->passComment` is on.
+
+HTML entity references (`&amp;`, `&#65;`, `&#xA0;`) are decoded into their characters; an unknown reference stays literal text. With `$allowed['html/entity']` off, references are ordinary text and render escaped.
 
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.
@@ -368,6 +372,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `script` | ✅ on | `{{command: args}}` | DirectiveModule |
 | `html/tag` | ✅ on | `<strong>`, `<div class=…>` | HtmlModule |
 | `html/comment` | ✅ on | `<!-- comment -->` | HtmlModule |
+| `html/entity` | ✅ on | `&amp;`, `&#160;` | HtmlModule |
 | `image` | ✅ on | `[* image.jpg *]` | ImageModule |
 | `phrase/strong+em` | ✅ on | `***text***` | PhraseModule |
 | `phrase/strong` | ✅ on | `**text**` | PhraseModule |
@@ -400,11 +405,11 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 
 | Syntax ID | Default | Markup | Module |
 |---|---|---|---|
-| `blocks` | ✅ on | `/-- type … \--` fenced blocks | DelimitedBlockModule |
+| `blocks` | ✅ on | `/-- type … \--` delimited blocks | DelimitedBlockModule |
 | `block/code` | ✅ on | subtype `/--code lang` | DelimitedBlockModule |
 | `block/html` | ✅ on | subtype `/--html` | DelimitedBlockModule |
 | `block/text` | ✅ on | subtype `/--text` | DelimitedBlockModule |
-| `block/texysource` | ✅ on | subtype `/--texysource` | DelimitedBlockModule |
+| `block/texysource` | ❌ off | subtype `/--texysource` | DelimitedBlockModule |
 | `block/comment` | ✅ on | subtype `/--comment` | DelimitedBlockModule |
 | `block/div` | ✅ on | subtype `/--div` | DelimitedBlockModule |
 | `block/pre` | ✅ on | subtype `/--pre` | DelimitedBlockModule |

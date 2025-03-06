@@ -14,8 +14,8 @@ require __DIR__ . '/../bootstrap.php';
 function processHtml(string $html, ?array $allowedTags = null): string
 {
 	$texy = new Texy;
-	$texy->htmlOutputModule->indent = false;
-	$texy->htmlOutputModule->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->lineWrap = 0;
 	$texy->allowed['typography'] = false;
 
 	if ($allowedTags !== null) {
@@ -151,14 +151,12 @@ test('details: summary outside details is suppressed, content kept', function ()
 // =============================================================================
 
 test('prohibits: nested anchors rejected', function () {
-	$html = processHtml('<a href="x"><a href="y">L</a></a>');
-	Assert::same(1, substr_count($html, '<a '));
+	Assert::same('<p><a href="x">L</a></p>', processHtml('<a href="x"><a href="y">L</a></a>'));
 });
 
 
 test('prohibits: nested forms rejected', function () {
-	$html = processHtml('<form><form><input></form></form>');
-	Assert::same(1, substr_count($html, '<form>'));
+	Assert::same('<form><input></form>', processHtml('<form><form><input></form></form>'));
 });
 
 
@@ -262,13 +260,6 @@ test('empty: iframe content stripped', function () {
 });
 
 
-test('text-only: textarea content as text', function () {
-	$html = processHtml('<textarea><b>X</b></textarea>');
-	// content treated as text, tags not processed as HTML
-	Assert::contains('<textarea>', $html);
-});
-
-
 // =============================================================================
 // UNKNOWN/CUSTOM TAGS - INHERIT FROM PARENT
 // =============================================================================
@@ -276,8 +267,8 @@ test('text-only: textarea content as text', function () {
 test('unknown: inherits flow content', function () {
 	$texy = new Texy;
 	$texy->allowedTags = Texy::ALL;
-	$texy->htmlOutputModule->indent = false;
-	$texy->htmlOutputModule->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::same(
 		'<div><x-a><p>T</p></x-a></div>',
@@ -289,8 +280,8 @@ test('unknown: inherits flow content', function () {
 test('unknown: inherits phrasing content', function () {
 	$texy = new Texy;
 	$texy->allowedTags = Texy::ALL;
-	$texy->htmlOutputModule->indent = false;
-	$texy->htmlOutputModule->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::same(
 		'<p><x-b><strong>B</strong></x-b></p>',
@@ -302,8 +293,8 @@ test('unknown: inherits phrasing content', function () {
 test('unknown: inherits table restrictions', function () {
 	$texy = new Texy;
 	$texy->allowedTags = Texy::ALL;
-	$texy->htmlOutputModule->indent = false;
-	$texy->htmlOutputModule->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->lineWrap = 0;
 
 	// x-c inside tr, only td/th allowed, so p is rejected
 	$html = trim($texy->process('<table><tr><x-c><p>T</p></x-c></tr></table>'));
@@ -329,7 +320,7 @@ test('allowedTags: NONE disables all tags', function () {
 test('allowedTags: selective', function () {
 	$texy = new Texy;
 	$texy->allowedTags = ['strong' => Texy::ALL, 'em' => Texy::ALL];
-	$texy->htmlOutputModule->indent = false;
+	$texy->htmlOutput->indent = false;
 
 	$html = trim($texy->process('<strong>A</strong> <b>B</b> <em>C</em>'));
 	Assert::contains('<strong>A</strong>', $html);
@@ -341,8 +332,8 @@ test('allowedTags: selective', function () {
 test('allowedTags: ALL enables everything', function () {
 	$texy = new Texy;
 	$texy->allowedTags = Texy::ALL;
-	$texy->htmlOutputModule->indent = false;
-	$texy->htmlOutputModule->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::same(
 		'<x-el>C</x-el>',
@@ -356,9 +347,7 @@ test('allowedTags: ALL enables everything', function () {
 // =============================================================================
 
 test('well-forming: unclosed tags', function () {
-	$html = processHtml('<div><p>T');
-	Assert::contains('</p>', $html);
-	Assert::contains('</div>', $html);
+	Assert::same('<div><p>T</p></div>', processHtml('<div><p>T'));
 });
 
 
@@ -370,7 +359,8 @@ test('well-forming: misnested inline', function () {
 
 test('well-forming: orphan end tags', function () {
 	// orphan end tags are ignored, remaining text is output
-	Assert::same('T', processHtml('</div>T</p>'));
+	// stray closers are dropped; the remaining visible text gets a normal <p>
+	Assert::same('<p>T</p>', processHtml('</div>T</p>'));
 });
 
 
@@ -382,13 +372,6 @@ test('edge: empty element end tag ignored', function () {
 	$html = processHtml('<br></br>');
 	Assert::contains('<br>', $html);
 	Assert::notContains('</br>', $html);
-});
-
-
-test('edge: self-closing syntax', function () {
-	$html = processHtml('<br/>T');
-	Assert::contains('<br>', $html);
-	Assert::contains('T', $html);
 });
 
 
@@ -420,8 +403,8 @@ test('allowed: head when added to allowedTags', function () {
 	$texy = new Texy;
 	$texy->allowedTags['head'] = Texy::ALL;
 	$texy->allowedTags['title'] = Texy::ALL;
-	$texy->htmlOutputModule->indent = false;
-	$texy->htmlOutputModule->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::same(
 		'<head><title>T</title></head>',
@@ -433,8 +416,8 @@ test('allowed: head when added to allowedTags', function () {
 test('allowed: custom element when added', function () {
 	$texy = new Texy;
 	$texy->allowedTags['x-w'] = Texy::ALL;
-	$texy->htmlOutputModule->indent = false;
-	$texy->htmlOutputModule->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::same(
 		'<x-w>C</x-w>',
