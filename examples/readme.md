@@ -31,8 +31,8 @@ php "1-2-3 start/demo.php"
 
 | Example | Description |
 |---------|-------------|
-| [images](images/) | Control image paths, add handlers for special URLs |
-| [links](links/) | Transform links, handle custom URL schemes |
+| [images](images/) | Control image paths, define images by name, change the `<img>` |
+| [links](links/) | Rewrite links in a transform pass, handle custom URL schemes |
 | [headings](headings/) | Configure heading levels, generate TOC |
 | [Figure as Definition List](Figure%20as%20Definition%20List/) | Change figure HTML from `<div>` to `<dl>` |
 
@@ -42,7 +42,7 @@ php "1-2-3 start/demo.php"
 |---------|-------------|
 | [HTML filtering](HTML%20filtering/) | Control allowed HTML tags (important for user input!) |
 | [modifiers](modifiers/) | Control allowed CSS classes and styles |
-| [references](references/) | Build a safe comment system with user mentions |
+| [references](references/) | Build a safe comment system with mentions of other comments resolved in a pass |
 
 ### Adding Features
 
@@ -53,12 +53,6 @@ php "1-2-3 start/demo.php"
 | [Youtube video](Youtube%20video/) | Embed videos using image syntax |
 | [user syntax](user%20syntax/) | Create your own markup syntax |
 
-### Reference
-
-| Example | Description |
-|---------|-------------|
-| [handler](handler/) | Complete list of all available handlers |
-
 ---
 
 ## Quick Reference
@@ -66,36 +60,49 @@ php "1-2-3 start/demo.php"
 ### Basic Processing
 
 ```php
-$texy = new Texy;
+$texy = new Texy\Texy;
 $html = $texy->process($text);
 ```
 
 ### Safe Mode (for user input)
 
 ```php
-$texy = new Texy;
+$texy = new Texy\Texy;
 Texy\Configurator::safeMode($texy);
 $html = $texy->process($userInput);
 ```
 
-### Adding a Handler
+### Changing the Document
 
 ```php
-$texy = new Texy;
-$texy->addHandler('image', function($invocation, $image, $link) {
-    // Modify the image or link
-    return $invocation->proceed();
+$texy = new Texy\Texy;
+$texy->addHandler(function (Texy\Nodes\DocumentNode $document): void {
+    foreach ($document->find(Texy\Nodes\LinkNode::class) as $link) {
+        // change the link, every output format gets it
+    }
 });
+```
+
+### Customizing Output
+
+```php
+$texy = new Texy\Texy;
+$texy->htmlOutput->addRenderer(
+    function (Texy\Nodes\ImageNode $node, Texy\Output\Html\Renderer $renderer, ?Closure $previous) {
+        // modify the rendered image, or return null to delegate
+        return $previous($node);
+    },
+);
 ```
 
 ### Registering Custom Syntax
 
 ```php
-$texy = new Texy;
+$texy = new Texy\Texy;
 $texy->registerLinePattern(
-    'myHandler',           // callback function
-    '#@@(\w+)#',          // regex pattern
-    'custom/username'      // syntax name
+    $parser,               // fn(ParseContext, array $matches): ?Node
+    '#@@(\w+)#',           // regex pattern
+    'custom/username',     // syntax name
 );
 ```
 
@@ -112,8 +119,8 @@ $texy->registerLinePattern(
 ### Images
 - `[* image.jpg *]` → image
 - `[* image.jpg *]:link` → linked image
-- `[*< image.jpg *]` → left-aligned
-- `[*> image.jpg *]` → right-aligned
+- `[* image.jpg <]` → left-floated
+- `[* image.jpg >]` → right-floated
 
 ### Headings
 ```
@@ -148,5 +155,5 @@ echo "Hello";
 
 ## Learn More
 
-- [Texy Documentation](https://texy.info)
+- [Texy Documentation](https://texy.deegee.dev)
 - [GitHub Repository](https://github.com/dg/texy)

@@ -44,6 +44,11 @@ test('HTML tag with attributes', function () {
 });
 
 
+test('line break inside a tag is a space', function () {
+	Assert::match('<p>x <a href="x" title="a b">y</a> z</p>', process("x <a href=x title=\"a\n  b\">y</a> z"));
+});
+
+
 test('HTML tag with class', function () {
 	Assert::match(
 		'<p><span class="highlight">text</span></p>',
@@ -80,7 +85,7 @@ test('HTML comment with dashes sanitized', function () {
 
 test('orphan closing tag - ignored by well-forming', function () {
 	Assert::match(
-		'text',
+		'<p>text</p>',
 		process('text</div>'),
 	);
 });

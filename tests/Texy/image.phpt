@@ -9,6 +9,21 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
+test('the alternative text and the float are properties of the image, not of its modifier', function () {
+	$texy = new Texy\Texy;
+	$image = fn(string $s) => $texy->parse($s)->content->children[0]->content->children[1];
+
+	$node = $image('x [* a.png .(Alt)[c] <] y');
+	Assert::same(['Alt', 'left', null, null], [$node->alt, $node->float, $node->modifier->title, $node->modifier->hAlign]);
+	Assert::same('Attr', $image('x [* a.png .(Alt){alt: Attr} >] y')->alt);
+
+	$texy->imageModule->addDefinition('logo', 'logo.png', alt: 'Logo');
+	$doc = $texy->parse('x [* logo *] y');
+	$texy->transform($doc);
+	Assert::same('Logo', $doc->content->children[0]->content->children[1]->alt);
+});
+
+
 // =============================================================================
 // Auto-detect dimensions
 // =============================================================================
@@ -71,33 +86,27 @@ test('image dimensions not detected without fileRoot', function () {
 // alignClasses
 // =============================================================================
 
-test('image with alignClasses', function () {
+test('image with a float class', function () {
 	$texy = new Texy\Texy;
-	$texy->alignClasses['right'] = 'float-right';
+	$texy->imageModule->rightClass = 'float-right';
 	Assert::match(
-		'<div class="figure-float-right"><img src="images/image.jpg" alt=""></div>
+		'<div class="figure float-right"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process('[* image.jpg >]'),
 	);
-});
-
-
-test('image with leftClass', function () {
-	$texy = new Texy\Texy;
-	$texy->figureModule->leftClass = 'img-left';
 	Assert::match(
-		'<div class="img-left"><img src="images/image.jpg" alt=""></div>
+		'<p>a <img src="images/image.jpg" alt="" class="float-right"> b</p>
 ',
-		$texy->process('[* image.jpg <]'),
+		$texy->process('a [* image.jpg >] b'),
 	);
 });
 
 
 test('image with float fallback', function () {
 	$texy = new Texy\Texy;
-	// No leftClass, no alignClasses - should use float style on container
+	// no float class - the float is an inline style on the container
 	Assert::match(
-		'<div style="float:left" class="figure"><img src="images/image.jpg" alt=""></div>
+		'<div class="figure" style="float:left"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process('[* image.jpg <]'),
 	);

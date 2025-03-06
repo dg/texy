@@ -9,11 +9,11 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-test('figure with leftClass', function () {
+test('figure floated left gets its float class besides the figure class', function () {
 	$texy = new Texy\Texy;
-	$texy->figureModule->leftClass = 'image-left';
+	$texy->imageModule->leftClass = 'image-left';
 	Assert::match(
-		'<div class="image-left"><img src="images/image.jpg" alt="">
+		'<div class="figure image-left"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
 </div>
 ',
@@ -22,9 +22,10 @@ test('figure with leftClass', function () {
 });
 
 
-test('figure with rightClass', function () {
+test('figure floated right', function () {
 	$texy = new Texy\Texy;
-	$texy->figureModule->rightClass = 'image-right';
+	$texy->imageModule->rightClass = 'image-right';
+	$texy->figureModule->class = null;
 	Assert::match(
 		'<div class="image-right"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
@@ -35,24 +36,11 @@ test('figure with rightClass', function () {
 });
 
 
-test('figure with alignClasses', function () {
+test('text alignment classes do not apply to the float', function () {
 	$texy = new Texy\Texy;
 	$texy->alignClasses['left'] = 'align-left';
 	Assert::match(
-		'<div class="figure-align-left"><img src="images/image.jpg" alt="">
-	<p>Caption</p>
-</div>
-',
-		$texy->process('[* image.jpg <] *** Caption'),
-	);
-});
-
-
-test('figure with float fallback', function () {
-	$texy = new Texy\Texy;
-	// No leftClass, no alignClasses - should use float style
-	Assert::match(
-		'<div style="float:left" class="figure"><img src="images/image.jpg" alt="">
+		'<div class="figure" style="float:left"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
 </div>
 ',

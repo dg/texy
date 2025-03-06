@@ -8,24 +8,22 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Modifier;
-use function count, is_array, strlen;
+use Texy\{Modifier, Syntax};
+use Texy\Nodes\{HeadingNode, HeadingType};
+use Texy\Output\Html;
+use Texy\Parsing\ParseContext;
+use function strlen;
 
 
 /**
- * Processes heading syntax (underlined and surrounded) and builds table of contents.
+ * Processes heading syntax (underlined and surrounded), balances the levels by the order of
+ * heading styles in the document and generates heading IDs.
  */
 final class HeadingModule extends Texy\Module
 {
 	public const
 		DYNAMIC = 1, // auto-leveling
 		FIXED = 2; // fixed-leveling
-
-	/** textual content of first heading */
-	public ?string $title = null;
-
-	/** @var list<array{el: Texy\HtmlElement, level: int, type: string, title?: string}>  generated Table of Contents */
-	public array $TOC = [];
 
 	public bool $generateID = false;
 
@@ -41,194 +39,204 @@ final class HeadingModule extends Texy\Module
 	/** balancing mode */
 	public int $balancing = self::DYNAMIC;
 
-	/** @var array<string, int>  when $balancing = HeadingModule::FIXED */
+	/** @var array<string, int>  underline character => level 1..6 */
 	public array $levels = [
-		'#' => 0, // # --> $levels['#'] + $top = 0 + 1 = 1 --> <h1> ... </h1>
-		'*' => 1,
-		'=' => 2,
-		'-' => 3,
+		'#' => 1,
+		'*' => 2,
+		'=' => 3,
+		'-' => 4,
 	];
-
-	/** @var array<string, true>  used ID's */
-	private array $usedID = [];
 
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('heading', $this->solve(...));
-		$texy->addHandler('afterParse', $this->afterParse(...));
+		$texy->htmlOutput->addRenderer($this->render(...));
 	}
 
 
-	public function beforeParse(string &$text): void
+	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parseUnderline(...),
+		$this->texy->addBlock(
+			Syntax::HeadingUnderlined,
 			'~^
 				( \S .{0,1000} )                 # heading text (1)
 				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
 				\n
 				( \#{3,}+ | \*{3,}+ | ={3,}+ | -{3,}+ )  # underline characters (3)
 			$~mUx',
-			'heading/underlined',
+			$this->parseUnderline(...),
 		);
 
-		$this->texy->registerBlockPattern(
-			$this->parseSurround(...),
+		$this->texy->addBlock(
+			Syntax::HeadingSurrounded,
 			'~^
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
 				(.+)                             # heading text (2)
-				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
+				' . Texy\Patterns::MODIFIER_H . '? # modifier (3)
 			$~mUx',
-			'heading/surrounded',
+			$this->parseSurround(...),
 		);
-
-		$this->title = null;
-		$this->usedID = [];
-		$this->TOC = [];
 	}
 
 
-	public function afterParse(Texy\HtmlElement $dom, bool $isSingleLine): void
+	public function processHeadings(Texy\Nodes\DocumentNode $document): void
 	{
-		if ($isSingleLine) {
-			return;
-		}
-
+		$headings = $document->getHeadings();
 		if ($this->balancing === self::DYNAMIC) {
-			$top = $this->top;
-			$map = [];
-			$min = 100;
-			foreach ($this->TOC as $item) {
-				$level = $item['level'];
-				if ($item['type'] === 'surrounded') {
-					$min = min($level, $min);
-					$top = $this->top - $min;
-
-				} elseif ($item['type'] === 'underlined') {
-					$map[$level] = $level;
-				}
-			}
-
-			asort($map);
-			$map = array_flip(array_values($map));
+			$this->balanceLevels($headings);
 		}
 
-		foreach ($this->TOC as $key => $item) {
-			if ($this->balancing === self::DYNAMIC) {
-				if ($item['type'] === 'surrounded') {
-					$level = $item['level'] + $top;
+		foreach ($headings as $node) {
+			$node->level = min(6, max(1, $node->level + $this->top - 1));
+		}
 
-				} elseif ($item['type'] === 'underlined') {
-					$level = $map[$item['level']] + $this->top;
+		if ($this->generateID) {
+			$this->generateIDs($headings);
+		}
+	}
 
+
+	/**
+	 * Levels are read from the notation, the level of a node may have been changed or cut off.
+	 * @param  list<HeadingNode>  $headings
+	 */
+	private function balanceLevels(array $headings): void
+	{
+		$underlined = [];
+		$top = PHP_INT_MAX;
+		foreach ($headings as $node) {
+			if ($node->marker !== null) {
+				$level = $this->readLevel($node->marker, $node->type);
+				if ($node->type === HeadingType::Underlined) {
+					$underlined[$level] = $level;
 				} else {
-					$level = $item['level'];
-				}
-
-				$item['el']->setName('h' . min(6, max(1, $level)));
-				$this->TOC[$key]['level'] = $level;
-			}
-
-			if ($this->generateID) {
-				$style = $item['el']->attrs['style'] ?? null;
-				if (is_array($style) && !empty($style['toc'])) {
-					$title = (string) $style['toc'];
-					unset($item['el']->attrs['style']['toc']);
-				} else {
-					$title = trim($item['el']->toText($this->texy));
-				}
-
-				$this->TOC[$key]['title'] = $title;
-				if (empty($item['el']->attrs['id'])) {
-					$id = $this->idPrefix . Texy\Helpers::webalize($title);
-					$counter = '';
-					if (isset($this->usedID[$id . $counter])) {
-						$counter = 2;
-						while (isset($this->usedID[$id . '-' . $counter])) {
-							$counter++;
-						}
-
-						$id .= '-' . $counter;
-					}
-
-					$this->usedID[$id] = true;
-					$item['el']->attrs['id'] = $id;
+					$top = min($top, $level);
 				}
 			}
 		}
 
-		// document title
-		if ($this->title === null && count($this->TOC)) {
-			$item = reset($this->TOC);
-			$this->title = $item['title'] ?? trim($item['el']->toText($this->texy));
+		asort($underlined);
+		$order = array_flip(array_values($underlined));
+
+		foreach ($headings as $node) {
+			if ($node->marker !== null) {
+				$level = $this->readLevel($node->marker, $node->type);
+				$node->level = min(6, match ($node->type) {
+					HeadingType::Surrounded => $level - $top + 1,
+					HeadingType::Underlined => $order[$level] + 1,
+				});
+			}
 		}
+	}
+
+
+	/** The level as written, by the notation alone. */
+	private function readLevel(string $marker, HeadingType $type): int
+	{
+		if ($type === HeadingType::Underlined) {
+			return $this->levels[$marker[0]];
+		}
+
+		$length = min(7, max(2, strlen($marker)));
+		return $this->moreMeansHigher ? 8 - $length : $length - 1;
+	}
+
+
+	/**
+	 * The {toc: ...} label gives the slug instead of the heading's text.
+	 * @param  list<HeadingNode>  $headings
+	 */
+	private function generateIDs(array $headings): void
+	{
+		$usedID = [];
+		foreach ($headings as $node) {
+			$title = self::hoistOverride($node) ?? trim($node->getPlainText());
+			if ($node->modifier?->id) {
+				$usedID[$node->modifier->id] = true;
+				continue;
+			}
+
+			$id = self::uniqueID($this->idPrefix . Texy\Helpers::webalize($title), $usedID);
+			$usedID[$id] = true;
+			$node->modifier ??= new Modifier;
+			$node->modifier->id = $id;
+		}
+	}
+
+
+	/** @param  array<string, true>  $usedID */
+	private static function uniqueID(string $id, array $usedID): string
+	{
+		if (!isset($usedID[$id])) {
+			return $id;
+		}
+
+		$counter = 2;
+		while (isset($usedID[$id . '-' . $counter])) {
+			$counter++;
+		}
+
+		return $id . '-' . $counter;
+	}
+
+
+	/**
+	 * Moves the {toc: ...} label out of the modifier; it is transport syntax and must
+	 * never reach the output.
+	 */
+	private static function hoistOverride(HeadingNode $node): ?string
+	{
+		if (!isset($node->modifier->styles['toc'])) {
+			return null;
+		}
+
+		$title = $node->modifier->styles['toc'];
+		unset($node->modifier->styles['toc']);
+		return $title;
 	}
 
 
 	/**
 	 * Parses underlined heading.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, ?string, string}  $matches
 	 */
-	public function parseUnderline(Texy\Parsing\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseUnderline(ParseContext $context, array $matches): HeadingNode
 	{
-		/** @var array{string, string, ?string, string} $matches */
 		[, $mContent, $mMod, $mLine] = $matches;
-		// $matches:
-		// [1] => ...
-		// [2] => .(title)[class]{style}<>
-		// [3] => ...
-
-		$mod = Modifier::parse($mMod);
-		$level = $this->levels[$mLine[0]];
-		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, false]);
+		return new HeadingNode(
+			$context->parseInline(trim($mContent)),
+			$this->readLevel($mLine, HeadingType::Underlined),
+			HeadingType::Underlined,
+			Modifier::parse($mMod),
+			$mLine[0],
+		);
 	}
 
 
 	/**
 	 * Parses surrounded heading.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, string, ?string}  $matches
 	 */
-	public function parseSurround(Texy\Parsing\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseSurround(ParseContext $context, array $matches): HeadingNode
 	{
-		/** @var array{string, string, string, ?string} $matches */
 		[, $mLine, $mContent, $mMod] = $matches;
-		// [1] => ###
-		// [2] => ...
-		// [3] => .(title)[class]{style}<>
-
-		$mod = Modifier::parse($mMod);
-		$level = min(7, max(2, strlen($mLine)));
-		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
-		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, true]);
+		return new HeadingNode(
+			$context->parseInline(trim($mContent)),
+			$this->readLevel($mLine, HeadingType::Surrounded),
+			HeadingType::Surrounded,
+			Modifier::parse($mMod),
+			$mLine,
+		);
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		int $level,
-		string $content,
-		Modifier $mod,
-		bool $isSurrounded,
-	): Texy\HtmlElement
+	public function render(HeadingNode $node, Html\Renderer $renderer): Html\Element
 	{
-		// as fixed balancing, for block/texysource & correct decorating
-		$el = new Texy\HtmlElement('h' . min(6, max(1, $level + $this->top)));
-		$mod->decorate($this->texy, $el);
-
-		$el->parseLine($this->texy, trim($content));
-
-		$this->TOC[] = [
-			'el' => $el,
-			'level' => $level,
-			'type' => $isSurrounded ? 'surrounded' : 'underlined',
-		];
-
+		$el = new Html\Element('h' . $node->level);
+		$renderer->decorateElement($node->modifier, $el);
+		$el->children = $renderer->renderNodes($node->content->children);
 		return $el;
 	}
 }

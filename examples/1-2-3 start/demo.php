@@ -22,7 +22,7 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 
 
 // STEP 1: Create a Texy instance
-$texy = new Texy;
+$texy = new Texy\Texy;
 
 
 // STEP 2: Configure Texy (all of this is optional)
@@ -36,16 +36,16 @@ $texy->imageModule->root = 'images/';
 // ^^superscript^^ renders as <sup>
 // __subscript__ renders as <sub>
 // visual ""citation"" renders as <cite>
-$texy->allowed['phrase/ins'] = true;
-$texy->allowed['phrase/del'] = true;
-$texy->allowed['phrase/sup'] = true;
-$texy->allowed['phrase/sub'] = true;
-$texy->allowed['phrase/cite'] = true;
+$texy->allowed[Texy\Syntax::Inserted] = true;
+$texy->allowed[Texy\Syntax::Deleted] = true;
+$texy->allowed[Texy\Syntax::Superscript] = true;
+$texy->allowed[Texy\Syntax::Subscript] = true;
 
 
 // STEP 3: Process your Texy text
 $text = file_get_contents(__DIR__ . '/syntax.texy');
-$html = $texy->process($text);  // That's it!
+$document = $texy->transform($texy->parse($text));
+$html = $texy->createHtmlRenderer()->render($document);  // That's it!
 
 
 // Display the result
@@ -53,7 +53,7 @@ echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';
 
 // You can use the first heading from your document as the page title
-echo '<title>' . $texy->headingModule->title . '</title>';
+echo '<title>' . ($document->getHeadings()[0] ?? null)?->getPlainText() . '</title>';
 
 echo $html;
 

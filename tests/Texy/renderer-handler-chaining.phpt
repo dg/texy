@@ -1,0 +1,113 @@
+<?php declare(strict_types=1);
+
+/**
+ * Test: Renderer handler chaining with $previous parameter
+ */
+
+use Tester\Assert;
+use Texy\{Nodes, Texy};
+use Texy\Output\Html;
+
+require __DIR__ . '/../bootstrap.php';
+
+
+test('handler receives $previous parameter', function () {
+	$texy = new Texy;
+	$ast = $texy->parse('hello');
+
+	$previousCalled = false;
+
+	$texy->htmlOutput->addRenderer(
+		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$previousCalled): Html\Element|string {
+			$previousCalled = $previous !== null;
+			// Call previous handler
+			$res = $previous($node);
+			Assert::type(Html\Element::class, $res);
+			return $res;
+		},
+	);
+
+	// Default handler should render <p>hello</p>
+	Assert::match('<p>hello</p>', trim($texy->createHtmlRenderer()->render($ast)));
+	Assert::true($previousCalled);
+});
+
+
+test('handler can delegate to previous handler by returning null', function () {
+	$texy = new Texy;
+	$ast = $texy->parse('hello');
+
+	$texy->htmlOutput->addRenderer(
+		fn(Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous): ?Html\Element => null,
+	);
+
+	Assert::match('<p>hello</p>', trim($texy->createHtmlRenderer()->render($ast)));
+});
+
+
+test('handler chain with conditional delegation', function () {
+	$texy = new Texy;
+	$ast = $texy->parse("hello\n\nworld");
+
+	$customCount = 0;
+
+	$texy->htmlOutput->addRenderer(
+		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$customCount): Html\Element|string|null {
+			// Only handle paragraphs containing "hello"
+			$text = $node->getPlainText();
+			if (str_contains($text, 'hello')) {
+				$customCount++;
+				// Delegate to default handler and modify result
+				$el = $previous($node);
+				$el->name = 'div';
+				$el->attrs['class'] = 'custom';
+				return $el;
+			}
+			// Delegate other paragraphs to previous handler
+			return null;
+		},
+	);
+
+	$html = $texy->createHtmlRenderer()->render($ast);
+	Assert::same(1, $customCount);
+	Assert::match('<div class="custom">hello</div>%A%<p>world</p>', trim($html));
+});
+
+
+test('multiple handlers form a chain', function () {
+	$texy = new Texy;
+	$ast = $texy->parse('hello');
+
+	$calls = [];
+
+	// First handler (registered first, called last in chain)
+	$texy->htmlOutput->addRenderer(
+		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$calls): Html\Element|string {
+			$calls[] = 'first';
+			// Delegate to default handler and modify result
+			$el = $previous($node);
+			$el->attrs['data-first'] = '1';
+			return $el;
+		},
+	);
+
+	// Second handler (registered second, called first, can delegate to first)
+	$texy->htmlOutput->addRenderer(
+		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$calls): Html\Element|string {
+			$calls[] = 'second';
+			// Delegate to first handler
+			$result = $previous($node);
+			// Modify result
+			if ($result instanceof Html\Element) {
+				$result->attrs['data-second'] = '1';
+			}
+			return $result;
+		},
+	);
+
+	$html = $texy->createHtmlRenderer()->render($ast);
+
+	// Second handler called first, then delegates to first
+	Assert::same(['second', 'first'], $calls);
+	Assert::match('<p data-first="1" data-second="1">hello</p>', trim($html));
+});

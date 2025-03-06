@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\{Patterns, Regexp, Syntax};
 use function count;
 
 
@@ -69,13 +70,13 @@ final class HyphenationModule extends Texy\Module
 		$this->beforeH = array_flip($this->beforeH);
 		$this->doubleVowels = array_flip($this->doubleVowels);
 
-		$texy->registerPostLine($this->postLine(...), 'longwords');
+		$texy->allowed[Syntax::Hyphenation] ??= true;
 	}
 
 
 	public function postLine(string $text): string
 	{
-		return Texy\Regexp::replace(
+		return Regexp::replace(
 			$text,
 			'~[^ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}~',
 			$this->pattern(...),
@@ -97,9 +98,9 @@ final class HyphenationModule extends Texy\Module
 			return $mWord;
 		}
 
-		$chars = Texy\Regexp::matchAll(
+		$chars = Regexp::matchAll(
 			$mWord,
-			'~[' . Texy\Patterns::MARK . ']+|.~',
+			'~[' . Patterns::MARK . ']+|.~',
 		);
 
 		/** @var list<string> */

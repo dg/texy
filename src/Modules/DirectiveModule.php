@@ -8,7 +8,10 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Regexp;
+use Texy\Nodes\DirectiveNode;
+use Texy\Output\Html;
+use Texy\Parsing\ParseContext;
+use Texy\Syntax;
 
 
 /**
@@ -16,21 +19,17 @@ use Texy\Regexp;
  */
 final class DirectiveModule extends Texy\Module
 {
-	/** arguments separator */
-	public string $separator = ',';
-
-
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('script', $this->solve(...));
+		$texy->htmlOutput->addRenderer($this->render(...));
 	}
 
 
-	public function beforeParse(string &$text): void
+	public function beforeParse(): void
 	{
-		$this->texy->registerLinePattern(
-			$this->parse(...),
+		$this->texy->addInline(
+			Syntax::Directive,
 			'~
 				\{\{
 				((?:
@@ -39,63 +38,22 @@ final class DirectiveModule extends Texy\Module
 				)+)
 				}}
 			~Ux',
-			'script',
+			fn(ParseContext $context, array $matches) => trim((string) $matches[1]) === '' ? null : new DirectiveNode((string) $matches[1]),
 		);
 	}
 
 
-	/**
-	 * Parses {{...}}
-	 * @param  array<?string>  $matches
-	 */
-	public function parse(Texy\Parsing\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function render(DirectiveNode $node, Html\Renderer $renderer): string
 	{
-		/** @var array{string, string} $matches */
-		[, $mContent] = $matches;
-		// [1] => ...
-
-		$cmd = trim($mContent);
-		if ($cmd === '') {
-			return null;
-		}
-
-		$raw = null;
-		$args = [];
-		// function (arg, arg, ...) or function: arg, arg
-		/** @var array{string, string, ?string, ?string} $matches */
-		if ($matches = Regexp::match($cmd, '~^ ([a-z_][a-z0-9_-]*) \s* (?: \( ([^()]*) \) | : (.*) )$~ix')) {
-			$cmd = $matches[1];
-			$raw = trim((string) ($matches[3] ?? $matches[2]));
-			if ($raw !== '') {
-				$args = Regexp::split($raw, '~\s*' . Regexp::quote($this->separator) . '\s*~');
+		// {{texy: ...}} sets options of the processing and leaves nothing in the output
+		if ($node->name === 'texy' && $node->args) {
+			if (in_array('nofollow', $node->args, true)) {
+				$this->texy->linkModule->forceNoFollow = true;
 			}
-		}
-
-		return $this->texy->invokeAroundHandlers('script', $parser, [$cmd, $args, $raw]);
-	}
-
-
-	/**
-	 * Finish invocation.
-	 * @param ?list<string>  $args
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		string $cmd,
-		?array $args = null,
-		?string $raw = null,
-	): ?string
-	{
-		if ($cmd === 'texy' && $args) {
-			switch ($args[0]) {
-				case 'nofollow':
-					$this->texy->linkModule->forceNoFollow = true;
-					break;
-			}
-
 			return '';
 		}
 
-		return null;
+		// Unknown directives - preserve original text (entities decoded like any display text)
+		return Texy\Helpers::decodeEntities('{{' . $node->text . '}}');
 	}
 }

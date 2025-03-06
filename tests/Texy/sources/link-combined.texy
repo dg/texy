@@ -21,15 +21,13 @@ Odkazy
 - Referenční odkaz "php Fashion":[php Fashion1#12]?
 - Referenční odkaz "php Fashion":[php Fashion2?a=45]?
 
-- Čistě referenční odkaz [php Fashion1]
-- Čistě referenční odkaz [php Fashion2]
-- Čistě referenční odkaz [php Fashion3]
-- Čistě referenční odkaz [email]
 
 - wiki link [Texy|http://texy.info]
 - wiki link [Texy | http://texy.info .{color:blue}]
 - markdown link [Texy](http://texy.info)
 - markdown link [Texy .{color:blue}](http://texy.info)
+- code link `Texy`:http://texy.info
+- code link `Texy .{color:blue}`:[php Fashion1]
 
 Obrázkové odkazy:
 -----------------
@@ -42,10 +40,6 @@ Obrázkové odkazy:
 - Referenční odkaz "obrazek":[*obrazek1*]
 - Referenční odkaz "obrazek":[*obrazek3*]
 
-- Čistě referenční odkaz [neobrazek1]
-- Čistě referenční odkaz [neobrazek2]
-- Čistě referenční odkaz [neobrazek3]
-- Čistě referenční odkaz [neobrazek4]
 
 
 Odkazující obrázky:

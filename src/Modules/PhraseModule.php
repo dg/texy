@@ -8,8 +8,11 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Modifier, Patterns};
-use Texy\Parsing\InlineParser;
+use Texy\{Modifier, Patterns, Syntax};
+use Texy\Nodes\{AnnotationNode, ContentNode, InlineCodeNode, LinkNode, PhraseNode, RawTextNode, TextNode};
+use Texy\Output\Html;
+use Texy\Parsing\ParseContext;
+use const ENT_HTML5, ENT_NOQUOTES;
 
 
 /**
@@ -19,23 +22,23 @@ final class PhraseModule extends Texy\Module
 {
 	/** @var array<string, string> */
 	public array $tags = [
-		'phrase/strong' => 'strong', // or 'b'
-		'phrase/em' => 'em', // or 'i'
-		'phrase/em-alt' => 'em',
-		'phrase/em-alt2' => 'em',
-		'phrase/ins' => 'ins',
-		'phrase/del' => 'del',
-		'phrase/sup' => 'sup',
-		'phrase/sup-alt' => 'sup',
-		'phrase/sub' => 'sub',
-		'phrase/sub-alt' => 'sub',
-		'phrase/span' => 'a',
-		'phrase/span-alt' => 'a',
-		'phrase/acronym' => 'abbr',
-		'phrase/acronym-alt' => 'abbr',
-		'phrase/code' => 'code',
-		'phrase/quote' => 'q',
-		'phrase/quicklink' => 'a',
+		Syntax::Strong => 'strong',
+		Syntax::Emphasis => 'em',
+		Syntax::EmphasisSingleAsterisk => 'em',
+		Syntax::EmphasisSingleAsterisk2 => 'em',
+		Syntax::Inserted => 'ins',
+		Syntax::Deleted => 'del',
+		Syntax::Superscript => 'sup',
+		Syntax::SuperscriptShort => 'sup',
+		Syntax::Subscript => 'sub',
+		Syntax::SubscriptShort => 'sub',
+		Syntax::SpanQuotes => 'span',
+		Syntax::SpanTilde => 'span',
+		Syntax::AbbreviationQuotes => 'abbr',
+		Syntax::Abbreviation => 'abbr',
+		Syntax::Code => 'code',
+		Syntax::Quote => 'q',
+		Syntax::QuickLink => 'a',
 	];
 
 	public bool $linksAllowed = true;
@@ -44,29 +47,24 @@ final class PhraseModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['phrase/ins'] = false;
-		$texy->allowed['phrase/del'] = false;
-		$texy->allowed['phrase/sup'] = false;
-		$texy->allowed['phrase/sub'] = false;
-		$texy->addHandler('phrase', $this->solve(...));
+		$texy->htmlOutput->addRenderer($this->renderPhrase(...));
+		$texy->htmlOutput->addRenderer($this->renderCode(...));
+		$texy->htmlOutput->addRenderer(fn(RawTextNode $node) => $node->text);
+		$texy->htmlOutput->addRenderer(
+			fn(AnnotationNode $node) => new Html\Element('abbr', ['title' => $node->annotation])->setText($node->text),
+		);
 	}
 
 
-	public function beforeParse(string &$text): void
+	public function beforeParse(): void
 	{
-		$texy = $this->texy;
-		/*
-		// UNIVERSAL
-		$texy->registerLinePattern(
-			array($this, 'patternPhrase'),
-			'~((?>([*+/^_"\~`-])+?))(?!\s)(.*(?!\2).)'.Texy\Patterns::MODIFIER.'?(?<!\s)\1(?!\2)(?::('.Texy\Patterns::LINK_URL.'))??~Us',
-			'phrase/strong'
-		);
-		*/
+		foreach ([Syntax::Inserted, Syntax::Deleted, Syntax::Superscript, Syntax::Subscript] as $name) {
+			$this->texy->declare($name, enabled: false);
+		}
 
 		// ***strong+emphasis***
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::StrongEmphasis,
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
 				\*\*\*
@@ -78,12 +76,12 @@ final class PhraseModule extends Texy\Module
 				(?! \* )                          # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/strong+em',
+			$this->parsePhrase(...),
 		);
 
 		// **strong**
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Strong,
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
 				\*\*
@@ -95,12 +93,12 @@ final class PhraseModule extends Texy\Module
 				(?! \* )                          # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/strong',
+			$this->parsePhrase(...),
 		);
 
 		// //emphasis//
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Emphasis,
 			'~
 				(?<! [/:] )                       # not preceded by / or :
 				//
@@ -112,12 +110,12 @@ final class PhraseModule extends Texy\Module
 				(?! / )                           # not followed by /
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/em',
+			$this->parsePhrase(...),
 		);
 
 		// *emphasisAlt*
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::EmphasisSingleAsterisk,
 			'~
 				(?<! [*\\\] )                    # not preceded by * or \
 				\*
@@ -129,12 +127,12 @@ final class PhraseModule extends Texy\Module
 				(?! \* )                         # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/em-alt',
+			$this->parsePhrase(...),
 		);
 
 		// *emphasisAlt2*
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::EmphasisSingleAsterisk2,
 			'~
 				(?<! [^\s.,;:<>()"\'' . Patterns::MARK . '-] )  # must be preceded by these chars
 				\*
@@ -146,12 +144,12 @@ final class PhraseModule extends Texy\Module
 				(?! [^\s.,;:<>()"?!\'-] )        # must be followed by these chars
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/em-alt2',
+			$this->parsePhrase(...),
 		);
 
 		// ++inserted++
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Inserted,
 			'~
 				(?<! \+ )                        # not preceded by +
 				\+\+
@@ -162,12 +160,12 @@ final class PhraseModule extends Texy\Module
 				\+\+
 				(?! \+ )                         # not followed by +
 			~Ux',
-			'phrase/ins',
+			$this->parsePhrase(...),
 		);
 
 		// --deleted--
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Deleted,
 			'~
 				(?<! [<-] )                      # not preceded by < or -
 				--
@@ -178,12 +176,12 @@ final class PhraseModule extends Texy\Module
 				--
 				(?! [>-] )                       # not followed by > or -
 			~Ux',
-			'phrase/del',
+			$this->parsePhrase(...),
 		);
 
 		// ^^superscript^^
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Superscript,
 			'~
 				(?<! \^ )                        # not preceded by ^
 				\^\^
@@ -194,24 +192,12 @@ final class PhraseModule extends Texy\Module
 				\^\^
 				(?! \^ )                         # not followed by ^
 			~Ux',
-			'phrase/sup',
-		);
-
-		// m^2 alternative superscript
-		$texy->registerLinePattern(
-			$this->parseSupSub(...),
-			'~
-				(?<= [a-z0-9] )                  # preceded by letter or number
-				\^
-				( [n0-9+-]{1,4}? )               # 1-4 digits, n, + or - (1)
-				(?! [a-z0-9] )                   # not followed by letter or number
-			~Uix',
-			'phrase/sup-alt',
+			$this->parsePhrase(...),
 		);
 
 		// __subscript__
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Subscript,
 			'~
 				(?<! _ )                         # not preceded by _
 				__
@@ -222,24 +208,12 @@ final class PhraseModule extends Texy\Module
 				__
 				(?! _ )                          # not followed by _
 			~Ux',
-			'phrase/sub',
-		);
-
-		// m_2 alternative subscript
-		$texy->registerLinePattern(
-			$this->parseSupSub(...),
-			'~
-				(?<= [a-z] )                     # preceded by letter
-				_
-				( [n0-9]{1,3} )                  # 1-3 digits or n (1)
-				(?! [a-z0-9] )                   # not followed by letter or number
-			~Uix',
-			'phrase/sub-alt',
+			$this->parsePhrase(...),
 		);
 
 		// "span"
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::SpanQuotes,
 			'~
 				(?<! " )                         # not preceded by "
 				"
@@ -251,12 +225,12 @@ final class PhraseModule extends Texy\Module
 				(?! " )                          # not followed by "
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/span',
+			$this->parsePhrase(...),
 		);
 
 		// ~alternative span~
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::SpanTilde,
 			'~
 				(?<! \~ )
 				\~
@@ -268,29 +242,53 @@ final class PhraseModule extends Texy\Module
 				(?! \~ )
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/span-alt',
+			$this->parsePhrase(...),
 		);
 
-		// >>quote
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		// >>quote<<
+		$this->texy->addInline(
+			Syntax::Quote,
 			'~
 				(?<! > )                         # not preceded by >
 				>>
 				(?! [\s>] )                      # not followed by space or >
 				( (?: [^\r\n <]++ | [ <] )+ )    # content (1)
 				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s<] )                     # not preceded by space or
+				(?<! [\s<] )                     # not preceded by space or <
 				<<
 				(?! < )                          # not followed by <
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/quote',
+			$this->parsePhrase(...),
+		);
+
+		// m^2 alternative superscript
+		$this->texy->addInline(
+			Syntax::SuperscriptShort,
+			'~
+				(?<= [a-z0-9] )                  # preceded by letter or number
+				\^
+				( [n0-9+-]{1,4}? )               # 1-4 digits, n, + or - (1)
+				(?! [a-z0-9] )                   # not followed by letter or number
+			~Uix',
+			$this->parseSupSub(...),
+		);
+
+		// m_2 alternative subscript
+		$this->texy->addInline(
+			Syntax::SubscriptShort,
+			'~
+				(?<= [a-z] )                     # preceded by letter
+				_
+				( [n0-9]{1,3} )                  # 1-3 digits or n (1)
+				(?! [a-z0-9] )                   # not followed by letter or number
+			~Uix',
+			$this->parseSupSub(...),
 		);
 
 		// acronym/abbr "et al."((and others))
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::AbbreviationQuotes,
 			'~
 				(?<! " )                         # not preceded by "
 				"
@@ -304,12 +302,12 @@ final class PhraseModule extends Texy\Module
 				( .+ )                           # explanation (3)
 				\)\)
 			~Ux',
-			'phrase/acronym',
+			$this->parseAcronym(...),
 		);
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Abbreviation,
 			'~
 				(?<! [' . Patterns::CHAR . '] )  # not preceded by char
 				( [' . Patterns::CHAR . ']{2,} ) # at least 2 chars (1)
@@ -318,12 +316,12 @@ final class PhraseModule extends Texy\Module
 				( (?: [^\n )]++ | [ )] )+ )      # explanation (3)
 				\)\)
 			~Ux',
-			'phrase/acronym-alt',
+			$this->parseAcronym(...),
 		);
 
 		// ''notexy''
-		$texy->registerLinePattern(
-			$this->parseNoTexy(...),
+		$this->texy->addInline(
+			Syntax::Raw,
 			'~
 				(?<! \' )                         # not preceded by quote
 				\'\'
@@ -333,12 +331,12 @@ final class PhraseModule extends Texy\Module
 				\'\'
 				(?! \' )                          # not followed by quote
 			~Ux',
-			'phrase/notexy',
+			$this->parseNoTexy(...),
 		);
 
 		// `code`
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::Code,
 			'~
 				`
 				( \S (?: [^' . Patterns::MARK . '\r\n `]++ | [ `] )* )  # content (1)
@@ -347,24 +345,24 @@ final class PhraseModule extends Texy\Module
 				`
 				(?: : (' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/code',
+			$this->parsePhrase(...),
 		);
 
 		// ....:LINK
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::QuickLink,
 			'~
 				( [' . Patterns::CHAR . '0-9@#$%&.,_-]++ )  # allowed chars (1)
 				()                                    # modifier placeholder (2)
 				: (?= \[ )                            # followed by :[
 				(' . Patterns::LINK_URL . ')          # link (3)
 			~Ux',
-			'phrase/quicklink',
+			$this->parseLink(...),
 		);
 
 		// [text |link]
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::WikiLink,
 			'~
 				(?<! \[ )                        # not preceded by [
 				\[
@@ -377,12 +375,12 @@ final class PhraseModule extends Texy\Module
 				]
 				(?! ] )                          # not followed by ]
 			~Ux',
-			'phrase/wikilink',
+			$this->parseWikilink(...),
 		);
 
 		// [text](link)
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
+		$this->texy->addInline(
+			Syntax::MarkdownLink,
 			'~
 				(?<! [[.] )                     # not preceded by [ or .
 				\[
@@ -395,122 +393,155 @@ final class PhraseModule extends Texy\Module
 				( (?: [^' . Patterns::MARK . '\r )]++ | [ ] )+ )  # link (3)
 				\)
 			~Ux',
-			'phrase/markdown',
+			$this->parseLink(...),
 		);
 
-		// \* escaped asterix
-		$texy->registerLinePattern(
-			fn() => '*',
-			'~\\\\\*~',                      // \* -> *
-			'phrase/escaped-asterix',
+		// \* escaped asterisk
+		$this->texy->addInline(
+			Syntax::EscapedAsterisk,
+			'~\\\\\*~',
+			fn($context, $matches) => new TextNode('*'),
 		);
 	}
 
 
 	/**
-	 * Parses phrase patterns.
-	 * @param  array<?string>  $matches
+	 * Parses phrase patterns. Phrases without a link part (ins, del, sup, sub) have
+	 * only two groups, hence the optional third one.
+	 * @param  array{string, string, ?string, 3?: ?string}  $matches
 	 */
-	public function parsePhrase(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
-	{
-		/** @var array{string, string, ?string, ?string} $matches */
-		[, $mContent, $mMod, $mLink] = $matches + [3 => null];
-		// [1] => ...
-		// [2] => .(title)[class]{style}
-		// [3] => LINK
-
-		if ($phrase === 'phrase/wikilink') {
-			[$mLink, $mMod] = [$mMod, $mLink];
-			$mContent = trim($mContent);
-		}
-
-		$texy = $this->texy;
-		$mod = Modifier::parse($mMod);
-		$link = null;
-
-		$parser->again = $phrase !== 'phrase/code' && $phrase !== 'phrase/quicklink';
-
-		if ($phrase === 'phrase/span' || $phrase === 'phrase/span-alt') {
-			if ($mLink === null) {
-				if (!$mMod) {
-					return null; // means "..."
-				}
-			} else {
-				$link = $texy->linkModule->factoryLink($mLink, $mMod, $mContent);
-			}
-		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
-			$mod->title = trim(Texy\Helpers::unescapeHtml((string) $mLink));
-
-		} elseif ($mLink !== null) {
-			$link = $texy->linkModule->factoryLink($mLink, null, $mContent);
-		}
-
-		return $texy->invokeAroundHandlers('phrase', $parser, [$phrase, $mContent, $mod, $link]);
-	}
-
-
-	/**
-	 * Parses: any^2 any_2.
-	 * @param  array<?string>  $matches
-	 */
-	public function parseSupSub(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
-	{
-		/** @var array{string, string} $matches */
-		[, $mContent] = $matches;
-		$mod = new Modifier;
-		$link = null;
-		$mContent = str_replace('-', "\u{2212}", $mContent); // &minus;
-		return $this->texy->invokeAroundHandlers('phrase', $parser, [$phrase, $mContent, $mod, $link]);
-	}
-
-
-	/** @param  array<?string>  $matches */
-	public function parseNoTexy(InlineParser $parser, array $matches): string
-	{
-		/** @var array{string, string} $matches */
-		[, $mContent] = $matches;
-		return $this->texy->protect(htmlspecialchars($mContent, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
-	}
-
-
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
+	public function parsePhrase(
+		ParseContext $context,
+		array $matches,
 		string $phrase,
-		string $content,
-		Modifier $mod,
-		?Texy\Link $link = null,
-	): Texy\HtmlElement|string|null
+	): PhraseNode|InlineCodeNode|LinkNode|null
 	{
-		$texy = $this->texy;
-		$tag = $this->tags[$phrase] ?? null;
+		[, $mContent, $mMod, $mLink] = $matches + [3 => null];
 
-		if ($tag === 'a') {
-			$tag = $link && $this->linksAllowed ? null : 'span';
+		// For phrase/span and phrase/span-alt, URL makes it a link
+		if ($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) {
+			if ($mLink !== null) {
+				return new LinkNode(
+					url: Texy\Helpers::decodeEntities($mLink),
+					content: $context->parseInline(trim($mContent)),
+					modifier: Modifier::parse($mMod),
+				);
+
+			} elseif ($mMod === null) {
+				return null;
+			}
 		}
 
-		if ($phrase === 'phrase/code') {
-			$content = $texy->protect(htmlspecialchars($content, ENT_NOQUOTES, 'UTF-8'), $texy::CONTENT_TEXTUAL);
+		$mod = Modifier::parse($mMod);
+		$node = $phrase === Syntax::Code
+			? new InlineCodeNode(trim($mContent), $mod) // code content is not parsed recursively
+			: new PhraseNode($context->parseInline(trim($mContent)), $phrase, $mod);
+
+		// Other phrases with link
+		if ($mLink !== null && $this->linksAllowed) {
+			return new LinkNode(
+				url: Texy\Helpers::decodeEntities($mLink),
+				content: new ContentNode([$node]),
+			);
 		}
 
-		if ($phrase === 'phrase/strong+em') {
-			$el = new Texy\HtmlElement($this->tags['phrase/strong']);
-			$el->create($this->tags['phrase/em'], $content);
-			$mod->decorate($texy, $el);
+		return $node;
+	}
 
-		} elseif ($tag) {
-			$el = new Texy\HtmlElement($tag, $content);
-			$mod->decorate($texy, $el);
-		} else {
-			$el = $content; // trick
+
+	/**
+	 * Parses superscript/subscript alternative (m^2, H_2O).
+	 * @param  array{string, string}  $matches
+	 */
+	public function parseSupSub(ParseContext $context, array $matches, string $phrase): PhraseNode
+	{
+		[, $mContent] = $matches;
+		$mContent = str_replace('-', "\u{2212}", $mContent); // &minus;
+		return new PhraseNode(new ContentNode([new TextNode(Texy\Helpers::decodeEntities($mContent))]), $phrase);
+	}
+
+
+	/**
+	 * Parses acronym/abbr.
+	 * @param  array{string, string, ?string, string}  $matches
+	 */
+	public function parseAcronym(ParseContext $context, array $matches, string $phrase): PhraseNode
+	{
+		[, $mContent, $mMod, $mTitle] = $matches;
+		$mod = Modifier::parse($mMod) ?? new Modifier;
+		$mod->title = trim(Texy\Helpers::unescapeHtml($mTitle));
+		return new PhraseNode($context->parseInline(trim($mContent)), $phrase, $mod);
+	}
+
+
+	/**
+	 * Parses ''notexy''.
+	 * @param  array{string, string}  $matches
+	 */
+	public function parseNoTexy(ParseContext $context, array $matches): RawTextNode
+	{
+		[, $mContent] = $matches;
+		return new RawTextNode($mContent);
+	}
+
+
+	/**
+	 * Parses links (phrase/quicklink, phrase/markdown).
+	 * Note: Markdown links don't support modifiers - modifier is intentionally ignored.
+	 * @param  array{string, string, ?string, string}  $matches
+	 */
+	public function parseLink(ParseContext $context, array $matches): LinkNode
+	{
+		[, $mContent, $mMod, $mLink] = $matches;
+		return new LinkNode(
+			Texy\Helpers::decodeEntities(trim($mLink)),
+			$context->parseInline(trim($mContent)),
+			null,  // quicklink and markdown links don't support modifiers
+		);
+	}
+
+
+	/**
+	 * Parses wikilink [text|link].
+	 * Note: Wikilinks don't support modifiers - modifier is intentionally ignored.
+	 * @param  array{string, string, string, ?string}  $matches
+	 */
+	public function parseWikilink(ParseContext $context, array $matches): LinkNode
+	{
+		[, $mContent, $mLink] = $matches;
+		return new LinkNode(
+			Texy\Helpers::decodeEntities(trim($mLink)),
+			$context->parseInline(trim($mContent)),
+			null,  // wikilinks don't support modifiers
+		);
+	}
+
+
+	public function renderPhrase(PhraseNode $node, Html\Renderer $renderer): Html\Element
+	{
+		$tag = $this->tags[$node->type] ?? 'span';
+
+		if ($node->type === Syntax::StrongEmphasis) {
+			$el = new Html\Element($this->tags[Syntax::Strong] ?? 'strong');
+			$renderer->decorateElement($node->modifier, $el);
+			$inner = $el->create($this->tags[Syntax::Emphasis] ?? 'em');
+			$inner->children = $renderer->renderNodes($node->content->children);
+			return $el;
 		}
 
-		if ($link && $this->linksAllowed) {
-			return $texy->linkModule->solve(null, $link, $el);
-		}
+		$el = new Html\Element($tag);
+		$renderer->decorateElement($node->modifier, $el);
+		$el->children = $renderer->renderNodes($node->content->children);
+		return $el;
+	}
 
+
+	public function renderCode(InlineCodeNode $node, Html\Renderer $renderer): Html\Element
+	{
+		$el = new Html\Element($this->tags[Syntax::Code] ?? 'code');
+		$renderer->decorateElement($node->modifier, $el);
+		// Only escape <, >, & - not quotes (ENT_NOQUOTES)
+		$el->children = [$renderer->protect(htmlspecialchars($node->code, ENT_NOQUOTES | ENT_HTML5, 'UTF-8'), $renderer::ContentTextual)];
 		return $el;
 	}
 }
