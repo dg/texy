@@ -94,7 +94,7 @@ Links
 using references
 
 
-	Look at Texy!
+	Look at http://texy.deegee.dev/
 
 	My address is me@example.com
 

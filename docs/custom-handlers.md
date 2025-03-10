@@ -295,7 +295,6 @@ $link->URL;        // ?string – target URL (after root/normalization)
 $link->raw;        // string – original URL text
 $link->modifier;   // Modifier
 $link->type;       // Link::COMMON | Link::BRACKET | Link::IMAGE
-$link->label;      // ?string – link text (for references)
 $link->name;       // ?string – reference name
 ```
 

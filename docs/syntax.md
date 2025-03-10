@@ -420,7 +420,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 
 | Syntax ID | Default | What it does | Module |
 |---|---|---|---|
-| `link/definition` | ✅ on | `[name]: url .(title)` reference definitions, extracted in `beforeParse` | LinkReferenceModule |
+| `link/definition` | ✅ on | `[name]: url` reference definitions, extracted in `beforeParse` (a label or modifier in the definition is deprecated) | LinkReferenceModule |
 | `image/definition` | ✅ on | `[*name*]: url .(alt)` image reference definitions, extracted in `beforeParse` | ImageModule |
 | `typography` | ✅ on | post-line typographic corrections (quotes, dashes, nbsp, symbols) | TypographyModule |
 | `longwords` | ✅ on | post-line insertion of `&shy;` soft hyphens into long words | HyphenationModule |
