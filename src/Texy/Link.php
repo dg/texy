@@ -30,9 +30,6 @@ final class Link
 	/** how was link created? */
 	public int $type = self::COMMON;
 
-	/** optional label, used by references */
-	public ?string $label = null;
-
 	/** reference name (if is stored as reference) */
 	public ?string $name = null;
 
