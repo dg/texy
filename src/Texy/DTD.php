@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy;
 
 $globalAttrs = array_fill_keys([
+	'aria-*',
 	'data-*',
 	'xml:lang',
 
@@ -39,7 +40,10 @@ $globalAttrs = array_fill_keys([
 	'class',
 	'id',
 	'slot',
-
+	'role',
+	'contextmenu',
+	'part',
+	'exportparts',
 
 	'onabort',
 	'onauxclick',
@@ -69,6 +73,7 @@ $globalAttrs = array_fill_keys([
 	'onerror',
 	'onfocus',
 	'onformdata',
+	'ongotpointercapture',
 	'oninput',
 	'oninvalid',
 	'onkeydown',
@@ -78,6 +83,7 @@ $globalAttrs = array_fill_keys([
 	'onloadeddata',
 	'onloadedmetadata',
 	'onloadstart',
+	'onlostpointercapture',
 	'onmousedown',
 	'onmouseenter',
 	'onmouseleave',
@@ -89,6 +95,14 @@ $globalAttrs = array_fill_keys([
 	'onpause',
 	'onplay',
 	'onplaying',
+	'onpointercancel',
+	'onpointerdown',
+	'onpointerenter',
+	'onpointerleave',
+	'onpointermove',
+	'onpointerout',
+	'onpointerover',
+	'onpointerup',
 	'onprogress',
 	'onratechange',
 	'onreset',
@@ -186,7 +200,9 @@ $flowContent = array_fill_keys([
 	'pre',
 	'progress',
 	'q',
+	'rb',
 	'ruby',
+	'rtc',
 	's',
 	'samp',
 	'script',
@@ -250,7 +266,9 @@ $phrasingContent = array_fill_keys([
 	'picture',
 	'progress',
 	'q',
+	'rb',
 	'ruby',
+	'rtc',
 	's',
 	'samp',
 	'script',
@@ -309,7 +327,7 @@ return [/*
 		$flowContent,
 	],
 	'audio' => [
-		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'preload', 'autoplay', 'loop', 'muted', 'controls'], 1),
+		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'preload', 'autoplay', 'loop', 'muted', 'controls', 'fetchpriority'], 1),
 		['source' => 1, 'track' => 1, HtmlElement::InnerTransparent => 1],
 	],
 	'b' => [
@@ -333,7 +351,12 @@ return [/*
 		$flowContent,
 	],
 	'body' => [
-		$globalAttrs + array_fill_keys(['onafterprint', 'onbeforeprint', 'onbeforeunload', 'onhashchange', 'onlanguagechange', 'onmessage', 'onmessageerror', 'onoffline', 'ononline', 'onpagehide', 'onpageshow', 'onpopstate', 'onrejectionhandled', 'onstorage', 'onunhandledrejection', 'onunload'], 1),
+		$globalAttrs + array_fill_keys([
+			'onafterprint', 'onbeforeprint', 'onbeforeunload', 'onhashchange',
+			'onlanguagechange', 'onmessage', 'onmessageerror', 'onoffline',
+			'ononline', 'onpagehide', 'onpageshow', 'onpopstate',
+			'onrejectionhandled', 'onstorage', 'onunhandledrejection', 'onunload',
+		], 1),
 		$flowContent,
 	],
 	'br' => [
@@ -485,11 +508,11 @@ return [/*
 		$phrasingContent,
 	],
 	'iframe' => [
-		$globalAttrs + array_fill_keys(['src', 'srcdoc', 'name', 'sandbox', 'allow', 'allowfullscreen', 'allowpaymentrequest', 'width', 'height', 'referrerpolicy'], 1),
+		$globalAttrs + array_fill_keys(['src', 'srcdoc', 'name', 'sandbox', 'allow', 'allowfullscreen', 'allowpaymentrequest', 'width', 'height', 'referrerpolicy', 'loading'], 1),
 		[],
 	],
 	'img' => [
-		$globalAttrs + array_fill_keys(['alt', 'src', 'srcset', 'crossorigin', 'usemap', 'ismap', 'width', 'height', 'decoding', 'referrerpolicy'], 1),
+		$globalAttrs + array_fill_keys(['alt', 'src', 'srcset', 'crossorigin', 'usemap', 'ismap', 'width', 'height', 'decoding', 'referrerpolicy', 'loading', 'sizes', 'fetchpriority'], 1),
 		false,
 	],
 	'input' => [
@@ -608,6 +631,14 @@ return [/*
 		$globalAttrs,
 		$phrasingContent + ['rt' => 1, 'rp' => 1],
 	],
+	'rb' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
+	'rtc' => [
+		$globalAttrs,
+		$phrasingContent,
+	],
 	's' => [
 		$globalAttrs,
 		$phrasingContent,
@@ -617,7 +648,7 @@ return [/*
 		$phrasingContent,
 	],
 	'script' => [
-		$globalAttrs + array_fill_keys(['src', 'type', 'async', 'defer', 'crossorigin', 'integrity', 'referrerpolicy'], 1),
+		$globalAttrs + array_fill_keys(['src', 'type', 'async', 'defer', 'crossorigin', 'integrity', 'referrerpolicy', 'nomodule'], 1),
 		[HtmlElement::InnerText => 1],
 	],
 	'section' => [
@@ -637,7 +668,7 @@ return [/*
 		$phrasingContent,
 	],
 	'source' => [
-		$globalAttrs + array_fill_keys(['src', 'type', 'srcset', 'sizes', 'media'], 1),
+		$globalAttrs + array_fill_keys(['src', 'type', 'srcset', 'sizes', 'media', 'fetchpriority'], 1),
 		false,
 	],
 	'span' => [
@@ -725,7 +756,7 @@ return [/*
 		$phrasingContent,
 	],
 	'video' => [
-		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'poster', 'preload', 'autoplay', 'playsinline', 'loop', 'muted', 'controls', 'width', 'height'], 1),
+		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'poster', 'preload', 'autoplay', 'playsinline', 'loop', 'muted', 'controls', 'width', 'height', 'fetchpriority'], 1),
 		['source' => 1, 'track' => 1, HtmlElement::InnerTransparent => 1],
 	],
 	'wbr' => [

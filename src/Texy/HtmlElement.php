@@ -473,8 +473,8 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 			foreach ($this->attrs as $attr => $foo) {
 				if (
 					!isset($allowed[$attr])
-					&& (!isset($allowed['data-*'])
-						|| !str_starts_with((string) $attr, 'data-'))
+					&& (!isset($allowed['data-*']) || !str_starts_with((string) $attr, 'data-'))
+					&& (!isset($allowed['aria-*']) || !str_starts_with((string) $attr, 'aria-'))
 				) {
 					unset($this->attrs[$attr]);
 				}
