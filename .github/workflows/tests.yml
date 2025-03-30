@@ -24,7 +24,7 @@ jobs:
             - if: failure()
               uses: actions/upload-artifact@v4
               with:
-                  name: output
+                  name: output-${{ matrix.php }}
                   path: tests/**/output
 
 
