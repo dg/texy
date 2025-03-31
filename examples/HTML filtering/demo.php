@@ -64,7 +64,7 @@ show('Enable nearly all valid tags');
 // Allows ALL HTML tags, including custom elements.
 // WARNING: Only use this if you trust the input completely!
 // ============================================================
-show('allowedTags = true - enables all tags', fn(Texy\Texy $texy) => $texy->allowedTags = true);
+show('allowedTags = true - enables all tags', fn(Texy\Texy $texy) => $texy->htmlPolicy->allowedTags = true);
 
 
 // ============================================================
@@ -87,7 +87,7 @@ show('disableLinks() - disable all links', fn(Texy\Texy $texy) => Texy\Configura
 // Completely disables all HTML tags.
 // Tags in input will be escaped and shown as text.
 // ============================================================
-show('allowedTags = false - disables all tags', fn(Texy\Texy $texy) => $texy->allowedTags = false);
+show('allowedTags = false - disables all tags', fn(Texy\Texy $texy) => $texy->htmlPolicy->allowedTags = false);
 
 
 // ============================================================
@@ -96,7 +96,7 @@ show('allowedTags = false - disables all tags', fn(Texy\Texy $texy) => $texy->al
 // Format: 'tag-name' => ['allowed', 'attributes']
 // Empty array [] means no attributes are allowed.
 // ============================================================
-show('Enable custom tags', fn(Texy\Texy $texy) => $texy->allowedTags = [
+show('Enable custom tags', fn(Texy\Texy $texy) => $texy->htmlPolicy->allowedTags = [
 	'my-extraTag' => ['attr1'],  // Allow <my-extraTag attr1="...">
 	'strong' => [],              // Allow <strong> with no attributes
 ]);

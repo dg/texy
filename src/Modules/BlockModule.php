@@ -12,7 +12,6 @@ use Texy\{Helpers, Syntax};
 use Texy\Nodes\{
 	BlockNode, CodeBlockNode, CommentNode, ContentNode, DivNode, HtmlBlockNode, PreformattedNode, TextBlockNode, TexySourceNode,
 };
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 
 
@@ -24,13 +23,6 @@ final class BlockModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->renderCode(...));
-		$texy->htmlOutput->addRenderer($this->renderPreformatted(...));
-		$texy->htmlOutput->addRenderer($this->renderHtml(...));
-		$texy->htmlOutput->addRenderer($this->renderText(...));
-		$texy->htmlOutput->addRenderer($this->renderTexySource(...));
-		$texy->htmlOutput->addRenderer($this->renderDiv(...));
-		$texy->htmlOutput->addRenderer(fn(CommentNode $node) => '');
 	}
 
 
@@ -142,88 +134,5 @@ final class BlockModule extends Texy\Module
 		return $context->getInlineParser()
 			->withPatterns($syntaxes)
 			->parse($context, $text);
-	}
-
-
-	public function renderCode(CodeBlockNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('pre');
-		$renderer->decorateElement($node->modifier, $el);
-		// Language class prepended before modifier classes
-		if ($node->language) {
-			$el->attrs['class'] = [$node->language, ...(array) ($el->attrs['class'] ?? [])];
-		}
-		$el->create('code')->add($renderer->protect(htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8'), $renderer::ContentTextual));
-		return $el;
-	}
-
-
-	/**
-	 * Preformatted text passes its HTML tags and decoded entities through.
-	 */
-	public function renderPreformatted(PreformattedNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('pre');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->setText($renderer->protect($this->renderMarkup($node->content->children, $renderer), $renderer::ContentBlock));
-		return $el;
-	}
-
-
-	public function renderHtml(HtmlBlockNode $node, Html\Renderer $renderer): string
-	{
-		return $node->code === ''
-			? "\n"
-			: $renderer->protect($this->renderMarkup($node->content->children, $renderer) . ' ', $renderer::ContentBlock);
-	}
-
-
-	/**
-	 * Plain text with <br> for newlines, no wrapper.
-	 */
-	public function renderText(TextBlockNode $node, Html\Renderer $renderer): string
-	{
-		$content = htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8');
-		return $renderer->protect(str_replace("\n", '<br>', $content) . ' ', $renderer::ContentBlock);
-	}
-
-
-	/**
-	 * The HTML of the parsed demo displayed as source code.
-	 */
-	public function renderTexySource(TexySourceNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$wellFormer = new Html\WellFormer($renderer->config);
-		$wellFormer->raw($renderer->unprotect(htmlspecialchars(
-			$renderer->serialize($renderer->renderNodes($node->content->children), "\n"),
-			ENT_NOQUOTES,
-			'UTF-8',
-		)));
-		$html = trim($wellFormer->finish());
-
-		$el = new Html\Element('pre');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->attrs['class'] = ['html', ...(array) ($el->attrs['class'] ?? [])];
-		$el->create('code')->add($renderer->protect(htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8'), $renderer::ContentTextual));
-		return $el;
-	}
-
-
-	public function renderDiv(DivNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('div');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->children = $renderer->renderNodes($node->content->children);
-		return $el;
-	}
-
-
-	/**
-	 * Serializes the parsed markup of a block (html, pre) to HTML.
-	 * @param  array<Texy\Node>  $content
-	 */
-	private function renderMarkup(array $content, Html\Renderer $renderer): string
-	{
-		return $renderer->unprotect(htmlspecialchars($renderer->serialize($renderer->renderNodes($content)), ENT_NOQUOTES, 'UTF-8'));
 	}
 }

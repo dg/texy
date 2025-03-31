@@ -1,0 +1,150 @@
+<?php declare(strict_types=1);
+
+/**
+ * Test: HTML Renderer is a pure function of the AST - rendering does not
+ * mutate nodes, repeated renders give identical output and directives
+ * do not leak between documents.
+ */
+
+use Tester\Assert;
+
+require __DIR__ . '/../bootstrap.php';
+
+
+test('repeated render of the same AST gives identical output', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse(
+		<<<'TEXY'
+			Hello **world** "link .[nofollow]":https://example.com
+
+			[* image.png .(The title) <]
+
+			[* figure.png .(Caption) >]:https://example.com *** Some caption
+
+			> quoted text
+			TEXY,
+	);
+
+	$html1 = $texy->createHtmlRenderer()->render($doc);
+	$html2 = $texy->createHtmlRenderer()->render($doc);
+	Assert::same($html1, $html2);
+});
+
+
+test('rendering does not mutate the image', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('text [* image.png .(The title)[c] <] text');
+
+	$paragraph = $doc->content->children[0];
+	$image = $paragraph->content->children[1];
+	Assert::type(Texy\Nodes\ImageNode::class, $image);
+	$before = serialize($image);
+
+	$texy->createHtmlRenderer()->render($doc);
+
+	Assert::same($before, serialize($image));
+	Assert::same(['The title', 'left'], [$image->alt, $image->float]);
+});
+
+
+test('rendering does not mutate link modifier (nofollow class)', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('"link .[nofollow]":https://example.com');
+
+	$paragraph = $doc->content->children[0];
+	$link = $paragraph->content->children[0];
+	Assert::type(Texy\Nodes\LinkNode::class, $link);
+	Assert::true(isset($link->modifier->classes['nofollow']));
+
+	$texy->createHtmlRenderer()->render($doc);
+
+	Assert::true(isset($link->modifier->classes['nofollow']));
+});
+
+
+test('the float of a figure is the figure\'s, rendering does not mutate it', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('[* figure.png >] *** Caption');
+
+	$figure = $doc->content->children[0];
+	Assert::type(Texy\Nodes\FigureNode::class, $figure);
+	Assert::type(Texy\Nodes\ImageNode::class, $figure->image);
+	Assert::same(['right', null], [$figure->float, $figure->image->float]);
+	$before = serialize($figure);
+
+	$texy->createHtmlRenderer()->render($doc);
+
+	Assert::same($before, serialize($figure));
+});
+
+
+test('nofollow directive applies to whole document including preceding links', function () {
+	$texy = new Texy\Texy;
+	$html = $texy->process(
+		<<<'TEXY'
+			"before":https://example.com
+
+			{{texy: nofollow}}
+
+			"after":https://example.com
+			TEXY,
+	);
+	Assert::match(
+		<<<'HTML'
+			<p><a href="https://example.com" rel="nofollow">before</a></p>
+
+			<p><a href="https://example.com" rel="nofollow">after</a></p>
+			HTML,
+		$html,
+	);
+});
+
+
+test('nofollow directive does not leak into next document processed by the same instance', function () {
+	$texy = new Texy\Texy;
+	$texy->process("\"link\":https://example.com\n\n{{texy: nofollow}}");
+
+	Assert::false($texy->htmlOutput->linkNoFollow);
+	Assert::match(
+		'<p><a href="https://example.com">link</a></p>',
+		$texy->process('"link":https://example.com'),
+	);
+});
+
+
+test('directive of one document does not affect rendering of another AST', function () {
+	$texy = new Texy\Texy;
+	$texy->process("{{texy: nofollow}}\n\n\"a\":https://example.com");
+
+	$docB = $texy->parse('"b":https://example.com');
+	Assert::match(
+		'<p><a href="https://example.com">b</a></p>',
+		$texy->createHtmlRenderer()->render($docB),
+	);
+});
+
+
+test('rendering does not depend on the syntaxes allowed after parsing', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse("/--html\n<b>raw</b> &amp;\n\\--\n\n/--pre\n<i>x</i>\n\\--\n\n/--texysource\n**bold**\n\\--");
+	$html = $texy->createHtmlRenderer()->render($doc);
+
+	$texy->allowed[Texy\Syntax::HtmlTag] = false;
+	$texy->allowed[Texy\Syntax::HtmlEntity] = false;
+	$texy->allowed[Texy\Syntax::Strong] = false;
+	Assert::same($html, $texy->createHtmlRenderer()->render($doc));
+});
+
+
+test('paragraph containing only a consumed directive produces no output', function () {
+	$texy = new Texy\Texy;
+	$html = $texy->process("first\n\n{{texy: nofollow}}\n\nlast");
+	Assert::match(
+		<<<'HTML'
+			<p>first</p>
+
+			<p>last</p>
+			HTML,
+		$html,
+	);
+});

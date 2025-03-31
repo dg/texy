@@ -15,6 +15,9 @@ use Texy;
  */
 class DocumentNode extends BlockNode
 {
+	/** @var array<string, mixed>  document-level options collected from {{texy: ...}} directives */
+	public array $meta = [];
+
 	/** @internal */
 	public TransformState $transformState = TransformState::Pending;
 

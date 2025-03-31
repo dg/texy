@@ -9,28 +9,18 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\{HtmlCommentNode, HtmlTagNode, TextNode};
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use Texy\{Patterns, Regexp, Syntax};
-use function is_array, is_string;
-use const ENT_HTML5, ENT_QUOTES;
 
 
 /**
- * Processes HTML tags, comments and entity references in input text, and validates
- * the tags by $allowedTags of Texy.
+ * Processes HTML tags, comments and entity references in input text.
  */
 final class HtmlModule extends Texy\Module
 {
-	/** pass HTML comments to output? */
-	public bool $passComment = true;
-
-
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->renderTag(...));
-		$texy->htmlOutput->addRenderer($this->renderComment(...));
 	}
 
 
@@ -158,151 +148,5 @@ final class HtmlModule extends Texy\Module
 		}
 
 		return $res;
-	}
-
-
-	public function renderTag(HtmlTagNode $node, Html\Renderer $renderer): string
-	{
-		$tagName = strtolower($node->name);
-		$attrs = $node->attributes;
-
-		// Check if tag is allowed
-		if (!$this->isTagAllowed($tagName)) {
-			return Texy\Helpers::decodeEntities($this->reconstructTag($node)); // shown as text
-		}
-
-		// Validate tag - reject if validation fails
-		$validation = $this->validateTag($tagName, $attrs, $node->closing);
-		if ($validation === false || $validation === 'drop') {
-			// Invalid tag - shown as text in the output
-			return Texy\Helpers::decodeEntities($this->reconstructTag($node));
-		}
-
-		// Add rel="nofollow" for external links when forceNoFollow is enabled
-		if ($tagName === 'a' && !$node->closing && isset($attrs['href']) && is_string($attrs['href'])) {
-			if ($this->texy->linkModule->forceNoFollow && str_contains($attrs['href'], '//')) {
-				$existingRel = isset($attrs['rel']) && is_string($attrs['rel']) ? $attrs['rel'] : '';
-				$relParts = $existingRel ? explode(' ', $existingRel) : [];
-				if (!in_array('nofollow', $relParts, true)) {
-					$relParts[] = 'nofollow';
-				}
-				$attrs['rel'] = implode(' ', $relParts);
-			}
-		}
-
-		// Value 0 = inline markup, 1 = inline replaced, not present = block
-		$type = match (Html\Schema::inlineElements()[$tagName] ?? null) {
-			null => $renderer::ContentBlock,
-			1 => $renderer::ContentReplaced,
-			default => $renderer::ContentMarkup,
-		};
-
-		if ($node->closing) {
-			return $renderer->protect('</' . htmlspecialchars($tagName, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '>', $type);
-		}
-
-		return $renderer->protect(new Html\Element($tagName, $attrs)->startTag(), $type);
-	}
-
-
-	public function renderComment(HtmlCommentNode $node, Html\Renderer $renderer): string
-	{
-		if (!$this->passComment) {
-			return '';
-		}
-
-		// Sanitize comment content (security: prevent nested comments)
-		$content = preg_replace('~-{2,}~', ' - ', $node->text);
-		$content = trim($content, '-');
-		return $renderer->protect('<!--' . $content . '-->', $renderer::ContentMarkup);
-	}
-
-
-	/**
-	 * Is the tag (opening or closing) acceptable? Mirrors the render-time
-	 * decision so it can also be evaluated before rendering.
-	 * @param  array<string, string|bool|null>  $attrs
-	 */
-	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
-	{
-		if (!$this->isTagAllowed($tagName)) {
-			return false;
-		}
-
-		$validation = $this->validateTag($tagName, $attrs, $closing);
-		return $validation !== false && $validation !== 'drop';
-	}
-
-
-	/**
-	 * Is tag allowed by the allowedTags whitelist?
-	 */
-	private function isTagAllowed(string $tagName): bool
-	{
-		$allowedTags = $this->texy->allowedTags;
-		if (!$allowedTags) { // all tags are disabled
-			return false;
-		}
-
-		return !is_array($allowedTags) || isset($allowedTags[$tagName]);
-	}
-
-
-	/**
-	 * Validate HTML tag for security.
-	 * Returns: true = valid, false = escape as text, 'drop' = remove entirely
-	 * @param  array<string, string|bool|null>  $attrs
-	 */
-	private function validateTag(string $tagName, array $attrs, bool $closing): bool|string
-	{
-		// <a> requires href, name, or id
-		if ($tagName === 'a' && !$closing) {
-			if (!isset($attrs['href']) && !isset($attrs['name']) && !isset($attrs['id'])) {
-				return false;
-			}
-			// Validate href URL scheme (security: filter javascript: etc.)
-			if (isset($attrs['href']) && is_string($attrs['href'])) {
-				if (!$this->texy->checkURL($attrs['href'], Texy\Texy::FILTER_ANCHOR)) {
-					return 'drop'; // XSS protection - drop dangerous URLs entirely
-				}
-			}
-		}
-
-		// <img> requires src
-		if ($tagName === 'img') {
-			if (!isset($attrs['src']) || (is_string($attrs['src']) && trim($attrs['src']) === '')) {
-				return false;
-			}
-			// Validate src URL scheme
-			if (is_string($attrs['src']) && !$this->texy->checkURL($attrs['src'], Texy\Texy::FILTER_IMAGE)) {
-				return 'drop'; // XSS protection - drop dangerous URLs entirely
-			}
-		}
-
-		return true;
-	}
-
-
-	/**
-	 * Reconstructs the original tag source text.
-	 */
-	private function reconstructTag(HtmlTagNode $node): string
-	{
-		$tag = '<';
-		if ($node->closing) {
-			$tag .= '/';
-		}
-		$tag .= $node->name;
-		foreach ($node->attributes as $name => $value) {
-			$tag .= ' ' . $name;
-			if ($value !== true) {
-				$tag .= '="' . $value . '"';
-			}
-		}
-		if ($node->selfClosing) {
-			$tag .= ' /';
-		}
-
-		return $tag . '>';
 	}
 }

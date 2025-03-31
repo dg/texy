@@ -11,8 +11,8 @@ require __DIR__ . '/../bootstrap.php';
 
 test('nested div blocks', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->root = 'xxx/';
-	$texy->imageModule->root = '../images/';
+	$texy->htmlOutput->linkBaseUrl = 'xxx/';
+	$texy->htmlOutput->imageBaseUrl = '../images/';
 	$texy->htmlOutput->lineWrap = 180;
 
 	Assert::matchFile(

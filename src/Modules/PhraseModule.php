@@ -9,10 +9,8 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\{Modifier, Patterns, Syntax};
-use Texy\Nodes\{AnnotationNode, ContentNode, InlineCodeNode, LinkNode, PhraseNode, RawTextNode, TextNode};
-use Texy\Output\Html;
+use Texy\Nodes\{ContentNode, InlineCodeNode, LinkNode, PhraseNode, RawTextNode, TextNode};
 use Texy\Parsing\ParseContext;
-use const ENT_HTML5, ENT_NOQUOTES;
 
 
 /**
@@ -20,39 +18,12 @@ use const ENT_HTML5, ENT_NOQUOTES;
  */
 final class PhraseModule extends Texy\Module
 {
-	/** @var array<string, string> */
-	public array $tags = [
-		Syntax::Strong => 'strong',
-		Syntax::Emphasis => 'em',
-		Syntax::EmphasisSingleAsterisk => 'em',
-		Syntax::EmphasisSingleAsterisk2 => 'em',
-		Syntax::Inserted => 'ins',
-		Syntax::Deleted => 'del',
-		Syntax::Superscript => 'sup',
-		Syntax::SuperscriptShort => 'sup',
-		Syntax::Subscript => 'sub',
-		Syntax::SubscriptShort => 'sub',
-		Syntax::SpanQuotes => 'span',
-		Syntax::SpanTilde => 'span',
-		Syntax::AbbreviationQuotes => 'abbr',
-		Syntax::Abbreviation => 'abbr',
-		Syntax::Code => 'code',
-		Syntax::Quote => 'q',
-		Syntax::QuickLink => 'a',
-	];
-
 	public bool $linksAllowed = true;
 
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->renderPhrase(...));
-		$texy->htmlOutput->addRenderer($this->renderCode(...));
-		$texy->htmlOutput->addRenderer(fn(RawTextNode $node) => $node->text);
-		$texy->htmlOutput->addRenderer(
-			fn(AnnotationNode $node) => new Html\Element('abbr', ['title' => $node->annotation])->setText($node->text),
-		);
 	}
 
 
@@ -514,34 +485,5 @@ final class PhraseModule extends Texy\Module
 			$context->parseInline(trim($mContent)),
 			null,  // wikilinks don't support modifiers
 		);
-	}
-
-
-	public function renderPhrase(PhraseNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$tag = $this->tags[$node->type] ?? 'span';
-
-		if ($node->type === Syntax::StrongEmphasis) {
-			$el = new Html\Element($this->tags[Syntax::Strong] ?? 'strong');
-			$renderer->decorateElement($node->modifier, $el);
-			$inner = $el->create($this->tags[Syntax::Emphasis] ?? 'em');
-			$inner->children = $renderer->renderNodes($node->content->children);
-			return $el;
-		}
-
-		$el = new Html\Element($tag);
-		$renderer->decorateElement($node->modifier, $el);
-		$el->children = $renderer->renderNodes($node->content->children);
-		return $el;
-	}
-
-
-	public function renderCode(InlineCodeNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element($this->tags[Syntax::Code] ?? 'code');
-		$renderer->decorateElement($node->modifier, $el);
-		// Only escape <, >, & - not quotes (ENT_NOQUOTES)
-		$el->children = [$renderer->protect(htmlspecialchars($node->code, ENT_NOQUOTES | ENT_HTML5, 'UTF-8'), $renderer::ContentTextual)];
-		return $el;
 	}
 }

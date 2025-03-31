@@ -26,7 +26,7 @@ test('addRenderer() replaces the default handler', function () {
 
 test('handler receives node data', function () {
 	$texy = new Texy;
-	$texy->imageModule->root = '/img/';
+	$texy->htmlOutput->imageBaseUrl = '/img/';
 	$ast = $texy->parse('[* image.jpg *]');
 
 	// Custom handler that accesses node properties

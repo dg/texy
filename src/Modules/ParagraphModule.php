@@ -12,7 +12,7 @@ use Texy\{Modifier, Nodes, Patterns, Regexp};
 use Texy\Nodes\{ContentNode, LineBreakNode, ParagraphNode, TextNode};
 use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
-use function is_string, strlen;
+use function strlen;
 
 
 /**
@@ -24,10 +24,6 @@ final class ParagraphModule extends Texy\Module
 		private Texy\Texy $texy,
 	) {
 		$texy->setGapHandler($this->parseText(...));
-		$texy->htmlOutput->addRenderer($this->render(...));
-		$texy->htmlOutput->addRenderer(
-			fn(LineBreakNode $node, Html\Renderer $renderer) => $renderer->protect('<br>', $renderer::ContentReplaced),
-		);
 	}
 
 
@@ -103,7 +99,7 @@ final class ParagraphModule extends Texy\Module
 				// Not an inline element = block element (includes custom elements)
 				if (
 					!isset(Html\Schema::inlineElements()[$tagName])
-					&& $this->texy->htmlModule->isTagAcceptable($tagName, $node->attributes, closing: false)
+					&& $this->texy->htmlPolicy->isTagAcceptable($tagName, $node->attributes, closing: false)
 				) {
 					return true;
 				}
@@ -186,89 +182,5 @@ final class ParagraphModule extends Texy\Module
 			}
 		}
 		return $result;
-	}
-
-
-	public function render(ParagraphNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$children = $renderer->renderNodes($node->content->children);
-
-		// Block HTML content - skip <p> wrapper entirely
-		if ($node->blockHtml) {
-			return $renderer->wrapChildren($children);
-		}
-
-		// Whole content rendered to nothing (consumed directives, comments) → no paragraph at all
-		if ($node->modifier === null && array_all($children, fn($child) => is_string($child) && trim($child) === '')) {
-			return $renderer->wrapChildren([]);
-		}
-
-		$info = $this->analyzeContent($node->content->children);
-
-		// Only markup (HTML tags/comments) without text → no <p> wrapper
-		if (!$info['hasText'] && !$info['hasOther'] && $info['hasMarkup'] && $node->modifier === null) {
-			return $renderer->wrapChildren($children);
-		}
-
-		// Only replaced content (images) → use nontextParagraph
-		if (!$info['hasText'] && !$info['hasOther'] && $info['hasReplaced']) {
-			$el = new Html\Element($this->texy->nontextParagraph);
-			$renderer->decorateElement($node->modifier, $el);
-			$el->children = $children;
-			return $el;
-		}
-
-		// Normal paragraph
-		$el = new Html\Element('p');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->children = $children;
-		return $el;
-	}
-
-
-	/**
-	 * Analyze paragraph content to determine what types of nodes it contains.
-	 * @param  array<Nodes\BlockNode|Nodes\InlineNode>  $content
-	 * @return array{hasText: bool, hasReplaced: bool, hasMarkup: bool, hasOther: bool}
-	 */
-	private function analyzeContent(array $content): array
-	{
-		$hasText = false;
-		$hasReplaced = false;
-		$hasMarkup = false;
-		$hasOther = false;
-
-		foreach ($content as $node) {
-			if ($node instanceof TextNode) {
-				$hasText = $hasText || trim($node->text) !== '';
-
-			} elseif ($node instanceof Nodes\ImageNode) {
-				$hasReplaced = true;
-
-			} elseif ($node instanceof Nodes\HtmlCommentNode) {
-				$hasMarkup = true;
-
-			} elseif ($node instanceof Nodes\HtmlTagNode) {
-				$inlineType = Html\Schema::inlineElements()[strtolower($node->name)] ?? null;
-				match ($inlineType) {
-					1 => $hasReplaced = true,    // replaced element (img, br, input, ...)
-					0 => $hasMarkup = true,      // inline markup (span, a, strong, ...)
-					default => $hasMarkup = true,   // block element or unknown
-				};
-
-			} elseif ($node instanceof Nodes\LinkNode) {
-				$inner = $this->analyzeContent($node->content->children);
-				if ($inner['hasText'] || $inner['hasOther']) {
-					$hasOther = true;
-				} elseif ($inner['hasReplaced']) {
-					$hasReplaced = true;
-				}
-
-			} else {
-				$hasOther = true;
-			}
-		}
-
-		return compact('hasText', 'hasReplaced', 'hasMarkup', 'hasOther');
 	}
 }

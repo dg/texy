@@ -76,7 +76,7 @@ test('custom ImageNode handler is called for inline images', function () {
 
 test('figure alignment is applied to wrapper, not to image', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->rightClass = 'float-right';
+	$texy->htmlOutput->floatClasses['right'] = 'float-right';
 
 	// Right-aligned figure (alignment inside brackets)
 	$html = $texy->process('[* image.jpg >]');
@@ -90,7 +90,7 @@ test('figure alignment is applied to wrapper, not to image', function () {
 
 test('a custom FigureNode renderer applies the float as configured', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->leftClass = 'float-left';
+	$texy->htmlOutput->floatClasses['left'] = 'float-left';
 	$texy->htmlOutput->addRenderer(function (Texy\Nodes\FigureNode $node, Html\Renderer $gen): Html\Element {
 		$el = new Html\Element('dl');
 		$el->create('dt')->children = $gen->renderNodes([$node->image]);

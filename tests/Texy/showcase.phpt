@@ -11,14 +11,14 @@ require __DIR__ . '/../bootstrap.php';
 
 test('complete syntax showcase', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->root = '../images/';
-	$texy->imageModule->leftClass = 'left';
+	$texy->htmlOutput->imageBaseUrl = '../images/';
+	$texy->htmlOutput->floatClasses['left'] = 'left';
 	$texy->allowed[Texy\Syntax::Inserted] = true;
 	$texy->allowed[Texy\Syntax::Deleted] = true;
 	$texy->allowed[Texy\Syntax::Superscript] = true;
 	$texy->allowed[Texy\Syntax::Subscript] = true;
 	$texy->typographyModule->locale = 'en';
-	$texy->horizLineModule->classes['*'] = 'hidden';
+	$texy->htmlOutput->horizontalRuleClasses['*'] = 'hidden';
 
 	Assert::matchFile(
 		__DIR__ . '/expected/showcase.html',

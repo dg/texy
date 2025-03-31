@@ -9,7 +9,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\DirectiveNode;
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use Texy\Syntax;
 
@@ -22,7 +21,30 @@ final class DirectiveModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->render(...));
+	}
+
+
+	/**
+	 * Consumes {{texy: ...}} directives: stores document-level options into
+	 * DocumentNode::$meta and removes the directive nodes from the AST, so all
+	 * output generators see the same document.
+	 */
+	public function processDirectives(Texy\Nodes\DocumentNode $doc): void
+	{
+		(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) use ($doc): ?Texy\TraverseAction {
+			if (!$node instanceof DirectiveNode) {
+				return null;
+			}
+
+			if ($node->name === 'texy' && $node->args) {
+				foreach ($node->args as $arg) {
+					$doc->meta[$arg] = true;
+				}
+				return Texy\TraverseAction::Remove;
+			}
+
+			return null;
+		});
 	}
 
 
@@ -40,20 +62,5 @@ final class DirectiveModule extends Texy\Module
 			~Ux',
 			fn(ParseContext $context, array $matches) => trim((string) $matches[1]) === '' ? null : new DirectiveNode((string) $matches[1]),
 		);
-	}
-
-
-	public function render(DirectiveNode $node, Html\Renderer $renderer): string
-	{
-		// {{texy: ...}} sets options of the processing and leaves nothing in the output
-		if ($node->name === 'texy' && $node->args) {
-			if (in_array('nofollow', $node->args, true)) {
-				$this->texy->linkModule->forceNoFollow = true;
-			}
-			return '';
-		}
-
-		// Unknown directives - preserve original text (entities decoded like any display text)
-		return Texy\Helpers::decodeEntities('{{' . $node->text . '}}');
 	}
 }
