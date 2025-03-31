@@ -14,6 +14,10 @@ namespace Texy\Nodes;
  */
 class EmoticonNode extends InlineNode
 {
+	/** Emoji/text the emoticon resolves to, by the table of the configuration at the time of parsing */
+	public ?string $resolved = null;
+
+
 	public function __construct(
 		public string $emoticon,
 	) {

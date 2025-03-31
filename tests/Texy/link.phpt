@@ -15,7 +15,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('link forceNoFollow', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->forceNoFollow = true;
+	$texy->htmlOutput->linkNoFollow = true;
 	Assert::match(
 		'<p><a href="https://example.com" rel="nofollow">https://example.com</a></p>
 ',
@@ -26,7 +26,7 @@ test('link forceNoFollow', function () {
 
 test('link forceNoFollow does not affect relative URLs', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->forceNoFollow = true;
+	$texy->htmlOutput->linkNoFollow = true;
 	$texy->allowed[Texy\Syntax::LinkReference] = true;
 	$texy->linkModule->addDefinition('test', '/local/page');
 	// Relative URL should not get nofollow
@@ -57,7 +57,7 @@ test('url shortening', function () {
 
 test('url shortening disabled', function () {
 	$texy = new Texy\Texy;
-	$texy->autolinkModule->shorten = false;
+	$texy->htmlOutput->shortenUrls = false;
 	$texy->htmlOutput->lineWrap = 500;
 	Assert::match(
 		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/very/long/path/to/some/page.html</a></p>

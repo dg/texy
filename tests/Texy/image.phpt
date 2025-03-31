@@ -30,8 +30,8 @@ test('the alternative text and the float are properties of the image, not of its
 
 test('image auto-detect dimensions', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->fileRoot = __DIR__ . '/fixtures/';
-	$texy->imageModule->root = '';
+	$texy->htmlOutput->imageBasePath = __DIR__ . '/fixtures/';
+	$texy->htmlOutput->imageBaseUrl = '';
 	Assert::match(
 		'<div class="figure"><img src="logo.gif" alt="" width="176" height="104"></div>
 ',
@@ -42,8 +42,8 @@ test('image auto-detect dimensions', function () {
 
 test('image auto-detect dimensions with specified width', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->fileRoot = __DIR__ . '/fixtures/';
-	$texy->imageModule->root = '';
+	$texy->htmlOutput->imageBasePath = __DIR__ . '/fixtures/';
+	$texy->htmlOutput->imageBaseUrl = '';
 	// Specify width only, height should be calculated proportionally
 	// Original: 176x104, ratio = 104/176 = 0.59
 	// With width=88: height = 88 * 0.59 = 52
@@ -57,8 +57,8 @@ test('image auto-detect dimensions with specified width', function () {
 
 test('image auto-detect dimensions with specified height', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->fileRoot = __DIR__ . '/fixtures/';
-	$texy->imageModule->root = '';
+	$texy->htmlOutput->imageBasePath = __DIR__ . '/fixtures/';
+	$texy->htmlOutput->imageBaseUrl = '';
 	// Specify height only, width should be calculated proportionally
 	// Original: 176x104, ratio = 176/104 = 1.69
 	// With height=52: width = 52 * 1.69 = 88
@@ -72,7 +72,7 @@ test('image auto-detect dimensions with specified height', function () {
 
 test('image dimensions not detected without fileRoot', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->root = '';
+	$texy->htmlOutput->imageBaseUrl = '';
 	// No fileRoot set, dimensions should not be added
 	Assert::match(
 		'<div class="figure"><img src="logo.gif" alt=""></div>
@@ -88,7 +88,7 @@ test('image dimensions not detected without fileRoot', function () {
 
 test('image with a float class', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->rightClass = 'float-right';
+	$texy->htmlOutput->floatClasses['right'] = 'float-right';
 	Assert::match(
 		'<div class="figure float-right"><img src="images/image.jpg" alt=""></div>
 ',

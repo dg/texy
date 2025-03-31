@@ -9,7 +9,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\BlockQuoteNode;
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use Texy\Syntax;
 use function strlen;
@@ -23,7 +22,6 @@ final class BlockQuoteModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->render(...));
 	}
 
 
@@ -72,14 +70,5 @@ final class BlockQuoteModule extends Texy\Module
 			$parsed,
 			Texy\Modifier::parse($mMod),
 		);
-	}
-
-
-	public function render(BlockQuoteNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('blockquote');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->children = $renderer->renderNodes($node->content->children);
-		return $el;
 	}
 }

@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('nontext paragraph', function () {
 	$texy = new Texy\Texy;
-	$texy->nontextParagraph = 'section';
+	$texy->htmlOutput->imageParagraphTag = 'section';
 	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::match(

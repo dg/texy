@@ -29,7 +29,7 @@ enum HeadingType
 
 
 /**
- * What a phrase means, whatever notation it is written in.
+ * What a phrase means, whatever notation it is written in; the value names it in Html\Config::$phraseTags.
  */
 enum PhraseType: string
 {

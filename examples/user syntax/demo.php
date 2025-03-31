@@ -15,11 +15,12 @@
  * - How to apply modifiers to your elements
  *
  * The new syntaxes create nodes Texy already knows, a strong or emphasized phrase,
- * so they need no renderer and every output format understands them.
+ * so they need no renderer and every output format understands them. Which HTML
+ * tag a phrase gets is up to $phraseTags.
  *
  * CUSTOM SYNTAX WE CREATE:
- * *bold text*        → <strong>bold text</strong>
- * _italic text_      → <em>italic text</em>
+ * *bold text*        → <b>bold text</b>
+ * _italic text_      → <i>italic text</i>
  */
 
 use Texy\{Modifier, Syntax};
@@ -40,6 +41,10 @@ $texy->allowed[Syntax::StrongEmphasis] = false;         // Disables ***text***
 $texy->allowed[Syntax::Strong] = false;                  // Disables **text**
 $texy->allowed[Syntax::EmphasisSingleAsterisk] = false;  // Disables *text*
 $texy->allowed[Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
+
+// Strong and emphasized phrases are rendered as <b> and <i> instead of <strong> and <em>
+$texy->htmlOutput->phraseTags[PhraseType::Strong->value] = 'b';
+$texy->htmlOutput->phraseTags[PhraseType::Emphasis->value] = 'i';
 
 
 // ============================================================

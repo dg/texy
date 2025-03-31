@@ -11,9 +11,9 @@ require __DIR__ . '/../bootstrap.php';
 
 test('special cases and edge cases', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->root = 'xxx/';
-	$texy->imageModule->root = '../images/';
-	$texy->imageModule->leftClass = 'left';
+	$texy->htmlOutput->linkBaseUrl = 'xxx/';
+	$texy->htmlOutput->imageBaseUrl = '../images/';
+	$texy->htmlOutput->floatClasses['left'] = 'left';
 	$texy->htmlOutput->lineWrap = 180;
 	$texy->allowed[Texy\Syntax::Hyphenation] = false;
 	$texy->typographyModule->locale = 'en';

@@ -9,8 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\{Modifier, Patterns, Regexp, Syntax};
-use Texy\Nodes\{DefinitionListNode, FigureNode, ListItemNode, ListNode, ListType, ParagraphNode};
-use Texy\Output\Html;
+use Texy\Nodes\{DefinitionListNode, ListItemNode, ListNode, ListType};
 use Texy\Parsing\ParseContext;
 use function count, strlen;
 
@@ -37,9 +36,6 @@ final class ListModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->renderList(...));
-		$texy->htmlOutput->addRenderer($this->renderItem(...));
-		$texy->htmlOutput->addRenderer($this->renderDefinitionList(...));
 	}
 
 
@@ -247,87 +243,5 @@ final class ListModule extends Texy\Module
 			false,
 			Modifier::parse($mMod),
 		);
-	}
-
-
-	public function renderList(ListNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element($node->type->isOrdered() ? 'ol' : 'ul');
-		$renderer->decorateElement($node->modifier, $el);
-
-		if ($node->start !== null && $node->start > 1) {
-			$el->attrs['start'] = $node->start;
-		}
-
-		if ($style = $node->type->getStyleType()) {
-			$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-			$el->attrs['style']['list-style-type'] = $style;
-		}
-
-		foreach ($node->items as $item) {
-			$el->add($this->renderItem($item, $renderer));
-		}
-
-		return $el;
-	}
-
-
-	public function renderItem(ListItemNode $node, Html\Renderer $renderer): Html\Element
-	{
-		// Regular list item (li)
-		$el = new Html\Element('li');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->children = $this->renderItemContent($node->content->children, $renderer);
-		return $el;
-	}
-
-
-	public function renderDefinitionList(DefinitionListNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('dl');
-		$renderer->decorateElement($node->modifier, $el);
-
-		foreach ($node->items as $item) {
-			$el->add($this->renderDefinitionItem($item, $renderer));
-		}
-
-		return $el;
-	}
-
-
-	private function renderDefinitionItem(ListItemNode $node, Html\Renderer $renderer): Html\Element
-	{
-		// Definition list item (dt for term=true, dd for term=false)
-		$el = new Html\Element($node->term ? 'dt' : 'dd');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->children = $node->term
-			? $renderer->renderNodes($node->content->children)
-			: $this->renderItemContent($node->content->children, $renderer);
-		return $el;
-	}
-
-
-	/**
-	 * The item is a block container itself, so a wrapper on the block that opens it
-	 * adds nothing: <li>text<ul>…</ul></li> needs no <p> around the text. A second
-	 * paragraph does get one, because there the wrapper is what separates them.
-	 * @param  array<Texy\Node>  $content
-	 * @return list<Html\Element|string>
-	 */
-	private function renderItemContent(array $content, Html\Renderer $renderer): array
-	{
-		$first = $content[0] ?? null;
-		$rest = array_slice($content, 1);
-
-		$opening = match (true) {
-			$first instanceof ParagraphNode && $first->modifier === null => $renderer->renderNodes($first->content->children),
-			!$rest && $first instanceof FigureNode && $first->caption === null && $first->modifier === null
-				=> $renderer->renderNodes([$first->image]),
-			default => null,
-		};
-
-		return $opening === null
-			? $renderer->renderNodes($content)
-			: [...$opening, ...$renderer->renderNodes($rest)];
 	}
 }

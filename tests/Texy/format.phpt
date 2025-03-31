@@ -86,3 +86,13 @@ test('disabled indentation', function () {
 		trim(wellform($config, '<div><p>text</p></div>')),
 	);
 });
+
+
+test('stray < stays in place', function () {
+	$config = (new Texy)->htmlOutput;
+	$config->lineWrap = 0;
+	Assert::same(
+		'a < b <span>x</span> c',
+		trim(wellform($config, 'a < b <span>x</span> c')),
+	);
+});

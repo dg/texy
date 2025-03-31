@@ -10,7 +10,6 @@ namespace Texy\Modules;
 use Texy;
 use Texy\{Helpers, Modifier, Patterns, Syntax};
 use Texy\Nodes\{ContentNode, FigureNode, ImageNode, LinkNode};
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use function in_array, is_array;
 
@@ -20,17 +19,9 @@ use function in_array, is_array;
  */
 final class FigureModule extends Texy\Module
 {
-	/** element wrapping an image with its caption; <figure> puts the caption in <figcaption>, other elements in <p> */
-	public string $tagName = 'div';
-
-	/** class of every figure; a floated one gets the class of its float too */
-	public ?string $class = 'figure';
-
-
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->render(...));
 	}
 
 
@@ -118,30 +109,5 @@ final class FigureModule extends Texy\Module
 			$float,
 			Modifier::parse($mMod),
 		);
-	}
-
-
-	public function render(FigureNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element($this->tagName);
-
-		// Build image via generator - this allows custom ImageNode handlers to work
-		$el->children = $renderer->renderNodes([$node->image]);
-
-		// Caption
-		if ($node->caption !== null) {
-			$el->create($this->tagName === 'figure' ? 'figcaption' : 'p')
-				->children = $renderer->renderNodes($node->caption->children);
-		}
-
-		// Modifier classes/styles
-		$renderer->decorateElement($node->modifier, $el);
-
-		if ($this->class) {
-			$el->addClass($this->class);
-		}
-		$renderer->applyFloat($el, $node->float);
-
-		return $el;
 	}
 }

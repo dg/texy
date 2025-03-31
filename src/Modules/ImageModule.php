@@ -10,9 +10,8 @@ namespace Texy\Modules;
 use Texy;
 use Texy\{Helpers, Modifier, Node, NodeTraverser, Patterns, Regexp, Syntax, TraverseAction};
 use Texy\Nodes\{ContentNode, DocumentNode, ImageDefinitionNode, ImageNode, LinkNode};
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
-use function array_key_exists, count, in_array, is_array;
+use function count, in_array, is_array;
 
 
 /**
@@ -20,33 +19,16 @@ use function array_key_exists, count, in_array, is_array;
  */
 final class ImageModule extends Texy\Module
 {
-	/** root of relative images (http) */
-	public ?string $root = 'images/';
-
-	/** physical location of images on server */
-	public ?string $fileRoot = null;
-
-	/** left-floated images CSS class */
-	public ?string $leftClass = null;
-
-	/** right-floated images CSS class */
-	public ?string $rightClass = null;
-
 	/** @var array<string, ImageDefinitionNode> collected image definitions */
 	private array $definitions = [];
 
 	/** @var array<string, ImageDefinitionNode> user-defined definitions (persist across process() calls) */
 	private array $userDefinitions = [];
 
-	/** @var array<string, array{int, int}|null>  getimagesize() results cached per file path */
-	private array $sizes = [];
-
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->render(...));
-		$texy->htmlOutput->addRenderer(fn(ImageDefinitionNode $node) => '');
 	}
 
 
@@ -294,76 +276,5 @@ final class ImageModule extends Texy\Module
 	public function getDefinition(string $name): ?ImageDefinitionNode
 	{
 		return $this->definitions[Helpers::toLower($name)] ?? null;
-	}
-
-
-	public function render(ImageNode $node, Html\Renderer $renderer): Html\Element
-	{
-		// Check URL scheme (security - filter dangerous schemes like javascript:)
-		if ($node->url === null || !$this->texy->checkURL($node->url, Texy\Texy::FILTER_IMAGE)) {
-			// URL is missing or fails scheme filter, return just the alternative text
-			return $renderer->wrapChildren([$node->alt ?? '']);
-		}
-
-		// Detect dimensions from file system
-		[$width, $height] = $this->detectDimensions($node);
-
-		$el = new Html\Element('img');
-		$renderer->decorateElement($node->modifier, $el);
-		$el->attrs = [
-			'src' => Helpers::prependRoot($node->url, $this->root),
-			'alt' => $renderer->postLineText($node->alt ?? ''),
-		] + $el->attrs;
-		$renderer->applyFloat($el, $node->float);
-
-		// dimensions
-		$el->attrs['width'] = $width;
-		$el->attrs['height'] = $height;
-
-		return $el;
-	}
-
-
-	/**
-	 * Detects image dimensions from file system. Does not modify the node.
-	 * @return array{?int, ?int}  [width, height]
-	 */
-	private function detectDimensions(ImageNode $node): array
-	{
-		$width = $node->width;
-		$height = $node->height;
-
-		if (
-			$node->url === null || !Helpers::isRelative($node->url) || str_contains($node->url, '..')
-			|| ($directory = $this->fileRoot) === null
-			|| !($size = $this->getSize(rtrim($directory, '/\\') . '/' . $node->url))
-		) {
-			return [$width, $height];
-		}
-
-		if ($width === null && $height === null) {
-			[$width, $height] = $size;
-		} elseif ($height === null) {
-			$height = (int) round($size[1] / $size[0] * $width);
-		} elseif ($width === null) {
-			$width = (int) round($size[0] / $size[1] * $height);
-		}
-
-		return [$width, $height];
-	}
-
-
-	/**
-	 * Returns [width, height] of an image file, cached.
-	 * @return array{int, int}|null
-	 */
-	private function getSize(string $file): ?array
-	{
-		if (!array_key_exists($file, $this->sizes)) {
-			$size = @is_file($file) ? @getimagesize($file) : false; // @ the path may be outside open_basedir, the image unreadable
-			$this->sizes[$file] = $size ? [$size[0], $size[1]] : null;
-		}
-
-		return $this->sizes[$file];
 	}
 }

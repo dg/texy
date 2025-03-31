@@ -10,7 +10,6 @@ namespace Texy\Modules;
 use Texy;
 use Texy\{Modifier, Patterns, Regexp, Syntax};
 use Texy\Nodes\{ContentNode, TableCellNode, TableNode, TableRowNode};
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 
 
@@ -25,9 +24,6 @@ final class TableModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->renderTable(...));
-		$texy->htmlOutput->addRenderer($this->renderRow(...));
-		$texy->htmlOutput->addRenderer($this->renderCell(...));
 	}
 
 
@@ -234,65 +230,5 @@ final class TableModule extends Texy\Module
 		}
 
 		return $context->parseInline(trim($matches[2]));
-	}
-
-
-	public function renderTable(TableNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('table');
-		$renderer->decorateElement($node->modifier, $el);
-
-		if ($node->caption !== null) {
-			$el->create('caption')->children = $renderer->renderNodes($node->caption->children);
-		}
-
-		$elPart = null;
-		foreach ($node->rows as $row) {
-			if ($elPart === null) {
-				$elPart = new Html\Element($row->header ? 'thead' : 'tbody');
-				$el->add($elPart);
-			} elseif (!$row->header && $elPart->name === 'thead') {
-				// switch from thead to tbody
-				$elPart = new Html\Element('tbody');
-				$el->add($elPart);
-			}
-			$elPart->add($this->renderRow($row, $renderer));
-		}
-
-		// if only thead without tbody, rename to tbody (tbody is required, thead is optional)
-		if ($elPart !== null && $elPart->name === 'thead') {
-			$elPart->name = 'tbody';
-		}
-
-		return $el;
-	}
-
-
-	public function renderRow(TableRowNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('tr');
-		$renderer->decorateElement($node->modifier, $el);
-		foreach ($node->cells as $cell) {
-			$el->add($this->renderCell($cell, $renderer));
-		}
-
-		return $el;
-	}
-
-
-	public function renderCell(TableCellNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element($node->header ? 'th' : 'td');
-		$renderer->decorateElement($node->modifier, $el);
-
-		if ($node->colspan > 1) {
-			$el->attrs['colspan'] = $node->colspan;
-		}
-		if ($node->rowspan > 1) {
-			$el->attrs['rowspan'] = $node->rowspan;
-		}
-
-		$el->children = $renderer->renderNodes($node->content->children);
-		return $el;
 	}
 }

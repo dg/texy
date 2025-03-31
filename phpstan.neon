@@ -50,7 +50,7 @@ parameters:
 			message: '#no signature specified for Closure\.$#'
 			paths:
 				- src/Output/Html/Config.php
-				- src/Output/Html/Renderer.php
+				- src/Output/NodeRenderer.php
 
 		# Pattern handlers are intentionally polymorphic: each declares the exact capture
 		# shape of its own regexp, so no single Closure signature fits them all -- a
