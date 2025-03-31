@@ -38,14 +38,8 @@ class Texy
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
-	/** @var bool|array<string, bool|array<int, string>>  allowed HTML tags and their attributes */
-	public bool|array $allowedTags;
-
-	/** @var bool|array<int, string>  allowed classes and IDs */
-	public bool|array $allowedClasses = self::ALL;
-
-	/** @var bool|array<int, string>  allowed inline CSS styles */
-	public bool|array $allowedStyles = self::ALL;
+	/** HTML security policy: allowed tags, classes and inline styles */
+	public readonly HtmlPolicy $htmlPolicy;
 
 	public Output\Html\Config $htmlOutput;
 
@@ -55,37 +49,16 @@ class Texy
 	/** join consecutive lines into one paragraph? false makes every newline a line break */
 	public bool $mergeLines = true;
 
-	/** Do obfuscate e-mail addresses? */
-	public bool $obfuscateEmail = true;
-
-	/** @var array<string, ?string>  classes in place of style="text-align" and "vertical-align", null keeps the style */
-	public array $alignClasses = [
-		'left' => null,
-		'right' => null,
-		'center' => null,
-		'justify' => null,
-		'top' => null,
-		'middle' => null,
-		'bottom' => null,
-	];
-
-	/** element in place of <p> for a paragraph holding images only */
-	public string $nontextParagraph = 'div';
-
 	/** @deprecated */
 	public bool $removeSoftHyphens = true;
 
 	/** @var array<string, string>  regexps checking URL schemes, keyed by FILTER_ANCHOR and FILTER_IMAGE */
 	public array $urlSchemeFilters = [];
 
-	public Modules\HtmlModule $htmlModule;
 	public Modules\ImageModule $imageModule;
 	public Modules\LinkReferenceModule $linkModule;
-	public Modules\AutolinkModule $autolinkModule;
 	public Modules\PhraseModule $phraseModule;
 	public Modules\EmoticonModule $emoticonModule;
-	public Modules\FigureModule $figureModule;
-	public Modules\HorizontalRuleModule $horizLineModule;
 	public Modules\HeadingModule $headingModule;
 	public Modules\ListModule $listModule;
 	public Modules\TypographyModule $typographyModule;
@@ -121,7 +94,7 @@ class Texy
 
 	public function __construct()
 	{
-		$this->allowedTags = Output\Html\Schema::defaultAllowedTags(); // accept all valid HTML tags and attributes by default
+		$this->htmlPolicy = new HtmlPolicy($this);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->createModules();
 	}
@@ -129,25 +102,26 @@ class Texy
 
 	private function createModules(): void
 	{
+		$directive = new Modules\DirectiveModule($this);
 		$this->imageModule = new Modules\ImageModule($this);
 		$this->linkModule = new Modules\LinkReferenceModule($this);
 		$this->headingModule = new Modules\HeadingModule($this);
 
 		$this->modules = [
 			// inline
-			new Modules\DirectiveModule($this),
-			$this->htmlModule = new Modules\HtmlModule($this),
+			$directive,
+			new Modules\HtmlModule($this),
 			$this->imageModule,
 			$this->phraseModule = new Modules\PhraseModule($this),
 			$this->linkModule,
-			$this->autolinkModule = new Modules\AutolinkModule($this),
+			new Modules\AutolinkModule($this),
 			$this->emoticonModule = new Modules\EmoticonModule($this),
 
 			// block
 			new Modules\ParagraphModule($this),
 			new Modules\BlockModule($this),
-			$this->figureModule = new Modules\FigureModule($this),
-			$this->horizLineModule = new Modules\HorizontalRuleModule($this),
+			new Modules\FigureModule($this),
+			new Modules\HorizontalRuleModule($this),
 			new Modules\BlockQuoteModule($this),
 			new Modules\TableModule($this),
 			$this->headingModule,
@@ -159,6 +133,7 @@ class Texy
 
 		$this->addHandler($this->linkModule->recognizeReferences(...), Stage::Syntax);
 
+		$this->addHandler($directive->processDirectives(...));
 		$this->addHandler($this->imageModule->resolveReferences(...));
 		$this->addHandler($this->linkModule->resolveReferences(...));
 		$this->addHandler($this->headingModule->processHeadings(...));
@@ -292,6 +267,7 @@ class Texy
 		$postHandlers = array_filter($this->postHandlers, fn(string $name): bool => !empty($this->allowed[$name]), ARRAY_FILTER_USE_KEY);
 		return new Output\Html\Renderer(
 			$this->htmlOutput,
+			$this->htmlPolicy,
 			$this,
 			$typography,
 			[...array_filter([$typography, $hyphenation]), ...array_values($postHandlers)],

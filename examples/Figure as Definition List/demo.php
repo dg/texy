@@ -54,8 +54,7 @@ $texy->htmlOutput->addRenderer(
 
 // You can also set the CSS classes of floated figures (optional),
 // otherwise the float is written as an inline style
-// $texy->imageModule->leftClass = 'figure-left';
-// $texy->imageModule->rightClass = 'figure-right';
+// $texy->htmlOutput->floatClasses = ['left' => 'figure-left', 'right' => 'figure-right'];
 
 
 // Process the text

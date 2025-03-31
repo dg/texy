@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('custom image handler', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->root = '../images/';
+	$texy->htmlOutput->imageBaseUrl = '../images/';
 	$texy->htmlOutput->lineWrap = 180;
 
 	// a transform pass modifies the ImageNodes in the AST
@@ -27,7 +27,7 @@ test('custom image handler', function () {
 				$imageNode->url = 'image.gif';
 				$imageNode->alt = 'Texy! logo';
 				$node->url = 'image-big.gif';  // Update link URL (root added during generation)
-				$node->isImageLink = true;  // Use imageModule->root for link href
+				$node->isImageLink = true;  // Use imageBaseUrl for link href
 			} elseif ($node instanceof ImageNode && $node->url === 'user') { // Handle ImageNode directly (image without link)
 				$node->url = 'image.gif';
 				$node->alt = 'Texy! logo';

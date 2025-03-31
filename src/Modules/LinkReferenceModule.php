@@ -10,7 +10,6 @@ namespace Texy\Modules;
 use Texy;
 use Texy\{Helpers, Nodes, Patterns, Syntax};
 use Texy\Nodes\{DocumentNode, LinkDefinitionNode};
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use function in_array, strlen;
 
@@ -20,12 +19,6 @@ use function in_array, strlen;
  */
 final class LinkReferenceModule extends Texy\Module
 {
-	/** root of relative links */
-	public ?string $root = null;
-
-	/** always use rel="nofollow" for absolute links? */
-	public bool $forceNoFollow = false;
-
 	/** @var array<string, LinkDefinitionNode> link definitions */
 	private array $definitions = [];
 
@@ -36,8 +29,6 @@ final class LinkReferenceModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->render(...));
-		$texy->htmlOutput->addRenderer(fn(LinkDefinitionNode $node) => '');
 	}
 
 
@@ -224,47 +215,5 @@ final class LinkReferenceModule extends Texy\Module
 		}
 
 		return null;
-	}
-
-
-	public function render(Nodes\LinkNode $node, Html\Renderer $renderer): Html\Element
-	{
-		// Check URL scheme (security - filter dangerous schemes like javascript:)
-		$rawUrl = $node->url ?? '';
-		if (!$this->texy->checkURL($rawUrl, Texy\Texy::FILTER_ANCHOR)) {
-			// URL fails scheme filter, return just the content without link
-			return $renderer->wrapChildren($renderer->renderNodes($node->content->children));
-		}
-
-		$el = new Html\Element('a');
-
-		// Handle nofollow class (work on a copy, the node must stay untouched)
-		$mod = $node->modifier;
-		$nofollow = false;
-		if ($mod !== null && isset($mod->classes['nofollow'])) {
-			$nofollow = true;
-			$mod = clone $mod;
-			unset($mod->classes['nofollow']);
-		}
-
-		// Apply modifier (title, class, id, style, etc.) before href
-		$el->attrs['href'] = null; // trick - reserve position at front
-		$renderer->decorateElement($mod, $el);
-
-		$rawUrl = Helpers::normalizeWww($rawUrl);
-
-		// a link to the image itself is relative to the images
-		$root = $node->isImageLink ? $this->texy->imageModule->root : $this->root;
-		$el->attrs['href'] = Helpers::prependRoot($rawUrl, $root);
-
-		// rel="nofollow"
-		if ($nofollow || ($this->forceNoFollow && str_contains($el->attrs['href'], '//'))) {
-			$el->attrs['rel'] = 'nofollow';
-		}
-
-		// Add content
-		$el->children = $renderer->renderNodes($node->content->children);
-
-		return $el;
 	}
 }

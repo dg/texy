@@ -34,11 +34,13 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 $texy = new Texy\Texy;
 
 // Configure image paths
-$texy->imageModule->root = 'imagesdir/';  // Base folder for images
+$texy->htmlOutput->imageBaseUrl = 'imagesdir/';  // Base folder for images
 
 // CSS classes for floated images
-$texy->imageModule->leftClass = 'my-left-class';   // Class for [* ... <] (left-floated)
-$texy->imageModule->rightClass = 'my-right-class'; // Class for [* ... >] (right-floated)
+$texy->htmlOutput->floatClasses = [
+	'left' => 'my-left-class',   // Class for [* ... <] (left-floated)
+	'right' => 'my-right-class', // Class for [* ... >] (right-floated)
+];
 
 
 // The special keyword "user" stands for an actual image file with its alternative text,

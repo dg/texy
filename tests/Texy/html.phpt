@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function createTexy()
 {
 	$texy = new Texy\Texy;
-	$texy->linkModule->root = 'xxx/';
+	$texy->htmlOutput->linkBaseUrl = 'xxx/';
 	$texy->htmlOutput->lineWrap = 180;
 	return $texy;
 }

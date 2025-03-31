@@ -100,9 +100,18 @@ class Element
 			return '';
 		}
 
-		$s = '<' . $this->name;
+		return '<' . $this->name . self::formatAttrs($this->attrs) . '>';
+	}
 
-		foreach ($this->attrs as $key => $value) {
+
+	/**
+	 * Formats attributes array to HTML string.
+	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
+	 */
+	public static function formatAttrs(array $attrs): string
+	{
+		$s = '';
+		foreach ($attrs as $key => $value) {
 			if ($value === null || $value === false) {
 				continue; // skip nulls and false boolean attributes
 
@@ -137,7 +146,7 @@ class Element
 			$s .= ' ' . $key . '="' . Helpers::freezeSpaces($value) . '"';
 		}
 
-		return $s . '>';
+		return $s;
 	}
 
 

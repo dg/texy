@@ -9,7 +9,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\EmoticonNode;
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use Texy\Syntax;
 
@@ -33,16 +32,12 @@ final class EmoticonModule extends Texy\Module
 		':-|' => '😐',
 	];
 
-	/** CSS class for emoticons */
-	public ?string $class = null;
-
 	private bool $warnedIcons = false;
 
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->render(...));
 	}
 
 
@@ -84,20 +79,12 @@ final class EmoticonModule extends Texy\Module
 		// Find the closest match
 		foreach ($this->icons as $emoticon => $_) {
 			if (str_starts_with($match, $emoticon)) {
-				return new EmoticonNode($emoticon);
+				$node = new EmoticonNode($emoticon);
+				$node->resolved = $this->icons[$emoticon];
+				return $node;
 			}
 		}
 
 		return null;
-	}
-
-
-	public function render(EmoticonNode $node, Html\Renderer $renderer): Html\Element|string
-	{
-		$emoji = $this->icons[$node->emoticon] ?? $node->emoticon;
-
-		return $this->class
-			? new Html\Element('span', ['class' => $this->class])->setText($emoji)
-			: $emoji;
 	}
 }

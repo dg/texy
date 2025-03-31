@@ -16,10 +16,34 @@ class HtmlTagNode extends InlineNode
 {
 	public function __construct(
 		public string $name,
-		/** @var array<string, string|bool> */
+		/** @var array<string, string|bool|null> */
 		public array $attributes = [],
 		public bool $closing = false,
 		public bool $selfClosing = false,
 	) {
+	}
+
+
+	/**
+	 * Reconstructs the original tag source text.
+	 */
+	public function toSource(): string
+	{
+		$tag = '<';
+		if ($this->closing) {
+			$tag .= '/';
+		}
+		$tag .= $this->name;
+		foreach ($this->attributes as $name => $value) {
+			$tag .= ' ' . $name;
+			if ($value !== true) {
+				$tag .= '="' . $value . '"';
+			}
+		}
+		if ($this->selfClosing) {
+			$tag .= ' /';
+		}
+
+		return $tag . '>';
 	}
 }

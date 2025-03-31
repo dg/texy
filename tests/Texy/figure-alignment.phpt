@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('figure floated left gets its float class besides the figure class', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->leftClass = 'image-left';
+	$texy->htmlOutput->floatClasses['left'] = 'image-left';
 	Assert::match(
 		'<div class="figure image-left"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
@@ -24,8 +24,8 @@ test('figure floated left gets its float class besides the figure class', functi
 
 test('figure floated right', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->rightClass = 'image-right';
-	$texy->figureModule->class = null;
+	$texy->htmlOutput->floatClasses['right'] = 'image-right';
+	$texy->htmlOutput->figureClass = null;
 	Assert::match(
 		'<div class="image-right"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
@@ -38,7 +38,7 @@ test('figure floated right', function () {
 
 test('text alignment classes do not apply to the float', function () {
 	$texy = new Texy\Texy;
-	$texy->alignClasses['left'] = 'align-left';
+	$texy->htmlOutput->textAlignClasses['left'] = 'align-left';
 	Assert::match(
 		'<div class="figure" style="float:left"><img src="images/image.jpg" alt="">
 	<p>Caption</p>

@@ -10,7 +10,6 @@ namespace Texy\Modules;
 use Texy;
 use Texy\{Modifier, Syntax};
 use Texy\Nodes\{HeadingNode, HeadingType};
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use function strlen;
 
@@ -51,7 +50,6 @@ final class HeadingModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->addRenderer($this->render(...));
 	}
 
 
@@ -229,14 +227,5 @@ final class HeadingModule extends Texy\Module
 			Modifier::parse($mMod),
 			$mLine,
 		);
-	}
-
-
-	public function render(HeadingNode $node, Html\Renderer $renderer): Html\Element
-	{
-		$el = new Html\Element('h' . $node->level);
-		$renderer->decorateElement($node->modifier, $el);
-		$el->children = $renderer->renderNodes($node->content->children);
-		return $el;
 	}
 }
