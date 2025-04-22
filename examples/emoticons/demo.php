@@ -39,7 +39,7 @@ $texy->htmlOutput->emoticonClass = 'smilie';
 
 // Add your own custom emoticon
 // When someone types :oops: in the text, it will show this emoji
-$texy->emoticonModule->icons[':oops:'] = '🙈';
+$texy->config->emoticons[':oops:'] = '🙈';
 
 
 // Process the text

@@ -7,45 +7,15 @@
 
 namespace Texy\Modules;
 
-use Texy;
-use Texy\{Patterns, Regexp, Syntax};
+use Texy\{Config, Patterns, Regexp};
 
 
 /**
  * Applies typographic corrections (quotes, dashes, ellipsis, non-breaking spaces).
+ * @internal
  */
-final class TypographyModule extends Texy\Module
+final class TypographyModule
 {
-	/** @var array<string, array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}}> */
-	public array $locales = [
-		'cs' => [
-			'singleQuotes' => ["\u{201A}", "\u{2018}"],
-			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
-		],
-
-		'de' => [
-			'singleQuotes' => ["\u{201A}", "\u{2018}"],
-			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
-		],
-
-		'en' => [
-			'singleQuotes' => ["\u{2018}", "\u{2019}"],
-			'doubleQuotes' => ["\u{201C}", "\u{201D}"],
-		],
-
-		'fr' => [
-			'singleQuotes' => ["\u{2039}", "\u{203A}"],
-			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
-		],
-
-		'pl' => [
-			'singleQuotes' => ["\u{201A}", "\u{2019}"],
-			'doubleQuotes' => ["\u{201E}", "\u{201D}"],
-		],
-	];
-
-	public string $locale = 'cs';
-
 	/**
 	 * search => replacement; :ldq:/:rdq:/:lsq:/:rsq: are placeholders for locale quotes
 	 * @var array<string, string>
@@ -99,13 +69,13 @@ final class TypographyModule extends Texy\Module
 	/** @var array<string, string> */
 	private array $localizedReplacements = [];
 
-	/** @var ?array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}} */
+	/** @var ?list<string> */
 	private ?array $compiledQuotes = null;
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$texy->allowed[Syntax::Typography] ??= true;
+	public function __construct(
+		private Config $config,
+	) {
 	}
 
 
@@ -122,14 +92,13 @@ final class TypographyModule extends Texy\Module
 	/** @return array<string, string> */
 	private function getReplacements(): array
 	{
-		// compared by value, so both changing $locale and mutating $locales invalidate the cache
-		$quotes = $this->locales[$this->locale] ?? $this->locales['en'];
+		// compared by value, so both changing the locale and mutating the table invalidate the cache
+		$quotes = $this->config->locales[$this->config->locale];
 		if ($quotes !== $this->compiledQuotes) {
 			$this->compiledQuotes = $quotes;
-			$dq = $quotes['doubleQuotes'];
-			$sq = $quotes['singleQuotes'];
+			$placeholders = array_combine([':ldq:', ':rdq:', ':lsq:', ':rsq:'], $quotes);
 			foreach ($this->replacements as $k => $v) {
-				$this->localizedReplacements[$k] = strtr($v, [':ldq:' => $dq[0], ':rdq:' => $dq[1], ':lsq:' => $sq[0], ':rsq:' => $sq[1]]);
+				$this->localizedReplacements[$k] = strtr($v, $placeholders);
 			}
 		}
 

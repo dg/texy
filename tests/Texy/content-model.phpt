@@ -16,7 +16,7 @@ function processHtml(string $html, ?array $allowedTags = null): string
 	$texy = new Texy;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
-	$texy->allowed['typography'] = false;
+	$texy->config->typography = false;
 
 	if ($allowedTags !== null) {
 		$texy->htmlPolicy->allowedTags = $allowedTags;
@@ -319,7 +319,7 @@ test('unknown: inherits table restrictions', function () {
 test('allowedTags: NONE disables all tags', function () {
 	$texy = new Texy;
 	$texy->htmlPolicy->allowedTags = Texy::NONE;
-	$texy->allowed['typography'] = false;
+	$texy->config->typography = false;
 	$html = trim($texy->process('<strong>Bold</strong>'));
 	Assert::notContains('<strong>', $html);
 	Assert::contains('Bold', $html);

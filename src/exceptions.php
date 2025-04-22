@@ -22,3 +22,11 @@ class Exception extends \Exception
 class RegexpException extends Exception
 {
 }
+
+
+/**
+ * The argument does not match the expected value.
+ */
+class InvalidArgumentException extends \InvalidArgumentException
+{
+}

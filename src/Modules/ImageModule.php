@@ -22,20 +22,17 @@ final class ImageModule extends Texy\Module
 	/** @var array<string, ImageDefinitionNode> collected image definitions */
 	private array $definitions = [];
 
-	/** @var array<string, ImageDefinitionNode> user-defined definitions (persist across process() calls) */
-	private array $userDefinitions = [];
-
 
 	public function __construct(
-		private Texy\Texy $texy,
+		private Texy\TexyConfig $config,
 	) {
 	}
 
 
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
 		// [*image*]:LINK
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Image,
 			'~
 				\[\* \ *+                         # opening bracket with asterisk
@@ -52,7 +49,7 @@ final class ImageModule extends Texy\Module
 		);
 
 		// [*ref*]: url .(title)[class]{style}
-		$this->texy->addBlock(
+		$registry->addBlock(
 			Syntax::ImageDefinition,
 			'~^
 				\[\*                              # opening [*
@@ -192,27 +189,12 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Adds a user-defined image definition (persists across process() calls).
-	 */
-	public function addDefinition(
-		string $name,
-		string $url,
-		?int $width = null,
-		?int $height = null,
-		?string $alt = null,
-	): void
-	{
-		$this->userDefinitions[Helpers::toLower($name)] = new ImageDefinitionNode($name, $url, $alt, $width, $height);
-	}
-
-
-	/**
 	 * Resolve image references in the document.
 	 */
 	public function resolveReferences(DocumentNode $doc): void
 	{
-		// Start with user-defined definitions
-		$this->definitions = $this->userDefinitions;
+		// Start with the definitions of the application
+		$this->definitions = $this->config->imageDefinitions;
 
 		// Pass 1: Collect document definitions (overwrites user-defined)
 		foreach ($doc->find(ImageDefinitionNode::class) as $node) {

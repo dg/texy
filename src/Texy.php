@@ -20,7 +20,7 @@ use function strlen;
  * $html = $texy->process($text);
  * </code>
  */
-class Texy
+class Texy implements Parsing\Registry
 {
 	// Texy version
 	public const VERSION = '4.0.0-dev';
@@ -35,19 +35,20 @@ class Texy
 		FILTER_ANCHOR = 'anchor',
 		FILTER_IMAGE = 'image';
 
-	/** @var array<string, bool>  Texy! syntax configuration */
+	/** @var array<string, bool>  syntax name => enabled */
 	public array $allowed = [];
+
+	/** what the document means */
+	public readonly TexyConfig $config;
+
+	/** how its HTML looks */
+	public readonly Output\Html\Config $htmlOutput;
 
 	/** HTML security policy: allowed tags, classes and inline styles */
 	public readonly HtmlPolicy $htmlPolicy;
 
-	public Output\Html\Config $htmlOutput;
-
 	/** TAB width (for converting tabs to spaces) */
 	public int $tabWidth = 8;
-
-	/** join consecutive lines into one paragraph? false makes every newline a line break */
-	public bool $mergeLines = true;
 
 	/** @deprecated */
 	public bool $removeSoftHyphens = true;
@@ -55,29 +56,23 @@ class Texy
 	/** @var array<string, string>  regexps checking URL schemes, keyed by FILTER_ANCHOR and FILTER_IMAGE */
 	public array $urlSchemeFilters = [];
 
-	public Modules\ImageModule $imageModule;
-	public Modules\LinkReferenceModule $linkModule;
-	public Modules\PhraseModule $phraseModule;
-	public Modules\EmoticonModule $emoticonModule;
-	public Modules\HeadingModule $headingModule;
-	public Modules\ListModule $listModule;
-	public Modules\TypographyModule $typographyModule;
-	public Modules\HyphenationModule $longWordsModule;
+	/**
+	 * Registered regexps and associated handlers for inline parsing, of the language and of the application.
+	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>}
+	 */
+	private array $inlinePatterns = ['language' => [], 'application' => []];
 
 	/**
-	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>
+	 * Registered regexps and associated handlers for block parsing, of the language and of the application.
+	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>}
 	 */
-	private array $inlinePatterns = [];
+	private array $blockPatterns = ['language' => [], 'application' => []];
 
-	/**
-	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>
-	 */
-	private array $blockPatterns = [];
+	/** @var array<string, bool>  syntax name => enabled by default */
+	private array $declared = [];
 
-	/** @var array<string, true>  names of the syntaxes registered by the application */
-	private array $applicationSyntaxes = [];
+	/** @var array<string, bool>  name of a syntax with a pattern => is it a block one? */
+	private array $kinds = [];
 
 	/** @var \Closure(ParseContext, string): array<Nodes\BlockNode>  takes the text between block syntaxes */
 	private \Closure $gapHandler;
@@ -94,64 +89,63 @@ class Texy
 
 	public function __construct()
 	{
+		$this->config = new TexyConfig;
 		$this->htmlPolicy = new HtmlPolicy($this);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->createModules();
+		$this->registerModules();
 	}
 
 
 	private function createModules(): void
 	{
-		$directive = new Modules\DirectiveModule($this);
-		$this->imageModule = new Modules\ImageModule($this);
-		$this->linkModule = new Modules\LinkReferenceModule($this);
-		$this->headingModule = new Modules\HeadingModule($this);
+		$directive = new Modules\DirectiveModule;
+		$image = new Modules\ImageModule($this->config);
+		$link = new Modules\LinkReferenceModule($this->config, $image);
+		$heading = new Modules\HeadingModule($this->config);
 
 		$this->modules = [
 			// inline
 			$directive,
-			new Modules\HtmlModule($this),
-			$this->imageModule,
-			$this->phraseModule = new Modules\PhraseModule($this),
-			$this->linkModule,
-			new Modules\AutolinkModule($this),
-			$this->emoticonModule = new Modules\EmoticonModule($this),
+			new Modules\HtmlModule,
+			$image,
+			new Modules\PhraseModule($this->config),
+			$link,
+			new Modules\AutolinkModule,
+			new Modules\EmoticonModule($this->config),
 
 			// block
-			new Modules\ParagraphModule($this),
-			new Modules\BlockModule($this),
-			new Modules\FigureModule($this),
-			new Modules\HorizontalRuleModule($this),
-			new Modules\BlockQuoteModule($this),
-			new Modules\TableModule($this),
-			$this->headingModule,
-			$this->listModule = new Modules\ListModule($this),
+			new Modules\ParagraphModule($this->config, $this->htmlPolicy),
+			new Modules\BlockModule,
+			new Modules\FigureModule($image),
+			new Modules\HorizontalRuleModule,
+			new Modules\BlockQuoteModule,
+			new Modules\TableModule,
+			$heading,
+			new Modules\ListModule($this->config),
 		];
 
-		$this->typographyModule = new Modules\TypographyModule($this);
-		$this->longWordsModule = new Modules\HyphenationModule($this);
-
-		$this->addHandler($this->linkModule->recognizeReferences(...), Stage::Syntax);
+		$this->addHandler($link->recognizeReferences(...), Stage::Syntax);
 
 		$this->addHandler($directive->processDirectives(...));
-		$this->addHandler($this->imageModule->resolveReferences(...));
-		$this->addHandler($this->linkModule->resolveReferences(...));
-		$this->addHandler($this->headingModule->processHeadings(...));
+		$this->addHandler($image->resolveReferences(...));
+		$this->addHandler($link->resolveReferences(...));
+		$this->addHandler($heading->processHeadings(...));
 	}
 
 
 	/** Lets modules register their patterns, which depend on the current configuration. */
 	private function registerModules(): void
 	{
+		$this->config->validate();
 		foreach ($this->modules as $module) {
-			$module->beforeParse();
+			$module->register($this);
 		}
+
+		$this->allowed = $this->completeAllowed($this->allowed);
 	}
 
 
-	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\InlineNode
-	 */
 	public function addInline(
 		string $name,
 		#[Language('RegExp')]
@@ -159,17 +153,11 @@ class Texy
 		callable $handler,
 	): void
 	{
-		if (!isset($this->applicationSyntaxes[$name])) { // a syntax of the application is never replaced by a module
-			$this->inlinePatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern];
-		}
-
-		$this->declare($name);
+		$this->introduce($name, block: false);
+		$this->inlinePatterns['language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern];
 	}
 
 
-	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\BlockNode
-	 */
 	public function addBlock(
 		string $name,
 		#[Language('RegExp')]
@@ -177,22 +165,17 @@ class Texy
 		callable $handler,
 	): void
 	{
-		if (!isset($this->applicationSyntaxes[$name])) { // a syntax of the application is never replaced by a module
-			$this->blockPatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
-		}
-
-		$this->declare($name);
+		$this->introduce($name, block: true);
+		$this->blockPatterns['language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
 	}
 
 
-	/** Declares a syntax name, also one without a pattern of its own. */
 	public function declare(string $name, bool $enabled = true): void
 	{
-		$this->allowed[$name] ??= $enabled;
+		$this->declared[$name] ??= $enabled;
 	}
 
 
-	/** @param  callable(ParseContext, string): array<Nodes\BlockNode>  $handler */
 	public function setGapHandler(callable $handler): void
 	{
 		$this->gapHandler = $handler(...);
@@ -209,8 +192,8 @@ class Texy
 		string $name,
 	): void
 	{
-		$this->applicationSyntaxes[$name] = true;
-		$this->inlinePatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern];
+		$this->introduce($name, block: false);
+		$this->inlinePatterns['application'][$name] = ['handler' => $handler(...), 'pattern' => $pattern];
 		$this->allowed[$name] ??= true;
 	}
 
@@ -225,8 +208,8 @@ class Texy
 		string $name,
 	): void
 	{
-		$this->applicationSyntaxes[$name] = true;
-		$this->blockPatterns[$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
+		$this->introduce($name, block: true);
+		$this->blockPatterns['application'][$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
 		$this->allowed[$name] ??= true;
 	}
 
@@ -236,6 +219,49 @@ class Texy
 	{
 		$this->postHandlers[$name] = $handler(...);
 		$this->allowed[$name] ??= true;
+	}
+
+
+	private function introduce(string $name, bool $block): void
+	{
+		if (($this->kinds[$name] ?? $block) !== $block) {
+			throw new \LogicException("Syntax '$name' cannot be both inline and block.");
+		}
+
+		$this->kinds[$name] = $block;
+		$this->declare($name);
+	}
+
+
+	/**
+	 * Completes the map of enabled syntaxes with the default state of the names it lacks.
+	 * @param  array<string, bool>  $allowedSyntaxes
+	 * @return array<string, bool>
+	 * @throws InvalidArgumentException  when the map holds a name nobody declared
+	 */
+	private function completeAllowed(array $allowedSyntaxes): array
+	{
+		foreach (array_diff_key($allowedSyntaxes, $this->declared) as $name => $_) {
+			$suggestion = $this->suggestName((string) $name);
+			throw new InvalidArgumentException("Unknown syntax '$name'" . ($suggestion === null ? '.' : ", did you mean '$suggestion'?"));
+		}
+
+		return $allowedSyntaxes + $this->declared;
+	}
+
+
+	private function suggestName(string $name): ?string
+	{
+		$best = null;
+		$min = (strlen($name) / 4 + 1) * 10 + .1;
+		foreach ($this->declared as $declared => $_) {
+			$distance = levenshtein((string) $declared, $name, 10, 11, 10);
+			if ($distance < $min) {
+				[$min, $best] = [$distance, (string) $declared];
+			}
+		}
+
+		return $best;
 	}
 
 
@@ -262,8 +288,8 @@ class Texy
 	 */
 	public function createHtmlRenderer(): Output\Html\Renderer
 	{
-		$typography = !empty($this->allowed[Syntax::Typography]) ? $this->typographyModule->postLine(...) : null;
-		$hyphenation = !empty($this->allowed[Syntax::Hyphenation]) ? $this->longWordsModule->postLine(...) : null;
+		$typography = $this->config->typography ? new Modules\TypographyModule($this->config)->postLine(...) : null;
+		$hyphenation = $this->config->hyphenation ? new Modules\HyphenationModule($this->config)->postLine(...) : null;
 		$postHandlers = array_filter($this->postHandlers, fn(string $name): bool => !empty($this->allowed[$name]), ARRAY_FILTER_USE_KEY);
 		return new Output\Html\Renderer(
 			$this->htmlOutput,
@@ -307,6 +333,7 @@ class Texy
 	 */
 	public function transform(Nodes\DocumentNode $document): Nodes\DocumentNode
 	{
+		$this->config->validate();
 		if ($document->transformState !== Nodes\TransformState::Pending) {
 			throw new \LogicException("A document is transformed only once, this one is {$document->transformState->name}.");
 		}
@@ -368,10 +395,11 @@ class Texy
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
 
-		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
+		$this->config->validate();
+		$text = new Modules\TypographyModule($this->config)->postLine($text, preserveSpaces: true);
 
-		if (!empty($this->allowed[Syntax::Hyphenation])) {
-			$text = $this->longWordsModule->postLine($text);
+		if ($this->config->hyphenation) {
+			$text = new Modules\HyphenationModule($this->config)->postLine($text);
 		}
 
 		return $text;
@@ -384,7 +412,7 @@ class Texy
 	 * (the default) runs in transform(), a Syntax pass already in parse(), where it may
 	 * only finish recognizing the source.
 	 *
-	 * Passes of a stage run in registration order, so the ones registered by modules
+	 * Passes of a stage run in registration order, so the ones of the language
 	 * run first and a consumer cannot get in front of them. Where that matters, call
 	 * parse(), do the work, and then transform().
 	 * @param  callable(Nodes\DocumentNode): void  $pass
@@ -409,8 +437,6 @@ class Texy
 
 
 	/**
-	 * Creates parse context. Modules must be initialized via parse() first
-	 * for patterns to be available.
 	 * @internal
 	 */
 	public function createParseContext(): ParseContext
@@ -418,6 +444,7 @@ class Texy
 		return new ParseContext(
 			$this->createInlineParser(),
 			$this->createBlockParser(),
+			$this->allowed,
 		);
 	}
 
@@ -425,7 +452,7 @@ class Texy
 	private function createBlockParser(): BlockParser
 	{
 		$patterns = array_filter(
-			$this->blockPatterns,
+			$this->blockPatterns['application'] + $this->blockPatterns['language'],
 			fn($_, $name) => !empty($this->allowed[$name]),
 			ARRAY_FILTER_USE_BOTH,
 		);
@@ -437,7 +464,7 @@ class Texy
 	private function createInlineParser(): InlineParser
 	{
 		$patterns = array_filter(
-			$this->inlinePatterns,
+			$this->inlinePatterns['application'] + $this->inlinePatterns['language'],
 			fn($_, $name) => !empty($this->allowed[$name]),
 			ARRAY_FILTER_USE_BOTH,
 		);

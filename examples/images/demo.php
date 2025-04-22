@@ -45,7 +45,7 @@ $texy->htmlOutput->floatClasses = [
 
 // The special keyword "user" stands for an actual image file with its alternative text,
 // both in [* user *] and in the link of [* user *]::
-$texy->imageModule->addDefinition('user', 'image.gif', alt: 'Texy! logo');
+$texy->config->addImageDefinition('user', 'image.gif', alt: 'Texy! logo');
 
 
 // Register our custom image handler

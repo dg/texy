@@ -17,7 +17,7 @@ test('complete syntax showcase', function () {
 	$texy->allowed[Texy\Syntax::Deleted] = true;
 	$texy->allowed[Texy\Syntax::Superscript] = true;
 	$texy->allowed[Texy\Syntax::Subscript] = true;
-	$texy->typographyModule->locale = 'en';
+	$texy->config->locale = 'en';
 	$texy->htmlOutput->horizontalRuleClasses['*'] = 'hidden';
 
 	Assert::matchFile(

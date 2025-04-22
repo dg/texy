@@ -18,23 +18,20 @@ use Texy\Parsing\ParseContext;
  */
 final class PhraseModule extends Texy\Module
 {
-	public bool $linksAllowed = true;
-
-
 	public function __construct(
-		private Texy\Texy $texy,
+		private Texy\TexyConfig $config,
 	) {
 	}
 
 
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
 		foreach ([Syntax::Inserted, Syntax::Deleted, Syntax::Superscript, Syntax::Subscript] as $name) {
-			$this->texy->declare($name, enabled: false);
+			$registry->declare($name, enabled: false);
 		}
 
 		// ***strong+emphasis***
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::StrongEmphasis,
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
@@ -51,7 +48,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// **strong**
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Strong,
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
@@ -68,7 +65,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// //emphasis//
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Emphasis,
 			'~
 				(?<! [/:] )                       # not preceded by / or :
@@ -85,7 +82,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// *emphasisAlt*
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::EmphasisSingleAsterisk,
 			'~
 				(?<! [*\\\] )                    # not preceded by * or \
@@ -102,7 +99,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// *emphasisAlt2*
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::EmphasisSingleAsterisk2,
 			'~
 				(?<! [^\s.,;:<>()"\'' . Patterns::MARK . '-] )  # must be preceded by these chars
@@ -119,7 +116,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ++inserted++
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Inserted,
 			'~
 				(?<! \+ )                        # not preceded by +
@@ -135,7 +132,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// --deleted--
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Deleted,
 			'~
 				(?<! [<-] )                      # not preceded by < or -
@@ -151,7 +148,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ^^superscript^^
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Superscript,
 			'~
 				(?<! \^ )                        # not preceded by ^
@@ -167,7 +164,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// __subscript__
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Subscript,
 			'~
 				(?<! _ )                         # not preceded by _
@@ -183,7 +180,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// "span"
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::SpanQuotes,
 			'~
 				(?<! " )                         # not preceded by "
@@ -200,7 +197,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ~alternative span~
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::SpanTilde,
 			'~
 				(?<! \~ )
@@ -217,7 +214,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// >>quote<<
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Quote,
 			'~
 				(?<! > )                         # not preceded by >
@@ -234,7 +231,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// m^2 alternative superscript
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::SuperscriptShort,
 			'~
 				(?<= [a-z0-9] )                  # preceded by letter or number
@@ -246,7 +243,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// m_2 alternative subscript
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::SubscriptShort,
 			'~
 				(?<= [a-z] )                     # preceded by letter
@@ -258,7 +255,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// acronym/abbr "et al."((and others))
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::AbbreviationQuotes,
 			'~
 				(?<! " )                         # not preceded by "
@@ -277,7 +274,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Abbreviation,
 			'~
 				(?<! [' . Patterns::CHAR . '] )  # not preceded by char
@@ -291,7 +288,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ''notexy''
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Raw,
 			'~
 				(?<! \' )                         # not preceded by quote
@@ -306,7 +303,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// `code`
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Code,
 			'~
 				`
@@ -320,7 +317,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ....:LINK
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::QuickLink,
 			'~
 				( [' . Patterns::CHAR . '0-9@#$%&.,_-]++ )  # allowed chars (1)
@@ -332,7 +329,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// [text |link]
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::WikiLink,
 			'~
 				(?<! \[ )                        # not preceded by [
@@ -350,7 +347,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// [text](link)
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::MarkdownLink,
 			'~
 				(?<! [[.] )                     # not preceded by [ or .
@@ -368,7 +365,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// \* escaped asterisk
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::EscapedAsterisk,
 			'~\\\\\*~',
 			fn($context, $matches) => new TextNode('*'),
@@ -409,7 +406,7 @@ final class PhraseModule extends Texy\Module
 			: new PhraseNode($context->parseInline(trim($mContent)), Syntax::PhraseTypes[$phrase], $mod, $phrase);
 
 		// Other phrases with link
-		if ($mLink !== null && $this->linksAllowed) {
+		if ($mLink !== null && $this->config->phraseLinks) {
 			return new LinkNode(
 				url: Texy\Helpers::decodeEntities($mLink),
 				content: new ContentNode([$node]),

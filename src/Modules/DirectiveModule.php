@@ -18,12 +18,6 @@ use Texy\Syntax;
  */
 final class DirectiveModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
 	/**
 	 * Consumes {{texy: ...}} directives: stores document-level options into
 	 * DocumentNode::$meta and removes the directive nodes from the AST, so all
@@ -48,9 +42,9 @@ final class DirectiveModule extends Texy\Module
 	}
 
 
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Directive,
 			'~
 				\{\{

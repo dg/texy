@@ -179,14 +179,6 @@ final class Syntax
 	/** Directive (`{{command}}`) */
 	public const Directive = 'script';
 
-	// Post-processing
-
-	/** Typography processing (quotes, dashes, ellipsis) */
-	public const Typography = 'typography';
-
-	/** Long words hyphenation */
-	public const Hyphenation = 'longwords';
-
 	/** what the phrase syntaxes mean */
 	public const PhraseTypes = [
 		self::StrongEmphasis => PhraseType::StrongEmphasis,

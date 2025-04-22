@@ -21,6 +21,19 @@ enum Stage
 
 
 /**
+ * How the levels of headings are computed.
+ */
+enum HeadingBalancing
+{
+	/** from the order of heading styles in the document */
+	case Dynamic;
+
+	/** from TexyConfig::$headingLevels */
+	case Fixed;
+}
+
+
+/**
  * What a callback of NodeTraverser asks for, when it returns no replacement node.
  */
 enum TraverseAction

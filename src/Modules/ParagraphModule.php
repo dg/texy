@@ -21,9 +21,15 @@ use function strlen;
 final class ParagraphModule extends Texy\Module
 {
 	public function __construct(
-		private Texy\Texy $texy,
+		private Texy\TexyConfig $config,
+		private Texy\HtmlPolicy $htmlPolicy,
 	) {
-		$texy->setGapHandler($this->parseText(...));
+	}
+
+
+	public function register(Texy\Parsing\Registry $registry): void
+	{
+		$registry->setGapHandler($this->parseText(...));
 	}
 
 
@@ -99,7 +105,7 @@ final class ParagraphModule extends Texy\Module
 				// Not an inline element = block element (includes custom elements)
 				if (
 					!isset(Html\Schema::inlineElements()[$tagName])
-					&& $this->texy->htmlPolicy->isTagAcceptable($tagName, $node->attributes, closing: false)
+					&& $this->htmlPolicy->isTagAcceptable($tagName, $node->attributes, closing: false)
 				) {
 					return true;
 				}
@@ -141,7 +147,7 @@ final class ParagraphModule extends Texy\Module
 		}
 
 		// Process line breaks: a space-indented continuation line is a hard break
-		if ($this->texy->mergeLines) {
+		if ($this->config->mergeLines) {
 			$text = Regexp::replace($text, '~\n\ +(?=\S)~', "\r");
 			$text = Regexp::replace($text, '~\n~', ' ');
 		} else {

@@ -19,37 +19,23 @@ use function count, strlen;
  */
 final class ListModule extends Texy\Module
 {
-	/** @var array<string, array{string, ListType, 2?: string}> [regex, type, next-regex?] */
-	public array $bullets = [
-		'*' => ['\* [ \t]', ListType::Unordered],
-		'-' => ['[\x{2013}-] (?! [>-] )', ListType::Unordered],
-		'+' => ['\+ [ \t]', ListType::Unordered],
-		'1.' => ['1 \. [ \t]' /* not \d! */, ListType::Decimal, '\d{1,3} \. [ \t]'],
-		'1)' => ['\d{1,3} \) [ \t]', ListType::Decimal],
-		'I.' => ['I \. [ \t]', ListType::UpperRoman, '[IVX]{1,4} \. [ \t]'],
-		'I)' => ['[IVX]+ \) [ \t]', ListType::UpperRoman], // before A) !
-		'a)' => ['[a-z] \) [ \t]', ListType::LowerAlpha],
-		'A)' => ['[A-Z] \) [ \t]', ListType::UpperAlpha],
-	];
-
-
 	public function __construct(
-		private Texy\Texy $texy,
+		private Texy\TexyConfig $config,
 	) {
 	}
 
 
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
 		$re = $reUl = [];
-		foreach ($this->bullets as $desc) {
+		foreach ($this->config->listBullets as $desc) {
 			$re[] = $desc[0];
 			if (!$desc[1]->isOrdered()) {
 				$reUl[] = $desc[0];
 			}
 		}
 
-		$this->texy->addBlock(
+		$registry->addBlock(
 			Syntax::List,
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)? # modifier (1)
@@ -60,7 +46,7 @@ final class ListModule extends Texy\Module
 			$this->parseList(...),
 		);
 
-		$this->texy->addBlock(
+		$registry->addBlock(
 			Syntax::DefinitionList,
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)?   # modifier (1)
@@ -91,7 +77,7 @@ final class ListModule extends Texy\Module
 		$start = null;
 		$listType = ListType::Unordered;
 
-		foreach ($this->bullets as $key => $desc) {
+		foreach ($this->config->listBullets as $key => $desc) {
 			if (Regexp::match($mBullet, '~' . $desc[0] . '~Ax')) {
 				$bullet = $desc[2] ?? $desc[0];
 				$min = isset($desc[2]) ? 2 : 1;
@@ -143,7 +129,7 @@ final class ListModule extends Texy\Module
 
 		$bullet = null;
 
-		foreach ($this->bullets as $desc) {
+		foreach ($this->config->listBullets as $desc) {
 			if (Regexp::match($mBullet, '~' . $desc[0] . '~Ax')) {
 				$bullet = $desc[2] ?? $desc[0];
 				break;
@@ -217,7 +203,7 @@ final class ListModule extends Texy\Module
 		// a bullet opening the first line is text, - * text is no nested list; the leading space keeps it so
 		$isBullet = Regexp::match(
 			$mContent ?? '',
-			'~(?:' . implode('|', array_column($this->bullets, 0)) . ')~Ax',
+			'~(?:' . implode('|', array_column($this->config->listBullets, 0)) . ')~Ax',
 		) !== null;
 
 		// next lines
