@@ -18,16 +18,10 @@ use Texy\{Patterns, Syntax};
  */
 final class AutolinkModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
-		$this->texy->addInline(
+		$texy->addInline(
 			Syntax::AutolinkUrl,
 			'~
 				(?<= ^ | [\s([<:>] )                 # must be preceded by these chars, > ends a tag
@@ -40,7 +34,7 @@ final class AutolinkModule extends Texy\Module
 		);
 
 		// direct email
-		$this->texy->addInline(
+		$texy->addInline(
 			Syntax::AutolinkEmail,
 			'~
 				(?<= ^ | [\s([<>] )                  # must be preceded by these chars, > ends a tag

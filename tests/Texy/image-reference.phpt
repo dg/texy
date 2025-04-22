@@ -295,7 +295,7 @@ test('direct image with alt text works', function () {
 
 test('user-defined image definition works', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->addDefinition('logo', 'logo.png', 100, 50, 'Company Logo');
+	$texy->config->addImageDefinition('logo', 'logo.png', 100, 50, 'Company Logo');
 	// alt parameter is used as alt text for images
 	Assert::match(
 		'<div class="figure"><img src="images/logo.png" alt="Company Logo" width="100"
@@ -308,7 +308,7 @@ height="50"></div>
 
 test('user-defined image definition persists across process() calls', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->addDefinition('logo', 'logo.png');
+	$texy->config->addImageDefinition('logo', 'logo.png');
 
 	// First call
 	Assert::match(
@@ -328,7 +328,7 @@ test('user-defined image definition persists across process() calls', function (
 
 test('user-defined image definition is overwritten by document definition', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->addDefinition('logo', 'user-logo.png', 100);
+	$texy->config->addImageDefinition('logo', 'user-logo.png', 100);
 
 	// Document defines same reference - it overwrites user-defined one
 	Assert::match(

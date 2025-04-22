@@ -19,7 +19,7 @@
  * - Hyphenates long words for better text wrapping
  *
  * Note: Typography rules depend on the locale setting.
- * Default is Czech (cs), can be changed via $texy->typographyModule->locale
+ * Default is Czech (cs), can be changed via $texy->config->locale
  */
 
 
@@ -31,13 +31,13 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 $texy = new Texy\Texy;
 
 // Long words get soft hyphens for better text wrapping (on by default)
-// $texy->allowed[Texy\Syntax::Hyphenation] = false;
+// $texy->config->hyphenation = false;
 
 // Optional: Change the locale for typography rules
-// $texy->typographyModule->locale = 'en';  // English quotes: "text"
-// $texy->typographyModule->locale = 'cs';  // Czech quotes: „text" (default)
-// $texy->typographyModule->locale = 'de';  // German quotes: „text"
-// $texy->typographyModule->locale = 'fr';  // French quotes: «text»
+// $texy->config->locale = 'en';  // English quotes: "text"
+// $texy->config->locale = 'cs';  // Czech quotes: „text" (default)
+// $texy->config->locale = 'de';  // German quotes: „text"
+// $texy->config->locale = 'fr';  // French quotes: «text»
 
 
 // Use processTypo() instead of process()

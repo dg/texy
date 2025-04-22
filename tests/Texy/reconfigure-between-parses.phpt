@@ -14,7 +14,7 @@ test('switching the typography locale', function () {
 	$texy = new Texy;
 
 	Assert::contains("\u{201E}q\u{201C}", $texy->process('"q"')); // cs
-	$texy->typographyModule->locale = 'en';
+	$texy->config->locale = 'en';
 	Assert::contains("\u{201C}q\u{201D}", $texy->process('"q"'));
 });
 
@@ -23,7 +23,7 @@ test('mutating the quote table of the active locale', function () {
 	$texy = new Texy;
 
 	Assert::contains("\u{201E}q\u{201C}", $texy->process('"q"'));
-	$texy->typographyModule->locales['cs']['doubleQuotes'] = ['«', '»'];
+	[$texy->config->locales['cs']['quotes'][0], $texy->config->locales['cs']['quotes'][1]] = ['«', '»'];
 	Assert::contains('«q»', $texy->process('"q"'));
 });
 
@@ -33,15 +33,6 @@ test('changing the emoticon table', function () {
 	$texy->allowed[Syntax::Emoticon] = true;
 
 	Assert::contains('🙂', $texy->process(':-)'));
-	$texy->emoticonModule->icons[':-)'] = '[SMILE]';
+	$texy->config->emoticons[':-)'] = '[SMILE]';
 	Assert::contains('[SMILE]', $texy->process(':-)'));
-});
-
-
-test('removing a list bullet', function () {
-	$texy = new Texy;
-
-	Assert::contains('<ul>', $texy->process("* one\n* two"));
-	unset($texy->listModule->bullets['*']);
-	Assert::notContains('<ul>', $texy->process("* one\n* two"));
 });

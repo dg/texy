@@ -64,6 +64,15 @@ final class Syntax
 	/** Ordered/unordered list (`-`, `*`, `1.`) */
 	public const List = 'list';
 
+	/** Decimal numbering of a list (`1.`, `1)`) */
+	public const ListDecimal = 'list/decimal';
+
+	/** Roman numbering of a list (`I.`, `I)`) */
+	public const ListRoman = 'list/roman';
+
+	/** Alphabetical numbering of a list (`a)`, `A)`) */
+	public const ListAlpha = 'list/alpha';
+
 	/** Definition list (`term:` followed by `- definition`) */
 	public const DefinitionList = 'list/definition';
 
@@ -142,6 +151,9 @@ final class Syntax
 
 	// Inline - links
 
+	/** Link carried by a phrase (`"text":url`), has no pattern of its own */
+	public const PhraseLink = 'phrase/link';
+
 	/** Quick link (`text:[url]`) */
 	public const QuickLink = 'phrase/quicklink';
 
@@ -178,14 +190,6 @@ final class Syntax
 
 	/** Directive (`{{command}}`) */
 	public const Directive = 'script';
-
-	// Post-processing
-
-	/** Typography processing (quotes, dashes, ellipsis) */
-	public const Typography = 'typography';
-
-	/** Long words hyphenation */
-	public const Hyphenation = 'longwords';
 
 	/** what the phrase syntaxes mean */
 	public const PhraseTypes = [

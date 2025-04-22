@@ -9,15 +9,14 @@ namespace Texy;
 
 
 /**
- * Texy! modules base class.
+ * A part of a language: the syntaxes of one topic. Used by the implementations of languages,
+ * an application extends a language by registerLinePattern(), registerBlockPattern() and addHandler().
  */
 abstract class Module
 {
 	/**
-	 * Called before each parse; modules refresh their patterns here so that
-	 * configuration changed between parses takes effect.
+	 * Declares the syntaxes by addInline(), addBlock(), declare() and setGapHandler(), nothing else;
+	 * what the module does over the whole document is a pass the facade adds.
 	 */
-	public function beforeParse(): void
-	{
-	}
+	abstract public function register(Texy $texy): void;
 }

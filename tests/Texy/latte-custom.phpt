@@ -10,8 +10,8 @@ require __DIR__ . '/../bootstrap.php';
 
 $fn = function (string $text, int $heading = 1, string $locale = 'cs'): string {
 	$texy = new Texy\Texy;
-	$texy->headingModule->top = $heading;
-	$texy->typographyModule->locale = $locale;
+	$texy->config->headingTop = $heading;
+	$texy->config->locale = $locale;
 	return $texy->process($text);
 };
 

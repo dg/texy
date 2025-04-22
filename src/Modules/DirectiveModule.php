@@ -18,15 +18,9 @@ use Texy\Syntax;
  */
 final class DirectiveModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
-		$this->texy->addInline(
+		$texy->addInline(
 			Syntax::Directive,
 			'~
 				\{\{

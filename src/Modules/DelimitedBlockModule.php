@@ -33,19 +33,13 @@ final class DelimitedBlockModule extends Texy\Module
 	];
 
 
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
 		foreach (self::Types as $name) {
-			$this->texy->declare($name);
+			$texy->declare($name, enabled: $name !== Syntax::DelimitedTexySource);
 		}
 
-		$this->texy->addBlock(
+		$texy->addBlock(
 			Syntax::Delimited,
 			'~^
 				/--++ \ *+                    # opening tag /--
@@ -74,7 +68,7 @@ final class DelimitedBlockModule extends Texy\Module
 	{
 		$parts = Texy\Regexp::split($matches[1], '~\s+~', limit: 2);
 		$type = $parts[0];
-		if (isset(self::Types[$type]) && empty($this->texy->allowed[self::Types[$type]])) {
+		if (isset(self::Types[$type]) && empty($context->allowedSyntaxes[self::Types[$type]])) {
 			return null;
 		}
 

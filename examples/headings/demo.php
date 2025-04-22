@@ -3,13 +3,12 @@
 /**
  * CONTROLLING HEADING LEVELS
  *
- * Texy offers three ways to handle heading levels:
+ * Texy offers two ways to handle heading levels:
  * 1. DYNAMIC - Texy automatically balances headings based on document structure
  * 2. FIXED - Each heading syntax always produces the same level
- * 3. USER-DEFINED - You manually map heading syntax to specific levels
  *
  * WHAT YOU'LL LEARN:
- * - Three different approaches to heading level management
+ * - Two different approaches to heading level management
  * - How to generate automatic IDs for headings (useful for linking)
  * - How to extract a table of contents (TOC) from your document
  * - How to get the first heading as a page title
@@ -51,12 +50,12 @@ $text = <<<'TEXY'
 // levels to create a logical hierarchy.
 // ============================================================
 
-$texy->headingModule->top = 2;   // Start with <h2> (useful when <h1> is the page title)
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::DYNAMIC;
+$texy->config->headingTop = 2;   // Start with <h2> (useful when <h1> is the page title)
+$texy->config->headingBalancing = Texy\HeadingBalancing::Dynamic;
 
 // Generate IDs for headings (creates id="toc-heading-text")
 // This allows linking to specific sections: page.html#toc-heading-text
-$texy->headingModule->generateID = true;
+$texy->config->headingIds = true;
 
 $document = $texy->transform($texy->parse($text));
 $html = $texy->createHtmlRenderer()->render($document);
@@ -80,35 +79,12 @@ echo '<hr>';
 // based on the number of characters used.
 // ============================================================
 
-$texy->headingModule->top = 1;   // Start with <h1>
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
+$texy->config->headingTop = 1;   // Start with <h1>
+$texy->config->headingBalancing = Texy\HeadingBalancing::Fixed;
 
 $html = $texy->process($text);
 
 echo '<strong>Fixed method:</strong>';
-echo '<pre>';
-echo htmlspecialchars($html);
-echo '</pre>';
-echo '<hr>';
-
-
-// ============================================================
-// METHOD 3: USER-DEFINED LEVELS
-// You manually define which syntax character produces which level.
-// ============================================================
-
-$texy->headingModule->top = 1;
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
-
-// Define your own mapping:
-// '=' underline produces level 1, with top 1 it is h1
-// '-' underline produces level 2, with top 1 it is h2
-$texy->headingModule->levels['='] = 1;
-$texy->headingModule->levels['-'] = 2;
-
-$html = $texy->process($text);
-
-echo '<strong>User-defined fixed method:</strong>';
 echo '<pre>';
 echo htmlspecialchars($html);
 echo '</pre>';

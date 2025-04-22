@@ -18,15 +18,9 @@ use Texy\Syntax;
  */
 final class HorizontalRuleModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
-		$this->texy->addBlock(
+		$texy->addBlock(
 			Syntax::HorizontalRule,
 			'~^
 				( \*{3,}+ | -{3,}+ )             # three or more * or - (1)

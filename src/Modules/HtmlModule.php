@@ -18,15 +18,9 @@ use Texy\{Patterns, Regexp, Syntax};
  */
 final class HtmlModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
-		$this->texy->addInline(
+		$texy->addInline(
 			Syntax::HtmlTag,
 			'~
 				< (/?)                                # tag begin
@@ -46,7 +40,7 @@ final class HtmlModule extends Texy\Module
 			$this->parseTag(...),
 		);
 
-		$this->texy->addInline(
+		$texy->addInline(
 			Syntax::HtmlComment,
 			'~
 				<!--
@@ -56,7 +50,7 @@ final class HtmlModule extends Texy\Module
 			fn(ParseContext $context, array $matches) => new HtmlCommentNode((string) $matches[1]),
 		);
 
-		$this->texy->addInline(
+		$texy->addInline(
 			Syntax::HtmlEntity,
 			'~' . Texy\Helpers::EntityPattern . '~',
 			$this->parseEntity(...),

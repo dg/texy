@@ -19,37 +19,37 @@ use function count, strlen;
  */
 final class ListModule extends Texy\Module
 {
-	/** @var array<string, array{string, ListType, 2?: string}> [regex, type, next-regex?] */
-	public array $bullets = [
-		'*' => ['\* [ \t]', ListType::Unordered],
-		'-' => ['[\x{2013}-] (?! [>-] )', ListType::Unordered],
-		'+' => ['\+ [ \t]', ListType::Unordered],
-		'1.' => ['1 \. [ \t]' /* not \d! */, ListType::Decimal, '\d{1,3} \. [ \t]'],
-		'1)' => ['\d{1,3} \) [ \t]', ListType::Decimal],
-		'I.' => ['I \. [ \t]', ListType::UpperRoman, '[IVX]{1,4} \. [ \t]'],
-		'I)' => ['[IVX]+ \) [ \t]', ListType::UpperRoman], // before A) !
-		'a)' => ['[a-z] \) [ \t]', ListType::LowerAlpha],
-		'A)' => ['[A-Z] \) [ \t]', ListType::UpperAlpha],
+	/** bullets [regex, type, next-regex?] by the syntax that switches them, in the order they are tried */
+	private const Bullets = [
+		Syntax::List => [
+			'*' => ['\* [ \t]', ListType::Unordered],
+			'-' => ['[\x{2013}-] (?! [>-] )', ListType::Unordered],
+			'+' => ['\+ [ \t]', ListType::Unordered],
+		],
+		Syntax::ListDecimal => [
+			'1.' => ['1 \. [ \t]' /* not \d! */, ListType::Decimal, '\d{1,3} \. [ \t]'],
+			'1)' => ['\d{1,3} \) [ \t]', ListType::Decimal],
+		],
+		Syntax::ListRoman => [
+			'I.' => ['I \. [ \t]', ListType::UpperRoman, '[IVX]{1,4} \. [ \t]'],
+			'I)' => ['[IVX]+ \) [ \t]', ListType::UpperRoman], // before A) !
+		],
+		Syntax::ListAlpha => [
+			'a)' => ['[a-z] \) [ \t]', ListType::LowerAlpha],
+			'A)' => ['[A-Z] \) [ \t]', ListType::UpperAlpha],
+		],
 	];
 
 
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
-		$re = $reUl = [];
-		foreach ($this->bullets as $desc) {
-			$re[] = $desc[0];
-			if (!$desc[1]->isOrdered()) {
-				$reUl[] = $desc[0];
-			}
+		$re = [];
+		foreach (self::Bullets as $name => $bullets) {
+			$texy->declare($name);
+			array_push($re, ...array_column($bullets, 0));
 		}
 
-		$this->texy->addBlock(
+		$texy->addBlock(
 			Syntax::List,
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)? # modifier (1)
@@ -60,7 +60,7 @@ final class ListModule extends Texy\Module
 			$this->parseList(...),
 		);
 
-		$this->texy->addBlock(
+		$texy->addBlock(
 			Syntax::DefinitionList,
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)?   # modifier (1)
@@ -69,7 +69,7 @@ final class ListModule extends Texy\Module
 				' . Patterns::MODIFIER_H . '?         # modifier (3)
 				\n
 				([ \t]++)                               # indentation (4)
-				(' . implode('|', $reUl) . ')         # description marker (5)
+				(' . implode('|', array_column(self::Bullets[Syntax::List], 0)) . ') # description marker (5)
 				[ \t]*+
 				\S .*                                   # content
 			$~mUx',
@@ -91,7 +91,7 @@ final class ListModule extends Texy\Module
 		$start = null;
 		$listType = ListType::Unordered;
 
-		foreach ($this->bullets as $key => $desc) {
+		foreach ($this->getBullets($context) as $key => $desc) {
 			if (Regexp::match($mBullet, '~' . $desc[0] . '~Ax')) {
 				$bullet = $desc[2] ?? $desc[0];
 				$min = isset($desc[2]) ? 2 : 1;
@@ -143,9 +143,9 @@ final class ListModule extends Texy\Module
 
 		$bullet = null;
 
-		foreach ($this->bullets as $desc) {
+		foreach (self::Bullets[Syntax::List] as $desc) {
 			if (Regexp::match($mBullet, '~' . $desc[0] . '~Ax')) {
-				$bullet = $desc[2] ?? $desc[0];
+				$bullet = $desc[0];
 				break;
 			}
 		}
@@ -217,7 +217,7 @@ final class ListModule extends Texy\Module
 		// a bullet opening the first line is text, - * text is no nested list; the leading space keeps it so
 		$isBullet = Regexp::match(
 			$mContent ?? '',
-			'~(?:' . implode('|', array_column($this->bullets, 0)) . ')~Ax',
+			'~(?:' . implode('|', array_column($this->getBullets($context), 0)) . ')~Ax',
 		) !== null;
 
 		// next lines
@@ -243,5 +243,22 @@ final class ListModule extends Texy\Module
 			false,
 			Modifier::parse($mMod),
 		);
+	}
+
+
+	/**
+	 * Bullets of the kinds switched on in the context.
+	 * @return array<string, array{string, ListType, 2?: string}>
+	 */
+	private function getBullets(ParseContext $context): array
+	{
+		$bullets = [];
+		foreach (self::Bullets as $name => $kind) {
+			if ($name === Syntax::List || !empty($context->allowedSyntaxes[$name])) {
+				$bullets += $kind;
+			}
+		}
+
+		return $bullets;
 	}
 }

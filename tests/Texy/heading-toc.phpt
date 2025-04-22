@@ -15,8 +15,8 @@ test('generateID = false (default)', function () {
 
 test('custom idPrefix', function () {
 	$texy = new Texy\Texy;
-	$texy->headingModule->generateID = true;
-	$texy->headingModule->idPrefix = 'h-';
+	$texy->config->headingIds = true;
+	$texy->config->headingIdPrefix = 'h-';
 	$html = $texy->process("Title\n=====");
 
 	Assert::contains('id="h-title"', $html);
@@ -25,7 +25,7 @@ test('custom idPrefix', function () {
 
 test('ID collision - duplicate headings', function () {
 	$texy = new Texy\Texy;
-	$texy->headingModule->generateID = true;
+	$texy->config->headingIds = true;
 	$html = $texy->process("Title\n=====\n\nTitle\n=====\n\nTitle\n=====");
 
 	Assert::contains('id="toc-title"', $html);

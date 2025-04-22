@@ -21,15 +21,9 @@ final class TableModule extends Texy\Module
 	private bool $disableTables = false;
 
 
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
-		$this->texy->addBlock(
+		$texy->addBlock(
 			Syntax::Table,
 			'~^
 				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)

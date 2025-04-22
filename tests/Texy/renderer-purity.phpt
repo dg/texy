@@ -114,6 +114,7 @@ test('nofollow directive does not leak into next document processed by the same 
 
 test('rendering does not depend on the syntaxes allowed after parsing', function () {
 	$texy = new Texy\Texy;
+	$texy->allowed[Texy\Syntax::DelimitedTexySource] = true;
 	$doc = $texy->parse("/--html\n<b>raw</b> &amp;\n\\--\n\n/--pre\n<i>x</i>\n\\--\n\n/--texysource\n**bold**\n\\--");
 	$html = $texy->createHtmlRenderer()->render($doc);
 

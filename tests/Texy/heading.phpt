@@ -23,7 +23,8 @@ test('heading syntax', function () {
 test('headings with generated IDs', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 180;
-	$texy->headingModule->generateID = true;
+	$texy->config->headingIds = true;
+	$texy->allowed[Texy\Syntax::DelimitedTexySource] = true;
 
 	Assert::matchFile(
 		__DIR__ . '/expected/heading-toc.html',

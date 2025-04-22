@@ -95,14 +95,24 @@ test('text block with line breaks', function () {
 
 
 test('texysource block', function () {
+	$texy = new Texy\Texy;
+	$texy->allowed[Texy\Syntax::DelimitedTexySource] = true;
 	Assert::same(
 		"<pre\nclass=\"html\"><code>&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt;&lt;/p&gt;</code></pre>\n",
-		process(<<<'XX'
+		$texy->process(<<<'XX'
 			/--texysource
 			**bold** and //italic//
 			\--
 			XX),
 	);
+});
+
+
+test('texysource block is off by default', function () {
+	$texy = new Texy\Texy;
+	Assert::false($texy->allowed[Texy\Syntax::DelimitedTexySource]);
+	Assert::notContains('language-html', $texy->process("/--texysource\n**bold**\n\\--"));
+	Assert::contains('/--texysource', $texy->process("/--texysource\n**bold**\n\\--"));
 });
 
 

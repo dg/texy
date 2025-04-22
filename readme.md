@@ -30,7 +30,7 @@ Texy requires PHP 8.4 or higher.
 Usage
 -----
 
-    $texy = new Texy;
+    $texy = new Texy\Texy;
     $html = $texy->process($text);
 
 For untrusted input, always enable safe mode, which restricts the output to a

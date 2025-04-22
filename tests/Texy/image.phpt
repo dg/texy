@@ -17,7 +17,7 @@ test('the alternative text and the float are properties of the image, not of its
 	Assert::same(['Alt', 'left', null, null], [$node->alt, $node->float, $node->modifier->title, $node->modifier->hAlign]);
 	Assert::same('Attr', $image('x [* a.png .(Alt){alt: Attr} >] y')->alt);
 
-	$texy->imageModule->addDefinition('logo', 'logo.png', alt: 'Logo');
+	$texy->config->addImageDefinition('logo', 'logo.png', alt: 'Logo');
 	$doc = $texy->parse('x [* logo *] y');
 	$texy->transform($doc);
 	Assert::same('Logo', $doc->content->children[0]->content->children[1]->alt);

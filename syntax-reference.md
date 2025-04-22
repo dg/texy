@@ -24,6 +24,9 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::ImageDefinition` | ImageModule | `ImageDefinitionNode` | `[*logo*]: img.png` | (definition) |
 | `Syntax::LinkDefinition` | LinkReferenceModule | `LinkDefinitionNode` | `[nette]: https://...` | (definition) |
 | `Syntax::List` | ListModule | `ListNode` | `- item` | `<ul>`, `<ol>` |
+| `Syntax::ListDecimal` | ListModule | `ListNode` | `1.`, `1)` | `<ol>` |
+| `Syntax::ListRoman` | ListModule | `ListNode` | `I.`, `I)` | `<ol>` |
+| `Syntax::ListAlpha` | ListModule | `ListNode` | `a)`, `A)` | `<ol>` |
 | `Syntax::DefinitionList` | ListModule | `DefinitionListNode` | `term:`<br>`- definition` | `<dl>` |
 | `Syntax::Table` | TableModule | `TableNode` | `| a | b |` | `<table>` |
 
@@ -49,6 +52,7 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::CodeSpan` | PhraseModule | `InlineCodeNode` | `` `code` `` | `<code>` |
 | `Syntax::Quote` | PhraseModule | `PhraseNode` | `>>quote<<` | `<q>` |
 | `Syntax::Raw` | PhraseModule | `RawTextNode` | `''raw text''` | (escaped) |
+| `Syntax::PhraseLink` | PhraseModule | `LinkNode` | `"text":url` | `<a>` |
 | `Syntax::QuickLink` | PhraseModule | `LinkNode` | `word:[url]` | `<a>` |
 | `Syntax::WikiLink` | PhraseModule | `LinkNode` | `[text|url]` | `<a>` |
 | `Syntax::MarkdownLink` | PhraseModule | `LinkNode` | `[text](url)` | `<a>` |
@@ -62,3 +66,6 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::HtmlComment` | HtmlModule | `HtmlCommentNode` | `<!-- text -->` | `<!-- -->` |
 | `Syntax::HtmlEntity` | HtmlModule | `TextNode` | `&amp;` | `&amp;` (the decoded character) |
 | `Syntax::Directive` | DirectiveModule | `DirectiveNode` | `{{texy}}` | (nothing) |
+
+Typography and hyphenation are not syntaxes: they are switched by `$texy->config->typography`
+and `$texy->config->hyphenation`.

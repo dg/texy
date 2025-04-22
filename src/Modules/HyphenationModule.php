@@ -7,15 +7,15 @@
 
 namespace Texy\Modules;
 
-use Texy;
-use Texy\{Patterns, Regexp, Syntax};
+use Texy\{Config, Patterns, Regexp};
 use function count;
 
 
 /**
  * Breaks long words with soft hyphens for better line wrapping.
+ * @internal
  */
-final class HyphenationModule extends Texy\Module
+final class HyphenationModule
 {
 	private const
 		Dont = 0, // don't hyphenate
@@ -23,8 +23,6 @@ final class HyphenationModule extends Texy\Module
 		After = 2; // hyphenate after
 
 	private const SafeLimit = 1000;
-
-	public int $wordLimit = 20;
 
 	/** @var array<string, int>|string[] */
 	private array $consonants = [
@@ -61,16 +59,15 @@ final class HyphenationModule extends Texy\Module
 	private array $doubleVowels = ['a', 'A', 'o', 'O'];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
+	public function __construct(
+		private Config $config,
+	) {
 		$this->consonants = array_flip($this->consonants);
 		$this->vowels = array_flip($this->vowels);
 		$this->beforeR = array_flip($this->beforeR);
 		$this->beforeL = array_flip($this->beforeL);
 		$this->beforeH = array_flip($this->beforeH);
 		$this->doubleVowels = array_flip($this->doubleVowels);
-
-		$texy->allowed[Syntax::Hyphenation] ??= true;
 	}
 
 
@@ -78,7 +75,7 @@ final class HyphenationModule extends Texy\Module
 	{
 		return Regexp::replace(
 			$text,
-			'~[^ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}~',
+			'~[^ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->config->hyphenationWordLimit . ',}~',
 			$this->pattern(...),
 		);
 	}
@@ -105,7 +102,7 @@ final class HyphenationModule extends Texy\Module
 
 		/** @var list<string> */
 		$chars = array_column($chars, 0);
-		if (count($chars) < $this->wordLimit) {
+		if (count($chars) < $this->config->hyphenationWordLimit) {
 			return $mWord;
 		}
 
@@ -135,7 +132,7 @@ final class HyphenationModule extends Texy\Module
 
 			$hyphen = $this->getHyphen($s[$a], $s[$a - 1], $s[$a + 1]);
 
-			if ($hyphen === self::Dont && ($a - $last > $this->wordLimit * 0.6)) {
+			if ($hyphen === self::Dont && ($a - $last > $this->config->hyphenationWordLimit * 0.6)) {
 				$positions[] = $last = $a - 1; // Hyphenate here
 			}
 
@@ -157,7 +154,7 @@ final class HyphenationModule extends Texy\Module
 		$syllables = [];
 		$last = 0;
 		foreach ($positions as $pos) {
-			if ($pos - $last > $this->wordLimit * 0.6) {
+			if ($pos - $last > $this->config->hyphenationWordLimit * 0.6) {
 				$syllables[] = implode('', array_splice($chars, 0, $trans[$pos] - $trans[$last]));
 				$last = $pos;
 			}

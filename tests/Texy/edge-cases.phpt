@@ -15,8 +15,8 @@ test('special cases and edge cases', function () {
 	$texy->htmlOutput->imageBaseUrl = '../images/';
 	$texy->htmlOutput->floatClasses['left'] = 'left';
 	$texy->htmlOutput->lineWrap = 180;
-	$texy->allowed[Texy\Syntax::Hyphenation] = false;
-	$texy->typographyModule->locale = 'en';
+	$texy->config->hyphenation = false;
+	$texy->config->locale = 'en';
 
 	Assert::matchFile(
 		__DIR__ . '/expected/edge-cases.html',

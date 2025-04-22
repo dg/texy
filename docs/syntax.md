@@ -18,7 +18,7 @@ After the blank line, a brand new paragraph starts.
 Disable merging so that every line becomes its own paragraph:
 
 ```php
-$texy->mergeLines = false;
+$texy->config->mergeLines = false;
 ```
 
 A **forced line break** without a new paragraph: start the next line with a single space (poems, addresses). Internally the break becomes a protected `<br>`.
@@ -62,7 +62,7 @@ Rules:
 - No spaces are allowed immediately inside the delimiters: `** not bold **` does not match.
 - The generated tag for each phrase is configurable through `$texy->phraseModule->tags` (e.g. map `phrase/strong` to `b`).
 - Any phrase accepts a [modifier](modifiers.md) just before the closing delimiter: `**strong and green .{color:green}**`.
-- Most phrases can become links by appending `:URL` (see below); this requires `$texy->phraseModule->linksAllowed = true` (default).
+- Most phrases can become links by appending `:URL` (see below); this requires `$texy->allowed['phrase/link']` to be on (default).
 
 ## Links
 
@@ -183,7 +183,7 @@ Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$
 + Butter
 ```
 
-**Numbered** – `1.`, `1)`, `a)`, `A)`, `I.`, `I)` styles; actual numbers do not matter, Texy renumbers automatically. Roman/alpha styles set `list-style-type`.
+**Numbered** – `1.`, `1)`, `a)`, `A)`, `I.`, `I)` styles; actual numbers do not matter, Texy renumbers automatically. Roman/alpha styles set `list-style-type`. Each kind of numbering is a syntax of its own: `list/decimal` (`1.`, `1)`), `list/roman` (`I.`, `I)`) and `list/alpha` (`a)`, `A)`); a switched-off marker is plain text, except that `I)`, `V)` or `X)` with `list/roman` off reads as a letter.
 
 **Nesting** – indent the nested item by at least two spaces or a tab:
 
@@ -333,11 +333,11 @@ Recognized emoticons and replacements come from `$texy->emoticonModule->icons` (
 
 ## Typography
 
-*(`typography` – TypographyModule; post-processing, no markup of its own)*
+*(`$config->typography`; a pass over the document, no markup of its own)*
 
 Applied automatically to all running text (never inside code or other protected content):
 
-- straight quotes → locale-specific typographic quotes (`$texy->typographyModule->locale`),
+- straight quotes → locale-specific typographic quotes (`$texy->config->locale`),
 - `...` → …, `--` → – (en dash), `---` → — (em dash), `10-15` → 10–15,
 - `(c)` © , `(r)` ® , `(tm)` ™ , `+-` ± , `10 x 5` → 10 × 5,
 - `->` → , `<-` ← , `<->` ↔ (surrounded by spaces),
@@ -345,9 +345,9 @@ Applied automatically to all running text (never inside code or other protected 
 
 ## Long-word hyphenation
 
-*(`longwords` – HyphenationModule; post-processing)*
+*(`$config->hyphenation`; a pass over the document)*
 
-Inserts invisible soft hyphens (`&shy;`) into words longer than `$texy->longWordsModule->wordLimit` (default 20) so browsers can break them. Uses Czech-oriented syllable heuristics. Enabled by default; disable with `$texy->allowed['longwords'] = false`.
+Inserts invisible soft hyphens (`&shy;`) into words longer than `$texy->config->hyphenationWordLimit` (default 20) so browsers can break them. Uses Czech-oriented syllable heuristics. Enabled by default; disable with `$texy->config->hyphenation = false`.
 
 ## Modifiers
 
@@ -392,6 +392,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `phrase/acronym-alt` | ✅ on | `NBA((National Basketball Association))` | PhraseModule |
 | `phrase/notexy` | ✅ on | `''no **markup** here''` | PhraseModule |
 | `phrase/code` | ✅ on | `` `inline code` `` | PhraseModule |
+| `phrase/link` | ✅ on | `:url` attached to a phrase (without it, links of phrases give plain content) | PhraseModule |
 | `phrase/quicklink` | ✅ on | `word:[url]` | PhraseModule |
 | `phrase/wikilink` | ✅ on | `[text | url]` | PhraseModule |
 | `phrase/markdown` | ✅ on | `[text](url)` | PhraseModule |
@@ -421,6 +422,9 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `heading/underlined` | ✅ on | heading underlined by `###`/`***`/`===`/`---` | HeadingModule |
 | `heading/surrounded` | ✅ on | `### Heading` | HeadingModule |
 | `list` | ✅ on | `- item`, `1) item` … | ListModule |
+| `list/decimal` | ✅ on | numbering `1.`, `1)` of a list | ListModule |
+| `list/roman` | ✅ on | numbering `I.`, `I)` of a list | ListModule |
+| `list/alpha` | ✅ on | numbering `a)`, `A)` of a list | ListModule |
 | `list/definition` | ✅ on | `Term:` + indented `- description` | ListModule |
 
 ### Pre-processing and post-processing syntaxes

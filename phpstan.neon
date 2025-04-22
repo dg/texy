@@ -8,6 +8,12 @@ parameters:
 		- src/Compatibility/Texy.php  # compatibility file with if (false) block
 
 	ignoreErrors:
+		# Config::validate() checks what the phpDoc types promise, because the tables are plain public arrays
+		-
+			identifier: function.alreadyNarrowedType
+			paths:
+				- src/Config.php
+
 		# Empty generator pattern using `false && yield` to satisfy return type Generator
 		# while yielding nothing. PHPStan correctly sees left side is always false.
 		# Note: by-ref generators cannot use `yield from []`, hence this workaround.
@@ -64,8 +70,8 @@ parameters:
 		-
 			identifier: missingType.callable
 			message: '#^Method Texy\\Texy\:\:add(Inline|Block)\(\) has parameter \$handler with no signature specified for callable\.$#'
-			count: 2
-			path: src/Texy.php
+			paths:
+				- src/Texy.php
 
 		# The traversal writes null through a reference yielded by getChildren().
 		# Nodes that yield a non-nullable typed property (e.g. `yield $this->content`)

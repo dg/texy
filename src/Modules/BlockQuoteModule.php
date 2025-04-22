@@ -19,15 +19,9 @@ use function strlen;
  */
 final class BlockQuoteModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Texy $texy): void
 	{
-		$this->texy->addBlock(
+		$texy->addBlock(
 			Syntax::BlockQuote,
 			'~^
 				(?: ' . Texy\Patterns::MODIFIER_H . '\n)? # modifier (1)
