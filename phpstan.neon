@@ -63,9 +63,10 @@ parameters:
 
 		-
 			identifier: missingType.callable
-			message: '#^Method Texy\\Texy\:\:add(Inline|Block)\(\) has parameter \$handler with no signature specified for callable\.$#'
-			count: 2
-			path: src/Texy.php
+			message: '#^Method Texy\\(Texy|Parsing\\Registry)\:\:add(Inline|Block)\(\) has parameter \$handler with no signature specified for callable\.$#'
+			paths:
+				- src/Texy.php
+				- src/Parsing/Registry.php
 
 		# The traversal writes null through a reference yielded by getChildren().
 		# Nodes that yield a non-nullable typed property (e.g. `yield $this->content`)

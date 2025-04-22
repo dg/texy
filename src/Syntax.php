@@ -176,12 +176,4 @@ final class Syntax
 
 	/** Directive (`{{command}}`) */
 	public const Directive = 'script';
-
-	// Post-processing
-
-	/** Typography processing (quotes, dashes, ellipsis) */
-	public const Typography = 'typography';
-
-	/** Long words hyphenation */
-	public const Hyphenation = 'longwords';
 }

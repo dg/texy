@@ -69,6 +69,19 @@ test('allowed[] still disables a consumer-registered syntax', function () {
 });
 
 
+test('a custom syntax registered after the first parse precedes built-ins on a tie as well', function () {
+	$texy = new Texy;
+	$texy->process('**text**');
+	$texy->registerLinePattern(
+		fn(ParseContext $context, array $matches) => new Nodes\TextNode('WON'),
+		'~\*\*(.+)\*\*~U',
+		'custom/strong',
+	);
+
+	Assert::contains('WON', $texy->process('**text**'));
+});
+
+
 test('a custom syntax registered before the first parse precedes built-ins on a tie', function () {
 	$texy = new Texy;
 	$texy->registerLinePattern(

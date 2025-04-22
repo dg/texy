@@ -75,7 +75,7 @@ class Configurator
 		$texy->allowed[Syntax::AutolinkUrl] = false;
 		$texy->allowed[Syntax::LinkDefinition] = false;
 		$texy->allowed[Syntax::LinkReference] = false;
-		$texy->phraseModule->linksAllowed = false;
+		$texy->config->phraseLinks = false;
 
 		if (is_array($texy->htmlPolicy->allowedTags)) {
 			unset($texy->htmlPolicy->allowedTags['a']);

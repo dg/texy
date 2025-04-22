@@ -22,22 +22,20 @@ final class LinkReferenceModule extends Texy\Module
 	/** @var array<string, LinkDefinitionNode> link definitions */
 	private array $definitions = [];
 
-	/** @var array<string, LinkDefinitionNode> user-defined definitions (persist across process() calls) */
-	private array $userDefinitions = [];
-
 
 	public function __construct(
-		private Texy\Texy $texy,
+		private Texy\TexyConfig $config,
+		private ImageModule $imageModule,
 	) {
 	}
 
 
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
-		$this->texy->declare(Syntax::LinkReference, enabled: false);
+		$registry->declare(Syntax::LinkReference, enabled: false);
 
 		// [ref]: url label .(title)[class]{style}
-		$this->texy->addBlock(
+		$registry->addBlock(
 			Syntax::LinkDefinition,
 			'~^
 				\[
@@ -53,7 +51,7 @@ final class LinkReferenceModule extends Texy\Module
 
 		// [reference] - bare reference link (opt-in); the raw target is kept in
 		// LinkNode::$ref for consumer resolution passes (wiki links etc.)
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::LinkReference,
 			'~
 				(?<! [.\#\[] )        # exclude modifier .[class], PHP attribute \#[Attr] and nested [
@@ -95,15 +93,6 @@ final class LinkReferenceModule extends Texy\Module
 
 
 	/**
-	 * Adds a user-defined link definition (persists across process() calls).
-	 */
-	public function addDefinition(string $name, string $url): void
-	{
-		$this->userDefinitions[Helpers::toLower($name)] = new LinkDefinitionNode($name, $url);
-	}
-
-
-	/**
 	 * Recognizes link targets written as a reference, [ref] or [*img*]: the name goes
 	 * to LinkNode::$ref and the URL is left to resolveReferences().
 	 */
@@ -132,8 +121,8 @@ final class LinkReferenceModule extends Texy\Module
 	 */
 	public function resolveReferences(DocumentNode $doc): void
 	{
-		// Start with user-defined definitions
-		$this->definitions = $this->userDefinitions;
+		// Start with the definitions of the application
+		$this->definitions = $this->config->linkDefinitions;
 
 		// Pass 1: Collect document definitions (overwrites user-defined)
 		foreach ($doc->find(LinkDefinitionNode::class) as $node) {
@@ -154,7 +143,7 @@ final class LinkReferenceModule extends Texy\Module
 	{
 		if ($node->url === null && $node->ref !== null) {
 			if ($node->isImageLink) {
-				$node->url = $this->texy->imageModule->getDefinition($node->ref)->url ?? $node->ref;
+				$node->url = $this->imageModule->getDefinition($node->ref)->url ?? $node->ref;
 				return;
 			}
 			$node->url = $this->resolveDefinition($node->ref)->url ?? $node->ref;

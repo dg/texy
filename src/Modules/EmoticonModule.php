@@ -18,46 +18,32 @@ use Texy\Syntax;
  */
 final class EmoticonModule extends Texy\Module
 {
-	/** @var array<string, string> */
-	public array $icons = [
-		':-)' => '🙂',
-		':-(' => '☹',
-		';-)' => '😉',
-		':-D' => '😁',
-		'8-O' => '😮',
-		'8-)' => '😄',
-		':-?' => '😕',
-		':-x' => '😶',
-		':-P' => '😛',
-		':-|' => '😐',
-	];
-
 	private bool $warnedIcons = false;
 
 
 	public function __construct(
-		private Texy\Texy $texy,
+		private Texy\TexyConfig $config,
 	) {
 	}
 
 
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
-		$this->texy->declare(Syntax::Emoticon, enabled: false);
+		$registry->declare(Syntax::Emoticon, enabled: false);
 
-		if (!$this->warnedIcons && str_contains(implode('', $this->icons), '.')) {
+		if (!$this->warnedIcons && str_contains(implode('', $this->config->emoticons), '.')) {
 			$this->warnedIcons = true;
 			trigger_error('EmoticonModule: using image files is deprecated, use Unicode characters instead.', E_USER_DEPRECATED);
 		}
 
-		$icons = $this->icons;
+		$icons = $this->config->emoticons;
 		krsort($icons);
 		$pattern = [];
 		foreach ($icons as $key => $foo) {
 			$pattern[] = Texy\Regexp::quote($key) . '+'; // last char can be repeated
 		}
 
-		$this->texy->addInline(
+		$registry->addInline(
 			Syntax::Emoticon,
 			'~
 				(?<= ^ | [\x00-\x20] )
@@ -77,10 +63,10 @@ final class EmoticonModule extends Texy\Module
 		$match = $matches[0];
 
 		// Find the closest match
-		foreach ($this->icons as $emoticon => $_) {
+		foreach ($this->config->emoticons as $emoticon => $_) {
 			if (str_starts_with($match, $emoticon)) {
 				$node = new EmoticonNode($emoticon);
-				$node->resolved = $this->icons[$emoticon];
+				$node->resolved = $this->config->emoticons[$emoticon];
 				return $node;
 			}
 		}

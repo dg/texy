@@ -37,12 +37,12 @@ $text = file_get_contents(__DIR__ . '/sample.texy');
 // levels to create a logical hierarchy.
 // ============================================================
 
-$texy->headingModule->top = 2;   // Start with <h2> (useful when <h1> is the page title)
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::DYNAMIC;
+$texy->config->headingTop = 2;   // Start with <h2> (useful when <h1> is the page title)
+$texy->config->headingBalancing = Texy\HeadingBalancing::Dynamic;
 
 // Generate IDs for headings (creates id="toc-heading-text")
 // This allows linking to specific sections: page.html#toc-heading-text
-$texy->headingModule->generateID = true;
+$texy->config->headingIds = true;
 
 $document = $texy->transform($texy->parse($text));
 $html = $texy->createHtmlRenderer()->render($document);
@@ -66,8 +66,8 @@ echo '<hr>';
 // based on the number of characters used.
 // ============================================================
 
-$texy->headingModule->top = 1;   // Start with <h1>
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
+$texy->config->headingTop = 1;   // Start with <h1>
+$texy->config->headingBalancing = Texy\HeadingBalancing::Fixed;
 
 $html = $texy->process($text);
 
@@ -83,14 +83,14 @@ echo '<hr>';
 // You manually define which syntax character produces which level.
 // ============================================================
 
-$texy->headingModule->top = 1;
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
+$texy->config->headingTop = 1;
+$texy->config->headingBalancing = Texy\HeadingBalancing::Fixed;
 
 // Define your own mapping:
 // '=' underline produces level 1, with top 1 it is h1
 // '-' underline produces level 2, with top 1 it is h2
-$texy->headingModule->levels['='] = 1;
-$texy->headingModule->levels['-'] = 2;
+$texy->config->headingLevels['='] = 1;
+$texy->config->headingLevels['-'] = 2;
 
 $html = $texy->process($text);
 

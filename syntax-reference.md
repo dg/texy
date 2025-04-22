@@ -59,3 +59,6 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::HtmlTag` | HtmlModule | `HtmlTagNode` | `<br>` | (any) |
 | `Syntax::HtmlComment` | HtmlModule | `HtmlCommentNode` | `<!-- text -->` | `<!-- -->` |
 | `Syntax::Directive` | DirectiveModule | `DirectiveNode` | `{{texy}}` | (nothing) |
+
+Typography and hyphenation are not syntaxes: they are switched by `$texy->config->typography`
+and `$texy->config->hyphenation`.

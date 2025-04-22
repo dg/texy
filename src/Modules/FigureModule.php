@@ -20,14 +20,14 @@ use function in_array, is_array;
 final class FigureModule extends Texy\Module
 {
 	public function __construct(
-		private Texy\Texy $texy,
+		private ImageModule $imageModule,
 	) {
 	}
 
 
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
-		$this->texy->addBlock(
+		$registry->addBlock(
 			Syntax::Figure,
 			'~^
 				(?>
@@ -60,7 +60,7 @@ final class FigureModule extends Texy\Module
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 
-		$parsed = $this->texy->imageModule->parseImageContent($mURLs);
+		$parsed = $this->imageModule->parseImageContent($mURLs);
 
 		// the float is written in the brackets of the image, but it is the figure that floats
 		$modifier = Modifier::parse($mImgMod . $mAlign);

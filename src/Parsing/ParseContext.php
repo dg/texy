@@ -19,6 +19,8 @@ class ParseContext
 	public function __construct(
 		private InlineParser $inlineParser,
 		private BlockParser $blockParser,
+		/** @var array<string, bool>  syntax name => enabled */
+		public readonly array $allowedSyntaxes = [],
 	) {
 	}
 
@@ -39,7 +41,7 @@ class ParseContext
 	public function parseBlock(string $text): ContentNode
 	{
 		$clonedParser = clone $this->blockParser;
-		$newContext = new self($this->inlineParser, $clonedParser);
+		$newContext = new self($this->inlineParser, $clonedParser, $this->allowedSyntaxes);
 		return $clonedParser->parse($newContext, $text);
 	}
 

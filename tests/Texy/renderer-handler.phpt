@@ -43,7 +43,7 @@ test('handler receives node data', function () {
 
 test('handler can access Texy configuration', function () {
 	$texy = new Texy;
-	$texy->headingModule->top = 3;
+	$texy->config->headingTop = 3;
 	$ast = $texy->parse("Title\n=====");
 
 	// Custom handler that modifies result of default handler

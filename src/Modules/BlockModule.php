@@ -20,13 +20,7 @@ use Texy\Parsing\ParseContext;
  */
 final class BlockModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
-
-
-	public function beforeParse(): void
+	public function register(Texy\Parsing\Registry $registry): void
 	{
 		foreach ([
 			Syntax::BlockDefault,
@@ -38,10 +32,10 @@ final class BlockModule extends Texy\Module
 			Syntax::BlockComment,
 			Syntax::BlockDiv,
 		] as $name) {
-			$this->texy->declare($name);
+			$registry->declare($name);
 		}
 
-		$this->texy->addBlock(
+		$registry->addBlock(
 			Syntax::Blocks,
 			'~^
 				/--++ \ *+                    # opening tag /--
@@ -78,7 +72,7 @@ final class BlockModule extends Texy\Module
 		$content = Helpers::outdent($mContent);
 
 		// a disallowed type stays as source text
-		if (empty($this->texy->allowed[$blocktype])) {
+		if (empty($context->allowedSyntaxes[$blocktype])) {
 			return null;
 		}
 
