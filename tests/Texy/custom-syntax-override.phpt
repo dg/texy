@@ -63,7 +63,7 @@ test('allowed[] still disables a consumer-registered syntax', function () {
 		'~@@(.+)@@~U',
 		'custom/foo',
 	);
-	$texy->allowed['custom/foo'] = false;
+	$texy->allowedSyntax['custom/foo'] = false;
 
 	Assert::contains('@@x@@', $texy->process('@@x@@'));
 });

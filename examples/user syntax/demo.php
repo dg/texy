@@ -37,10 +37,10 @@ $texy = new Texy\Texy;
 // IMPORTANT: Disable conflicting default syntax
 // We want to use * for bold, but Texy uses it for emphasis
 // We must disable the default * patterns first
-$texy->allowed[Syntax::StrongEmphasis] = false;         // Disables ***text***
-$texy->allowed[Syntax::Strong] = false;                  // Disables **text**
-$texy->allowed[Syntax::EmphasisSingleAsterisk] = false;  // Disables *text*
-$texy->allowed[Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
+$texy->allowedSyntax[Syntax::StrongEmphasis] = false;         // Disables ***text***
+$texy->allowedSyntax[Syntax::Strong] = false;                  // Disables **text**
+$texy->allowedSyntax[Syntax::EmphasisSingleAsterisk] = false;  // Disables *text*
+$texy->allowedSyntax[Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 
 // Strong and emphasized phrases are rendered as <b> and <i> instead of <strong> and <em>
 $texy->htmlOutput->phraseTags[PhraseType::Strong->value] = 'b';

@@ -15,7 +15,7 @@ function render(string $source, string ...$disabled): string
 	$texy = new Texy;
 	$texy->config->typography = false;
 	foreach ($disabled as $name) {
-		$texy->allowed[$name] = false;
+		$texy->allowedSyntax[$name] = false;
 	}
 
 	return trim($texy->process($source));

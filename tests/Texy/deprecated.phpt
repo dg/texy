@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('emoticon with file triggers deprecation', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::Emoticon] = true;
+	$texy->allowedSyntax[Texy\Syntax::Emoticon] = true;
 	$texy->config->emoticons = [':-)' => 'smile.gif'];
 
 	Assert::error(function () use ($texy) {

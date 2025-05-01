@@ -62,7 +62,7 @@ Rules:
 - No spaces are allowed immediately inside the delimiters: `** not bold **` does not match.
 - The generated tag for each phrase is configurable through `$texy->phraseModule->tags` (e.g. map `phrase/strong` to `b`).
 - Any phrase accepts a [modifier](modifiers.md) just before the closing delimiter: `**strong and green .{color:green}**`.
-- Most phrases can become links by appending `:URL` (see below); this requires `$texy->allowed['phrase/link']` to be on (default).
+- Most phrases can become links by appending `:URL` (see below); this requires `$texy->allowedSyntax['phrase/link']` to be on (default).
 
 ## Links
 
@@ -303,7 +303,7 @@ Each subtype (except `block/texy`) is individually switchable in `$allowedSyntax
 
 HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->allowedTags` and the content model; disallowed tags/attributes are removed, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlModule->passComment` is on.
 
-HTML entity references (`&amp;`, `&#65;`, `&#xA0;`) are decoded into their characters; an unknown reference stays literal text. With `$allowed['html/entity']` off, references are ordinary text and render escaped.
+HTML entity references (`&amp;`, `&#65;`, `&#xA0;`) are decoded into their characters; an unknown reference stays literal text. With `$allowedSyntax['html/entity']` off, references are ordinary text and render escaped.
 
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.
@@ -326,7 +326,7 @@ Texy itself renders nothing for scripts – the construct exists solely for user
 *(`emoticon` – EmoticonModule; **disabled by default**)*
 
 ```php
-$texy->allowed['emoticon'] = true;
+$texy->allowedSyntax['emoticon'] = true;
 ```
 
 Recognized emoticons and replacements come from `$texy->emoticonModule->icons` (default: `:-)` 🙂, `:-(` ☹, `;-)` 😉, `:-D` 😁, `8-O` 😮, `8-)` 😄, `:-?` 😕, `:-x` 😶, `:-P` 😛, `:-|` 😐). Replacements are rendered as text (wrapped in a `<span>` when `$texy->emoticonModule->class` is set); image-file emoticons are no longer supported. The pattern is registered in `beforeParse`.
@@ -363,7 +363,7 @@ See [modifiers.md](modifiers.md) for the full description and the configuration 
 
 ## Syntax overview
 
-Every syntax lists its ID (the key in `$texy->allowed`), its default state, and the module that implements it. Defaults were verified against the module constructors in `src/Modules/`.
+Every syntax lists its ID (the key in `$texy->allowedSyntax`), its default state, and the module that implements it. Defaults were verified against the module constructors in `src/Modules/`.
 
 ### Inline (line) syntaxes
 
@@ -441,6 +441,6 @@ Paragraphs themselves have no syntax ID – text between recognized blocks is al
 Enable or disable any syntax by its ID:
 
 ```php
-$texy->allowed['phrase/ins'] = true;
-$texy->allowed['image'] = false;
+$texy->allowedSyntax['phrase/ins'] = true;
+$texy->allowedSyntax['image'] = false;
 ```

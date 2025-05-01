@@ -29,7 +29,7 @@ test('unknown or malformed references stay literal', function () {
 
 test('disabled syntax leaves entities as plain text', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::HtmlEntity] = false;
+	$texy->allowedSyntax[Texy\Syntax::HtmlEntity] = false;
 	Assert::same(
 		"<p>a &amp;amp; b</p>\n",
 		$texy->process('a &amp; b'),

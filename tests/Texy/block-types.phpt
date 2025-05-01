@@ -96,7 +96,7 @@ test('text block with line breaks', function () {
 
 test('texysource block', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::DelimitedTexySource] = true;
+	$texy->allowedSyntax[Texy\Syntax::DelimitedTexySource] = true;
 	Assert::same(
 		"<pre\nclass=\"html\"><code>&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt;&lt;/p&gt;</code></pre>\n",
 		$texy->process(<<<'XX'
@@ -110,7 +110,7 @@ test('texysource block', function () {
 
 test('texysource block is off by default', function () {
 	$texy = new Texy\Texy;
-	Assert::false($texy->allowed[Texy\Syntax::DelimitedTexySource]);
+	Assert::false($texy->allowedSyntax[Texy\Syntax::DelimitedTexySource]);
 	Assert::notContains('language-html', $texy->process("/--texysource\n**bold**\n\\--"));
 	Assert::contains('/--texysource', $texy->process("/--texysource\n**bold**\n\\--"));
 });
@@ -165,6 +165,6 @@ test('pre block', function () {
 
 test('a disallowed block type stays as text', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::DelimitedHtml] = false;
+	$texy->allowedSyntax[Texy\Syntax::DelimitedHtml] = false;
 	Assert::same('<p>/--html <b>x</b> \--</p>', trim($texy->process("/--html\n<b>x</b>\n\\--")));
 });

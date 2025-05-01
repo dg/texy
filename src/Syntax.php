@@ -11,7 +11,7 @@ use Texy\Nodes\PhraseType;
 
 
 /**
- * Texy syntax identifiers for use with $texy->allowed[].
+ * Texy syntax identifiers for use with $texy->allowedSyntax[].
  */
 final class Syntax
 {

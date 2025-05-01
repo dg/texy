@@ -125,7 +125,7 @@ test('bare reference syntax is off by default', function () {
 
 test('bare reference resolves against definitions when enabled', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::LinkReference] = true;
+	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 	Assert::same(
 		"<p>viz <a href=\"https://example.com\">home</a> stranka</p>\n",
 		$texy->process("viz [home] stranka\n\n[home]: https://example.com"),
@@ -135,7 +135,7 @@ test('bare reference resolves against definitions when enabled', function () {
 
 test('unresolved bare reference keeps name as URL and in ref', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::LinkReference] = true;
+	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 	$doc = $texy->parse('viz [wiki#kotva] stranka');
 	$texy->transform($doc);
 	$link = $doc->findFirst(Texy\Nodes\LinkNode::class);
@@ -174,7 +174,7 @@ test('a pass rewrites the target of a code phrase like that of any link', functi
 
 test('in the syntax tree a reference has its name and no URL yet', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::LinkReference] = true;
+	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 	$links = $texy->parse('[bare] "text":[ref] "img":[*pic*] "url":https://example.com')->find(Texy\Nodes\LinkNode::class);
 
 	Assert::same(['bare', 'ref', 'pic', null], array_map(fn($link) => $link->ref, $links));
@@ -185,7 +185,7 @@ test('in the syntax tree a reference has its name and no URL yet', function () {
 
 test('bare reference does not swallow neighboring syntaxes', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::LinkReference] = true;
+	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 
 	// image syntax
 	Assert::contains('<img src="images/photo.png"', $texy->process('[* photo.png *]'));
