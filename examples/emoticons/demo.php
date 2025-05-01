@@ -32,7 +32,7 @@ $texy = new Texy\Texy;
 
 // IMPORTANT: Emoticons are disabled by default!
 // You must enable them like this:
-$texy->allowed[Texy\Syntax::Emoticon] = true;
+$texy->allowedSyntax[Texy\Syntax::Emoticon] = true;
 
 // Set a CSS class that will be added to all emoticon images
 $texy->htmlOutput->emoticonClass = 'smilie';

@@ -61,12 +61,12 @@ $texy->htmlOutput->addRenderer(
 Texy\Configurator::safeMode($texy);
 
 // Bare [ref] references are opt-in
-$texy->allowed[Texy\Syntax::LinkReference] = true;
+$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 
 // Alternative: If you want to disable specific features manually:
-// $texy->allowed[Texy\Syntax::Image] = false;
-// $texy->allowed[Texy\Syntax::Figure] = false;
-// $texy->allowed[Texy\Syntax::AutolinkUrl] = false;
+// $texy->allowedSyntax[Texy\Syntax::Image] = false;
+// $texy->allowedSyntax[Texy\Syntax::Figure] = false;
+// $texy->allowedSyntax[Texy\Syntax::AutolinkUrl] = false;
 
 
 // Process the comment text

@@ -39,10 +39,10 @@ $texy = new Texy\Texy;
 // IMPORTANT: Disable conflicting default syntax
 // We want to use * for bold, but Texy uses it for emphasis
 // We must disable the default * patterns first
-$texy->allowed[Texy\Syntax::StrongEmphasis] = false;         // Disables ***text***
-$texy->allowed[Texy\Syntax::Strong] = false;                  // Disables **text**
-$texy->allowed[Texy\Syntax::EmphasisSingleAsterisk] = false;  // Disables *text*
-$texy->allowed[Texy\Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
+$texy->allowedSyntax[Texy\Syntax::StrongEmphasis] = false;         // Disables ***text***
+$texy->allowedSyntax[Texy\Syntax::Strong] = false;                  // Disables **text**
+$texy->allowedSyntax[Texy\Syntax::EmphasisSingleAsterisk] = false;  // Disables *text*
+$texy->allowedSyntax[Texy\Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 
 
 // ============================================================

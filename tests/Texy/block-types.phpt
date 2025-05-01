@@ -155,8 +155,8 @@ test('pre block', function () {
 
 test('a disallowed block type stays as text, a language counts as code', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed[Texy\Syntax::BlockHtml] = false;
-	$texy->allowed[Texy\Syntax::BlockCode] = false;
+	$texy->allowedSyntax[Texy\Syntax::BlockHtml] = false;
+	$texy->allowedSyntax[Texy\Syntax::BlockCode] = false;
 	Assert::same('<p>/--html <b>x</b> \--</p>', trim($texy->process("/--html\n<b>x</b>\n\\--")));
 	Assert::same('<p>/--php echo; \--</p>', trim($texy->process("/--php\necho;\n\\--")));
 });

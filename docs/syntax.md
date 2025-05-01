@@ -289,13 +289,13 @@ Displayed literally, both Texy and HTML markup escaped.
 | `block/pre` | `<pre>`; content is escaped, but HTML tags written inside are recognized and validated |
 | `block/html` | content parsed as HTML (tags validated against `$allowedTags`), Texy markup off, no wrapper element |
 | `block/text` | content escaped literally, line breaks become `<br>` |
-| `block/texy` | content parsed as regular Texy – restores full processing, e.g. inside a `div` block; handled before the `$allowed` check, so it cannot be disabled |
+| `block/texy` | content parsed as regular Texy – restores full processing, e.g. inside a `div` block; handled before the `$allowedSyntax` check, so it cannot be disabled |
 | `block/texysource` | content processed by Texy and the *resulting HTML source* displayed in a code block (parameter `line` switches to inline parsing) |
 | `block/comment` | content discarded entirely |
 | `block/div` | `<div>`, content parsed as Texy blocks; may nest |
 | `block/default` | plain `/--` without a type; escaped `<pre>`, the parameter (if any) becomes a CSS class |
 
-Each subtype (except `block/texy`) is individually switchable in `$allowed`; the whole feature via `blocks`.
+Each subtype (except `block/texy`) is individually switchable in `$allowedSyntax`; the whole feature via `blocks`.
 
 ## Direct HTML
 
@@ -303,7 +303,7 @@ Each subtype (except `block/texy`) is individually switchable in `$allowed`; the
 
 HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->allowedTags` and the content model; disallowed tags/attributes are removed, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlModule->passComment` is on.
 
-HTML entity references (`&amp;`, `&#65;`, `&#xA0;`) are decoded into their characters; an unknown reference stays literal text. With `$allowed['html/entity']` off, references are ordinary text and render escaped.
+HTML entity references (`&amp;`, `&#65;`, `&#xA0;`) are decoded into their characters; an unknown reference stays literal text. With `$allowedSyntax['html/entity']` off, references are ordinary text and render escaped.
 
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.
@@ -326,7 +326,7 @@ Texy itself renders nothing for scripts – the construct exists solely for user
 *(`emoticon` – EmoticonModule; **disabled by default**)*
 
 ```php
-$texy->allowed['emoticon'] = true;
+$texy->allowedSyntax['emoticon'] = true;
 ```
 
 Recognized emoticons and replacements come from `$texy->emoticonModule->icons` (default: `:-)` 🙂, `:-(` ☹, `;-)` 😉, `:-D` 😁, `8-O` 😮, `8-)` 😄, `:-?` 😕, `:-x` 😶, `:-P` 😛, `:-|` 😐). Replacements are rendered as text (wrapped in a `<span>` when `$texy->emoticonModule->class` is set); image-file emoticons are no longer supported. The pattern is registered in `beforeParse`.
@@ -363,7 +363,7 @@ See [modifiers.md](modifiers.md) for the full description and the configuration 
 
 ## Syntax overview
 
-Every syntax lists its ID (the key in `$texy->allowed`), its default state, and the module that implements it. Defaults were verified against the module constructors in `src/Modules/`.
+Every syntax lists its ID (the key in `$texy->allowedSyntax`), its default state, and the module that implements it. Defaults were verified against the module constructors in `src/Modules/`.
 
 ### Inline (line) syntaxes
 
@@ -437,6 +437,6 @@ Paragraphs themselves have no syntax ID – text between recognized blocks is al
 Enable or disable any syntax by its ID:
 
 ```php
-$texy->allowed['phrase/ins'] = true;
-$texy->allowed['image'] = false;
+$texy->allowedSyntax['phrase/ins'] = true;
+$texy->allowedSyntax['image'] = false;
 ```
