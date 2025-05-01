@@ -30,7 +30,7 @@ test('mutating the quote table of the active locale', function () {
 
 test('changing the emoticon table', function () {
 	$texy = new Texy;
-	$texy->allowed[Syntax::Emoticon] = true;
+	$texy->allowedSyntax[Syntax::Emoticon] = true;
 
 	Assert::contains('🙂', $texy->process(':-)'));
 	$texy->config->emoticons[':-)'] = '[SMILE]';

@@ -36,10 +36,10 @@ $texy->htmlOutput->imageBaseUrl = 'images/';
 // ^^superscript^^ renders as <sup>
 // __subscript__ renders as <sub>
 // visual ""citation"" renders as <cite>
-$texy->allowed[Texy\Syntax::Inserted] = true;
-$texy->allowed[Texy\Syntax::Deleted] = true;
-$texy->allowed[Texy\Syntax::Superscript] = true;
-$texy->allowed[Texy\Syntax::Subscript] = true;
+$texy->allowedSyntax[Texy\Syntax::Inserted] = true;
+$texy->allowedSyntax[Texy\Syntax::Deleted] = true;
+$texy->allowedSyntax[Texy\Syntax::Superscript] = true;
+$texy->allowedSyntax[Texy\Syntax::Subscript] = true;
 
 
 // STEP 3: Process your Texy text

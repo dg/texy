@@ -36,7 +36,7 @@ class Texy implements Parsing\Registry
 		FILTER_IMAGE = 'image';
 
 	/** @var array<string, bool>  syntax name => enabled */
-	public array $allowed = [];
+	public array $allowedSyntax = [];
 
 	/** what the document means */
 	public readonly TexyConfig $config;
@@ -142,7 +142,7 @@ class Texy implements Parsing\Registry
 			$module->register($this);
 		}
 
-		$this->allowed = $this->completeAllowed($this->allowed);
+		$this->allowedSyntax = $this->completeAllowed($this->allowedSyntax);
 	}
 
 
@@ -194,7 +194,7 @@ class Texy implements Parsing\Registry
 	{
 		$this->introduce($name, block: false);
 		$this->inlinePatterns['application'][$name] = ['handler' => $handler(...), 'pattern' => $pattern];
-		$this->allowed[$name] ??= true;
+		$this->allowedSyntax[$name] ??= true;
 	}
 
 
@@ -210,7 +210,7 @@ class Texy implements Parsing\Registry
 	{
 		$this->introduce($name, block: true);
 		$this->blockPatterns['application'][$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
-		$this->allowed[$name] ??= true;
+		$this->allowedSyntax[$name] ??= true;
 	}
 
 
@@ -218,7 +218,7 @@ class Texy implements Parsing\Registry
 	final public function registerPostLine(callable $handler, string $name): void
 	{
 		$this->postHandlers[$name] = $handler(...);
-		$this->allowed[$name] ??= true;
+		$this->allowedSyntax[$name] ??= true;
 	}
 
 
@@ -290,7 +290,11 @@ class Texy implements Parsing\Registry
 	{
 		$typography = $this->config->typography ? new Modules\TypographyModule($this->config)->postLine(...) : null;
 		$hyphenation = $this->config->hyphenation ? new Modules\HyphenationModule($this->config)->postLine(...) : null;
-		$postHandlers = array_filter($this->postHandlers, fn(string $name): bool => !empty($this->allowed[$name]), ARRAY_FILTER_USE_KEY);
+		$postHandlers = array_filter(
+			$this->postHandlers,
+			fn(string $name): bool => !empty($this->allowedSyntax[$name]),
+			ARRAY_FILTER_USE_KEY,
+		);
 		return new Output\Html\Renderer(
 			$this->htmlOutput,
 			$this->htmlPolicy,
@@ -444,7 +448,7 @@ class Texy implements Parsing\Registry
 		return new ParseContext(
 			$this->createInlineParser(),
 			$this->createBlockParser(),
-			$this->allowed,
+			$this->allowedSyntax,
 		);
 	}
 
@@ -453,7 +457,7 @@ class Texy implements Parsing\Registry
 	{
 		$patterns = array_filter(
 			$this->blockPatterns['application'] + $this->blockPatterns['language'],
-			fn($_, $name) => !empty($this->allowed[$name]),
+			fn($_, $name) => !empty($this->allowedSyntax[$name]),
 			ARRAY_FILTER_USE_BOTH,
 		);
 
@@ -465,7 +469,7 @@ class Texy implements Parsing\Registry
 	{
 		$patterns = array_filter(
 			$this->inlinePatterns['application'] + $this->inlinePatterns['language'],
-			fn($_, $name) => !empty($this->allowed[$name]),
+			fn($_, $name) => !empty($this->allowedSyntax[$name]),
 			ARRAY_FILTER_USE_BOTH,
 		);
 

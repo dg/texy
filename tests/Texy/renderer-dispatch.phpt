@@ -102,7 +102,7 @@ test('a list rendered by a handler inside an item is no item of the outer list',
 
 test('a renderer of every built-in class is dispatched to', function () {
 	$texy = new Texy;
-	$texy->allowed[Syntax::Emoticon] = true;
+	$texy->allowedSyntax[Syntax::Emoticon] = true;
 	$classes = array_keys(new ReflectionProperty(NodeRenderer::class, 'handlers')->getValue($texy->createHtmlRenderer()));
 	$seen = [];
 	foreach ($classes as $class) {

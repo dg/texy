@@ -13,10 +13,10 @@ test('complete syntax showcase', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->imageBaseUrl = '../images/';
 	$texy->htmlOutput->floatClasses['left'] = 'left';
-	$texy->allowed[Texy\Syntax::Inserted] = true;
-	$texy->allowed[Texy\Syntax::Deleted] = true;
-	$texy->allowed[Texy\Syntax::Superscript] = true;
-	$texy->allowed[Texy\Syntax::Subscript] = true;
+	$texy->allowedSyntax[Texy\Syntax::Inserted] = true;
+	$texy->allowedSyntax[Texy\Syntax::Deleted] = true;
+	$texy->allowedSyntax[Texy\Syntax::Superscript] = true;
+	$texy->allowedSyntax[Texy\Syntax::Subscript] = true;
 	$texy->config->locale = 'en';
 	$texy->htmlOutput->horizontalRuleClasses['*'] = 'hidden';
 
