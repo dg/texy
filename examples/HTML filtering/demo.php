@@ -54,7 +54,7 @@ function show(string $title, ?Closure $configure = null): void
 
 		</my-extraTag>
 		TEXY;
-	$html = $texy->process($text);
+	$html = $texy->toHtml($text);
 
 	// Show the rendered output and its HTML source code
 	echo "<h2>$title</h2>";

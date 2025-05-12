@@ -16,6 +16,6 @@ test('nontext paragraph', function () {
 
 	Assert::match(
 		'<section class="n"><img src="images/a" alt=""> <img src="images/b" alt=""></section>',
-		$texy->process('[* a *] [* b *] .[n]'),
+		$texy->toHtml('[* a *] [* b *] .[n]'),
 	);
 });

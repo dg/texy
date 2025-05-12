@@ -76,7 +76,7 @@ $text = <<<'TEXY'
 
 	And this is by-cms-defined image with by-cms-defined link [* user *]::
 	TEXY;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

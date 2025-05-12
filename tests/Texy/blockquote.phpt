@@ -19,7 +19,7 @@ test('blockquote with merged lines', function () {
 				<p>First line Second line</p>
 			</blockquote>
 			HTML,
-		$texy->process(<<<'XX'
+		$texy->toHtml(<<<'XX'
 			> First line
 			> Second line
 			XX),
@@ -38,7 +38,7 @@ test('blockquote with line breaks', function () {
 				Second line</p>
 			</blockquote>
 			HTML,
-		$texy->process(<<<'XX'
+		$texy->toHtml(<<<'XX'
 			> First line
 			>  Second line
 			XX),
@@ -55,6 +55,6 @@ test('blockquote single line', function () {
 				<p>Quote text</p>
 			</blockquote>
 			HTML,
-		$texy->process('> Quote text'),
+		$texy->toHtml('> Quote text'),
 	);
 });

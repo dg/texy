@@ -35,7 +35,7 @@ test('image auto-detect dimensions', function () {
 	Assert::match(
 		'<div class="figure"><img src="logo.gif" alt="" width="176" height="104"></div>
 ',
-		$texy->process('[* logo.gif *]'),
+		$texy->toHtml('[* logo.gif *]'),
 	);
 });
 
@@ -50,7 +50,7 @@ test('image auto-detect dimensions with specified width', function () {
 	Assert::match(
 		'<div class="figure"><img src="logo.gif" alt="" width="88" height="52"></div>
 ',
-		$texy->process('[* logo.gif 88x? *]'),
+		$texy->toHtml('[* logo.gif 88x? *]'),
 	);
 });
 
@@ -65,7 +65,7 @@ test('image auto-detect dimensions with specified height', function () {
 	Assert::match(
 		'<div class="figure"><img src="logo.gif" alt="" width="88" height="52"></div>
 ',
-		$texy->process('[* logo.gif ?x52 *]'),
+		$texy->toHtml('[* logo.gif ?x52 *]'),
 	);
 });
 
@@ -77,7 +77,7 @@ test('image dimensions not detected without fileRoot', function () {
 	Assert::match(
 		'<div class="figure"><img src="logo.gif" alt=""></div>
 ',
-		$texy->process('[* logo.gif *]'),
+		$texy->toHtml('[* logo.gif *]'),
 	);
 });
 
@@ -92,12 +92,12 @@ test('image with a float class', function () {
 	Assert::match(
 		'<div class="figure float-right"><img src="images/image.jpg" alt=""></div>
 ',
-		$texy->process('[* image.jpg >]'),
+		$texy->toHtml('[* image.jpg >]'),
 	);
 	Assert::match(
 		'<p>a <img src="images/image.jpg" alt="" class="float-right"> b</p>
 ',
-		$texy->process('a [* image.jpg >] b'),
+		$texy->toHtml('a [* image.jpg >] b'),
 	);
 });
 
@@ -108,7 +108,7 @@ test('image with float fallback', function () {
 	Assert::match(
 		'<div class="figure" style="float:left"><img src="images/image.jpg" alt=""></div>
 ',
-		$texy->process('[* image.jpg <]'),
+		$texy->toHtml('[* image.jpg <]'),
 	);
 });
 
@@ -123,7 +123,7 @@ test('image with direct link', function () {
 		'<div class="figure"><a href="https://example.com"><img src="images/image.jpg"
 alt=""></a></div>
 ',
-		$texy->process('[* image.jpg *]:https://example.com'),
+		$texy->toHtml('[* image.jpg *]:https://example.com'),
 	);
 });
 
@@ -134,6 +134,6 @@ test('image with double colon link (uses main URL)', function () {
 		'<div class="figure"><a href="images/image.jpg"><img src="images/image.jpg"
 alt=""></a></div>
 ',
-		$texy->process('[* image.jpg *]::'),
+		$texy->toHtml('[* image.jpg *]::'),
 	);
 });

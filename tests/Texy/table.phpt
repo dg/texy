@@ -15,6 +15,6 @@ test('advanced table features', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/table.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/table.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/table.texy')),
 	);
 });

@@ -48,5 +48,5 @@ function texyWithAlert(): Texy
 test('the format with a renderer uses it', function () {
 	$texy = texyWithAlert();
 
-	Assert::contains('<div class="alert">Watch out</div>', $texy->process('!!! Watch out'));
+	Assert::contains('<div class="alert">Watch out</div>', $texy->toHtml('!!! Watch out'));
 });

@@ -13,7 +13,7 @@ function process(string $text, bool $mergeLines = true): string
 {
 	$texy = new Texy\Texy;
 	$texy->config->mergeLines = $mergeLines;
-	return $texy->process($text);
+	return $texy->toHtml($text);
 }
 
 

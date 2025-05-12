@@ -31,13 +31,13 @@ Usage
 -----
 
     $texy = new Texy\Texy;
-    $html = $texy->process($text);
+    $html = $texy->toHtml($text);
 
 For untrusted input, always enable safe mode, which restricts the output to a
 safe subset of HTML:
 
     Texy\Configurator::safeMode($texy);
-    $html = $texy->process($text);
+    $html = $texy->toHtml($text);
 
 
 Documentation and Examples

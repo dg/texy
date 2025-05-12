@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text): string
 {
 	$texy = new Texy\Texy;
-	return $texy->process($text);
+	return $texy->toHtml($text);
 }
 
 
@@ -99,7 +99,7 @@ test('texysource block', function () {
 	$texy->allowedSyntax[Texy\Syntax::DelimitedTexySource] = true;
 	Assert::same(
 		"<pre\nclass=\"html\"><code>&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt;&lt;/p&gt;</code></pre>\n",
-		$texy->process(<<<'XX'
+		$texy->toHtml(<<<'XX'
 			/--texysource
 			**bold** and //italic//
 			\--
@@ -111,8 +111,8 @@ test('texysource block', function () {
 test('texysource block is off by default', function () {
 	$texy = new Texy\Texy;
 	Assert::false($texy->allowedSyntax[Texy\Syntax::DelimitedTexySource]);
-	Assert::notContains('language-html', $texy->process("/--texysource\n**bold**\n\\--"));
-	Assert::contains('/--texysource', $texy->process("/--texysource\n**bold**\n\\--"));
+	Assert::notContains('language-html', $texy->toHtml("/--texysource\n**bold**\n\\--"));
+	Assert::contains('/--texysource', $texy->toHtml("/--texysource\n**bold**\n\\--"));
 });
 
 
@@ -166,5 +166,5 @@ test('pre block', function () {
 test('a disallowed block type stays as text', function () {
 	$texy = new Texy\Texy;
 	$texy->allowedSyntax[Texy\Syntax::DelimitedHtml] = false;
-	Assert::same('<p>/--html <b>x</b> \--</p>', trim($texy->process("/--html\n<b>x</b>\n\\--")));
+	Assert::same('<p>/--html <b>x</b> \--</p>', trim($texy->toHtml("/--html\n<b>x</b>\n\\--")));
 });

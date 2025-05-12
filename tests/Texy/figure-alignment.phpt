@@ -17,7 +17,7 @@ test('figure floated left gets its float class besides the figure class', functi
 	<p>Caption</p>
 </div>
 ',
-		$texy->process('[* image.jpg <] *** Caption'),
+		$texy->toHtml('[* image.jpg <] *** Caption'),
 	);
 });
 
@@ -31,7 +31,7 @@ test('figure floated right', function () {
 	<p>Caption</p>
 </div>
 ',
-		$texy->process('[* image.jpg >] *** Caption'),
+		$texy->toHtml('[* image.jpg >] *** Caption'),
 	);
 });
 
@@ -44,7 +44,7 @@ test('text alignment classes do not apply to the float', function () {
 	<p>Caption</p>
 </div>
 ',
-		$texy->process('[* image.jpg <] *** Caption'),
+		$texy->toHtml('[* image.jpg <] *** Caption'),
 	);
 });
 
@@ -56,6 +56,6 @@ test('figure centered (no float)', function () {
 	<p>Caption</p>
 </div>
 ',
-		$texy->process('[* image.jpg *] *** Caption'),
+		$texy->toHtml('[* image.jpg *] *** Caption'),
 	);
 });

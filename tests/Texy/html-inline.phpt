@@ -13,7 +13,7 @@ function process(string $text): string
 {
 	$texy = new Texy\Texy;
 	$texy->htmlPolicy->allowedTags = Texy\Texy::ALL;
-	return $texy->process($text);
+	return $texy->toHtml($text);
 }
 
 

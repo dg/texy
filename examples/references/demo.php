@@ -75,7 +75,7 @@ $text = <<<'TEXY'
 
 	I must agree with [1] and [2]. But [3] is IMHO wrong.
 	TEXY;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

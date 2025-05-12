@@ -61,7 +61,7 @@ $texy->htmlOutput->addRenderer(
 $text = <<<'TEXY'
 	[* image.gif *] *** This is image with description, coded as definition list
 	TEXY;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

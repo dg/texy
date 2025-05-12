@@ -46,7 +46,7 @@ $text = <<<'TEXY'
 
 	When acronyms and smilies may collide, use spaces:  FBI((Famous But Incompetent :-) ))
 	TEXY;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

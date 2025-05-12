@@ -82,7 +82,7 @@ echo '<hr>';
 $texy->config->headingTop = 1;   // Start with <h1>
 $texy->config->headingBalancing = Texy\HeadingBalancing::Fixed;
 
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 echo '<strong>Fixed method:</strong>';
 echo '<pre>';

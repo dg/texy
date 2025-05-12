@@ -69,7 +69,7 @@ $text = <<<'TEXY'
 	- "my first page":first-page
 	- "my second page":second-page
 	TEXY;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

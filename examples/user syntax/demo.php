@@ -102,7 +102,7 @@ $texy->registerLinePattern(
 $text = <<<'TEXY'
 	User syntax - this is *bold* and this _italic_
 	TEXY;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

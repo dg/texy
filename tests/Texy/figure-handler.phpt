@@ -40,7 +40,7 @@ test('custom ImageNode handler is called for images in figures', function () {
 	);
 
 	// Figure syntax (image on its own line)
-	$html = $texy->process('[* youtube:abc123 320x240 *]');
+	$html = $texy->toHtml('[* youtube:abc123 320x240 *]');
 
 	Assert::contains('https://youtube.com/embed/abc123', $html);
 	Assert::contains('width="320"', $html);
@@ -67,7 +67,7 @@ test('custom ImageNode handler is called for inline images', function () {
 	);
 
 	// Inline image (within paragraph)
-	$html = $texy->process('Watch this: [* youtube:xyz789 *] video.');
+	$html = $texy->toHtml('Watch this: [* youtube:xyz789 *] video.');
 
 	Assert::contains('<iframe src="https://youtube.com/embed/xyz789"></iframe>', $html);
 	Assert::contains('<p>Watch this:', $html);
@@ -80,7 +80,7 @@ test('figure alignment is applied to wrapper, not to image', function () {
 
 	Assert::same(
 		"<div class=\"figure float-right\"><img src=\"images/image.jpg\" alt=\"\"></div>\n",
-		$texy->process('[* image.jpg >]'),
+		$texy->toHtml('[* image.jpg >]'),
 	);
 });
 
@@ -96,5 +96,5 @@ test('a custom FigureNode renderer applies the float as configured', function ()
 		return $el;
 	});
 
-	Assert::contains('<dl class="float-left">', $texy->process('[* image.jpg <]'));
+	Assert::contains('<dl class="float-left">', $texy->toHtml('[* image.jpg <]'));
 });

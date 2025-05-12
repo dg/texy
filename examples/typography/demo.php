@@ -8,7 +8,7 @@
  * and hyphenation of long words.
  *
  * WHAT YOU'LL LEARN:
- * - How to use processTypo() instead of process()
+ * - How to use processTypo() instead of toHtml()
  * - Texy's typographic improvements (quotes, dashes, spaces)
  *
  * WHAT processTypo() DOES:
@@ -40,7 +40,7 @@ $texy = new Texy\Texy;
 // $texy->config->locale = 'fr';  // French quotes: «text»
 
 
-// Use processTypo() instead of process()
+// Use processTypo() instead of toHtml()
 // This applies only typography fixes, not full Texy markup
 $text = <<<'TEXY'
 	"Hello"

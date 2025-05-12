@@ -61,7 +61,7 @@ php "1-2-3 start/demo.php"
 
 ```php
 $texy = new Texy\Texy;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 ```
 
 ### Safe Mode (for user input)
@@ -69,7 +69,7 @@ $html = $texy->process($text);
 ```php
 $texy = new Texy\Texy;
 Texy\Configurator::safeMode($texy);
-$html = $texy->process($userInput);
+$html = $texy->toHtml($userInput);
 ```
 
 ### Changing the Document

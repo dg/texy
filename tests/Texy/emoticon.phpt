@@ -15,7 +15,7 @@ test('emoticon with unicode', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/emoticon.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/emoticon.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/emoticon.texy')),
 	);
 });
 
@@ -28,6 +28,6 @@ test('emoticon with custom class', function () {
 
 	Assert::match(
 		"<p>I\u{A0}fell <span class=\"smiley\">🙂</span></p>",
-		$texy->process('I fell :-)'),
+		$texy->toHtml('I fell :-)'),
 	);
 });

@@ -20,6 +20,6 @@ test('special cases and edge cases', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/edge-cases.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/edge-cases.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/edge-cases.texy')),
 	);
 });

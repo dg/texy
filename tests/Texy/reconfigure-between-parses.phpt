@@ -13,18 +13,18 @@ require __DIR__ . '/../bootstrap.php';
 test('switching the typography locale', function () {
 	$texy = new Texy;
 
-	Assert::contains("\u{201E}q\u{201C}", $texy->process('"q"')); // cs
+	Assert::contains('„q“', $texy->toHtml('"q"')); // cs
 	$texy->config->locale = 'en';
-	Assert::contains("\u{201C}q\u{201D}", $texy->process('"q"'));
+	Assert::contains('“q”', $texy->toHtml('"q"'));
 });
 
 
 test('mutating the quote table of the active locale', function () {
 	$texy = new Texy;
 
-	Assert::contains("\u{201E}q\u{201C}", $texy->process('"q"'));
+	Assert::contains('„q“', $texy->toHtml('"q"'));
 	[$texy->config->locales['cs']['quotes'][0], $texy->config->locales['cs']['quotes'][1]] = ['«', '»'];
-	Assert::contains('«q»', $texy->process('"q"'));
+	Assert::contains('«q»', $texy->toHtml('"q"'));
 });
 
 
@@ -32,7 +32,7 @@ test('changing the emoticon table', function () {
 	$texy = new Texy;
 	$texy->allowedSyntax[Syntax::Emoticon] = true;
 
-	Assert::contains('🙂', $texy->process(':-)'));
+	Assert::contains('🙂', $texy->toHtml(':-)'));
 	$texy->config->emoticons[':-)'] = '[SMILE]';
-	Assert::contains('[SMILE]', $texy->process(':-)'));
+	Assert::contains('[SMILE]', $texy->toHtml(':-)'));
 });

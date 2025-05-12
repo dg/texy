@@ -17,7 +17,7 @@ test('figure with caption', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/figure.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/figure.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/figure.texy')),
 	);
 });
 
@@ -32,6 +32,6 @@ test('figure with HTML5 figure tag', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/figure-html5.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/figure.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/figure.texy')),
 	);
 });

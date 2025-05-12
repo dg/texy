@@ -27,7 +27,7 @@ class TexyExtension extends Latte\Extension
 	public function __construct(Texy|\Closure $texy)
 	{
 		$this->processor = $texy instanceof Texy
-			? fn(string $text): string => $texy->process(Helpers::outdent(str_replace("\t", '    ', $text)))
+			? fn(string $text): string => $texy->toHtml(Helpers::outdent(str_replace("\t", '    ', $text)))
 			: $texy;
 	}
 

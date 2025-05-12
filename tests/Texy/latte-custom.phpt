@@ -12,7 +12,7 @@ $fn = function (string $text, int $heading = 1, string $locale = 'cs'): string {
 	$texy = new Texy\Texy;
 	$texy->config->headingTop = $heading;
 	$texy->config->locale = $locale;
-	return $texy->process($text);
+	return $texy->toHtml($text);
 };
 
 $latte = new Latte\Engine;

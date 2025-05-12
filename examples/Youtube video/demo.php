@@ -64,7 +64,7 @@ $text = <<<'TEXY'
 
 	[* youtube:2mTLO2F_ERY *]
 	TEXY;
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

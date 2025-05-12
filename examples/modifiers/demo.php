@@ -44,7 +44,7 @@ function processAndShow(Texy\Texy $texy): void
 
 		And this "text has defined .[one two #id]" class and id names.
 		TEXY;
-	$html = $texy->process($text);
+	$html = $texy->toHtml($text);
 
 	// Show the rendered output
 	echo $html;

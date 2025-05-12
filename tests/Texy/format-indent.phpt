@@ -15,6 +15,6 @@ test('output indentation', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/formatter-indent.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/formatter-indent.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/formatter-indent.texy')),
 	);
 });

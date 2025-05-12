@@ -13,11 +13,11 @@ use function strlen;
 
 
 /**
- * Texy! - Convert plain text to HTML format using {@link process()}.
+ * Texy! - Convert plain text to HTML format using {@link toHtml()}.
  *
  * <code>
  * $texy = new Texy();
- * $html = $texy->process($text);
+ * $html = $texy->toHtml($text);
  * </code>
  */
 class Texy
@@ -198,7 +198,7 @@ class Texy
 	/**
 	 * Converts Texy text to HTML.
 	 */
-	public function process(string $text): string
+	public function toHtml(string $text): string
 	{
 		return $this->createHtmlRenderer()->render($this->transform($this->parse($text)));
 	}
@@ -207,7 +207,7 @@ class Texy
 	/**
 	 * Converts one line of Texy text to HTML: inline markup only, no paragraph around it.
 	 */
-	public function processLine(string $text): string
+	public function toInlineHtml(string $text): string
 	{
 		return $this->createHtmlRenderer()->render($this->transform($this->parseInline($text)));
 	}

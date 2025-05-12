@@ -18,7 +18,7 @@ function render(string $source, string ...$disabled): string
 		$texy->allowedSyntax[$name] = false;
 	}
 
-	return trim($texy->process($source));
+	return trim($texy->toHtml($source));
 }
 
 
