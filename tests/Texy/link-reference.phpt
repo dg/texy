@@ -13,7 +13,7 @@ test('link reference is resolved via phrase syntax', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p><a href=\"https://example.com\">Click here</a></p>\n",
-		$texy->process("\"Click here\":[link]\n\n[link]: https://example.com"),
+		$texy->toHtml("\"Click here\":[link]\n\n[link]: https://example.com"),
 	);
 });
 
@@ -22,7 +22,7 @@ test('link reference with fragment', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p><a href=\"https://example.com#section\">Click</a></p>\n",
-		$texy->process("\"Click\":[link#section]\n\n[link]: https://example.com"),
+		$texy->toHtml("\"Click\":[link#section]\n\n[link]: https://example.com"),
 	);
 });
 
@@ -31,14 +31,14 @@ test('undefined reference uses destination as URL', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p><a href=\"undefined\">Click</a></p>\n",
-		$texy->process('"Click":[undefined]'),
+		$texy->toHtml('"Click":[undefined]'),
 	);
 });
 
 
 test('link definition is removed from output', function () {
 	$texy = new Texy\Texy;
-	$result = $texy->process("[link]: https://example.com\n\ntext");
+	$result = $texy->toHtml("[link]: https://example.com\n\ntext");
 	Assert::same("<p>text</p>\n", $result);
 });
 
@@ -47,7 +47,7 @@ test('case insensitive reference matching', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p><a href=\"https://example.com\">Click</a></p>\n",
-		$texy->process("\"Click\":[LINK]\n\n[link]: https://example.com"),
+		$texy->toHtml("\"Click\":[LINK]\n\n[link]: https://example.com"),
 	);
 });
 
@@ -61,7 +61,7 @@ test('user-defined link definition works', function () {
 	$texy->config->addLinkDefinition('texy', 'https://texy.deegee.dev/');
 	Assert::same(
 		"<p><a href=\"https://texy.deegee.dev/\">Visit</a></p>\n",
-		$texy->process('"Visit":[texy]'),
+		$texy->toHtml('"Visit":[texy]'),
 	);
 });
 
@@ -73,13 +73,13 @@ test('user-defined definition persists across process() calls', function () {
 	// First process()
 	Assert::same(
 		"<p><a href=\"https://texy.deegee.dev/\">Texy</a></p>\n",
-		$texy->process('"Texy":[texy]'),
+		$texy->toHtml('"Texy":[texy]'),
 	);
 
 	// Second process() - definition should still work
 	Assert::same(
 		"<p><a href=\"https://texy.deegee.dev/\">Texy</a></p>\n",
-		$texy->process('"Texy":[texy]'),
+		$texy->toHtml('"Texy":[texy]'),
 	);
 });
 
@@ -88,12 +88,12 @@ test('document-defined reference does NOT leak to next process()', function () {
 	$texy = new Texy\Texy;
 
 	// First process() defines a reference
-	$texy->process("[link]: https://example.com\n\n\"Click\":[link]");
+	$texy->toHtml("[link]: https://example.com\n\n\"Click\":[link]");
 
 	// Second process() - reference should NOT be available, falls back to using "link" as URL
 	Assert::same(
 		"<p><a href=\"link\">Click</a></p>\n",
-		$texy->process('"Click":[link]'),
+		$texy->toHtml('"Click":[link]'),
 	);
 });
 
@@ -105,7 +105,7 @@ test('user-defined definition is overwritten by document definition', function (
 	// Document defines same reference - it overwrites user-defined one
 	Assert::same(
 		"<p><a href=\"https://document.com\">Click</a></p>\n",
-		$texy->process("\"Click\":[link]\n\n[link]: https://document.com"),
+		$texy->toHtml("\"Click\":[link]\n\n[link]: https://document.com"),
 	);
 });
 
@@ -118,7 +118,7 @@ test('bare reference syntax is off by default', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p>viz [home] stranka</p>\n",
-		$texy->process('viz [home] stranka'),
+		$texy->toHtml('viz [home] stranka'),
 	);
 });
 
@@ -128,7 +128,7 @@ test('bare reference resolves against definitions when enabled', function () {
 	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 	Assert::same(
 		"<p>viz <a href=\"https://example.com\">home</a> stranka</p>\n",
-		$texy->process("viz [home] stranka\n\n[home]: https://example.com"),
+		$texy->toHtml("viz [home] stranka\n\n[home]: https://example.com"),
 	);
 });
 
@@ -167,7 +167,7 @@ test('a pass rewrites the target of a code phrase like that of any link', functi
 	});
 	Assert::same(
 		"<p><a href=\"http://wiki/page\"><code>foo</code></a></p>\n",
-		$texy->process('`foo`:[page]'),
+		$texy->toHtml('`foo`:[page]'),
 	);
 });
 
@@ -188,11 +188,11 @@ test('bare reference does not swallow neighboring syntaxes', function () {
 	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 
 	// image syntax
-	Assert::contains('<img src="images/photo.png"', $texy->process('[* photo.png *]'));
+	Assert::contains('<img src="images/photo.png"', $texy->toHtml('[* photo.png *]'));
 	// modifier class
-	Assert::same("<p class=\"note\">text</p>\n", $texy->process('text .[note]'));
+	Assert::same("<p class=\"note\">text</p>\n", $texy->toHtml('text .[note]'));
 	// PHP attribute
-	Assert::same("<p>atribut #[Requires] zustava</p>\n", $texy->process('atribut #[Requires] zustava'));
+	Assert::same("<p>atribut #[Requires] zustava</p>\n", $texy->toHtml('atribut #[Requires] zustava'));
 	// labeled form is handled by its own syntax, not swallowed by bare reference
-	Assert::same("<p><a href=\"odkaz\">text</a></p>\n", $texy->process('[text |odkaz]'));
+	Assert::same("<p><a href=\"odkaz\">text</a></p>\n", $texy->toHtml('[text |odkaz]'));
 });

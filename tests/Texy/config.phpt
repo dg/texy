@@ -56,7 +56,7 @@ test('a locale added to the table is accepted', function () {
 	$texy = new Texy;
 	$texy->config->locales['xx'] = ['[', ']', '<', '>'];
 	$texy->config->locale = 'xx';
-	Assert::same('<p>[q]</p>', trim($texy->process('"q"')));
+	Assert::same('<p>[q]</p>', trim($texy->toHtml('"q"')));
 });
 
 
@@ -100,8 +100,8 @@ test('an underline character missing from the table is refused when it is read',
 
 test('two instances of a facade do not share definitions read from their documents', function () {
 	$texy = new Texy;
-	$first = $texy->process("[x]: https://one.cz\n\n\"a\":[x]");
-	$second = $texy->process('"a":[x]');
+	$first = $texy->toHtml("[x]: https://one.cz\n\n\"a\":[x]");
+	$second = $texy->toHtml('"a":[x]');
 	Assert::contains('https://one.cz', $first);
 	Assert::notContains('https://one.cz', $second);
 });
@@ -118,13 +118,13 @@ test('objects of configuration can be copied for an independent variant', functi
 test('typography and hyphenation are switched by the configuration', function () {
 	$texy = new Texy;
 	$texy->config->typography = false;
-	Assert::same('"q"...', trim(strip_tags($texy->process('"q"...'))));
+	Assert::same('"q"...', trim(strip_tags($texy->toHtml('"q"...'))));
 
 	$texy->config->typography = true;
 	$texy->config->hyphenation = false;
 	$word = str_repeat('slabika', 10);
-	Assert::same($word, trim(strip_tags($texy->process($word))));
+	Assert::same($word, trim(strip_tags($texy->toHtml($word))));
 
 	$texy->config->hyphenation = true;
-	Assert::notSame($word, trim(strip_tags($texy->process($word))));
+	Assert::notSame($word, trim(strip_tags($texy->toHtml($word))));
 });

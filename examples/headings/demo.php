@@ -69,7 +69,7 @@ echo '<hr>';
 $texy->config->headingTop = 1;   // Start with <h1>
 $texy->config->headingBalancing = Texy\HeadingBalancing::Fixed;
 
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 echo '<strong>Fixed method:</strong>';
 echo '<pre>';
@@ -92,7 +92,7 @@ $texy->config->headingBalancing = Texy\HeadingBalancing::Fixed;
 $texy->config->headingLevels['='] = 1;
 $texy->config->headingLevels['-'] = 2;
 
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 echo '<strong>User-defined fixed method:</strong>';
 echo '<pre>';

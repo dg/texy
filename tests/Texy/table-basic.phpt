@@ -30,7 +30,7 @@ test('simple table', function () {
 				</tbody>
 			</table>
 			HTML,
-		$texy->process(<<<'XX'
+		$texy->toHtml(<<<'XX'
 			| A | B |
 			| C | D |
 			XX),

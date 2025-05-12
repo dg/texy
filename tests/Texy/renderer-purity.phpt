@@ -80,7 +80,7 @@ test('the float of a figure is the figure\'s, rendering does not mutate it', fun
 
 test('nofollow directive applies to whole document including preceding links', function () {
 	$texy = new Texy\Texy;
-	$html = $texy->process(
+	$html = $texy->toHtml(
 		<<<'TEXY'
 			"before":https://example.com
 
@@ -102,19 +102,19 @@ test('nofollow directive applies to whole document including preceding links', f
 
 test('nofollow directive does not leak into next document processed by the same instance', function () {
 	$texy = new Texy\Texy;
-	$texy->process("\"link\":https://example.com\n\n{{texy: nofollow}}");
+	$texy->toHtml("\"link\":https://example.com\n\n{{texy: nofollow}}");
 
 	Assert::false($texy->htmlOutput->linkNoFollow);
 	Assert::match(
 		'<p><a href="https://example.com">link</a></p>',
-		$texy->process('"link":https://example.com'),
+		$texy->toHtml('"link":https://example.com'),
 	);
 });
 
 
 test('directive of one document does not affect rendering of another AST', function () {
 	$texy = new Texy\Texy;
-	$texy->process("{{texy: nofollow}}\n\n\"a\":https://example.com");
+	$texy->toHtml("{{texy: nofollow}}\n\n\"a\":https://example.com");
 
 	$docB = $texy->parse('"b":https://example.com');
 	Assert::match(
@@ -138,7 +138,7 @@ test('rendering does not depend on the syntaxes allowed after parsing', function
 
 test('paragraph containing only a consumed directive produces no output', function () {
 	$texy = new Texy\Texy;
-	$html = $texy->process("first\n\n{{texy: nofollow}}\n\nlast");
+	$html = $texy->toHtml("first\n\n{{texy: nofollow}}\n\nlast");
 	Assert::match(
 		<<<'HTML'
 			<p>first</p>

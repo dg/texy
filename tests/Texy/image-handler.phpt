@@ -38,6 +38,6 @@ test('custom image handler', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/image-handler.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/image-handler.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/image-handler.texy')),
 	);
 });

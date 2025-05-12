@@ -13,20 +13,20 @@ require __DIR__ . '/../bootstrap.php';
 test('fixed Offset didn\'t correspond to the begin of a valid UTF-8 code point', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	Assert::truthy($texy->process('"š":xxx://')); // i.e. triggers no error
+	Assert::truthy($texy->toHtml('"š":xxx://')); // i.e. triggers no error
 });
 
 
 test('"label":@link', function () {
 	$texy = new Texy;
-	Assert::same("<p><a href=\"&#64;link\">a</a></p>\n", $texy->process('"a":@link'));
+	Assert::same("<p><a href=\"&#64;link\">a</a></p>\n", $texy->toHtml('"a":@link'));
 });
 
 
 test('allowed XSS for URLs #31', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	$result = $texy->process('<a href="jAvascript://">click</a>');
+	$result = $texy->toHtml('<a href="jAvascript://">click</a>');
 	// XSS protection: javascript URLs must be neutralized (either escaped or removed)
 	Assert::notContains('javascript:', $result);
 	Assert::contains('click', $result);
@@ -36,14 +36,14 @@ test('allowed XSS for URLs #31', function () {
 test('allowed XSS for URLs #31 link', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	Assert::same("<p>a</p>\n", $texy->process('"a":[javaScript:alert()]'));
+	Assert::same("<p>a</p>\n", $texy->toHtml('"a":[javaScript:alert()]'));
 });
 
 
 test('allowed XSS for URLs #34', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	$result = $texy->process('<a href=" javascript:">click</a>');
+	$result = $texy->toHtml('<a href=" javascript:">click</a>');
 	// XSS protection: javascript URLs must be neutralized (tag escaped as text)
 	Assert::notContains('<a href=', $result); // no active <a> tag
 	Assert::contains('&lt;a href=', $result); // escaped as text
@@ -55,9 +55,9 @@ test('rejected inline match must not duplicate preceding text', function () {
 	// span syntax "..." without modifier/link is rejected by the handler;
 	// the parser must not emit the preceding text twice
 	$texy = new Texy;
-	Assert::same("<p>řekl „ahoj“ a šel</p>\n", $texy->process('řekl "ahoj" a šel'));
+	Assert::same("<p>řekl „ahoj“ a šel</p>\n", $texy->toHtml('řekl "ahoj" a šel'));
 	Assert::same(
 		"<p>A „quote <strong>b</strong>“ c</p>\n",
-		$texy->process('A "quote **b**" c'),
+		$texy->toHtml('A "quote **b**" c'),
 	);
 });

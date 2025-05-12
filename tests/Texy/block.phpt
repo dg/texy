@@ -17,6 +17,6 @@ test('nested div blocks', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/block.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/block.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/block.texy')),
 	);
 });

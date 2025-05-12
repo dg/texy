@@ -14,7 +14,7 @@ test('horizontal rule with dashes', function () {
 
 	Assert::match(
 		'<hr>',
-		$texy->process('---'),
+		$texy->toHtml('---'),
 	);
 });
 
@@ -24,6 +24,6 @@ test('horizontal rule with asterisks', function () {
 
 	Assert::match(
 		'<hr>',
-		$texy->process('***'),
+		$texy->toHtml('***'),
 	);
 });

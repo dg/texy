@@ -24,7 +24,7 @@ test('links and images', function () {
 	$texy = createTexy();
 	Assert::matchFile(
 		__DIR__ . '/expected/link-combined.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/link-combined.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/link-combined.texy')),
 	);
 });
 
@@ -35,7 +35,7 @@ test('links and images in safe mode', function () {
 	$texy->htmlPolicy->allowedTags['a'][] = 'rel';
 	Assert::matchFile(
 		__DIR__ . '/expected/link-combined-safe.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/link-combined.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/link-combined.texy')),
 	);
 });
 
@@ -46,6 +46,6 @@ test('links and images with allowed classes', function () {
 	$texy->htmlPolicy->allowedStyles = false;
 	Assert::matchFile(
 		__DIR__ . '/expected/link-combined-classes.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/link-combined.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/link-combined.texy')),
 	);
 });

@@ -73,7 +73,7 @@ test('directive with hyphen in name', function () {
 
 test('unknown directive is preserved in output', function () {
 	$texy = new Texy\Texy;
-	$html = $texy->process('text {{directive}} more');
+	$html = $texy->toHtml('text {{directive}} more');
 	Assert::match(
 		<<<'HTML'
 			<p>text {{directive}} more</p>
@@ -85,7 +85,7 @@ test('unknown directive is preserved in output', function () {
 
 test('texy directive without args is preserved', function () {
 	$texy = new Texy\Texy;
-	$html = $texy->process('text {{ texy }} more');
+	$html = $texy->toHtml('text {{ texy }} more');
 	Assert::match(
 		<<<'HTML'
 			<p>text {{ texy }} more</p>
@@ -97,7 +97,7 @@ test('texy directive without args is preserved', function () {
 
 test('texy directive with args returns empty', function () {
 	$texy = new Texy\Texy;
-	$html = $texy->process('text {{ texy (test) }} more');
+	$html = $texy->toHtml('text {{ texy (test) }} more');
 	// the well-forming engine shrinks multiple spaces to single space
 	Assert::match(
 		<<<'HTML'

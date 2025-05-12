@@ -37,7 +37,7 @@ function show(string $title, ?Closure $configure = null): void
 	if ($configure) {
 		$configure($texy);
 	}
-	$html = $texy->process(file_get_contents(__DIR__ . '/sample.texy'));
+	$html = $texy->toHtml(file_get_contents(__DIR__ . '/sample.texy'));
 
 	// Show the rendered output and its HTML source code
 	echo "<h2>$title</h2>";

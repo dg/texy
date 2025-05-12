@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text): string
 {
 	$texy = new Texy\Texy;
-	return $texy->process($text);
+	return $texy->toHtml($text);
 }
 
 
@@ -157,6 +157,6 @@ test('a disallowed block type stays as text, a language counts as code', functio
 	$texy = new Texy\Texy;
 	$texy->allowedSyntax[Texy\Syntax::BlockHtml] = false;
 	$texy->allowedSyntax[Texy\Syntax::BlockCode] = false;
-	Assert::same('<p>/--html <b>x</b> \--</p>', trim($texy->process("/--html\n<b>x</b>\n\\--")));
-	Assert::same('<p>/--php echo; \--</p>', trim($texy->process("/--php\necho;\n\\--")));
+	Assert::same('<p>/--html <b>x</b> \--</p>', trim($texy->toHtml("/--html\n<b>x</b>\n\\--")));
+	Assert::same('<p>/--php echo; \--</p>', trim($texy->toHtml("/--php\necho;\n\\--")));
 });

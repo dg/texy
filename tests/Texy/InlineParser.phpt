@@ -442,8 +442,8 @@ test('pattern matching empty string is skipped', function () {
 test('a delimiter inside a code span does not consume the pair behind it', function () {
 	// the ** in the code span must not pair with the next **: a pattern returns
 	// non-overlapping matches, so the real pair would never be offered again
-	Assert::contains('<strong>ne</strong>', (new Texy)->process('kod `**` a pak **ne** konec'));
-	Assert::contains('<em>ne</em>', (new Texy)->process('kod `//` a pak //ne// konec'));
+	Assert::contains('<strong>ne</strong>', (new Texy)->toHtml('kod `**` a pak **ne** konec'));
+	Assert::contains('<em>ne</em>', (new Texy)->toHtml('kod `//` a pak //ne// konec'));
 });
 
 

@@ -21,6 +21,6 @@ function createTexy()
 test('html-tags5', function () {
 	Assert::matchFile(
 		__DIR__ . '/expected/html-tags5.html',
-		createTexy()->process(file_get_contents(__DIR__ . '/sources/html-tags5.texy')),
+		createTexy()->toHtml(file_get_contents(__DIR__ . '/sources/html-tags5.texy')),
 	);
 });

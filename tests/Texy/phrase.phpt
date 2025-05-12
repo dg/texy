@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text): string
 {
 	$texy = new Texy\Texy;
-	return $texy->process($text);
+	return $texy->toHtml($text);
 }
 
 
@@ -78,7 +78,7 @@ test('a phrase loses its link when links are disabled', function () {
 	Texy\Configurator::disableLinks($texy);
 	Assert::match(
 		'<p><code>foo</code> and <strong>bar</strong></p>',
-		$texy->process('`foo`:http://a.cz and **bar**:http://b.cz'),
+		$texy->toHtml('`foo`:http://a.cz and **bar**:http://b.cz'),
 	);
 });
 

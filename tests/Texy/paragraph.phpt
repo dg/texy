@@ -16,6 +16,6 @@ test('paragraphs with modifiers', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/paragraph.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/paragraph.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/paragraph.texy')),
 	);
 });
