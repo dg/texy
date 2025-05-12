@@ -15,7 +15,7 @@ test('heading syntax', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/heading.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/heading.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/heading.texy')),
 	);
 });
 
@@ -27,6 +27,6 @@ test('headings with generated IDs', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/heading-toc.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/heading-toc.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/heading-toc.texy')),
 	);
 });

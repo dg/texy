@@ -15,7 +15,7 @@ test('heading surrounded', function () {
 	// With default DYNAMIC balancing, a single heading becomes h1
 	Assert::match(
 		'<h1>Heading</h1>',
-		$texy->process('## Heading'),
+		$texy->toHtml('## Heading'),
 	);
 });
 
@@ -26,7 +26,7 @@ test('heading underlined', function () {
 	// With default DYNAMIC balancing, a single heading becomes h1
 	Assert::match(
 		'<h1>Heading</h1>',
-		$texy->process(<<<'XX'
+		$texy->toHtml(<<<'XX'
 			Heading
 			-------
 			XX),
@@ -38,6 +38,6 @@ test('heading with modifier', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
 		'<h1 class="class">Heading</h1>',
-		$texy->process('## Heading .[class]'),
+		$texy->toHtml('## Heading .[class]'),
 	);
 });

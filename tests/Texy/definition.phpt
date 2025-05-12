@@ -36,6 +36,6 @@ test('image definition creates AST node', function () {
 
 test('definition does not appear in output', function () {
 	$texy = new Texy\Texy;
-	$html = $texy->process("[ref]: https://example.com\n\nParagraph text");
+	$html = $texy->toHtml("[ref]: https://example.com\n\nParagraph text");
 	Assert::same("<p>Paragraph text</p>\n", $html);
 });

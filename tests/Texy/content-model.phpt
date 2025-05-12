@@ -22,7 +22,7 @@ function processHtml(string $html, ?array $allowedTags = null): string
 		$texy->htmlPolicy->allowedTags = $allowedTags;
 	}
 
-	return trim($texy->process($html));
+	return trim($texy->toHtml($html));
 }
 
 
@@ -281,7 +281,7 @@ test('unknown: inherits flow content', function () {
 
 	Assert::same(
 		'<div><x-a><p>T</p></x-a></div>',
-		trim($texy->process('<div><x-a><p>T</p></x-a></div>')),
+		trim($texy->toHtml('<div><x-a><p>T</p></x-a></div>')),
 	);
 });
 
@@ -294,7 +294,7 @@ test('unknown: inherits phrasing content', function () {
 
 	Assert::same(
 		'<p><x-b><strong>B</strong></x-b></p>',
-		trim($texy->process('<p><x-b><strong>B</strong></x-b></p>')),
+		trim($texy->toHtml('<p><x-b><strong>B</strong></x-b></p>')),
 	);
 });
 
@@ -306,7 +306,7 @@ test('unknown: inherits table restrictions', function () {
 	$texy->htmlOutput->lineWrap = 0;
 
 	// x-c inside tr, only td/th allowed, so p is rejected
-	$html = trim($texy->process('<table><tr><x-c><p>T</p></x-c></tr></table>'));
+	$html = trim($texy->toHtml('<table><tr><x-c><p>T</p></x-c></tr></table>'));
 	Assert::contains('<x-c>', $html);
 	Assert::notContains('<p>', $html);
 });
@@ -320,7 +320,7 @@ test('allowedTags: NONE disables all tags', function () {
 	$texy = new Texy;
 	$texy->htmlPolicy->allowedTags = Texy::NONE;
 	$texy->config->typography = false;
-	$html = trim($texy->process('<strong>Bold</strong>'));
+	$html = trim($texy->toHtml('<strong>Bold</strong>'));
 	Assert::notContains('<strong>', $html);
 	Assert::contains('Bold', $html);
 });
@@ -331,7 +331,7 @@ test('allowedTags: selective', function () {
 	$texy->htmlPolicy->allowedTags = ['strong' => Texy::ALL, 'em' => Texy::ALL];
 	$texy->htmlOutput->indent = false;
 
-	$html = trim($texy->process('<strong>A</strong> <b>B</b> <em>C</em>'));
+	$html = trim($texy->toHtml('<strong>A</strong> <b>B</b> <em>C</em>'));
 	Assert::contains('<strong>A</strong>', $html);
 	Assert::contains('<em>C</em>', $html);
 	Assert::notContains('<b>', $html);
@@ -346,7 +346,7 @@ test('allowedTags: ALL enables everything', function () {
 
 	Assert::same(
 		'<x-el>C</x-el>',
-		trim($texy->process('<x-el>C</x-el>')),
+		trim($texy->toHtml('<x-el>C</x-el>')),
 	);
 });
 
@@ -426,7 +426,7 @@ test('allowed: head when added to allowedTags', function () {
 
 	Assert::same(
 		'<head><title>T</title></head>',
-		trim($texy->process('<head><title>T</title></head>')),
+		trim($texy->toHtml('<head><title>T</title></head>')),
 	);
 });
 
@@ -439,6 +439,6 @@ test('allowed: custom element when added', function () {
 
 	Assert::same(
 		'<x-w>C</x-w>',
-		trim($texy->process('<x-w>C</x-w>')),
+		trim($texy->toHtml('<x-w>C</x-w>')),
 	);
 });

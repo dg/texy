@@ -59,7 +59,7 @@ $texy->htmlOutput->addRenderer(
 
 // Process the text
 $text = file_get_contents(__DIR__ . '/sample.texy');
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

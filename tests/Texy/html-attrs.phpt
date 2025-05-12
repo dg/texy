@@ -21,7 +21,7 @@ test('safe mode strips event handlers and styles from hand-written tags', functi
 	foreach ($cases as $source => $forbidden) {
 		$texy = new Texy;
 		Configurator::safeMode($texy);
-		Assert::notContains($forbidden, $texy->process($source), $source);
+		Assert::notContains($forbidden, $texy->toHtml($source), $source);
 	}
 });
 
@@ -29,7 +29,7 @@ test('safe mode strips event handlers and styles from hand-written tags', functi
 test('the tag itself and its allowed attributes survive', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	$html = $texy->process('<a href="https://example.com" title="popis" onclick="alert(1)">klik</a>');
+	$html = $texy->toHtml('<a href="https://example.com" title="popis" onclick="alert(1)">klik</a>');
 
 	Assert::contains('<a href="https://example.com"', $html);
 	Assert::contains('title="popis"', $html);
@@ -41,7 +41,7 @@ test('a custom whitelist names both the tags and their attributes', function () 
 	$texy = new Texy;
 	$texy->htmlPolicy->allowedTags = ['a' => ['href'], 'b' => []];
 
-	$html = $texy->process('<a href="/x" title="t">odkaz</a> <b class="c">tuk</b>');
+	$html = $texy->toHtml('<a href="/x" title="t">odkaz</a> <b class="c">tuk</b>');
 
 	Assert::contains('href="/x"', $html);
 	Assert::notContains('title=', $html);   // 'a' allows href only
@@ -54,5 +54,5 @@ test('Texy::ALL on a tag lets every attribute through', function () {
 	$texy = new Texy;
 	$texy->htmlPolicy->allowedTags = ['b' => Texy::ALL];
 
-	Assert::contains('onmouseover', $texy->process('<b onmouseover="x">tuk</b>'));
+	Assert::contains('onmouseover', $texy->toHtml('<b onmouseover="x">tuk</b>'));
 });

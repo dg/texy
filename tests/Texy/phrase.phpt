@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text): string
 {
 	$texy = new Texy\Texy;
-	return $texy->process($text);
+	return $texy->toHtml($text);
 }
 
 
@@ -78,7 +78,7 @@ test('a phrase loses its link when links are disabled', function () {
 	Texy\Configurator::disableLinks($texy);
 	Assert::match(
 		'<p><code>foo</code> and <strong>bar</strong></p>',
-		$texy->process('`foo`:http://a.cz and **bar**:http://b.cz'),
+		$texy->toHtml('`foo`:http://a.cz and **bar**:http://b.cz'),
 	);
 });
 
@@ -121,7 +121,7 @@ test('the tag of a phrase follows what it means, whatever the notation', functio
 	$texy->htmlOutput->phraseTags[Texy\Nodes\PhraseType::Abbreviation->value] = 'dfn';
 	Assert::same(
 		'<p><i>a</i> <i>b</i> <dfn title="t">NATO</dfn> <dfn title="u">et al.</dfn></p>',
-		trim($texy->process('*a* //b// NATO((t)) "et al."((u))')),
+		trim($texy->toHtml('*a* //b// NATO((t)) "et al."((u))')),
 	);
 
 	$phrases = $texy->parse('*a* //b//')->find(Texy\Nodes\PhraseNode::class);

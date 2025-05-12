@@ -95,7 +95,7 @@ test('integration with Texy processing', function () {
 	// Single heading with DYNAMIC balancing becomes h1
 	Assert::same(
 		"<h1>Title</h1>\n\n<p>Paragraph text.</p>",
-		trim($texy->process("Title\n=====\n\nParagraph text.")),
+		trim($texy->toHtml("Title\n=====\n\nParagraph text.")),
 	);
 });
 

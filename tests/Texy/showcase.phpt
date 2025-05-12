@@ -22,6 +22,6 @@ test('complete syntax showcase', function () {
 
 	Assert::matchFile(
 		__DIR__ . '/expected/showcase.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/showcase.texy')),
+		$texy->toHtml(file_get_contents(__DIR__ . '/sources/showcase.texy')),
 	);
 });

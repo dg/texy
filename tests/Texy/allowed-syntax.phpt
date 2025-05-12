@@ -52,6 +52,6 @@ test('a name stays declared when its pattern is gone', function () {
 	$texy = new Texy;
 	$texy->allowedSyntax[Syntax::Emoticon] = true;
 	$texy->config->emoticons = [];
-	Assert::same("<p>a</p>\n", $texy->process('a'));
+	Assert::same("<p>a</p>\n", $texy->toHtml('a'));
 	Assert::true($texy->allowedSyntax[Syntax::Emoticon]);
 });

@@ -181,7 +181,7 @@ $texy->htmlOutput->addRenderer(
 
 // Process the text
 $text = file_get_contents(__DIR__ . '/syntax.texy');
-$html = $texy->process($text);
+$html = $texy->toHtml($text);
 
 
 // Display the result

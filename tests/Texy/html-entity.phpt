@@ -13,7 +13,7 @@ test('entity references are decoded and re-escaped on output', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p>a &amp; b &lt;c&gt; A\u{A0}B</p>\n",
-		$texy->process('a &amp; b &lt;c&gt; &#65; &#x42;'),
+		$texy->toHtml('a &amp; b &lt;c&gt; &#65; &#x42;'),
 	);
 });
 
@@ -22,7 +22,7 @@ test('unknown or malformed references stay literal', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p>&amp;bogus17; &amp;copy tady &amp; tam</p>\n",
-		$texy->process('&bogus17; &copy tady & tam'),
+		$texy->toHtml('&bogus17; &copy tady & tam'),
 	);
 });
 
@@ -32,7 +32,7 @@ test('disabled syntax leaves entities as plain text', function () {
 	$texy->allowedSyntax[Texy\Syntax::HtmlEntity] = false;
 	Assert::same(
 		"<p>a &amp;amp; b</p>\n",
-		$texy->process('a &amp; b'),
+		$texy->toHtml('a &amp; b'),
 	);
 });
 
@@ -40,9 +40,9 @@ test('disabled syntax leaves entities as plain text', function () {
 test('control characters smuggled in entities are stripped', function () {
 	$texy = new Texy\Texy;
 	// &#12; is the only C0 reference html_entity_decode resolves into the stripped range
-	Assert::same("<p>ab</p>\n", $texy->process('a&#12;b'));
+	Assert::same("<p>ab</p>\n", $texy->toHtml('a&#12;b'));
 	// most control references are not recognized at all and stay literal
-	Assert::same("<p>a&amp;#1;b</p>\n", $texy->process('a&#1;b'));
+	Assert::same("<p>a&amp;#1;b</p>\n", $texy->toHtml('a&#1;b'));
 });
 
 
@@ -50,7 +50,7 @@ test('NUL reference becomes the replacement character', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p>a\u{FFFD}b</p>\n",
-		$texy->process('a&#0;b'),
+		$texy->toHtml('a&#0;b'),
 	);
 });
 
@@ -59,7 +59,7 @@ test('typography pairs quotes across entity boundaries', function () {
 	$texy = new Texy\Texy;
 	Assert::contains(
 		'„slovo“',
-		$texy->process('rekl &quot;slovo&quot; a sel'),
+		$texy->toHtml('rekl &quot;slovo&quot; a sel'),
 	);
 });
 
@@ -68,6 +68,6 @@ test('code content is not touched by the entity syntax', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p><code>&amp;amp;</code></p>\n",
-		$texy->process('`&amp;`'),
+		$texy->toHtml('`&amp;`'),
 	);
 });

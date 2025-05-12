@@ -22,7 +22,7 @@ test('caption becomes <caption>, separator space is not content', function () {
 		. "\t\t</tr>\n"
 		. "\t</tbody>\n"
 		. "</table>\n",
-		$texy->process("|## Caption\n| a | b\n"),
+		$texy->toHtml("|## Caption\n| a | b\n"),
 	);
 });
 
@@ -31,7 +31,7 @@ test('caption content is parsed as inline markup', function () {
 	$texy = new Texy;
 	Assert::contains(
 		'<caption>Caption with <strong>bold</strong></caption>',
-		$texy->process("|## Caption with **bold**\n| a | b\n"),
+		$texy->toHtml("|## Caption with **bold**\n| a | b\n"),
 	);
 });
 
@@ -39,20 +39,20 @@ test('caption content is parsed as inline markup', function () {
 test('= is accepted like #, and closing chars are optional', function () {
 	$texy = new Texy;
 	foreach (["|== Caption\n| a | b\n", "|## Caption ##|\n| a | b\n"] as $source) {
-		Assert::contains('<caption>Caption</caption>', $texy->process($source));
+		Assert::contains('<caption>Caption</caption>', $texy->toHtml($source));
 	}
 });
 
 
 test('table without caption emits no <caption>', function () {
 	$texy = new Texy;
-	Assert::notContains('<caption>', $texy->process("| a | b\n"));
+	Assert::notContains('<caption>', $texy->toHtml("| a | b\n"));
 });
 
 
 test('a caption line alone is not a table', function () {
 	$texy = new Texy;
-	Assert::same("<p>|## Caption</p>\n", $texy->process("|## Caption\n"));
+	Assert::same("<p>|## Caption</p>\n", $texy->toHtml("|## Caption\n"));
 });
 
 

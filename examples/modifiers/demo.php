@@ -39,7 +39,7 @@ $texy->htmlOutput->baseIndent = 1;
 function doIt($texy)
 {
 	$text = file_get_contents(__DIR__ . '/sample.texy');
-	$html = $texy->process($text);
+	$html = $texy->toHtml($text);
 
 	// Show the rendered output
 	echo $html;

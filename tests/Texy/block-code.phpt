@@ -13,7 +13,7 @@ test('code block', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
 		'<pre class="php"><code>echo \'hello\';</code></pre>',
-		$texy->process(<<<'XX'
+		$texy->toHtml(<<<'XX'
 			/--code php
 			echo 'hello';
 			\--
@@ -26,7 +26,7 @@ test('default block is preformatted text', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
 		'<pre>preformatted</pre>',
-		$texy->process(<<<'XX'
+		$texy->toHtml(<<<'XX'
 			/--
 			preformatted
 			\--
@@ -37,7 +37,7 @@ test('default block is preformatted text', function () {
 
 test('comment block', function () {
 	$texy = new Texy\Texy;
-	Assert::same('', trim($texy->process(<<<'XX'
+	Assert::same('', trim($texy->toHtml(<<<'XX'
 		/--comment
 		This is hidden
 		\--

@@ -73,7 +73,7 @@ test('a renderer serves the nodes a list or a table holds', function () {
 		return $previous($node)->addClass('cell');
 	});
 
-	$html = $texy->process("- one\n\nterm:\n  - definition\n\n| a | b");
+	$html = $texy->toHtml("- one\n\nterm:\n  - definition\n\n| a | b");
 	Assert::same(['item', 'term', 'item', 'row', 'cell', 'cell'], $seen);
 	Assert::contains('<dt>term</dt>', $html);
 	Assert::contains('<dd>definition</dd>', $html);
@@ -95,7 +95,7 @@ test('a list rendered by a handler inside an item is no item of the outer list',
 
 	Assert::same(
 		'<dl><dt>term</dt><dd>definition<ul class="custom"><li>nested a</li><li>nested b</li></ul></dd></dl>',
-		$texy->process("term:\n  - definition\n\n    - nested a\n    - nested b\n"),
+		$texy->toHtml("term:\n  - definition\n\n    - nested a\n    - nested b\n"),
 	);
 });
 

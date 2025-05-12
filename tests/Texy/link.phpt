@@ -19,7 +19,7 @@ test('link forceNoFollow', function () {
 	Assert::match(
 		'<p><a href="https://example.com" rel="nofollow">https://example.com</a></p>
 ',
-		$texy->process('https://example.com'),
+		$texy->toHtml('https://example.com'),
 	);
 });
 
@@ -33,7 +33,7 @@ test('link forceNoFollow does not affect relative URLs', function () {
 	Assert::match(
 		'<p><a href="/local/page">test</a></p>
 ',
-		$texy->process('[test]'),
+		$texy->toHtml('[test]'),
 	);
 });
 
@@ -50,7 +50,7 @@ test('url shortening', function () {
 	Assert::match(
 		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/…me/page.html</a></p>
 ',
-		$texy->process('https://example.com/very/long/path/to/some/page.html'),
+		$texy->toHtml('https://example.com/very/long/path/to/some/page.html'),
 	);
 });
 
@@ -62,7 +62,7 @@ test('url shortening disabled', function () {
 	Assert::match(
 		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/very/long/path/to/some/page.html</a></p>
 ',
-		$texy->process('https://example.com/very/long/path/to/some/page.html'),
+		$texy->toHtml('https://example.com/very/long/path/to/some/page.html'),
 	);
 });
 
@@ -73,7 +73,7 @@ test('url shortening short path', function () {
 	Assert::match(
 		'<p><a href="https://example.com/page">https://example.com/page</a></p>
 ',
-		$texy->process('https://example.com/page'),
+		$texy->toHtml('https://example.com/page'),
 	);
 });
 
@@ -84,7 +84,7 @@ test('url shortening with query', function () {
 	Assert::match(
 		'<p><a href="https://example.com/?query=long">https://example.com/?…</a></p>
 ',
-		$texy->process('https://example.com/?query=long'),
+		$texy->toHtml('https://example.com/?query=long'),
 	);
 });
 
@@ -94,23 +94,23 @@ test('url shortening www prefix', function () {
 	Assert::match(
 		'<p><a href="http://www.example.com/page">www.example.com/page</a></p>
 ',
-		$texy->process('www.example.com/page'),
+		$texy->toHtml('www.example.com/page'),
 	);
 });
 
 
 test('entities in link targets are decoded once', function () {
 	$texy = new Texy\Texy;
-	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->process('"x":http://a.cz/?a=1&amp;b=2')));
-	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->process("\"x\":[r]\n\n[r]: http://a.cz/?a=1&amp;b=2")));
-	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">http://a.cz/?…</a></p>', trim($texy->process('http://a.cz/?a=1&amp;b=2')));
-	Assert::same('<p>x <img src="images/a.png?x=1&amp;y=2" alt=""></p>', trim($texy->process('x [* a.png?x=1&amp;y=2 *]')));
+	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->toHtml('"x":http://a.cz/?a=1&amp;b=2')));
+	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->toHtml("\"x\":[r]\n\n[r]: http://a.cz/?a=1&amp;b=2")));
+	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">http://a.cz/?…</a></p>', trim($texy->toHtml('http://a.cz/?a=1&amp;b=2')));
+	Assert::same('<p>x <img src="images/a.png?x=1&amp;y=2" alt=""></p>', trim($texy->toHtml('x [* a.png?x=1&amp;y=2 *]')));
 });
 
 
 test('autolinks right after an HTML tag, an e-mail inside a link is obfuscated text', function () {
 	$texy = new Texy\Texy;
-	Assert::same('<p><b><a href="http://x.cz">http://x.cz</a></b></p>', trim($texy->process('<b>http://x.cz</b>')));
-	Assert::same('<p><b><a href="mailto:c&#64;x.cz">c&#64;<!-- -->x.cz</a></b></p>', trim($texy->process('<b>c@x.cz</b>')));
-	Assert::same('<p><a href="mailto:a&#64;x.cz">a&#64;<!-- -->x.cz</a></p>', trim($texy->process('<a href="mailto:a@x.cz">a@x.cz</a>')));
+	Assert::same('<p><b><a href="http://x.cz">http://x.cz</a></b></p>', trim($texy->toHtml('<b>http://x.cz</b>')));
+	Assert::same('<p><b><a href="mailto:c&#64;x.cz">c&#64;<!-- -->x.cz</a></b></p>', trim($texy->toHtml('<b>c@x.cz</b>')));
+	Assert::same('<p><a href="mailto:a&#64;x.cz">a&#64;<!-- -->x.cz</a></p>', trim($texy->toHtml('<a href="mailto:a@x.cz">a@x.cz</a>')));
 });

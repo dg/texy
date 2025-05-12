@@ -18,7 +18,7 @@ test('image reference is resolved', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
-		$texy->process("[*logo*]\n\n[*logo*]: image.jpg"),
+		$texy->toHtml("[*logo*]\n\n[*logo*]: image.jpg"),
 	);
 });
 
@@ -28,7 +28,7 @@ test('forward image reference is resolved', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
-		$texy->process("[*logo*]: image.jpg\n\n[* logo *]"),
+		$texy->toHtml("[*logo*]: image.jpg\n\n[* logo *]"),
 	);
 });
 
@@ -38,7 +38,7 @@ test('image definition is removed from output', function () {
 	Assert::match(
 		'<p>text</p>
 ',
-		$texy->process("[*logo*]: image.jpg\n\ntext"),
+		$texy->toHtml("[*logo*]: image.jpg\n\ntext"),
 	);
 });
 
@@ -48,7 +48,7 @@ test('undefined image reference shows as direct URL', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/undefined" alt=""></div>
 ',
-		$texy->process('[* undefined *]'),
+		$texy->toHtml('[* undefined *]'),
 	);
 });
 
@@ -58,7 +58,7 @@ test('case insensitive image reference matching', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
-		$texy->process("[* LOGO *]\n\n[*logo*]: image.jpg"),
+		$texy->toHtml("[* LOGO *]\n\n[*logo*]: image.jpg"),
 	);
 });
 
@@ -72,7 +72,7 @@ test('multiple references to same image definition', function () {
 			<div class="figure"><img src="images/image.jpg" alt=""></div>
 
 			XX,
-		$texy->process("[* logo *]\n\n[* logo *]\n\n[*logo*]: image.jpg"),
+		$texy->toHtml("[* logo *]\n\n[* logo *]\n\n[*logo*]: image.jpg"),
 	);
 });
 
@@ -87,7 +87,7 @@ test('image reference inherits dimensions from definition', function () {
 		'<div class="figure"><img src="images/image.jpg" alt="" width="200"
 height="100"></div>
 ',
-		$texy->process("[* logo *]\n\n[*logo*]: image.jpg 200x100"),
+		$texy->toHtml("[* logo *]\n\n[*logo*]: image.jpg 200x100"),
 	);
 });
 
@@ -99,7 +99,7 @@ test('image reference with dimensions in usage overrides definition', function (
 		'<div class="figure"><img src="images/image.jpg" alt="" width="50"
 height="25"></div>
 ',
-		$texy->process("[* logo 50x25 *]\n\n[*logo*]: image.jpg 200x100"),
+		$texy->toHtml("[* logo 50x25 *]\n\n[*logo*]: image.jpg 200x100"),
 	);
 });
 
@@ -113,7 +113,7 @@ test('image reference inherits alt text from definition', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/image.jpg" alt="Default alt"></div>
 ',
-		$texy->process("[* logo *]\n\n[*logo*]: image.jpg .(Default alt)"),
+		$texy->toHtml("[* logo *]\n\n[*logo*]: image.jpg .(Default alt)"),
 	);
 });
 
@@ -123,7 +123,7 @@ test('image reference can override alt text', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/image.jpg" alt="Local alt"></div>
 ',
-		$texy->process("[* logo .(Local alt) *]\n\n[*logo*]: image.jpg .(Default alt)"),
+		$texy->toHtml("[* logo .(Local alt) *]\n\n[*logo*]: image.jpg .(Default alt)"),
 	);
 });
 
@@ -138,7 +138,7 @@ test('image reference with alignment override', function () {
 		'<div class="figure" style="float:right"><img src="images/image.jpg"
 alt=""></div>
 ',
-		$texy->process("[* logo >]\n\n[*logo*]: image.jpg"),
+		$texy->toHtml("[* logo >]\n\n[*logo*]: image.jpg"),
 	);
 });
 
@@ -148,7 +148,7 @@ test('image reference with left alignment', function () {
 	Assert::match(
 		'<div class="figure" style="float:left"><img src="images/image.jpg" alt=""></div>
 ',
-		$texy->process("[* logo <]\n\n[*logo*]: image.jpg"),
+		$texy->toHtml("[* logo <]\n\n[*logo*]: image.jpg"),
 	);
 });
 
@@ -166,7 +166,7 @@ test('figure with image reference', function () {
 			</div>
 
 			XX,
-		$texy->process("[* logo *] *** Caption\n\n[*logo*]: image.jpg"),
+		$texy->toHtml("[* logo *] *** Caption\n\n[*logo*]: image.jpg"),
 	);
 });
 
@@ -180,7 +180,7 @@ test('figure with forward image reference', function () {
 			</div>
 
 			XX,
-		$texy->process("[*logo*]: image.jpg\n\n[* logo *] *** Caption"),
+		$texy->toHtml("[*logo*]: image.jpg\n\n[* logo *] *** Caption"),
 	);
 });
 
@@ -195,7 +195,7 @@ test('figure with image reference and explicit link', function () {
 			</div>
 
 			XX,
-		$texy->process("[* logo *]:https://example.com *** Caption\n\n[*logo*]: image.jpg"),
+		$texy->toHtml("[* logo *]:https://example.com *** Caption\n\n[*logo*]: image.jpg"),
 	);
 });
 
@@ -210,7 +210,7 @@ test('figure with image reference and link reference', function () {
 			</div>
 
 			XX,
-		$texy->process("[* logo *]:[link] *** Caption\n\n[*logo*]: image.jpg\n\n[link]: https://example.com"),
+		$texy->toHtml("[* logo *]:[link] *** Caption\n\n[*logo*]: image.jpg\n\n[link]: https://example.com"),
 	);
 });
 
@@ -225,7 +225,7 @@ test('figure with image reference and image link reference', function () {
 			</div>
 
 			XX,
-		$texy->process("[* thumb *]:[*big*] *** Caption\n\n[*thumb*]: thumb.jpg\n\n[*big*]: big.jpg"),
+		$texy->toHtml("[* thumb *]:[*big*] *** Caption\n\n[*thumb*]: thumb.jpg\n\n[*big*]: big.jpg"),
 	);
 });
 
@@ -244,7 +244,7 @@ test('figure with direct image and link reference', function () {
 			</div>
 
 			XX,
-		$texy->process("[* image.jpg *]:[link] *** Caption\n\n[link]: https://example.com"),
+		$texy->toHtml("[* image.jpg *]:[link] *** Caption\n\n[link]: https://example.com"),
 	);
 });
 
@@ -259,7 +259,7 @@ test('figure with direct image and image link reference', function () {
 			</div>
 
 			XX,
-		$texy->process("[* thumb.jpg *]:[*big*] *** Caption\n\n[*big*]: big.jpg"),
+		$texy->toHtml("[* thumb.jpg *]:[*big*] *** Caption\n\n[*big*]: big.jpg"),
 	);
 });
 
@@ -273,7 +273,7 @@ test('direct image works', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
-		$texy->process('[* image.jpg *]'),
+		$texy->toHtml('[* image.jpg *]'),
 	);
 });
 
@@ -284,7 +284,7 @@ test('direct image with dimensions works', function () {
 		'<div class="figure"><img src="images/image.jpg" alt="" width="100"
 height="50"></div>
 ',
-		$texy->process('[* image.jpg 100x50 *]'),
+		$texy->toHtml('[* image.jpg 100x50 *]'),
 	);
 });
 
@@ -294,7 +294,7 @@ test('direct image with alt text works', function () {
 	Assert::match(
 		'<div class="figure"><img src="images/image.jpg" alt="Alt text"></div>
 ',
-		$texy->process('[* image.jpg .(Alt text) *]'),
+		$texy->toHtml('[* image.jpg .(Alt text) *]'),
 	);
 });
 
@@ -308,7 +308,7 @@ test('direct figure works', function () {
 			</div>
 
 			XX,
-		$texy->process('[* image.jpg *] *** Caption text'),
+		$texy->toHtml('[* image.jpg *] *** Caption text'),
 	);
 });
 
@@ -325,12 +325,12 @@ test('user-defined image definition works', function () {
 		'<div class="figure"><img src="images/logo.png" alt="Company Logo" width="100"
 height="50"></div>
 ',
-		$texy->process('[* logo *]'),
+		$texy->toHtml('[* logo *]'),
 	);
 });
 
 
-test('user-defined image definition persists across process() calls', function () {
+test('user-defined image definition persists across toHtml() calls', function () {
 	$texy = new Texy\Texy;
 	$texy->config->addImageDefinition('logo', 'logo.png');
 
@@ -338,14 +338,14 @@ test('user-defined image definition persists across process() calls', function (
 	Assert::match(
 		'<div class="figure"><img src="images/logo.png" alt=""></div>
 ',
-		$texy->process('[* logo *]'),
+		$texy->toHtml('[* logo *]'),
 	);
 
 	// Second call - definition should still work
 	Assert::match(
 		'<div class="figure"><img src="images/logo.png" alt=""></div>
 ',
-		$texy->process('[* logo *]'),
+		$texy->toHtml('[* logo *]'),
 	);
 });
 
@@ -354,13 +354,13 @@ test('document-defined image reference does NOT leak to the next call', function
 	$texy = new Texy\Texy;
 
 	// First call defines a reference
-	$texy->process("[*logo*]: image.jpg\n\n[* logo *]");
+	$texy->toHtml("[*logo*]: image.jpg\n\n[* logo *]");
 
 	// Second call - reference should NOT be available
 	// Falls back to using "logo" as direct URL
 	Assert::match(
 		'<div class="figure"><img src="images/logo" alt=""></div>',
-		$texy->process('[* logo *]'),
+		$texy->toHtml('[* logo *]'),
 	);
 });
 
@@ -374,6 +374,6 @@ test('user-defined image definition is overwritten by document definition', func
 		'<div class="figure"><img src="images/document-logo.jpg" alt="" width="200"
 height="100"></div>
 ',
-		$texy->process("[* logo *]\n\n[*logo*]: document-logo.jpg 200x100"),
+		$texy->toHtml("[* logo *]\n\n[*logo*]: document-logo.jpg 200x100"),
 	);
 });
