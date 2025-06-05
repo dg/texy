@@ -26,7 +26,10 @@
 		"dg/texy": "*"
 	},
 	"autoload": {
-		"classmap": ["src/"]
+		"classmap": ["src/"],
+		"psr-4": {
+			"Texy\\": "src/Texy"
+		}
 	},
 	"minimum-stability": "dev",
 	"scripts": {
