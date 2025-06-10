@@ -8,7 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
-use Texy\HasModifier;
+use Texy\{HasModifier, Range};
 
 
 /**
@@ -25,6 +25,7 @@ class HeadingNode extends BlockNode implements HasModifier
 		public int $level,
 		public HeadingType $type,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 		/** the underline character or the opening sequence as written, e.g. '-' or '###' */
 		public ?string $marker = null,
 	) {

@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -24,8 +25,9 @@ class HtmlBlockNode extends VerbatimBlockNode
 		/** the code parsed for its HTML tags, comments and entities */
 		public ContentNode $content = new ContentNode,
 		?Texy\Modifier $modifier = null,
+		?Range $range = null,
 	) {
-		parent::__construct($code, $modifier);
+		parent::__construct($code, $modifier, $range);
 	}
 
 

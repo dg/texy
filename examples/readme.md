@@ -100,7 +100,7 @@ $texy->htmlOutput->addRenderer(
 ```php
 $texy = new Texy\Texy;
 $texy->registerLinePattern(
-    $parser,               // fn(ParseContext, array $matches): ?Node
+    $parser,               // fn(ParseContext, array $matches, array $offsets): ?Node
     '#@@(\w+)#',           // regex pattern
     'custom/username',     // syntax name
 );

@@ -8,10 +8,10 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Helpers, Modifier, Node, NodeTraverser, Patterns, Regexp, Syntax, TraverseAction};
+use Texy\{Helpers, Modifier, Node, NodeTraverser, Patterns, Range, Regexp, Syntax, TraverseAction};
 use Texy\Nodes\{ContentNode, DocumentNode, ImageDefinitionNode, ImageNode, LinkNode};
 use Texy\Parsing\ParseContext;
-use function count, in_array, is_array;
+use function count, in_array, is_array, strlen;
 
 
 /**
@@ -69,12 +69,13 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Parses [*image*]: urls .(title)[class]{style}
 	 * @param  array{string, string, string, ?string}  $matches
+	 * @param  array{int, int, int, ?int}  $offsets
 	 */
-	public function parseDefinition(ParseContext $context, array $matches): ImageDefinitionNode
+	public function parseDefinition(ParseContext $context, array $matches, array $offsets): ImageDefinitionNode
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
-		$modifier = Modifier::parse($mMod);
+		$modifier = Modifier::parse($mMod, $offsets[3] ?? null);
 
 		return new ImageDefinitionNode(
 			trim($mRef),
@@ -83,6 +84,7 @@ final class ImageModule extends Texy\Module
 			$parsed['width'],
 			$parsed['height'],
 			$modifier,
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -90,21 +92,28 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Parses [* small.jpg 80x13 .(alternative text)[class]{style}>]:LINK
 	 * @param  array{string, string, ?string, string, ?string}  $matches
+	 * @param  array{int, int, ?int, int, ?int}  $offsets
 	 */
-	public function parseImage(ParseContext $context, array $matches): ImageNode|LinkNode
+	public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode|LinkNode
 	{
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
-		$imageNode = $this->createImage($mURLs, $mMod . $mAlign);
+		$imageNode = $this->createImage($mURLs, $mMod . $mAlign, $offsets);
 		return $mLink
-			? $this->wrapInLink($imageNode, $mLink)
+			? $this->wrapInLink(
+				$imageNode,
+				$mLink,
+				$offsets[0],
+				$offsets[4] ?? throw new \LogicException('Link without group 4.'),
+			)
 			: $imageNode;
 	}
 
 
 	/**
-	 * Creates the image written as [* $mURLs $mMod *].
+	 * Creates the image written as [* $mURLs $mMod *]; the source span is "[* ... <alignment>]".
+	 * @param  array<?int>  $offsets
 	 */
-	private function createImage(string $mURLs, string $mMod): ImageNode
+	private function createImage(string $mURLs, string $mMod, array $offsets): ImageNode
 	{
 		$parsed = $this->parseImageContent($mURLs);
 		$modifier = Modifier::parse($mMod);
@@ -113,6 +122,8 @@ final class ImageModule extends Texy\Module
 			$modifier->hAlign = null;
 		}
 
+		$start = $offsets[0] ?? throw new \LogicException('Match without group 0.');
+		$alignEnd = ($offsets[3] ?? throw new \LogicException('Match without group 3.')) + 1; // the alignment is one character
 		return new ImageNode(
 			$parsed['url'],
 			self::takeAlt($modifier),
@@ -120,6 +131,7 @@ final class ImageModule extends Texy\Module
 			$parsed['height'],
 			$float,
 			$modifier,
+			new Range($start, $alignEnd + 1 - $start), // 1 = "]"
 		);
 	}
 
@@ -140,14 +152,15 @@ final class ImageModule extends Texy\Module
 	}
 
 
-	/** Wraps the image in the link written after it. */
-	private function wrapInLink(ImageNode $imageNode, string $mLink): LinkNode
+	/** Wraps the image written at $offset in the link written after it at $linkOffset. */
+	private function wrapInLink(ImageNode $imageNode, string $mLink, int $offset, int $linkOffset): LinkNode
 	{
 		// ':' links to the image itself; a reference like [ref] or [*img*] is recognized by LinkReferenceModule
 		$isSelf = $mLink === ':';
 		return new LinkNode(
 			url: $isSelf ? $imageNode->url : Helpers::decodeEntities($mLink),
 			content: new ContentNode([$imageNode]),
+			range: new Range($offset, $linkOffset + strlen($mLink) - $offset),
 			isImageLink: $isSelf,
 		);
 	}

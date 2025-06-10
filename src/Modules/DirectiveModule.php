@@ -10,7 +10,8 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\DirectiveNode;
 use Texy\Parsing\ParseContext;
-use Texy\Syntax;
+use Texy\{Range, Syntax};
+use function strlen;
 
 
 /**
@@ -54,7 +55,20 @@ final class DirectiveModule extends Texy\Module
 				)+)
 				}}
 			~Ux',
-			fn(ParseContext $context, array $matches) => trim((string) $matches[1]) === '' ? null : new DirectiveNode((string) $matches[1]),
+			$this->parse(...),
 		);
+	}
+
+
+	/**
+	 * Parses {{macro}}.
+	 * @param  array{string, string}  $matches
+	 * @param  array{int, int}  $offsets
+	 */
+	public function parse(ParseContext $context, array $matches, array $offsets): ?DirectiveNode
+	{
+		return trim($matches[1]) === ''
+			? null
+			: new DirectiveNode($matches[1], new Range($offsets[0], strlen($matches[0])));
 	}
 }

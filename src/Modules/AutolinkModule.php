@@ -10,7 +10,8 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\{EmailNode, UrlNode};
 use Texy\Parsing\ParseContext;
-use Texy\{Patterns, Syntax};
+use Texy\{Patterns, Range, Syntax};
+use function strlen;
 
 
 /**
@@ -45,16 +46,22 @@ final class AutolinkModule extends Texy\Module
 	}
 
 
-	/** @param  array{string}  $matches */
-	public function parseUrl(ParseContext $context, array $matches): UrlNode
+	/**
+	 * @param  array{string}  $matches
+	 * @param  array{int}  $offsets
+	 */
+	public function parseUrl(ParseContext $context, array $matches, array $offsets): UrlNode
 	{
-		return new UrlNode(Texy\Helpers::decodeEntities($matches[0]));
+		return new UrlNode(Texy\Helpers::decodeEntities($matches[0]), new Range($offsets[0], strlen($matches[0])));
 	}
 
 
-	/** @param  array{string}  $matches */
-	public function parseEmail(ParseContext $context, array $matches): EmailNode
+	/**
+	 * @param  array{string}  $matches
+	 * @param  array{int}  $offsets
+	 */
+	public function parseEmail(ParseContext $context, array $matches, array $offsets): EmailNode
 	{
-		return new EmailNode(Texy\Helpers::decodeEntities($matches[0]));
+		return new EmailNode(Texy\Helpers::decodeEntities($matches[0]), new Range($offsets[0], strlen($matches[0])));
 	}
 }

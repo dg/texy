@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -23,7 +24,8 @@ class CodeBlockNode extends VerbatimBlockNode
 		string $code,
 		public ?string $language = null,
 		?Texy\Modifier $modifier = null,
+		?Range $range = null,
 	) {
-		parent::__construct($code, $modifier);
+		parent::__construct($code, $modifier, $range);
 	}
 }
