@@ -7,7 +7,7 @@
 
 namespace Texy\Nodes;
 
-use Texy\Regexp;
+use Texy\{Range, Regexp};
 
 
 /**
@@ -29,6 +29,7 @@ class DirectiveNode extends InlineNode
 	public function __construct(
 		/** the source between the braces */
 		public string $text,
+		public ?Range $range = null,
 	) {
 		$this->name = trim($text);
 		// name (arg, arg, ...) or name: arg, arg

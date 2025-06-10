@@ -31,8 +31,8 @@ function texyWithAlert(): Texy
 {
 	$texy = new Texy;
 	$texy->registerBlockPattern(
-		fn(ParseContext $context, array $matches) => new AlertNode(
-			$context->parseInline($matches[1]),
+		fn(ParseContext $context, array $matches, array $offsets) => new AlertNode(
+			$context->parseInline($matches[1], $offsets[1]),
 		),
 		'~^!!!\ (.+)$~',
 		'custom/alert',

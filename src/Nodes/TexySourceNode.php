@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -24,8 +25,9 @@ class TexySourceNode extends VerbatimBlockNode
 		/** the code parsed as Texy */
 		public ContentNode $content = new ContentNode,
 		?Texy\Modifier $modifier = null,
+		?Range $range = null,
 	) {
-		parent::__construct($code, $modifier);
+		parent::__construct($code, $modifier, $range);
 	}
 
 

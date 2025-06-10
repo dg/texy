@@ -8,7 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
-use Texy\HasModifier;
+use Texy\{HasModifier, Range};
 
 
 /**
@@ -22,6 +22,7 @@ class DefinitionListNode extends BlockNode implements HasModifier
 		/** @var ListItemNode[] */
 		public array $items = [],
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 		(function (ListItemNode ...$items) {})(...$items);
 	}

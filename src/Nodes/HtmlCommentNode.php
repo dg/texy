@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * HTML comment.
@@ -16,6 +18,7 @@ class HtmlCommentNode extends InlineNode
 {
 	public function __construct(
 		public string $text,
+		public ?Range $range = null,
 	) {
 	}
 }

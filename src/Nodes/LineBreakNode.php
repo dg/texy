@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Line break.
@@ -15,4 +17,8 @@ namespace Texy\Nodes;
  */
 class LineBreakNode extends InlineNode
 {
+	public function __construct(
+		public ?Range $range = null,
+	) {
+	}
 }

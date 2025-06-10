@@ -54,7 +54,7 @@ class GapNode extends BlockNode
  */
 function createBlockHandler(string $type): Closure
 {
-	return fn(ParseContext $context, array $matches, string $name): TestBlockNode => new TestBlockNode($type, $matches[0]);
+	return fn(ParseContext $context, array $matches, array $offsets, string $name): TestBlockNode => new TestBlockNode($type, $matches[0]);
 }
 
 
@@ -63,7 +63,7 @@ function createBlockHandler(string $type): Closure
  */
 function createGapHandler(): Closure
 {
-	return fn(ParseContext $context, string $text) => $text !== '' ? [new GapNode($text)] : [];
+	return fn(ParseContext $context, string $text, int $offset) => $text !== '' ? [new GapNode($text)] : [];
 }
 
 
@@ -403,7 +403,7 @@ test('handler receives correct pattern name', function () {
 	parseWithBlockParser([
 		'my/custom-pattern' => [
 			'pattern' => '~^test~m',
-			'handler' => function (ParseContext $context, $matches, $name) use (&$receivedName) {
+			'handler' => function (ParseContext $context, $matches, $offsets, $name) use (&$receivedName) {
 				$receivedName = $name;
 				return new TestBlockNode('test');
 			},
@@ -411,4 +411,50 @@ test('handler receives correct pattern name', function () {
 	], "test\n");
 
 	Assert::same('my/custom-pattern', $receivedName);
+});
+
+
+test('handler receives offsets', function () {
+	$receivedOffsets = null;
+
+	parseWithBlockParser([
+		'test' => [
+			'pattern' => '~^(prefix)(.+)~m',
+			'handler' => function (ParseContext $context, $matches, $offsets) use (&$receivedOffsets) {
+				$receivedOffsets = $offsets;
+				return new TestBlockNode('test');
+			},
+		],
+	], "prefixcontent\n");
+
+	Assert::same(0, $receivedOffsets[0]); // whole match
+	Assert::same(0, $receivedOffsets[1]); // "prefix"
+	Assert::same(6, $receivedOffsets[2]); // "content"
+});
+
+
+// =============================================================================
+// H. Range tracking
+// =============================================================================
+
+
+test('offsets of the handler and of next() are byte-based and shifted by the base offset', function () {
+	$received = [];
+	$blockParser = new BlockParser([
+		'list' => [
+			'pattern' => '~^-[ ](.+)~m',
+			'handler' => function (ParseContext $context, array $matches, array $offsets) use (&$received) {
+				$received[] = $offsets;
+				while ($context->getBlockParser()->next('~^-[ ](.+)~', $m, $o)) {
+					$received[] = $o;
+				}
+				return new TestBlockNode('list');
+			},
+		],
+	], createGapHandler());
+	$context = new ParseContext(createInlineParser(), $blockParser);
+	$blockParser->parse($context, "日本\n- one\n- two\n", baseOffset: 100);
+
+	// "日本\n" is 7 bytes
+	Assert::same([[107, 109], [113, 115]], $received);
 });

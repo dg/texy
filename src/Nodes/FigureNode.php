@@ -7,7 +7,7 @@
 
 namespace Texy\Nodes;
 
-use Texy\{HasModifier, Modifier};
+use Texy\{HasModifier, Modifier, Range};
 
 
 /**
@@ -23,6 +23,7 @@ class FigureNode extends BlockNode implements HasModifier
 		/** @var 'left'|'right'|null  written in the brackets of the image, but the figure floats */
 		public ?string $float = null,
 		public ?Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

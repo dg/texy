@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Link definition.
@@ -17,6 +19,7 @@ class LinkDefinitionNode extends BlockNode
 	public function __construct(
 		public string $reference,
 		public string $url,
+		public ?Range $range = null,
 	) {
 	}
 }

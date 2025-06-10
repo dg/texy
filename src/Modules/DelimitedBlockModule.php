@@ -8,11 +8,12 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Helpers, Syntax};
 use Texy\Nodes\{
 	BlockNode, CodeBlockNode, CommentNode, ContentNode, DivNode, HtmlBlockNode, PreformattedNode, TextBlockNode, TexySourceNode,
 };
-use Texy\Parsing\ParseContext;
+use Texy\Parsing\{OffsetMap, ParseContext};
+use Texy\{Range, Syntax};
+use function strlen;
 
 
 /**
@@ -63,8 +64,9 @@ final class DelimitedBlockModule extends Texy\Module
 	/**
 	 * Parses blocks /--foo
 	 * @param  array{string, string, ?string, string}  $matches
+	 * @param  array{int, int, ?int, int}  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): ?BlockNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?BlockNode
 	{
 		$parts = Texy\Regexp::split($matches[1], '~\s+~', limit: 2);
 		$type = $parts[0];
@@ -73,44 +75,57 @@ final class DelimitedBlockModule extends Texy\Module
 		}
 
 		$param = empty($parts[1]) ? null : $parts[1];
-		$mod = Texy\Modifier::parse($matches[2]);
+		$mod = Texy\Modifier::parse($matches[2], $offsets[2] ?? null);
 		$mContent = $matches[3];
-		$content = Helpers::outdent($mContent);
+		[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]));
+		$range = new Range($offsets[0], strlen($matches[0]));
 
 		switch ($type) {
 			case 'code':
-				return new CodeBlockNode($content, $param, $mod);
+				return new CodeBlockNode($content, $param, $mod, $range);
 
 			case 'pre':
-				return new PreformattedNode($content, $this->parseVerbatim($context, $content), $mod, Syntax::DelimitedPre);
+				return new PreformattedNode(
+					$content,
+					$this->parseVerbatim($context, $content, $map),
+					$mod,
+					$range,
+					Syntax::DelimitedPre,
+				);
 
 			case '':
-				return new PreformattedNode($content, $this->parseVerbatim($context, $content, []), $mod, Syntax::DelimitedBare);
+				$text = $this->parseVerbatim($context, $content, $map, []);
+				return new PreformattedNode($content, $text, $mod, $range, Syntax::DelimitedBare);
 
 			case 'comment':
-				return new CommentNode($content);
+				return new CommentNode($content, $range);
 
 			case 'html':
 			case 'text':
 				// html/text blocks don't use outdent - preserve original indentation
 				$content = trim($mContent, "\n");
+				$map = OffsetMap::fromLines(OffsetMap::linesOf($content, $offsets[3] + strspn($mContent, "\n")));
 				return $type === 'html'
-					? new HtmlBlockNode($content, $this->parseVerbatim($context, $content), $mod)
-					: new TextBlockNode($content, $mod);
+					? new HtmlBlockNode($content, $this->parseVerbatim($context, $content, $map), $mod, $range)
+					: new TextBlockNode($content, $mod, $range);
 
 			case 'div':
-				$content = Helpers::outdent($mContent, firstLine: true);
+				[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]), firstLine: true);
 				if ($content === '') {
 					return null;
 				}
-				return new DivNode($context->parseBlock($content), $mod);
+				$parsed = $context->parseBlock($content);
+				$map->applyTo($parsed);
+				return new DivNode($parsed, $mod, $range);
 
 			case 'texysource':
 				// parsed as Texy, its HTML is displayed as source code
 				if ($content === '') {
 					return null;
 				}
-				return new TexySourceNode($content, $context->parseBlock($content), $mod);
+				$parsed = $context->parseBlock($content);
+				$map->applyTo($parsed);
+				return new TexySourceNode($content, $parsed, $mod, $range);
 
 			default:
 				return null; // an unknown type stays as source text
@@ -126,11 +141,14 @@ final class DelimitedBlockModule extends Texy\Module
 	private function parseVerbatim(
 		ParseContext $context,
 		string $text,
+		OffsetMap $map,
 		array $syntaxes = [Syntax::HtmlTag, Syntax::HtmlComment, Syntax::HtmlEntity],
 	): ContentNode
 	{
-		return $context->getInlineParser()
+		$parsed = $context->getInlineParser()
 			->withPatterns($syntaxes)
 			->parse($context, $text);
+		$map->applyTo($parsed);
+		return $parsed;
 	}
 }

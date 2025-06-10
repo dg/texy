@@ -23,7 +23,7 @@
  * _italic text_      → <i>italic text</i>
  */
 
-use Texy\{Modifier, Syntax};
+use Texy\{Modifier, Range, Syntax};
 use Texy\Nodes\{PhraseNode, PhraseType};
 use Texy\Parsing\ParseContext;
 
@@ -54,16 +54,17 @@ $texy->htmlOutput->phraseTags[PhraseType::Emphasis->value] = 'i';
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks and an optional modifier
 $texy->registerLinePattern(
-	function (ParseContext $context, array $matches): PhraseNode {
+	function (ParseContext $context, array $matches, array $offsets): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
 		// Parse the content recursively (allows nesting like *bold _and italic_ text*)
-		$content = $context->parseInline(trim($mContent));
+		$content = $context->parseInline(trim($mContent), $offsets[1]);
 
 		return new PhraseNode(
 			$content,
 			PhraseType::Strong, // the same phrase as **bold** creates
 			Modifier::parse($mMod),
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
 	'~
@@ -77,15 +78,16 @@ $texy->registerLinePattern(
 
 // Add new syntax: _italic_
 $texy->registerLinePattern(
-	function (ParseContext $context, array $matches): PhraseNode {
+	function (ParseContext $context, array $matches, array $offsets): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
-		$content = $context->parseInline(trim($mContent));
+		$content = $context->parseInline(trim($mContent), $offsets[1]);
 
 		return new PhraseNode(
 			$content,
 			PhraseType::Emphasis,
 			Modifier::parse($mMod),
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
 	'~

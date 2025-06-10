@@ -36,3 +36,18 @@ test('simple table', function () {
 			XX),
 	);
 });
+
+
+test('a | divides cells unless it is escaped or stands inside brackets', function () {
+	$cells = function (string $row): array {
+		$table = new Texy\Texy()->parse($row)->findFirst(Texy\Nodes\TableNode::class);
+		return array_map(fn($cell) => $cell->getPlainText(), $table->rows[0]->cells);
+	};
+
+	Assert::same(['a | b', 'c'], $cells('| a \| b | c |'));
+	Assert::same(['[a|b|c]', 'd'], $cells('| [a|b|c] | d |'));
+	Assert::same(['a [ b', 'c', 'd'], $cells('| a [ b | c | d |'));
+
+	Assert::contains('<td title="a | b">x</td>', new Texy\Texy()->toHtml('| .(a \| b) x | y |'));
+	Assert::contains('<td title="a | b">x</td>', new Texy\Texy()->toHtml('| x .(a \| b) | y |'));
+});

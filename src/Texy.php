@@ -58,13 +58,13 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing, of the language and of the application.
-	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>}
+	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>}
 	 */
 	private array $inlinePatterns = ['language' => [], 'application' => []];
 
 	/**
 	 * Registered regexps and associated handlers for block parsing, of the language and of the application.
-	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>}
+	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>}
 	 */
 	private array $blockPatterns = ['language' => [], 'application' => []];
 
@@ -74,7 +74,7 @@ class Texy
 	/** @var array<string, bool>  name of a syntax with a pattern => is it a block one? */
 	private array $kinds = [];
 
-	/** @var \Closure(ParseContext, string): array<Nodes\BlockNode>  takes the text between block syntaxes */
+	/** @var \Closure(ParseContext, string, int): array<Nodes\BlockNode>  takes the text between block syntaxes */
 	private \Closure $gapHandler;
 
 	/** @var array<string, list<\Closure(Nodes\DocumentNode): void>>  stage name => passes in registration order */
@@ -147,7 +147,7 @@ class Texy
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\InlineNode
+	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
 	 * @throws \LogicException  when the name belongs to a block syntax
 	 */
 	public function addInline(
@@ -163,7 +163,7 @@ class Texy
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\BlockNode
+	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
 	 * @throws \LogicException  when the name belongs to an inline syntax
 	 */
 	public function addBlock(
@@ -188,7 +188,7 @@ class Texy
 	}
 
 
-	/** @param  callable(ParseContext, string): array<Nodes\BlockNode>  $handler */
+	/** @param  callable(ParseContext, string, int): array<Nodes\BlockNode>  $handler */
 	public function setGapHandler(callable $handler): void
 	{
 		$this->gapHandler = $handler(...);
@@ -214,8 +214,10 @@ class Texy
 
 
 	/**
-	 * Parses text to the syntax tree: nothing of its meaning is applied yet (see
-	 * transform()). The text is preprocessed first (idempotent).
+	 * Parses text to the syntax tree: every node records where it is written, and
+	 * nothing of its meaning is applied yet (see transform()). The text is preprocessed
+	 * first (idempotent), so node ranges always refer to the preprocessed form
+	 * obtainable via preprocess().
 	 */
 	public function parse(string $text): Nodes\DocumentNode
 	{
@@ -341,7 +343,7 @@ class Texy
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\InlineNode
+	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
 	 */
 	final public function registerLinePattern(
 		callable $handler,
@@ -357,7 +359,7 @@ class Texy
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, string $name): ?Nodes\BlockNode
+	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
 	 */
 	final public function registerBlockPattern(
 		callable $handler,
@@ -427,7 +429,7 @@ class Texy
 	 * Registers a pass: fn(Nodes\DocumentNode): void, called with the whole document.
 	 * The AST may be freely modified there; return values are ignored. A Transform pass
 	 * (the default) runs in transform(), a Syntax pass already in parse(), where it may
-	 * only finish recognizing the source.
+	 * only finish recognizing the source and keeps ranges exact. Passes of a stage run in registration order.
 	 * @param  callable(Nodes\DocumentNode): void  $pass
 	 */
 	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void

@@ -14,7 +14,7 @@ require __DIR__ . '/../bootstrap.php';
 test('overriding a built-in line syntax survives repeated parsing', function () {
 	$texy = new Texy;
 	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches) => new Nodes\TextNode('CUSTOM-IMAGE'),
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('CUSTOM-IMAGE'),
 		'~\[\*(.+)\*\]~U',
 		Syntax::Image,
 	);
@@ -27,8 +27,8 @@ test('overriding a built-in line syntax survives repeated parsing', function () 
 test('overriding a built-in block syntax survives repeated parsing', function () {
 	$texy = new Texy;
 	$texy->registerBlockPattern(
-		fn(ParseContext $context, array $matches) => new Nodes\ParagraphNode(
-			$context->parseInline('CUSTOM-RULE'),
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\ParagraphNode(
+			$context->parseInline('CUSTOM-RULE', $offsets[0]),
 		),
 		'~^-{4,}$~m',
 		Syntax::HorizontalRule,
@@ -42,12 +42,12 @@ test('overriding a built-in block syntax survives repeated parsing', function ()
 test('the last consumer registration of a name wins', function () {
 	$texy = new Texy;
 	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches) => new Nodes\TextNode('FIRST'),
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('FIRST'),
 		'~@@(.+)@@~U',
 		'custom/foo',
 	);
 	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches) => new Nodes\TextNode('SECOND'),
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('SECOND'),
 		'~@@(.+)@@~U',
 		'custom/foo',
 	);
@@ -59,7 +59,7 @@ test('the last consumer registration of a name wins', function () {
 test('allowed[] still disables a consumer-registered syntax', function () {
 	$texy = new Texy;
 	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches) => new Nodes\TextNode('ACTIVE'),
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('ACTIVE'),
 		'~@@(.+)@@~U',
 		'custom/foo',
 	);
@@ -73,7 +73,7 @@ test('a custom syntax registered after the first parse precedes built-ins on a t
 	$texy = new Texy;
 	$texy->toHtml('**text**');
 	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches) => new Nodes\TextNode('WON'),
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('WON'),
 		'~\*\*(.+)\*\*~U',
 		'custom/strong',
 	);
@@ -85,7 +85,7 @@ test('a custom syntax registered after the first parse precedes built-ins on a t
 test('a custom syntax registered before the first parse precedes built-ins on a tie', function () {
 	$texy = new Texy;
 	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches) => new Nodes\TextNode('WON'),
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('WON'),
 		'~\*\*(.+)\*\*~U',
 		'custom/strong',
 	);

@@ -1,0 +1,18 @@
+Nadpis .[hlava]
+###############
+
+Odstavec textu. .[telo]
+
+- polozka .[item]
+
+> citace .[quote]
+
+***** .[rule]
+
+"span"://x .(titulek)
+
+/--code php .[blok]
+x
+\--
+
+| bunka .[cell] | dve

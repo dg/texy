@@ -8,10 +8,10 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Helpers, Modifier, Patterns, Syntax};
+use Texy\{Helpers, Modifier, Patterns, Range, Syntax};
 use Texy\Nodes\{ContentNode, FigureNode, ImageNode, LinkNode};
 use Texy\Parsing\ParseContext;
-use function in_array, is_array;
+use function in_array, is_array, strlen;
 
 
 /**
@@ -55,8 +55,9 @@ final class FigureModule extends Texy\Module
 	/**
 	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
 	 * @param  array{string, string, ?string, string, ?string, ?string, ?string}  $matches
+	 * @param  array{int, int, ?int, int, ?int, ?int, ?int}  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): FigureNode
+	public function parse(ParseContext $context, array $matches, array $offsets): FigureNode
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 
@@ -77,21 +78,25 @@ final class FigureModule extends Texy\Module
 			$modifier->title = null;
 		}
 
+		// ImageNode source span is "[* ... <alignment>]"
 		$imageNode = new ImageNode(
 			$parsed['url'],
 			is_array($alt) ? implode(' ', $alt) : $alt,
 			$parsed['width'],
 			$parsed['height'],
 			modifier: $modifier,
+			range: new Range($offsets[0], $offsets[3] + strlen($mAlign) + 1 - $offsets[0]), // 1 = "]"
 		);
 
 		// ':' links to the image itself; a reference like [ref] or [*img*] is recognized by LinkReferenceModule
 		$image = $imageNode;
 		if ($mLink) {
+			$linkOffset = $offsets[4] ?? throw new \LogicException('Link without group 4.');
 			$isSelf = $mLink === ':';
 			$image = new LinkNode(
 				url: $isSelf ? $imageNode->url : Helpers::decodeEntities($mLink),
 				content: new ContentNode([$imageNode]),
+				range: new Range($offsets[0], $linkOffset + strlen($mLink) - $offsets[0]),
 				isImageLink: $isSelf,
 			);
 		}
@@ -100,14 +105,15 @@ final class FigureModule extends Texy\Module
 		$caption = null;
 		$mContent = trim($mContent ?? '');
 		if ($mContent !== '') {
-			$caption = $context->parseInline($mContent);
+			$caption = $context->parseInline($mContent, $offsets[5] ?? $offsets[0]);
 		}
 
 		return new FigureNode(
 			$image,
 			$caption,
 			$float,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[6] ?? null),
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 }
