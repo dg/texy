@@ -13,6 +13,9 @@ namespace Texy;
  */
 abstract class Node
 {
+	public ?Range $range = null;
+
+
 	/** @return \Generator<self> */
 	public function &getChildren(): \Generator
 	{

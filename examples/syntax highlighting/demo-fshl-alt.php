@@ -30,6 +30,7 @@
 
 use Texy\Nodes\CodeBlockNode;
 use Texy\Output\Html;
+use Texy\Range;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -86,10 +87,14 @@ $texy->htmlOutput->addRenderer(
 // Register NEW syntax: recognize blocks starting with <?php
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
 $texy->registerBlockPattern(
-	function (Texy\Parsing\ParseContext $context, array $matches): CodeBlockNode {
+	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets): CodeBlockNode {
 		[$content] = $matches;
 
-		return new CodeBlockNode($content, 'php');
+		return new CodeBlockNode(
+			$content,
+			'php',
+			range: new Range($offsets[0], strlen($matches[0])),
+		);
 	},
 	'~^
 		<\?php \n .+? \n \?>
@@ -99,12 +104,13 @@ $texy->registerBlockPattern(
 
 // Register NEW syntax: recognize <script> ... </script> blocks
 $texy->registerBlockPattern(
-	function (Texy\Parsing\ParseContext $context, array $matches): CodeBlockNode {
+	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets): CodeBlockNode {
 		[$content] = $matches;
 
 		return new CodeBlockNode(
 			$content,
 			'html', // HTML lexer handles <script> tags well
+			range: new Range($offsets[0], strlen($matches[0])),
 		);
 	},
 	'~^

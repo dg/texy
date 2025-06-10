@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Modifier, Syntax};
+use Texy\{Modifier, Range, Syntax};
 use Texy\Nodes\{HeadingNode, HeadingType};
 use Texy\Parsing\ParseContext;
 use function strlen;
@@ -179,15 +179,18 @@ final class HeadingModule extends Texy\Module
 	/**
 	 * Parses underlined heading.
 	 * @param  array{string, string, ?string, string}  $matches
+	 * @param  array{int, int, ?int, int}  $offsets
 	 */
-	public function parseUnderline(ParseContext $context, array $matches): HeadingNode
+	public function parseUnderline(ParseContext $context, array $matches, array $offsets): HeadingNode
 	{
 		[, $mContent, $mMod, $mLine] = $matches;
+		$contentOffset = $offsets[1];
 		return new HeadingNode(
-			$context->parseInline(trim($mContent)),
+			$context->parseInline(trim($mContent), $contentOffset),
 			$this->readLevel($mLine, HeadingType::Underlined),
 			HeadingType::Underlined,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[2] ?? null),
+			new Range($offsets[0], strlen($matches[0])),
 			$mLine[0],
 		);
 	}
@@ -196,16 +199,25 @@ final class HeadingModule extends Texy\Module
 	/**
 	 * Parses surrounded heading.
 	 * @param  array{string, string, string, ?string}  $matches
+	 * @param  array{int, int, int, ?int}  $offsets
 	 */
-	public function parseSurround(ParseContext $context, array $matches): HeadingNode
+	public function parseSurround(ParseContext $context, array $matches, array $offsets): HeadingNode
 	{
 		[, $mLine, $mContent, $mMod] = $matches;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
+		$contentOffset = $offsets[2];
+
+		// Adjust offset for leading whitespace removed by trim
+		$trimmed = ltrim($mContent);
+		$leadingSpaces = strlen($mContent) - strlen($trimmed);
+		$contentOffset += $leadingSpaces;
+
 		return new HeadingNode(
-			$context->parseInline(trim($mContent)),
+			$context->parseInline(trim($mContent), $contentOffset),
 			$this->readLevel($mLine, HeadingType::Surrounded),
 			HeadingType::Surrounded,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[3] ?? null),
+			new Range($offsets[0], strlen($matches[0])),
 			$mLine,
 		);
 	}

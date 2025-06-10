@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Helpers, Nodes, Patterns, Syntax};
+use Texy\{Helpers, Nodes, Patterns, Range, Syntax};
 use Texy\Nodes\{DocumentNode, LinkDefinitionNode};
 use Texy\Parsing\ParseContext;
 use function in_array, strlen;
@@ -67,12 +67,15 @@ final class LinkReferenceModule extends Texy\Module
 	/**
 	 * Parses bare [ref]
 	 * @param  array{string, string}  $matches
+	 * @param  array{int, int}  $offsets
 	 */
-	public function parseReference(ParseContext $context, array $matches): Nodes\LinkNode
+	public function parseReference(ParseContext $context, array $matches, array $offsets): Nodes\LinkNode
 	{
 		[, $mRef] = $matches;
+		$range = new Range($offsets[0], strlen($matches[0]));
 		return new Nodes\LinkNode(
-			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef))]),
+			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef), $range)]),
+			range: $range,
 			ref: $mRef,
 		);
 	}
@@ -81,14 +84,19 @@ final class LinkReferenceModule extends Texy\Module
 	/**
 	 * Parses [ref]: url
 	 * @param  array{string, string, string, ?string, ?string}  $matches
+	 * @param  array{int, int, int, ?int, ?int}  $offsets
 	 */
-	public function parseDefinition(ParseContext $context, array $matches): LinkDefinitionNode
+	public function parseDefinition(ParseContext $context, array $matches, array $offsets): LinkDefinitionNode
 	{
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		if ($mMod || $mLabel) {
 			trigger_error('Modifiers and label in link definitions are deprecated.', E_USER_DEPRECATED);
 		}
-		return new LinkDefinitionNode($mRef, Helpers::decodeEntities($mLink));
+		return new LinkDefinitionNode(
+			$mRef,
+			Helpers::decodeEntities($mLink),
+			new Range($offsets[0], strlen($matches[0])),
+		);
 	}
 
 

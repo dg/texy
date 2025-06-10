@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -24,10 +25,11 @@ class PreformattedNode extends VerbatimBlockNode
 		/** the code parsed for its HTML tags and entities, or the code itself for a bare /-- */
 		public ContentNode $content = new ContentNode,
 		?Texy\Modifier $modifier = null,
+		?Range $range = null,
 		/** name of the syntax it is written in, Syntax::BlockPre or Syntax::BlockDefault for a bare /-- */
 		public ?string $syntax = null,
 	) {
-		parent::__construct($code, $modifier);
+		parent::__construct($code, $modifier, $range);
 	}
 
 

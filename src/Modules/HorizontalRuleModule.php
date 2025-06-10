@@ -10,7 +10,8 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\HorizontalRuleNode;
 use Texy\Parsing\ParseContext;
-use Texy\Syntax;
+use Texy\{Range, Syntax};
+use function strlen;
 
 
 /**
@@ -27,10 +28,22 @@ final class HorizontalRuleModule extends Texy\Module
 				[ \t]*                       # optional spaces
 				' . Texy\Patterns::MODIFIER . '? # modifier (2)
 			$~mUx',
-			fn(ParseContext $context, array $matches) => new HorizontalRuleNode(
-				((string) $matches[1])[0],
-				Texy\Modifier::parse($matches[2]),
-			),
+			$this->parse(...),
+		);
+	}
+
+
+	/**
+	 * Parses --- and ***.
+	 * @param  array{string, string, ?string}  $matches
+	 * @param  array{int, int, ?int}  $offsets
+	 */
+	public function parse(ParseContext $context, array $matches, array $offsets): HorizontalRuleNode
+	{
+		return new HorizontalRuleNode(
+			$matches[1][0],
+			Texy\Modifier::parse($matches[2], $offsets[2]),
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 }

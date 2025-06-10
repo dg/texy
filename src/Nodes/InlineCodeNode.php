@@ -8,7 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
-use Texy\HasModifier;
+use Texy\{HasModifier, Range};
 
 
 /**
@@ -20,6 +20,7 @@ class InlineCodeNode extends InlineNode implements HasModifier
 	public function __construct(
 		public string $code,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

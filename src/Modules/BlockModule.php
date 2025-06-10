@@ -8,11 +8,12 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Helpers, Syntax};
 use Texy\Nodes\{
 	BlockNode, CodeBlockNode, CommentNode, ContentNode, DivNode, HtmlBlockNode, PreformattedNode, TextBlockNode, TexySourceNode,
 };
-use Texy\Parsing\ParseContext;
+use Texy\Parsing\{OffsetMap, ParseContext};
+use Texy\{Range, Syntax};
+use function strlen;
 
 
 /**
@@ -59,17 +60,19 @@ final class BlockModule extends Texy\Module
 	/**
 	 * Parses blocks /--foo
 	 * @param  array{string, string, ?string, string}  $matches
+	 * @param  array{int, int, ?int, int}  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): ?BlockNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?BlockNode
 	{
 		[, $mParam, $mMod, $mContent] = $matches;
 
-		$mod = Texy\Modifier::parse($mMod);
+		$mod = Texy\Modifier::parse($mMod, $offsets[2] ?? null);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
 		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];
 
-		$content = Helpers::outdent($mContent);
+		[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]));
+		$range = new Range($offsets[0], strlen($matches[0]));
 
 		// a disallowed type stays as source text
 		if (empty($context->allowedSyntaxes[$blocktype])) {
@@ -77,37 +80,43 @@ final class BlockModule extends Texy\Module
 		}
 
 		if ($blocktype === Syntax::BlockCode) {
-			return new CodeBlockNode($content, $param, $mod);
+			return new CodeBlockNode($content, $param, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockPre) {
-			return new PreformattedNode($content, $this->parseVerbatim($context, $content), $mod, Syntax::BlockPre);
+			return new PreformattedNode($content, $this->parseVerbatim($context, $content, $map), $mod, $range, Syntax::BlockPre);
 
 		} elseif ($blocktype === Syntax::BlockDefault) {
-			return new PreformattedNode($content, $this->parseVerbatim($context, $content, []), $mod, Syntax::BlockDefault);
+			$text = $this->parseVerbatim($context, $content, $map, []);
+			return new PreformattedNode($content, $text, $mod, $range, Syntax::BlockDefault);
 
 		} elseif ($blocktype === Syntax::BlockComment) {
-			return new CommentNode($content);
+			return new CommentNode($content, $range);
 
 		} elseif ($blocktype === Syntax::BlockHtml || $blocktype === Syntax::BlockText) {
 			// html/text blocks don't use outdent - preserve original indentation
 			$content = trim($mContent, "\n");
+			$map = OffsetMap::fromLines(OffsetMap::linesOf($content, $offsets[3] + strspn($mContent, "\n")));
 			return $blocktype === Syntax::BlockHtml
-				? new HtmlBlockNode($content, $this->parseVerbatim($context, $content), $mod)
-				: new TextBlockNode($content, $mod);
+				? new HtmlBlockNode($content, $this->parseVerbatim($context, $content, $map), $mod, $range)
+				: new TextBlockNode($content, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockDiv) {
-			$content = Helpers::outdent($mContent, firstLine: true);
+			[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]), firstLine: true);
 			if ($content === '') {
 				return null;
 			}
-			return new DivNode($context->parseBlock($content), $mod);
+			$parsed = $context->parseBlock($content);
+			$map->applyTo($parsed);
+			return new DivNode($parsed, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockTexySource) {
 			// parsed as Texy, its HTML is displayed as source code
 			if ($content === '') {
 				return null;
 			}
-			return new TexySourceNode($content, $context->parseBlock($content), $mod);
+			$parsed = $context->parseBlock($content);
+			$map->applyTo($parsed);
+			return new TexySourceNode($content, $parsed, $mod, $range);
 		}
 
 		return null;
@@ -122,11 +131,14 @@ final class BlockModule extends Texy\Module
 	private function parseVerbatim(
 		ParseContext $context,
 		string $text,
+		OffsetMap $map,
 		array $syntaxes = [Syntax::HtmlTag, Syntax::HtmlComment, Syntax::HtmlEntity],
 	): ContentNode
 	{
-		return $context->getInlineParser()
+		$parsed = $context->getInlineParser()
 			->withPatterns($syntaxes)
 			->parse($context, $text);
+		$map->applyTo($parsed);
+		return $parsed;
 	}
 }

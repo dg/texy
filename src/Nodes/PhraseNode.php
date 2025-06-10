@@ -7,7 +7,7 @@
 
 namespace Texy\Nodes;
 
-use Texy\{HasModifier, Modifier};
+use Texy\{HasModifier, Modifier, Range};
 
 
 /**
@@ -20,6 +20,7 @@ class PhraseNode extends InlineNode implements HasModifier
 		public ContentNode $content,
 		public string $type,
 		public ?Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 
