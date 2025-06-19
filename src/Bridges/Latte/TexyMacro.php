@@ -11,6 +11,7 @@ namespace Texy\Bridges\Latte;
 
 use Latte;
 use Texy\Texy;
+use function strlen;
 
 
 /**

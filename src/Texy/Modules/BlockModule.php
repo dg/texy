@@ -12,6 +12,8 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Helpers;
 use Texy\HtmlElement;
+use function assert, htmlspecialchars, preg_split, str_replace, trim;
+use const ENT_NOQUOTES;
 
 
 /**
@@ -95,7 +97,7 @@ final class BlockModule extends Texy\Module
 	{
 		$texy = $this->texy;
 		$parser = $invocation->getParser();
-		\assert($parser instanceof Texy\BlockParser);
+		assert($parser instanceof Texy\BlockParser);
 
 		if ($blocktype === 'block/texy') {
 			return $this->blockTexy($s, $texy, $parser);

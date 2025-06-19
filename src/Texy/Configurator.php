@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use function is_array;
+
 
 /**
  * Texy basic configurators.

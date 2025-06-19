@@ -14,6 +14,7 @@ use Texy\HtmlElement;
 use Texy\Modifier;
 use Texy\Patterns;
 use Texy\Regexp;
+use function explode, ltrim, rtrim, str_contains, str_replace, strtr;
 
 
 /**

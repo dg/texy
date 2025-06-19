@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use function is_string, max, strlen, substr, trim, usort;
+
 
 /**
  * Parser for block structures.

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use function array_flip, explode, is_array, preg_match, settype, str_replace, str_starts_with, strlen, strpos, strtolower, substr, trim;
+
 
 /**
  * Modifier processor.

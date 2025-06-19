@@ -14,6 +14,7 @@ use Texy\HandlerInvocation;
 use Texy\LineParser;
 use Texy\Link;
 use Texy\Patterns;
+use function iconv_strlen, iconv_substr, link, preg_match, str_contains, str_replace, strlen, strncasecmp, strpos, substr, trim, urlencode;
 
 
 /**

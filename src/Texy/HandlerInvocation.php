@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use function array_unshift, count, get_class, is_string;
+
 
 /**
  * Around advice handlers.

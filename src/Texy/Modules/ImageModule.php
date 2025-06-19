@@ -13,6 +13,7 @@ use Texy;
 use Texy\Helpers;
 use Texy\Image;
 use Texy\Patterns;
+use function explode, getimagesize, is_file, is_int, min, round, rtrim, str_contains, trim;
 
 
 /**

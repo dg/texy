@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use function max, strlen;
 
 
 /**

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use function array_fill_keys;
+
 $globalAttrs = array_fill_keys([
 	'aria-*',
 	'data-*',

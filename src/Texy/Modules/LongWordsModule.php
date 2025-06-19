@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use function array_flip, array_pop, array_splice, count, end, iconv_strlen, implode, ord, preg_match_all;
 
 
 /**

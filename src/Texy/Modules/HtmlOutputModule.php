@@ -12,6 +12,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\HtmlElement;
 use Texy\Regexp;
+use function array_intersect, array_keys, array_unshift, max, reset, rtrim, str_repeat, str_replace, strtr, wordwrap;
 
 
 /**

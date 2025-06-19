@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use function array_splice, count, http_build_query, implode, is_array, is_object, is_string, str_replace, str_starts_with;
+
 
 /**
  * HTML helper.

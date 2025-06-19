@@ -13,6 +13,8 @@ use Texy;
 use Texy\LineParser;
 use Texy\Modifier;
 use Texy\Patterns;
+use function htmlspecialchars, str_replace, trim;
+use const ENT_NOQUOTES;
 
 
 /**

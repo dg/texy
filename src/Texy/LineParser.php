@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use function array_keys, strlen, substr_replace;
+
 
 /**
  * Parser for single line structures.
