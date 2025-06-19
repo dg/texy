@@ -215,6 +215,7 @@ Rows start with `|`, cells are separated by `|`:
 | Eva  | Nova  | Brno
 ```
 
+- **Caption:** a line `|## Caption text` above the first row becomes `<caption>`. `=` works like `#`, the opening chars may be repeated after the text (`|## Caption ##|`), and the text may contain inline markup.
 - **Header row(s):** separate the head with a dashed line `|---…`.
 - **Row headers:** start the cell with `|*` to produce `<th>`.
 - **Colspan:** end the cell with `||` (empty following cell merges left).
@@ -224,6 +225,7 @@ Rows start with `|`, cells are separated by `|`:
 
 ```texy
 .[data-table]
+|## Price list
 | Name       | .> Price | In stock
 |------------|----------|---------
 | Product A  | $12      | yes
@@ -297,9 +299,11 @@ Each subtype (except `block/texy`) is individually switchable in `$allowed`; the
 
 ## Direct HTML
 
-*(`html/tag`, `html/comment` – HtmlModule)*
+*(`html/tag`, `html/comment`, `html/entity` – HtmlModule)*
 
 HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->allowedTags` and the content model; disallowed tags/attributes are removed, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlModule->passComment` is on.
+
+HTML entity references (`&amp;`, `&#65;`, `&#xA0;`) are decoded into their characters; an unknown reference stays literal text. With `$allowed['html/entity']` off, references are ordinary text and render escaped.
 
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.
@@ -366,6 +370,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `script` | ✅ on | `{{command: args}}` | DirectiveModule |
 | `html/tag` | ✅ on | `<strong>`, `<div class=…>` | HtmlModule |
 | `html/comment` | ✅ on | `<!-- comment -->` | HtmlModule |
+| `html/entity` | ✅ on | `&amp;`, `&#160;` | HtmlModule |
 | `image` | ✅ on | `[* image.jpg *]` | ImageModule |
 | `phrase/strong+em` | ✅ on | `***text***` | PhraseModule |
 | `phrase/strong` | ✅ on | `**text**` | PhraseModule |

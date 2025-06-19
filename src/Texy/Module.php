@@ -13,7 +13,11 @@ namespace Texy;
  */
 abstract class Module
 {
-	public function beforeParse(string &$text): void
+	/**
+	 * Called before each parse; modules refresh their patterns here so that
+	 * configuration changed between parses takes effect.
+	 */
+	public function beforeParse(): void
 	{
 	}
 }

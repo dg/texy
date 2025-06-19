@@ -40,6 +40,49 @@ test('code phrase', function () {
 });
 
 
+test('code phrase with a link', function () {
+	$link = '<p><a href="http://a.cz"><code>foo</code></a></p>';
+	Assert::match($link, process('`foo`:http://a.cz'));
+	Assert::match($link, process('`foo`:[http://a.cz]'));
+	Assert::match($link, process("`foo`:[ref]\n\n[ref]: http://a.cz"));
+	Assert::match('<p>See <a href="http://a.cz"><code>foo</code></a>.</p>', process('See `foo`:http://a.cz.'));
+});
+
+
+test('code phrase with a link keeps its modifier and its literal content', function () {
+	Assert::match(
+		'<p><a href="http://a.cz"><code class="bar">foo</code></a></p>',
+		process('`foo .[bar]`:http://a.cz'),
+	);
+	Assert::match(
+		'<p><a href="http://a.cz"><code>**a** &lt;b&gt;</code></a></p>',
+		process('`**a** <b>`:http://a.cz'),
+	);
+});
+
+
+test('whitespace before the modifier of a code phrase is not its content', function () {
+	Assert::match(
+		'<p><code class="bar">foo</code></p>',
+		process("`foo\t .[bar]`"),
+	);
+	Assert::match(
+		'<p><a href="http://a.cz"><code class="bar">foo</code></a></p>',
+		process("`foo\t .[bar]`:http://a.cz"),
+	);
+});
+
+
+test('a phrase loses its link when links are disabled', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::disableLinks($texy);
+	Assert::match(
+		'<p><code>foo</code> and <strong>bar</strong></p>',
+		$texy->process('`foo`:http://a.cz and **bar**:http://b.cz'),
+	);
+});
+
+
 test('strong+emphasis phrase', function () {
 	Assert::match(
 		'<p><strong><em>bold italic</em></strong></p>',

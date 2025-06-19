@@ -7,146 +7,143 @@
 
 namespace Texy\Parsing;
 
-use Texy\{HtmlElement, Parser, Regexp, Texy};
-use function is_string, strlen;
+use Texy\{Nodes, Regexp};
+use Texy\Nodes\TextNode;
+use function strlen;
 
 
 /**
  * Parses inline structures (links, images, formatting, etc.).
  */
-class InlineParser extends Parser
+class InlineParser
 {
-	public bool $again;
-
-
 	public function __construct(
-		protected Texy $texy,
-		/** @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}> */
 		public array $patterns,
 	) {
 	}
 
 
-	public function parse(string $text): string
+	/** @param \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode $handler */
+	public function addPattern(string $name, string $pattern, \Closure $handler): void
 	{
-		if (!$this->patterns) { // nothing to do
-			return $text;
-		}
-
-		$offset = 0;
-		$names = array_keys($this->patterns);
-		$matches = $offsets = [];
-		foreach ($names as $name) {
-			$offsets[$name] = -1;
-		}
-
-		do {
-			$first = $this->match($text, $offset, $names, $offsets, $matches);
-			if ($first === null) {
-				break;
-			}
-
-			$px = $this->patterns[$first];
-			$offset = $start = $offsets[$first];
-
-			$this->again = false;
-			$res = $px['handler']($this, $matches[$first], $first);
-
-			if ($res instanceof HtmlElement) {
-				$res = $res->toString($this->texy);
-			} elseif ($res === null) {
-				$offsets[$first] = -2;
-				continue;
-			}
-
-			assert(is_string($matches[$first][0]));
-			$len = strlen($matches[$first][0]);
-			$text = substr_replace($text, $res, $start, $len);
-
-			$delta = strlen($res) - $len;
-			foreach ($names as $name) {
-				if ($offsets[$name] < $start + $len) {
-					$offsets[$name] = -1;
-				} else {
-					$offsets[$name] += $delta;
-				}
-			}
-
-			if ($this->again) {
-				$offsets[$first] = -2;
-			} else {
-				$offsets[$first] = -1;
-				$offset += strlen($res);
-			}
-		} while (1);
-
-		return $text;
+		$this->patterns[$name] = [
+			'pattern' => $pattern,
+			'handler' => $handler,
+		];
 	}
 
 
 	/**
-	 * @param  array<int, string>  $names
-	 * @param  array<string, int>  $offsets
-	 * @param  array<string, array<?string>>  $matches
+	 * Returns a clone with only specified patterns.
+	 * @param array<string> $names Pattern names to keep
 	 */
-	private function match(string $text, int $offset, array &$names, array &$offsets, array &$matches): ?string
+	public function withPatterns(array $names): self
 	{
-		$first = null;
-		$minOffset = strlen($text);
+		$clone = clone $this;
+		$clone->patterns = array_intersect_key($this->patterns, array_flip($names));
+		return $clone;
+	}
 
-		foreach ($names as $index => $name) {
-			if ($offsets[$name] < $offset) {
-				$delta = 0;
-				if ($offsets[$name] === -2) {
-					do {
-						$delta++;
-					} while (
-						isset($text[$offset + $delta])
-						&& $text[$offset + $delta] >= "\x80"
-						&& $text[$offset + $delta] < "\xC0"
-					);
-				}
 
-				if ($offset + $delta > strlen($text)) {
-					unset($names[$index]);
-					continue;
-
-				} elseif ($m = Regexp::match(
-					$text,
-					$this->patterns[$name]['pattern'],
-					captureOffset: true,
-					offset: $offset + $delta,
-				)) {
-					/** @var non-empty-array<array{?string, int}> $m */
-					assert(is_string($m[0][0]));
-					if ($m[0][0] === '') {
-						continue;
-					}
-
-					$offsets[$name] = $m[0][1];
-					$matches[$name] = [];
-					foreach ($m as $keyx => $value) {
-						$matches[$name][$keyx] = $value[0];
-					}
-				} else {
-					// try next time?
-					if (
-						!$this->patterns[$name]['again']
-						|| !Regexp::match($text, $this->patterns[$name]['again'], offset: $offset + $delta)
-					) {
-						unset($names[$index]);
-					}
-
-					continue;
-				}
+	/**
+	 * First match of one pattern at or after the offset, in the shape the loop works with.
+	 * @param  array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}  $info
+	 * @return ?array{name: string, offset: int, length: int, match: array<?string>, handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode}
+	 */
+	private function match(string $text, array $info, string $name, int $offset): ?array
+	{
+		while ($offset <= strlen($text)) {
+			$m = Regexp::match($text, $info['pattern'], captureOffset: true, offset: $offset);
+			if ($m === null) {
+				return null;
 			}
 
-			if ($offsets[$name] < $minOffset) {
-				$minOffset = $offsets[$name];
-				$first = $name;
+			// a zero-length match would never move the position forward
+			if ($m[0][0] === null || $m[0][0] === '') {
+				$offset = $m[0][1] + 1;
+				continue;
 			}
+
+			$flatten = [];
+			foreach ($m as $key => $value) {
+				$flatten[$key] = $value[0];
+			}
+
+			return [
+				'name' => $name,
+				'offset' => $m[0][1],
+				'length' => strlen($m[0][0]),
+				'match' => $flatten,
+				'handler' => $info['handler'],
+			];
 		}
 
-		return $first;
+		return null;
+	}
+
+
+	public function parse(ParseContext $context, string $text): Nodes\ContentNode
+	{
+		if ($text === '' || !$this->patterns) {
+			if ($text === '') {
+				return new Nodes\ContentNode;
+			}
+			return new Nodes\ContentNode([new TextNode($text)]);
+		}
+
+		// One candidate per pattern, refreshed as the position moves. Searching every
+		// pattern once up front would lose matches: a pattern returns non-overlapping
+		// matches, so a wrong early one swallows the region where the right one sits.
+		// `**` inside a code span used to pair with the next `**` this way, and the
+		// real pair behind it was never offered.
+		$candidates = [];
+		foreach ($this->patterns as $name => $info) {
+			$candidates[$name] = $this->match($text, $info, $name, 0);
+		}
+
+
+		$res = [];
+		$pos = 0;
+
+		while (true) {
+			$best = null;
+			foreach ($candidates as $name => $m) {
+				if ($m !== null && $m['offset'] < $pos) {
+					$candidates[$name] = $m = $this->match($text, $this->patterns[$name], $name, $pos);
+				}
+				// leftmost wins, longer match on a tie
+				if ($m !== null && ($best === null || [$m['offset'], -$m['length']] < [$best['offset'], -$best['length']])) {
+					$best = $m;
+				}
+			}
+
+			if ($best === null) {
+				break;
+			}
+
+			// Call handler
+			$node = ($best['handler'])($context, $best['match'], $best['name']);
+			if ($node === null) {
+				// Handler rejected - other patterns at this position still get their turn
+				$candidates[$best['name']] = $this->match($text, $this->patterns[$best['name']], $best['name'], $best['offset'] + 1);
+				continue;
+			}
+
+			// Add text before this match (only now - a rejected match must not emit it)
+			if ($best['offset'] > $pos) {
+				$res[] = new TextNode(substr($text, $pos, $best['offset'] - $pos));
+			}
+
+			$res[] = $node;
+			$pos = $best['offset'] + $best['length'];
+		}
+
+		// Add remaining text
+		if ($pos < strlen($text)) {
+			$res[] = new TextNode(substr($text, $pos));
+		}
+
+		return new Nodes\ContentNode($res);
 	}
 }
