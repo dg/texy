@@ -9,16 +9,9 @@ namespace Texy;
 
 
 /**
- * Base class for BlockParser and LineParser.
+ * A node that can carry a modifier.
  */
-class Parser
+interface HasModifier
 {
-	protected Texy $texy;
-	protected HtmlElement $element;
-
-
-	public function getTexy(): Texy
-	{
-		return $this->texy;
-	}
+	function getModifier(): ?Modifier;
 }

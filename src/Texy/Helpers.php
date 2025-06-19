@@ -17,6 +17,10 @@ use const ENT_HTML5, ENT_QUOTES, ICONV_IMPL;
  */
 final class Helpers
 {
+	/** Matches one HTML entity reference; shared by languages that treat `&...;` as an entity. */
+	public const EntityPattern = '&(?:\#[0-9]{1,7}|\#[xX][0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{1,31});';
+
+
 	public function __construct()
 	{
 		throw new \LogicException('Cannot instantiate static class ' . self::class);
@@ -41,8 +45,51 @@ final class Helpers
 
 
 	/**
+	 * Decodes HTML entities into display text; strips control characters
+	 * they may smuggle in (input normalization does the same for raw input).
+	 */
+	public static function decodeEntities(string $s): string
+	{
+		if (!str_contains($s, '&')) {
+			return $s;
+		}
+
+		return self::stripControlChars(self::unescapeHtml($s));
+	}
+
+
+	/**
+	 * Decodes a single reference matched by EntityPattern into display text,
+	 * null when it is not a known entity and should stay literal.
+	 */
+	public static function decodeEntity(string $ref): ?string
+	{
+		$s = self::unescapeHtml($ref);
+		if ($s === $ref) {
+			// html_entity_decode refuses NUL and other control references; per CommonMark
+			// only NUL maps to U+FFFD, the rest stay literal (a deliberate deviation:
+			// the reference implementation decodes them into raw control characters)
+			return preg_match('~^&\#(?:0+|[xX]0+);$~', $ref) ? "\u{FFFD}" : null;
+		}
+
+		return self::stripControlChars($s);
+	}
+
+
+	/**
+	 * Strips control characters that must never occur in AST text (they collide with
+	 * the internal marker bytes); every decoder that can create them must call this.
+	 * \x0D survives - it is the internal hard line break marker.
+	 */
+	public static function stripControlChars(string $s): string
+	{
+		return Regexp::replace($s, '~[\x00-\x08\x0B\x0C\x0E-\x1F]+~');
+	}
+
+
+	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
-	 * which are ignored by HtmlOutputModule routine
+	 * which are ignored by the well-forming engine
 	 */
 	public static function freezeSpaces(string $s): string
 	{
@@ -69,10 +116,10 @@ final class Helpers
 		$s = strtr($s, "\r", "\n"); // Mac
 
 		// remove special chars; leave \t + \n
-		$s = Regexp::replace($s, '~[\x00-\x08\x0B-\x1F]+~', '');
+		$s = Regexp::replace($s, '~[\x00-\x08\x0B-\x1F]+~');
 
 		// right trim
-		$s = Regexp::replace($s, "~[\t ]+$~m", '');
+		$s = Regexp::replace($s, "~[\t ]+$~m");
 
 		// trailing spaces
 		$s = trim($s, "\n");
@@ -137,7 +184,7 @@ final class Helpers
 		}
 
 		if ($min) {
-			$s = Regexp::replace($s, "~^\\ {1,$min}~mx", '');
+			$s = Regexp::replace($s, "~^\\ {1,$min}~mx");
 		}
 
 		return $s;
@@ -214,5 +261,27 @@ final class Helpers
 		}
 
 		return $res;
+	}
+
+
+	/**
+	 * Extracts plain text content from AST node(s).
+	 * @param  Node|iterable<Node>  $node
+	 */
+	public static function extractText(Node|iterable $node): string
+	{
+		// RawTextNode is visible text too - it is the node code-like content is held in,
+		// and it has no children to recurse into
+		if ($node instanceof Nodes\TextNode || $node instanceof Nodes\RawTextNode) {
+			return $node->text;
+		}
+
+		$text = '';
+		$children = $node instanceof Node ? $node->getChildren() : $node;
+		foreach ($children as $child) {
+			$text .= self::extractText($child);
+		}
+
+		return $text;
 	}
 }

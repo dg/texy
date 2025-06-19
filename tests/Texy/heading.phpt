@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('heading syntax', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlOutputModule->lineWrap = 180;
+	$texy->htmlOutput->lineWrap = 180;
 
 	Assert::matchFile(
 		__DIR__ . '/expected/heading.html',
@@ -22,7 +22,7 @@ test('heading syntax', function () {
 
 test('headings with generated IDs', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlOutputModule->lineWrap = 180;
+	$texy->htmlOutput->lineWrap = 180;
 	$texy->headingModule->generateID = true;
 
 	Assert::matchFile(

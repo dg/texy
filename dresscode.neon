@@ -24,26 +24,26 @@ overrides:
 			- deprecations
 
 	- # the public constants and properties of the 3.x API keep their names
-		paths:
-			- src/Texy/Image.php
-			- src/Texy/Link.php
-			- src/Texy/Modules/HeadingModule.php
-			- src/Texy/Patterns.php
-			- src/Texy/Texy.php
+		paths: [src/Texy/Modules/HeadingModule.php, src/Texy/Patterns.php, src/Texy/Texy.php]
 		naming: {constant: keep, property: keep}
 
 	- # renaming the parameters $URL would break calls naming them
-		paths: [src/Texy/Helpers.php, src/Texy/Link.php, src/Texy/Texy.php]
+		paths: [src/Texy/Helpers.php, src/Texy/Texy.php]
 		naming: {variable: keep}
-
-	- # renaming the parameters would break calls naming index: or child:
-		paths: [src/Texy/HtmlElement.php]
-		classes: {overridingMethod: {parameterName: keep}}
 
 	- # the package keeps its own deprecated API working, so it uses it
 		paths:
 			- src/Texy/Modifier.php
+			- src/Texy/Modules/BlockModule.php
+			- src/Texy/Modules/BlockQuoteModule.php
+			- src/Texy/Modules/FigureModule.php
+			- src/Texy/Modules/HeadingModule.php
+			- src/Texy/Modules/HorizontalRuleModule.php
 			- src/Texy/Modules/ImageModule.php
 			- src/Texy/Modules/LinkReferenceModule.php
+			- src/Texy/Modules/ListModule.php
+			- src/Texy/Modules/ParagraphModule.php
+			- src/Texy/Modules/PhraseModule.php
 			- src/Texy/Modules/TableModule.php
+			- src/Texy/Texy.php
 		upgrading: {declarations: {deprecatedMember: keep}}

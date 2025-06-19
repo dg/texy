@@ -47,7 +47,7 @@ When `Texy::process()` receives input text, the following happens (`src/Texy/Tex
 
 2. **Pattern selection.** The registered line and block patterns are filtered by the `$allowed` array. This happens once per `process()` call, so changing `$allowed` during processing has no effect.
 
-3. **Parsing.** A root `HtmlElement` representing the document is created. For a full document, `parseBlock()` creates a `BlockParser` that walks the text and identifies block constructs; text between blocks is handled by `ParagraphModule`, which internally uses `InlineParser` for the inline content. For `processLine()`, only `parseLine()`/`InlineParser` is used. Parsing incrementally builds the DOM tree.
+3. **Parsing.** A root `HtmlElement` representing the document is created. For a full document, `parseBlock()` creates a `BlockParser` that walks the text and identifies block constructs; text between blocks is handled by `ParagraphModule`, which internally uses `InlineParser` for the inline content. For `processLine()`, only the `InlineParser` is used. Parsing incrementally builds the DOM tree.
 
 4. **afterParse.** After parsing completes, `afterParse` notification handlers are invoked with the root element. They can perform final tree adjustments, e.g. `HeadingModule` assigns final heading levels, generates IDs and builds the TOC here.
 

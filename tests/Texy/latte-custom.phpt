@@ -8,10 +8,6 @@ use Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
 
-if (version_compare(Latte\Engine::VERSION, '3', '<')) {
-	Tester\Environment::skip('Test for Latte 3');
-}
-
 $fn = function (string $text, int $heading = 1, string $locale = 'cs'): string {
 	$texy = new Texy\Texy;
 	$texy->headingModule->top = $heading;
