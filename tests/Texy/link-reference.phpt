@@ -158,6 +158,17 @@ test('LinkNode keeps the written reference name after resolution', function () {
 });
 
 
+test('a %s in the target is the link text', function () {
+	$texy = new Texy\Texy;
+	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
+	$texy->config->addLinkDefinition('php', 'https://php.net/%s');
+	Assert::same('<a href="https://php.net/strlen">strlen</a>', $texy->toInlineHtml('"strlen":[php]'));
+	Assert::same('<a href="https://php.net/str+len"><strong>str len</strong></a>', $texy->toInlineHtml('**str len**:[php]'));
+	Assert::same('<a href="http://x.cz/?q=a+b">a b</a>', $texy->toInlineHtml('"a b":http://x.cz/?q=%s'));
+	Assert::same('<a href="https://php.net/%s">php</a>', $texy->toInlineHtml('[php]'));
+});
+
+
 test('a pass rewrites the target of a code phrase like that of any link', function () {
 	$texy = new Texy\Texy;
 	$texy->addHandler(function (Texy\Nodes\DocumentNode $doc) {

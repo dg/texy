@@ -21,6 +21,8 @@ abstract class VerbatimBlockNode extends BlockNode implements HasModifier
 		public string $code,
 		public ?Texy\Modifier $modifier = null,
 		public ?Range $range = null,
+		/** maps offsets in $code to the source, which differs from it by the stripped indentation */
+		public ?Texy\Parsing\OffsetMap $codeMap = null,
 	) {
 	}
 

@@ -49,6 +49,12 @@ function check(Node $node, Range $outer, string $path = '', ?Range $table = null
 		$errors[] = "$path modifier " . format($modifier->range) . ' lies outside ' . format($own);
 	}
 
+	foreach (get_object_vars($node) as $name => $part) {
+		if ($part instanceof Range && $name !== 'range' && !contains($own, $part)) {
+			$errors[] = "$path $name " . format($part) . ' lies outside ' . format($own);
+		}
+	}
+
 	// a cell continued by ^| takes its content from the following rows too
 	$table = $node instanceof Nodes\TableNode ? $range : $table;
 	$inner = $node instanceof Nodes\TableCellNode && $range !== null && $table !== null
@@ -99,15 +105,30 @@ test('test sources', function () {
 });
 
 
+test('the code map of a code block points every line of the code at its source', function () {
+	$src = "- item\n\n  /--code php\n    \$a = 1;\n      \$b = 2;\n  \\--\n\n> /--\n> x\n>   y\n> \\--\n\n/--html\n<b>z</b>\n\\--";
+	$blocks = (new Texy\Texy)->parse($src)->find(Nodes\VerbatimBlockNode::class);
+	Assert::count(3, $blocks);
+
+	foreach ($blocks as $block) {
+		$local = 0;
+		foreach (explode("\n", $block->code) as $line) {
+			Assert::same($line, substr($src, $block->codeMap->toAbsolute($local), strlen($line)));
+			$local += strlen($line) + 1;
+		}
+	}
+});
+
+
 /**
- * Ranges of the node and its subtree, by node.
- * @return SplObjectStorage<object, ?Range>
+ * Ranges of the node and its subtree, the parts of the notation included, by node.
+ * @return SplObjectStorage<object, array<string, ?Range>>
  */
 function collectRanges(Node $node, SplObjectStorage $ranges = new SplObjectStorage): SplObjectStorage
 {
-	$ranges[$node] = $node->range;
+	$ranges[$node] = array_filter(get_object_vars($node), fn($value) => $value instanceof Range) + ['range' => null];
 	if (($modifier = $node instanceof Texy\HasModifier ? $node->getModifier() : null) !== null) {
-		$ranges[$modifier] = $modifier->range;
+		$ranges[$modifier] = ['range' => $modifier->range];
 	}
 	foreach ($node->getChildren() as $child) {
 		collectRanges($child, $ranges);
@@ -128,9 +149,9 @@ test('transform() keeps the range of every node, and a node it creates points at
 		$after = collectRanges($doc);
 
 		foreach ($after as $object) {
-			$range = $after[$object];
+			$range = $after[$object]['range'];
 			if (isset($before[$object])) {
-				Assert::same($before[$object], $range, basename($file));
+				Assert::same($before[$object], $after[$object], basename($file));
 			} elseif ($range !== null) {
 				Assert::true(contains(new Range(0, strlen($src)), $range), basename($file));
 			}
@@ -177,5 +198,41 @@ test('code blocks parsed as markup map their content into the source', function 
 
 	Assert::same('**bold**', $read($doc->findFirst(Nodes\PhraseNode::class)));
 	Assert::same(['<b>', '</b>', '<i>', '</i>'], array_map($read, $doc->find(Nodes\HtmlTagNode::class)));
+	Assert::same([], checkSource($src));
+});
+
+
+test('the code of an inline code is what its range reads', function () {
+	$src = "`foo\t .[bar]`:http://a.cz";
+	$code = (new Texy\Texy)->parse($src)->findFirst(Nodes\InlineCodeNode::class);
+
+	Assert::same('foo', $code->code);
+	Assert::same('foo', substr($src, $code->codeRange->offset, $code->codeRange->length));
+	Assert::same([], checkSource($src));
+});
+
+
+test('a link records the syntax it is written in, its text and its target', function () {
+	$texy = new Texy\Texy;
+	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
+	$src = "- \"quoted\":http://a\n- **strong**:b\n- [wiki | c]\n- [mark](d)\n- word:[e]\n- [ref]\n- see [* img.png *]:f\n- `code .[g]`:h";
+	$read = fn(?Range $range) => $range === null ? null : substr($src, $range->offset, $range->length);
+
+	Assert::same(
+		[
+			[Texy\Syntax::SpanQuotes, 'quoted', 'http://a'],
+			[Texy\Syntax::Strong, 'strong', 'b'],
+			[Texy\Syntax::WikiLink, 'wiki', 'c'],
+			[Texy\Syntax::MarkdownLink, 'mark', 'd'],
+			[Texy\Syntax::QuickLink, 'word', '[e]'],
+			[Texy\Syntax::LinkReference, 'ref', 'ref'],
+			[Texy\Syntax::Image, null, 'f'],
+			[Texy\Syntax::Code, 'code', 'h'],
+		],
+		array_map(
+			fn($link) => [$link->syntax, $read($link->textRange), $read($link->urlRange)],
+			$texy->parse($src)->find(Nodes\LinkNode::class),
+		),
+	);
 	Assert::same([], checkSource($src));
 });

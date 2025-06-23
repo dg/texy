@@ -26,10 +26,11 @@ class PreformattedNode extends VerbatimBlockNode
 		public ContentNode $content = new ContentNode,
 		?Texy\Modifier $modifier = null,
 		?Range $range = null,
+		?Texy\Parsing\OffsetMap $codeMap = null,
 		/** name of the syntax it is written in, Syntax::BlockPre or Syntax::BlockDefault for a bare /-- */
 		public ?string $syntax = null,
 	) {
-		parent::__construct($code, $modifier, $range);
+		parent::__construct($code, $modifier, $range, $codeMap);
 	}
 
 

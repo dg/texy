@@ -80,14 +80,14 @@ final class BlockModule extends Texy\Module
 		}
 
 		if ($blocktype === Syntax::BlockCode) {
-			return new CodeBlockNode($content, $param, $mod, $range);
+			return new CodeBlockNode($content, $param, $mod, $range, $map);
 
 		} elseif ($blocktype === Syntax::BlockPre) {
-			return new PreformattedNode($content, $this->parseVerbatim($context, $content, $map), $mod, $range, Syntax::BlockPre);
+			return new PreformattedNode($content, $this->parseVerbatim($context, $content, $map), $mod, $range, $map, Syntax::BlockPre);
 
 		} elseif ($blocktype === Syntax::BlockDefault) {
 			$text = $this->parseVerbatim($context, $content, $map, []);
-			return new PreformattedNode($content, $text, $mod, $range, Syntax::BlockDefault);
+			return new PreformattedNode($content, $text, $mod, $range, $map, Syntax::BlockDefault);
 
 		} elseif ($blocktype === Syntax::BlockComment) {
 			return new CommentNode($content, $range);
@@ -97,8 +97,8 @@ final class BlockModule extends Texy\Module
 			$content = trim($mContent, "\n");
 			$map = OffsetMap::fromLines(OffsetMap::linesOf($content, $offsets[3] + strspn($mContent, "\n")));
 			return $blocktype === Syntax::BlockHtml
-				? new HtmlBlockNode($content, $this->parseVerbatim($context, $content, $map), $mod, $range)
-				: new TextBlockNode($content, $mod, $range);
+				? new HtmlBlockNode($content, $this->parseVerbatim($context, $content, $map), $mod, $range, $map)
+				: new TextBlockNode($content, $mod, $range, $map);
 
 		} elseif ($blocktype === Syntax::BlockDiv) {
 			[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]), firstLine: true);
@@ -116,7 +116,7 @@ final class BlockModule extends Texy\Module
 			}
 			$parsed = $context->parseBlock($content);
 			$map->applyTo($parsed);
-			return new TexySourceNode($content, $parsed, $mod, $range);
+			return new TexySourceNode($content, $parsed, $mod, $range, $map);
 		}
 
 		return null;

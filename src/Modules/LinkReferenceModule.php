@@ -72,11 +72,14 @@ final class LinkReferenceModule extends Texy\Module
 	public function parseReference(ParseContext $context, array $matches, array $offsets): Nodes\LinkNode
 	{
 		[, $mRef] = $matches;
-		$range = new Range($offsets[0], strlen($matches[0]));
+		$refRange = new Range($offsets[1], strlen($mRef));
 		return new Nodes\LinkNode(
-			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef), $range)]),
-			range: $range,
+			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef), $refRange)]),
+			range: new Range($offsets[0], strlen($matches[0])),
 			ref: $mRef,
+			syntax: Syntax::LinkReference,
+			textRange: $refRange,
+			urlRange: $refRange,
 		);
 	}
 
@@ -146,6 +149,7 @@ final class LinkReferenceModule extends Texy\Module
 
 	/**
 	 * Resolves the URL of a link written as [ref] or [*img*]; a reference not found is used as the URL.
+	 * A %s in the URL stands for the link text, such as "strlen":[php] with php.net/%s.
 	 */
 	private function resolveLinkNodeUrl(Nodes\LinkNode $node): void
 	{
@@ -155,6 +159,10 @@ final class LinkReferenceModule extends Texy\Module
 				return;
 			}
 			$node->url = $this->resolveDefinition($node->ref)->url ?? $node->ref;
+		}
+
+		if ($node->url !== null && $node->syntax !== Syntax::LinkReference && str_contains($node->url, '%s')) {
+			$node->url = str_replace('%s', urlencode(trim($node->content->getPlainText())), $node->url);
 		}
 
 		$this->convertEmailUrl($node);

@@ -104,6 +104,7 @@ final class ImageModule extends Texy\Module
 				$mLink,
 				$offsets[0],
 				$offsets[4] ?? throw new \LogicException('Link without group 4.'),
+				Syntax::Image,
 			)
 			: $imageNode;
 	}
@@ -115,7 +116,7 @@ final class ImageModule extends Texy\Module
 	 */
 	private function createImage(string $mURLs, string $mMod, array $offsets): ImageNode
 	{
-		$parsed = $this->parseImageContent($mURLs);
+		$parsed = $this->parseImageContent($mURLs, $offsets[1]);
 		$modifier = Modifier::parse($mMod);
 		$float = $modifier !== null && in_array($modifier->hAlign, ['left', 'right'], true) ? $modifier->hAlign : null;
 		if ($float !== null) {
@@ -132,6 +133,7 @@ final class ImageModule extends Texy\Module
 			$float,
 			$modifier,
 			new Range($start, $alignEnd + 1 - $start), // 1 = "]"
+			urlRange: $parsed['urlRange'],
 		);
 	}
 
@@ -153,7 +155,7 @@ final class ImageModule extends Texy\Module
 
 
 	/** Wraps the image written at $offset in the link written after it at $linkOffset. */
-	private function wrapInLink(ImageNode $imageNode, string $mLink, int $offset, int $linkOffset): LinkNode
+	private function wrapInLink(ImageNode $imageNode, string $mLink, int $offset, int $linkOffset, string $syntax): LinkNode
 	{
 		// ':' links to the image itself; a reference like [ref] or [*img*] is recognized by LinkReferenceModule
 		$isSelf = $mLink === ':';
@@ -162,18 +164,20 @@ final class ImageModule extends Texy\Module
 			content: new ContentNode([$imageNode]),
 			range: new Range($offset, $linkOffset + strlen($mLink) - $offset),
 			isImageLink: $isSelf,
+			syntax: $syntax,
+			urlRange: new Range($linkOffset, strlen($mLink)),
 		);
 	}
 
 
 	/**
-	 * Parse image content: "image.jpg 100x200"
-	 * @return array{url: string, width: ?int, height: ?int}
+	 * Parse image content: "image.jpg 100x200"; $offset is where the content is written.
+	 * @return array{url: string, width: ?int, height: ?int, urlRange: ?Range}
 	 */
-	public function parseImageContent(string $content): array
+	public function parseImageContent(string $content, ?int $offset = null): array
 	{
 		$parts = explode('|', $content);
-		$main = trim($parts[0]);
+		$main = $written = trim($parts[0]);
 
 		if (count($parts) > 1) {
 			trigger_error(
@@ -188,7 +192,7 @@ final class ImageModule extends Texy\Module
 		// Parse dimensions: "image.jpg 100x200" or "image.jpg 100X200" (asMax)
 		if ($m = Regexp::match($main, '~^(.*)\ (\d+|\?)\ *[xX]\ *(\d+|\?)\ *$~U')) {
 			/** @var array{string, string, string, string} $m */
-			$url = trim($m[1]);
+			$url = $written = trim($m[1]);
 			$width = $m[2] === '?' ? null : (int) $m[2];
 			$height = $m[3] === '?' ? null : (int) $m[3];
 		}
@@ -197,6 +201,7 @@ final class ImageModule extends Texy\Module
 			'url' => $url,
 			'width' => $width,
 			'height' => $height,
+			'urlRange' => $offset === null ? null : new Range($offset + strlen($parts[0]) - strlen(ltrim($parts[0])), strlen($written)),
 		];
 	}
 

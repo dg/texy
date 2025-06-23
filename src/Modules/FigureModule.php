@@ -61,7 +61,7 @@ final class FigureModule extends Texy\Module
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 
-		$parsed = $this->imageModule->parseImageContent($mURLs);
+		$parsed = $this->imageModule->parseImageContent($mURLs, $offsets[1]);
 
 		// the float is written in the brackets of the image, but it is the figure that floats
 		$modifier = Modifier::parse($mImgMod . $mAlign);
@@ -86,6 +86,7 @@ final class FigureModule extends Texy\Module
 			$parsed['height'],
 			modifier: $modifier,
 			range: new Range($offsets[0], $offsets[3] + strlen($mAlign) + 1 - $offsets[0]), // 1 = "]"
+			urlRange: $parsed['urlRange'],
 		);
 
 		// ':' links to the image itself; a reference like [ref] or [*img*] is recognized by LinkReferenceModule
@@ -98,6 +99,8 @@ final class FigureModule extends Texy\Module
 				content: new ContentNode([$imageNode]),
 				range: new Range($offsets[0], $linkOffset + strlen($mLink) - $offsets[0]),
 				isImageLink: $isSelf,
+				syntax: Syntax::Figure,
+				urlRange: new Range($linkOffset, strlen($mLink)),
 			);
 		}
 
