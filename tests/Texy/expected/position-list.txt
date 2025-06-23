@@ -1,33 +1,33 @@
 DocumentNode
   ContentNode
     ListNode [0,24] unordered
-      ListItemNode [0,7]
+      ListItemNode [0,7] bulletRange[0,1] bullet=-
         ContentNode
           ParagraphNode [2,5]
             ContentNode
               TextNode [2,5] "first"
-      ListItemNode [8,8]
+      ListItemNode [8,8] bulletRange[8,1] bullet=-
         ContentNode
           ParagraphNode [10,6]
             ContentNode
               TextNode [10,6] "second"
-      ListItemNode [17,7]
+      ListItemNode [17,7] bulletRange[17,1] bullet=-
         ContentNode
           ParagraphNode [19,5]
             ContentNode
               TextNode [19,5] "third"
     ListNode [26,22] ordered
-      ListItemNode [26,6]
+      ListItemNode [26,6] bulletRange[26,2] bullet=1)
         ContentNode
           ParagraphNode [29,3]
             ContentNode
               TextNode [29,3] "one"
-      ListItemNode [33,6]
+      ListItemNode [33,6] bulletRange[33,2] bullet=2)
         ContentNode
           ParagraphNode [36,3]
             ContentNode
               TextNode [36,3] "two"
-      ListItemNode [40,8]
+      ListItemNode [40,8] bulletRange[40,2] bullet=3)
         ContentNode
           ParagraphNode [43,5]
             ContentNode

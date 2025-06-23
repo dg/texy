@@ -390,6 +390,8 @@ final class PhraseModule extends Texy\Module
 		[, $mContent, $mMod, $mLink] = $matches + [3 => null];
 		$range = new Range($offsets[0], strlen($matches[0]));
 		$contentOffset = $offsets[1];
+		$textRange = self::trimRange($mContent, $contentOffset);
+		$urlRange = $mLink === null ? null : new Range($offsets[3] ?? throw new \LogicException('Link without group 3.'), strlen($mLink));
 
 		// For phrase/span and phrase/span-alt, URL makes it a link
 		if ($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) {
@@ -399,6 +401,9 @@ final class PhraseModule extends Texy\Module
 					content: $context->parseInline(trim($mContent), $contentOffset),
 					modifier: Modifier::parse($mMod, $offsets[2] ?? null),
 					range: $range,
+					syntax: $phrase,
+					textRange: $textRange,
+					urlRange: $urlRange,
 				);
 
 			} elseif ($mMod === null) {
@@ -408,7 +413,7 @@ final class PhraseModule extends Texy\Module
 
 		$mod = Modifier::parse($mMod, $offsets[2] ?? null);
 		$node = $phrase === Syntax::Code
-			? new InlineCodeNode(trim($mContent), $mod, $range) // code content is not parsed recursively
+			? new InlineCodeNode(trim($mContent), $mod, $range, $textRange) // code content is not parsed recursively
 			: new PhraseNode($context->parseInline(trim($mContent), $contentOffset), $phrase, $mod, $range);
 
 		// Other phrases with link
@@ -417,6 +422,9 @@ final class PhraseModule extends Texy\Module
 				url: Texy\Helpers::decodeEntities($mLink),
 				content: new ContentNode([$node]),
 				range: $range,
+				syntax: $phrase,
+				textRange: $textRange,
+				urlRange: $urlRange,
 			);
 		}
 
@@ -479,7 +487,7 @@ final class PhraseModule extends Texy\Module
 	 * @param  array{string, string, ?string, string}  $matches
 	 * @param  array{int, int, ?int, int}  $offsets
 	 */
-	public function parseLink(ParseContext $context, array $matches, array $offsets): LinkNode
+	public function parseLink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
 	{
 		[, $mContent, $mMod, $mLink] = $matches;
 		return new LinkNode(
@@ -487,6 +495,9 @@ final class PhraseModule extends Texy\Module
 			$context->parseInline(trim($mContent), $offsets[1]),
 			null,  // quicklink and markdown links don't support modifiers
 			new Range($offsets[0], strlen($matches[0])),
+			syntax: $name,
+			textRange: self::trimRange($mContent, $offsets[1]),
+			urlRange: self::trimRange($mLink, $offsets[3]),
 		);
 	}
 
@@ -497,7 +508,7 @@ final class PhraseModule extends Texy\Module
 	 * @param  array{string, string, string, ?string}  $matches
 	 * @param  array{int, int, int, ?int}  $offsets
 	 */
-	public function parseWikilink(ParseContext $context, array $matches, array $offsets): LinkNode
+	public function parseWikilink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
 	{
 		[, $mContent, $mLink] = $matches;
 		return new LinkNode(
@@ -505,6 +516,16 @@ final class PhraseModule extends Texy\Module
 			$context->parseInline(trim($mContent), $offsets[1]),
 			null,  // wikilinks don't support modifiers
 			new Range($offsets[0], strlen($matches[0])),
+			syntax: $name,
+			textRange: self::trimRange($mContent, $offsets[1]),
+			urlRange: self::trimRange($mLink, $offsets[2]),
 		);
+	}
+
+
+	/** Range of the text without its surrounding whitespace. */
+	private static function trimRange(string $text, int $offset): Range
+	{
+		return new Range($offset + strlen($text) - strlen(ltrim($text)), strlen(trim($text)));
 	}
 }

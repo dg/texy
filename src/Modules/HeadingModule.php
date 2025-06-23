@@ -192,6 +192,7 @@ final class HeadingModule extends Texy\Module
 			Modifier::parse($mMod, $offsets[2] ?? null),
 			new Range($offsets[0], strlen($matches[0])),
 			$mLine[0],
+			new Range($contentOffset, strlen(rtrim($mContent))),
 		);
 	}
 
@@ -219,6 +220,7 @@ final class HeadingModule extends Texy\Module
 			Modifier::parse($mMod, $offsets[3] ?? null),
 			new Range($offsets[0], strlen($matches[0])),
 			$mLine,
+			new Range($contentOffset, strlen($trimmed)),
 		);
 	}
 }

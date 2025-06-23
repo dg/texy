@@ -29,7 +29,8 @@ class CodeBlockNode extends VerbatimBlockNode
 		public ?string $language = null,
 		?Texy\Modifier $modifier = null,
 		?Range $range = null,
+		?Texy\Parsing\OffsetMap $codeMap = null,
 	) {
-		parent::__construct($code, $modifier, $range);
+		parent::__construct($code, $modifier, $range, $codeMap);
 	}
 }
