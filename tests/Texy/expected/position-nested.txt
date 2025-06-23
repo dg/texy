@@ -17,12 +17,12 @@ DocumentNode
       ListItemNode [50,9]
         ContentNode
           TextNode [50,8] "Def Term"
-      ListItemNode [60,19]
+      ListItemNode [60,19] bulletRange[62,1] bullet=-
         ContentNode
           ParagraphNode [64,15]
             ContentNode
               TextNode [64,15] "description one"
-      ListItemNode [80,19]
+      ListItemNode [80,19] bulletRange[82,1] bullet=-
         ContentNode
           ParagraphNode [84,15]
             ContentNode

@@ -21,6 +21,8 @@ class InlineCodeNode extends InlineNode implements HasModifier
 		public string $code,
 		public ?Texy\Modifier $modifier = null,
 		public ?Range $range = null,
+		/** where the code is written, without the backticks */
+		public ?Range $codeRange = null,
 	) {
 	}
 

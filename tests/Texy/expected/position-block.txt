@@ -6,4 +6,4 @@ DocumentNode
           ContentNode
             TextNode [2,31] "Quote line one Quote line two"
     HorizontalRuleNode [35,3]
-    CodeBlockNode [40,29] lang=php
+    CodeBlockNode [40,29] codeMap@52 lang=php

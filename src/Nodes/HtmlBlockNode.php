@@ -26,8 +26,9 @@ class HtmlBlockNode extends VerbatimBlockNode
 		public ContentNode $content = new ContentNode,
 		?Texy\Modifier $modifier = null,
 		?Range $range = null,
+		?Texy\Parsing\OffsetMap $codeMap = null,
 	) {
-		parent::__construct($code, $modifier, $range);
+		parent::__construct($code, $modifier, $range, $codeMap);
 	}
 
 

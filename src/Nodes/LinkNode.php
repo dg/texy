@@ -27,6 +27,11 @@ class LinkNode extends InlineNode implements HasModifier
 		public bool $isImageLink = false,
 		/** Original reference name for links written as [ref]; survives resolution */
 		public ?string $ref = null,
+		/** name of the syntax the link is written in, e.g. Syntax::WikiLink */
+		public ?string $syntax = null,
+		public ?Range $textRange = null,
+		/** where the target is written; for [ref] the same as $textRange */
+		public ?Range $urlRange = null,
 	) {
 	}
 

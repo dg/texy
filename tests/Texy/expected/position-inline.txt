@@ -21,7 +21,7 @@ DocumentNode
     ParagraphNode [63,25]
       ContentNode
         TextNode [63,6] "Code: "
-        InlineCodeNode [69,13] "inline code"
+        InlineCodeNode [69,13] codeRange[70,11] "inline code"
         TextNode [82,6] " here."
     ParagraphNode [90,32]
       ContentNode
