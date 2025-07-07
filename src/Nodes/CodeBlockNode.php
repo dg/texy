@@ -17,6 +17,10 @@ use Texy\Range;
  * /--code language
  * Code
  * \--
+ *
+ * ```language
+ * Code
+ * ```
  */
 class CodeBlockNode extends VerbatimBlockNode
 {

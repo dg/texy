@@ -44,6 +44,9 @@ final class Syntax
 	/** Division wrapper (`/--div`) */
 	public const BlockDiv = 'block/div';
 
+	/** Fenced code block (```` ```language ````) */
+	public const CodeFenced = 'block/fenced';
+
 	// Block elements - structures
 
 	/** Block quote (`> text`) */
