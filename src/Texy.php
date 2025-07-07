@@ -118,6 +118,7 @@ class Texy
 			new Modules\ParagraphModule($this->config, $this->htmlPolicy),
 			new Modules\DelimitedBlockModule,
 			new Modules\FigureModule($image),
+			new Modules\FencedCodeModule,
 			new Modules\HorizontalRuleModule,
 			new Modules\BlockQuoteModule,
 			new Modules\TableModule,

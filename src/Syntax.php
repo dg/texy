@@ -46,6 +46,9 @@ final class Syntax
 
 	// Block elements - structures
 
+	/** Fenced code block (```` ```language ````) */
+	public const FencedCode = 'fenced-code';
+
 	/** Block quote (`> text`) */
 	public const BlockQuote = 'blockquote';
 

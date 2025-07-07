@@ -297,6 +297,14 @@ Displayed literally, both Texy and HTML markup escaped.
 
 Each subtype (except `block/texy`) is individually switchable in `$allowedSyntax`; the whole feature via `blocks`.
 
+**Markdown-style fenced code blocks** *(`fenced-code`)* are also supported: three or more backticks, optionally followed by a language (the first word of the info string), closed by a fence of at least the same length. Content is verbatim; a longer fence can embed shorter backtick runs.
+
+````texy
+```php
+echo 'Hello';
+```
+````
+
 ## Direct HTML
 
 *(`html/tag`, `html/comment`, `html/entity` – HtmlModule)*
@@ -415,6 +423,7 @@ Every syntax lists its ID (the key in `$texy->allowedSyntax`), its default state
 | `block/div` | ✅ on | subtype `/--div` | DelimitedBlockModule |
 | `block/pre` | ✅ on | subtype `/--pre` | DelimitedBlockModule |
 | `block/default` | ✅ on | plain `/--` block | DelimitedBlockModule |
+| `fenced-code` | ✅ on | ```` ```language ```` | FencedCodeModule |
 | `figure` | ✅ on | `[* img.jpg *] *** caption` | FigureModule |
 | `horizline` | ✅ on | `---` or `***` on its own line | HorizontalRuleModule |
 | `blockquote` | ✅ on | `> quoted text` | BlockQuoteModule |
