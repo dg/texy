@@ -28,7 +28,7 @@ final class HtmlPolicy
 
 
 	public function __construct(
-		private Texy $texy,
+		public readonly UrlPolicy $urlPolicy,
 	) {
 		$this->allowedTags = Schema::defaultAllowedTags(); // accept all valid HTML tags and attributes by default
 	}
@@ -70,7 +70,7 @@ final class HtmlPolicy
 			}
 			// Validate href URL scheme (security: filter javascript: etc.)
 			if (isset($attrs['href']) && is_string($attrs['href'])) {
-				if (!$this->texy->checkURL($attrs['href'], Texy::FILTER_ANCHOR)) {
+				if (!$this->urlPolicy->isLinkAllowed($attrs['href'])) {
 					return false;
 				}
 			}
@@ -82,7 +82,7 @@ final class HtmlPolicy
 				return false;
 			}
 			// Validate src URL scheme
-			if (is_string($attrs['src']) && !$this->texy->checkURL($attrs['src'], Texy::FILTER_IMAGE)) {
+			if (is_string($attrs['src']) && !$this->urlPolicy->isImageAllowed($attrs['src'])) {
 				return false;
 			}
 		}
@@ -122,7 +122,7 @@ final class HtmlPolicy
 
 
 	/**
-	 * A URL attribute survives only if checkURL() accepts it. This holds regardless of
+	 * A URL attribute survives only if UrlPolicy accepts it. This holds regardless of
 	 * the whitelist - "javascript:" must not get through even on a permissive policy.
 	 * @template T
 	 * @param  array<string, T>  $attrs
@@ -136,7 +136,9 @@ final class HtmlPolicy
 				continue;
 			}
 
-			$allowed = $this->texy->checkURL($value, $kind === Schema::UrlImage ? Texy::FILTER_IMAGE : Texy::FILTER_ANCHOR);
+			$allowed = $kind === Schema::UrlImage
+				? $this->urlPolicy->isImageAllowed($value)
+				: $this->urlPolicy->isLinkAllowed($value);
 			if (!$allowed) {
 				unset($attrs[$name]);
 			}
