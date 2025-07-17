@@ -7,7 +7,7 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{HtmlPolicy, Modifier, Texy};
+use Texy\{HtmlPolicy, Modifier, UrlPolicy};
 use function is_array, is_string;
 
 
@@ -30,7 +30,7 @@ final class ElementDecorator
 
 	public function __construct(
 		private HtmlPolicy $policy,
-		private Texy $texy,
+		private UrlPolicy $urlPolicy,
 		private Config $config,
 		private Renderer $renderer,
 	) {
@@ -68,7 +68,7 @@ final class ElementDecorator
 
 
 	/**
-	 * A URL attribute survives only if checkURL() accepts it. This runs regardless of
+	 * A URL attribute survives only if UrlPolicy accepts it. This runs regardless of
 	 * the whitelist - "javascript:" must not get through even on a permissive policy.
 	 * @param  array<string, mixed>  $attrs
 	 * @return array<string, mixed>
@@ -81,7 +81,9 @@ final class ElementDecorator
 				continue;
 			}
 
-			$allowed = $this->texy->checkURL($value, $kind === Schema::UrlImage ? Texy::FILTER_IMAGE : Texy::FILTER_ANCHOR);
+			$allowed = $kind === Schema::UrlImage
+				? $this->urlPolicy->isImageAllowed($value)
+				: $this->urlPolicy->isLinkAllowed($value);
 			if (!$allowed) {
 				unset($attrs[$name]);
 			}

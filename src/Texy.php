@@ -30,11 +30,6 @@ class Texy implements Parsing\Registry
 		ALL = true,
 		NONE = false;
 
-	// url filters
-	public const
-		FILTER_ANCHOR = 'anchor',
-		FILTER_IMAGE = 'image';
-
 	/** @var array<string, bool>  syntax name => enabled */
 	public array $allowedSyntax = [];
 
@@ -53,8 +48,8 @@ class Texy implements Parsing\Registry
 	/** @deprecated */
 	public bool $removeSoftHyphens = true;
 
-	/** @var array<string, string>  regexps checking URL schemes, keyed by FILTER_ANCHOR and FILTER_IMAGE */
-	public array $urlSchemeFilters = [];
+	/** URL scheme security policy for links and images */
+	public readonly UrlPolicy $urlPolicy;
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing, of the language and of the application.
@@ -90,7 +85,8 @@ class Texy implements Parsing\Registry
 	public function __construct()
 	{
 		$this->config = new TexyConfig;
-		$this->htmlPolicy = new HtmlPolicy($this);
+		$this->urlPolicy = new UrlPolicy;
+		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->createModules();
 		$this->registerModules();
@@ -100,7 +96,7 @@ class Texy implements Parsing\Registry
 	private function createModules(): void
 	{
 		$directive = new Modules\DirectiveModule;
-		$image = new Modules\ImageModule($this->config);
+		$image = new Modules\ImageModule($this->config, $this->urlPolicy);
 		$link = new Modules\LinkReferenceModule($this->config, $image);
 		$heading = new Modules\HeadingModule($this->config);
 
@@ -284,7 +280,8 @@ class Texy implements Parsing\Registry
 
 
 	/**
-	 * Creates an HTML renderer wired to the current configuration.
+	 * Creates an HTML renderer wired to the current configuration. The renderer
+	 * needs no live Texy instance and is reusable across documents.
 	 */
 	public function createHtmlRenderer(): Output\Html\Renderer
 	{
@@ -298,7 +295,7 @@ class Texy implements Parsing\Registry
 		return new Output\Html\Renderer(
 			$this->htmlOutput,
 			$this->htmlPolicy,
-			$this,
+			$this->urlPolicy,
 			$typography,
 			[...array_filter([$typography, $hyphenation]), ...array_values($postHandlers)],
 		);
@@ -426,19 +423,6 @@ class Texy implements Parsing\Registry
 	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
 	{
 		$this->passes[$stage->name][] = $pass(...);
-	}
-
-
-	/**
-	 * Filters bad URLs: a URL with a scheme must match the filter of its type; relative URLs always pass.
-	 * @param  string  $type  Texy::FILTER_ANCHOR | Texy::FILTER_IMAGE
-	 */
-	final public function checkURL(string $url, string $type): bool
-	{
-		$url = str_replace(["\t", "\n", "\r"], '', $url); // a browser drops them from a URL before reading its scheme
-		return empty($this->urlSchemeFilters[$type])
-			|| !Regexp::match($url, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // no scheme (relative URL)
-			|| (bool) Regexp::match($url, $this->urlSchemeFilters[$type]);
 	}
 
 

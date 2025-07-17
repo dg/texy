@@ -25,6 +25,7 @@ final class ImageModule extends Texy\Module
 
 	public function __construct(
 		private Texy\TexyConfig $config,
+		private Texy\UrlPolicy $urlPolicy,
 	) {
 	}
 
@@ -94,10 +95,14 @@ final class ImageModule extends Texy\Module
 	 * @param  array{string, string, ?string, string, ?string}  $matches
 	 * @param  array{int, int, ?int, int, ?int}  $offsets
 	 */
-	public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode|LinkNode
+	public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode|LinkNode|null
 	{
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		$imageNode = $this->createImage($mURLs, $mMod . $mAlign, $offsets);
+		if ($imageNode === null) {
+			return null;
+		}
+
 		return $mLink
 			? $this->wrapInLink(
 				$imageNode,
@@ -114,9 +119,13 @@ final class ImageModule extends Texy\Module
 	 * Creates the image written as [* $mURLs $mMod *]; the source span is "[* ... <alignment>]".
 	 * @param  array<?int>  $offsets
 	 */
-	private function createImage(string $mURLs, string $mMod, array $offsets): ImageNode
+	private function createImage(string $mURLs, string $mMod, array $offsets): ?ImageNode
 	{
 		$parsed = $this->parseImageContent($mURLs, $offsets[1]);
+		if ($parsed['url'] === null) {
+			return null;
+		}
+
 		$modifier = Modifier::parse($mMod);
 		$float = $modifier !== null && in_array($modifier->hAlign, ['left', 'right'], true) ? $modifier->hAlign : null;
 		if ($float !== null) {
@@ -172,7 +181,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Parse image content: "image.jpg 100x200"; $offset is where the content is written.
-	 * @return array{url: string, width: ?int, height: ?int, urlRange: ?Range}
+	 * @return array{url: ?string, width: ?int, height: ?int, urlRange: ?Range}
 	 */
 	public function parseImageContent(string $content, ?int $offset = null): array
 	{
@@ -197,6 +206,11 @@ final class ImageModule extends Texy\Module
 			$height = $m[3] === '?' ? null : (int) $m[3];
 		}
 
+		// Check URL
+		if (!$this->urlPolicy->isImageAllowed($url)) {
+			$url = null;
+		}
+
 		return [
 			'url' => $url,
 			'width' => $width,
@@ -214,8 +228,8 @@ final class ImageModule extends Texy\Module
 		// Start with the definitions of the application
 		$this->definitions = $this->config->imageDefinitions;
 
-		// Pass 1: Collect document definitions (overwrites user-defined)
-		foreach ($doc->find(ImageDefinitionNode::class) as $node) {
+		// Pass 1: Collect document definitions (overwrites user-defined), one with a rejected URL defines nothing
+		foreach ($doc->find(ImageDefinitionNode::class, fn($node) => $node->url !== null) as $node) {
 			$this->definitions[Helpers::toLower($node->reference)] = $node;
 		}
 

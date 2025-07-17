@@ -57,11 +57,14 @@ final class FigureModule extends Texy\Module
 	 * @param  array{string, string, ?string, string, ?string, ?string, ?string}  $matches
 	 * @param  array{int, int, ?int, int, ?int, ?int, ?int}  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches, array $offsets): FigureNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?FigureNode
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 
 		$parsed = $this->imageModule->parseImageContent($mURLs, $offsets[1]);
+		if ($parsed['url'] === null) {
+			return null;
+		}
 
 		// the float is written in the brackets of the image, but it is the figure that floats
 		$modifier = Modifier::parse($mImgMod . $mAlign);
