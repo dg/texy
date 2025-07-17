@@ -52,17 +52,26 @@ class Configurator
 	 */
 	public static function safeMode(Texy $texy): void
 	{
-		$texy->htmlPolicy->allowedClasses = Texy::NONE; // no class or ID are allowed
-		$texy->htmlPolicy->allowedStyles = Texy::NONE; // style modifiers are disabled
-		// only some "safe" HTML tags and attributes are allowed; the '*' list names
-		// attributes acceptable on any element and is the only source for modifiers
-		$texy->htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];
-		$texy->urlSchemeFilters[$texy::FILTER_ANCHOR] = '~https?:|ftp:|mailto:~A';
-		$texy->urlSchemeFilters[$texy::FILTER_IMAGE] = '~https?:~A';
+		self::restrictPolicies($texy->htmlPolicy, $texy->htmlOutput);
 		$texy->allowedSyntax[Syntax::Image] = false; // disable images
 		$texy->allowedSyntax[Syntax::LinkDefinition] = false; // disable [ref]: URL reference definitions
 		$texy->allowedSyntax[Syntax::HtmlComment] = false; // disable HTML comments
-		$texy->htmlOutput->linkNoFollow = true; // force rel="nofollow"
+	}
+
+
+	/**
+	 * The restrictions of safe mode that do not depend on the language.
+	 */
+	public static function restrictPolicies(HtmlPolicy $htmlPolicy, Output\Html\Config $htmlOutput): void
+	{
+		$htmlPolicy->allowedClasses = Texy::NONE; // no class or ID are allowed
+		$htmlPolicy->allowedStyles = Texy::NONE; // style modifiers are disabled
+		// only some "safe" HTML tags and attributes are allowed; the '*' list names
+		// attributes acceptable on any element and is the only source for modifiers
+		$htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];
+		$htmlPolicy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
+		$htmlPolicy->urlPolicy->imagePattern = '~https?:~A';
+		$htmlOutput->linkNoFollow = true; // force rel="nofollow"
 	}
 
 

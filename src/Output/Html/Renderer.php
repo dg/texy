@@ -7,7 +7,7 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, Texy};
+use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, UrlPolicy};
 use Texy\Output\NodeRenderer;
 use function count, is_array, is_string;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
@@ -45,7 +45,7 @@ final class Renderer extends NodeRenderer
 	public function __construct(
 		public readonly Config $config,
 		private HtmlPolicy $htmlPolicy,
-		private Texy $texy,
+		private UrlPolicy $urlPolicy,
 		/** @var ?\Closure(string): string typography for isolated strings (title, alt); null = disabled */
 		private ?\Closure $postLine = null,
 		/** @var list<\Closure(string): string> post-processing of the document text */
@@ -629,7 +629,7 @@ final class Renderer extends NodeRenderer
 	private function renderImage(Nodes\ImageNode $node): Element
 	{
 		// Check URL scheme (security - filter dangerous schemes like javascript:)
-		if ($node->url === null || !$this->texy->checkURL($node->url, Texy::FILTER_IMAGE)) {
+		if ($node->url === null || !$this->urlPolicy->isImageAllowed($node->url)) {
 			// URL is missing or fails scheme filter, return just the alternative text
 			return $this->wrapChildren([$node->alt ?? '']);
 		}
@@ -657,7 +657,7 @@ final class Renderer extends NodeRenderer
 	{
 		// Check URL scheme (security - filter dangerous schemes like javascript:)
 		$rawUrl = $node->url ?? '';
-		if (!$this->texy->checkURL($rawUrl, Texy::FILTER_ANCHOR)) {
+		if (!$this->urlPolicy->isLinkAllowed($rawUrl)) {
 			// URL fails scheme filter, return just the content without link
 			return $this->wrapChildren($this->renderNodes($node->content->children));
 		}
@@ -739,7 +739,7 @@ final class Renderer extends NodeRenderer
 	private function renderUrl(Nodes\UrlNode $node): Element|string
 	{
 		$url = Helpers::normalizeWww($node->url);
-		if (!$this->texy->checkURL($url, Texy::FILTER_ANCHOR)) {
+		if (!$this->urlPolicy->isLinkAllowed($url)) {
 			return $node->url;
 		}
 
@@ -763,7 +763,7 @@ final class Renderer extends NodeRenderer
 				self::ContentTextual,
 			)
 			: $node->email;
-		return $this->texy->checkURL($href, Texy::FILTER_ANCHOR)
+		return $this->urlPolicy->isLinkAllowed($href)
 			? new Element('a', ['href' => $href])->add($text)
 			: $text;
 	}

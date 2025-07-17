@@ -176,7 +176,7 @@ final class Schema
 
 	/**
 	 * Attributes whose value is a URL, and which policy governs them. Whoever writes
-	 * such an attribute - hand-written tag or modifier - must pass the URL scheme filters, or
+	 * such an attribute - hand-written tag or modifier - must pass UrlPolicy, or
 	 * "javascript:" gets in through the back door.
 	 */
 	private const UrlAttrs = [
