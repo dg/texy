@@ -16,7 +16,7 @@ class HtmlTagNode extends InlineNode
 {
 	public function __construct(
 		public string $name,
-		/** @var array<string, string|bool> */
+		/** @var array<string, string|bool|null> */
 		public array $attributes = [],
 		public bool $closing = false,
 		public bool $selfClosing = false,

@@ -7,7 +7,7 @@
 use Tester\Assert;
 use Texy\Nodes\{ContentNode, PhraseNode, TextNode};
 use Texy\Parsing\{InlineParser, ParseContext};
-use Texy\{Syntax, Texy};
+use Texy\Texy;
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -68,7 +68,7 @@ test('simple pattern match', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 	]);
 
@@ -76,7 +76,7 @@ test('simple pattern match', function () {
 
 	assertNodes([
 		[TextNode::class, 'Hello '],
-		[PhraseNode::class, Syntax::Strong],
+		[PhraseNode::class, 'phrase/strong'],
 		[TextNode::class, ' today'],
 	], $nodes);
 });
@@ -86,20 +86,20 @@ test('multiple patterns without overlap', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 		'italic' => [
 			'pattern' => '~//(.+?)//~',
-			'handler' => createPhraseHandler(Syntax::Emphasis),
+			'handler' => createPhraseHandler('phrase/em'),
 		],
 	]);
 
 	$nodes = $parser->parse(createContext(), '**bold** and //italic//');
 
 	assertNodes([
-		[PhraseNode::class, Syntax::Strong],
+		[PhraseNode::class, 'phrase/strong'],
 		[TextNode::class, ' and '],
-		[PhraseNode::class, Syntax::Emphasis],
+		[PhraseNode::class, 'phrase/em'],
 	], $nodes);
 });
 
@@ -108,18 +108,18 @@ test('multiple matches of same pattern', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 	]);
 
 	$nodes = $parser->parse(createContext(), '**one** **two** **three**');
 
 	assertNodes([
-		[PhraseNode::class, Syntax::Strong],
+		[PhraseNode::class, 'phrase/strong'],
 		[TextNode::class, ' '],
-		[PhraseNode::class, Syntax::Strong],
+		[PhraseNode::class, 'phrase/strong'],
 		[TextNode::class, ' '],
-		[PhraseNode::class, Syntax::Strong],
+		[PhraseNode::class, 'phrase/strong'],
 	], $nodes);
 });
 
@@ -128,19 +128,19 @@ test('adjacent matches without space', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 		'italic' => [
 			'pattern' => '~//(.+?)//~',
-			'handler' => createPhraseHandler(Syntax::Emphasis),
+			'handler' => createPhraseHandler('phrase/em'),
 		],
 	]);
 
 	$nodes = $parser->parse(createContext(), '**bold**//italic//');
 
 	assertNodes([
-		[PhraseNode::class, Syntax::Strong],
-		[PhraseNode::class, Syntax::Emphasis],
+		[PhraseNode::class, 'phrase/strong'],
+		[PhraseNode::class, 'phrase/em'],
 	], $nodes);
 });
 
@@ -153,18 +153,18 @@ test('longer match wins at same offset', function () {
 	$parser = new InlineParser([
 		'short' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 		'long' => [
 			'pattern' => '~\*\*\*(.+?)\*\*\*~',
-			'handler' => createPhraseHandler(Syntax::StrongEmphasis),
+			'handler' => createPhraseHandler('phrase/strong+em'),
 		],
 	]);
 
 	$nodes = $parser->parse(createContext(), '***bold***');
 
 	assertNodes([
-		[PhraseNode::class, Syntax::StrongEmphasis],
+		[PhraseNode::class, 'phrase/strong+em'],
 	], $nodes);
 });
 
@@ -194,7 +194,7 @@ test('overlapping matches - earlier offset wins', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 	]);
 
@@ -235,7 +235,7 @@ test('null allows inner patterns to match', function () {
 		],
 		'italic' => [
 			'pattern' => '~\*(.+?)\*~',
-			'handler' => createPhraseHandler(Syntax::Emphasis),
+			'handler' => createPhraseHandler('phrase/em'),
 		],
 	]);
 
@@ -244,7 +244,7 @@ test('null allows inner patterns to match', function () {
 	// Outer pattern returns null, inner pattern gets a chance
 	assertNodes([
 		[TextNode::class, '['],
-		[PhraseNode::class, Syntax::Emphasis],
+		[PhraseNode::class, 'phrase/em'],
 		[TextNode::class, ']'],
 	], $nodes);
 });
@@ -290,7 +290,7 @@ test('null does not block non-overlapping patterns', function () {
 		],
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 	]);
 
@@ -299,7 +299,7 @@ test('null does not block non-overlapping patterns', function () {
 	// [x] returns null, so text before **works** becomes one TextNode
 	assertNodes([
 		[TextNode::class, '[x] '],
-		[PhraseNode::class, Syntax::Strong],
+		[PhraseNode::class, 'phrase/strong'],
 	], $nodes);
 });
 
@@ -335,7 +335,7 @@ test('empty text returns empty ContentNode', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 	]);
 
@@ -350,7 +350,7 @@ test('no pattern matches returns single TextNode', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 	]);
 
@@ -376,12 +376,12 @@ test('no patterns registered returns single TextNode', function () {
 test('addPattern method works', function () {
 	$parser = new InlineParser([]);
 
-	$parser->addPattern('bold', '~\*\*(.+?)\*\*~', createPhraseHandler(Syntax::Strong));
+	$parser->addPattern('bold', '~\*\*(.+?)\*\*~', createPhraseHandler('phrase/strong'));
 
 	$nodes = $parser->parse(createContext(), '**text**');
 
 	assertNodes([
-		[PhraseNode::class, Syntax::Strong],
+		[PhraseNode::class, 'phrase/strong'],
 	], $nodes);
 });
 
@@ -394,7 +394,7 @@ test('UTF-8 content in match', function () {
 	$parser = new InlineParser([
 		'bold' => [
 			'pattern' => '~\*\*(.+?)\*\*~u',
-			'handler' => createPhraseHandler(Syntax::Strong),
+			'handler' => createPhraseHandler('phrase/strong'),
 		],
 	]);
 
@@ -413,7 +413,7 @@ test('UTF-8 content in match', function () {
 
 
 // =============================================================================
-// H. Empty matches
+// G. Empty matches
 // =============================================================================
 
 test('pattern matching empty string is skipped', function () {

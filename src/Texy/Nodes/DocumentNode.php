@@ -13,7 +13,7 @@ namespace Texy\Nodes;
  */
 class DocumentNode extends BlockNode
 {
-	/** @var array<string, mixed>  document-level state */
+	/** @var array<string, mixed>  document-level options collected from {{texy: ...}} directives */
 	public array $meta = [];
 
 

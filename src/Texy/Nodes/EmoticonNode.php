@@ -14,6 +14,10 @@ namespace Texy\Nodes;
  */
 class EmoticonNode extends InlineNode
 {
+	/** Emoji/text the emoticon resolves to; filled in the transform phase so generators need not reach into modules */
+	public ?string $resolved = null;
+
+
 	public function __construct(
 		public string $emoticon,
 	) {

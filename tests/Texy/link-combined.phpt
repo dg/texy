@@ -12,9 +12,9 @@ require __DIR__ . '/../bootstrap.php';
 function createTexy()
 {
 	$texy = new Texy\Texy;
-	$texy->linkModule->root = 'xxx/';
-	$texy->imageModule->root = '../images/';
-	$texy->imageModule->leftClass = 'left';
+	$texy->htmlOutput->linkRoot = 'xxx/';
+	$texy->htmlOutput->imageRoot = '../images/';
+	$texy->htmlOutput->imageLeftClass = 'left';
 	$texy->htmlOutput->lineWrap = 180;
 	return $texy;
 }
@@ -32,7 +32,7 @@ test('links and images', function () {
 test('links and images in safe mode', function () {
 	$texy = createTexy();
 	Texy\Configurator::safeMode($texy);
-	$texy->allowedTags['a'][] = 'rel';
+	$texy->htmlPolicy->allowedTags['a'][] = 'rel';
 	Assert::matchFile(
 		__DIR__ . '/expected/link-combined-safe.html',
 		$texy->process(file_get_contents(__DIR__ . '/sources/link-combined.texy')),
@@ -42,8 +42,8 @@ test('links and images in safe mode', function () {
 
 test('links and images with allowed classes', function () {
 	$texy = createTexy();
-	$texy->allowedClasses = ['#nofollow'];
-	$texy->allowedStyles = false;
+	$texy->htmlPolicy->allowedClasses = ['#nofollow'];
+	$texy->htmlPolicy->allowedStyles = false;
 	Assert::matchFile(
 		__DIR__ . '/expected/link-combined-classes.html',
 		$texy->process(file_get_contents(__DIR__ . '/sources/link-combined.texy')),

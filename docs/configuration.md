@@ -43,8 +43,8 @@ $texy->allowedTags = [
 Controls CSS classes and IDs usable in [modifiers](modifiers.md). Default `Texy::ALL`.
 
 ```php
-$texy->allowedClasses = Texy\Texy::NONE;               // no classes/IDs
-$texy->allowedClasses = ['highlight', '#main'];        // whitelist; IDs prefixed with #
+$texy->htmlPolicy->allowedClasses = Texy\Texy::NONE;               // no classes/IDs
+$texy->htmlPolicy->allowedClasses = ['highlight', '#main'];        // whitelist; IDs prefixed with #
 ```
 
 ### $allowedStyles
@@ -52,8 +52,8 @@ $texy->allowedClasses = ['highlight', '#main'];        // whitelist; IDs prefixe
 Controls inline CSS properties usable in modifiers. Default `Texy::ALL`.
 
 ```php
-$texy->allowedStyles = Texy\Texy::NONE;
-$texy->allowedStyles = ['color', 'background-color'];
+$texy->htmlPolicy->allowedStyles = Texy\Texy::NONE;
+$texy->htmlPolicy->allowedStyles = ['color', 'background-color'];
 ```
 
 ### $alignClasses

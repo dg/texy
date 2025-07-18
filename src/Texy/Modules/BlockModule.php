@@ -10,7 +10,6 @@ namespace Texy\Modules;
 use Texy;
 use Texy\{Helpers, Syntax};
 use Texy\Nodes\{BlockNode, CodeBlockNode, CommentNode, ContentNode, SectionNode};
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 
 
@@ -30,9 +29,6 @@ final class BlockModule extends Texy\Module
 		$texy->allowed[Syntax::BlockTexySource] = true;
 		$texy->allowed[Syntax::BlockComment] = true;
 		$texy->allowed[Syntax::BlockDiv] = true;
-		$texy->htmlOutput->registerHandler($this->solveCodeBlock(...));
-		$texy->htmlOutput->registerHandler($this->solveSection(...));
-		$texy->htmlOutput->registerHandler(fn(CommentNode $node) => '');
 	}
 
 
@@ -123,88 +119,5 @@ final class BlockModule extends Texy\Module
 		return $context->getInlineParser()
 			->withPatterns([Syntax::HtmlTag, Syntax::HtmlComment, Syntax::HtmlEntity])
 			->parse($context, $text);
-	}
-
-
-	public function solveCodeBlock(CodeBlockNode $node, Html\Renderer $generator): Html\Element|string
-	{
-		// block/texysource - the HTML of the parsed demo displayed as source code
-		if ($node->type === 'texysource') {
-			$html = $generator->serialize($generator->renderNodes($node->content->children ?? []), "\n");
-			$wellFormer = new Html\WellFormer($this->texy->htmlOutput);
-			$wellFormer->raw($this->texy->unprotect(htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8')));
-			$html = trim($wellFormer->finish());
-			// Now escape the final HTML to show as source code
-			$escaped = htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8');
-			$escaped = $this->texy->protect($escaped, $this->texy::CONTENT_TEXTUAL);
-
-			$el = new Html\Element('pre');
-			$node->modifier?->decorate($this->texy, $el);
-			$el->attrs['class'] = ['html', ...(array) ($el->attrs['class'] ?? [])];
-			$el->create('code', $escaped);
-			return $el;
-		}
-
-		// block/html - passthrough HTML tags/comments
-		if ($node->type === 'html') {
-			if ($node->code === '') {
-				return "\n";
-			}
-
-			return $this->texy->protect($this->renderMarkup($node, $generator) . ' ', $this->texy::CONTENT_BLOCK);
-		}
-
-		// block/text - plain text with <br> for newlines (no wrapper)
-		// Include trailing space inside protection for proper separation from next block
-		if ($node->type === 'text') {
-			$content = htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8');
-			$content = str_replace("\n", '<br>', $content);
-			return $this->texy->protect($content . ' ', $this->texy::CONTENT_BLOCK);
-		}
-
-		// Types that use <pre> wrapper
-		$el = new Html\Element('pre');
-		$node->modifier?->decorate($this->texy, $el);
-
-		// Language class prepended before modifier classes
-		if ($node->language) {
-			$el->attrs['class'] = [$node->language, ...(array) ($el->attrs['class'] ?? [])];
-		}
-
-		// PRE block - passthrough HTML tags and decoded entities
-		if ($node->type === 'pre') {
-			$el->setText($this->texy->protect($this->renderMarkup($node, $generator), $this->texy::CONTENT_BLOCK));
-			return $el;
-		}
-
-		$content = htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8');
-		$content = $this->texy->protect($content, $this->texy::CONTENT_TEXTUAL);
-
-		if ($node->type === 'code') {
-			$el->create('code', $content);
-		} else {
-			$el->setText($content);
-		}
-
-		return $el;
-	}
-
-
-	public function solveSection(SectionNode $node, Html\Renderer $generator): Html\Element
-	{
-		$el = new Html\Element($node->type === 'div' ? 'div' : 'section');
-		$node->modifier?->decorate($this->texy, $el);
-		$el->children = $generator->renderNodes($node->content->children);
-		return $el;
-	}
-
-
-	/**
-	 * Serialize the parsed markup of a code block (html, pre) to HTML.
-	 */
-	private function renderMarkup(CodeBlockNode $node, Html\Renderer $generator): string
-	{
-		$html = $generator->serialize($generator->renderNodes($node->content->children ?? []));
-		return $this->texy->unprotect(htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8'));
 	}
 }
