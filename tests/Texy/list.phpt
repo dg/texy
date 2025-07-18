@@ -70,3 +70,41 @@ test('ordered list with letter bullets', function () {
 			XX),
 	);
 });
+
+
+test('a lone image is not wrapped in a figure inside an item', function () {
+	// the item is a block container itself, so the wrapper would add nothing
+	$texy = new Texy\Texy;
+
+	Assert::match(
+		<<<'HTML'
+			<ul>
+				<li class="img"><img src="images/logo.webp" alt=""></li>
+
+				<li>text</li>
+			</ul>
+			HTML,
+		$texy->process(<<<'XX'
+			- [* logo.webp *] .[img]
+			- text
+			XX),
+	);
+});
+
+
+test('an image with a caption keeps its figure inside an item', function () {
+	$texy = new Texy\Texy;
+
+	Assert::match(
+		<<<'HTML'
+			<ul>
+				<li>
+					<div class="figure"><img src="images/logo.webp" alt="">
+						<p>Caption</p>
+					</div>
+				</li>
+			</ul>
+			HTML,
+		$texy->process('- [* logo.webp *] *** Caption'),
+	);
+});

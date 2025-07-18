@@ -7,7 +7,7 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{Helpers, Texy};
+use Texy\Helpers;
 use function is_array, is_object, is_string;
 
 
@@ -24,7 +24,7 @@ class Element
 	/** @var array<string, string|int|bool|array<string|int|bool>|null>  element's attributes */
 	public array $attrs = [];
 
-	/** @var list<Element|string> */
+	/** @var array<Element|string> */
 	public array $children = [];
 
 	private bool $isVoid;
@@ -85,33 +85,6 @@ class Element
 
 
 	/**
-	 * TODO: možná zrušit ve prospěch Texy\Output\Html\Renderer::serialize()
-	 */
-	public function toString(Texy $texy): string
-	{
-		$ct = $this->getContentType();
-		$s = $texy->protect($this->startTag(), $ct);
-
-		// empty elements are finished now
-		if ($this->isVoid) {
-			return $s;
-		}
-
-		// add content
-		foreach ($this->children as $child) {
-			if (is_object($child)) {
-				$s .= $child->toString($texy);
-			} else {
-				$s .= $child;
-			}
-		}
-
-		// add end tag
-		return $s . $texy->protect($this->endTag(), $ct);
-	}
-
-
-	/**
 	 * Returns element's start tag.
 	 */
 	public function startTag(): string
@@ -120,9 +93,18 @@ class Element
 			return '';
 		}
 
-		$s = '<' . $this->name;
+		return '<' . $this->name . self::formatAttrs($this->attrs) . '>';
+	}
 
-		foreach ($this->attrs as $key => $value) {
+
+	/**
+	 * Formats attributes array to HTML string.
+	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
+	 */
+	public static function formatAttrs(array $attrs): string
+	{
+		$s = '';
+		foreach ($attrs as $key => $value) {
 			if ($value === null || $value === false) {
 				continue; // skip nulls and false boolean attributes
 
@@ -157,7 +139,7 @@ class Element
 			$s .= ' ' . $key . '="' . Helpers::freezeSpaces($value) . '"';
 		}
 
-		return $s . '>';
+		return $s;
 	}
 
 
@@ -184,14 +166,5 @@ class Element
 				$this->children[$key] = clone $value;
 			}
 		}
-	}
-
-
-	final public function getContentType(): string
-	{
-		$inlineType = Schema::inlineElements()[$this->name ?? ''] ?? null;
-		return $inlineType === null
-			? Texy::CONTENT_BLOCK
-			: ($inlineType ? Texy::CONTENT_REPLACED : Texy::CONTENT_MARKUP);
 	}
 }

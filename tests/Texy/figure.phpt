@@ -13,8 +13,8 @@ test('figure with caption', function () {
 	$texy = new Texy\Texy;
 	$texy->tabWidth = 0;
 	$texy->htmlOutput->lineWrap = 180;
-	$texy->imageModule->root = '../images/';
-	$texy->imageModule->leftClass = 'left';
+	$texy->htmlOutput->imageRoot = '../images/';
+	$texy->htmlOutput->imageLeftClass = 'left';
 
 	Assert::matchFile(
 		__DIR__ . '/expected/figure.html',
@@ -27,12 +27,12 @@ test('figure with HTML5 figure tag', function () {
 	$texy = new Texy\Texy;
 	$texy->tabWidth = 0;
 	$texy->htmlOutput->lineWrap = 180;
-	$texy->imageModule->root = '../images/';
-	$texy->imageModule->leftClass = 'left';
-	$texy->figureModule->tagName = 'figure';
-	$texy->figureModule->class = null;
-	$texy->figureModule->leftClass = 'aside-left';
-	$texy->figureModule->rightClass = 'aside-right';
+	$texy->htmlOutput->imageRoot = '../images/';
+	$texy->htmlOutput->imageLeftClass = 'left';
+	$texy->htmlOutput->figureTagName = 'figure';
+	$texy->htmlOutput->figureClass = null;
+	$texy->htmlOutput->figureLeftClass = 'aside-left';
+	$texy->htmlOutput->figureRightClass = 'aside-right';
 
 	Assert::matchFile(
 		__DIR__ . '/expected/figure-html5.html',

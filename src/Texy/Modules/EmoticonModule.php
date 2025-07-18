@@ -9,7 +9,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\EmoticonNode;
-use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
 use Texy\Syntax;
 
@@ -19,7 +18,7 @@ use Texy\Syntax;
  */
 final class EmoticonModule extends Texy\Module
 {
-	/** @var array<string, string> */
+	/** @var array<string, string> emoticon → emoji/image mapping */
 	public array $icons = [
 		':-)' => '🙂',
 		':-(' => '☹',
@@ -33,9 +32,6 @@ final class EmoticonModule extends Texy\Module
 		':-|' => '😐',
 	];
 
-	/** CSS class for emoticons */
-	public ?string $class = null;
-
 	private bool $warnedIcons = false;
 
 
@@ -43,7 +39,23 @@ final class EmoticonModule extends Texy\Module
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed[Syntax::Emoticon] = false;
-		$texy->htmlOutput->registerHandler($this->solve(...));
+		$texy->addHandler($this->resolveEmoticons(...));
+	}
+
+
+	/**
+	 * Writes resolved emoji into EmoticonNode so the AST is semantically complete
+	 * and generators need not reach into this module.
+	 */
+	public function resolveEmoticons(Texy\Nodes\DocumentNode $doc): void
+	{
+		if (empty($this->texy->allowed[Syntax::Emoticon])) { // disabled → no EmoticonNodes in AST
+			return;
+		}
+
+		foreach (Texy\NodeHelpers::find($doc, EmoticonNode::class) as $node) {
+			$node->resolved = $this->icons[$node->emoticon] ?? $node->emoticon;
+		}
 	}
 
 
@@ -54,9 +66,10 @@ final class EmoticonModule extends Texy\Module
 			trigger_error('EmoticonModule: using image files is deprecated, use Unicode characters instead.', E_USER_DEPRECATED);
 		}
 
-		krsort($this->icons);
+		$icons = $this->icons;
+		krsort($icons);
 		$pattern = [];
-		foreach ($this->icons as $key => $foo) {
+		foreach ($icons as $key => $foo) {
 			$pattern[] = Texy\Regexp::quote($key) . '+'; // last char can be repeated
 		}
 
@@ -88,14 +101,5 @@ final class EmoticonModule extends Texy\Module
 		}
 
 		return null;
-	}
-
-
-	public function solve(EmoticonNode $node, Html\Renderer $generator): Html\Element|string
-	{
-		$emoji = $this->icons[$node->emoticon];
-		return $this->class
-			? (new Html\Element('span', ['class' => $this->class]))->setText($emoji)
-			: $emoji;
 	}
 }

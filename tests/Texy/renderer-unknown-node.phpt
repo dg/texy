@@ -1,0 +1,52 @@
+<?php declare(strict_types=1);
+
+/**
+ * Test: a node one format does not know degrades to its content in the others.
+ */
+
+use Tester\Assert;
+use Texy\{Nodes, Output, Texy};
+use Texy\Parsing\ParseContext;
+
+require __DIR__ . '/../bootstrap.php';
+
+
+class AlertNode extends Nodes\BlockNode
+{
+	public function __construct(
+		public Nodes\ContentNode $content,
+	) {
+	}
+
+
+	public function &getChildren(): Generator
+	{
+		yield $this->content;
+	}
+}
+
+
+/** Registers a custom block syntax rendered only in HTML. */
+function texyWithAlert(): Texy
+{
+	$texy = new Texy;
+	$texy->registerBlockPattern(
+		fn(ParseContext $context, array $matches) => new AlertNode(
+			$context->parseInline($matches[1]),
+		),
+		'~^!!!\ (.+)$~',
+		'custom/alert',
+	);
+	$texy->htmlOutput->registerHandler(
+		fn(AlertNode $node, Output\Html\Renderer $gen) => (new Output\Html\Element('div', ['class' => 'alert']))
+			->add(...$gen->renderNodes($node->content->children)),
+	);
+	return $texy;
+}
+
+
+test('the format with a renderer uses it', function () {
+	$texy = texyWithAlert();
+
+	Assert::contains('<div class="alert">Watch out</div>', $texy->process('!!! Watch out'));
+});

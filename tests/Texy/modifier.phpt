@@ -12,8 +12,8 @@ require __DIR__ . '/../bootstrap.php';
 test('disabled classes and styles', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
-	$texy->allowedClasses = false;
-	$texy->allowedStyles = false;
+	$texy->htmlPolicy->allowedClasses = false;
+	$texy->htmlPolicy->allowedStyles = false;
 
 	Assert::match(
 		'<p>This <strong>text is formatted</strong> with <em>style</em> modifiers.</p>',
@@ -30,8 +30,8 @@ test('disabled classes and styles', function () {
 test('filtered classes and styles', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
-	$texy->allowedClasses = ['one', '#id'];
-	$texy->allowedStyles = ['color'];
+	$texy->htmlPolicy->allowedClasses = ['one', '#id'];
+	$texy->htmlPolicy->allowedStyles = ['color'];
 
 	Assert::match(
 		'<p>This <strong style="color:red">text is formatted</strong> with <em>style</em> modifiers.</p>',

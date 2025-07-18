@@ -98,3 +98,13 @@ test('integration with Texy processing', function () {
 		trim($texy->process("Title\n=====\n\nParagraph text.")),
 	);
 });
+
+
+test('stray < stays in place', function () {
+	$config = (new Texy)->htmlOutput;
+	$config->lineWrap = 0;
+	Assert::same(
+		'a < b <span>x</span> c',
+		trim(wellform($config, 'a < b <span>x</span> c')),
+	);
+});

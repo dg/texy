@@ -36,7 +36,7 @@ $texy = new Texy;
 // Register our custom link handler
 // The first parameter type (LinkNode) determines which node class the handler processes
 $texy->htmlOutput->registerHandler(
-	function (LinkNode $node, Html\Renderer $gen) use ($texy): Html\Element {
+	function (LinkNode $node, Html\Renderer $gen): Html\Element {
 		$url = $node->url ?? '';
 
 		// Check if this is a relative link (doesn't contain "://")
@@ -55,22 +55,24 @@ $texy->htmlOutput->registerHandler(
 		// Build the link element
 		$el = new Html\Element('a');
 
-		// Handle nofollow class
+		// Handle nofollow class (work on a copy, the node must stay untouched)
+		$modifier = $node->modifier;
 		$nofollow = false;
-		if ($node->modifier && isset($node->modifier->classes['nofollow'])) {
+		if ($modifier && isset($modifier->classes['nofollow'])) {
 			$nofollow = true;
-			unset($node->modifier->classes['nofollow']);
+			$modifier = clone $modifier;
+			unset($modifier->classes['nofollow']);
 		}
 
 		// Apply modifier (title, class, id, style, etc.)
 		$el->attrs['href'] = null; // Reserve position at front
-		$node->modifier?->decorate($texy, $el);
+		$gen->decorateElement($modifier, $el);
 
 		// Set the URL
 		$el->attrs['href'] = $url;
 
 		// rel="nofollow"
-		if ($nofollow || ($texy->linkModule->forceNoFollow && str_contains($url, '//'))) {
+		if ($nofollow || ($gen->config->linkNoFollow && str_contains($url, '//'))) {
 			$el->attrs['rel'] = 'nofollow';
 		}
 

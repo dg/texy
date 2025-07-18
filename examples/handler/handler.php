@@ -211,7 +211,7 @@ $texy->htmlOutput->registerHandler(
 				. ' src="https://www.youtube.com/embed/' . htmlspecialchars($videoId) . '"'
 				. ' frameborder="0" allowfullscreen></iframe>';
 
-			return $texy->protect($code, Texy::CONTENT_BLOCK);
+			return $gen->protect($code, $gen::ContentBlock);
 		}
 		return null;
 	},

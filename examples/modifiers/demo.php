@@ -61,8 +61,8 @@ echo '<link rel="stylesheet" href="../style.css">';
 // All CSS classes and inline styles are allowed.
 // ============================================================
 echo '<h2>mode: Styles and Classes allowed (default)</h2>';
-$texy->allowedClasses = true;
-$texy->allowedStyles = true;
+$texy->htmlPolicy->allowedClasses = true;
+$texy->htmlPolicy->allowedStyles = true;
 doIt($texy);
 
 
@@ -72,8 +72,8 @@ doIt($texy);
 // The modifier syntax is ignored.
 // ============================================================
 echo '<h2>mode: Styles and Classes disabled</h2>';
-$texy->allowedClasses = false;
-$texy->allowedStyles = false;
+$texy->htmlPolicy->allowedClasses = false;
+$texy->htmlPolicy->allowedStyles = false;
 doIt($texy);
 
 
@@ -84,6 +84,6 @@ doIt($texy);
 // - Styles: only "color" property is allowed
 // ============================================================
 echo '<h2>mode: Custom</h2>';
-$texy->allowedClasses = ['one', '#id'];  // Note: IDs are prefixed with #
-$texy->allowedStyles = ['color'];
+$texy->htmlPolicy->allowedClasses = ['one', '#id'];  // Note: IDs are prefixed with #
+$texy->htmlPolicy->allowedStyles = ['color'];
 doIt($texy);
