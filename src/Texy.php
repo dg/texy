@@ -8,7 +8,7 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use Texy\Parsing\{BlockParser, InlineParser, ParseContext};
+use Texy\Parsing\{Engine, ParseContext};
 use function strlen;
 
 
@@ -20,7 +20,7 @@ use function strlen;
  * $html = $texy->toHtml($text);
  * </code>
  */
-class Texy implements Parsing\Registry
+class Texy
 {
 	// Texy version
 	public const VERSION = '4.0.0-dev';
@@ -51,29 +51,7 @@ class Texy implements Parsing\Registry
 	/** URL scheme security policy for links and images */
 	public readonly UrlPolicy $urlPolicy;
 
-	/**
-	 * Registered regexps and associated handlers for inline parsing, of the language and of the application.
-	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>}
-	 */
-	private array $inlinePatterns = ['language' => [], 'application' => []];
-
-	/**
-	 * Registered regexps and associated handlers for block parsing, of the language and of the application.
-	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>}
-	 */
-	private array $blockPatterns = ['language' => [], 'application' => []];
-
-	/** @var array<string, bool>  syntax name => enabled by default */
-	private array $declared = [];
-
-	/** @var array<string, bool>  name of a syntax with a pattern => is it a block one? */
-	private array $kinds = [];
-
-	/** @var \Closure(ParseContext, string, int): array<Nodes\BlockNode>  takes the text between block syntaxes */
-	private \Closure $gapHandler;
-
-	/** @var array<string, list<\Closure(Nodes\DocumentNode): void>>  stage name => passes in registration order */
-	private array $passes = [];
+	private Engine $engine;
 
 	/** @var list<Module>  in the order that decides ties between syntaxes */
 	private array $modules;
@@ -84,6 +62,7 @@ class Texy implements Parsing\Registry
 
 	public function __construct()
 	{
+		$this->engine = new Engine('Texy');
 		$this->config = new TexyConfig;
 		$this->urlPolicy = new UrlPolicy;
 		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
@@ -121,12 +100,12 @@ class Texy implements Parsing\Registry
 			new Modules\ListModule($this->config),
 		];
 
-		$this->addHandler($link->recognizeReferences(...), Stage::Syntax);
+		$this->engine->addPass($link->recognizeReferences(...), Stage::Syntax);
 
-		$this->addHandler($directive->processDirectives(...));
-		$this->addHandler($image->resolveReferences(...));
-		$this->addHandler($link->resolveReferences(...));
-		$this->addHandler($heading->processHeadings(...));
+		$this->engine->addPass($directive->processDirectives(...));
+		$this->engine->addPass($image->resolveReferences(...));
+		$this->engine->addPass($link->resolveReferences(...));
+		$this->engine->addPass($heading->processHeadings(...));
 	}
 
 
@@ -135,46 +114,10 @@ class Texy implements Parsing\Registry
 	{
 		$this->config->validate();
 		foreach ($this->modules as $module) {
-			$module->register($this);
+			$module->register($this->engine);
 		}
 
-		$this->allowedSyntax = $this->completeAllowed($this->allowedSyntax);
-	}
-
-
-	public function addInline(
-		string $name,
-		#[Language('RegExp')]
-		string $pattern,
-		callable $handler,
-	): void
-	{
-		$this->introduce($name, block: false);
-		$this->inlinePatterns['language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern];
-	}
-
-
-	public function addBlock(
-		string $name,
-		#[Language('RegExp')]
-		string $pattern,
-		callable $handler,
-	): void
-	{
-		$this->introduce($name, block: true);
-		$this->blockPatterns['language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
-	}
-
-
-	public function declare(string $name, bool $enabled = true): void
-	{
-		$this->declared[$name] ??= $enabled;
-	}
-
-
-	public function setGapHandler(callable $handler): void
-	{
-		$this->gapHandler = $handler(...);
+		$this->allowedSyntax = $this->engine->completeAllowed($this->allowedSyntax);
 	}
 
 
@@ -188,8 +131,7 @@ class Texy implements Parsing\Registry
 		string $name,
 	): void
 	{
-		$this->introduce($name, block: false);
-		$this->inlinePatterns['application'][$name] = ['handler' => $handler(...), 'pattern' => $pattern];
+		$this->engine->addInline($name, $pattern, $handler, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
@@ -204,8 +146,7 @@ class Texy implements Parsing\Registry
 		string $name,
 	): void
 	{
-		$this->introduce($name, block: true);
-		$this->blockPatterns['application'][$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
+		$this->engine->addBlock($name, $pattern, $handler, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
@@ -215,49 +156,6 @@ class Texy implements Parsing\Registry
 	{
 		$this->postHandlers[$name] = $handler(...);
 		$this->allowedSyntax[$name] ??= true;
-	}
-
-
-	private function introduce(string $name, bool $block): void
-	{
-		if (($this->kinds[$name] ?? $block) !== $block) {
-			throw new \LogicException("Syntax '$name' cannot be both inline and block.");
-		}
-
-		$this->kinds[$name] = $block;
-		$this->declare($name);
-	}
-
-
-	/**
-	 * Completes the map of enabled syntaxes with the default state of the names it lacks.
-	 * @param  array<string, bool>  $allowedSyntaxes
-	 * @return array<string, bool>
-	 * @throws InvalidArgumentException  when the map holds a name nobody declared
-	 */
-	private function completeAllowed(array $allowedSyntaxes): array
-	{
-		foreach (array_diff_key($allowedSyntaxes, $this->declared) as $name => $_) {
-			$suggestion = $this->suggestName((string) $name);
-			throw new InvalidArgumentException("Unknown syntax '$name'" . ($suggestion === null ? '.' : ", did you mean '$suggestion'?"));
-		}
-
-		return $allowedSyntaxes + $this->declared;
-	}
-
-
-	private function suggestName(string $name): ?string
-	{
-		$best = null;
-		$min = (strlen($name) / 4 + 1) * 10 + .1;
-		foreach ($this->declared as $declared => $_) {
-			$distance = levenshtein((string) $declared, $name, 10, 11, 10);
-			if ($distance < $min) {
-				[$min, $best] = [$distance, (string) $declared];
-			}
-		}
-
-		return $best;
 	}
 
 
@@ -311,9 +209,7 @@ class Texy implements Parsing\Registry
 	public function parse(string $text): Nodes\DocumentNode
 	{
 		$this->registerModules();
-		$document = new Nodes\DocumentNode($this->createParseContext()->parseBlock($this->preprocess($text)));
-		$this->runPasses($document, Stage::Syntax);
-		return $document;
+		return $this->engine->parse($this->preprocess($text), $this->allowedSyntax);
 	}
 
 
@@ -323,9 +219,7 @@ class Texy implements Parsing\Registry
 	public function parseInline(string $text): Nodes\DocumentNode
 	{
 		$this->registerModules();
-		$document = new Nodes\DocumentNode($this->createParseContext()->parseInline($this->preprocess($text)));
-		$this->runPasses($document, Stage::Syntax);
-		return $document;
+		return $this->engine->parse($this->preprocess($text), $this->allowedSyntax, singleLine: true);
 	}
 
 
@@ -337,29 +231,8 @@ class Texy implements Parsing\Registry
 	public function transform(Nodes\DocumentNode $document): Nodes\DocumentNode
 	{
 		$this->config->validate();
-		if ($document->transformState !== Nodes\TransformState::Pending) {
-			throw new \LogicException("A document is transformed only once, this one is {$document->transformState->name}.");
-		}
-
-		$document->transformState = Nodes\TransformState::Running;
-		try {
-			$this->runPasses($document, Stage::Transform);
-			$this->runPasses($document, Stage::Finalize);
-		} catch (\Throwable $e) {
-			$document->transformState = Nodes\TransformState::Failed;
-			throw $e;
-		}
-
-		$document->transformState = Nodes\TransformState::Done;
+		$this->engine->transform($document);
 		return $document;
-	}
-
-
-	private function runPasses(Nodes\DocumentNode $document, Stage $stage): void
-	{
-		foreach ($this->passes[$stage->name] ?? [] as $pass) {
-			$pass($document);
-		}
 	}
 
 
@@ -422,7 +295,7 @@ class Texy implements Parsing\Registry
 	 */
 	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
 	{
-		$this->passes[$stage->name][] = $pass(...);
+		$this->engine->addPass($pass(...), $stage);
 	}
 
 
@@ -431,35 +304,7 @@ class Texy implements Parsing\Registry
 	 */
 	public function createParseContext(): ParseContext
 	{
-		return new ParseContext(
-			$this->createInlineParser(),
-			$this->createBlockParser(),
-			$this->allowedSyntax,
-		);
-	}
-
-
-	private function createBlockParser(): BlockParser
-	{
-		$patterns = array_filter(
-			$this->blockPatterns['application'] + $this->blockPatterns['language'],
-			fn($_, $name) => !empty($this->allowedSyntax[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-
-		return new BlockParser($patterns, $this->gapHandler);
-	}
-
-
-	private function createInlineParser(): InlineParser
-	{
-		$patterns = array_filter(
-			$this->inlinePatterns['application'] + $this->inlinePatterns['language'],
-			fn($_, $name) => !empty($this->allowedSyntax[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-
-		return new InlineParser($patterns);
+		return $this->engine->createParseContext($this->allowedSyntax);
 	}
 
 

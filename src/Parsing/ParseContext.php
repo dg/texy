@@ -21,6 +21,8 @@ class ParseContext
 		private BlockParser $blockParser,
 		/** @var array<string, bool>  syntax name => enabled */
 		public readonly array $allowedSyntaxes = [],
+		/** @var ?\Closure(string, int): ContentNode  takes the inline content instead of the parser, in a language parsing it later */
+		private ?\Closure $inlineDeferral = null,
 	) {
 	}
 
@@ -30,7 +32,9 @@ class ParseContext
 	 */
 	public function parseInline(string $text, int $baseOffset = 0): ContentNode
 	{
-		return $this->inlineParser->parse($this, $text, $baseOffset);
+		return $this->inlineDeferral === null
+			? $this->inlineParser->parse($this, $text, $baseOffset)
+			: ($this->inlineDeferral)($text, $baseOffset);
 	}
 
 
@@ -41,7 +45,7 @@ class ParseContext
 	public function parseBlock(string $text, int $baseOffset = 0): ContentNode
 	{
 		$clonedParser = clone $this->blockParser;
-		$newContext = new self($this->inlineParser, $clonedParser, $this->allowedSyntaxes);
+		$newContext = new self($this->inlineParser, $clonedParser, $this->allowedSyntaxes, $this->inlineDeferral);
 		return $clonedParser->parse($newContext, $text, $baseOffset);
 	}
 
