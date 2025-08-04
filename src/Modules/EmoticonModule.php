@@ -28,9 +28,9 @@ final class EmoticonModule extends Texy\Module
 	}
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->declare(Syntax::Emoticon, enabled: false);
+		$engine->declare(Syntax::Emoticon, enabled: false);
 
 		if (!$this->warnedIcons && str_contains(implode('', $this->config->emoticons), '.')) {
 			$this->warnedIcons = true;
@@ -44,7 +44,7 @@ final class EmoticonModule extends Texy\Module
 			$pattern[] = Texy\Regexp::quote($key) . '+'; // last char can be repeated
 		}
 
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Emoticon,
 			'~
 				(?<= ^ | [\x00-\x20] )

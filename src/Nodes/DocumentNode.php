@@ -21,6 +21,9 @@ class DocumentNode extends BlockNode
 	/** @internal */
 	public TransformState $transformState = TransformState::Pending;
 
+	/** @internal the language that parsed the document, the only one that transforms it */
+	public ?string $language = null;
+
 
 	public function __construct(
 		public ContentNode $content = new ContentNode,

@@ -27,9 +27,9 @@ final class ParagraphModule extends Texy\Module
 	}
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->setGapHandler($this->parseText(...));
+		$engine->setGapHandler($this->parseText(...));
 	}
 
 

@@ -19,16 +19,16 @@ use function strlen;
  */
 final class PhraseModule extends Texy\Module
 {
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->declare(Syntax::PhraseLink);
+		$engine->declare(Syntax::PhraseLink);
 
 		foreach ([Syntax::Inserted, Syntax::Deleted, Syntax::Superscript, Syntax::Subscript] as $name) {
-			$texy->declare($name, enabled: false);
+			$engine->declare($name, enabled: false);
 		}
 
 		// ***strong+emphasis***
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::StrongEmphasis,
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
@@ -45,7 +45,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// **strong**
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Strong,
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
@@ -62,7 +62,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// //emphasis//
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Emphasis,
 			'~
 				(?<! [/:] )                       # not preceded by / or :
@@ -79,7 +79,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// *emphasisAlt*
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::EmphasisSingleAsterisk,
 			'~
 				(?<! [*\\\] )                    # not preceded by * or \
@@ -96,7 +96,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// *emphasisAlt2*
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::EmphasisSingleAsterisk2,
 			'~
 				(?<! [^\s.,;:<>()"\'' . Patterns::MARK . '-] )  # must be preceded by these chars
@@ -113,7 +113,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ++inserted++
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Inserted,
 			'~
 				(?<! \+ )                        # not preceded by +
@@ -129,7 +129,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// --deleted--
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Deleted,
 			'~
 				(?<! [<-] )                      # not preceded by < or -
@@ -145,7 +145,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ^^superscript^^
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Superscript,
 			'~
 				(?<! \^ )                        # not preceded by ^
@@ -161,7 +161,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// __subscript__
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Subscript,
 			'~
 				(?<! _ )                         # not preceded by _
@@ -177,7 +177,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// "span"
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::SpanQuotes,
 			'~
 				(?<! " )                         # not preceded by "
@@ -194,7 +194,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ~alternative span~
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::SpanTilde,
 			'~
 				(?<! \~ )
@@ -211,7 +211,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// >>quote<<
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Quote,
 			'~
 				(?<! > )                         # not preceded by >
@@ -228,7 +228,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// m^2 alternative superscript
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::SuperscriptShort,
 			'~
 				(?<= [a-z0-9] )                  # preceded by letter or number
@@ -240,7 +240,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// m_2 alternative subscript
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::SubscriptShort,
 			'~
 				(?<= [a-z] )                     # preceded by letter
@@ -252,7 +252,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// acronym/abbr "et al."((and others))
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::AbbreviationQuotes,
 			'~
 				(?<! " )                         # not preceded by "
@@ -271,7 +271,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Abbreviation,
 			'~
 				(?<! [' . Patterns::CHAR . '] )  # not preceded by char
@@ -285,7 +285,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ''notexy''
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Raw,
 			'~
 				(?<! \' )                        # not preceded by quote
@@ -300,7 +300,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// `code`
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::CodeSpan,
 			'~
 				`
@@ -314,7 +314,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// ....:LINK
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::QuickLink,
 			'~
 				( [' . Patterns::CHAR . '0-9@#$%&.,_-]++ )  # allowed chars (1)
@@ -326,7 +326,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// [text |link]
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::WikiLink,
 			'~
 				(?<! \[ )                        # not preceded by [
@@ -344,7 +344,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// [text](link)
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::MarkdownLink,
 			'~
 				(?<! [[.] )                      # not preceded by [ or .
@@ -362,7 +362,7 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// \* escaped asterisk
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::EscapedAsterisk,
 			'~\\\\\*~',
 			fn($context, $matches, $offsets) => new TextNode('*', new Range($offsets[0], 2)),

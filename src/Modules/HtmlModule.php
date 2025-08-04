@@ -19,9 +19,9 @@ use function strlen;
  */
 final class HtmlModule extends Texy\Module
 {
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::HtmlTag,
 			'~
 				< (/?)                                # tag begin
@@ -41,7 +41,7 @@ final class HtmlModule extends Texy\Module
 			$this->parseTag(...),
 		);
 
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::HtmlComment,
 			'~
 				<!--
@@ -51,7 +51,7 @@ final class HtmlModule extends Texy\Module
 			$this->parseComment(...),
 		);
 
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::HtmlEntity,
 			'~' . Texy\Helpers::EntityPattern . '~',
 			$this->parseEntity(...),

@@ -18,5 +18,5 @@ abstract class Module
 	 * Declares the syntaxes by addInline(), addBlock(), declare() and setGapHandler(), nothing else;
 	 * what the module does over the whole document is a pass the facade adds.
 	 */
-	abstract public function register(Texy $texy): void;
+	abstract public function register(Parsing\Engine $engine): void;
 }

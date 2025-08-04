@@ -41,15 +41,15 @@ final class ListModule extends Texy\Module
 	];
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
 		$re = [];
 		foreach (self::Bullets as $name => $bullets) {
-			$texy->declare($name);
+			$engine->declare($name);
 			array_push($re, ...array_column($bullets, 0));
 		}
 
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::List,
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)? # modifier (1)
@@ -60,7 +60,7 @@ final class ListModule extends Texy\Module
 			$this->parseList(...),
 		);
 
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::DefinitionList,
 			'~^
 				(?:' . Patterns::MODIFIER_H . '\n)?   # modifier (1)

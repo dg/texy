@@ -36,9 +36,9 @@ final class HeadingModule extends Texy\Module
 	}
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::HeadingUnderlined,
 			'~^
 				( \S .{0,1000} )                        # heading text (1)
@@ -49,7 +49,7 @@ final class HeadingModule extends Texy\Module
 			$this->parseUnderline(...),
 		);
 
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::HeadingSurrounded,
 			'~^
 				( \#{2,}+ | ={2,}+ )                    # opening characters (1)

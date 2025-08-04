@@ -30,10 +30,10 @@ final class ImageModule extends Texy\Module
 	}
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
 		// [*image*]:LINK
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Image,
 			'~
 				\[\* \ *+                         # opening bracket with asterisk
@@ -50,7 +50,7 @@ final class ImageModule extends Texy\Module
 		);
 
 		// [*ref*]: url .(title)[class]{style}
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::ImageDefinition,
 			'~^
 				\[\*                              # opening [*

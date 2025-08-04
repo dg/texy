@@ -19,9 +19,9 @@ use function strlen;
  */
 final class DirectiveModule extends Texy\Module
 {
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::Directive,
 			'~
 				\{\{

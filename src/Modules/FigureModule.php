@@ -25,9 +25,9 @@ final class FigureModule extends Texy\Module
 	}
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::Figure,
 			'~^
 				(?>

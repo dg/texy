@@ -34,13 +34,13 @@ final class DelimitedBlockModule extends Texy\Module
 	];
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
 		foreach (self::Types as $name) {
-			$texy->declare($name, enabled: $name !== Syntax::DelimitedTexySource);
+			$engine->declare($name, enabled: $name !== Syntax::DelimitedTexySource);
 		}
 
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::Delimited,
 			'~^
 				/--++ \ *+                    # opening tag /--

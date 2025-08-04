@@ -22,9 +22,9 @@ final class TableModule extends Texy\Module
 	private bool $disableTables = false;
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::Table,
 			'~^
 				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)

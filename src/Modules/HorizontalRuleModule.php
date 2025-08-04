@@ -19,9 +19,9 @@ use function strlen;
  */
 final class HorizontalRuleModule extends Texy\Module
 {
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::HorizontalRule,
 			'~^
 				( \*{3,}+ | -{3,}+ )             # three or more * or - (1)

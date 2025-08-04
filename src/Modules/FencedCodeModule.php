@@ -19,9 +19,9 @@ use function strlen;
  */
 final class FencedCodeModule extends Texy\Module
 {
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::FencedCode,
 			'~^
 				(`{3,}) \ *+                        # opening fence (1)

@@ -19,10 +19,10 @@ use function strlen;
  */
 final class AutolinkModule extends Texy\Module
 {
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::AutolinkUrl,
 			'~
 				(?<= ^ | [\s([<:>] )                 # must be preceded by these chars, > ends a tag
@@ -35,7 +35,7 @@ final class AutolinkModule extends Texy\Module
 		);
 
 		// direct email
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::AutolinkEmail,
 			'~
 				(?<= ^ | [\s([<>] )                  # must be preceded by these chars, > ends a tag

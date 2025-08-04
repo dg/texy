@@ -30,12 +30,12 @@ final class LinkReferenceModule extends Texy\Module
 	}
 
 
-	public function register(Texy\Texy $texy): void
+	public function register(Texy\Parsing\Engine $engine): void
 	{
-		$texy->declare(Syntax::LinkReference, enabled: false);
+		$engine->declare(Syntax::LinkReference, enabled: false);
 
 		// [ref]: url label .(title)[class]{style}
-		$texy->addBlock(
+		$engine->addBlock(
 			Syntax::LinkDefinition,
 			'~^
 				\[
@@ -51,7 +51,7 @@ final class LinkReferenceModule extends Texy\Module
 
 		// [reference] - bare reference link (opt-in); the raw target is kept in
 		// LinkNode::$ref for consumer resolution passes (wiki links etc.)
-		$texy->addInline(
+		$engine->addInline(
 			Syntax::LinkReference,
 			'~
 				(?<! [.\#\[] )        # exclude modifier .[class], PHP attribute \#[Attr] and nested [
