@@ -24,7 +24,7 @@ use const ENT_NOQUOTES;
 class Texy
 {
 	// Texy version
-	public const VERSION = '3.2.5';
+	public const VERSION = '3.2.6';
 
 	// configuration directives
 	public const
