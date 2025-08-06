@@ -46,9 +46,9 @@ Assert::match(
 
 
 		';
-				ob_start(fn() => '') /* line 8 */;
+				ob_start(fn() => '') /* line %a% */;
 				try {
-					echo %a%'dynamic<>'%a% /* line 9 */;
+					echo %a%'dynamic<>'%a% /* line %a% */;
 					echo '
 		-----
 		<x n:attr>
