@@ -86,3 +86,12 @@ test('clone leaves the original untouched', function () {
 
 	Assert::same('one', $original->findFirst(TextNode::class)->text);
 });
+
+
+test('transforming a clone leaves the modifiers of the original untouched', function () {
+	$texy = new Texy\Texy;
+	$original = $texy->parse('"text .(a "title" ...)":https://example.com');
+	$texy->transform(clone $original);
+
+	Assert::same('a "title" ...', $original->findFirst(Texy\Nodes\LinkNode::class)->modifier->title);
+});

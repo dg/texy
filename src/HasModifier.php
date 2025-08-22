@@ -13,5 +13,7 @@ namespace Texy;
  */
 interface HasModifier
 {
+	public ?Modifier $modifier { get; set; }
+
 	function getModifier(): ?Modifier;
 }

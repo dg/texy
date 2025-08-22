@@ -5,43 +5,44 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy\Modules;
+namespace Texy\Typography;
 
 use Texy\{Config, Patterns, Regexp};
 
 
 /**
- * Applies typographic corrections (quotes, dashes, ellipsis, non-breaking spaces).
+ * Typographic corrections (quotes, dashes, ellipsis, non-breaking spaces). Its patterns are
+ * written over the image of Passes\TextRunPass.
  * @internal
  */
-final class TypographyModule
+final class Typographer
 {
 	/**
 	 * search => replacement; :ldq:/:rdq:/:lsq:/:rsq: are placeholders for locale quotes
 	 * @var array<string, string>
 	 */
 	private array $replacements = [
-		'~(?<! [.\x{2026}] ) \.{3,4} (?! [.\x{2026}] )~mx'  => "\u{2026}",                // ellipsis  ...
-		'~(?<= [\d ] | ^ ) - (?= [\d ] | $)~x' /* .         */ => "\u{2013}",                // en dash 123-123
+		'~(?<! [.\x{2026}] ) \.{3,4} (?! [.\x{2026}] )~mx'  => '…',                       // ellipsis  ...
+		'~(?<= [\d ] | ^ ) - (?= [\d ] | $)~x' /* .      */ => "\u{2013}",                // en dash 123-123
 		'~(?<= [^!*+,/:;<=>@\\\_|-] ) -- (?= [^!*+,/:;<=>@\\\_|-] )~x' => "\u{2013}",   // en dash alphanum--alphanum
-		'~,-~' /* .                               */ => ",\u{2013}",               // en dash ,-
-		'~(?<! \d ) (\d{1,2}\.) \ (\d{1,2}\.) \ (\d\d)~x' => "\$1\u{A0}\$2\u{A0}\$3",      // date 23. 1. 1978
-		'~(?<! \d ) (\d{1,2}\.) \ (\d{1,2}\.)~x' /* .  */ => "\$1\u{A0}\$2",            // date 23. 1.
-		'~\ ---\ ~' /* .                          */ => "\u{A0}\u{2014} ",         // em dash ---
-		'~\ ([\x{2013}\x{2014}])~' /* .           */ => "\u{A0}\$1",               // &nbsp; behind dash (dash stays at line end)
-		'~\ <-{1,2} >\ ~x' /* .                      */ => " \u{2194} ",              // left right arrow <-->
-		'~-{1,}>\ ~' /* .                          */ => "\u{2192} ",               // right arrow -->
-		'~\ <-{1,}~' /* .                         */ => " \u{2190} ",              // left arrow <--
-		'~={1,}>\ ~' /* .                         */ => "\u{21D2} ",              // right arrow ==>
-		'~\+-~' /* .                              */ => "\u{B1}",                  // +-
-		'~(\d++) \ x\ (?= \d)~x' /* .                */ => "\$1\u{A0}\u{D7}\u{A0}",   // dimension sign 123 x 123...
-		'~(\d++) x (?= \d)~x' /* .                    */ => "\$1\u{D7}",               // dimension sign 123x123...
-		'~(?<= \d ) x (?= \ |,|\.|$ )~mx' /* .           */ => "\u{D7}",                  // dimension sign 123x
-		'~(\S\ ?) \(TM\)~ix' /* .                   */ => "\$1\u{2122}",             // trademark (TM)
-		'~(\S\ ?) \(R\)~ix' /* .                    */ => "\$1\u{AE}",               // registered (R)
-		'~\(C\) (\ ?\S)~ix' /* .                    */ => "\u{A9}\$1",               // copyright (C)
-		'~\(EUR\)~' /* .                          */ => "\u{20AC}",                // Euro (EUR)
-		'~(\d) \ (?= \d{3})~x' /* .                  */ => "\$1\u{A0}",               // (phone) number 1 123 123 123...
+		'~,-~' /* .                                      */ => ",\u{2013}",               // en dash ,-
+		'~(?<! \d ) (\d{1,2}\.) \ (\d{1,2}\.) \ (\d\d)~x' => "\$1\u{A0}\$2\u{A0}\$3",     // date 23. 1. 1978
+		'~(?<! \d ) (\d{1,2}\.) \ (\d{1,2}\.)~x' /* .    */ => "\$1\u{A0}\$2",            // date 23. 1.
+		'~\ ---\ ~' /* .                                 */ => "\u{A0}\u{2014} ",         // em dash ---
+		'~\ ([\x{2013}\x{2014}])~' /* .                  */ => "\u{A0}\$1",               // &nbsp; behind dash (dash stays at line end)
+		'~\ <-{1,2} >\ ~x' /* .                          */ => ' ↔ ',                     // left right arrow <-->
+		'~-{1,}>\ ~' /* .                                */ => '→ ',                      // right arrow -->
+		'~\ <-{1,}~' /* .                                */ => ' ← ',                     // left arrow <--
+		'~={1,}>\ ~' /* .                                */ => '⇒ ',                      // right arrow ==>
+		'~\+-~' /* .                                     */ => '±',                       // +-
+		'~(\d++) \ x\ (?= \d)~x' /* .                    */ => "\$1\u{A0}×\u{A0}",        // dimension sign 123 x 123...
+		'~(\d++) x (?= \d)~x' /* .                       */ => '$1×',                     // dimension sign 123x123...
+		'~(?<= \d ) x (?= \ |,|\.|$ )~mx' /* .           */ => '×',                       // dimension sign 123x
+		'~(\S\ ?) \(TM\)~ix' /* .                        */ => '$1™',                     // trademark (TM)
+		'~(\S\ ?) \(R\)~ix' /* .                         */ => '$1®',                     // registered (R)
+		'~\(C\) (\ ?\S)~ix' /* .                         */ => '©$1',                     // copyright (C)
+		'~\(EUR\)~' /* .                                 */ => '€',                       // Euro (EUR)
+		'~(\d) \ (?= \d{3})~x' /* .                      */ => "\$1\u{A0}",               // (phone) number 1 123 123 123...
 
 		// CONTENT_MARKUP mark: \x17-\x1F, CONTENT_REPLACED mark: \x16, CONTENT_TEXTUAL mark: \x17
 		'~(?<= [^\s\x17] ) \s++ ([\x17-\x1F]++)(?= \s)~x'  => '$1',                      // remove intermarkup space phase 1
@@ -79,7 +80,7 @@ final class TypographyModule
 	}
 
 
-	public function postLine(string $text, bool $preserveSpaces = false): string
+	public function correct(string $text, bool $preserveSpaces = false): string
 	{
 		if (!$preserveSpaces) {
 			$text = Regexp::replace($text, '~\ {2,}~', ' ');
