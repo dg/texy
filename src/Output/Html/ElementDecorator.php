@@ -23,7 +23,6 @@ final class ElementDecorator
 	public function __construct(
 		private HtmlPolicy $policy,
 		private Config $config,
-		private Renderer $renderer,
 	) {
 	}
 
@@ -53,7 +52,7 @@ final class ElementDecorator
 		}
 
 		if ($modifier->title !== null) {
-			$attrs['title'] = $this->renderer->postLineText($modifier->title);
+			$attrs['title'] = $modifier->title;
 		}
 	}
 

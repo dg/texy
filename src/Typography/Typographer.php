@@ -5,16 +5,17 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy\Modules;
+namespace Texy\Typography;
 
 use Texy\{Config, Patterns, Regexp};
 
 
 /**
- * Applies typographic corrections (quotes, dashes, ellipsis, non-breaking spaces).
+ * Typographic corrections (quotes, dashes, ellipsis, non-breaking spaces). Its patterns are
+ * written over the image of Passes\TextRunPass.
  * @internal
  */
-final class TypographyModule
+final class Typographer
 {
 	/**
 	 * search => replacement; :ldq:/:rdq:/:lsq:/:rsq: are placeholders for locale quotes
@@ -79,7 +80,7 @@ final class TypographyModule
 	}
 
 
-	public function postLine(string $text, bool $preserveSpaces = false): string
+	public function correct(string $text, bool $preserveSpaces = false): string
 	{
 		if (!$preserveSpaces) {
 			$text = Regexp::replace($text, '~\ {2,}~', ' ');

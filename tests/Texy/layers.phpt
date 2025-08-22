@@ -9,7 +9,7 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-const EngineDirectories = ['Parsing', 'Nodes', 'Output'];
+const EngineDirectories = ['Parsing', 'Nodes', 'Passes', 'Typography', 'Output'];
 
 
 function isForbidden(string $class): bool

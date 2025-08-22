@@ -106,6 +106,8 @@ class Texy
 		$this->engine->addPass($image->resolveReferences(...));
 		$this->engine->addPass($link->resolveReferences(...));
 		$this->engine->addPass($heading->processHeadings(...));
+
+		Passes\DocumentPasses::register($this->engine, $this->config);
 	}
 
 
@@ -183,19 +185,15 @@ class Texy
 	 */
 	public function createHtmlRenderer(): Output\Html\Renderer
 	{
-		$typography = $this->config->typography ? new Modules\TypographyModule($this->config)->postLine(...) : null;
-		$hyphenation = $this->config->hyphenation ? new Modules\HyphenationModule($this->config)->postLine(...) : null;
-		$postHandlers = array_filter(
-			$this->postHandlers,
-			fn(string $name): bool => !empty($this->allowedSyntax[$name]),
-			ARRAY_FILTER_USE_KEY,
-		);
 		return new Output\Html\Renderer(
 			$this->htmlOutput,
 			$this->htmlPolicy,
 			$this->urlPolicy,
-			$typography,
-			[...array_filter([$typography, $hyphenation]), ...array_values($postHandlers)],
+			array_values(array_filter(
+				$this->postHandlers,
+				fn(string $name): bool => !empty($this->allowedSyntax[$name]),
+				ARRAY_FILTER_USE_KEY,
+			)),
 		);
 	}
 
@@ -225,7 +223,7 @@ class Texy
 
 	/**
 	 * Turns the syntax tree into the document: resolves references, balances
-	 * headings and applies the consumer's passes.
+	 * headings, applies typography and the consumer's passes.
 	 * Changes the tree in place and returns it; a second call for one document throws.
 	 */
 	public function transform(Nodes\DocumentNode $document): Nodes\DocumentNode
@@ -272,10 +270,10 @@ class Texy
 		$text = Helpers::normalize($text);
 
 		$this->config->validate();
-		$text = new Modules\TypographyModule($this->config)->postLine($text, preserveSpaces: true);
+		$text = new Typography\Typographer($this->config)->correct($text, preserveSpaces: true);
 
 		if ($this->config->hyphenation) {
-			$text = new Modules\HyphenationModule($this->config)->postLine($text);
+			$text = new Typography\CzechHyphenator($this->config)->hyphenate($text);
 		}
 
 		return $text;

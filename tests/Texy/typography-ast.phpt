@@ -1,0 +1,151 @@
+<?php declare(strict_types=1);
+
+/**
+ * Test: typography and hyphenation as an AST transform.
+ */
+
+use Tester\Assert;
+
+require __DIR__ . '/../bootstrap.php';
+
+
+function convert(string $text): string
+{
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	return $texy->toHtml($text);
+}
+
+
+test('basic typography', function () {
+	Assert::same("<p>Rekl „ahoj“ a sel…</p>\n", convert('Rekl "ahoj" a sel...'));
+	Assert::same("<p>Vazi 5\u{A0}kg a stoji 10\u{A0}EUR</p>\n", convert('Vazi 5 kg a stoji 10 EUR'));
+	Assert::same("<p>datum 23.\u{A0}1.\u{A0}1978 je datum</p>\n", convert('datum 23. 1. 1978 je datum'));
+	Assert::same("<p>rozmer je 10\u{A0}\u{D7}\u{A0}20 cm</p>\n", convert('rozmer je 10 x 20 cm'));
+	Assert::same("<p>text \u{A9} a \u{2122} a \u{B1}</p>\n", convert('text (c) a (TM) a +-'));
+});
+
+
+test('quotes pair across phrase boundaries', function () {
+	Assert::same(
+		"<p>řekl „ahoj <strong>světe</strong>!“ a šel</p>\n",
+		convert('řekl "ahoj **světe**!" a šel'),
+	);
+});
+
+
+test('the content of an unknown inline node gets typography', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('outside "quoted" ...');
+	$doc->findFirst(Texy\Nodes\ParagraphNode::class)->content->children[] = new class (new Texy\Nodes\ContentNode(
+		[new Texy\Nodes\TextNode(' and inside "quoted" ...')],
+	)) extends Texy\Nodes\InlineNode {
+		public function __construct(
+			public Texy\Nodes\ContentNode $content,
+		) {
+		}
+
+
+		public function &getChildren(): Generator
+		{
+			yield $this->content;
+		}
+	};
+
+	Assert::same("<p>outside „quoted“ … and inside „quoted“ …</p>\n", $texy->createHtmlRenderer()->render($texy->transform($doc)));
+});
+
+
+test('code phrase content is protected from typography', function () {
+	Assert::same(
+		"<p>napiš <code>\"quotes\" -- ...</code> takto</p>\n",
+		convert('napiš `"quotes" -- ...` takto'),
+	);
+});
+
+
+test('long words get soft hyphens', function () {
+	Assert::contains("\u{AD}", convert('Dlouheslovohodnedlouhatezkorozdelitelne slovo'));
+});
+
+
+test('typography can be disabled', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	$texy->config->typography = false;
+	Assert::same("<p>Rekl \"ahoj\" a sel...</p>\n", $texy->toHtml('Rekl "ahoj" a sel...'));
+});
+
+
+test('hyphenation can be disabled', function () {
+	$texy = new Texy\Texy;
+	$texy->config->hyphenation = false;
+	Assert::notContains("\u{AD}", $texy->toHtml('Dlouheslovohodnedlouhatezkorozdelitelne slovo'));
+});
+
+
+test('modifier title gets typography exactly once', function () {
+	$texy = new Texy\Texy;
+	Assert::same(
+		"<p title=\"říká „ahoj“\">text</p>\n",
+		$texy->toHtml('text .(říká "ahoj")'),
+	);
+});
+
+
+test('disabled typography leaves titles and alt alone', function () {
+	$texy = new Texy\Texy;
+	$texy->config->typography = false;
+	Assert::same(
+		"<p title=\"s &quot;uvozovkami&quot;\">text -- ok</p>\n",
+		$texy->toHtml('text -- ok .(s "uvozovkami")'),
+	);
+
+	$texy = new Texy\Texy;
+	$texy->config->typography = false;
+	$html = $texy->toHtml('[* obr.png .(popisek "v uvozovkach") *]');
+	Assert::contains('alt="popisek &quot;v uvozovkach&quot;"', $html);
+});
+
+
+test('image alt gets typography', function () {
+	$texy = new Texy\Texy;
+	$html = $texy->toHtml('[* obr.png .(popisek "v uvozovkach") *]');
+	Assert::contains("alt=\"popisek „v\u{A0}uvozovkach“\"", $html);
+});
+
+
+test('render is repeatable on typographed AST (purity)', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('Rekl "ahoj **svete**" a vazi 5 kg');
+	$texy->transform($doc);
+	Assert::same(
+		$texy->createHtmlRenderer()->render($doc),
+		$texy->createHtmlRenderer()->render($doc),
+	);
+});
+
+
+test('entities are decoded before typography', function () {
+	// &#160; must act as nbsp, not as a 6-character word for hyphenation
+	Assert::notContains(
+		"&amp;\u{AD}#160;",
+		convert('slovo&#160;dlouheslovokterehyphenacevidi neco'),
+	);
+});
+
+
+test('block-level passthrough tag splits the typographic segment', function () {
+	// quotes must not pair across a block tag
+	$html = convert('text "prvni <div>blok</div> druha" konec');
+	Assert::notContains('„', $html);
+});
+
+
+test('phrase modifier title is typographed once', function () {
+	$texy = new Texy\Texy;
+	Assert::same(
+		"<p><strong title=\"s „uvozovkami“\">tucne</strong></p>\n",
+		$texy->toHtml('**tucne .(s "uvozovkami")**'),
+	);
+});
