@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\{HtmlPolicy, Nodes, Texy, UrlPolicy};
+use Texy\{HtmlPolicy, Modifier, Nodes, Texy, UrlPolicy};
 use Texy\Output\Html;
 
 require __DIR__ . '/../bootstrap.php';
@@ -44,6 +44,24 @@ test('per-document facts come from the document, so one renderer serves differen
 	Assert::notContains('nofollow', $renderer->render($plain));
 	Assert::contains('rel="nofollow"', $renderer->render($noFollow));
 	Assert::notContains('nofollow', $renderer->render($plain)); // no leak from the previous render
+});
+
+
+test('the title is typographed by transform(), the renderer leaves it as it is', function () {
+	$texy = new Texy;
+
+	$doc = $texy->parse('"link .(title "quoted")":https://example.com');
+	$texy->transform($doc);
+	Assert::contains('title="title „quoted“"', $texy->createHtmlRenderer()->render($doc));
+
+	$modifier = new Modifier;
+	$modifier->title = 'title "quoted"';
+	$handMade = new Nodes\DocumentNode(new Nodes\ContentNode([
+		new Nodes\ParagraphNode(new Nodes\ContentNode([
+			new Nodes\LinkNode('https://example.com', new Nodes\ContentNode([new Nodes\TextNode('link')]), $modifier),
+		])),
+	]));
+	Assert::contains('title="title &quot;quoted&quot;"', $texy->createHtmlRenderer()->render($handMade));
 });
 
 

@@ -43,14 +43,12 @@ final class Renderer extends NodeRenderer
 		public readonly Config $config,
 		private HtmlPolicy $htmlPolicy,
 		private UrlPolicy $urlPolicy,
-		/** @var ?\Closure(string): string typography for isolated strings (title, alt); null = disabled */
-		private ?\Closure $postLine = null,
 		/** @var list<\Closure(string): string> post-processing of the document text */
 		private array $postHandlers = [],
 	) {
 		$this->noFollow = $config->linkNoFollow;
 		$this->imageDimensions = new ImageDimensions($config);
-		$this->decorator = new ElementDecorator($htmlPolicy, $urlPolicy, $config, $this);
+		$this->decorator = new ElementDecorator($htmlPolicy, $urlPolicy, $config);
 
 		$this->handlers = [
 			// Core nodes
@@ -243,16 +241,6 @@ final class Renderer extends NodeRenderer
 		return $inlineType === null
 			? self::ContentBlock
 			: ($inlineType ? self::ContentReplaced : self::ContentMarkup);
-	}
-
-
-	/**
-	 * Applies typography to an isolated string (title, alt) unless typography is disabled.
-	 * @internal
-	 */
-	public function postLineText(string $s): string
-	{
-		return $this->postLine !== null ? ($this->postLine)($s) : $s;
 	}
 
 
@@ -626,7 +614,7 @@ final class Renderer extends NodeRenderer
 		$this->decorateElement($node->modifier, $el);
 		$el->attrs = [
 			'src' => Helpers::prependRoot($node->url, $this->config->imageBaseUrl),
-			'alt' => $this->postLineText($node->alt ?? ''),
+			'alt' => $node->alt ?? '',
 		] + $el->attrs;
 		$this->applyFloat($el, $node->float);
 

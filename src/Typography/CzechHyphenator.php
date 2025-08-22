@@ -5,17 +5,18 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy\Modules;
+namespace Texy\Typography;
 
 use Texy\{Config, Patterns, Regexp};
 use function count;
 
 
 /**
- * Breaks long words with soft hyphens for better line wrapping.
+ * Breaks long words with soft hyphens for better line wrapping. Its patterns are
+ * written over the image of Passes\TextRunPass.
  * @internal
  */
-final class HyphenationModule
+final class CzechHyphenator
 {
 	private const
 		Dont = 0, // don't hyphenate
@@ -71,7 +72,7 @@ final class HyphenationModule
 	}
 
 
-	public function postLine(string $text): string
+	public function hyphenate(string $text): string
 	{
 		return Regexp::replace(
 			$text,
