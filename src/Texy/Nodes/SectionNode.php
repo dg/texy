@@ -8,7 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
-use Texy\HasModifier;
+use Texy\{HasModifier, Range};
 
 
 /**
@@ -22,6 +22,7 @@ class SectionNode extends BlockNode implements HasModifier
 		public ContentNode $content = new ContentNode,
 		public ?string $type = null,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

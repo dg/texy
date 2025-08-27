@@ -8,7 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
-use Texy\HasModifier;
+use Texy\{HasModifier, Range};
 
 
 /**
@@ -29,6 +29,7 @@ class CodeBlockNode extends BlockNode implements HasModifier
 		public string $code,
 		public ?string $language = null,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 		/** the code parsed, for types whose code is markup: html, pre and texysource */
 		public ?ContentNode $content = null,
 	) {

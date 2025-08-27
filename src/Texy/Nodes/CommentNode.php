@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Comment.
@@ -17,6 +19,7 @@ class CommentNode extends BlockNode
 {
 	public function __construct(
 		public string $text,
+		public ?Range $range = null,
 	) {
 	}
 }

@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Emoticon.
@@ -20,6 +22,7 @@ class EmoticonNode extends InlineNode
 
 	public function __construct(
 		public string $emoticon,
+		public ?Range $range = null,
 	) {
 	}
 }

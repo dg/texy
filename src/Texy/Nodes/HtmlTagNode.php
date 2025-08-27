@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * HTML tag.
@@ -16,10 +18,11 @@ class HtmlTagNode extends InlineNode
 {
 	public function __construct(
 		public string $name,
-		/** @var array<string, string|bool|null> */
+		/** @var array<string, string|bool|null> HTML attributes */
 		public array $attributes = [],
 		public bool $closing = false,
 		public bool $selfClosing = false,
+		public ?Range $range = null,
 	) {
 	}
 }

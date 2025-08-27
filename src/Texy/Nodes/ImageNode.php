@@ -7,7 +7,7 @@
 
 namespace Texy\Nodes;
 
-use Texy\{HasModifier, Modifier};
+use Texy\{HasModifier, Modifier, Range};
 
 
 /**
@@ -21,6 +21,7 @@ class ImageNode extends InlineNode implements HasModifier
 		public ?int $width = null,
 		public ?int $height = null,
 		public ?Modifier $modifier = null,
+		public ?Range $range = null,
 		/** Original reference name for images written as [*ref*]; survives resolution */
 		public ?string $ref = null,
 	) {

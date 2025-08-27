@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Raw text.
@@ -16,6 +18,7 @@ class RawTextNode extends InlineNode
 {
 	public function __construct(
 		public string $text,
+		public ?Range $range = null,
 	) {
 	}
 }

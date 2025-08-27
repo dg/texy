@@ -10,7 +10,8 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\{HtmlCommentNode, HtmlTagNode, TextNode};
 use Texy\Parsing\ParseContext;
-use Texy\{Patterns, Regexp, Syntax};
+use Texy\{Patterns, Range, Regexp, Syntax};
+use function strlen;
 
 
 /**
@@ -47,7 +48,7 @@ final class HtmlModule extends Texy\Module
 		);
 
 		$this->texy->registerLinePattern(
-			fn(ParseContext $context, array $matches) => new HtmlCommentNode((string) $matches[1]),
+			$this->parseComment(...),
 			'~
 				<!--
 				( [^' . Patterns::MARK . ']*? )
@@ -66,23 +67,36 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Parses &amp;, &#160;, &#xA0;
-	 * @param  array<?string>  $matches
+	 * @param  array{string}  $matches
+	 * @param  array{int}  $offsets
 	 */
-	public function parseEntity(ParseContext $context, array $matches): ?TextNode
+	public function parseEntity(ParseContext $context, array $matches, array $offsets): ?TextNode
 	{
-		/** @var array{string} $matches */
 		$decoded = Texy\Helpers::decodeEntity($matches[0]);
-		return $decoded === null ? null : new TextNode($decoded);
+		return $decoded === null
+			? null
+			: new TextNode($decoded, new Range($offsets[0], strlen($matches[0])));
+	}
+
+
+	/**
+	 * Parses <!-- comment -->
+	 * @param  array{string, string}  $matches
+	 * @param  array{int, int}  $offsets
+	 */
+	public function parseComment(ParseContext $context, array $matches, array $offsets): HtmlCommentNode
+	{
+		return new HtmlCommentNode($matches[1], new Range($offsets[0], strlen($matches[0])));
 	}
 
 
 	/**
 	 * Parses <tag attr="...">
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, string, string, string}  $matches
+	 * @param  array{int, int, int, int, int}  $offsets
 	 */
-	public function parseTag(ParseContext $context, array $matches): ?HtmlTagNode
+	public function parseTag(ParseContext $context, array $matches, array $offsets): ?HtmlTagNode
 	{
-		/** @var array{string, string, string, string, string} $matches */
 		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 
 		$isStart = $mEnd !== '/';
@@ -108,6 +122,7 @@ final class HtmlModule extends Texy\Module
 			$isStart ? $this->parseAttributes($mAttr) : [],
 			closing: !$isStart,
 			selfClosing: $isEmpty,
+			range: new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 

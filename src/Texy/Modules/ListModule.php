@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Modifier, Patterns, Regexp, Syntax};
+use Texy\{Modifier, Patterns, Range, Regexp, Syntax};
 use Texy\Nodes\{DefinitionListNode, ListItemNode, ListNode, ListType};
 use Texy\Parsing\ParseContext;
 use function count, strlen;
@@ -82,11 +82,11 @@ final class ListModule extends Texy\Module
 
 	/**
 	 * Parses list.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, ?string, string}  $matches
+	 * @param  array{int, ?int, int}  $offsets
 	 */
-	public function parseList(ParseContext $context, array $matches): ?ListNode
+	public function parseList(ParseContext $context, array $matches, array $offsets): ?ListNode
 	{
-		/** @var array{string, ?string, string} $matches */
 		[, $mMod, $mBullet] = $matches;
 
 		$bullet = null;
@@ -131,18 +131,19 @@ final class ListModule extends Texy\Module
 			$items,
 			$listType,
 			$start,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[1]),
+			$this->createRange($offsets[0], $items),
 		);
 	}
 
 
 	/**
 	 * Parses definition list.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, ?string, string, ?string, string, string}  $matches
+	 * @param  array{int, ?int, int, ?int, int, int}  $offsets
 	 */
-	public function parseDefList(ParseContext $context, array $matches): ?DefinitionListNode
+	public function parseDefList(ParseContext $context, array $matches, array $offsets): ?DefinitionListNode
 	{
-		/** @var array{string, ?string, string, ?string, string, string} $matches */
 		[, $mMod, , , , $mBullet] = $matches;
 
 		$bullet = null;
@@ -175,21 +176,30 @@ final class ListModule extends Texy\Module
 			}
 
 			$termMatches = null;
-			if ($context->getBlockParser()->next($patternTerm, $termMatches)) {
+			$termOffsets = null;
+			if ($context->getBlockParser()->next($patternTerm, $termMatches, $termOffsets)) {
 				/** @var array{string, string, ?string} $termMatches */
 				[, $mContent, $mTermMod] = $termMatches;
-				$termMod = Modifier::parse($mTermMod);
-				$termContent = $context->parseInline($mContent);
-				$items[] = new ListItemNode($termContent, true, $termMod);
+				$termMod = Modifier::parse($mTermMod, $termOffsets[2] ?? null);
+				// groups 0 and 1 always participate in a successful match, but next() cannot type that
+				$termOffset = $termOffsets[0] ?? throw new \LogicException('Match without group 0.');
+				$contentOffset = $termOffsets[1] ?? throw new \LogicException('Match without group 1.');
+				$termContent = $context->parseInline($mContent, $contentOffset);
+				$items[] = new ListItemNode($termContent, true, $termMod, new Range($termOffset, strlen($termMatches[0])));
 				continue;
 			}
 
 			break;
 		}
 
+		if (!$items) {
+			return null;
+		}
+
 		return new DefinitionListNode(
 			$items,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[1]),
+			$this->createRange($offsets[0], $items),
 		);
 	}
 
@@ -210,22 +220,34 @@ final class ListModule extends Texy\Module
 		$~mAUx';
 
 		$matches = null;
-		if (!$context->getBlockParser()->next($patternItem, $matches)) {
+		$offsets = null;
+		if (!$context->getBlockParser()->next($patternItem, $matches, $offsets)) {
 			return null;
 		}
 
 		/** @var array{string, string, ?string, ?string} $matches */
 		[, $mIndent, $mContent, $mMod] = $matches;
+		// group 0 always participates in a successful match, but next() cannot type that
+		$itemOffset = $offsets[0] ?? throw new \LogicException('Match without group 0.');
+		$modOffset = $offsets[3] ?? null;
+		$itemEnd = $itemOffset + strlen($matches[0]);
+
+		// Assemble content and map local line starts to absolute source offsets
+		$map = [];
+		$content = ' ' . ($mContent ?? '');
+		if ($mContent !== null) {
+			// content matched, so group 2 participated and carries an offset
+			$map[1] = $offsets[2] ?? throw new \LogicException('Content without group 2.'); // 1 = the leading space
+		}
 
 		// next lines
 		$spaces = '';
-		$content = ' ' . ($mContent ?? '');
 		while ($context->getBlockParser()->next('~^
 			(\n*)
 			' . Regexp::quote($mIndent) . '
 			([ \t]{1,' . $spaces . '})
 			(.*)                                     # content (3)
-		$~Amx', $matches)) {
+		$~Amx', $matches, $offsets)) {
 			/** @var array{string, string, string, string} $matches */
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 
@@ -233,16 +255,39 @@ final class ListModule extends Texy\Module
 				$spaces = strlen($mSpaces);
 			}
 
+			if ($mContent !== '' && $offsets[3] !== null) {
+				$map[strlen($content) + 1 + strlen($mBlank)] = $offsets[3]; // 1 = "\n"
+			}
+
 			$content .= "\n" . $mBlank . $mContent;
+			$itemEnd = ($offsets[0] ?? throw new \LogicException('Match without group 0.')) + strlen($matches[0]);
 		}
 
 		// Parse content as blocks
 		$parsed = $context->parseBlock(trim($content));
 
+		// Fix positions in parsed content using offset mapping
+		if ($map) {
+			$skipped = strlen($content) - strlen(ltrim($content));
+			(new Texy\Parsing\OffsetMap($map, $skipped))->applyTo($parsed);
+		}
+
 		return new ListItemNode(
 			$parsed,
 			false,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $modOffset),
+			new Range($itemOffset, $itemEnd - $itemOffset),
 		);
+	}
+
+
+	/**
+	 * Range of a whole list, from its start to the end of its last item.
+	 * @param  non-empty-list<ListItemNode>  $items
+	 */
+	private function createRange(int $offset, array $items): Range
+	{
+		$last = $items[count($items) - 1]->range ?? throw new \LogicException('List item without range.');
+		return new Range($offset, $last->offset + $last->length - $offset);
 	}
 }

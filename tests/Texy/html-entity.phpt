@@ -71,3 +71,14 @@ test('code content is not touched by the entity syntax', function () {
 		$texy->process('`&amp;`'),
 	);
 });
+
+
+test('an entity node carries the exact source range', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('x &amp; y');
+	$paragraph = $doc->content->children[0];
+	$entity = $paragraph->content->children[1];
+	Assert::same('&', $entity->text);
+	Assert::same(2, $entity->range->offset);
+	Assert::same(5, $entity->range->length);
+});
