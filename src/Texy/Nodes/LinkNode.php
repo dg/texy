@@ -8,7 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
-use Texy\HasModifier;
+use Texy\{HasModifier, Range};
 
 
 /**
@@ -22,6 +22,7 @@ class LinkNode extends InlineNode implements HasModifier
 		public ?string $url = null,
 		public ContentNode $content = new ContentNode,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 		/** Link targets an image URL (use imageModule.root instead of linkModule.root) */
 		public bool $isImageLink = false,
 		/** Original reference name for links written as [ref]; survives resolution */

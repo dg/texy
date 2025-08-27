@@ -76,25 +76,25 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>
 	 */
 	private array $linePatterns = [];
 
 	/**
 	 * Inline patterns the configuration allows, cached for parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>
 	 */
 	private array $activeLinePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
 	/**
 	 * Block patterns the configuration allows, cached for parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>
 	 */
 	private array $activeBlockPatterns;
 
@@ -160,7 +160,7 @@ class Texy
 	}
 
 
-	/** @param  \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode  $handler */
+	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode */
 	final public function registerLinePattern(
 		\Closure $handler,
 		#[Language('RegExp')]
@@ -187,7 +187,7 @@ class Texy
 	}
 
 
-	/** @param  \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode  $handler */
+	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode */
 	final public function registerBlockPattern(
 		\Closure $handler,
 		#[Language('RegExp')]
@@ -238,8 +238,10 @@ class Texy
 
 
 	/**
-	 * Parses text to the syntax tree: nothing of its meaning is applied yet (see
-	 * transform()). The text is preprocessed first (idempotent).
+	 * Parses text to the syntax tree: every node records where it is written, and
+	 * nothing of its meaning is applied yet (see transform()). The text is preprocessed
+	 * first (idempotent), so node ranges always refer to the preprocessed form
+	 * obtainable via preprocess().
 	 */
 	public function parse(string $text, bool $singleLine = false): Nodes\DocumentNode
 	{
@@ -357,7 +359,7 @@ class Texy
 	 * Registers a pass: fn(Nodes\DocumentNode): void, called with the whole document.
 	 * The AST may be freely modified there; return values are ignored. A Transform pass
 	 * (the default) runs in transform(), a Syntax pass already in parse(), where it may
-	 * only finish recognizing the source.
+	 * only finish recognizing the source and keeps ranges exact.
 	 *
 	 * Passes of a stage run in registration order, so the ones registered by modules
 	 * run first and a consumer cannot get in front of them. Where that matters, call
@@ -405,7 +407,7 @@ class Texy
 		);
 		return new BlockParser(
 			$this->activeBlockPatterns,
-			fn(ParseContext $context, string $text) => $this->paragraphModule->parseText($context, $text),
+			fn(ParseContext $context, string $text, int $offset) => $this->paragraphModule->parseText($context, $text, $offset),
 		);
 	}
 

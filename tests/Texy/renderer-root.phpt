@@ -90,9 +90,9 @@ test('lineWrap preserves short lines', function () {
 });
 
 
-test('lineWrap uses htmlGenerator->formatter setting', function () {
+test('lineWrap uses htmlOutput setting', function () {
 	$texy = new Texy\Texy;
-	// AST mode now uses lineWrap from htmlGenerator->formatter (default 80)
+	// AST mode now uses lineWrap from htmlOutput (default 80)
 	Assert::same(
 		"<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis\nenim, placerat tincidunt.</p>\n",
 		$texy->process('Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur turpis enim, placerat tincidunt.'),

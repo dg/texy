@@ -28,7 +28,7 @@
  * Install FSHL: composer require kukulich/fshl
  */
 
-use Texy\Helpers;
+use Texy\{Helpers, Range};
 use Texy\Nodes\CodeBlockNode;
 use Texy\Output\Html;
 use Texy\Parsing\ParseContext;
@@ -88,7 +88,7 @@ $texy->htmlOutput->registerHandler(
 // Register NEW syntax: recognize blocks starting with <?php
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
 $texy->registerBlockPattern(
-	function (ParseContext $context, array $matches, string $name): CodeBlockNode {
+	function (ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
 		[$content] = $matches;
 		$lang = $name === 'phpBlockSyntax' ? 'php' : 'javascript';
 
@@ -96,6 +96,8 @@ $texy->registerBlockPattern(
 			'block/code',
 			$content,
 			$lang,
+			null,
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
 	'~^
@@ -106,13 +108,15 @@ $texy->registerBlockPattern(
 
 // Register NEW syntax: recognize <script> ... </script> blocks
 $texy->registerBlockPattern(
-	function (ParseContext $context, array $matches, string $name): CodeBlockNode {
+	function (ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
 		[$content] = $matches;
 
 		return new CodeBlockNode(
 			'block/code',
 			$content,
 			'html', // HTML lexer handles <script> tags well
+			null,
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
 	'~^

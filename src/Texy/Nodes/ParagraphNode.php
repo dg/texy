@@ -8,7 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
-use Texy\HasModifier;
+use Texy\{HasModifier, Range};
 
 
 /**
@@ -23,6 +23,7 @@ class ParagraphNode extends BlockNode implements HasModifier
 	public function __construct(
 		public ContentNode $content = new ContentNode,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 
