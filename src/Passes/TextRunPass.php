@@ -34,6 +34,9 @@ final class TextRunPass
 	/** piece of a text image: [text, writable target node or null] */
 	private const Break = null; // sentinel piece: block-level markup splits the image into segments
 
+	/** HTML elements holding code or preformatted text, protected like a code phrase */
+	private const VerbatimElements = ['code' => 1, 'kbd' => 1, 'pre' => 1, 'samp' => 1, 'script' => 1, 'style' => 1, 'textarea' => 1];
+
 	private Typographer $typographer;
 
 	private CzechHyphenator $hyphenator;
@@ -184,6 +187,22 @@ final class TextRunPass
 				$pieces[] = $inlineType === null
 					? self::Break // block-level tag ends the typographic segment
 					: [$inlineType ? self::Replaced : self::Markup, null];
+
+			} elseif ($node instanceof Nodes\HtmlElementNode) {
+				$name = strtolower($node->name);
+				$inlineType = Output\Html\Schema::inlineElements()[$name] ?? null;
+				$boundary = match ($inlineType) {
+					null => self::Break, // block-level element splits the segment
+					1 => [self::Replaced, null],
+					default => [self::Markup, null],
+				};
+				$pieces[] = $boundary;
+				if (isset(self::VerbatimElements[$name])) {
+					$pieces[] = [self::textualRun($node->content->getPlainText()), null];
+				} else {
+					$this->collect($node->content->children, $pieces);
+				}
+				$pieces[] = $boundary;
 
 			} elseif ($node instanceof Nodes\HtmlCommentNode) {
 				$pieces[] = [self::Markup, null];
