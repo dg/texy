@@ -56,3 +56,14 @@ test('Texy::ALL on a tag lets every attribute through', function () {
 
 	Assert::contains('onmouseover', $texy->toHtml('<b onmouseover="x">tuk</b>'));
 });
+
+
+test('filtering also applies to paired elements, not just lone tags', function () {
+	// the pairing pass turns these into HtmlElementNode, a different branch
+	$texy = new Texy;
+	Configurator::safeMode($texy);
+	$html = $texy->toHtml("<b onmouseover=\"alert(1)\">first</b>\n\nsecond");
+
+	Assert::notContains('onmouseover', $html);
+	Assert::contains('<b>first</b>', $html);
+});
