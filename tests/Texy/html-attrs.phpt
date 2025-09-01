@@ -58,7 +58,7 @@ test('Texy::ALL on a tag lets every attribute through', function () {
 });
 
 
-test('filtering also applies to a tag that is never closed', function () {
+test('filtering also applies to a lone tag the pairing pass left unpaired', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
 	Assert::same(

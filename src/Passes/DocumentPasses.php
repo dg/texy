@@ -25,6 +25,7 @@ final class DocumentPasses
 
 	public static function register(Engine $engine, Config $config): void
 	{
+		$engine->addPass((new HtmlPairingPass)->process(...));
 		$engine->addPass(new TextRunPass($config)->process(...), Stage::Finalize);
 	}
 }
