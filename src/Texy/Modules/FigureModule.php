@@ -64,7 +64,7 @@ final class FigureModule extends Texy\Module
 		$texy = $this->texy;
 
 		// Parse image content
-		$parsed = $texy->imageModule->parseImageContent($mURLs);
+		$parsed = $texy->imageModule->parseImageContent($mURLs, $offsets[1]);
 		$modifier = Modifier::parse($mImgMod . $mAlign);
 
 		if ($parsed['url'] === null) {
@@ -79,6 +79,7 @@ final class FigureModule extends Texy\Module
 			$parsed['height'],
 			$modifier,
 			new Range($offsets[0], $imageEnd - $offsets[0]),
+			urlRange: $parsed['urlRange'],
 		);
 
 		// If figure has link, wrap image in LinkNode
@@ -102,6 +103,8 @@ final class FigureModule extends Texy\Module
 				content: new ContentNode([$imageNode]),
 				range: new Range($offsets[0], $offsets[4] + strlen($mLink) - $offsets[0]),
 				isImageLink: $isImageLink,
+				syntax: Syntax::Figure,
+				urlRange: new Range($offsets[4] ?? throw new \LogicException('Link without group 4.'), strlen($mLink)),
 			);
 		}
 

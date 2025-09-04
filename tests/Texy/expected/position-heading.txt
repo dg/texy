@@ -1,11 +1,11 @@
 DocumentNode
   ContentNode
-    HeadingNode [0,19] level=2
+    HeadingNode [0,19] textRange[0,9] level=2 marker==
       ContentNode
         TextNode [0,9] "Title One"
-    HeadingNode [21,16] level=5
+    HeadingNode [21,16] textRange[24,10] level=5 marker=##
       ContentNode
         TextNode [24,10] "Surrounded"
-    HeadingNode [39,15] level=3
+    HeadingNode [39,15] textRange[39,7] level=3 marker=-
       ContentNode
         TextNode [39,7] "Another"

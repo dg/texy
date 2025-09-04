@@ -94,7 +94,7 @@ See the "documentation":[doc] and use [Nette].
 [Nette]: https://nette.org
 ```
 
-References can also be added programmatically with `$texy->linkModule->addDefinition()`. An unresolved `[ref]` triggers the `newReference` element handler.
+References can also be added programmatically with `$texy->linkModule->addDefinition()`. A `%s` in a target stands for the link text, URL-encoded: with `[php]: https://php.net/%s`, `"strlen":[php]` leads to `https://php.net/strlen`. An unresolved `[ref]` triggers the `newReference` element handler.
 
 **Automatic links** *(`link/url`, `link/email`, AutolinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. Displayed URLs are shortened when `$texy->autolinkModule->shorten` is on; e-mails are obfuscated against bots when `$texy->obfuscateEmail` is on. A URL rejected by `$texy->urlSchemeFilters` produces no link.
 

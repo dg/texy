@@ -1,6 +1,6 @@
 DocumentNode
   ContentNode
-    HeadingNode [0,16] level=2
+    HeadingNode [0,16] textRange[0,9] level=2 marker==
       ContentNode
         TextNode [0,9] "日本語"
     ParagraphNode [18,28]
@@ -14,12 +14,12 @@ DocumentNode
       ContentNode
         TextNode [48,5] "List:"
     ListNode [54,23] unordered
-      ListItemNode [54,14]
+      ListItemNode [54,14] bulletRange[54,1] bullet=-
         ContentNode
           ParagraphNode [56,12]
             ContentNode
               TextNode [56,12] "アイテム"
-      ListItemNode [69,8]
+      ListItemNode [69,8] bulletRange[69,1] bullet=-
         ContentNode
           ParagraphNode [71,6]
             ContentNode

@@ -8,9 +8,9 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\{Helpers, Range, Syntax};
 use Texy\Nodes\{BlockNode, CodeBlockNode, CommentNode, ContentNode, SectionNode};
-use Texy\Parsing\ParseContext;
+use Texy\Parsing\{OffsetMap, ParseContext};
+use Texy\{Range, Syntax};
 use function strlen;
 
 
@@ -70,39 +70,31 @@ final class BlockModule extends Texy\Module
 		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];
 
-		$content = Helpers::outdent($mContent);
+		[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]));
 		$range = new Range($offsets[0], strlen($matches[0]));
 
 		if ($blocktype === Syntax::BlockCode) {
-			return new CodeBlockNode('code', $content, $param, $mod, $range);
+			return new CodeBlockNode('code', $content, $param, $mod, $range, codeMap: $map);
 
 		} elseif ($blocktype === Syntax::BlockDefault) {
-			return new CodeBlockNode('default', $content, $param, $mod, $range);
+			return new CodeBlockNode('default', $content, $param, $mod, $range, codeMap: $map);
 
 		} elseif ($blocktype === Syntax::BlockPre) {
-			[$content, $map] = Texy\Parsing\OffsetMap::outdentLines(Texy\Parsing\OffsetMap::linesOf($mContent, $offsets[3]));
-			$parsed = $this->parseHtml($context, $content, 0);
-			$map->applyTo($parsed);
-			return new CodeBlockNode('pre', $content, $param, $mod, $range, $parsed);
+			return new CodeBlockNode('pre', $content, $param, $mod, $range, $this->parseHtml($context, $content, $map), $map);
 
 		} elseif ($blocktype === Syntax::BlockComment) {
 			return new CommentNode($content, $range);
 
-		} elseif ($blocktype === Syntax::BlockHtml) {
+		} elseif ($blocktype === Syntax::BlockHtml || $blocktype === Syntax::BlockText) {
 			// html/text blocks don't use outdent - preserve original indentation
 			$content = trim($mContent, "\n");
-			$parsed = $this->parseHtml($context, $content, $offsets[3] + strspn($mContent, "\n"));
-			return new CodeBlockNode('html', $content, null, $mod, $range, $parsed);
-
-		} elseif ($blocktype === Syntax::BlockText) {
-			// html/text blocks don't use outdent - preserve original indentation
-			return new CodeBlockNode('text', trim($mContent, "\n"), null, $mod, $range);
+			$map = OffsetMap::fromLines(OffsetMap::linesOf($content, $offsets[3] + strspn($mContent, "\n")));
+			return $blocktype === Syntax::BlockHtml
+				? new CodeBlockNode('html', $content, null, $mod, $range, $this->parseHtml($context, $content, $map), $map)
+				: new CodeBlockNode('text', $content, null, $mod, $range, codeMap: $map);
 
 		} elseif ($blocktype === Syntax::BlockDiv) {
-			[$content, $map] = Texy\Parsing\OffsetMap::outdentLines(
-				Texy\Parsing\OffsetMap::linesOf($mContent, $offsets[3]),
-				firstLine: true,
-			);
+			[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]), firstLine: true);
 			if ($content === '') {
 				return null;
 			}
@@ -112,13 +104,12 @@ final class BlockModule extends Texy\Module
 
 		} elseif ($blocktype === Syntax::BlockTexySource) {
 			// parsed as Texy, its HTML is displayed as source code
-			[$content, $map] = Texy\Parsing\OffsetMap::outdentLines(Texy\Parsing\OffsetMap::linesOf($mContent, $offsets[3]));
 			if ($content === '') {
 				return null;
 			}
 			$parsed = $context->parseBlock($content);
 			$map->applyTo($parsed);
-			return new CodeBlockNode('texysource', $content, null, $mod, $range, $parsed);
+			return new CodeBlockNode('texysource', $content, null, $mod, $range, $parsed, $map);
 		}
 
 		return null;
@@ -128,10 +119,12 @@ final class BlockModule extends Texy\Module
 	/**
 	 * Parses the markup of html and pre blocks, which knows HTML tags, comments and entities only.
 	 */
-	private function parseHtml(ParseContext $context, string $text, int $offset): ContentNode
+	private function parseHtml(ParseContext $context, string $text, OffsetMap $map): ContentNode
 	{
-		return $context->getInlineParser()
+		$parsed = $context->getInlineParser()
 			->withPatterns([Syntax::HtmlTag, Syntax::HtmlComment, Syntax::HtmlEntity])
-			->parse($context, $text, $offset);
+			->parse($context, $text);
+		$map->applyTo($parsed);
+		return $parsed;
 	}
 }

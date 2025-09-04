@@ -26,6 +26,15 @@ final class AstDumper
 			$line .= " mod[{$modifier->range->offset},{$modifier->range->length}]";
 		}
 
+		// parts of the notation
+		foreach (get_object_vars($node) as $name => $value) {
+			if ($value instanceof Texy\Range && $name !== 'range') {
+				$line .= " $name" . "[{$value->offset},{$value->length}]";
+			} elseif ($value instanceof Texy\Parsing\OffsetMap) {
+				$line .= " $name@" . $value->toAbsolute(0);
+			}
+		}
+
 		// Add type-specific extra info
 		$extra = self::getExtraInfo($node);
 		if ($extra !== '') {
@@ -49,10 +58,15 @@ final class AstDumper
 			$node instanceof Nodes\TextNode => '"' . self::escape($node->text) . '"',
 			$node instanceof Nodes\RawTextNode => '"' . self::escape($node->text) . '"',
 			$node instanceof Nodes\PhraseNode => $node->type,
-			$node instanceof Nodes\HeadingNode => 'level=' . $node->level,
+			$node instanceof Nodes\HeadingNode => 'level=' . $node->level . ($node->marker === null ? '' : ' marker=' . $node->marker),
 			$node instanceof Nodes\ListNode => $node->type->isOrdered() ? 'ordered' : 'unordered',
+			$node instanceof Nodes\ListItemNode => $node->bullet === null ? '' : 'bullet=' . $node->bullet,
 			$node instanceof Nodes\CodeBlockNode => $node->language ? 'lang=' . $node->language : '',
-			$node instanceof Nodes\LinkNode => $node->url ? 'url=' . $node->url : '',
+			$node instanceof Nodes\LinkNode => implode(' ', array_filter([
+				$node->syntax,
+				$node->url === null ? null : 'url=' . $node->url,
+				$node->ref === null ? null : 'ref=' . $node->ref,
+			])),
 			$node instanceof Nodes\ImageNode => $node->url ? 'src=' . $node->url : '',
 			$node instanceof Nodes\HtmlTagNode => '<' . $node->name . '>',
 			$node instanceof Nodes\CommentNode => '# ' . self::escape(substr($node->text, 0, 20)),

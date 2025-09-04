@@ -32,6 +32,8 @@ class CodeBlockNode extends BlockNode implements HasModifier
 		public ?Range $range = null,
 		/** the code parsed, for types whose code is markup: html, pre and texysource */
 		public ?ContentNode $content = null,
+		/** maps offsets in $code to the source, which differs from it by the stripped indentation */
+		public ?Texy\Parsing\OffsetMap $codeMap = null,
 	) {
 	}
 

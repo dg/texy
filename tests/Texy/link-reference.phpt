@@ -170,6 +170,17 @@ test('LinkNode keeps the written reference name after resolution', function () {
 });
 
 
+test('a %s in the target is the link text', function () {
+	$texy = new Texy\Texy;
+	$texy->allowed[Texy\Syntax::LinkReference] = true;
+	$texy->linkModule->addDefinition('php', 'https://php.net/%s');
+	Assert::same('<a href="https://php.net/strlen">strlen</a>', $texy->process('"strlen":[php]', true));
+	Assert::same('<a href="https://php.net/str+len"><strong>str len</strong></a>', $texy->process('**str len**:[php]', true));
+	Assert::same('<a href="http://x.cz/?q=a+b">a b</a>', $texy->process('"a b":http://x.cz/?q=%s', true));
+	Assert::same('<a href="https://php.net/%s">php</a>', $texy->process('[php]', true));
+});
+
+
 test('in the syntax tree a reference has its name and no URL yet', function () {
 	$texy = new Texy\Texy;
 	$texy->allowed[Texy\Syntax::LinkReference] = true;
