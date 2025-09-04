@@ -25,6 +25,9 @@ class HeadingNode extends BlockNode implements HasModifier
 		public HeadingType $type,
 		public ?Texy\Modifier $modifier = null,
 		public ?Range $range = null,
+		/** the underline character or the opening sequence as written, e.g. '-' or '###' */
+		public ?string $marker = null,
+		public ?Range $textRange = null,
 	) {
 	}
 

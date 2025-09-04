@@ -2,11 +2,11 @@ DocumentNode
   ContentNode
     ParagraphNode [0,31]
       ContentNode
-        LinkNode [0,31] url=https://example.com
+        LinkNode [0,31] textRange[1,9] urlRange[12,19] phrase/span url=https://example.com
           ContentNode
             TextNode [1,9] "link text"
     FigureNode [33,15]
-      ImageNode [33,15] src=image.jpg
+      ImageNode [33,15] urlRange[36,9] src=image.jpg
     ImageDefinitionNode [50,18]
     FigureNode [70,9]
-      ImageNode [70,9] src=ref
+      ImageNode [70,9] urlRange[73,3] src=ref

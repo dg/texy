@@ -24,6 +24,7 @@ class ImageNode extends InlineNode implements HasModifier
 		public ?Range $range = null,
 		/** Original reference name for images written as [*ref*]; survives resolution */
 		public ?string $ref = null,
+		public ?Range $urlRange = null,
 	) {
 	}
 

@@ -76,11 +76,14 @@ final class LinkReferenceModule extends Texy\Module
 	public function parseReference(ParseContext $context, array $matches, array $offsets): Nodes\LinkNode
 	{
 		[, $mRef] = $matches;
-		$range = new Range($offsets[0], strlen($matches[0]));
+		$refRange = new Range($offsets[1], strlen($mRef));
 		return new Nodes\LinkNode(
-			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef), $range)]),
-			range: $range,
+			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef), $refRange)]),
+			range: new Range($offsets[0], strlen($matches[0])),
 			ref: $mRef,
+			syntax: Syntax::LinkReference,
+			textRange: $refRange,
+			urlRange: $refRange,
 		);
 	}
 

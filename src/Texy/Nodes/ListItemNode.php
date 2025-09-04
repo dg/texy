@@ -21,6 +21,9 @@ class ListItemNode extends BlockNode implements HasModifier
 		public bool $term = false,
 		public ?Texy\Modifier $modifier = null,
 		public ?Range $range = null,
+		/** the bullet as written, e.g. '-' or '1)'; null for a term */
+		public ?string $bullet = null,
+		public ?Range $bulletRange = null,
 	) {
 	}
 

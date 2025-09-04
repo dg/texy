@@ -213,10 +213,10 @@ final class ListModule extends Texy\Module
 		$patternItem = "~^
 			\\n?
 			($spacesBase)                            # base indentation (1)
-			{$bullet}                                # bullet character
+			({$bullet})                              # bullet character (2)
 			[ \\t]*
-			( \\S .* )?                              # content (2)
-			" . Patterns::MODIFIER_H . '?           # modifier (3)
+			( \\S .* )?                              # content (3)
+			" . Patterns::MODIFIER_H . '?           # modifier (4)
 		$~mAUx';
 
 		$matches = null;
@@ -225,19 +225,20 @@ final class ListModule extends Texy\Module
 			return null;
 		}
 
-		/** @var array{string, string, ?string, ?string} $matches */
-		[, $mIndent, $mContent, $mMod] = $matches;
-		// group 0 always participates in a successful match, but next() cannot type that
+		/** @var array{string, string, string, ?string, ?string} $matches */
+		[, $mIndent, $mBullet, $mContent, $mMod] = $matches;
+		// groups 0 and 2 always participate in a successful match, but next() cannot type that
 		$itemOffset = $offsets[0] ?? throw new \LogicException('Match without group 0.');
-		$modOffset = $offsets[3] ?? null;
+		$bulletRange = new Range($offsets[2] ?? throw new \LogicException('Match without group 2.'), strlen(rtrim($mBullet)));
+		$modOffset = $offsets[4] ?? null;
 		$itemEnd = $itemOffset + strlen($matches[0]);
 
 		// Assemble content and map local line starts to absolute source offsets
 		$map = [];
 		$content = ' ' . ($mContent ?? '');
 		if ($mContent !== null) {
-			// content matched, so group 2 participated and carries an offset
-			$map[1] = $offsets[2] ?? throw new \LogicException('Content without group 2.'); // 1 = the leading space
+			// content matched, so group 3 participated and carries an offset
+			$map[1] = $offsets[3] ?? throw new \LogicException('Content without group 3.'); // 1 = the leading space
 		}
 
 		// next lines
@@ -277,6 +278,8 @@ final class ListModule extends Texy\Module
 			false,
 			Modifier::parse($mMod, $modOffset),
 			new Range($itemOffset, $itemEnd - $itemOffset),
+			rtrim($mBullet),
+			$bulletRange,
 		);
 	}
 

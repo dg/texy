@@ -135,8 +135,9 @@ final class OffsetMap
 
 
 	/**
-	 * Recursively rewrites node positions from local to absolute coordinates.
-	 * Length of multi-line spans grows by the stripped prefixes they cover in the source.
+	 * Recursively rewrites node positions from local to absolute coordinates: every
+	 * Range and OffsetMap the node holds. Length of multi-line spans grows by the
+	 * stripped prefixes they cover in the source.
 	 */
 	public function applyTo(Node $node): void
 	{
@@ -144,8 +145,12 @@ final class OffsetMap
 			return;
 		}
 
-		if ($node->range !== null) {
-			$node->range = $this->rangeToAbsolute($node->range);
+		foreach (get_object_vars($node) as $name => $value) {
+			if ($value instanceof Range) {
+				$node->$name = $this->rangeToAbsolute($value);
+			} elseif ($value instanceof self) {
+				$node->$name = $this->compose($value);
+			}
 		}
 
 		$modifier = $node instanceof HasModifier ? $node->getModifier() : null;
@@ -164,5 +169,20 @@ final class OffsetMap
 		$offset = $this->toAbsolute($range->offset);
 		$end = $this->toAbsolute($range->offset + $range->length);
 		return new Range($offset, $end - $offset);
+	}
+
+
+	/**
+	 * A map whose result is mapped by this one, i.e. a map of text nested in the text of this map.
+	 * Mapping the entries is enough because both maps have one at every line start.
+	 */
+	private function compose(self $inner): self
+	{
+		$composed = new self;
+		foreach ($inner->map as $local => $offset) {
+			$composed->map[$local] = $this->toAbsolute($offset);
+		}
+
+		return $composed;
 	}
 }
