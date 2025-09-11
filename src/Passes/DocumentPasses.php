@@ -7,7 +7,7 @@
 
 namespace Texy\Passes;
 
-use Texy\{Config, Stage};
+use Texy\{Config, HtmlPolicy, Stage};
 use Texy\Parsing\Engine;
 
 
@@ -23,9 +23,10 @@ final class DocumentPasses
 	}
 
 
-	public static function register(Engine $engine, Config $config): void
+	public static function register(Engine $engine, Config $config, HtmlPolicy $htmlPolicy): void
 	{
 		$engine->addPass((new HtmlPairingPass)->process(...));
+		$engine->addPass(new HtmlSanitizePass($htmlPolicy)->process(...));
 		$engine->addPass(new TextRunPass($config)->process(...), Stage::Finalize);
 	}
 }

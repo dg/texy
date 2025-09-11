@@ -12,10 +12,6 @@ use Texy\{HtmlPolicy, Modifier};
 
 /**
  * Applies Modifier (classes, styles, attributes, alignment) to an Element, filtered by the policy.
- * This is where the security policy is enforced, and the placement is deliberate:
- * it is the moment an author-written modifier is poured into the output element.
- * Anything a transform pass or a renderer handler writes into the Element itself
- * never passes through here, so generated markup is not subject to the policy.
  */
 final class ElementDecorator
 {

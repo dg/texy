@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\{Configurator, Texy};
+use Texy\{Configurator, Node, Nodes, Texy};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -65,4 +65,20 @@ test('filtering also applies to a lone tag the pairing pass left unpaired', func
 		"<p><b>never closed</b></p>\n\n<p>second</p>\n",
 		$texy->toHtml("<b onmouseover=\"alert(1)\">never closed\n\nsecond"),
 	);
+});
+
+
+test('the AST already carries filtered attributes, so every output format is covered', function () {
+	$texy = new Texy;
+	Configurator::safeMode($texy);
+	$doc = $texy->parse('<b onmouseover="alert(1)">tuk</b>');
+	$texy->transform($doc);
+
+	$found = [];
+	$filter = fn(Node $node) => $node instanceof Nodes\HtmlElementNode || $node instanceof Nodes\HtmlTagNode;
+	foreach ($doc->find(Node::class, $filter) as $node) {
+		$found[] = array_keys($node->attributes);
+	}
+
+	Assert::same([[]], $found);
 });

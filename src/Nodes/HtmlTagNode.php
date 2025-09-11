@@ -23,15 +23,21 @@ class HtmlTagNode extends InlineNode
 		public bool $closing = false,
 		public bool $selfClosing = false,
 		public ?Range $range = null,
+		/** the tag as written, shown when it is rejected */
+		public ?string $source = null,
 	) {
 	}
 
 
 	/**
-	 * Reconstructs the original tag source text.
+	 * Returns the tag as written; a tag the parser did not make is rebuilt from its attributes.
 	 */
 	public function toSource(): string
 	{
+		if ($this->source !== null) {
+			return strtr($this->source, "\r", "\n"); // \r is the hard break mark of a paragraph
+		}
+
 		$tag = '<';
 		if ($this->closing) {
 			$tag .= '/';
