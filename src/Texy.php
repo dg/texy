@@ -107,7 +107,7 @@ class Texy
 		$this->engine->addPass($link->resolveReferences(...));
 		$this->engine->addPass($heading->processHeadings(...));
 
-		Passes\DocumentPasses::register($this->engine, $this->config);
+		Passes\DocumentPasses::register($this->engine, $this->config, $this->htmlPolicy);
 	}
 
 
@@ -223,7 +223,7 @@ class Texy
 
 	/**
 	 * Turns the syntax tree into the document: resolves references, balances
-	 * headings, applies typography and the consumer's passes.
+	 * headings, sanitizes HTML, applies typography and the consumer's passes.
 	 * Changes the tree in place and returns it; a second call for one document throws.
 	 */
 	public function transform(Nodes\DocumentNode $document): Nodes\DocumentNode

@@ -13,10 +13,12 @@ use Texy\{HtmlPolicy, Modifier};
 /**
  * Applies Modifier (classes, styles, attributes, alignment) to an Element.
  *
- * This is where the security policy is enforced, and the placement is deliberate:
- * it is the moment an author-written modifier is poured into the output element.
- * Anything a transform pass or a renderer handler writes into the Element itself
- * never passes through here, so generated markup is not subject to the policy.
+ * HtmlSanitizePass has applied the policy to the modifiers already; it is applied here once
+ * more, when an author-written modifier is poured into the output element, since a tree
+ * built by code need not have been transformed. The attributes whitelist is applied only
+ * here, as it depends on the element. Anything a transform pass or a renderer handler
+ * writes into the Element itself never passes through here, so generated markup is not
+ * subject to the policy.
  */
 final class ElementDecorator
 {

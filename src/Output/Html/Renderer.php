@@ -295,8 +295,11 @@ final class Renderer extends NodeRenderer
 	{
 		$children = $this->renderNodes($node->content->children);
 
-		// Block HTML content - skip <p> wrapper entirely
-		if ($node->blockHtml) {
+		// Block HTML content - skip <p> wrapper entirely. The parse-time flag is
+		// stale when a pass turned the block tags into something else, so its
+		// own predicate is re-checked over the transformed content: paragraphs
+		// degraded to visible text get a normal <p> again.
+		if ($node->blockHtml && $this->containsBlockPassthrough($node->content->children)) {
 			return $this->wrapChildren($children);
 		}
 
@@ -774,7 +777,8 @@ final class Renderer extends NodeRenderer
 			return Helpers::decodeEntities($node->toSource()); // shown as text
 		}
 
-		// an accepted tag must not smuggle in attributes the whitelist does not allow
+		// defense in depth: HtmlSanitizePass has already done this, but a hand-built
+		// AST or a policy tightened after parsing must not slip attributes through
 		$attrs = $this->htmlPolicy->filterUrls($this->htmlPolicy->filterAttrs($tagName, $attrs));
 
 		// Add rel="nofollow" for external links when linkNoFollow is enabled
@@ -830,7 +834,7 @@ final class Renderer extends NodeRenderer
 	 */
 	private function renderHtmlElement(Nodes\HtmlElementNode $node): Element
 	{
-		$open = new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range);
+		$open = new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range, source: $node->source);
 		$close = $node->closingTag ?? new Nodes\HtmlTagNode($node->name, closing: true);
 		return $this->wrapChildren([
 			$this->renderHtmlTag($open),
@@ -857,6 +861,34 @@ final class Renderer extends NodeRenderer
 
 
 	/********************* utility methods ****************d*g**/
+
+
+	/**
+	 * Does the content still contain block-level passthrough markup?
+	 * The same predicate ParagraphModule uses when setting the blockHtml flag,
+	 * re-evaluated after transforms (a pass may have replaced the tags).
+	 * @param  array<Node>  $content
+	 */
+	private function containsBlockPassthrough(array $content): bool
+	{
+		foreach ($content as $node) {
+			if ($node instanceof Nodes\HtmlTagNode) {
+				if (!$node->closing && !isset(Schema::inlineElements()[strtolower($node->name)])) {
+					return true;
+				}
+			} elseif ($node instanceof Nodes\HtmlElementNode) {
+				// block element, or a transparent inline wrapper (<a>, <ins>, ...) holding one
+				if (
+					!isset(Schema::inlineElements()[strtolower($node->name)])
+					|| $this->containsBlockPassthrough($node->content->children)
+				) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 
 
 	/**

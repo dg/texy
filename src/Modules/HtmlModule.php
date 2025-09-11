@@ -26,6 +26,7 @@ final class HtmlModule extends Texy\Module
 			'~
 				< (/?)                          # tag begin
 				([a-z][a-z0-9_:-]{0,50})        # tag name
+				(?= [\s/>] )
 				(
 					(?:
 						\s++ [a-z0-9_:-]++ |   # attribute name
@@ -117,6 +118,7 @@ final class HtmlModule extends Texy\Module
 			closing: !$isStart,
 			selfClosing: $isEmpty,
 			range: new Range($offsets[0], strlen($matches[0])),
+			source: $matches[0],
 		);
 	}
 
