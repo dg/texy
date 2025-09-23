@@ -8,14 +8,14 @@
 namespace Texy\Passes;
 
 use Texy\{Helpers, HtmlPolicy, Node, Nodes, NodeTraverser, TraverseAction};
-use Texy\Nodes\{HtmlElementNode, HtmlTagNode, TextNode};
+use Texy\Nodes\{HtmlElementNode, HtmlTagNode, RawTextNode};
 
 
 /**
  * Evaluates the tag whitelist and validation over the paired passthrough
  * tree in the transform phase: rejected tags and elements are replaced by
- * TextNode with the tag as written, so the AST tells the truth -
- * escaped tags are visible text (typography applies to them), allowed tags
+ * RawTextNode with the tag as written, so the AST tells the truth -
+ * escaped tags are visible text, shown exactly as written, allowed tags
  * are markup. Renderers keep their own checks as defense in depth.
  */
 final class HtmlSanitizePass
@@ -53,7 +53,7 @@ final class HtmlSanitizePass
 		foreach ($children as $child) {
 			if ($child instanceof HtmlTagNode) {
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, $child->closing)) {
-					$out[] = new TextNode(Helpers::decodeEntities($this->policy->reconstructTag($child)), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($this->policy->reconstructTag($child)), $child->range);
 					continue;
 				}
 
@@ -64,11 +64,11 @@ final class HtmlSanitizePass
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, closing: false)) {
 					$open = new HtmlTagNode($child->name, $child->attributes, range: $child->range, source: $child->source);
 					$close = $child->closingTag ?? new HtmlTagNode($child->name, closing: true);
-					$out[] = new TextNode(Helpers::decodeEntities($this->policy->reconstructTag($open)), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($this->policy->reconstructTag($open)), $child->range);
 					foreach ($this->sanitize($child->content->children) as $inner) {
 						$out[] = $inner;
 					}
-					$out[] = new TextNode(Helpers::decodeEntities($this->policy->reconstructTag($close)), $close->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($this->policy->reconstructTag($close)), $close->range);
 					continue;
 				}
 

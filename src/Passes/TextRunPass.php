@@ -175,7 +175,7 @@ final class TextRunPass
 				$pieces[] = [self::Markup, null];
 
 			} elseif ($node instanceof Nodes\RawTextNode) {
-				$pieces[] = [$node->text, $node]; // rendered as plain text, typography applies
+				$pieces[] = [self::textualRun($node->text), null];
 
 			} elseif ($node instanceof Nodes\AnnotationNode) {
 				$pieces[] = [self::Markup, null];
@@ -312,7 +312,7 @@ final class TextRunPass
 
 		// phase 2: apply
 		foreach ($writes as [$node, $text]) {
-			assert($node instanceof Nodes\TextNode || $node instanceof Nodes\RawTextNode || $node instanceof Nodes\AnnotationNode);
+			assert($node instanceof Nodes\TextNode || $node instanceof Nodes\AnnotationNode);
 			$node->text = strtr($text, $originals);
 		}
 	}

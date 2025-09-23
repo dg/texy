@@ -126,6 +126,34 @@ test('block-level passthrough tag splits the typographic segment', function () {
 });
 
 
+test('notexy content is protected from typography and hyphenation', function () {
+	Assert::same(
+		"<p>text \"a\" --b &lt;c&gt; text</p>\n",
+		convert("text ''\"a\" --b <c>'' text"),
+	);
+	Assert::same(
+		"<h1>-w | --watch &lt;path&gt;</h1>\n",
+		convert("''-w | --watch <path>''\n--------"),
+	);
+	Assert::match(
+		'%A%<td>"x"</td>%A%',
+		convert("| ''\"x\"'' |"),
+	);
+	Assert::same(
+		"<p>Dlouheslovohodnedlouhatezkorozdelitelne</p>\n",
+		convert("''Dlouheslovohodnedlouhatezkorozdelitelne''"),
+	);
+});
+
+
+test('notexy content does not pair quotes with the text around it', function () {
+	Assert::same(
+		"<p>„ahoj x\"y světe“</p>\n",
+		convert("\"ahoj ''x\"y'' světe\""),
+	);
+});
+
+
 test('phrase modifier title is typographed once', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
