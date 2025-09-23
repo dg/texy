@@ -7,7 +7,7 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, UrlPolicy};
+use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, Regexp, UrlPolicy};
 use Texy\Output\NodeRenderer;
 use function count, is_array, is_string;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
@@ -18,7 +18,7 @@ use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
  * Configuration is read from the Config object; the per-document fact (nofollow)
  * is derived from the document itself at render time, so the instance is a
  * configuration snapshot reusable across documents.
- * @extends NodeRenderer<Element|string>
+ * @extends NodeRenderer<Element|Raw|string>
  */
 final class Renderer extends NodeRenderer
 {
@@ -33,6 +33,8 @@ final class Renderer extends NodeRenderer
 
 	private bool $noFollow;
 
+	private bool $plainBreaks = false;
+
 	/** the list whose items are being rendered */
 	private Nodes\ListNode|Nodes\DefinitionListNode|null $list = null;
 
@@ -46,8 +48,6 @@ final class Renderer extends NodeRenderer
 		public readonly Config $config,
 		private HtmlPolicy $htmlPolicy,
 		private UrlPolicy $urlPolicy,
-		/** @var list<\Closure(string): string> post-processing of the document text */
-		private array $postHandlers = [],
 	) {
 		$this->noFollow = $config->linkNoFollow;
 		$this->imageDimensions = new ImageDimensions($config);
@@ -57,7 +57,7 @@ final class Renderer extends NodeRenderer
 			// Core nodes
 			Nodes\DocumentNode::class => fn(Nodes\DocumentNode $n, self $g) => $g->renderDocument($n),
 			Nodes\TextNode::class => fn(Nodes\TextNode $n) => $n->text,
-			Nodes\ContentNode::class => fn(Nodes\ContentNode $n, self $g) => $g->serialize($g->renderNodes($n->children)),
+			Nodes\ContentNode::class => fn(Nodes\ContentNode $n, self $g) => $g->wrapChildren($g->renderNodes($n->children)),
 
 			// Block nodes
 			Nodes\ParagraphNode::class => fn(Nodes\ParagraphNode $n, self $g) => $g->renderParagraph($n),
@@ -92,7 +92,7 @@ final class Renderer extends NodeRenderer
 				$n->text,
 			),
 			Nodes\EmoticonNode::class => fn(Nodes\EmoticonNode $n, self $g) => $g->renderEmoticon($n),
-			Nodes\LineBreakNode::class => fn() => $this->protect('<br>', self::ContentReplaced),
+			Nodes\LineBreakNode::class => fn(Nodes\LineBreakNode $n, self $g) => $g->plainBreaks ? "\n" : new Raw('<br>'),
 
 			// Autolink nodes
 			Nodes\UrlNode::class => fn(Nodes\UrlNode $n, self $g) => $g->renderUrl($n),
@@ -126,38 +126,14 @@ final class Renderer extends NodeRenderer
 	{
 		$this->noFollow = $this->config->linkNoFollow || !empty($document->meta['nofollow']);
 		$this->marks = [];
-		$s = $this->renderNode($document);
-		assert(is_string($s));
-
-		// line-postprocessing
-		$blocks = explode(self::ContentBlock, $s);
-		foreach ($this->postHandlers as $handler) {
-			foreach ($blocks as $n => $s) {
-				if ($n % 2 === 0 && $s !== '') {
-					$blocks[$n] = $handler($s);
-				}
-			}
-		}
-
-		$s = implode(self::ContentBlock, $blocks);
-
-		// encode < > &
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-
-		// replace protected marks
-		$s = $this->unprotect($s);
-
-		// wellform and reformat HTML
-		$wellFormer = new WellFormer($this->config);
-		$wellFormer->raw($s);
-		return ltrim($wellFormer->finish(), "\n");
+		return $this->finalize($this->renderNode($document));
 	}
 
 
 	/**
 	 * Render children as array (for Element->children).
 	 * @param array<Node> $content
-	 * @return list<Element|string>
+	 * @return list<Element|Raw|string>
 	 */
 	public function renderNodes(array $content): array
 	{
@@ -172,7 +148,7 @@ final class Renderer extends NodeRenderer
 
 	/**
 	 * Checks whether rendered children produce no visible output (only empty strings/whitespace).
-	 * @param array<Element|string> $children
+	 * @param array<Element|Raw|string> $children
 	 */
 	private function renderedToNothing(array $children): bool
 	{
@@ -181,70 +157,79 @@ final class Renderer extends NodeRenderer
 
 
 	/**
+	 * Turns the rendered document into the final HTML string: walks the
+	 * Element tree straight into the well-forming engine.
+	 */
+	private function finalize(Element|Raw|string $root): string
+	{
+		$wellFormer = new WellFormer($this->config);
+		$this->walk([$root], $wellFormer);
+		return ltrim($wellFormer->finish(), "\n");
+	}
+
+
+	/**
 	 * Well-forms a standalone fragment (texysource).
-	 * @param array<Element|string> $content
+	 * @param array<Element|Raw|string> $content
 	 */
 	private function finalizeFragment(array $content): string
 	{
 		$wellFormer = new WellFormer($this->config);
-		$wellFormer->raw($this->unprotect(htmlspecialchars($this->serialize($content, "\n"), ENT_NOQUOTES, 'UTF-8')));
+		$first = true;
+		foreach ($content as $child) {
+			if (!$first) {
+				$wellFormer->text("\n");
+			}
+			$first = false;
+			$this->walk([$child], $wellFormer);
+		}
+
 		return trim($wellFormer->finish());
 	}
 
 
 	/**
-	 * Serializes the parsed markup of a block (html, pre) to HTML.
-	 * @param array<Node> $content
+	 * Feeds rendered content (Elements and strings with protection marks)
+	 * to the well-forming engine as tags, text and raw HTML islands.
+	 * @param array<Element|Raw|string> $content
 	 */
-	private function renderMarkup(array $content): string
+	private function walk(array $content, WellFormer $wellFormer): void
 	{
-		return $this->unprotect(htmlspecialchars($this->serialize($this->renderNodes($content)), ENT_NOQUOTES, 'UTF-8'));
-	}
-
-
-	/**
-	 * Serialize Element/string array to string.
-	 * @param array<Element|string> $content
-	 */
-	private function serialize(array $content, string $separator = ''): string
-	{
-		$html = [];
 		foreach ($content as $child) {
-			$html[] = $child instanceof Element ? $this->serializeElement($child) : $child;
-		}
+			if ($child instanceof Raw) {
+				$wellFormer->raw($child->html);
 
-		return implode($separator, $html);
+			} elseif (!$child instanceof Element) {
+				$this->walkString($child, $wellFormer);
+
+			} elseif ($child->name === null || $child->name === '') {
+				$this->walk($child->children, $wellFormer); // transparent wrapper
+
+			} else {
+				$wellFormer->startTag($child->name, Element::formatAttrs($child->attrs), $child->isVoid());
+				if (!$child->isVoid()) {
+					$this->walk($child->children, $wellFormer);
+					$wellFormer->endTag($child->name);
+				}
+			}
+		}
 	}
 
 
 	/**
-	 * Serialize a single Element to string, its tags protected.
+	 * Splits a rendered string into protection-mark islands (raw HTML) and
+	 * display text (TextNode content is entity-decoded since the parse phase).
 	 */
-	private function serializeElement(Element $el): string
+	private function walkString(string $s, WellFormer $wellFormer): void
 	{
-		$ct = $this->getElementContentType($el);
-		$s = $this->protect($el->startTag(), $ct);
-		if ($el->isVoid()) {
-			return $s;
+		foreach (Regexp::split($s, '~([\x14-\x17][\x18-\x1F]++[\x14-\x17])~') as $part) {
+			if ($part === '') {
+			} elseif (isset($this->marks[$part])) {
+				$wellFormer->raw($this->marks[$part]);
+			} else {
+				$wellFormer->text($part);
+			}
 		}
-
-		foreach ($el->children as $child) {
-			$s .= $child instanceof Element ? $this->serializeElement($child) : $child;
-		}
-
-		return $s . $this->protect($el->endTag(), $ct);
-	}
-
-
-	/**
-	 * Determine content type for an element.
-	 */
-	private function getElementContentType(Element $el): string
-	{
-		$inlineType = Schema::inlineElements()[$el->name ?? ''] ?? null;
-		return $inlineType === null
-			? self::ContentBlock
-			: ($inlineType ? self::ContentReplaced : self::ContentMarkup);
 	}
 
 
@@ -270,21 +255,12 @@ final class Renderer extends NodeRenderer
 	}
 
 
-	/**
-	 * Replace protection marks back to original content.
-	 */
-	public function unprotect(string $html): string
-	{
-		return strtr($html, $this->marks);
-	}
-
-
 	/********************* core node renderers ****************d*g**/
 
 
-	private function renderDocument(Nodes\DocumentNode $node): string
+	private function renderDocument(Nodes\DocumentNode $node): Element
 	{
-		return $this->serialize($this->renderNodes($node->content->children));
+		return $this->wrapChildren($this->renderNodes($node->content->children));
 	}
 
 
@@ -293,26 +269,30 @@ final class Renderer extends NodeRenderer
 
 	private function renderParagraph(Nodes\ParagraphNode $node): Element
 	{
-		$children = $this->renderNodes($node->content->children);
-
 		// Block HTML content - skip <p> wrapper entirely. The parse-time flag is
 		// stale when a pass turned the block tags into something else, so its
 		// own predicate is re-checked over the transformed content: paragraphs
 		// degraded to visible text get a normal <p> again.
 		if ($node->blockHtml && $this->containsBlockPassthrough($node->content->children)) {
-			return $this->wrapChildren($children);
-		}
-
-		// Whole content rendered to nothing (consumed directives, comments) → no paragraph at all
-		if ($node->modifier === null && $this->renderedToNothing($children)) {
-			return $this->wrapChildren([]);
+			return $this->renderWithoutBreaks($node->content->children);
 		}
 
 		$info = $this->analyzeContent($node->content->children);
 
-		// Only markup (HTML tags/comments) without text → no <p> wrapper
-		if (!$info['hasText'] && !$info['hasOther'] && $info['hasMarkup'] && $node->modifier === null) {
-			return $this->wrapChildren($children);
+		// Only markup (HTML tags/comments) without text → no <p> wrapper. Replaced content
+		// with a hard line break gets one for its <br>, unless it stands beside a block tag.
+		if (
+			!$info['hasText'] && !$info['hasOther'] && $info['hasMarkup'] && $node->modifier === null
+			&& ($info['hasBlock'] || !$info['hasReplaced'] || !$info['hasBreak'])
+		) {
+			return $this->renderWithoutBreaks($node->content->children);
+		}
+
+		$children = $this->renderNodes($node->content->children);
+
+		// Whole content rendered to nothing (consumed directives, comments) → no paragraph at all
+		if ($node->modifier === null && $this->renderedToNothing($children)) {
+			return $this->wrapChildren([]);
 		}
 
 		// Only replaced content (images) → use imageParagraphTag
@@ -354,7 +334,7 @@ final class Renderer extends NodeRenderer
 		if ($node->language) {
 			$el->attrs['class'] = [$node->language, ...(array) ($el->attrs['class'] ?? [])];
 		}
-		$el->create('code')->add($this->protect(htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8'), self::ContentTextual));
+		$el->create('code')->add(new Raw(htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8')));
 		return $el;
 	}
 
@@ -366,26 +346,26 @@ final class Renderer extends NodeRenderer
 	{
 		$el = new Element('pre');
 		$this->decorateElement($node->modifier, $el);
-		$el->setText($this->protect($this->renderMarkup($node->content->children), self::ContentBlock));
+		$el->children = [$this->wrapChildren($this->renderNodes($node->content->children))];
 		return $el;
 	}
 
 
-	private function renderHtmlBlock(Nodes\HtmlBlockNode $node): string
+	private function renderHtmlBlock(Nodes\HtmlBlockNode $node): Element|string
 	{
 		return $node->code === ''
 			? "\n"
-			: $this->protect($this->renderMarkup($node->content->children) . ' ', self::ContentBlock);
+			: $this->wrapChildren($this->renderNodes($node->content->children))->add(' ');
 	}
 
 
 	/**
 	 * Plain text with <br> for newlines, no wrapper.
 	 */
-	private function renderTextBlock(Nodes\TextBlockNode $node): string
+	private function renderTextBlock(Nodes\TextBlockNode $node): Raw
 	{
 		$content = htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8');
-		return $this->protect(str_replace("\n", '<br>', $content) . ' ', self::ContentBlock);
+		return new Raw(str_replace("\n", '<br>', $content) . ' ');
 	}
 
 
@@ -398,7 +378,7 @@ final class Renderer extends NodeRenderer
 		$el = new Element('pre');
 		$this->decorateElement($node->modifier, $el);
 		$el->attrs['class'] = ['html', ...(array) ($el->attrs['class'] ?? [])];
-		$el->create('code')->add($this->protect(htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8'), self::ContentTextual));
+		$el->create('code')->add(new Raw(htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8')));
 		return $el;
 	}
 
@@ -536,7 +516,7 @@ final class Renderer extends NodeRenderer
 	 * adds nothing: <li>text<ul>…</ul></li> needs no <p> around the text. A second
 	 * paragraph does get one, because there the wrapper is what separates them.
 	 * @param  array<Node>  $content
-	 * @return list<Element|string>
+	 * @return list<Element|Raw|string>
 	 */
 	private function renderItemContent(array $content): array
 	{
@@ -544,7 +524,7 @@ final class Renderer extends NodeRenderer
 		$rest = array_slice($content, 1);
 
 		$opening = match (true) {
-			$first instanceof Nodes\ParagraphNode && $first->modifier === null => $this->renderNodes($first->content->children),
+			$first instanceof Nodes\ParagraphNode && $first->modifier === null => $this->renderParagraph($first)->children,
 			!$rest && $first instanceof Nodes\FigureNode && $first->caption === null && $first->modifier === null
 				=> $this->renderNodes([$first->image]),
 			default => null,
@@ -714,7 +694,7 @@ final class Renderer extends NodeRenderer
 		$el = new Element($this->config->phraseTags['code'] ?? 'code');
 		$this->decorateElement($node->modifier, $el);
 		// Only escape <, >, & - not quotes (ENT_NOQUOTES)
-		$el->children = [$this->protect(htmlspecialchars($node->code, ENT_NOQUOTES | ENT_HTML5, 'UTF-8'), self::ContentTextual)];
+		$el->children = [new Raw(htmlspecialchars($node->code, ENT_NOQUOTES | ENT_HTML5, 'UTF-8'))];
 		return $el;
 	}
 
@@ -744,20 +724,15 @@ final class Renderer extends NodeRenderer
 			$el->attrs['rel'] = 'nofollow';
 		}
 
-		// Protect URL text from typography/longwords processing
-		$textualUrl = $this->config->shortenUrls ? Helpers::shortenUrl($node->url) : $node->url;
-		return $el->add($this->protect(htmlspecialchars($textualUrl, ENT_NOQUOTES | ENT_HTML5, 'UTF-8'), self::ContentTextual));
+		return $el->add($this->config->shortenUrls ? Helpers::shortenUrl($node->url) : $node->url);
 	}
 
 
-	private function renderEmail(Nodes\EmailNode $node): Element|string
+	private function renderEmail(Nodes\EmailNode $node): Element|Raw|string
 	{
 		$href = 'mailto:' . $node->email;
 		$text = $this->config->obfuscateEmail
-			? $this->protect(
-				str_replace('@', '&#64;<!-- -->', htmlspecialchars($node->email, ENT_NOQUOTES | ENT_HTML5, 'UTF-8')),
-				self::ContentTextual,
-			)
+			? new Raw(str_replace('@', '&#64;<!-- -->', htmlspecialchars($node->email, ENT_NOQUOTES | ENT_HTML5, 'UTF-8')))
 			: $node->email;
 		return $this->urlPolicy->isLinkAllowed($href)
 			? new Element('a', ['href' => $href])->add($text)
@@ -768,7 +743,7 @@ final class Renderer extends NodeRenderer
 	/********************* HTML passthrough node renderers ****************d*g**/
 
 
-	private function renderHtmlTag(Nodes\HtmlTagNode $node): string
+	private function renderHtmlTag(Nodes\HtmlTagNode $node): Raw|string
 	{
 		$tagName = strtolower($node->name);
 		$attrs = $node->attributes;
@@ -793,27 +768,19 @@ final class Renderer extends NodeRenderer
 			}
 		}
 
-		// Value 0 = inline markup, 1 = inline replaced, not present = block
-		$type = match (Schema::inlineElements()[$tagName] ?? null) {
-			null => self::ContentBlock,
-			1 => self::ContentReplaced,
-			default => self::ContentMarkup,
-		};
-
 		if ($node->closing) {
-			return $this->protect('</' . htmlspecialchars($tagName, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '>', $type);
+			return new Raw('</' . htmlspecialchars($tagName, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '>');
 		}
 
-		return $this->protect(
+		return new Raw(
 			'<' . htmlspecialchars($tagName, ENT_QUOTES | ENT_HTML5, 'UTF-8')
 			. Element::formatAttrs($attrs)
 			. '>',
-			$type,
 		);
 	}
 
 
-	private function renderHtmlComment(Nodes\HtmlCommentNode $node): string
+	private function renderHtmlComment(Nodes\HtmlCommentNode $node): Raw|string
 	{
 		if (!$this->config->passHtmlComments) {
 			return '';
@@ -823,7 +790,7 @@ final class Renderer extends NodeRenderer
 		$content = preg_replace('~-{2,}~', ' - ', $node->text);
 		$content = trim($content, '-');
 		$content = str_starts_with($content, '>') ? ' ' . $content : $content; // <!--> would end the comment
-		return $this->protect('<!--' . $content . '-->', self::ContentMarkup);
+		return new Raw('<!--' . $content . '-->');
 	}
 
 
@@ -894,13 +861,15 @@ final class Renderer extends NodeRenderer
 	/**
 	 * Analyze paragraph content to determine what types of nodes it contains.
 	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $content
-	 * @return array{hasText: bool, hasReplaced: bool, hasMarkup: bool, hasOther: bool}
+	 * @return array{hasText: bool, hasReplaced: bool, hasMarkup: bool, hasBlock: bool, hasBreak: bool, hasOther: bool}
 	 */
 	private function analyzeContent(array $content): array
 	{
 		$hasText = false;
 		$hasReplaced = false;
 		$hasMarkup = false;
+		$hasBlock = false;
+		$hasBreak = false;
 		$hasOther = false;
 
 		foreach ($content as $node) {
@@ -918,20 +887,23 @@ final class Renderer extends NodeRenderer
 				match ($inlineType) {
 					1 => $hasReplaced = true,    // replaced element (img, br, input, ...)
 					0 => $hasMarkup = true,      // inline markup (span, a, strong, ...)
-					null => $hasMarkup = true,   // block element
+					null => $hasMarkup = $hasBlock = true, // block element
 				};
 
 			} elseif ($node instanceof Nodes\HtmlElementNode) {
 				$inlineType = Schema::inlineElements()[strtolower($node->name)] ?? null;
 				match ($inlineType) {
 					1 => $hasReplaced = true,    // replaced element (script, object, ...)
-					default => $hasMarkup = true,
+					0 => $hasMarkup = true,
+					null => $hasMarkup = $hasBlock = true,
 				};
 				// the element's descendants count as content of the paragraph
 				$inner = $this->analyzeContent($node->content->children);
 				$hasText = $hasText || $inner['hasText'];
 				$hasReplaced = $hasReplaced || $inner['hasReplaced'];
 				$hasMarkup = $hasMarkup || $inner['hasMarkup'];
+				$hasBlock = $hasBlock || $inner['hasBlock'];
+				$hasBreak = $hasBreak || $inner['hasBreak'];
 				$hasOther = $hasOther || $inner['hasOther'];
 
 			} elseif ($node instanceof Nodes\LinkNode) {
@@ -942,18 +914,36 @@ final class Renderer extends NodeRenderer
 					$hasReplaced = true;
 				}
 
+			} elseif ($node instanceof Nodes\LineBreakNode) {
+				$hasBreak = true;
+
 			} else {
 				$hasOther = true;
 			}
 		}
 
-		return compact('hasText', 'hasReplaced', 'hasMarkup', 'hasOther');
+		return compact('hasText', 'hasReplaced', 'hasMarkup', 'hasBlock', 'hasBreak', 'hasOther');
+	}
+
+
+	/**
+	 * Renders the content of a paragraph without a wrapper, where a hard line break is only whitespace.
+	 * @param array<Node> $content
+	 */
+	private function renderWithoutBreaks(array $content): Element
+	{
+		$this->plainBreaks = true;
+		try {
+			return $this->wrapChildren($this->renderNodes($content));
+		} finally {
+			$this->plainBreaks = false;
+		}
 	}
 
 
 	/**
 	 * Wrap children in a null element (no tag wrapper).
-	 * @param list<Element|string> $children
+	 * @param list<Element|Raw|string> $children
 	 */
 	private function wrapChildren(array $children): Element
 	{
@@ -971,7 +961,7 @@ final class Renderer extends NodeRenderer
 
 	/**
 	 * Create paragraph for non-text content (images only).
-	 * @param list<Element|string> $children
+	 * @param list<Element|Raw|string> $children
 	 */
 	private function createNontextParagraph(array $children, ?Modifier $modifier): Element
 	{

@@ -8,15 +8,15 @@
 namespace Texy\Passes;
 
 use Texy\{HasModifier, Helpers, HtmlPolicy, Modifier, Node, Nodes, NodeTraverser, TraverseAction};
-use Texy\Nodes\{HtmlElementNode, HtmlTagNode, RawTextNode, TextNode};
+use Texy\Nodes\{HtmlElementNode, HtmlTagNode, RawTextNode};
 
 
 /**
  * Applies HtmlPolicy in the transform phase, so the AST tells the truth to every output format
  * and every renderer handler:
  *
- * - a rejected tag or element is replaced by TextNode with the tag as written, so escaped
- *   tags are visible text (typography applies to them), allowed tags are markup;
+ * - a rejected tag or element is replaced by RawTextNode with the tag as written, so escaped
+ *   tags are visible text, shown exactly as written, allowed tags are markup;
  * - a link whose URL the policy rejects is replaced by its content, an autolink by its text,
  *   and a rejected image loses its URL, so it shows its alternative text; an e-mail is an address,
  *   not a URL, so it stays and only the HTML renderer refuses its mailto: link;
@@ -70,7 +70,7 @@ final class HtmlSanitizePass
 		foreach ($children as $child) {
 			if ($child instanceof HtmlTagNode) {
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, $child->closing)) {
-					$out[] = new TextNode(Helpers::decodeEntities($child->toSource()), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($child->toSource()), $child->range);
 					continue;
 				}
 
@@ -81,11 +81,11 @@ final class HtmlSanitizePass
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, closing: false)) {
 					$open = new HtmlTagNode($child->name, $child->attributes, range: $child->range, source: $child->source);
 					$close = $child->closingTag ?? new HtmlTagNode($child->name, closing: true);
-					$out[] = new TextNode(Helpers::decodeEntities($open->toSource()), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($open->toSource()), $child->range);
 					foreach ($this->sanitize($child->content->children) as $inner) {
 						$out[] = $inner;
 					}
-					$out[] = new TextNode(Helpers::decodeEntities($close->toSource()), $close->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($close->toSource()), $close->range);
 					continue;
 				}
 

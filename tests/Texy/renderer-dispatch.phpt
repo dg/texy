@@ -115,7 +115,6 @@ test('a renderer of every built-in class is dispatched to', function () {
 	$doc = $texy->parse($source);
 	$doc->content->children[] = new Nodes\ParagraphNode(new Nodes\ContentNode([
 		new Nodes\AnnotationNode('NATO', 'North Atlantic Treaty Organisation'),
-		new Nodes\RawTextNode('<b>'),
 	]));
 	$texy->createHtmlRenderer()->render($texy->transform($doc));
 

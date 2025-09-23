@@ -56,9 +56,6 @@ class Texy
 	/** @var list<Module>  in the order that decides ties between syntaxes */
 	private array $modules;
 
-	/** @var array<string, \Closure(string): string> */
-	private array $postHandlers = [];
-
 
 	public function __construct()
 	{
@@ -153,14 +150,6 @@ class Texy
 	}
 
 
-	/** @param  callable(string): string  $handler */
-	final public function registerPostLine(callable $handler, string $name): void
-	{
-		$this->postHandlers[$name] = $handler(...);
-		$this->allowedSyntax[$name] ??= true;
-	}
-
-
 	/**
 	 * Converts Texy text to HTML.
 	 */
@@ -185,16 +174,7 @@ class Texy
 	 */
 	public function createHtmlRenderer(): Output\Html\Renderer
 	{
-		return new Output\Html\Renderer(
-			$this->htmlOutput,
-			$this->htmlPolicy,
-			$this->urlPolicy,
-			array_values(array_filter(
-				$this->postHandlers,
-				fn(string $name): bool => !empty($this->allowedSyntax[$name]),
-				ARRAY_FILTER_USE_KEY,
-			)),
-		);
+		return new Output\Html\Renderer($this->htmlOutput, $this->htmlPolicy, $this->urlPolicy);
 	}
 
 
