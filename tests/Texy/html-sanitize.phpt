@@ -10,7 +10,7 @@ use Texy\Nodes;
 require __DIR__ . '/../bootstrap.php';
 
 
-test('rejected tags become text nodes in the AST', function () {
+test('rejected tags become literal text nodes in the AST', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlPolicy->allowedTags = ['b' => Texy\Texy::ALL];
 	$doc = $texy->parse('a <u>x</u> <b>y</b>');
@@ -18,11 +18,11 @@ test('rejected tags become text nodes in the AST', function () {
 	$children = $doc->content->children[0]->content->children;
 
 	// <u>...</u> is rejected: open text, content, close text
-	Assert::type(Nodes\TextNode::class, $children[1]);
+	Assert::type(Nodes\RawTextNode::class, $children[1]);
 	Assert::same('<u>', $children[1]->text);
 	Assert::type(Nodes\TextNode::class, $children[2]);
 	Assert::same('x', $children[2]->text);
-	Assert::type(Nodes\TextNode::class, $children[3]);
+	Assert::type(Nodes\RawTextNode::class, $children[3]);
 	Assert::same('</u>', $children[3]->text);
 
 	// <b>...</b> is allowed and stays a paired element
@@ -37,10 +37,11 @@ test('nested rejected elements are sanitized recursively', function () {
 	$texy->transform($doc);
 	$children = $doc->content->children[0]->content->children;
 
-	// everything of <u><i>x</i></u> is text
-	foreach ([0, 1, 2, 3, 4] as $i) {
-		Assert::type(Nodes\TextNode::class, $children[$i]);
+	// everything of <u><i>x</i></u> is text, the tags literal
+	foreach ([0, 1, 3, 4] as $i) {
+		Assert::type(Nodes\RawTextNode::class, $children[$i]);
 	}
+	Assert::type(Nodes\TextNode::class, $children[2]);
 	// allowed <b> inside rejected <u> survives as element
 	Assert::type(Nodes\HtmlElementNode::class, $children[7]);
 	Assert::same('b', $children[7]->name);
@@ -57,13 +58,17 @@ test('rejected pair is escaped consistently in output', function () {
 });
 
 
-test('escaped tag text participates in typography', function () {
+test('escaped tag text is shown as written, untouched by typography', function () {
 	$texy = new Texy\Texy;
 	Texy\Configurator::safeMode($texy);
 	$texy->htmlOutput->lineWrap = 0;
 	Assert::contains(
-		'&lt;font size=„3“&gt;',
+		'&lt;font size="3"&gt;x&lt;/font&gt; konec',
 		$texy->toHtml('text <font size="3">x</font> konec'),
+	);
+	Assert::contains(
+		'&lt;/nejneobhospodarovavatelnejsimi&gt;',
+		$texy->toHtml('text </nejneobhospodarovavatelnejsimi>'),
 	);
 });
 

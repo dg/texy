@@ -144,6 +144,17 @@ test('quoted acronym', function () {
 });
 
 
+test('notexy is escaped once wherever it stands', function () {
+	Assert::same("<p>text &lt;c&gt; &amp;amp; text</p>\n", process("text ''<c> &amp;'' text"));
+	Assert::same("<p>&lt;c&gt;</p>\n", process("''<c>''"));
+	Assert::same("<h1>&lt;path&gt;</h1>\n", process("''<path>''\n--------"));
+	Assert::match(
+		'%A%<td>&gt;&gt;text&lt;&lt;</td>%A%',
+		process("| ''>>text<<'' |"),
+	);
+});
+
+
 test('a long link of a phrase is parsed', function () {
 	foreach (['a.', '(a)', '//a//:'] as $fragment) {
 		Assert::noError(fn() => process('"a":http://a.cz/' . str_repeat($fragment, 10_000)));

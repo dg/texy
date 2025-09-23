@@ -13,9 +13,10 @@ use function count, strlen;
 
 
 /**
- * Call-driven well-forming and formatting engine, fed by the raw() string
- * frontend, which tokenizes the rendered HTML into startTag()/endTag() calls.
- * Fixes pairing, content model and nesting, produces indented, wrapped HTML.
+ * Call-driven well-forming and formatting engine, fed by startTag()/endTag()/
+ * text()/raw() calls from the renderer's tree walk (or by the raw() string
+ * frontend). Fixes pairing, content model and nesting, produces indented,
+ * wrapped HTML.
  */
 final class WellFormer
 {
@@ -72,6 +73,15 @@ final class WellFormer
 
 
 	/**
+	 * Plain (unescaped) text.
+	 */
+	public function text(string $s): void
+	{
+		$this->escapedText(htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8'));
+	}
+
+
+	/**
 	 * Raw HTML fragment: tokenized by the same grammar the string engine
 	 * used. Unmatched pieces (stray "<", trailing text) keep their position,
 	 * exactly as the string parser left them in place.
@@ -79,6 +89,17 @@ final class WellFormer
 	public function raw(string $html): void
 	{
 		$offset = 0;
+		$item = reset($this->tagStack);
+		if ($item && Schema::isRawText($item['tag'])) {
+			// the content of script and style is no markup: it goes out as it is, or not at all with a dropped element
+			$offset = stripos($html, '</' . $item['tag']);
+			$offset = $offset === false ? strlen($html) : $offset;
+			if ($item['open'] !== null) {
+				$this->flushText();
+				$this->appendPre(substr($html, 0, $offset));
+			}
+		}
+
 		$matches = Regexp::matchAll(
 			$html,
 			'~
@@ -86,6 +107,7 @@ final class WellFormer
 				< (?: (!--.*--) | (/?) ([a-z][a-z0-9._:-]*) (|[ \n].*) \s* (/?) ) >
 			~Uisx',
 			captureOffset: true,
+			offset: $offset,
 		);
 
 		foreach ($matches as $m) {

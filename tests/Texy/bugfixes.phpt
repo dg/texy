@@ -27,7 +27,7 @@ test('allowed XSS for URLs #31', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
 	Assert::same(
-		"<p>&lt;a href=„jAvascrip\u{AD}t://“&gt;click&lt;/a&gt;</p>\n",
+		"<p>&lt;a href=\"jAvascript://\"&gt;click&lt;/a&gt;</p>\n",
 		$texy->toHtml('<a href="jAvascript://">click</a>'),
 	);
 });

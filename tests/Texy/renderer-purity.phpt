@@ -78,6 +78,36 @@ test('the float of a figure is the figure\'s, rendering does not mutate it', fun
 });
 
 
+test('paragraph without <p> renders the nodes of the AST once', function () {
+	$seen = [];
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->addRenderer(function (Texy\Nodes\HtmlCommentNode $node) use (&$seen) {
+		$seen[] = $node;
+		return null;
+	});
+
+	$doc = $texy->parse("<!-- a -->\n  <!-- b -->");
+	[$a, $break, $b] = $doc->content->children[0]->content->children;
+	Assert::type(Texy\Nodes\LineBreakNode::class, $break);
+
+	$texy->createHtmlRenderer()->render($doc);
+	Assert::same([$a, $b], $seen);
+	Assert::same([$a, $break, $b], $doc->content->children[0]->content->children);
+});
+
+
+test('line break after a failed render of a paragraph without <p>', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->addRenderer(function (Texy\Nodes\HtmlCommentNode $node) {
+		throw new RuntimeException('failed');
+	});
+	$renderer = $texy->createHtmlRenderer();
+
+	Assert::exception(fn() => $renderer->render($texy->parse("<div>a\n  <!-- b --></div>")), RuntimeException::class);
+	Assert::contains('<br>', $renderer->render($texy->parse("a\n  b")));
+});
+
+
 test('nofollow directive applies to whole document including preceding links', function () {
 	$texy = new Texy\Texy;
 	$html = $texy->toHtml(

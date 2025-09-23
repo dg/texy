@@ -197,6 +197,16 @@ final class Schema
 
 
 	/**
+	 * Is the content of the element raw text, which HTML does not read as markup?
+	 */
+	public static function isRawText(string $tag): bool
+	{
+		$tag = strtolower($tag);
+		return $tag === 'script' || $tag === 'style';
+	}
+
+
+	/**
 	 * Returns UrlLink / UrlImage for an attribute carrying a URL, null otherwise.
 	 */
 	public static function urlAttribute(string $name): ?string

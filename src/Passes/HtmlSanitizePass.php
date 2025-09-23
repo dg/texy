@@ -8,15 +8,13 @@
 namespace Texy\Passes;
 
 use Texy\{HasModifier, Helpers, HtmlPolicy, Modifier, Node, Nodes, NodeTraverser, TraverseAction};
-use Texy\Nodes\{HtmlElementNode, HtmlTagNode, RawTextNode, TextNode};
+use Texy\Nodes\{HtmlElementNode, HtmlTagNode, RawTextNode};
 
 
 /**
  * Applies HtmlPolicy in the transform phase, so every output format and renderer handler gets
  * the sanitized AST: a rejected tag becomes text as written, a rejected link its content,
  * a rejected image its alternative text, and a modifier keeps only what the policy allows.
- * - a rejected tag or element is replaced by TextNode with the tag as written, so escaped
- *   tags are visible text (typography applies to them), allowed tags are markup;
  */
 final class HtmlSanitizePass
 {
@@ -60,7 +58,7 @@ final class HtmlSanitizePass
 		foreach ($children as $child) {
 			if ($child instanceof HtmlTagNode) {
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, $child->closing)) {
-					$out[] = new TextNode(Helpers::decodeEntities($child->toSource()), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($child->toSource()), $child->range);
 					continue;
 				}
 
@@ -71,11 +69,11 @@ final class HtmlSanitizePass
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, closing: false)) {
 					$open = new HtmlTagNode($child->name, $child->attributes, range: $child->range, source: $child->source);
 					$close = $child->closingTag ?? new HtmlTagNode($child->name, closing: true);
-					$out[] = new TextNode(Helpers::decodeEntities($open->toSource()), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($open->toSource()), $child->range);
 					foreach ($this->sanitize($child->content->children) as $inner) {
 						$out[] = $inner;
 					}
-					$out[] = new TextNode(Helpers::decodeEntities($close->toSource()), $close->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($close->toSource()), $close->range);
 					continue;
 				}
 
