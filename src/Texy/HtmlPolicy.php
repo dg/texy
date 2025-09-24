@@ -26,15 +26,9 @@ final class HtmlPolicy
 	/** @var bool|array<int, string>  allowed inline CSS styles */
 	public bool|array $allowedStyles = Texy::ALL;
 
-	/** @var array<string, int>|bool */
-	private bool|array $classes;
-
-	/** @var array<string, int>|bool */
-	private bool|array $styles;
-
 
 	public function __construct(
-		private Texy $texy,
+		private UrlPolicy $urlPolicy,
 	) {
 		$this->allowedTags = Schema::defaultAllowedTags(); // accept all valid HTML tags and attributes by default
 	}
@@ -67,7 +61,7 @@ final class HtmlPolicy
 			}
 			// Validate href URL scheme (security: filter javascript: etc.)
 			if (isset($attrs['href']) && is_string($attrs['href'])) {
-				if (!$this->texy->checkURL($attrs['href'], Texy::FILTER_ANCHOR)) {
+				if (!$this->urlPolicy->isLinkAllowed($attrs['href'])) {
 					return 'drop'; // XSS protection - drop dangerous URLs entirely
 				}
 			}
@@ -79,7 +73,7 @@ final class HtmlPolicy
 				return false;
 			}
 			// Validate src URL scheme
-			if (is_string($attrs['src']) && !$this->texy->checkURL($attrs['src'], Texy::FILTER_IMAGE)) {
+			if (is_string($attrs['src']) && !$this->urlPolicy->isImageAllowed($attrs['src'])) {
 				return 'drop'; // XSS protection - drop dangerous URLs entirely
 			}
 		}
@@ -139,30 +133,5 @@ final class HtmlPolicy
 		}
 
 		return $tag . '>';
-	}
-
-
-	/**
-	 * Allowed classes and styles as lookup sets (or the ALL/NONE booleans).
-	 * @internal
-	 * @return array{array<string, int>|bool, array<string, int>|bool}
-	 */
-	public function getAllowedProps(): array
-	{
-		$this->classes ??= is_array($this->allowedClasses)
-			? array_flip($this->allowedClasses)
-			: $this->allowedClasses;
-		$this->styles ??= is_array($this->allowedStyles)
-			? array_flip($this->allowedStyles)
-			: $this->allowedStyles;
-
-		return [$this->classes, $this->styles];
-	}
-
-
-	/** @internal */
-	public function resetCache(): void
-	{
-		unset($this->classes, $this->styles);
 	}
 }

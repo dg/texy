@@ -30,19 +30,14 @@ class Texy
 		ALL = true,
 		NONE = false;
 
-	// url filters
-	public const
-		FILTER_ANCHOR = 'anchor',
-		FILTER_IMAGE = 'image';
-
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
 	/** TAB width (for converting tabs to spaces) */
 	public int $tabWidth = 8;
 
-	/** @var array<string, string>  regexps to check URL schemes */
-	public array $urlSchemeFilters; // disable URL scheme filter
+	/** URL scheme security policy for links and images */
+	public readonly UrlPolicy $urlPolicy;
 
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
@@ -109,7 +104,8 @@ class Texy
 
 	public function __construct()
 	{
-		$this->htmlPolicy = new HtmlPolicy($this);
+		$this->urlPolicy = new UrlPolicy;
+		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->loadModules();
 	}
@@ -230,10 +226,25 @@ class Texy
 	 */
 	public function process(string $text, bool $singleLine = false): string
 	{
-		$this->htmlPolicy->resetCache();
 		$document = $this->parse($text, $singleLine);
 		$this->transform($document);
-		return (new Output\Html\Renderer($this->htmlOutput, $this))->render($document);
+		return $this->createHtmlRenderer()->render($document);
+	}
+
+
+	/**
+	 * Creates an HTML renderer wired to the current configuration. The renderer
+	 * needs no live Texy instance and is reusable across documents.
+	 */
+	public function createHtmlRenderer(): Output\Html\Renderer
+	{
+		return new Output\Html\Renderer(
+			$this->htmlOutput,
+			$this->htmlPolicy,
+			$this->urlPolicy,
+			!empty($this->allowed[Syntax::Typography]) ? $this->typographyModule->postLine(...) : null,
+			array_filter($this->postHandlers, fn(string $name): bool => !empty($this->allowed[$name]), ARRAY_FILTER_USE_KEY),
+		);
 	}
 
 
@@ -369,19 +380,6 @@ class Texy
 	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
 	{
 		$this->passes[$stage->name][] = $pass(...);
-	}
-
-
-	/**
-	 * Filters bad URLs.
-	 * @param  string  $type  Texy::FILTER_ANCHOR | Texy::FILTER_IMAGE
-	 */
-	final public function checkURL(string $URL, string $type): bool
-	{
-		// absolute URL with scheme? check scheme!
-		return empty($this->urlSchemeFilters[$type])
-			|| !Regexp::match($URL, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // http: | mailto:
-			|| Regexp::match($URL, $this->urlSchemeFilters[$type]);
 	}
 
 

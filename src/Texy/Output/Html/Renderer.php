@@ -7,15 +7,17 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{Helpers, Modifier, Node, Nodes, Syntax, Texy};
+use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, Syntax, UrlPolicy};
 use Texy\Output\NodeRenderer;
 use function count, is_array, is_string;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
 
 
 /**
- * Renders the AST to the output HTML string. Created per render() call;
- * configuration is read from the Config object.
+ * Renders the AST to the output HTML string; needs no live Texy instance.
+ * Configuration is read from the Config object; per-document facts (nofollow)
+ * are derived from the document itself at render time, so the instance is a
+ * configuration snapshot reusable across documents.
  * @extends NodeRenderer<Element|string>
  */
 final class Renderer extends NodeRenderer
@@ -39,11 +41,16 @@ final class Renderer extends NodeRenderer
 
 	public function __construct(
 		public readonly Config $config,
-		private Texy $texy,
+		private HtmlPolicy $htmlPolicy,
+		private UrlPolicy $urlPolicy,
+		/** @var ?\Closure(string): string typography for isolated strings (title, alt); null = disabled */
+		private ?\Closure $postLine = null,
+		/** @var array<string, \Closure(string): string> post-processing of the document text (typography, long words) */
+		private array $postHandlers = [],
 	) {
 		$this->noFollow = $config->linkNoFollow;
 		$this->imageDimensions = new ImageDimensions($config);
-		$this->decorator = new ElementDecorator($texy, $config, $this);
+		$this->decorator = new ElementDecorator($htmlPolicy, $urlPolicy, $config, $this);
 
 		$this->handlers = [
 			// Core nodes
@@ -117,11 +124,7 @@ final class Renderer extends NodeRenderer
 
 		// line-postprocessing (typography, long words)
 		$blocks = explode(self::ContentBlock, $s);
-		foreach ($this->texy->postHandlers as $name => $handler) {
-			if (empty($this->texy->allowed[$name])) {
-				continue;
-			}
-
+		foreach ($this->postHandlers as $handler) {
 			foreach ($blocks as $n => $s) {
 				if ($n % 2 === 0 && $s !== '') {
 					$blocks[$n] = $handler($s);
@@ -235,9 +238,7 @@ final class Renderer extends NodeRenderer
 	 */
 	public function postLineText(string $s): string
 	{
-		return !empty($this->texy->allowed[Syntax::Typography])
-			? $this->texy->typographyModule->postLine($s)
-			: $s;
+		return $this->postLine !== null ? ($this->postLine)($s) : $s;
 	}
 
 
@@ -697,7 +698,7 @@ final class Renderer extends NodeRenderer
 	{
 		// Check URL scheme (security - filter dangerous schemes like javascript:)
 		$rawUrl = $node->url ?? '';
-		if (!$this->texy->checkURL($rawUrl, Texy::FILTER_ANCHOR)) {
+		if (!$this->urlPolicy->isLinkAllowed($rawUrl)) {
 			// URL fails scheme filter, return just the content without link
 			return $this->serialize($this->renderNodes($node->content->children));
 		}
@@ -717,10 +718,7 @@ final class Renderer extends NodeRenderer
 		$el->attrs['href'] = null; // trick - reserve position at front
 		$this->decorateElement($mod, $el);
 
-		// Normalize www. to http://
-		if (strncasecmp($rawUrl, 'www.', 4) === 0) {
-			$rawUrl = 'http://' . $rawUrl;
-		}
+		$rawUrl = Helpers::normalizeWww($rawUrl);
 
 		// Prepend root to relative URLs
 		// Use imageModule.root for image links, linkModule.root otherwise
@@ -772,7 +770,8 @@ final class Renderer extends NodeRenderer
 
 	private function renderEmoticon(Nodes\EmoticonNode $node): Element|string
 	{
-		$emoji = $node->resolved ?? $this->texy->emoticonModule->icons[$node->emoticon] ?? $node->emoticon;
+		$emoji = $node->resolved ?? $node->emoticon; // resolved is filled by the transform pass
+
 		return $this->config->emoticonClass
 			? (new Element('span', ['class' => $this->config->emoticonClass]))->setText($emoji)
 			: $emoji;
@@ -784,9 +783,7 @@ final class Renderer extends NodeRenderer
 
 	private function renderUrl(Nodes\UrlNode $node): Element
 	{
-		$url = strncasecmp($node->url, 'www.', 4) === 0
-			? 'http://' . $node->url
-			: $node->url;
+		$url = Helpers::normalizeWww($node->url);
 
 		$el = new Element('a', ['href' => $url]);
 		if ($this->noFollow && str_contains($url, '//')) {
@@ -818,19 +815,19 @@ final class Renderer extends NodeRenderer
 		$attrs = $node->attributes;
 
 		// Check if tag is allowed
-		if (!$this->texy->htmlPolicy->isTagAllowed($tagName)) {
-			return Helpers::decodeEntities($this->texy->htmlPolicy->reconstructTag($node)); // shown as text
+		if (!$this->htmlPolicy->isTagAllowed($tagName)) {
+			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node)); // shown as text
 		}
 
 		// Validate tag - reject if validation fails
-		$validation = $this->texy->htmlPolicy->validateTag($tagName, $attrs, $node->closing);
+		$validation = $this->htmlPolicy->validateTag($tagName, $attrs, $node->closing);
 		if ($validation === false || $validation === 'drop') {
 			// Invalid tag - shown as text in the output
-			return Helpers::decodeEntities($this->texy->htmlPolicy->reconstructTag($node));
+			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node));
 		}
 
 		// an accepted tag must not smuggle in attributes the whitelist does not allow
-		$attrs = $this->texy->htmlPolicy->filterAttrs($tagName, $attrs);
+		$attrs = $this->htmlPolicy->filterAttrs($tagName, $attrs);
 
 		// Add rel="nofollow" for external links when linkNoFollow is enabled
 		if ($tagName === 'a' && !$node->closing && isset($attrs['href']) && is_string($attrs['href'])) {

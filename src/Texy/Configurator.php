@@ -57,8 +57,8 @@ class Configurator
 		// only some "safe" HTML tags and attributes are allowed; the '*' list names
 		// attributes acceptable on any element and is the only source for modifiers
 		$texy->htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];
-		$texy->urlSchemeFilters[$texy::FILTER_ANCHOR] = '~https?:|ftp:|mailto:~A';
-		$texy->urlSchemeFilters[$texy::FILTER_IMAGE] = '~https?:~A';
+		$texy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
+		$texy->urlPolicy->imagePattern = '~https?:~A';
 		$texy->allowed[Syntax::Image] = false; // disable images
 		$texy->allowed[Syntax::LinkDefinition] = false; // disable [ref]: URL reference definitions
 		$texy->allowed[Syntax::HtmlComment] = false; // disable HTML comments

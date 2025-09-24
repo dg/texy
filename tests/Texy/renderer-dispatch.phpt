@@ -28,7 +28,7 @@ function documentWith(Texy $texy, Nodes\InlineNode $node): Nodes\DocumentNode
 /** Renders a document to HTML. */
 function renderDoc(Texy $texy, Nodes\DocumentNode $doc): string
 {
-	return (new Html\Renderer($texy->htmlOutput, $texy))->render($doc);
+	return $texy->createHtmlRenderer()->render($doc);
 }
 
 
