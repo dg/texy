@@ -28,7 +28,7 @@ overrides:
 		naming: {constant: keep, property: keep}
 
 	- # renaming the parameters $URL would break calls naming them
-		paths: [src/Texy/Helpers.php, src/Texy/Texy.php]
+		paths: [src/Texy/Helpers.php]
 		naming: {variable: keep}
 
 	- # the package keeps its own deprecated API working, so it uses it

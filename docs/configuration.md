@@ -64,13 +64,13 @@ Maps alignment modifiers to CSS classes instead of inline styles. Default: all s
 $texy->alignClasses['left'] = 'text-left';   // .< now produces class="text-left"
 ```
 
-### $urlSchemeFilters
+### $urlPolicy
 
-Regexps checking URL schemes, keyed by `Texy::FILTER_ANCHOR` (links) and `Texy::FILTER_IMAGE` (images). By default the property is not initialized and no filtering occurs. A URL with a scheme passes only if it matches the filter; scheme-less URLs always pass (`Texy::checkURL()`).
+URL scheme security policy (`Texy\UrlPolicy`): a regex of allowed link schemes and one for image schemes. A null pattern means no restriction. Only absolute URLs with a scheme are checked; scheme-less (relative) URLs always pass.
 
 ```php
-$texy->urlSchemeFilters[Texy\Texy::FILTER_ANCHOR] = '#https?:|ftp:|mailto:#A';
-$texy->urlSchemeFilters[Texy\Texy::FILTER_IMAGE] = '#https?:#A';
+$texy->urlPolicy->linkPattern = '#https?:|ftp:|mailto:#A';
+$texy->urlPolicy->imagePattern = '#https?:#A';
 ```
 
 ### Other properties
@@ -271,7 +271,7 @@ Texy's protections against common attacks are activated by safe mode – enable 
 "click":javascript:alert('XSS')       → link not created
 ```
 
-**URL validation** applies to all links and images via `$urlSchemeFilters` (see above). Only absolute URLs with a scheme are checked; relative URLs always pass.
+**URL validation** applies to all links and images via `$urlPolicy` (see above). Only absolute URLs with a scheme are checked; relative URLs always pass.
 
 **Tag filtering** via `$allowedTags` applies both to HTML written in the input and to the generated output; disallowed tags are dropped while their textual content is kept.
 
