@@ -8,7 +8,7 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use Texy\Parsing\{BlockParser, InlineParser, ParseContext};
+use Texy\Parsing\{Engine, ParseContext};
 use function strlen;
 
 
@@ -67,34 +67,13 @@ class Texy
 	public array $postHandlers = [];
 
 	/** @var Module[] */
-	private array $modules;
+	private array $modules = [];
 
 	/**
-	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>
+	 * The parsing engine - a cumulative pattern registry. Modules refresh their
+	 * patterns before each parse; consumer registrations are never overwritten.
 	 */
-	private array $linePatterns = [];
-
-	/**
-	 * Inline patterns the configuration allows, cached for parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>
-	 */
-	private array $activeLinePatterns;
-
-	/**
-	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>
-	 */
-	private array $blockPatterns = [];
-
-	/**
-	 * Block patterns the configuration allows, cached for parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>
-	 */
-	private array $activeBlockPatterns;
-
-	/** @var array<string, list<\Closure(Nodes\DocumentNode): void>>  stage name => passes in registration order */
-	private array $passes = [];
+	private Engine $engine;
 
 	/** @var array{line: array<string, true>, block: array<string, true>}  syntax names registered by the consumer */
 	private array $consumerSyntaxes = ['line' => [], 'block' => []];
@@ -104,10 +83,14 @@ class Texy
 
 	public function __construct()
 	{
+		$this->engine = new Engine;
 		$this->urlPolicy = new UrlPolicy;
 		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->loadModules();
+		$this->engine->setGapHandler(
+			fn(ParseContext $context, string $gapText, int $offset) => $this->paragraphModule->parseText($context, $gapText, $offset),
+		);
 	}
 
 
@@ -176,10 +159,7 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->linePatterns[$name] = [
-			'handler' => $handler,
-			'pattern' => $pattern,
-		];
+		$this->engine->registerLinePattern($handler, $pattern, $name);
 	}
 
 
@@ -203,10 +183,7 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->blockPatterns[$name] = [
-			'handler' => $handler,
-			'pattern' => $pattern . 'm', // force multiline
-		];
+		$this->engine->registerBlockPattern($handler, $pattern, $name);
 	}
 
 
@@ -268,15 +245,8 @@ class Texy
 			$this->inModulePrepare = false;
 		}
 
-		unset($this->activeLinePatterns, $this->activeBlockPatterns);
-		$context = $this->createParseContext();
-		$content = $singleLine
-			? $context->parseInline($text)
-			: $context->parseBlock($text);
-
-		$document = new Nodes\DocumentNode($content);
-		$this->runPasses($document, Stage::Syntax);
-		return $document;
+		// Parse using the engine with current allowed settings
+		return $this->engine->parse($text, $this->allowed, $singleLine);
 	}
 
 
@@ -287,19 +257,7 @@ class Texy
 	 */
 	public function transform(Nodes\DocumentNode $document): void
 	{
-		if (empty($document->meta['transformed'])) {
-			$document->meta['transformed'] = true;
-			$this->runPasses($document, Stage::Transform);
-			$this->runPasses($document, Stage::Finalize);
-		}
-	}
-
-
-	private function runPasses(Nodes\DocumentNode $document, Stage $stage): void
-	{
-		foreach ($this->passes[$stage->name] ?? [] as $pass) {
-			$pass($document);
-		}
+		$this->engine->transform($document);
 	}
 
 
@@ -379,7 +337,7 @@ class Texy
 	 */
 	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
 	{
-		$this->passes[$stage->name][] = $pass(...);
+		$this->engine->addPass($pass(...), $stage);
 	}
 
 
@@ -389,35 +347,7 @@ class Texy
 	 */
 	public function createParseContext(): ParseContext
 	{
-		return new ParseContext(
-			$this->createInlineParser(),
-			$this->createBlockParser(),
-		);
-	}
-
-
-	private function createBlockParser(): BlockParser
-	{
-		$this->activeBlockPatterns ??= array_filter(
-			$this->blockPatterns,
-			fn($pattern, $name) => !empty($this->allowed[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-		return new BlockParser(
-			$this->activeBlockPatterns,
-			fn(ParseContext $context, string $text, int $offset) => $this->paragraphModule->parseText($context, $text, $offset),
-		);
-	}
-
-
-	private function createInlineParser(): InlineParser
-	{
-		$this->activeLinePatterns ??= array_filter(
-			$this->linePatterns,
-			fn($pattern, $name) => !empty($this->allowed[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-		return new InlineParser($this->activeLinePatterns);
+		return $this->engine->createParseContext($this->allowed);
 	}
 
 
