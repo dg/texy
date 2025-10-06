@@ -53,7 +53,7 @@ echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';
 
 // You can use the first heading from your document as the page title
-echo '<title>' . ($document->getHeadings()[0] ?? null)?->getPlainText() . '</title>';
+echo '<title>' . ($document->getHeadings()[0] ?? null)?->getTitle() . '</title>';
 
 echo $html;
 

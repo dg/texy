@@ -51,7 +51,7 @@ echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';
 
 // You can use the first heading as the page title
-echo '<title>' . ($document->getHeadings()[0] ?? null)?->getPlainText() . '</title>';
+echo '<title>' . ($document->getHeadings()[0] ?? null)?->getTitle() . '</title>';
 
 echo '<strong>Dynamic method:</strong>';
 echo '<pre>';
@@ -110,6 +110,6 @@ echo '<hr>';
 echo '<h2>Table of contents</h2>';
 echo '<pre>';
 foreach ($document->getHeadings() as $heading) {
-	echo str_repeat('  ', $heading->level - 1), htmlspecialchars(trim($heading->getPlainText())), ' #', $heading->modifier?->id, "\n";
+	echo str_repeat('  ', $heading->level - 1), htmlspecialchars($heading->getTitle()), ' #', $heading->id, "\n";
 }
 echo '</pre>';

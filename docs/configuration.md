@@ -88,9 +88,6 @@ $texy->nontextParagraph = 'div';   // element for paragraphs without text (e.g. 
 After `process()`:
 
 ```php
-$texy->headingModule->title;   // first heading text (for <title>)
-$texy->headingModule->TOC;     // table of contents: [{el, level, type, title}]
-$texy->getDOM();               // the parsed HtmlElement tree
 $texy->toText();               // plain-text rendition
 ```
 
@@ -110,6 +107,19 @@ $texy->headingModule->levels = ['#' => 0, '*' => 1, '=' => 2, '-' => 3]; // used
 ```
 
 With `DYNAMIC` balancing the most important heading found becomes `$top`; with `FIXED` each underline character maps to a fixed level via `$levels` (level = `$levels[$char] + $top`).
+
+The results are facts about the document, so they are read from the AST, not from the module:
+
+```php
+$document = $texy->parse($text);
+$headings = $document->getHeadings(); // document order, texysource excluded
+$title = $headings[0]?->getTitle();                      // document title
+foreach ($headings as $heading) {
+	echo $heading->level, $heading->getTitle(), $heading->id;
+}
+```
+
+`HeadingNode::$id` is the effective anchor: an explicit `.[#id]` written by the author, or the generated one. A generated ID is written by the engine, so it survives safe mode; an author's `.[#id]` goes through the `allowedClasses` policy like any other modifier.
 
 ### PhraseModule
 
