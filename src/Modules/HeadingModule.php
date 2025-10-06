@@ -16,7 +16,7 @@ use function strlen;
 
 /**
  * Processes heading syntax (underlined and surrounded), balances the levels by the order of
- * heading styles in the document and generates heading IDs.
+ * heading styles in the document and hoists {toc: ...} labels.
  */
 final class HeadingModule extends Texy\Module
 {
@@ -66,11 +66,8 @@ final class HeadingModule extends Texy\Module
 		}
 
 		foreach ($headings as $node) {
-			$node->level = min(6, max(1, $node->level + $this->config->headingTop - 1));
-		}
-
-		if ($this->config->headingIds) {
-			$this->generateIDs($headings);
+			$hoisted = self::hoistOverride($node);
+			$node->titleOverride ??= $hoisted; // a pass that ran earlier may have set its own
 		}
 	}
 
@@ -119,44 +116,6 @@ final class HeadingModule extends Texy\Module
 
 		$length = min(7, max(2, strlen($marker)));
 		return $this->config->headingMoreMeansHigher ? 8 - $length : $length - 1;
-	}
-
-
-	/**
-	 * The {toc: ...} label gives the slug instead of the heading's text.
-	 * @param  list<HeadingNode>  $headings
-	 */
-	private function generateIDs(array $headings): void
-	{
-		$usedID = [];
-		foreach ($headings as $node) {
-			$title = self::hoistOverride($node) ?? trim($node->getPlainText());
-			if ($node->modifier?->id) {
-				$usedID[$node->modifier->id] = true;
-				continue;
-			}
-
-			$id = self::uniqueID($this->config->headingIdPrefix . Texy\Helpers::webalize($title), $usedID);
-			$usedID[$id] = true;
-			$node->modifier ??= new Modifier;
-			$node->modifier->id = $id;
-		}
-	}
-
-
-	/** @param  array<string, true>  $usedID */
-	private static function uniqueID(string $id, array $usedID): string
-	{
-		if (!isset($usedID[$id])) {
-			return $id;
-		}
-
-		$counter = 2;
-		while (isset($usedID[$id . '-' . $counter])) {
-			$counter++;
-		}
-
-		return $id . '-' . $counter;
 	}
 
 

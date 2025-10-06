@@ -312,6 +312,10 @@ final class Renderer extends NodeRenderer
 	{
 		$el = new Element('h' . $node->level);
 		$this->decorateElement($node->modifier, $el);
+		if ($node->id !== null) {
+			$el->attrs['id'] = $node->id; // the transformation has applied the policy
+		}
+
 		$el->children = $this->renderNodes($node->content->children);
 		return $el;
 	}

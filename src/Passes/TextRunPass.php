@@ -104,8 +104,10 @@ final class TextRunPass
 			$modifier->title = self::transformIsolated($modifier->title, $transform);
 		}
 
-		// the alternative text is display text too
-		if ($node instanceof Nodes\ImageNode && $node->alt !== null) {
+		// the {toc: ...} label and the alternative text are display text too
+		if ($node instanceof Nodes\HeadingNode && $node->titleOverride !== null) {
+			$node->titleOverride = self::transformIsolated($node->titleOverride, $transform);
+		} elseif ($node instanceof Nodes\ImageNode && $node->alt !== null) {
 			$node->alt = self::transformIsolated($node->alt, $transform);
 		}
 	}

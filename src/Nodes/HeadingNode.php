@@ -19,6 +19,13 @@ use Texy\{HasModifier, Range};
  */
 class HeadingNode extends BlockNode implements HasModifier
 {
+	/** the {toc: ...} label, hoisted out of the modifier; null means the content is the title */
+	public ?string $titleOverride = null;
+
+	/** the heading's anchor, filled by HeadingPass; an explicit .[#id] the policy allows wins over the generated one */
+	public ?string $id = null;
+
+
 	public function __construct(
 		public ContentNode $content,
 		/** 1..6, by the notation in the syntax tree and the real one in a transformed document */
@@ -30,6 +37,16 @@ class HeadingNode extends BlockNode implements HasModifier
 		public ?string $marker = null,
 		public ?Range $textRange = null,
 	) {
+	}
+
+
+	/**
+	 * The heading as plain text, for the document title, the outline and the ID slug.
+	 * Derived from the content, not copied, so the two cannot drift apart.
+	 */
+	public function getTitle(): string
+	{
+		return $this->titleOverride ?? trim($this->getPlainText());
 	}
 
 
