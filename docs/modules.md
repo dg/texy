@@ -1,94 +1,80 @@
 # The Module System
 
-Modules are the basic organizational unit of Texy. Each module encapsulates the complete functionality for one area of the markup language: recognizing its syntaxes, converting them to HTML, and exposing configuration.
+Modules are the internal organization of a language in the parse and transform phases. Each module encapsulates one area of the markup: it declares the syntax names, registers the patterns and turns matches into AST nodes. Modules do **not** render – all output generation lives in `Texy\Output` (see [rendering.md](rendering.md)).
 
-## Responsibilities of a module
+Modules are not an API of an application. A language consists of them, and they can be split, merged or rebuilt at will. An application extends Texy with `registerLinePattern()`, `registerBlockPattern()`, `addHandler()` and `$texy->htmlOutput->addRenderer()`, and configures it on `$texy->config`.
 
-1. **Registering syntaxes.** A module registers its line and block patterns in its `beforeParse()` method (called on every `process()`) via `Texy::registerLinePattern()` / `registerBlockPattern()`; post-line handlers are registered once in the constructor with `registerPostLine()`. This tells the parser: "when you find these patterns, call me."
-2. **Implementing element handlers.** The module registers default handlers (via `Texy::addHandler()`) for the elements its syntaxes produce. These handlers contain the logic that turns matched constructs into `HtmlElement` objects.
-3. **Providing configuration.** Public properties let users adjust the module's behavior without touching its code (e.g. `ImageModule::$root` for the image URL prefix).
-4. **Managing module-specific state.** E.g. `LinkReferenceModule` maintains the dictionary of link references. This state is private to the module; per-parse *results* belong in the tree, not on the module (see `HeadingNode::getTitle()`).
+## The contract
 
-Modules are designed as independent units: each can work on its own and must not depend on the implementation details of other modules. Communication happens through shared value objects (`Texy\Link`, `Texy\Image`), not through direct method calls.
+A module extends `Texy\Module`, whose single method is `register(Parsing\Registry $registry)`; the same contract serves [texy/markdown](https://github.com/dg/texy-markdown). `Registry` has `addInline()`, `addBlock()`, `declare($name, $enabled)` for a name without a pattern of its own or with a default other than enabled, and `setGapHandler()`.
+
+- `register()` runs in the constructor of the facade and again before every parse in Texy, because patterns depend on the configuration (`TexyConfig::$listBullets`); a name keeps its position, and the state declared first holds.
+- A module gets in the constructor only what it needs: the configuration, a policy, another module. It holds no reference to the facade.
+- A module registers no passes. What it does over the whole document is a public method and the facade lists it among the passes, whose order is thus one explicit list in `Texy::createModules()`.
+- Configuration lives on `TexyConfig`, permanent registrations of the application too (`addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
 
 ## Anatomy of a typical module
-
-Every module extends the base class `Texy\Module` (`src/Module.php`), which provides an overridable `beforeParse()` method; each module keeps its own `$texy` back-reference (constructor-promoted). The constructor wires up element handlers and defaults; line and block patterns are registered in `beforeParse()`, which runs on every `process()` call:
 
 ```php
 final class FooModule extends Texy\Module
 {
-    public string $someOption = 'default';   // public configuration
+	public function __construct(
+		private Texy\TexyConfig $config,
+	) {
+	}
 
-    public function __construct(
-        private Texy\Texy $texy,
-    ) {
-        $texy->allowed['foo/advanced'] = false;      // default off
-        $texy->addHandler('foo', $this->solve(...));  // default element handler
-    }
 
-    public function beforeParse(string &$text): void
-    {
-        $this->texy->registerLinePattern(
-            $this->parseFoo(...),   // syntax handler
-            '~...~U',               // pattern
-            'foo',                  // syntax name
-        );
-    }
+	public function register(Texy\Parsing\Registry $registry): void
+	{
+		$registry->declare('foo/advanced', enabled: false);
+		$registry->addInline('foo', '~...~U', $this->parseFoo(...));
+	}
+
+
+	/** @param array<?string> $matches  @param array<?int> $offsets */
+	public function parseFoo(Texy\Parsing\ParseContext $context, array $matches, array $offsets): ?Texy\Nodes\InlineNode
+	{
+		// extract data, optionally $context->parseInline(...) for nested content,
+		// return a node or null to refuse the match
+	}
 }
 ```
 
-- **Syntax handlers** (`parseFoo()`) are called by the parser on a match. They extract data from the regex groups, build helper objects (`Link`, `Image`, `Modifier`), and invoke the element handler chain via `Texy::invokeAroundHandlers()`.
-- **Element handlers** (`solve()`) do the actual work: create the `HtmlElement`, apply the modifier with `Modifier::decorate()`, process content, and return the result.
-- **Public properties** are the configuration interface – typically primitive types or arrays.
-
-The set of modules is created in `Texy::loadModules()`; a subclass of `Texy` may override this method to replace or extend the module set.
-
 ## Module overview
 
-All modules live in `src/Modules/`. Registered syntax IDs and their defaults are detailed in the syntax reference (user manual); configurable properties in the configuration reference (user manual).
+All modules live in `src/Modules/`; syntax names are catalogued on `Texy\Syntax`.
 
-### Line (inline) modules
+### Inline (line) modules
 
 | Module | Purpose |
 |---|---|
-| **DirectiveModule** | `{{command: args}}` macro calls; delegates entirely to user handlers of the `script` element. |
-| **HtmlModule** | HTML tags (`html/tag`) and comments (`html/comment`) written directly in the input; validates them against `$allowedTags` and the content model. |
-| **ImageModule** | Images `[* url *]` including dimensions and alignment; maintains image reference definitions (`image/definition`, collected in `beforeParse`); invokes the `image` element. |
-| **PhraseModule** | All inline formatting – bold, italic, code, spans, acronyms, sub/sup, quotes, and the alternative link syntaxes (wikilink, markdown, quicklink). Maps syntax names to HTML tags via its `$tags` property; a single `phrase` element handler serves all of them. |
-| **LinkReferenceModule** | Reference links `[ref]` and their definitions (`link/definition`, collected in `beforeParse`); provides `factoryLink()`; invokes `linkReference` and `newReference` elements. |
-| **AutolinkModule** | Autodetected URLs and e-mails (`link/url`, `link/email`); shortens displayed URLs (`shorten`); invokes `linkURL` and `linkEmail` elements. |
-| **EmoticonModule** | Emoticons `:-)` → Unicode characters (or a `<span>` when a CSS class is set). Disabled by default; registers its pattern in `beforeParse`. |
+| **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` in the transform phase. |
+| **HtmlModule** | HTML tags and comments written in the input → `HtmlTagNode` / `HtmlCommentNode`; the pairing and the sanitization are common passes ([rendering.md](rendering.md#html-passthrough-transform-passes)). |
+| **ImageModule** | Images `[* url *]` → `ImageNode` (wrapped in `LinkNode` when clickable); collects `[*ref*]:` definitions and resolves references in the transform phase. |
+| **PhraseModule** | All inline formatting → `PhraseNode` (`$type` the meaning, `$syntax` the syntax name), `` `code` `` → `InlineCodeNode`; acronyms → `AnnotationNode`, `''notexy''` → `RawTextNode`; the alternative link syntaxes (wikilink, markdown, quicklink) → `LinkNode`. |
+| **LinkReferenceModule** | `[ref]: url` definitions → `LinkDefinitionNode`; resolves `[ref]` targets of `LinkNode`s in the transform phase. |
+| **AutolinkModule** | Autodetected URLs and e-mails → `UrlNode` / `EmailNode`. |
+| **EmoticonModule** | Emoticons `:-)` → `EmoticonNode`; resolved to Unicode characters by the table of the configuration already when parsed (`$resolved`). Disabled by default. |
 
 ### Block modules
 
 | Module | Purpose |
 |---|---|
-| **ParagraphModule** | Not pattern-based: `BlockParser` hands it the text between recognized blocks and it produces paragraphs, invoking the `paragraph` element. Chooses the wrapper by the content's protection marks – `<p>` for text, `$texy->nontextParagraph` for replaced-only content, no wrapper around blocks (see [parsing.md](parsing.md#how-content-types-drive-behavior)). Honors `$texy->mergeLines`; converts hard line breaks to `<br>`. |
-| **BlockModule** | Special fenced blocks `/-- type ... \--` (`blocks` syntax) with subtypes `block/code`, `block/html`, `block/text`, `block/texy`, `block/texysource`, `block/comment`, `block/div`, `block/pre`, `block/default`; normalizes fences in `beforeBlockParse`; invokes the `block` element. |
-| **FigureModule** | Image with a visible caption `[* img *] *** caption` (`figure`); combines an `Image`, optional `Link`, and caption; invokes the `figure` element. |
-| **HorizontalRuleModule** | Horizontal rules `---` / `***` (`horizline`); type-specific CSS classes via `$classes`. |
-| **BlockQuoteModule** | Quotations introduced by `>` (`blockquote`), including nested quotes and link citation; fires `afterBlockquote`. |
-| **TableModule** | Tables (`table`) with head/body detection, row headers, colspan/rowspan (helper class `TableCellElement`); fires `afterTable`. One of the most complex modules. |
-| **HeadingModule** | Underlined (`heading/underlined`) and surrounded (`heading/surrounded`) headings; registers `Passes\HeadingPass`, which assigns levels according to the balancing mode (`DYNAMIC`/`FIXED`), hoists `{toc: …}` labels and generates IDs; invokes the `heading` element. |
-| **ListModule** | Bulleted, numbered (`list`) and definition (`list/definition`) lists; bullet styles configured via `$bullets`; registers its patterns in `beforeParse` (they depend on `$bullets`); fires `afterList` / `afterDefinitionList`. |
+| **ParagraphModule** | Not pattern-based: the block parser's *gap handler*. Splits inter-block text into `ParagraphNode`s, handles hard line breaks and the paragraph modifier (see [parsing.md](parsing.md#paragraphmodule-the-gap-handler)). |
+| **BlockModule** | Fenced blocks `/-- type … \--` → a `VerbatimBlockNode` per type (`CodeBlockNode` for code, `PreformattedNode` for `/--pre` and a bare `/--`, `HtmlBlockNode`, `TextBlockNode`, `TexySourceNode`), `DivNode`, `CommentNode`; nested Texy for `block/texy`. |
+| **FigureModule** | Image with caption → `FigureNode` holding the image node and caption content. |
+| **HorizontalRuleModule** | `---` / `***` → `HorizontalRuleNode`. |
+| **BlockQuoteModule** | `>` quotations → `BlockQuoteNode`, including nested content and citation link. |
+| **TableModule** | Tables → `TableNode` / `TableRowNode` / `TableCellNode` with head detection, colspan/rowspan and an optional `\|##` caption. |
+| **HeadingModule** | Underlined and surrounded headings → `HeadingNode` with the absolute level; balances levels of `HeadingBalancing::Dynamic` and hoists `{toc: …}` labels. The common `Passes\HeadingPass` shifts the levels and generates IDs. |
+| **ListModule** | Bulleted, numbered and definition lists → `ListNode` / `DefinitionListNode` with `ListItemNode`s. |
 
-### Post-processing modules
-
-| Module | Purpose |
-|---|---|
-| **TypographyModule** | Post-line handler `typography`: locale-aware quotes, en/em dashes, ellipsis, non-breaking spaces, arrows, ©®™, multiplication sign. Prepares locale patterns in `beforeParse`. |
-| **HyphenationModule** | Post-line handler `longwords`: inserts `&shy;` soft hyphens into words longer than `$wordLimit`, using Czech-oriented syllable heuristics. |
-| **HtmlOutputModule** | `postProcess` handler: makes the output well-formed (auto-closes tags, fixes nesting against the content model), indents, and wraps long lines. |
+Typography and hyphenation are not modules: `Typography\Typographer` and `CzechHyphenator` are algorithms over `Config`, run by `TextRunPass` ([architecture.md](architecture.md#typography-over-the-ast)). Output formatting is not a module either: its configuration lives on `$texy->htmlOutput` (`Output\Html\Config`).
 
 ## Interactions between modules
 
-Although modules are independent, some cooperation is necessary:
+Modules communicate through the AST, not through each other:
 
-**Shared value objects** are the main mechanism. A `Texy\Link` created by `LinkReferenceModule` can be handed to `ImageModule` to build a clickable image; a `Texy\Image` created by `ImageModule` is passed to `FigureModule` for a captioned figure. The objects carry the URL, modifier, and metadata, and expose a common interface.
-
-**The reference system** separates definition from use. `LinkReferenceModule::addDefinition()` / `getReference()` manage the dictionary of named links; `ImageModule` has the same pair for images. Factory methods (`factoryLink()`, `factoryImage()`) check whether the given value is a reference name or a direct value.
-
-**Element handler delegation.** `PhraseModule`, when processing e.g. `"text":url` (`phrase/span` with a link), creates a `Link` object and calls `LinkReferenceModule`'s handler to build the `<a>` element, delegating responsibility to the specialized module.
-
-Relations are one-directional: `PhraseModule` knows about `LinkReferenceModule` and `ImageModule`, but not vice versa. This keeps dependencies simple and modules replaceable.
+- **Nodes are the interface.** A clickable image is a `LinkNode` wrapping an `ImageNode`; a figure holds its image node; `PhraseModule` produces `LinkNode`s directly for its link syntaxes. There are no shared mutable value objects.
+- **References resolve in the transform phase.** Definitions collected during parsing (`ImageDefinitionNode`, `LinkDefinitionNode`) stay in the tree; the modules' transform passes walk the document with `$document->find()` and fill in the referencing nodes. Definitions of the application (`addLinkDefinition()`, `addImageDefinition()`) persist across `toHtml()` calls.
+- Relations are one-directional (`PhraseModule` knows link nodes exist; link modules know nothing of phrases), keeping modules replaceable.
