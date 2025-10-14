@@ -51,7 +51,7 @@ directory holds the reference for using and extending Texy:
 - **[Configuration](docs/configuration.md)** – all configuration options, the
   `Configurator` presets, and security (safe mode)
 - **[Custom handlers](docs/custom-handlers.md)** – changing the behavior of
-  existing constructs via element and notification handlers
+  existing constructs via renderer handlers and AST passes
 - **[Custom syntax](docs/custom-syntax.md)** – adding brand-new markup constructs
 
 The **[examples/](examples/)** directory contains ready-to-run demos.
