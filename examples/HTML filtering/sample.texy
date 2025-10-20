@@ -1,4 +1,4 @@
-This <strong>example</strong> shows how <a href=https://texy.info title='Texy! excellent text-to-html converter & formatter'>Texy!</a> handle HTML tags.
+This <strong>example</strong> shows how <a href=https://texy.nette.org title='Texy! excellent text-to-html converter & formatter'>Texy!</a> handle HTML tags.
 
 Dangerous <span onmouseover="alert('onmouseover')">span</span>
 
@@ -9,6 +9,6 @@ Dangerous <span onmouseover="alert('onmouseover')">span</span>
 
 <my-extraTag attr1="10">
 
-"Homepage .{target: _blank}":www.texy.info
+"Homepage .{target: _blank}":texy.nette.org
 
 </my-extraTag>
