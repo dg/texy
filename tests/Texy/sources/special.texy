@@ -41,7 +41,7 @@ obrazek [* obr.jpg *]:[* popup.php?img=obr-big.jpg *]
 
 [* obr.jpg .{alt:alternative; title:title text }*]:[* popup.php?img=obr-big.jpg *] *** Nějaký popisek pod obrázkem
 
-absolutní obr [* http://www.texy.info/images/buttons/texy-powered.png *] test
+absolutní obr [* https://texy.nette.org/images/buttons/texy-powered.png *] test
 
 [* 0 *] nebo **0**
 

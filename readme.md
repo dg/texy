@@ -25,7 +25,7 @@ Documentation and Examples
 --------------------------
 
 Refer to the 'examples' directory for examples. Texy documentation is
-available on the homepage https://texy.info.
+available on the homepage https://texy.nette.org.
 
 
 [Support Me](https://github.com/sponsors/dg)

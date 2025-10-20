@@ -135,15 +135,15 @@ nested
 Links
 =====
 
-- Look at "homepage":http://texy.info.
+- Look at "homepage":http://texy.nette.org.
 - Do you know "php Fashion":[http://phpfashion.com/]?
-- This picture [* image.gif *]:www.texy.info is clickable
+- This picture [* image.gif *]:texy.nette.org is clickable
 
 
 using references
 ----------------
 
-[homepage]:  http://texy.info/ Texy! .(this is homepage)
+[homepage]:  http://texy.nette.org/ Texy! .(this is homepage)
 [email]:     me@example.com
 
 

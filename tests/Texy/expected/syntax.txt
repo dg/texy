@@ -98,8 +98,7 @@ using references
 
 	My address is me@example.com
 
-	What about this
-	site?
+	What about this site?
 
 
 Images
