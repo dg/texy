@@ -47,14 +47,12 @@ class Texy
 
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\ImageModule $imageModule;
-	public Modules\AutolinkModule $autolinkModule;
 	public Modules\LinkReferenceModule $linkModule;
 	public Modules\PhraseModule $phraseModule;
 	public Modules\EmoticonModule $emoticonModule;
 	public Modules\HeadingModule $headingModule;
 	public Modules\ListModule $listModule;
 	public Modules\FigureModule $figureModule;
-	public Modules\HorizontalRuleModule $horizLineModule;
 	public Modules\TypographyModule $typographyModule;
 	public Modules\HyphenationModule $longWordsModule;
 
@@ -79,6 +77,9 @@ class Texy
 	private array $consumerSyntaxes = ['line' => [], 'block' => []];
 
 	private bool $inModulePrepare = false;
+
+	/** @var array<string, Compat\LegacyModuleProxy>  v3 compatibility */
+	private array $legacyProxies = [];
 
 
 	public function __construct()
@@ -106,14 +107,14 @@ class Texy
 		$this->addModule($this->imageModule = new Modules\ImageModule($this));
 		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));
 		$this->addModule($this->linkModule = new Modules\LinkReferenceModule($this));
-		$this->addModule($this->autolinkModule = new Modules\AutolinkModule($this));
+		$this->addModule(new Modules\AutolinkModule($this));
 		$this->addModule($this->emoticonModule = new Modules\EmoticonModule($this));
 
 		// block parsing
 		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
 		$this->addModule(new Modules\BlockModule($this));
 		$this->addModule($this->figureModule = new Modules\FigureModule($this));
-		$this->addModule($this->horizLineModule = new Modules\HorizontalRuleModule($this));
+		$this->addModule(new Modules\HorizontalRuleModule($this));
 		$this->addModule(new Modules\BlockQuoteModule($this));
 		$this->addModule(new Modules\TableModule($this));
 		$this->addModule($this->headingModule = new Modules\HeadingModule($this));
@@ -354,6 +355,43 @@ class Texy
 	final public function __clone()
 	{
 		throw new \LogicException('Clone is not supported.');
+	}
+
+
+	/**
+	 * @deprecated v3 compatibility: serves properties that moved elsewhere and modules that no longer exist
+	 */
+	public function &__get(string $name): mixed
+	{
+		if (isset(Compat\Legacy::OfModule[$name])) {
+			$proxy = $this->legacyProxies[$name] ??= new Compat\LegacyModuleProxy($this, $name);
+			return $proxy;
+		}
+
+		return Compat\Legacy::ref($this, Compat\Legacy::OfTexy, '$texy', $name, 'read');
+	}
+
+
+	public function __set(string $name, mixed $value): void
+	{
+		Compat\Legacy::set($this, Compat\Legacy::OfTexy, '$texy', $name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return isset(Compat\Legacy::OfModule[$name])
+			|| Compat\Legacy::isSet($this, Compat\Legacy::OfTexy, $name);
+	}
+
+
+	/**
+	 * @deprecated v3 compatibility: navigates away from removed methods
+	 * @param  array<mixed>  $args
+	 */
+	public function __call(string $name, array $args): mixed
+	{
+		return Compat\Legacy::call($this, $name, $args);
 	}
 }
 

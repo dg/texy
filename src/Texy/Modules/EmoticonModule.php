@@ -8,9 +8,9 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\{Compat, Range, Syntax};
 use Texy\Nodes\EmoticonNode;
 use Texy\Parsing\ParseContext;
-use Texy\{Range, Syntax};
 use function strlen;
 
 
@@ -102,5 +102,29 @@ final class EmoticonModule extends Texy\Module
 		}
 
 		return null;
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->emoticonClass etc. instead
+	 */
+	public function &__get(string $name): mixed
+	{
+		return Compat\Legacy::ref($this->texy, Compat\Legacy::OfModule['emoticonModule'], '$texy->emoticonModule', $name, 'read');
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->emoticonClass etc. instead
+	 */
+	public function __set(string $name, mixed $value): void
+	{
+		Compat\Legacy::set($this->texy, Compat\Legacy::OfModule['emoticonModule'], '$texy->emoticonModule', $name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return Compat\Legacy::isSet($this->texy, Compat\Legacy::OfModule['emoticonModule'], $name);
 	}
 }
