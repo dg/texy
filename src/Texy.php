@@ -261,6 +261,17 @@ class Texy
 
 
 	/**
+	 * Converts Texy text to a plain-text rendition.
+	 */
+	public function toText(string $text): string
+	{
+		$document = $this->parse($text);
+		$this->transform($document);
+		return (new Output\Text\Renderer)->render($document);
+	}
+
+
+	/**
 	 * Registers a pass: fn(Nodes\DocumentNode): void, called with the whole document.
 	 * The AST may be freely modified there; return values are ignored. A Transform pass
 	 * (the default) runs in transform(), a Syntax pass already in parse(), where it may

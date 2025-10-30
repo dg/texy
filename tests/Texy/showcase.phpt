@@ -24,4 +24,9 @@ test('complete syntax showcase', function () {
 		__DIR__ . '/expected/showcase.html',
 		$texy->toHtml(file_get_contents(__DIR__ . '/sources/showcase.texy')),
 	);
+
+	Assert::matchFile(
+		__DIR__ . '/expected/showcase.txt',
+		$texy->toText(file_get_contents(__DIR__ . '/sources/showcase.texy')),
+	);
 });
