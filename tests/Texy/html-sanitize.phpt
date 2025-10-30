@@ -73,6 +73,25 @@ test('escaped tag text is shown as written, untouched by typography', function (
 });
 
 
+test('other output formats render rejected tags as text', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::safeMode($texy);
+	$doc = $texy->parse('<u>klik</u> text');
+	$texy->transform($doc);
+	Assert::same("<u>klik</u> text\n", (new Texy\Output\Text\Renderer)->render($doc));
+});
+
+
+test('dangerous URL scheme is neutralized in transform phase', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::safeMode($texy);
+	$doc = $texy->parse('<a href="javascript:evil()">click</a>');
+	$texy->transform($doc);
+	Assert::same([], $doc->find(Texy\Nodes\HtmlElementNode::class));
+	Assert::same("<a href=\"javascript:evil()\">click</a>\n", (new Texy\Output\Text\Renderer)->render($doc));
+});
+
+
 test('a rejected tag is shown as written', function () {
 	$tags = [
 		'<a href=x>',

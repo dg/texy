@@ -140,6 +140,17 @@ class Texy
 
 
 	/**
+	 * Converts Texy text to a plain-text rendition.
+	 */
+	public function toText(string $text): string
+	{
+		$document = $this->parse($text);
+		$this->transform($document);
+		return (new Output\Text\Renderer)->render($document);
+	}
+
+
+	/**
 	 * Parses text to the syntax tree: every node records where it is written, and
 	 * nothing of its meaning is applied yet (see transform()). The text is preprocessed
 	 * first (idempotent), so node ranges always refer to the preprocessed form

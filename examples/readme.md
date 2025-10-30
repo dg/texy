@@ -78,7 +78,7 @@ $html = $texy->toHtml($userInput);
 $texy = new Texy\Texy;
 $texy->addHandler(function (Texy\Nodes\DocumentNode $document): void {
     foreach ($document->find(Texy\Nodes\LinkNode::class) as $link) {
-        // change the link, every output format gets it
+        // change the link, every output format (HTML, text) gets it
     }
 });
 ```
