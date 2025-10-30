@@ -116,7 +116,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	{
 		$this->name = $name;
 		$this->isEmpty = $empty === null
-			? isset(self::$emptyElements[$name])
+			? isset(self::$emptyElements[$name ?? ''])
 			: (bool) $empty;
 		return $this;
 	}
@@ -461,7 +461,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	final public function getContentType(): string
 	{
-		$inlineType = self::$inlineElements[$this->name] ?? null;
+		$inlineType = self::$inlineElements[$this->name ?? ''] ?? null;
 		return $inlineType === null
 			? Texy::CONTENT_BLOCK
 			: ($inlineType ? Texy::CONTENT_REPLACED : Texy::CONTENT_MARKUP);
