@@ -9,6 +9,7 @@ namespace Texy;
 
 use JetBrains\PhpStorm\Language;
 use Texy\Parsing\{Engine, ParseContext};
+use Texy\Passes\TextRunPass;
 use function strlen;
 
 
@@ -44,6 +45,12 @@ class Texy
 
 	/** @deprecated */
 	public bool $removeSoftHyphens = true;
+
+	/**
+	 * Experimental: apply typography and hyphenation as an AST transform
+	 * instead of HTML string post-processing.
+	 */
+	public bool $astTypography = false;
 
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\ImageModule $imageModule;
@@ -89,6 +96,7 @@ class Texy
 		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->loadModules();
+		$this->engine->addPass($this->applyAstTypography(...), Stage::Finalize);
 		$this->engine->setGapHandler(
 			fn(ParseContext $context, string $gapText, int $offset) => $this->paragraphModule->parseText($context, $gapText, $offset),
 		);
@@ -259,6 +267,35 @@ class Texy
 	public function transform(Nodes\DocumentNode $document): void
 	{
 		$this->engine->transform($document);
+	}
+
+
+	/**
+	 * Runs typography/hyphenation over the AST and marks the document so
+	 * generators skip their string post-processing.
+	 */
+	private function applyAstTypography(Nodes\DocumentNode $document): void
+	{
+		if (!$this->astTypography) {
+			return;
+		}
+
+		$transformers = [];
+		if (!empty($this->allowed[Syntax::Typography])) {
+			$transformers[] = fn(string $s): string => $this->typographyModule->postLine($s);
+		}
+		if (!empty($this->allowed[Syntax::Hyphenation])) {
+			$transformers[] = fn(string $s): string => $this->longWordsModule->postLine($s);
+		}
+
+		(new TextRunPass(
+			$transformers,
+			empty($this->allowed[Syntax::Typography])
+				? null
+				: fn(string $s): string => $this->typographyModule->postLine($s),
+		))->process($document);
+
+		$document->meta['typographed'] = true;
 	}
 
 
