@@ -15,9 +15,9 @@ use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
 
 /**
  * Renders the AST to the output HTML string; needs no live Texy instance.
- * Configuration is read from the Config object; per-document facts (nofollow)
- * are derived from the document itself at render time, so the instance is a
- * configuration snapshot reusable across documents.
+ * Configuration is read from the Config object; per-document facts (nofollow,
+ * typographed) are derived from the document itself at render time, so the
+ * instance is a configuration snapshot reusable across documents.
  * @extends NodeRenderer<Element|string>
  */
 final class Renderer extends NodeRenderer
@@ -31,9 +31,11 @@ final class Renderer extends NodeRenderer
 
 	private ElementDecorator $decorator;
 
-	private ImageDimensions $imageDimensions;
-
 	private bool $noFollow;
+
+	private bool $titleTypography = true;
+
+	private ImageDimensions $imageDimensions;
 
 	/** @var array<string, string>  Protection markup table */
 	private array $marks = [];
@@ -113,18 +115,21 @@ final class Renderer extends NodeRenderer
 
 	/**
 	 * Render document AST to final HTML string. Per-document facts are read
-	 * from the document itself: the {{texy: nofollow}} directive.
+	 * from the document itself: the {{texy: nofollow}} directive and the
+	 * typographed mark left by the transform phase.
 	 */
 	public function render(Nodes\DocumentNode $document): string
 	{
 		$this->noFollow = $this->config->linkNoFollow || !empty($document->meta['nofollow']);
+		$this->titleTypography = empty($document->meta['typographed']);
 		$this->marks = [];
 		$s = $this->renderNode($document);
 		assert(is_string($s));
 
-		// line-postprocessing (typography, long words)
+		// line-postprocessing (typography, long words); skipped when typography
+		// already ran over the AST
 		$blocks = explode(self::ContentBlock, $s);
-		foreach ($this->postHandlers as $handler) {
+		foreach ($this->titleTypography ? $this->postHandlers : [] as $handler) {
 			foreach ($blocks as $n => $s) {
 				if ($n % 2 === 0 && $s !== '') {
 					$blocks[$n] = $handler($s);
@@ -233,12 +238,15 @@ final class Renderer extends NodeRenderer
 
 
 	/**
-	 * Applies typography to an isolated string (title, alt) unless typography is disabled.
+	 * Applies typography to an isolated string (title, alt) unless the AST
+	 * was already typographed in the transform phase or typography is disabled.
 	 * @internal
 	 */
 	public function postLineText(string $s): string
 	{
-		return $this->postLine !== null ? ($this->postLine)($s) : $s;
+		return $this->titleTypography && $this->postLine !== null
+			? ($this->postLine)($s)
+			: $s;
 	}
 
 
