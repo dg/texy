@@ -7,7 +7,7 @@
 
 namespace Texy\Typography;
 
-use Texy\{Config, Patterns, Regexp};
+use Texy\{Config, Regexp};
 use function count;
 
 
@@ -74,9 +74,11 @@ final class CzechHyphenator
 
 	public function hyphenate(string $text): string
 	{
+		// \x15 (protected text) and \x16 (replaced content) break words,
+		// \x17 (markup boundary) is transparent - see the TextRunPass image alphabet
 		return Regexp::replace(
 			$text,
-			'~[^ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->config->hyphenationWordLimit . ',}~',
+			'~[^ \n\t\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->config->hyphenationWordLimit . ',}~',
 			$this->pattern(...),
 		);
 	}
@@ -98,7 +100,7 @@ final class CzechHyphenator
 
 		$chars = Regexp::matchAll(
 			$mWord,
-			'~[' . Patterns::MARK . ']+|.~',
+			'~[\x15-\x17]+|.~', // a run of image marker bytes counts as one pseudo-character
 		);
 
 		/** @var list<string> */

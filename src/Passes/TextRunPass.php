@@ -16,20 +16,21 @@ use function count, strlen;
  * Applies string transformations (typography, hyphenation) to the AST.
  *
  * For every block-level inline container it builds a "text image": TextNode
- * contents joined with marker characters standing in for markup boundaries
- * and replaced/protected content - the same alphabet (\x15 textual,
- * \x16 replaced, \x17 markup) the typography and hyphenation regexes
- * understand. Transformers run over the image and the result is written back
- * into the text nodes. The patterns never create nor destroy marker characters,
- * so on the way back the markers delimit the runs unambiguously.
+ * contents joined with the Textual/Replaced/Markup marker bytes standing in
+ * for protected, replaced and markup content. The image is the contract with
+ * the transformers: the typography and hyphenation regexes are written over
+ * this three-byte alphabet. Transformers run over the image and the result
+ * is written back into the text nodes. The patterns never create nor destroy
+ * marker bytes, so on the way back the markers delimit the runs unambiguously.
  * A marker byte occurring in the text itself travels as a stand-in character.
  */
 final class TextRunPass
 {
+	// the text image alphabet
 	private const
 		Textual = "\x15",  // opaque protected text (code, URL); breaks words, not transparent to patterns
 		Replaced = "\x16", // replaced content (images, br); nbsp patterns bind to it
-		Markup = "\x17";   // markup boundary; transparent to patterns via [\x17-\x1F]
+		Markup = "\x17";   // markup boundary; transparent to patterns
 
 	/** piece of a text image: [text, writable target node or null] */
 	private const Break = null; // sentinel piece: block-level markup splits the image into segments
