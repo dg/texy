@@ -26,8 +26,8 @@ final class DirectiveModule extends Texy\Module
 			'~
 				\{\{
 				((?:
-					[^' . Texy\Patterns::MARK . '}]++ |  # content not containing }
-					}                                    # or single }
+					[^}]++ |   # content not containing }
+					}          # or single }
 				)+)
 				}}
 			~Ux',

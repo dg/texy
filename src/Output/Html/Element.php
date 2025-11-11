@@ -28,16 +28,12 @@ class Element
 	public array $children = [];
 
 
-	/** @param  array<string, mixed>|string|null  $attrs  element's attributes (or textual content) */
+	/** @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs  element's attributes */
 	public function __construct(
 		public ?string $name = null,
-		array|string|null $attrs = null,
+		array $attrs = [],
 	) {
-		if (is_array($attrs)) {
-			$this->attrs = $attrs;
-		} elseif ($attrs !== null) {
-			$this->children = [$attrs];
-		}
+		$this->attrs = $attrs;
 	}
 
 
@@ -82,9 +78,9 @@ class Element
 
 	/**
 	 * Creates and adds a new HtmlElement child.
-	 * @param  array<string, mixed>|string|null  $attrs
+	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
 	 */
-	public function create(string $name, array|string|null $attrs = null): self
+	public function create(string $name, array $attrs = []): self
 	{
 		$this->children[] = $child = new self($name, $attrs);
 		return $child;
