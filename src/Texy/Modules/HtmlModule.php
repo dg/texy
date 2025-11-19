@@ -22,6 +22,16 @@ final class HtmlModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
+		$texy->addHandler($this->processPassthrough(...));
+	}
+
+
+	/**
+	 * Pairs passthrough tags into HtmlElementNode trees (transform phase).
+	 */
+	public function processPassthrough(Texy\Nodes\DocumentNode $doc): void
+	{
+		(new Texy\Passes\HtmlPairingPass)->process($doc);
 	}
 
 
