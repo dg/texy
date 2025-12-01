@@ -19,6 +19,46 @@ use function strlen;
  */
 final class PhraseModule extends Texy\Module
 {
+	/**
+	 * Paired phrases: a delimiter, some content, an optional modifier, the same
+	 * delimiter again. They all share one skeleton (see buildPhrasePattern()),
+	 * so a row holds the delimiter and what sets the phrase apart:
+	 *
+	 *   close        the closing delimiter, when it differs
+	 *   guard        characters that must not precede either delimiter
+	 *   guardAfter   characters that must not follow either delimiter
+	 *   link         the phrase can carry a :link suffix
+	 *   multiline    the content may span lines
+	 *   noSpaces     the content holds no whitespace at all
+	 *   noDelimiter  the content holds no character of the delimiter
+	 *
+	 * beforeOpen and afterClose replace a class of the skeleton.
+	 */
+	private const Phrases = [
+		Syntax::StrongEmphasis => ['***', 'guard' => '\\', 'link' => true, 'multiline' => true],
+		Syntax::Strong => ['**', 'guard' => '\\', 'link' => true, 'multiline' => true],
+		// : guards the // in http://
+		Syntax::Emphasis => ['//', 'guard' => ':', 'link' => true, 'multiline' => true],
+		Syntax::EmphasisSingleAsterisk => ['*', 'guard' => '\\', 'link' => true, 'noSpaces' => true],
+		Syntax::EmphasisSingleAsterisk2 => [
+			'*', 'guard' => '\\', 'link' => true, 'multiline' => true,
+			'beforeOpen' => '[^\s.,;:<>()"\'-]',    // must stand at a word boundary, ...
+			'afterClose' => '[^\s.,;:<>()"?!\'-]',  // ... hence the inverted classes
+		],
+		Syntax::Inserted => ['++'],
+		// < and > guard the arrows <-- and -->
+		Syntax::Deleted => ['--', 'guard' => '<', 'guardAfter' => '>'],
+		Syntax::Superscript => ['^^'],
+		Syntax::Subscript => ['__'],
+		Syntax::SpanQuotes => ['"', 'link' => true, 'multiline' => true, 'noDelimiter' => true],
+		Syntax::SpanTilde => ['~', 'link' => true, 'multiline' => true, 'noDelimiter' => true],
+		Syntax::Quote => ['>>', 'close' => '<<', 'link' => true],
+	];
+
+	/** @var array<string, string>  patterns of Phrases, which depend on nothing, built once */
+	private static array $patterns = [];
+
+
 	public function register(Texy\Parsing\Engine $engine): void
 	{
 		$engine->declare(Syntax::PhraseLink);
@@ -27,205 +67,9 @@ final class PhraseModule extends Texy\Module
 			$engine->declare($name, enabled: false);
 		}
 
-		// ***strong+emphasis***
-		$engine->addInline(
-			Syntax::StrongEmphasis,
-			'~
-				(?<! [*\\\] )                     # not preceded by * or \
-				\*\*\*
-				(?! [\s*] )                       # not followed by space or *
-				( (?: [^ *]++ | [ *] )+ )         # content (1)
-				' . Patterns::MODIFIER . '?       # modifier (2)
-				(?<! [\s*\\\] )                   # not preceded by space, * or \
-				\*\*\*
-				(?! \* )                          # not followed by *
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			$this->parsePhrase(...),
-		);
-
-		// **strong**
-		$engine->addInline(
-			Syntax::Strong,
-			'~
-				(?<! [*\\\] )                     # not preceded by * or \
-				\*\*
-				(?! [\s*] )                       # not followed by space or *
-				( (?: [^ *]++ | [ *] )+ )         # content (1)
-				' . Patterns::MODIFIER . '?       # modifier (2)
-				(?<! [\s*\\\] )                   # not preceded by space, * or \
-				\*\*
-				(?! \* )                          # not followed by *
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			$this->parsePhrase(...),
-		);
-
-		// //emphasis//
-		$engine->addInline(
-			Syntax::Emphasis,
-			'~
-				(?<! [/:] )                       # not preceded by / or :
-				//
-				(?! [\s/] )                       # not followed by space or /
-				( (?: [^ /]++ | [ /] )+ )         # content (1)
-				' . Patterns::MODIFIER . '?       # modifier (2)
-				(?<! [\s/:] )                     # not preceded by space, / or :
-				//
-				(?! / )                           # not followed by /
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			$this->parsePhrase(...),
-		);
-
-		// *emphasisAlt*
-		$engine->addInline(
-			Syntax::EmphasisSingleAsterisk,
-			'~
-				(?<! [*\\\] )                    # not preceded by * or \
-				\*
-				(?! [\s*] )                      # not followed by space or *
-				( (?: [^\s*]++ | [*] )+ )        # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s*\\\] )                  # not preceded by space, * or \
-				\*
-				(?! \* )                         # not followed by *
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			$this->parsePhrase(...),
-		);
-
-		// *emphasisAlt2*
-		$engine->addInline(
-			Syntax::EmphasisSingleAsterisk2,
-			'~
-				(?<! [^\s.,;:<>()"\'-] )         # must be preceded by these chars
-				\*
-				(?! [\s*] )                      # not followed by space or *
-				( (?: [^ *]++ | [ *] )+ )        # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s*\\\] )                  # not preceded by space, * or \
-				\*
-				(?! [^\s.,;:<>()"?!\'-] )        # must be followed by these chars
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			$this->parsePhrase(...),
-		);
-
-		// ++inserted++
-		$engine->addInline(
-			Syntax::Inserted,
-			'~
-				(?<! \+ )                        # not preceded by +
-				\+\+
-				(?! [\s+] )                      # not followed by space or +
-				( (?: [^\r\n +]++ | [ +] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s+] )                     # not preceded by space or +
-				\+\+
-				(?! \+ )                         # not followed by +
-			~Ux',
-			$this->parsePhrase(...),
-		);
-
-		// --deleted--
-		$engine->addInline(
-			Syntax::Deleted,
-			'~
-				(?<! [<-] )                      # not preceded by < or -
-				--
-				(?! [\s>-] )                     # not followed by space, > or -
-				( (?: [^\r\n -]++ | [ -] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s<-] )                    # not preceded by space, < or -
-				--
-				(?! [>-] )                       # not followed by > or -
-			~Ux',
-			$this->parsePhrase(...),
-		);
-
-		// ^^superscript^^
-		$engine->addInline(
-			Syntax::Superscript,
-			'~
-				(?<! \^ )                        # not preceded by ^
-				\^\^
-				(?! [\s^] )                      # not followed by space or ^
-				( (?: [^\r\n ^]++ | [ ^] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s^] )                     # not preceded by space or ^
-				\^\^
-				(?! \^ )                         # not followed by ^
-			~Ux',
-			$this->parsePhrase(...),
-		);
-
-		// __subscript__
-		$engine->addInline(
-			Syntax::Subscript,
-			'~
-				(?<! _ )                         # not preceded by _
-				__
-				(?! [\s_] )                      # not followed by space or _
-				( (?: [^\r\n _]++ | [ _] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s_] )                     # not preceded by space or _
-				__
-				(?! _ )                          # not followed by _
-			~Ux',
-			$this->parsePhrase(...),
-		);
-
-		// "span"
-		$engine->addInline(
-			Syntax::SpanQuotes,
-			'~
-				(?<! " )                         # not preceded by "
-				"
-				(?! \s )                         # not followed by space
-				( (?: [^\r "]++ | [ ] )+ )       # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! \s )                        # not preceded by space
-				"
-				(?! " )                          # not followed by "
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Ux',
-			$this->parsePhrase(...),
-		);
-
-		// ~alternative span~
-		$engine->addInline(
-			Syntax::SpanTilde,
-			'~
-				(?<! \~ )
-				\~
-				(?! \s )                         # not followed by space
-				( (?: [^\r \~]++ | [ ] )+ )      # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! \s )                        # not preceded by space
-				\~
-				(?! \~ )
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Ux',
-			$this->parsePhrase(...),
-		);
-
-		// >>quote<<
-		$engine->addInline(
-			Syntax::Quote,
-			'~
-				(?<! > )                         # not preceded by >
-				>>
-				(?! [\s>] )                      # not followed by space or >
-				( (?: [^\r\n <]++ | [ <] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s<] )                     # not preceded by space or <
-				<<
-				(?! < )                          # not followed by <
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Ux',
-			$this->parsePhrase(...),
-		);
+		foreach (self::Phrases as $syntax => $spec) {
+			$engine->addInline($syntax, self::$patterns[$syntax] ??= self::buildPhrasePattern($spec), $this->parsePhrase(...));
+		}
 
 		// m^2 alternative superscript
 		$engine->addInline(
@@ -296,7 +140,7 @@ final class PhraseModule extends Texy\Module
 				\'\'
 				(?! \' )                         # not followed by quote
 			~Ux',
-			$this->parseNoTexy(...),
+			fn($context, $matches, $offsets) => new RawTextNode($matches[1], new Range($offsets[0], strlen($matches[0]))),
 		);
 
 		// `code`
@@ -340,7 +184,7 @@ final class PhraseModule extends Texy\Module
 				]
 				(?! ] )                          # not followed by ]
 			~Ux',
-			$this->parseWikilink(...),
+			$this->parseLink(...),
 		);
 
 		// [text](link)
@@ -371,6 +215,45 @@ final class PhraseModule extends Texy\Module
 
 
 	/**
+	 * Builds the pattern of a paired phrase from its delimiter spec:
+	 *
+	 *   (?<! guard ) open (?! space or char ) content modifier? (?<! space or guard ) close (?! char ) (:link)??
+	 *
+	 * @param  array<int|string, string|bool>  $spec
+	 */
+	private static function buildPhrasePattern(array $spec): string
+	{
+		$open = (string) $spec[0];
+		$close = (string) ($spec['close'] ?? $open);
+		$char = preg_quote($open[0], '~');
+		$closeChar = preg_quote($close[0], '~');
+		$guard = preg_quote((string) ($spec['guard'] ?? ''), '~');
+		$guardAfter = preg_quote((string) ($spec['guardAfter'] ?? ''), '~');
+
+		$beforeOpen = $spec['beforeOpen'] ?? '[' . $char . $guard . ']';
+		$afterClose = $spec['afterClose'] ?? '[' . $closeChar . $guardAfter . ']';
+		$whitespace = match (true) {
+			!empty($spec['noSpaces']) => '\s',
+			!empty($spec['multiline']) => ' ',
+			default => '\r\n ',
+		};
+		$lone = (empty($spec['noSpaces']) ? ' ' : '') . (empty($spec['noDelimiter']) ? $closeChar : '');
+
+		return '~
+				(?<! ' . $beforeOpen . ' ) ' . preg_quote($open, '~') . ' (?! [\s' . $char . $guardAfter . '] )  # opening delimiter
+				( (?: [^' . $whitespace . $closeChar . ']++ | [' . $lone . '] )+ )  # content (1)
+				' . Patterns::MODIFIER . '?  # modifier (2)
+				(?<! [\s' . $closeChar . $guard . '] ) ' . preg_quote($close, '~') . ' (?! ' . $afterClose . ' )  # closing delimiter'
+			. (empty($spec['link'])
+				? ''
+				: '
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)')
+			. '
+			~Ux';
+	}
+
+
+	/**
 	 * Parses phrase patterns. Phrases without a link part (ins, del, sup, sub) have
 	 * only two groups, hence the optional third one.
 	 * @param  array{string, string, ?string, 3?: ?string}  $matches
@@ -384,48 +267,39 @@ final class PhraseModule extends Texy\Module
 	): PhraseNode|InlineCodeNode|LinkNode|null
 	{
 		[, $mContent, $mMod, $mLink] = $matches + [3 => null];
+		$isSpan = $phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde;
+		if ($isSpan && $mLink === null && $mMod === null) {
+			return null;
+		}
+
 		$range = new Range($offsets[0], strlen($matches[0]));
-		$contentOffset = $offsets[1];
-		$textRange = self::trimRange($mContent, $contentOffset);
-		$urlRange = $mLink === null ? null : new Range($offsets[3] ?? throw new \LogicException('Link without group 3.'), strlen($mLink));
-		$linksAllowed = !empty($context->allowedSyntaxes[Syntax::PhraseLink]);
-
-		// For phrase/span and phrase/span-alt, URL makes it a link
-		if ($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) {
-			if ($mLink !== null) {
-				return new LinkNode(
-					url: Texy\Helpers::decodeEntities($mLink),
-					content: $context->parseInline(trim($mContent), $contentOffset),
-					modifier: Modifier::parse($mMod, $offsets[2] ?? null),
-					range: $range,
-					syntax: $phrase,
-					textRange: $textRange,
-					urlRange: $urlRange,
-				);
-
-			} elseif ($mMod === null) {
-				return null;
-			}
-		}
-
+		$textRange = self::trimRange($mContent, $offsets[1]);
+		$isLink = $mLink !== null && ($isSpan || !empty($context->allowedSyntaxes[Syntax::PhraseLink]));
 		$mod = Modifier::parse($mMod, $offsets[2] ?? null);
-		$node = $phrase === Syntax::CodeSpan
-			? new InlineCodeNode(trim($mContent), $mod, $range, $textRange) // code content is not parsed recursively
-			: new PhraseNode($context->parseInline(trim($mContent), $contentOffset), Syntax::PhraseTypes[$phrase], $mod, $range, $phrase);
 
-		// Other phrases with link
-		if ($mLink !== null && $linksAllowed) {
-			return new LinkNode(
-				url: Texy\Helpers::decodeEntities($mLink),
-				content: new ContentNode([$node]),
-				range: $range,
-				syntax: $phrase,
-				textRange: $textRange,
-				urlRange: $urlRange,
-			);
+		if ($isLink && $isSpan) { // a span with a link is the link itself
+			$content = $context->parseInline(trim($mContent), $offsets[1]);
+
+		} else {
+			$node = $phrase === Syntax::CodeSpan
+				? new InlineCodeNode(trim($mContent), $mod, $range, $textRange) // code content is not parsed recursively
+				: new PhraseNode($context->parseInline(trim($mContent), $offsets[1]), Syntax::PhraseTypes[$phrase], $mod, $range, $phrase);
+			if (!$isLink) {
+				return $node;
+			}
+
+			$content = new ContentNode([$node]);
 		}
 
-		return $node;
+		return new LinkNode(
+			url: Texy\Helpers::decodeEntities($mLink),
+			content: $content,
+			modifier: $isSpan ? $mod : null,
+			range: $range,
+			syntax: $phrase,
+			textRange: $textRange,
+			urlRange: new Range($offsets[3] ?? throw new \LogicException('Link without group 3.'), strlen($mLink)),
+		);
 	}
 
 
@@ -436,11 +310,9 @@ final class PhraseModule extends Texy\Module
 	 */
 	private function parseSupSub(ParseContext $context, array $matches, array $offsets, string $phrase): PhraseNode
 	{
-		[, $mContent] = $matches;
-		$mContent = str_replace('-', "\u{2212}", $mContent); // &minus;
-		$content = [new TextNode(Texy\Helpers::decodeEntities($mContent), new Range($offsets[1], strlen($matches[1])))];
+		$text = str_replace('-', "\u{2212}", $matches[1]); // &minus;
 		return new PhraseNode(
-			new ContentNode($content),
+			new ContentNode([new TextNode($text, new Range($offsets[1], strlen($matches[1])))]),
 			Syntax::PhraseTypes[$phrase],
 			null,
 			new Range($offsets[0], strlen($matches[0])),
@@ -468,55 +340,22 @@ final class PhraseModule extends Texy\Module
 
 
 	/**
-	 * Parses ''notexy''.
-	 * @param  array{string, string}  $matches
-	 * @param  array{int, int}  $offsets
+	 * Parses links (phrase/quicklink, phrase/markdown, phrase/wikilink).
+	 * Note: These links don't support modifiers - modifier is intentionally ignored.
+	 * @param  array{string, string, ?string, ?string}  $matches
+	 * @param  array{int, int, ?int, ?int}  $offsets
 	 */
-	public function parseNoTexy(ParseContext $context, array $matches, array $offsets): RawTextNode
+	private function parseLink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
 	{
-		[, $mContent] = $matches;
-		return new RawTextNode($mContent, new Range($offsets[0], strlen($matches[0])));
-	}
-
-
-	/**
-	 * Parses links (phrase/quicklink, phrase/markdown).
-	 * Note: Markdown links don't support modifiers - modifier is intentionally ignored.
-	 * @param  array{string, string, ?string, string}  $matches
-	 * @param  array{int, int, ?int, int}  $offsets
-	 */
-	public function parseLink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
-	{
-		[, $mContent, $mMod, $mLink] = $matches;
+		$group = $name === Syntax::WikiLink ? 2 : 3; // [text|link .modifier] has the link before the modifier
 		return new LinkNode(
-			Texy\Helpers::decodeEntities(trim($mLink)),
-			$context->parseInline(trim($mContent), $offsets[1]),
-			null,  // quicklink and markdown links don't support modifiers
+			Texy\Helpers::decodeEntities(trim((string) $matches[$group])),
+			$context->parseInline(trim($matches[1]), $offsets[1]),
+			null,
 			new Range($offsets[0], strlen($matches[0])),
 			syntax: $name,
-			textRange: self::trimRange($mContent, $offsets[1]),
-			urlRange: self::trimRange($mLink, $offsets[3]),
-		);
-	}
-
-
-	/**
-	 * Parses wikilink [text|link].
-	 * Note: Wikilinks don't support modifiers - modifier is intentionally ignored.
-	 * @param  array{string, string, string, ?string}  $matches
-	 * @param  array{int, int, int, ?int}  $offsets
-	 */
-	public function parseWikilink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
-	{
-		[, $mContent, $mLink] = $matches;
-		return new LinkNode(
-			Texy\Helpers::decodeEntities(trim($mLink)),
-			$context->parseInline(trim($mContent), $offsets[1]),
-			null,  // wikilinks don't support modifiers
-			new Range($offsets[0], strlen($matches[0])),
-			syntax: $name,
-			textRange: self::trimRange($mContent, $offsets[1]),
-			urlRange: self::trimRange($mLink, $offsets[2]),
+			textRange: self::trimRange($matches[1], $offsets[1]),
+			urlRange: self::trimRange((string) $matches[$group], (int) $offsets[$group]),
 		);
 	}
 
