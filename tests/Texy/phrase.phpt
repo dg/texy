@@ -127,6 +127,28 @@ test('quoted acronym', function () {
 });
 
 
+test('paired phrases keep their delimiter guards', function () {
+	// the guards encoded in the phrase table: each delimiter must not touch
+	// its own character, and // must not eat the one in http://
+	Assert::match('<p>2 * 3 * 4</p>', process('2 * 3 * 4'));
+	Assert::match('<p><a href="http://x.cz">http://x.cz</a></p>', process('http://x.cz'));
+});
+
+
+test('asymmetric >>quote<< delimiters', function () {
+	Assert::match('<p><q>quoted</q></p>', process('>>quoted<<'));
+});
+
+
+test('deleted phrase and its arrow guard', function () {
+	$texy = new Texy\Texy;
+	$texy->allowedSyntax[Texy\Syntax::Deleted] = true;
+	Assert::match('<p><del>gone</del></p>', trim($texy->toHtml('--gone--')));
+	// the guardAfter keeps --> an arrow instead of an unterminated deletion
+	Assert::contains("\u{2192}", $texy->toHtml('x --> y'));
+});
+
+
 test('notexy is escaped once wherever it stands', function () {
 	Assert::same("<p>text &lt;c&gt; &amp;amp; text</p>\n", process("text ''<c> &amp;'' text"));
 	Assert::same("<p>&lt;c&gt;</p>\n", process("''<c>''"));
@@ -135,4 +157,14 @@ test('notexy is escaped once wherever it stands', function () {
 		'%A%<td>&gt;&gt;text&lt;&lt;</td>%A%',
 		process("| ''>>text<<'' |"),
 	);
+});
+
+
+test('phrases can be extended through the table', function () {
+	// the pattern of every paired phrase is generated, so a syntax that is
+	// off by default behaves exactly like the built-in ones once enabled
+	$texy = new Texy\Texy;
+	$texy->allowedSyntax[Texy\Syntax::Superscript] = true;
+	$texy->allowedSyntax[Texy\Syntax::Subscript] = true;
+	Assert::match('<p>a<sup>b</sup> c<sub>d</sub></p>', trim($texy->toHtml('a^^b^^ c__d__')));
 });
