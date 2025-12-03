@@ -23,6 +23,8 @@ class HtmlTagNode extends InlineNode
 		public bool $closing = false,
 		public bool $selfClosing = false,
 		public ?Range $range = null,
+		/** the tag as written, shown when it is rejected */
+		public ?string $source = null,
 	) {
 	}
 }

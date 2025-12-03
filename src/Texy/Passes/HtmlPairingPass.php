@@ -85,7 +85,7 @@ final class HtmlPairingPass
 			self::emit(
 				$out,
 				$frames,
-				new HtmlElementNode($tag->name, $tag->attributes, new Nodes\ContentNode($collected), $child, $tag->range),
+				new HtmlElementNode($tag->name, $tag->attributes, new Nodes\ContentNode($collected), $child, $tag->range, $tag->source),
 			);
 		}
 

@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\{Configurator, Texy};
+use Texy\{Configurator, Node, NodeHelpers, Nodes, Texy};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -66,4 +66,20 @@ test('filtering also applies to paired elements, not just lone tags', function (
 
 	Assert::notContains('onmouseover', $html);
 	Assert::contains('<b>first</b>', $html);
+});
+
+
+test('the AST already carries filtered attributes, so every output format is covered', function () {
+	$texy = new Texy;
+	Configurator::safeMode($texy);
+	$doc = $texy->parse('<b onmouseover="alert(1)">tuk</b>');
+	$texy->transform($doc);
+
+	$found = [];
+	$filter = fn(Node $node) => $node instanceof Nodes\HtmlElementNode || $node instanceof Nodes\HtmlTagNode;
+	foreach (NodeHelpers::find($doc, $filter) as $node) {
+		$found[] = array_keys($node->attributes);
+	}
+
+	Assert::notContains('onmouseover', array_merge(...$found ?: [[]]));
 });

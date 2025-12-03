@@ -27,11 +27,18 @@ final class HtmlModule extends Texy\Module
 
 
 	/**
-	 * Pairs passthrough tags into HtmlElementNode trees (transform phase).
+	 * Pairs passthrough tags into HtmlElementNode trees and evaluates the
+	 * tag whitelist over them (transform phase): rejected tags become text.
 	 */
 	public function processPassthrough(Texy\Nodes\DocumentNode $doc): void
 	{
+		if (empty($this->texy->allowed[Syntax::HtmlTag])) {
+			return;
+		}
+
 		(new Texy\Passes\HtmlPairingPass)->process($doc);
+		(new Texy\Passes\HtmlSanitizePass($this->texy->htmlPolicy))
+			->process($doc);
 	}
 
 
@@ -42,6 +49,7 @@ final class HtmlModule extends Texy\Module
 			'~
 				< (/?)                          # tag begin
 				([a-z][a-z0-9_:-]{0,50})        # tag name
+				(?= [\s/>] )
 				(
 					(?:
 						\s++ [a-z0-9_:-]++ |   # attribute name
@@ -133,6 +141,7 @@ final class HtmlModule extends Texy\Module
 			closing: !$isStart,
 			selfClosing: $isEmpty,
 			range: new Range($offsets[0], strlen($matches[0])),
+			source: $matches[0],
 		);
 	}
 

@@ -44,8 +44,18 @@ test('HTML tag with attributes', function () {
 });
 
 
+test('tag name ends with a space, slash or >', function () {
+	Assert::match('<p>volba -d &lt;key=value&gt; konec</p>', process('volba -d <key=value> konec'));
+	Assert::match('<p>&lt;a=b&gt;text</p>', process('<a=b>text</a>'));
+});
+
+
 test('line break inside a tag is a space', function () {
 	Assert::match('<p>x <a href="x" title="a b">y</a> z</p>', process("x <a href=x title=\"a\n  b\">y</a> z"));
+
+	$texy = new Texy\Texy;
+	$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;
+	Assert::notContains("\r", $texy->process("x <a href=x title=\"a\n  b\">y</a> z"));
 });
 
 

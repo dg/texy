@@ -47,7 +47,7 @@ test('allowed XSS for URLs #34', function () {
 	// XSS protection: javascript URLs must be neutralized (tag escaped as text)
 	Assert::notContains('<a href=', $result); // no active <a> tag
 	Assert::contains('&lt;a href=', $result); // escaped as text
-	Assert::contains('click', $result);
+	Assert::contains('click', str_replace("\u{AD}", '', $result));
 });
 
 

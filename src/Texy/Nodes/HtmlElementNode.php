@@ -27,6 +27,8 @@ class HtmlElementNode extends InlineNode
 		/** original closing tag (case/attributes may differ), for faithful escaping */
 		public ?HtmlTagNode $closingTag = null,
 		public ?Range $range = null,
+		/** the opening tag as written, shown when it is rejected */
+		public ?string $source = null,
 	) {
 	}
 

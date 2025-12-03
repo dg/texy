@@ -113,10 +113,30 @@ final class HtmlPolicy
 
 
 	/**
-	 * Reconstructs the original tag source text.
+	 * Is the tag (opening or closing) acceptable? Mirrors the render-time
+	 * decision so it can also be evaluated in the transform phase.
+	 * @param  array<string, string|bool|null>  $attrs
+	 */
+	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
+	{
+		if (!$this->isTagAllowed($tagName)) {
+			return false;
+		}
+
+		$validation = $this->validateTag($tagName, $attrs, $closing);
+		return $validation !== false && $validation !== 'drop';
+	}
+
+
+	/**
+	 * Returns the tag as written; a tag the parser did not make is rebuilt from its attributes.
 	 */
 	public function reconstructTag(Nodes\HtmlTagNode $node): string
 	{
+		if ($node->source !== null) {
+			return strtr($node->source, "\r", "\n"); // \r is the hard break mark of a paragraph
+		}
+
 		$tag = '<';
 		if ($node->closing) {
 			$tag .= '/';

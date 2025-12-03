@@ -261,7 +261,7 @@ class Texy
 
 	/**
 	 * Turns the syntax tree into the document: resolves references, balances
-	 * headings and applies the consumer's passes.
+	 * headings, sanitizes HTML and applies the consumer's passes.
 	 * Changes the tree in place; a document is transformed only once.
 	 */
 	public function transform(Nodes\DocumentNode $document): void
