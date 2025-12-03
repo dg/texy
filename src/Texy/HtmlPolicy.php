@@ -113,6 +113,22 @@ final class HtmlPolicy
 
 
 	/**
+	 * Is the tag (opening or closing) acceptable? Mirrors the render-time
+	 * decision so it can also be evaluated in the transform phase.
+	 * @param  array<string, string|bool|null>  $attrs
+	 */
+	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
+	{
+		if (!$this->isTagAllowed($tagName)) {
+			return false;
+		}
+
+		$validation = $this->validateTag($tagName, $attrs, $closing);
+		return $validation !== false && $validation !== 'drop';
+	}
+
+
+	/**
 	 * Reconstructs the original tag source text.
 	 */
 	public function reconstructTag(Nodes\HtmlTagNode $node): string
