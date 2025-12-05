@@ -25,10 +25,11 @@ class Texy
 	// Texy version
 	public const VERSION = '4.0.0-dev';
 
-	// configuration directives
-	public const
-		ALL = true,
-		NONE = false;
+	#[\Deprecated('use true', since: '4.0')]
+	public const ALL = true;
+
+	#[\Deprecated('use false', since: '4.0')]
+	public const NONE = false;
 
 	/** @var array<string, bool>  syntax name => enabled */
 	public array $allowedSyntax = [];

@@ -64,8 +64,8 @@ class Configurator
 	 */
 	public static function restrictPolicies(HtmlPolicy $htmlPolicy, Output\Html\Config $htmlOutput): void
 	{
-		$htmlPolicy->allowedClasses = Texy::NONE; // no class or ID are allowed
-		$htmlPolicy->allowedStyles = Texy::NONE; // style modifiers are disabled
+		$htmlPolicy->allowedClasses = false; // no class or ID are allowed
+		$htmlPolicy->allowedStyles = false; // style modifiers are disabled
 		// only some "safe" HTML tags and attributes are allowed; the '*' list names
 		// attributes acceptable on any element and is the only source for modifiers
 		$htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];
