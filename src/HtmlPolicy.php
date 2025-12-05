@@ -17,14 +17,14 @@ use function is_array, is_string;
  */
 final class HtmlPolicy
 {
-	/** @var bool|array<string, bool|array<int, string>>  allowed HTML tags and their attributes */
+	/** @var bool|array<string, bool|array<int, string>>  allowed HTML tags and their attributes; true allows any tag, false none */
 	public bool|array $allowedTags;
 
-	/** @var bool|array<int, string>  allowed classes and IDs */
-	public bool|array $allowedClasses = Texy::ALL;
+	/** @var bool|array<int, string>  allowed classes and IDs; true allows any, false none */
+	public bool|array $allowedClasses = true;
 
-	/** @var bool|array<int, string>  allowed inline CSS styles */
-	public bool|array $allowedStyles = Texy::ALL;
+	/** @var bool|array<int, string>  allowed inline CSS styles; true allows any, false none */
+	public bool|array $allowedStyles = true;
 
 
 	public function __construct(
@@ -110,7 +110,7 @@ final class HtmlPolicy
 
 		$names = [];
 		foreach ([$this->allowedTags[$tagName] ?? [], $this->allowedTags['*'] ?? []] as $allowed) {
-			if ($allowed === Texy::ALL) {
+			if ($allowed === true) {
 				return $attrs;
 			} elseif (is_array($allowed)) {
 				$names = [...$names, ...$allowed];

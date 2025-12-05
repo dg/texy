@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('rejected tags become literal text nodes in the AST', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = ['b' => Texy\Texy::ALL];
+	$texy->htmlPolicy->allowedTags = ['b' => true];
 	$doc = $texy->parse('a <u>x</u> <b>y</b>');
 	$texy->transform($doc);
 	$children = $doc->content->children[0]->content->children;
@@ -32,7 +32,7 @@ test('rejected tags become literal text nodes in the AST', function () {
 
 test('nested rejected elements are sanitized recursively', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = ['b' => Texy\Texy::ALL];
+	$texy->htmlPolicy->allowedTags = ['b' => true];
 	$doc = $texy->parse('<u><i>x</i></u> a <u><b>y</b></u>');
 	$texy->transform($doc);
 	$children = $doc->content->children[0]->content->children;
@@ -105,7 +105,7 @@ test('a rejected tag is shown as written', function () {
 
 	foreach ($tags as $tag) {
 		$texy = new Texy\Texy;
-		$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;
+		$texy->htmlPolicy->allowedTags = false;
 		Assert::same('<pre>' . htmlspecialchars($tag, ENT_NOQUOTES) . "</pre>\n", $texy->toHtml("/--pre\n$tag\n\\--"), $tag);
 	}
 });
@@ -131,7 +131,7 @@ test('a tag the whitelist leaves invalid is shown as written', function () {
 
 test('a rejected tag across lines is shown as the parser read it', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;
+	$texy->htmlPolicy->allowedTags = false;
 	Assert::same("<blockquote>\n\t<p>a &lt;key foo=bar&gt; z</p>\n</blockquote>\n", $texy->toHtml("> a <key\n> foo=bar> z"));
 	Assert::same("<p>x &lt;key foo=bar&gt; y</p>\n", $texy->toHtml("x <key\n  foo=bar> y"));
 });
@@ -146,7 +146,7 @@ test('nothing inside a rejected tag becomes active', function () {
 	];
 	$policies = [
 		fn(Texy\Texy $texy) => Texy\Configurator::safeMode($texy),
-		fn(Texy\Texy $texy) => $texy->htmlPolicy->allowedTags = Texy\Texy::NONE,
+		fn(Texy\Texy $texy) => $texy->htmlPolicy->allowedTags = false,
 	];
 
 	foreach ($policies as $policy) {
