@@ -13,9 +13,10 @@ use function count, strlen;
 
 
 /**
- * Call-driven well-forming and formatting engine, fed by the raw() string
- * frontend, which tokenizes the rendered HTML into startTag()/endTag() calls.
- * Fixes pairing, content model and nesting, produces indented, wrapped HTML.
+ * Call-driven well-forming and formatting engine, fed by startTag()/endTag()/
+ * text()/raw() calls from the renderer's tree walk (or by the raw() string
+ * frontend). Fixes pairing, content model and nesting, produces indented,
+ * wrapped HTML.
  *
  * The output buffer is a list of segments, and the whitespace fix-ups are
  * explicit operations on it: eating the spaces after an indented opening tag
@@ -75,6 +76,15 @@ final class WellFormer
 	) {
 		$this->space = $config->baseIndent;
 		$this->baseDTD = Schema::flowContent();
+	}
+
+
+	/**
+	 * Plain (unescaped) text.
+	 */
+	public function text(string $s): void
+	{
+		$this->escapedText(htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8'));
 	}
 
 

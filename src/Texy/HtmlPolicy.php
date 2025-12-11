@@ -13,7 +13,8 @@ use function is_array, is_string;
 
 /**
  * Security policy for HTML in the document: which tags, classes and inline
- * styles may appear, plus validation of passthrough HTML tags.
+ * styles may appear, plus validation and reconstruction of passthrough
+ * HTML tags.
  */
 final class HtmlPolicy
 {
