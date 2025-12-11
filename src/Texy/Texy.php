@@ -46,12 +46,6 @@ class Texy
 	/** @deprecated */
 	public bool $removeSoftHyphens = true;
 
-	/**
-	 * Experimental: apply typography and hyphenation as an AST transform
-	 * instead of HTML string post-processing.
-	 */
-	public bool $astTypography = false;
-
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\ImageModule $imageModule;
 	public Modules\LinkReferenceModule $linkModule;
@@ -67,9 +61,6 @@ class Texy
 	public readonly HtmlPolicy $htmlPolicy;
 
 	public Output\Html\Config $htmlOutput;
-
-	/** @var array<string, \Closure(string): string> @internal */
-	public array $postHandlers = [];
 
 	/** @var Module[] */
 	private array $modules = [];
@@ -196,17 +187,6 @@ class Texy
 	}
 
 
-	/** @param  \Closure(string): string  $handler */
-	final public function registerPostLine(\Closure $handler, string $name): void
-	{
-		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = true;
-		}
-
-		$this->postHandlers[$name] = $handler;
-	}
-
-
 	/**
 	 * Converts Texy text to HTML.
 	 */
@@ -229,7 +209,6 @@ class Texy
 			$this->htmlPolicy,
 			$this->urlPolicy,
 			!empty($this->allowed[Syntax::Typography]) ? $this->typographyModule->postLine(...) : null,
-			array_filter($this->postHandlers, fn(string $name): bool => !empty($this->allowed[$name]), ARRAY_FILTER_USE_KEY),
 		);
 	}
 
@@ -261,7 +240,7 @@ class Texy
 
 	/**
 	 * Turns the syntax tree into the document: resolves references, balances
-	 * headings, sanitizes HTML and applies the consumer's passes.
+	 * headings, sanitizes HTML, applies typography and the consumer's passes.
 	 * Changes the tree in place; a document is transformed only once.
 	 */
 	public function transform(Nodes\DocumentNode $document): void
@@ -276,10 +255,6 @@ class Texy
 	 */
 	private function applyAstTypography(Nodes\DocumentNode $document): void
 	{
-		if (!$this->astTypography) {
-			return;
-		}
-
 		$transformers = [];
 		if (!empty($this->allowed[Syntax::Typography])) {
 			$transformers[] = fn(string $s): string => $this->typographyModule->postLine($s);
