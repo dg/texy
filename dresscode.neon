@@ -23,10 +23,6 @@ overrides:
 			- compilerOptimizations
 			- deprecations
 
-	- # the public constants of the 3.x API keep their names
-		paths: [src/Modules/HeadingModule.php, src/Patterns.php, src/Texy.php]
-		naming: {constant: keep}
-
 	- # renaming the parameters $URL would break calls naming them
 		paths: [src/Helpers.php]
 		naming: {variable: keep}

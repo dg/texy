@@ -39,7 +39,7 @@ final class HeadingModule extends Texy\Module
 			Syntax::HeadingUnderlined,
 			'~^
 				( \S .{0,1000} )                 # heading text (1)
-				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
+				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				\n
 				( \#{3,}+ | \*{3,}+ | ={3,}+ | -{3,}+ )  # underline characters (3)
 			$~mUx',
@@ -51,7 +51,7 @@ final class HeadingModule extends Texy\Module
 			'~^
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
 				(.+)                             # heading text (2)
-				' . Texy\Patterns::MODIFIER_H . '? # modifier (3)
+				' . Texy\Patterns::ModifierHAlign . '? # modifier (3)
 			$~mUx',
 			$this->parseSurround(...),
 		);

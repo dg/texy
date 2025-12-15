@@ -69,7 +69,7 @@ $texy->registerLinePattern(
 	'~
 		(?<! \* ) \* (?! [ *] )
 		(.+)
-		' . Texy\Patterns::MODIFIER . '?
+		' . Texy\Patterns::Modifier . '?
 		(?<! [ *] ) \* (?! \* )
 	~Ux', // regular expression
 	'myInlineSyntax1', // Unique name for this syntax
@@ -93,7 +93,7 @@ $texy->registerLinePattern(
 	'~
 		(?<! _ ) _ (?! [ _] )
 		(.+)
-		' . Texy\Patterns::MODIFIER . '?
+		' . Texy\Patterns::Modifier . '?
 		(?<! [ _] ) _ (?! _ )
 	~Ux',
 	'myInlineSyntax2',

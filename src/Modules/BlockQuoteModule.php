@@ -24,7 +24,7 @@ final class BlockQuoteModule extends Texy\Module
 		$registry->addBlock(
 			Syntax::Blockquote,
 			'~^
-				(?: ' . Texy\Patterns::MODIFIER_H . '\n)? # modifier (1)
+				(?: ' . Texy\Patterns::ModifierHAlign . '\n)? # modifier (1)
 				>                                      # blockquote char
 				( [ \t]++ | : )                        # space/tab or colon (2)
 				( \S.*+ )                              # content (3)
