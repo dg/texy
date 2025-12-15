@@ -52,7 +52,7 @@ final class ListModule extends Texy\Module
 		$engine->addBlock(
 			Syntax::List,
 			'~^
-				(?:' . Patterns::MODIFIER_H . '\n)? # modifier (1)
+				(?:' . Patterns::ModifierHAlign . '\n)? # modifier (1)
 				(' . implode('|', $re) . ')             # list marker (2)
 				[ \t]*+
 				\S .*                                   # content
@@ -63,10 +63,10 @@ final class ListModule extends Texy\Module
 		$engine->addBlock(
 			Syntax::DefinitionList,
 			'~^
-				(?:' . Patterns::MODIFIER_H . '\n)?   # modifier (1)
+				(?:' . Patterns::ModifierHAlign . '\n)? # modifier (1)
 				( \S .{0,2000} )                        # definition term (2)
 				: [ \t]*                                # colon separator
-				' . Patterns::MODIFIER_H . '?         # modifier (3)
+				' . Patterns::ModifierHAlign . '?       # modifier (3)
 				\n
 				([ \t]++)                               # indentation (4)
 				(' . implode('|', array_column(self::Bullets[Syntax::List], 0)) . ') # description marker (5)
@@ -164,7 +164,7 @@ final class ListModule extends Texy\Module
 			\n?
 			( \S .* )                       # term content
 			: [ \t]*                        # colon separator
-			' . Patterns::MODIFIER_H . '?
+			' . Patterns::ModifierHAlign . '?
 		$~mUAx';
 
 		while (true) {
@@ -214,7 +214,7 @@ final class ListModule extends Texy\Module
 			({$bullet})                              # bullet character (2)
 			[ \\t]*
 			( \\S .* )?                              # content (3)
-			" . Patterns::MODIFIER_H . '?           # modifier (4)
+			" . Patterns::ModifierHAlign . '?        # modifier (4)
 		$~mAUx';
 
 		$matches = null;

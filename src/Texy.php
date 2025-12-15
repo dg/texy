@@ -23,7 +23,10 @@ use function strlen;
 class Texy
 {
 	// Texy version
-	public const VERSION = '4.0.0-dev';
+	public const Version = '4.0.0-dev';
+
+	#[\Deprecated('use Texy::Version', since: '4.0')]
+	public const VERSION = self::Version;
 
 	#[\Deprecated('use true', since: '4.0')]
 	public const ALL = true;

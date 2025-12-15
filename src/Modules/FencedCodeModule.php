@@ -49,7 +49,7 @@ final class FencedCodeModule extends Texy\Module
 
 		// a Texy modifier may trail the info string: ```php .{file: Foo.php}
 		$mod = null;
-		if ($m = Texy\Regexp::match($mInfo, '~' . Texy\Patterns::MODIFIER_H . '$~x', captureOffset: true)) {
+		if ($m = Texy\Regexp::match($mInfo, '~' . Texy\Patterns::ModifierHAlign . '$~x', captureOffset: true)) {
 			$mod = Texy\Modifier::parse($m[1][0], $offsets[2] + $m[1][1]);
 			$mInfo = substr($mInfo, 0, $m[0][1]);
 		}

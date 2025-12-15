@@ -45,7 +45,7 @@ final class DelimitedBlockModule extends Texy\Module
 			'~^
 				/--++ \ *+                    # opening tag /--
 				(.*)                         # content type (1)
-				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
+				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				$
 				((?:                         # content (3)
 					\n (?0) |                # recursive nested blocks
