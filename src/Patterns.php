@@ -58,14 +58,14 @@ class Patterns
 		)
 		X;
 
-	// links, url - doesn't end by :).,!?
+	// links, url - doesn't end by :;,.!? and takes ) only to close its own (, used with the U flag
 	public const LinkUrl = <<<'X'
 		(?x:
 			\[ [^]\n]++ ]                    # link text in brackets
 			|
 			(?= [\w/+.\~%&?@=_#$] )          # URL must start with these chars
-			\S{0,1000}?                      # URL body
-			[^:);,.!?\s]                     # URL must not end with these chars
+			(?: [^\s()] | \( [^\s()]{0,100}+ \) | \( )+?  # URL body, parentheses balanced
+			(?<! [:;,.!?] )                  # URL must not end with these chars
 		)
 		X;
 
