@@ -108,6 +108,33 @@ test('entities in link targets are decoded once', function () {
 });
 
 
+test('a URL takes the parentheses it opens, not the one around the link', function () {
+	$texy = new Texy\Texy;
+	Assert::same(
+		'<p><a href="https://cs.wikipedia.org/wiki/Texy_(software)">Texy</a>.</p>',
+		trim($texy->toHtml('"Texy":https://cs.wikipedia.org/wiki/Texy_(software).')),
+	);
+	Assert::same('<p>(viz <a href="https://example.com/x">web</a>)</p>', trim($texy->toHtml('(viz "web":https://example.com/x)')));
+
+	Texy\Configurator::safeMode($texy);
+	Assert::same('<p>klikni</p>', trim($texy->toHtml('"klikni":javascript:alert(1)')));
+});
+
+
+test('an autolink takes the parentheses it opens, not a trailing question mark', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	Assert::same(
+		'<p>viz <a href="http://a.cz/Texy_(software)">http://a.cz/Texy_(software)</a>.</p>',
+		trim($texy->toHtml('viz http://a.cz/Texy_(software).')),
+	);
+	Assert::same('<p>(viz <a href="http://a.cz/x">http://a.cz/x</a>)</p>', trim($texy->toHtml('(viz http://a.cz/x)')));
+	Assert::same('<p>Je to <a href="http://a.cz/">http://a.cz/</a>?</p>', trim($texy->toHtml('Je to http://a.cz/?')));
+	Assert::same('<p>www.ab a http://ab</p>', trim($texy->toHtml('www.ab a http://ab')));
+	Assert::noError(fn() => $texy->toHtml('http://a.cz/' . str_repeat(',.', 5000) . str_repeat('(', 5000)));
+});
+
+
 test('autolinks right after an HTML tag, an e-mail inside a link is obfuscated text', function () {
 	$texy = new Texy\Texy;
 	Assert::same('<p><b><a href="http://x.cz">http://x.cz</a></b></p>', trim($texy->toHtml('<b>http://x.cz</b>')));

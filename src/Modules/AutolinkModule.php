@@ -22,14 +22,16 @@ final class AutolinkModule extends Texy\Module
 	public function register(Texy\Parsing\Engine $engine): void
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
+		$char = '[/\d' . Patterns::Letter . '+.\~%&?@=_:;#$!,*\x{ad}-]';
+		$paren = '(?: \( ' . $char . '{0,1000}+ \) | \( ) ' . $char . '{0,1000}'; // takes ) only to close its own (
 		$engine->addInline(
 			Syntax::AutolinkUrl,
 			'~
 				(?<= ^ | [\s([<:>] )                 # must be preceded by these chars, > ends a tag
 				(?: https?:// | www\. | ftp:// )     # protocol or www
 				[0-9.' . Patterns::Letter . '-]      # first char
-				[/\d' . Patterns::Letter . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
-				[/\d' . Patterns::Letter . '+\~?@=_#$*]  # last char
+				' . $char . ' (?: ' . $char . '{1,1000} (?:' . $paren . '){0,10} | (?:' . $paren . '){1,10} )  # URL body
+				(?<= [/\d' . Patterns::Letter . '+\~@=_#$*)] )  # last char
 			~x',
 			$this->parseUrl(...),
 		);

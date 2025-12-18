@@ -96,7 +96,7 @@ See the "documentation":[doc] and use [Nette].
 
 References can also be added programmatically with `$texy->config->addLinkDefinition()`. A `%s` in a target stands for the link text, URL-encoded: with `[php]: https://php.net/%s`, `"strlen":[php]` leads to `https://php.net/strlen`. The bare `[ref]` form is **opt-in** (`$texy->allowedSyntax[Syntax::LinkReference] = true`): it produces a link whose target is resolved against the definitions, and the written reference name stays available in `LinkNode::$ref`, so a consumer transform pass can resolve wiki-style targets itself.
 
-**Automatic links** *(`link/url`, `link/email`, AutolinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. Displayed URLs are shortened when `$texy->htmlOutput->shortenUrls` is on; e-mails are obfuscated against bots when `$texy->htmlOutput->obfuscateEmail` is on. A URL rejected by `$texy->urlPolicy` produces no link.
+**Automatic links** *(`link/url`, `link/email`, AutolinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. A closing parenthesis belongs to the URL only when it closes one opened in it, and trailing punctuation, a question mark included, is left out. Displayed URLs are shortened when `$texy->htmlOutput->shortenUrls` is on; e-mails are obfuscated against bots when `$texy->htmlOutput->obfuscateEmail` is on. A URL rejected by `$texy->urlPolicy` produces no link.
 
 A `.[nofollow]` class on a link converts to `rel="nofollow"`.
 
