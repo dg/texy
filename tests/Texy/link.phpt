@@ -108,6 +108,19 @@ test('entities in link targets are decoded once', function () {
 });
 
 
+test('a URL takes the parentheses it opens, not the one around the link', function () {
+	$texy = new Texy\Texy;
+	Assert::same(
+		'<p><a href="https://cs.wikipedia.org/wiki/Texy_(software)">Texy</a>.</p>',
+		trim($texy->toHtml('"Texy":https://cs.wikipedia.org/wiki/Texy_(software).')),
+	);
+	Assert::same('<p>(viz <a href="https://example.com/x">web</a>)</p>', trim($texy->toHtml('(viz "web":https://example.com/x)')));
+
+	Texy\Configurator::safeMode($texy);
+	Assert::same('<p>klikni</p>', trim($texy->toHtml('"klikni":javascript:alert(1)')));
+});
+
+
 test('autolinks right after an HTML tag, an e-mail inside a link is obfuscated text', function () {
 	$texy = new Texy\Texy;
 	Assert::same('<p><b><a href="http://x.cz">http://x.cz</a></b></p>', trim($texy->toHtml('<b>http://x.cz</b>')));
