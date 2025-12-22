@@ -17,6 +17,14 @@ class Exception extends \Exception
 
 
 /**
+ * The input is not valid UTF-8 text.
+ */
+class InvalidInputException extends Exception
+{
+}
+
+
+/**
  * Matching the text exhausted a limit of PCRE; a pattern that does not compile is a \LogicException.
  */
 class RegexpException extends Exception
