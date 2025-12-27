@@ -25,7 +25,7 @@ final class Modifier
 {
 	public ?string $id = null;
 
-	/** @var array<string, bool> of classes (as keys) */
+	/** @var array<string, true> of classes (as keys) */
 	public array $classes = [];
 
 	/** @var array<string, string> of CSS styles */
@@ -37,7 +37,7 @@ final class Modifier
 	public ?string $vAlign = null;
 	public ?string $title = null;
 
-	/** @var array<string, int>  list of properties which are regarded as HTML element attributes */
+	/** @var array<string, 1>  list of properties which are regarded as HTML element attributes */
 	public static array $elAttrs = [
 		'abbr' => 1, 'accesskey' => 1, 'alt' => 1, 'cite' => 1, 'colspan' => 1, 'contenteditable' => 1, 'crossorigin' => 1,
 		'datetime' => 1, 'decoding' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1, 'hidden' => 1,
@@ -108,6 +108,7 @@ final class Modifier
 	}
 
 
+	/** @param  array<string, mixed>  $attrs */
 	private function decorateAttrs(Texy $texy, array &$attrs, string $name): void
 	{
 		if (!$this->attrs) {
@@ -136,6 +137,7 @@ final class Modifier
 	}
 
 
+	/** @param  array<string, mixed>  $attrs */
 	private function decorateClasses(Texy $texy, array &$attrs): void
 	{
 		if ($this->classes || $this->id !== null) {
@@ -162,6 +164,7 @@ final class Modifier
 	}
 
 
+	/** @param  array<string, mixed>  $attrs */
 	private function decorateStyles(Texy $texy, array &$attrs): void
 	{
 		if ($this->styles) {
@@ -182,6 +185,7 @@ final class Modifier
 	}
 
 
+	/** @param  array<string, mixed>  $attrs */
 	private function decorateAligns(Texy $texy, array &$attrs): void
 	{
 		if ($this->hAlign) {

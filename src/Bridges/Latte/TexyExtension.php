@@ -17,13 +17,15 @@ use Texy\Texy;
 
 
 /**
- * Macro {texy} ... {/texy} for Latte v3
+ * Provides {texy} tag and |texy filter for Latte v3.
  */
 class TexyExtension extends Latte\Extension
 {
+	/** @var \Closure(string, mixed...): string */
 	private \Closure $processor;
 
 
+	/** @param  Texy|callable(string, mixed...): string  $texy */
 	public function __construct(Texy|callable $texy)
 	{
 		$this->processor = $texy instanceof Texy

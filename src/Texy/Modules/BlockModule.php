@@ -15,7 +15,7 @@ use const ENT_NOQUOTES;
 
 
 /**
- * Special blocks module.
+ * Processes special blocks (/-- code, html, text, div, etc.).
  */
 final class BlockModule extends Texy\Module
 {
@@ -64,6 +64,7 @@ final class BlockModule extends Texy\Module
 	 * ....
 	 * ....
 	 * \----
+	 * @param  string[]  $matches
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
 	{

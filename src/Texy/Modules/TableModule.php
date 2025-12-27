@@ -16,7 +16,7 @@ use function explode, ltrim, rtrim, str_contains, str_replace, strtr;
 
 
 /**
- * Table module.
+ * Processes table syntax with headers, colspan, and rowspan support.
  */
 final class TableModule extends Texy\Module
 {
@@ -49,6 +49,7 @@ final class TableModule extends Texy\Module
 	 * | xxx | xxx | xxx | .(..){..}[..]
 	 * |------------------
 	 * | aa | bb | cc |
+	 * @param  string[]  $matches
 	 */
 	public function patternTable(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
 	{
@@ -147,6 +148,10 @@ final class TableModule extends Texy\Module
 	}
 
 
+	/**
+	 * @param  array<int, TableCellElement>  $prevRow
+	 * @param  array<int, Modifier|null>  $colModifier
+	 */
 	private function processRow(
 		string $content,
 		string $mMod,

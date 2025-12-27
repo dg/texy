@@ -11,11 +11,11 @@ use function array_keys, strlen, substr_replace;
 
 
 /**
- * Parser for single line structures.
+ * Parses inline structures (links, images, formatting, etc.).
  */
 class LineParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure, pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(LineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	public array $patterns;
 	public bool $again;
 
@@ -28,6 +28,9 @@ class LineParser extends Parser
 	}
 
 
+	/**
+	 * Parses text and appends results to parent element.
+	 */
 	public function parse(string $text): void
 	{
 		if (!$this->patterns) { // nothing to do
@@ -37,7 +40,7 @@ class LineParser extends Parser
 
 		$offset = 0;
 		$names = array_keys($this->patterns);
-		/** @var array<string, array<int, array{string, int}>> $matches */
+		/** @var array<string, array<string>> $matches */
 		$matches = $offsets = [];
 		foreach ($names as $name) {
 			$offsets[$name] = -1;
@@ -91,6 +94,11 @@ class LineParser extends Parser
 	}
 
 
+	/**
+	 * @param  array<int, string>  $names
+	 * @param  array<string, int>  $offsets
+	 * @param  array<string, array<string>>  $matches
+	 */
 	private function match(string $text, int $offset, array &$names, array &$offsets, array &$matches): ?string
 	{
 		$first = null;

@@ -9,7 +9,7 @@ namespace Texy;
 
 
 /**
- * Image.
+ * Stores image URL, dimensions, modifiers, and reference info.
  */
 final class Image
 {

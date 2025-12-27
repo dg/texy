@@ -11,6 +11,9 @@ use function array_keys, array_values, is_array, preg_last_error, preg_last_erro
 use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SPLIT_OFFSET_CAPTURE;
 
 
+/**
+ * Regular expression utilities with error handling.
+ */
 class Regexp
 {
 	public const ALL = 1;
@@ -19,7 +22,8 @@ class Regexp
 
 	/**
 	 * Splits string by a regular expression.
-	 * @param  int $flags  OFFSET_CAPTURE
+	 * @param  int  $flags  OFFSET_CAPTURE
+	 * @return list<string|array{string, int}>
 	 */
 	public static function split(string $subject, string $pattern, int $flags = 0): array
 	{
@@ -35,7 +39,7 @@ class Regexp
 
 	/**
 	 * Performs a regular expression match.
-	 * @param  int $flags  OFFSET_CAPTURE, ALL
+	 * @param  int  $flags  OFFSET_CAPTURE, ALL
 	 */
 	public static function match(string $subject, string $pattern, int $flags = 0, int $offset = 0): mixed
 	{
@@ -60,6 +64,8 @@ class Regexp
 
 	/**
 	 * Perform a regular expression search and replace.
+	 * @param  string|string[]  $pattern
+	 * @param  string|\Closure(string[]): string|null  $replacement
 	 */
 	public static function replace(
 		string $subject,

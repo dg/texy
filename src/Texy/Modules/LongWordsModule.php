@@ -12,7 +12,7 @@ use function array_flip, array_pop, array_splice, count, end, iconv_strlen, impl
 
 
 /**
- * Long words wrap module.
+ * Breaks long words with soft hyphens for better line wrapping.
  */
 final class LongWordsModule extends Texy\Module
 {
@@ -25,6 +25,7 @@ final class LongWordsModule extends Texy\Module
 
 	public int $wordLimit = 20;
 
+	/** @var array<string, int>|string[] */
 	private array $consonants = [
 		'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z',
 		'B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Z',
@@ -32,6 +33,7 @@ final class LongWordsModule extends Texy\Module
 		"\u{10C}", "\u{10E}", "\u{147}", "\u{158}", "\u{160}", "\u{164}", "\u{17D}",
 	];
 
+	/** @var array<string, int>|string[] */
 	private array $vowels = [
 		'a', 'e', 'i', 'o', 'u', 'y',
 		'A', 'E', 'I', 'O', 'U', 'Y',
@@ -39,18 +41,22 @@ final class LongWordsModule extends Texy\Module
 		"\u{C1}", "\u{C9}", "\u{11A}", "\u{CD}", "\u{D3}", "\u{DA}", "\u{16E}", "\u{DD}",
 	];
 
+	/** @var array<string, int>|string[] */
 	private array $before_r = [
 		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'p', 'P', 'r', 'R', 't', 'T', 'v', 'V',
 		"\u{10D}", "\u{10C}", "\u{10F}", "\u{10E}", "\u{159}", "\u{158}", "\u{165}", "\u{164}", // Czech UTF-8
 	];
 
+	/** @var array<string, int>|string[] */
 	private array $before_l = [
 		'b', 'B', 'c', 'C', 'd', 'D', 'f', 'F', 'g', 'G', 'k', 'K', 'l', 'L', 'p', 'P', 't', 'T', 'v', 'V',
 		"\u{10D}", "\u{10C}", "\u{10F}", "\u{10E}", "\u{165}", "\u{164}", // Czech UTF-8
 	];
 
+	/** @var array<string, int>|string[] */
 	private array $before_h = ['c', 'C', 's', 'S'];
 
+	/** @var array<string, int>|string[] */
 	private array $doubleVowels = ['a', 'A', 'o', 'O'];
 
 
@@ -81,6 +87,7 @@ final class LongWordsModule extends Texy\Module
 
 	/**
 	 * Callback for long words.
+	 * @param  string[]  $matches
 	 */
 	private function pattern(array $matches): string
 	{

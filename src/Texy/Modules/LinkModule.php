@@ -16,7 +16,7 @@ use function iconv_strlen, iconv_substr, link, preg_match, str_contains, str_rep
 
 
 /**
- * Links module.
+ * Processes links, email addresses, and URL references.
  */
 final class LinkModule extends Texy\Module
 {
@@ -35,7 +35,7 @@ final class LinkModule extends Texy\Module
 	/** @var array<string, Link> link references */
 	private array $references = [];
 
-	/** @var array<string, bool> */
+	/** @var array<string, true> */
 	private static array $livelock;
 
 	private static string $EMAIL;
@@ -98,6 +98,7 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}.
+	 * @param  string[]  $matches
 	 */
 	private function patternReferenceDef(array $matches): string
 	{
@@ -118,6 +119,7 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: [ref].
+	 * @param  string[]  $matches
 	 */
 	public function patternReference(LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
@@ -157,6 +159,7 @@ final class LinkModule extends Texy\Module
 
 	/**
 	 * Callback for: http://davidgrudl.com david@grudl.com.
+	 * @param  string[]  $matches
 	 */
 	public function patternUrlEmail(LineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 	{

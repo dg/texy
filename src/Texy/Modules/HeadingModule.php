@@ -13,7 +13,7 @@ use function array_flip, array_values, asort, count, is_array, max, min, reset, 
 
 
 /**
- * Heading module.
+ * Processes heading syntax (underlined and surrounded) and builds table of contents.
  */
 final class HeadingModule extends Texy\Module
 {
@@ -24,7 +24,7 @@ final class HeadingModule extends Texy\Module
 	/** textual content of first heading */
 	public ?string $title = null;
 
-	/** @var array<int, array{el: Texy\HtmlElement, level: int, type: string}>  generated Table of Contents */
+	/** @var list<array{el: Texy\HtmlElement, level: int, type: string, title?: string}>  generated Table of Contents */
 	public array $TOC = [];
 
 	public bool $generateID = false;
@@ -166,6 +166,7 @@ final class HeadingModule extends Texy\Module
 	 *
 	 * Heading .(title)[class]{style}>
 	 * -------------------------------
+	 * @param  string[]  $matches
 	 */
 	public function patternUnderline(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
@@ -185,6 +186,7 @@ final class HeadingModule extends Texy\Module
 	 * Callback for surrounded heading.
 	 *
 	 * ### Heading .(title)[class]{style}>
+	 * @param  string[]  $matches
 	 */
 	public function patternSurround(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{

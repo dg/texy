@@ -13,7 +13,7 @@ use function trim;
 
 
 /**
- * The captioned figures.
+ * Processes images with captions.
  */
 final class FigureModule extends Texy\Module
 {
@@ -58,6 +58,7 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
+	 * @param  string[]  $matches
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{

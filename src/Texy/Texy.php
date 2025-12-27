@@ -69,13 +69,13 @@ class Texy
 	/** Do obfuscate e-mail addresses? */
 	public bool $obfuscateEmail = true;
 
-	/** @var array<string|string>  regexps to check URL schemes */
+	/** @var array<string, string>  regexps to check URL schemes */
 	public array $urlSchemeFilters; // disable URL scheme filter
 
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
 
-	/** @var array<string, string[]>  Parsing summary */
+	/** @var array{images: list<string>, links: list<string>}  Parsing summary */
 	public array $summary = [
 		'images' => [],
 		'links' => [],
@@ -114,40 +114,40 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure, pattern: string, again: ?string}>
+	 * @var array<string, array{handler: \Closure(LineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
 	 */
 	private array $linePatterns = [];
 
-	/** @var array<string, array{handler: \Closure, pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(LineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	private array $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure, pattern: string}>
+	 * @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
-	/** @var array<string, array{handler: \Closure, pattern: string}> */
+	/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}> */
 	private array $_blockPatterns;
 
-	/** @var array<string, \Closure> */
+	/** @var array<string, \Closure(string): string> */
 	private array $postHandlers = [];
 
 	/** DOM structure for parsed text */
 	private ?HtmlElement $DOM;
 
-	/** Texy protect markup table */
+	/** @var array<string, string>  Texy protect markup table */
 	private array $marks = [];
 
-	/** for internal usage */
+	/** @var array<string, int>|bool  for internal usage */
 	private bool|array $_classes;
 
-	/** for internal usage */
+	/** @var array<string, int>|bool  for internal usage */
 	private bool|array $_styles;
 
 	private bool $processing = false;
 
-	/** @var array<string, array<int, \Closure>> of events and registered handlers */
+	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
 	private array $handlers = [];
 
 	/**
@@ -226,6 +226,9 @@ class Texy
 	}
 
 
+	/**
+	 * @param  callable(LineParser, string[], string): (HtmlElement|string|null)  $handler
+	 */
 	final public function registerLinePattern(
 		callable $handler,
 		string $pattern,
@@ -245,6 +248,9 @@ class Texy
 	}
 
 
+	/**
+	 * @param  callable(BlockParser, string[], string): (HtmlElement|string|null)  $handler
+	 */
 	final public function registerBlockPattern(callable $handler, string $pattern, string $name): void
 	{
 		// if (!preg_match('#(.)\^.*\$\1[a-z]*#is', $pattern)) die("Texy: Not a block pattern $name");
@@ -259,6 +265,7 @@ class Texy
 	}
 
 
+	/** @param  callable(string): string  $handler */
 	final public function registerPostLine(callable $handler, string $name): void
 	{
 		if (!isset($this->allowed[$name])) {
@@ -466,6 +473,7 @@ class Texy
 
 	/**
 	 * Invoke registered around-handlers.
+	 * @param  mixed[]  $args
 	 */
 	final public function invokeAroundHandlers(string $event, Parser $parser, array $args): mixed
 	{
@@ -480,6 +488,7 @@ class Texy
 
 	/**
 	 * Invoke registered after-handlers.
+	 * @param  mixed[]  $args
 	 */
 	final public function invokeHandlers(string $event, array $args): void
 	{
@@ -531,14 +540,14 @@ class Texy
 	}
 
 
-	/** @return array<string, array{handler: \Closure, pattern: string, again: ?string}> */
+	/** @return array<string, array{handler: \Closure(LineParser, string[], string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	final public function getLinePatterns(): array
 	{
 		return $this->_linePatterns;
 	}
 
 
-	/** @return array<string, array{handler: \Closure, pattern: string}> */
+	/** @return array<string, array{handler: \Closure(BlockParser, string[], string): (HtmlElement|string|null), pattern: string}> */
 	final public function getBlockPatterns(): array
 	{
 		return $this->_blockPatterns;
@@ -561,7 +570,10 @@ class Texy
 	}
 
 
-	/** @internal */
+	/**
+	 * @internal
+	 * @return array{array<string, int>|bool, array<string, int>|bool}
+	 */
 	final public function getAllowedProps(): array
 	{
 		return [$this->_classes, $this->_styles];

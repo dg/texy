@@ -11,7 +11,7 @@ use Texy;
 
 
 /**
- * Horizontal line module.
+ * Processes horizontal line syntax (---, ***).
  */
 final class HorizLineModule extends Texy\Module
 {
@@ -38,6 +38,7 @@ final class HorizLineModule extends Texy\Module
 
 	/**
 	 * Callback for: -------.
+	 * @param  string[]  $matches
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
 	{

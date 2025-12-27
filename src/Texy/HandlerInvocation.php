@@ -11,7 +11,7 @@ use function array_unshift, count, is_string;
 
 
 /**
- * Around advice handlers.
+ * Implements chain of responsibility for element handlers.
  */
 final class HandlerInvocation
 {
@@ -21,8 +21,9 @@ final class HandlerInvocation
 	private array $args;
 
 
+	/** @param mixed[] $args */
 	public function __construct(
-		/** @var array<int, \Closure> */
+		/** @var list<\Closure(mixed...): mixed> */
 		private array $handlers,
 		private readonly Parser $parser,
 		array $args,
@@ -33,7 +34,9 @@ final class HandlerInvocation
 	}
 
 
-	/** @return mixed */
+	/**
+	 * Invokes next handler in chain, or throws if none remain.
+	 */
 	public function proceed(...$args)
 	{
 		if ($this->pos === 0) {

@@ -12,7 +12,7 @@ use function getimagesize, implode, is_array, is_file, krsort, preg_quote, rtrim
 
 
 /**
- * Emoticon module.
+ * Replaces emoticons with images or Unicode characters.
  */
 final class EmoticonModule extends Texy\Module
 {
@@ -73,6 +73,7 @@ final class EmoticonModule extends Texy\Module
 
 	/**
 	 * Callback for: :-))).
+	 * @param  string[]  $matches
 	 */
 	public function pattern(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{

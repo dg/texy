@@ -27,7 +27,10 @@ class TexyNode extends StatementNode
 	public ArrayNode $args;
 
 
-	/** @return \Generator<int, ?array, array{AreaNode, ?Tag}, static> */
+	/**
+	 * @param  \Closure(string, mixed...): string  $processor
+	 * @return \Generator<int, ?array{list<string>}, array{AreaNode, ?Tag}, static|Latte\Compiler\Nodes\TextNode>
+	 */
 	public static function create(Tag $tag, TemplateParser $parser, \Closure $processor): \Generator
 	{
 		if ($tag->isNAttribute()) {

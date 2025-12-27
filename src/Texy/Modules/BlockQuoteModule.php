@@ -12,7 +12,7 @@ use function max, strlen;
 
 
 /**
- * Blockquote module.
+ * Processes blockquote syntax with nested content.
  */
 final class BlockQuoteModule extends Texy\Module
 {
@@ -36,6 +36,7 @@ final class BlockQuoteModule extends Texy\Module
 	 * swath of the marching Orcs tramped its ugly slot; the sweet grass
 	 * of Rohan had been bruised and blackened as they passed.
 	 * >:http://www.mycom.com/tolkien/twotowers.html
+	 * @param  string[]  $matches
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{

@@ -12,11 +12,11 @@ use function strlen;
 
 
 /**
- * Parser for block structures.
+ * Parses block structures (paragraphs, headings, lists, tables, etc.).
  */
 class BlockParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure, pattern: string}> */
+	/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}> */
 	public array $patterns;
 	private string $text;
 	private int $offset;
@@ -38,15 +38,19 @@ class BlockParser extends Parser
 	}
 
 
-	// match current line against RE.
-	// if succesfull, increments current position and returns true
+	/**
+	 * Match current line against RE.
+	 * If successful, increments current position and returns true.
+	 * @param  ?array<string>  $matches
+	 * @param-out array<string> $matches
+	 */
 	public function next(string $pattern, &$matches): bool
 	{
 		if ($this->offset > strlen($this->text)) {
 			return false;
 		}
 
-		/** @var array<int, array{string, int}>|null $matches */
+		/** @var ?array<int, array{string, int}> $matches */
 		$matches = Regexp::match(
 			$this->text,
 			$pattern . 'Am', // anchored & multiline
@@ -67,6 +71,9 @@ class BlockParser extends Parser
 	}
 
 
+	/**
+	 * Moves position back by specified number of lines.
+	 */
 	public function moveBackward(int $linesCount = 1): void
 	{
 		while (--$this->offset > 0) {
@@ -82,6 +89,9 @@ class BlockParser extends Parser
 	}
 
 
+	/**
+	 * Parses text and appends results to parent element.
+	 */
 	public function parse(string $text): void
 	{
 		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
@@ -130,13 +140,13 @@ class BlockParser extends Parser
 	}
 
 
-	/** @return array<int, array{int, string, array<int, string>, int}> */
+	/** @return list<array{int, ?string, ?array<int, string>, int}> */
 	private function match(string $text): array
 	{
 		$matches = [];
 		$priority = 0;
 		foreach ($this->patterns as $name => $pattern) {
-			/** @var array<int, array<int, array{string, int}>>|null $ms */
+			/** @var ?array<int, array<int, array{string, int}>> $ms */
 			$ms = Regexp::match(
 				$text,
 				$pattern['pattern'],
