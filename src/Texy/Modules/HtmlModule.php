@@ -133,7 +133,7 @@ final class HtmlModule extends Texy\Module
 			}
 		} else { // allowedTags === Texy\Texy::ALL
 			if ($forceEmpty) {
-				$el->setName($name, true);
+				$el->setName($name, empty: true);
 			}
 		}
 
@@ -172,7 +172,7 @@ final class HtmlModule extends Texy\Module
 	}
 
 
-	private function applyAttrs(&$attrs, $allowedAttrs): void
+	private function applyAttrs(array &$attrs, $allowedAttrs): void
 	{
 		if (!$allowedAttrs) {
 			$attrs = [];
@@ -189,7 +189,7 @@ final class HtmlModule extends Texy\Module
 	}
 
 
-	private function applyClasses(&$attrs, $allowedClasses): void
+	private function applyClasses(array &$attrs, $allowedClasses): void
 	{
 		if (!isset($attrs['class'])) {
 		} elseif (is_array($allowedClasses)) {
@@ -214,7 +214,7 @@ final class HtmlModule extends Texy\Module
 	}
 
 
-	private function applyStyles(&$attrs, $allowedStyles): void
+	private function applyStyles(array &$attrs, $allowedStyles): void
 	{
 		if (!isset($attrs['style'])) {
 		} elseif (is_array($allowedStyles)) {

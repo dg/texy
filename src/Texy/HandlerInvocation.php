@@ -17,25 +17,26 @@ use function array_unshift, count, get_class, is_string;
  */
 final class HandlerInvocation
 {
-	/** @var array<int, callable> */
-	private array $handlers;
 	private int $pos;
+
+	/** @var mixed[] */
 	private array $args;
-	private Parser $parser;
 
 
-	public function __construct(array $handlers, Parser $parser, array $args)
-	{
-		$this->handlers = $handlers;
-		$this->pos = count($handlers);
-		$this->parser = $parser;
+	public function __construct(
+		/** @var array<int, callable> */
+		private array $handlers,
+		private readonly Parser $parser,
+		array $args,
+	) {
+		$this->pos = count($this->handlers);
 		array_unshift($args, $this);
 		$this->args = $args;
 	}
 
 
 	/** @return mixed */
-	public function proceed(...$args)
+	public function proceed(...$args): string|HtmlElement|null
 	{
 		if ($this->pos === 0) {
 			throw new \RuntimeException('No more handlers.');
@@ -49,7 +50,7 @@ final class HandlerInvocation
 		$this->pos--;
 		$res = $this->handlers[$this->pos](...$this->args);
 		if ($res !== null && !is_string($res) && !$res instanceof HtmlElement) {
-			throw new \UnexpectedValueException("Invalid value returned from handler '" . get_class($this->handlers[$this->pos][0]) . "'.");
+			throw new \UnexpectedValueException("Invalid value returned from handler '" . $this->handlers[$this->pos][0]::class . "'.");
 		}
 
 		return $res;

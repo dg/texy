@@ -143,7 +143,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Overloaded setter for element's attribute.
 	 */
-	final public function __set(string $name, $value): void
+	final public function __set(string $name, mixed $value): void
 	{
 		$this->attrs[$name] = $value;
 	}
@@ -152,7 +152,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Overloaded getter for element's attribute.
 	 */
-	final public function &__get(string $name)
+	final public function &__get(string $name): mixed
 	{
 		return $this->attrs[$name];
 	}
@@ -266,7 +266,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 */
 	final public function offsetSet($index, $child): void
 	{
-		$this->insert($index, $child, true);
+		$this->insert($index, $child, replace: true);
 	}
 
 
@@ -331,6 +331,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns all of children.
+	 * @return array<int, HtmlElement|string>
 	 */
 	final public function getChildren(): array
 	{

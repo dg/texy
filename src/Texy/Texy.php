@@ -355,7 +355,7 @@ class Texy
 	 */
 	public function processLine(string $text): string
 	{
-		return $this->process($text, true);
+		return $this->process($text, singleLine: true);
 	}
 
 
@@ -368,7 +368,7 @@ class Texy
 		$text = Helpers::normalize($text);
 
 		$this->typographyModule->beforeParse($this, $text);
-		$text = $this->typographyModule->postLine($text, true);
+		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
 
 		if (!empty($this->allowed['longwords'])) {
 			$text = $this->longWordsModule->postLine($text);

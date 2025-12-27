@@ -317,7 +317,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	private function solveNewReference(HandlerInvocation $invocation, string $name)
+	private function solveNewReference(HandlerInvocation $invocation, string $name): void
 	{
 		// no change
 	}
