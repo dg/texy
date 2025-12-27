@@ -11,7 +11,7 @@ namespace Texy;
 
 
 /**
- * Texy parser base class.
+ * Base class for BlockParser and LineParser.
  */
 class Parser
 {

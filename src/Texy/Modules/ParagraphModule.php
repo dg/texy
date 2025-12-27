@@ -16,7 +16,7 @@ use const PREG_SPLIT_NO_EMPTY;
 
 
 /**
- * Paragraph module.
+ * Processes paragraphs and handles line breaks.
  */
 final class ParagraphModule extends Texy\Module
 {

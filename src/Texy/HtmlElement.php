@@ -20,16 +20,19 @@ use function array_splice, count, http_build_query, implode, is_array, is_object
  * $el->class = 'myclass';
  *
  * echo $el->startTag(), $el->endTag();
+ *
+ * @implements \ArrayAccess<int, HtmlElement|string>
+ * @implements \IteratorAggregate<int, HtmlElement|string>
  */
 class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 {
 	public const InnerText = '%TEXT';
 	public const InnerTransparent = '%TRANS';
 
-	/** @var array<string, string|int|bool|string[]|null>  element's attributes */
+	/** @var array<string, string|int|bool|array<string|int|bool>|null>  element's attributes */
 	public array $attrs = [];
 
-	/** @var array<string, int>  void elements */
+	/** @var array<string, 1>  void elements */
 	public static array $emptyElements = [
 		'area' => 1, 'base' => 1, 'br' => 1, 'col' => 1, 'embed' => 1, 'hr' => 1, 'img' => 1, 'input' => 1,
 		'link' => 1, 'meta' => 1, 'param' => 1, 'source' => 1, 'track' => 1, 'wbr' => 1,
@@ -45,13 +48,13 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		'svg' => 1, 'template' => 0, 'textarea' => 1, 'time' => 0, 'u' => 0, 'var' => 0, 'video' => 1, 'wbr' => 0,
 	];
 
-	/** @var array<string, int>  elements with optional end tag in HTML */
+	/** @var array<string, 1>  elements with optional end tag in HTML */
 	public static array $optionalEnds = [
 		'body' => 1, 'head' => 1, 'html' => 1, 'colgroup' => 1, 'dd' => 1, 'dt' => 1, 'li' => 1,
 		'option' => 1, 'p' => 1, 'tbody' => 1, 'td' => 1, 'tfoot' => 1, 'th' => 1, 'thead' => 1, 'tr' => 1,
 	];
 
-	/** @var array<string, array<int, string>> */
+	/** @var array<string, list<string>> */
 	public static array $prohibits = [
 		'a' => ['a', 'button'],
 		'button' => ['a', 'button'],
@@ -83,14 +86,14 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 		'progress' => ['progress'],
 	];
 
-	/** @var array<int, HtmlElement|string> nodes */
+	/** @var list<HtmlElement|string> nodes */
 	protected array $children = [];
 	private ?string $name;
 	private bool $isEmpty;
 
 
 	/**
-	 * @param  array|string  $attrs  element's attributes (or textual content)
+	 * @param  array<string, mixed>|string|null  $attrs  element's attributes (or textual content)
 	 */
 	public function __construct(?string $name = null, array|string|null $attrs = null)
 	{
@@ -103,6 +106,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
+	/** @param  array<string, mixed>|string|null  $attrs */
 	public static function el(?string $name = null, $attrs = null): static
 	{
 		return new self($name, $attrs);
@@ -160,6 +164,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Sets element's attribute.
+	 * @param  string|int|bool|string[]|null  $value
 	 */
 	final public function setAttribute(string $name, $value): static
 	{
@@ -170,7 +175,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns element's attribute.
-	 * @return string|int|bool|string[]|null
+	 * @return string|int|bool|array<string|int|bool>|null
 	 */
 	final public function getAttribute(string $name)
 	{
@@ -180,6 +185,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Special setter for element's attribute.
+	 * @param  array<string, mixed>|null  $query
 	 */
 	final public function href(string $path, ?array $query = null): static
 	{
@@ -235,6 +241,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Creates and adds a new HtmlElement child.
+	 * @param  array<string, mixed>|string|null  $attrs
 	 */
 	final public function create(string $name, array|string|null $attrs = null): static
 	{
@@ -322,6 +329,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Required by the IteratorAggregate interface.
+	 * @return \ArrayIterator<int, HtmlElement|string>
 	 */
 	final public function getIterator(): \ArrayIterator
 	{
@@ -331,6 +339,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	/**
 	 * Returns all of children.
+	 * @return list<HtmlElement|string>
 	 */
 	final public function getChildren(): array
 	{
@@ -468,6 +477,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
+	/** @param  array<string, array{array<string, int>, array<string, int>}>  $dtd */
 	final public function validateAttrs(array $dtd): void
 	{
 		$allowed = $dtd[$this->name][0] ?? null;
@@ -485,6 +495,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	}
 
 
+	/** @param  array<string, array{array<string, int>, array<string, int>}>  $dtd */
 	public function validateChild($child, array $dtd): bool
 	{
 		if (isset($dtd[$this->name])) {

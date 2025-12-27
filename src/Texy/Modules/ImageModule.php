@@ -17,7 +17,7 @@ use function explode, getimagesize, is_file, is_int, min, round, rtrim, str_cont
 
 
 /**
- * Images module.
+ * Processes image syntax and detects image dimensions.
  */
 final class ImageModule extends Texy\Module
 {
@@ -79,6 +79,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Callback for: [*image*]: urls .(title)[class]{style}.
+	 * @param  string[]  $matches
 	 */
 	private function patternReferenceDef(array $matches): string
 	{
@@ -95,6 +96,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Callback for [* small.jpg 80x13 || big.jpg .(alternative text)[class]{style}>]:LINK.
+	 * @param  string[]  $matches
 	 */
 	public function patternImage(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{

@@ -15,7 +15,7 @@ use const ENT_HTML5, ENT_QUOTES, ICONV_IMPL;
 
 
 /**
- * Helpers.
+ * Static utility helpers.
  */
 final class Helpers
 {

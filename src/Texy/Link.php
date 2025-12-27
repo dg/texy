@@ -11,7 +11,7 @@ namespace Texy;
 
 
 /**
- * Link.
+ * Stores link URL, modifiers, and reference info.
  */
 final class Link
 {

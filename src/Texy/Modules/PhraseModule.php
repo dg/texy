@@ -18,10 +18,11 @@ use const ENT_NOQUOTES;
 
 
 /**
- * Phrases module.
+ * Processes inline text formatting (bold, italic, code, etc.).
  */
 final class PhraseModule extends Texy\Module
 {
+	/** @var array<string, string> */
 	public array $tags = [
 		'phrase/strong' => 'strong', // or 'b'
 		'phrase/em' => 'em', // or 'i'
@@ -224,6 +225,7 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: **.... .(title)[class]{style}**:LINK.
+	 * @param  string[]  $matches
 	 */
 	public function patternPhrase(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
@@ -265,6 +267,7 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: any^2 any_2.
+	 * @param  string[]  $matches
 	 */
 	public function patternSupSub(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
@@ -276,6 +279,7 @@ final class PhraseModule extends Texy\Module
 	}
 
 
+	/** @param  string[]  $matches */
 	public function patternNoTexy(LineParser $parser, array $matches): string
 	{
 		[, $mContent] = $matches;

@@ -22,6 +22,7 @@ use function is_array;
  */
 class Configurator
 {
+	/** @var array<string, list<string>> */
 	public static array $safeTags = [
 		'a' => ['href', 'title'],
 		'abbr' => ['title'],

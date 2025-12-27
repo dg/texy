@@ -15,10 +15,11 @@ use function strtr;
 
 
 /**
- * Typography replacements module.
+ * Applies typographic corrections (quotes, dashes, ellipsis, non-breaking spaces).
  */
 final class TypographyModule extends Texy\Module
 {
+	/** @var array<string, array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}}> */
 	public static array $locales = [
 		'cs' => [
 			'singleQuotes' => ["\u{201A}", "\u{2018}"],
@@ -48,6 +49,7 @@ final class TypographyModule extends Texy\Module
 
 	public string $locale = 'cs';
 
+	/** @var array<string, string> */
 	private static array $patterns = [
 		'#(?<![.\x{2026}])\.{3,4}(?![.\x{2026}])#mu' => "\u{2026}",                // ellipsis  ...
 		'#(?<=[\d ]|^)-(?=[\d ]|$)#' /*.          */ => "\u{2013}",                // en dash 123-123
@@ -88,6 +90,7 @@ final class TypographyModule extends Texy\Module
 		'#(?<!\'|\w)\'(?!\ |\')((?:[^\']++|\')+)(?<!\ |\')\'(?![\'' . Patterns::CHAR . '])()#Uu' => ':lsq:$1:rsq:',
 	];
 
+	/** @var array<string, string> */
 	private array $pattern = [];
 
 

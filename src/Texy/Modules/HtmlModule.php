@@ -17,7 +17,7 @@ use const PREG_SET_ORDER;
 
 
 /**
- * Html tags module.
+ * Processes HTML tags and comments in input text.
  */
 final class HtmlModule extends Texy\Module
 {
@@ -48,6 +48,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <!-- comment -->.
+	 * @param  string[]  $matches
 	 */
 	public function patternComment(Texy\LineParser $parser, array $matches): HtmlElement|string|null
 	{
@@ -58,6 +59,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <tag attr="...">.
+	 * @param  string[]  $matches
 	 */
 	public function patternTag(Texy\LineParser $parser, array $matches): HtmlElement|string|null
 	{
@@ -172,6 +174,10 @@ final class HtmlModule extends Texy\Module
 	}
 
 
+	/**
+	 * @param  array<string, array<string|int|bool>|string|int|bool|null>  $attrs
+	 * @param  bool|string[]  $allowedAttrs
+	 */
 	private function applyAttrs(&$attrs, $allowedAttrs): void
 	{
 		if (!$allowedAttrs) {
@@ -189,6 +195,10 @@ final class HtmlModule extends Texy\Module
 	}
 
 
+	/**
+	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
+	 * @param  array<string, int>|bool  $allowedClasses
+	 */
 	private function applyClasses(&$attrs, $allowedClasses): void
 	{
 		if (!isset($attrs['class'])) {
@@ -215,6 +225,10 @@ final class HtmlModule extends Texy\Module
 	}
 
 
+	/**
+	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
+	 * @param  array<string, int>|bool  $allowedStyles
+	 */
 	private function applyStyles(&$attrs, $allowedStyles): void
 	{
 		if (!isset($attrs['style'])) {
@@ -299,6 +313,7 @@ final class HtmlModule extends Texy\Module
 	}
 
 
+	/** @return array<string, string|bool> */
 	private function parseAttributes(string $attrs): array
 	{
 		$matches = $res = [];

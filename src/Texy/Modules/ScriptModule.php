@@ -14,7 +14,7 @@ use function preg_quote, preg_split, trim;
 
 
 /**
- * Scripts module.
+ * Processes {{macro}} script commands.
  */
 final class ScriptModule extends Texy\Module
 {
@@ -38,6 +38,7 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Callback for: {{...}}.
+	 * @param  string[]  $matches
 	 */
 	public function pattern(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
@@ -66,6 +67,7 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Finish invocation.
+	 * @param ?list<string>  $args
 	 */
 	private function solve(
 		Texy\HandlerInvocation $invocation,

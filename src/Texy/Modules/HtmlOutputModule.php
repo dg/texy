@@ -16,7 +16,7 @@ use function array_intersect, array_keys, array_unshift, max, reset, rtrim, str_
 
 
 /**
- * HTML output
+ * Formats and validates HTML output (well-forming, indentation, line wrapping).
  */
 final class HtmlOutputModule extends Texy\Module
 {
@@ -38,7 +38,7 @@ final class HtmlOutputModule extends Texy\Module
 	/** @var array<string, int> */
 	private array $tagUsed = [];
 
-	/** @var array<int, array{tag: string, open: string, close: string, dtdContent: array<string, int>, indent: int}> */
+	/** @var array<int, array{tag: string, open: ?string, close: ?string, dtdContent: array<string, int>, indent: int}> */
 	private array $tagStack = [];
 
 	/** @var array<string, int>  content DTD used, when context is not defined */
@@ -103,6 +103,7 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: <tag> | </tag> | ....
+	 * @param  string[]  $matches
 	 */
 	private function cb(array $matches): string
 	{
@@ -290,6 +291,7 @@ final class HtmlOutputModule extends Texy\Module
 	}
 
 
+	/** @param  array<string, int>  $dtdContent */
 	private function closeOptionalTags(string $tag, array &$dtdContent): string
 	{
 		$s = '';
@@ -327,6 +329,7 @@ final class HtmlOutputModule extends Texy\Module
 
 	/**
 	 * Callback function: wrap lines.
+	 * @param  string[]  $m
 	 */
 	private function wrap(array $m): string
 	{
