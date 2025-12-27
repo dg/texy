@@ -133,7 +133,7 @@ final class HtmlModule extends Texy\Module
 			}
 		} else { // allowedTags === Texy\Texy::ALL
 			if ($forceEmpty) {
-				$el->setName($name, true);
+				$el->setName($name, empty: true);
 			}
 		}
 

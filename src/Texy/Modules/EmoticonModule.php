@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use function getimagesize, implode, is_array, is_file, krsort, preg_quote, rtrim, str_contains, strlen, strncmp;
+use function getimagesize, implode, is_array, is_file, krsort, preg_quote, rtrim, str_contains;
 
 
 /**
@@ -82,7 +82,7 @@ final class EmoticonModule extends Texy\Module
 
 		// find the closest match
 		foreach ($this->icons as $emoticon => $foo) {
-			if (strncmp($match, $emoticon, strlen($emoticon)) === 0) {
+			if (str_starts_with($match, $emoticon)) {
 				return $this->texy->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
 			}
 		}
