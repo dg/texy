@@ -270,7 +270,7 @@ final class BlockModule extends Texy\Module
 
 	private function blockDiv(string $s, Texy\Texy $texy, Texy\Modifier $mod, Texy\BlockParser $parser)
 	{
-		$s = Helpers::outdent($s, true);
+		$s = Helpers::outdent($s, firstLine: true);
 		if ($s === '') {
 			return "\n";
 		}

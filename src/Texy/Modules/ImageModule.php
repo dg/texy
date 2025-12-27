@@ -85,7 +85,7 @@ final class ImageModule extends Texy\Module
 		// [2] => urls
 		// [3] => .(title)[class]{style}<>
 
-		$image = $this->factoryImage($mURLs, $mMod, false);
+		$image = $this->factoryImage($mURLs, $mMod, tryRef: false);
 		$this->addReference($mRef, $image);
 		return '';
 	}

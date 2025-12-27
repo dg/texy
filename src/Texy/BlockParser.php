@@ -7,7 +7,8 @@
 
 namespace Texy;
 
-use function is_string, max, strlen, substr, trim, usort;
+use function strlen;
+
 
 
 /**
@@ -121,12 +122,10 @@ class BlockParser extends Parser
 				$this->offset = $mOffset; // turn offset back
 				continue;
 
-			} elseif ($res instanceof HtmlElement) {
-				$this->element->insert(null, $res);
-
-			} elseif (is_string($res)) {
+			} else {
 				$this->element->insert(null, $res);
 			}
+
 		} while (1);
 	}
 

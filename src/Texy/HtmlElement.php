@@ -264,7 +264,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 */
 	final public function offsetSet($index, $child): void
 	{
-		$this->insert($index, $child, true);
+		$this->insert($index, $child, replace: true);
 	}
 
 

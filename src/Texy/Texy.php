@@ -353,7 +353,7 @@ class Texy
 	 */
 	public function processLine(string $text): string
 	{
-		return $this->process($text, true);
+		return $this->process($text, singleLine: true);
 	}
 
 
@@ -366,7 +366,7 @@ class Texy
 		$text = Helpers::normalize($text);
 
 		$this->typographyModule->beforeParse($this, $text);
-		$text = $this->typographyModule->postLine($text, true);
+		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
 
 		if (!empty($this->allowed['longwords'])) {
 			$text = $this->longWordsModule->postLine($text);
@@ -417,7 +417,7 @@ class Texy
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 
 		// replace protected marks
-		$s = $this->unProtect($s);
+		$s = $this->unprotect($s);
 
 		// wellform and reformat HTML
 		$this->invokeHandlers('postProcess', [$this, &$s]);
@@ -525,7 +525,7 @@ class Texy
 	}
 
 
-	final public function unProtect(string $html): string
+	final public function unprotect(string $html): string
 	{
 		return strtr($html, $this->marks);
 	}
