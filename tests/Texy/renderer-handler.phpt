@@ -45,7 +45,6 @@ test('handler can access Texy configuration', function () {
 	$texy = new Texy;
 	$texy->headingModule->top = 3;
 	$ast = $texy->parse("Title\n=====");
-	$texy->headingModule->processHeadings($ast);
 
 	// Custom handler that modifies result of default handler
 	$texy->htmlOutput->registerHandler(
