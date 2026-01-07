@@ -9,16 +9,31 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\{Helpers, Modifier, Node, NodeTraverser, Patterns, Range, Regexp, Syntax, TraverseAction};
-use Texy\Nodes\{ContentNode, DocumentNode, ImageDefinitionNode, ImageNode, LinkNode};
+use Texy\Nodes\{ContentNode, DocumentNode, FigureNode, ImageDefinitionNode, ImageNode, LinkNode};
 use Texy\Parsing\ParseContext;
 use function count, in_array, is_array, strlen;
 
 
 /**
- * Processes image syntax.
+ * Processes image and figure (image with caption) syntax.
  */
 final class ImageModule extends Texy\Module
 {
+	/** the [* url .(title) alignment ] part, shared by the image and figure syntaxes */
+	private const ImagePattern = '
+			\[\* \ *+                         # opening bracket with asterisk
+			([^\n]{1,1000})                   # URLs (1)
+			' . Patterns::Modifier . '?       # modifier (2)
+			\ *+
+			( \* | (?<! < ) > | < )           # alignment (3)
+			]';
+
+	/** the optional :LINK (or :: self link) suffix */
+	private const LinkPattern = '
+			(?:
+				:(' . Patterns::LinkUrl . ' | : ) # link or just colon (4)
+			)??';
+
 	/** @var array<string, ImageDefinitionNode> collected image definitions */
 	private array $definitions = [];
 
@@ -35,16 +50,7 @@ final class ImageModule extends Texy\Module
 		// [*image*]:LINK
 		$registry->addInline(
 			Syntax::Image,
-			'~
-				\[\* \ *+                         # opening bracket with asterisk
-				([^\n]{1,1000})                   # URLs (1)
-				' . Patterns::Modifier . '?       # modifier (2)
-				\ *+
-				( \* | (?<! < ) > | < )           # alignment (3)
-				]
-				(?:
-					:(' . Patterns::LinkUrl . ' | : ) # link or just colon (4)
-				)??
+			'~' . self::ImagePattern . self::LinkPattern . '
 			~Ux',
 			$this->parseImage(...),
 		);
@@ -63,6 +69,20 @@ final class ImageModule extends Texy\Module
 				\s*
 			$~mUx',
 			$this->parseDefinition(...),
+		);
+
+		// [*image*]:link *** caption
+		$registry->addBlock(
+			Syntax::Figure,
+			'~^
+				(?>' . self::ImagePattern . ')' . self::LinkPattern . '
+				(?:
+					\ ++ \*\*\* \ ++              # separator
+					(.{0,2000})                   # caption (5)
+				)?
+				' . Patterns::ModifierHAlign . '?     # modifier (6)
+			$~mUx',
+			$this->parseFigure(...),
 		);
 	}
 
@@ -112,6 +132,50 @@ final class ImageModule extends Texy\Module
 				Syntax::Image,
 			)
 			: $imageNode;
+	}
+
+
+	/**
+	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
+	 * @param  array{string, string, ?string, string, ?string, ?string, ?string}  $matches
+	 * @param  array{int, int, ?int, int, ?int, ?int, ?int}  $offsets
+	 */
+	public function parseFigure(ParseContext $context, array $matches, array $offsets): ?FigureNode
+	{
+		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
+		$imageNode = $this->createImage($mURLs, $mImgMod . $mAlign, $offsets);
+		if ($imageNode === null) {
+			return null;
+		}
+
+		// the float is written in the brackets of the image, but it is the figure that floats
+		$float = $imageNode->float;
+		$imageNode->float = null;
+
+		$image = $mLink
+			? $this->wrapInLink(
+				$imageNode,
+				$mLink,
+				$offsets[0],
+				$offsets[4] ?? throw new \LogicException('Link without group 4.'),
+				Syntax::Figure,
+			)
+			: $imageNode;
+
+		// Parse caption as inline content
+		$caption = null;
+		$mContent = trim($mContent ?? '');
+		if ($mContent !== '') {
+			$caption = $context->parseInline($mContent, $offsets[5] ?? $offsets[0]);
+		}
+
+		return new FigureNode(
+			$image,
+			$caption,
+			$float,
+			Modifier::parse($mMod, $offsets[6] ?? null),
+			new Range($offsets[0], strlen($matches[0])),
+		);
 	}
 
 

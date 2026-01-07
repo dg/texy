@@ -93,7 +93,6 @@ class Texy
 			// block
 			new Modules\ParagraphModule($this->config, $this->htmlPolicy),
 			new Modules\BlockModule,
-			new Modules\FigureModule($image),
 			new Modules\HorizontalRuleModule,
 			new Modules\BlockQuoteModule,
 			new Modules\TableModule,
