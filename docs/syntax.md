@@ -137,7 +137,7 @@ Our logo [* company-logo *] symbolizes our vision.
 
 ## Figures (image with caption)
 
-*(`figure` – FigureModule)*
+*(`figure` – ImageModule)*
 
 An image followed by ` *** ` and caption text on the same block:
 
@@ -424,7 +424,7 @@ Every syntax lists its ID (the key in `$texy->allowedSyntax`), its default state
 | `block/pre` | ✅ on | subtype `/--pre` | DelimitedBlockModule |
 | `block/default` | ✅ on | plain `/--` block | DelimitedBlockModule |
 | `fenced-code` | ✅ on | ```` ```language ```` | FencedCodeModule |
-| `figure` | ✅ on | `[* img.jpg *] *** caption` | FigureModule |
+| `figure` | ✅ on | `[* img.jpg *] *** caption` | ImageModule |
 | `horizline` | ✅ on | `---` or `***` on its own line | HorizontalRuleModule |
 | `blockquote` | ✅ on | `> quoted text` | BlockQuoteModule |
 | `table` | ✅ on | `| cell | cell |` | TableModule |

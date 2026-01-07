@@ -23,7 +23,7 @@ class LinkNode extends InlineNode implements HasModifier
 		public ContentNode $content = new ContentNode,
 		public ?Texy\Modifier $modifier = null,
 		public ?Range $range = null,
-		/** Link targets an image URL (relative to Html\Config::$imageBaseUrl instead of $linkBaseUrl) */
+		/** the target is an image, [*img*] or the image itself: a reference names an image definition, the URL is relative to images */
 		public bool $isImageLink = false,
 		/** Original reference name for links written as [ref]; survives resolution */
 		public ?string $ref = null,
