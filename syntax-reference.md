@@ -16,7 +16,7 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::BlockComment` | BlockModule | `CommentNode` | `/--comment` | (nothing) |
 | `Syntax::BlockDiv` | BlockModule | `DivNode` | `/--div` | `<div>` |
 | `Syntax::Blockquote` | BlockQuoteModule | `BlockQuoteNode` | `> quote` | `<blockquote>` |
-| `Syntax::Figure` | FigureModule | `FigureNode` | `[*img*] *** caption` | `<div class="figure">` |
+| `Syntax::Figure` | ImageModule | `FigureNode` | `[*img*] *** caption` | `<div class="figure">` |
 | `Syntax::HeadingUnderlined` | HeadingModule | `HeadingNode` | `Heading`<br>`#######` | `<h1>`–`<h6>` |
 | `Syntax::HeadingSurrounded` | HeadingModule | `HeadingNode` | `### Heading` | `<h1>`–`<h6>` |
 | `Syntax::HorizontalRule` | HorizontalRuleModule | `HorizontalRuleNode` | `---` or `***` | `<hr>` |
