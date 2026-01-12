@@ -46,22 +46,22 @@ $mod->title;    // ?string – title / alt text (unescaped)
 
 Note that `$classes` is an associative array with the class names as *keys* (`isset($mod->classes['gallery'])`), not a plain list.
 
-## Applying to elements: decorate()
+## Applying to elements: ElementDecorator
 
-`Modifier::decorate(Texy $texy, HtmlElement $el): HtmlElement` applies the modifier to an element, respecting the Texy configuration. In order:
+The modifier is a **semantic part of the AST node** (`$node->modifier`); it takes effect only in the render phase. `Output\Html\ElementDecorator` (invoked through `Renderer::decorateElement($modifier, $el)`) applies it to the rendered `Element`, respecting configuration. In order:
 
-1. **Attributes** (`$mod->attrs`) are copied only if allowed: with `$texy->allowedTags === Texy::ALL` all of them; with an array configuration only those listed for the element's tag (or all if the tag maps to `Texy::ALL`).
-2. **Title** is always applied if set; the text first passes through `TypographyModule::postLine()`, so quotes and dashes in titles are typographically corrected.
+1. **Attributes** (`$mod->attrs`) are copied only if allowed: with `$htmlPolicy->allowedTags === Texy::ALL` all of them; with an array configuration only those listed for the element's tag (or all if the tag maps to `Texy::ALL`).
+2. **Title** is applied if set; the text is typographically corrected (by the AST typography pass, or on the fly when rendering a hand-built tree).
 3. **Classes and ID** are filtered by `$texy->htmlPolicy->allowedClasses`: with `ALL` everything is applied; with a whitelist, only listed classes, and the ID only when the whitelist contains `'#' . $id`.
 4. **Styles** are filtered analogously by `$texy->htmlPolicy->allowedStyles`.
-5. **Alignment** is applied either as a CSS class (when `$texy->alignClasses` defines a class for the direction) or as an inline `text-align` / `vertical-align` style.
+5. **Alignment** is applied either as a CSS class (when `$htmlOutput->alignClasses` defines a class for the direction) or as an inline `text-align` / `vertical-align` style.
 
-The result: the element carries everything from the modifier that the current configuration permits – the basis of safe processing of untrusted input (see the configuration reference (user manual)).
+The result: the element carries everything from the modifier that the current configuration permits – the basis of safe processing of untrusted input.
 
 ## Propagation through the system
 
-1. The **syntax handler** extracts the modifier text from the regex match and constructs a `Modifier`.
-2. The `Modifier` object travels as a parameter into **element handlers** – handlers receive the parsed object, not raw text, and may adjust it (add classes, change styles) before application.
-3. The element handler creates the `HtmlElement` and calls `$mod->decorate($texy, $el)` – this is the moment the modifier takes effect, subject to configuration.
+1. The **syntax handler** extracts the modifier text from the regex match and stores `Modifier::parse($text)` on the AST node.
+2. The modifier travels with the node; transform passes or custom code may adjust it (add classes, change styles) before rendering. Renderers must not mutate it – when a renderer needs to consume part of a modifier (e.g. a figure taking over the image's alignment), it works on a clone.
+3. The node's renderer creates the `Element` and calls `decorateElement()` – this is the moment the modifier takes effect, subject to configuration.
 
 Some modules combine several modifiers. `TableModule` parses modifiers at the table, row, column, and cell level; a cell's effective modifier is a clone of its column modifier with the cell's own modifier applied on top, so column-wide defaults can be overridden per cell.
