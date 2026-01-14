@@ -49,11 +49,16 @@ class Configurator
 
 	/**
 	 * Configure Texy! for web comments and other usages, where input text may insert attacker.
+	 * Images and figures are disabled unless $images allows them, the definitions of images stay disabled.
 	 */
-	public static function safeMode(Texy $texy): void
+	public static function safeMode(Texy $texy, bool $images = false): void
 	{
 		self::restrictPolicies($texy->htmlPolicy, $texy->htmlOutput);
-		$texy->allowedSyntax[Syntax::Image] = false; // disable images
+		if ($images) {
+			$texy->allowedSyntax[Syntax::ImageDefinition] = false;
+		} else {
+			self::disableImages($texy);
+		}
 		$texy->allowedSyntax[Syntax::LinkDefinition] = false; // disable [ref]: URL reference definitions
 		$texy->allowedSyntax[Syntax::HtmlComment] = false; // disable HTML comments
 	}
