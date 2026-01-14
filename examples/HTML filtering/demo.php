@@ -8,7 +8,7 @@
  *
  * WHAT YOU'LL LEARN:
  * - Different security levels from permissive to strict
- * - safeMode() - the recommended setting for user-submitted content
+ * - safeMode() - the recommended setting for user-submitted content, with or without images
  * - How to disable all links
  * - How to create a custom whitelist of allowed tags
  *
@@ -73,6 +73,13 @@ show('allowedTags = true - enables all tags', fn(Texy\Texy $texy) => $texy->html
 // Removes images, scripts, styles, and dangerous attributes.
 // ============================================================
 show('safeMode() - enables only some "safe" tags', fn(Texy\Texy $texy) => Texy\Configurator::safeMode($texy));
+
+
+// ============================================================
+// SAFE MODE WITH IMAGES
+// The same safe tags, but users may insert images and figures.
+// ============================================================
+show('safeMode(images: true) - safe tags and images', fn(Texy\Texy $texy) => Texy\Configurator::safeMode($texy, images: true));
 
 
 // ============================================================
