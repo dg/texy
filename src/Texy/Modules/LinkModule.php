@@ -140,6 +140,7 @@ final class LinkModule extends Texy\Module
 
 		if ($link->label != '') { // null or ''
 			// prevent circular references
+			assert($link->name !== null);
 			if (isset(self::$livelock[$link->name])) {
 				$content = $link->label;
 			} else {
@@ -332,6 +333,10 @@ final class LinkModule extends Texy\Module
 	 */
 	private function checkLink(Link $link): void
 	{
+		if ($link->URL === null) {
+			return;
+		}
+
 		// remove soft hyphens; if not removed by Texy\Texy::process()
 		$link->URL = str_replace("\u{AD}", '', $link->URL);
 

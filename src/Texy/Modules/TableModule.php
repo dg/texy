@@ -267,7 +267,9 @@ final class TableModule extends Texy\Module
 	private function finishPart(HtmlElement $elPart): void
 	{
 		foreach ($elPart->getChildren() as $elRow) {
+			assert($elRow instanceof HtmlElement);
 			foreach ($elRow->getChildren() as $elCell) {
+				assert($elCell instanceof TableCellElement);
 				if ($elCell->colSpan > 1) {
 					$elCell->attrs['colspan'] = $elCell->colSpan;
 				}

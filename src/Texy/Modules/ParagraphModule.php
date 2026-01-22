@@ -33,7 +33,7 @@ final class ParagraphModule extends Texy\Module
 			? preg_split('#(\n(?!\ )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY)
 			: preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
 
-		foreach ($parts as $s) {
+		foreach ($parts ?: [] as $s) {
 			$s = trim($s);
 			if ($s === '') {
 				continue;
@@ -80,7 +80,8 @@ final class ParagraphModule extends Texy\Module
 
 		$el = new Texy\HtmlElement('p');
 		$el->parseLine($texy, $content);
-		$content = $el->getText(); // string
+		$content = $el->getText();
+		assert($content !== null);
 
 		// check content type
 		// block contains block tag

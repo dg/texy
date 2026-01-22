@@ -1,5 +1,13 @@
 parameters:
-	level: 5
+	level: 7
 
 	paths:
 		- src
+
+	excludePaths:
+		- src/Texy.php  # compatibility file with if (false) block
+
+	checkMissingCallableSignature: true
+
+includes:
+	- phpstan-baseline.neon

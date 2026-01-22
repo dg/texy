@@ -123,20 +123,21 @@ class LineParser extends Parser
 					unset($names[$index]);
 					continue;
 
-				} elseif ($matches[$name] = Regexp::match(
+				} elseif ($m = Regexp::match(
 					$text,
 					$this->patterns[$name]['pattern'],
 					Regexp::OFFSET_CAPTURE,
 					$offset + $delta,
 				)) {
-					$m = &$matches[$name];
+					/** @var array<int|string, array{string, int}> $m */
 					if (!strlen($m[0][0])) {
 						continue;
 					}
 
 					$offsets[$name] = $m[0][1];
+					$matches[$name] = [];
 					foreach ($m as $keyx => $value) {
-						$m[$keyx] = $value[0];
+						$matches[$name][$keyx] = $value[0];
 					}
 				} else {
 					// try next time?

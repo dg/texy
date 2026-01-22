@@ -113,6 +113,7 @@ final class ListModule extends Texy\Module
 				break;
 			}
 		}
+		assert($bullet !== null);
 
 		$mod = new Modifier($mMod);
 		$mod->decorate($this->texy, $el);
@@ -161,6 +162,7 @@ final class ListModule extends Texy\Module
 				break;
 			}
 		}
+		assert($bullet !== null);
 
 		$el = new HtmlElement('dl');
 		$mod = new Modifier($mMod);
