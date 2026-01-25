@@ -28,7 +28,7 @@ class TexyNode extends StatementNode
 
 
 	/** @return \Generator<int, ?array, array{AreaNode, ?Tag}, static> */
-	public static function create(Tag $tag, TemplateParser $parser, callable $processor): \Generator
+	public static function create(Tag $tag, TemplateParser $parser, \Closure $processor): \Generator
 	{
 		if ($tag->isNAttribute()) {
 			throw new \LogicException('The n:texy is not supported');

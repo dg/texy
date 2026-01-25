@@ -15,7 +15,7 @@ use function array_keys, strlen, substr_replace;
  */
 class LineParser extends Parser
 {
-	/** @var array<string, array{handler: callable, pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure, pattern: string, again: ?string}> */
 	public array $patterns;
 	public bool $again;
 

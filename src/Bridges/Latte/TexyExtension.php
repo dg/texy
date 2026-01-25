@@ -21,17 +21,14 @@ use Texy\Texy;
  */
 class TexyExtension extends Latte\Extension
 {
-	private $processor;
+	private \Closure $processor;
 
 
 	public function __construct(Texy|callable $texy)
 	{
 		$this->processor = $texy instanceof Texy
-			? function (string $text) use ($texy): string {
-				$text = Helpers::outdent(str_replace("\t", '    ', $text));
-				return $texy->process($text);
-			}
-		: $texy;
+			? fn(string $text): string => $texy->process(Helpers::outdent(str_replace("\t", '    ', $text)))
+			: $texy(...);
 	}
 
 

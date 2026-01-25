@@ -64,10 +64,10 @@ class Regexp
 	public static function replace(
 		string $subject,
 		string|array $pattern,
-		string|callable|null $replacement = null,
+		string|\Closure|null $replacement = null,
 	): string
 	{
-		if (is_object($replacement) || is_array($replacement)) {
+		if ($replacement instanceof \Closure) {
 			$res = preg_replace_callback($pattern, $replacement, $subject);
 			if ($res === null && preg_last_error()) { // run-time error
 				trigger_error(preg_last_error_msg(), E_USER_WARNING);

@@ -114,23 +114,23 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: callable, pattern: string, again: ?string}>
+	 * @var array<string, array{handler: \Closure, pattern: string, again: ?string}>
 	 */
 	private array $linePatterns = [];
 
-	/** @var array<string, array{handler: callable, pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure, pattern: string, again: ?string}> */
 	private array $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: callable, pattern: string}>
+	 * @var array<string, array{handler: \Closure, pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
-	/** @var array<string, array{handler: callable, pattern: string}> */
+	/** @var array<string, array{handler: \Closure, pattern: string}> */
 	private array $_blockPatterns;
 
-	/** @var array<string, callable> */
+	/** @var array<string, \Closure> */
 	private array $postHandlers = [];
 
 	/** DOM structure for parsed text */
@@ -147,7 +147,7 @@ class Texy
 
 	private bool $processing = false;
 
-	/** @var array<string, array<int, callable>> of events and registered handlers */
+	/** @var array<string, array<int, \Closure>> of events and registered handlers */
 	private array $handlers = [];
 
 	/**
@@ -238,7 +238,7 @@ class Texy
 		}
 
 		$this->linePatterns[$name] = [
-			'handler' => $handler,
+			'handler' => $handler(...),
 			'pattern' => $pattern,
 			'again' => $againTest,
 		];
@@ -253,7 +253,7 @@ class Texy
 		}
 
 		$this->blockPatterns[$name] = [
-			'handler' => $handler,
+			'handler' => $handler(...),
 			'pattern' => $pattern . 'm', // force multiline
 		];
 	}
@@ -265,7 +265,7 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->postHandlers[$name] = $handler;
+		$this->postHandlers[$name] = $handler(...);
 	}
 
 
@@ -460,7 +460,7 @@ class Texy
 	 */
 	final public function addHandler(string $event, callable $callback): void
 	{
-		$this->handlers[$event][] = $callback;
+		$this->handlers[$event][] = $callback(...);
 	}
 
 
@@ -531,14 +531,14 @@ class Texy
 	}
 
 
-	/** @return array<string, array{handler: callable, pattern: string, again: ?string}> */
+	/** @return array<string, array{handler: \Closure, pattern: string, again: ?string}> */
 	final public function getLinePatterns(): array
 	{
 		return $this->_linePatterns;
 	}
 
 
-	/** @return array<string, array{handler: callable, pattern: string}> */
+	/** @return array<string, array{handler: \Closure, pattern: string}> */
 	final public function getBlockPatterns(): array
 	{
 		return $this->_blockPatterns;

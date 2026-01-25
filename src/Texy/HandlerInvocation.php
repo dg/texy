@@ -22,7 +22,7 @@ final class HandlerInvocation
 
 
 	public function __construct(
-		/** @var array<int, callable> */
+		/** @var array<int, \Closure> */
 		private array $handlers,
 		private readonly Parser $parser,
 		array $args,
@@ -48,7 +48,7 @@ final class HandlerInvocation
 		$this->pos--;
 		$res = $this->handlers[$this->pos](...$this->args);
 		if ($res !== null && !is_string($res) && !$res instanceof HtmlElement) {
-			throw new \UnexpectedValueException("Invalid value returned from handler '" . get_class($this->handlers[$this->pos][0]) . "'.");
+			throw new \UnexpectedValueException('Invalid value returned from handler.');
 		}
 
 		return $res;

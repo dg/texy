@@ -16,7 +16,7 @@ use function strlen;
  */
 class BlockParser extends Parser
 {
-	/** @var array<string, array{handler: callable, pattern: string}> */
+	/** @var array<string, array{handler: \Closure, pattern: string}> */
 	public array $patterns;
 	private string $text;
 	private int $offset;
