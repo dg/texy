@@ -23,17 +23,14 @@ use Texy\Texy;
  */
 class TexyExtension extends Latte\Extension
 {
-	private $processor;
+	private \Closure $processor;
 
 
 	public function __construct(Texy|callable $texy)
 	{
 		$this->processor = $texy instanceof Texy
-			? function (string $text) use ($texy): string {
-				$text = Helpers::outdent(str_replace("\t", '    ', $text));
-				return $texy->process($text);
-			}
-		: $texy;
+			? fn(string $text): string => $texy->process(Helpers::outdent(str_replace("\t", '    ', $text)))
+			: $texy(...);
 	}
 
 
@@ -61,7 +58,7 @@ class TexyExtension extends Latte\Extension
 	}
 
 
-	public function texyFilter(FilterInfo $info, string $text, ...$args): string
+	public function texyFilter(FilterInfo $info, string $text, mixed ...$args): string
 	{
 		$info->contentType ??= ContentType::Html;
 		return ($this->processor)($text, ...$args);
