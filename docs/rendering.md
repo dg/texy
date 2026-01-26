@@ -5,14 +5,16 @@ Everything under `src/Texy/Output/` turns a finished AST into a string. The laye
 ```
 Output/
 ├── NodeRenderer            shared dispatch: node class → handler, chainable
-└── Html/
-    ├── Config              all HTML output options ($texy->htmlOutput)
-    ├── Element, Raw        the rendered tree the renderers build
-    ├── Renderer            node renderers, entry point of the render phase
-    ├── ElementDecorator    Modifier → attributes/classes/styles, filtered by HtmlPolicy
-    ├── ImageDimensions     file-system probe for image sizes (the only I/O)
-    ├── Schema              declarative HTML vocabulary (content model, categories)
-    └── WellFormer          call-driven well-forming + indentation + line wrapping
+├── Html/
+│   ├── Config              all HTML output options ($texy->htmlOutput)
+│   ├── Element, Raw        the rendered tree the renderers build
+│   ├── Renderer            node renderers, entry point of the render phase
+│   ├── ElementDecorator    Modifier → attributes/classes/styles, filtered by HtmlPolicy
+│   ├── ImageDimensions     file-system probe for image sizes (the only I/O)
+│   ├── Schema              declarative HTML vocabulary (content model, categories)
+│   └── WellFormer          call-driven well-forming + indentation + line wrapping
+└── Text/
+    └── Renderer            plain-text rendition (Texy::toText())
 ```
 
 ## NodeRenderer – dispatch and extensibility
@@ -53,6 +55,10 @@ Elements built from Texy syntax are correct by construction; invalid structure c
 - **`WellFormer`** is the stack automaton that enforces pairing and the content model while producing the output string: auto-closes optional-end and crossed inline tags, re-opens inline tags crossed by a close, suppresses tags not allowed in context (their children survive and validate against the parent's model), drops stray closing tags, treats unknown tags (custom elements) as transparent and always allowed. It also does the formatting: whitespace shrinking outside `preserveSpaces` contexts, block indentation, and line wrapping. Its configuration is read from the `Config` object it is constructed with.
 
 The content model lives in **`Schema`**, the declarative per-element vocabulary: explicit child lists for tables/lists/select/media, transparent elements (`a`, `ins`, `del`, `figure`…), text-only (`script`, `style`, `textarea`), phrasing-only contexts (`p`, headings, inline elements), flow content elsewhere. Deep prohibitions block `<a>`-in-`<a>`, `<button>`, `<form>` nesting at any depth. `Schema::inlineElements()` doubles as the phrasing catalogue (value `1` = replaced element), used by paragraph analysis and the typography pass alike.
+
+## The Text Renderer
+
+`Text\Renderer` renders a plain-text rendition: markup dropped, visible text and block structure kept, typography artifacts (non-breaking spaces, soft hyphens) normalized back. It needs no `Texy` instance at all – the test of the AST's semantic completeness. Because sanitization and typography already happened in the transform phase, safe mode and typographic corrections apply to its output as well.
 
 ## Deprecated: protection marks
 

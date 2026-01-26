@@ -24,7 +24,7 @@ $texy->htmlOutput->registerHandler(
 
 Registration validates the parameter: a nullable, union or untyped first parameter could never be dispatched to, so it is refused with an exception right away. Dispatch respects inheritance – a node subclass without its own renderer uses the renderer of its nearest ancestor, so `class MyImageNode extends ImageNode` renders like an image until you register a renderer for it.
 
-A node no renderer is found for at all **degrades to its content**: the wrapper disappears, the children render as usual. That is what keeps a document renderable in every format – you register a renderer for the format you care about.
+A node no renderer is found for at all **degrades to its content**: the wrapper disappears, the children render as usual. That is what keeps a document renderable in every format – you register a renderer for the format you care about, and `toText()` still works on the same tree instead of failing on a class it has never heard of.
 
 Handlers for one node class form a chain, executed **from the last registered to the first**; the generator's default renderer sits at the end. Your handler can:
 
