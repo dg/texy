@@ -56,6 +56,12 @@ test('a caption line alone is not a table', function () {
 });
 
 
+test('toText prints the caption above the rows', function () {
+	$texy = new Texy;
+	Assert::same("Caption\na\tb\n", $texy->toText("|## Caption\n| a | b\n"));
+});
+
+
 test('caption is part of the AST, so a traverser reaches it', function () {
 	$texy = new Texy;
 	$doc = $texy->parse("|## Caption\n| a | b\n");
