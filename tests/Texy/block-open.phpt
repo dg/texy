@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * Test: Open block
+ */
+
+declare(strict_types=1);
+
+use Tester\Assert;
+
+require __DIR__ . '/../bootstrap.php';
+
+
+test('open block syntax', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutputModule->lineWrap = 180;
+
+	Assert::matchFile(
+		__DIR__ . '/expected/block-open.html',
+		$texy->process(file_get_contents(__DIR__ . '/sources/block-open.texy')),
+	);
+});

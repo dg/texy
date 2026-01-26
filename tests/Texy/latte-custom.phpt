@@ -43,6 +43,7 @@ $template = <<<'XX'
 	XX;
 
 
+// Typography: Czech uses „..." and English uses "..."
 Assert::match(
 	<<<'XX'
 		<h1>default</h1>
