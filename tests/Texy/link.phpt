@@ -19,7 +19,7 @@ test('link forceNoFollow', function () {
 	$texy = new Texy\Texy;
 	$texy->linkModule->forceNoFollow = true;
 	Assert::match(
-		'<p><a href="https://example.com" rel="nofollow">https://example.com</a></p>
+		'<p><a href="https://example.com" rel="nofollow">example.com</a></p>
 ',
 		$texy->process('https://example.com'),
 	);
@@ -29,9 +29,7 @@ test('link forceNoFollow', function () {
 test('link forceNoFollow does not affect relative URLs', function () {
 	$texy = new Texy\Texy;
 	$texy->linkModule->forceNoFollow = true;
-	$link = new Texy\Link('/local/page');
-	$link->label = 'Local';
-	$texy->linkModule->addReference('test', $link);
+	$texy->linkModule->addDefinition('test', '/local/page', 'Local');
 	// Relative URL should not get nofollow
 	Assert::match(
 		'<p><a href="/local/page">Local</a></p>
@@ -50,7 +48,7 @@ test('url shortening', function () {
 	$texy->htmlOutputModule->lineWrap = 500; // disable line wrapping for this test
 	// Long path should be shortened (keeps last 12 chars of path)
 	Assert::match(
-		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/…me/page.html</a></p>
+		'<p><a href="https://example.com/very/long/path/to/some/page.html">example.com/…me/page.html</a></p>
 ',
 		$texy->process('https://example.com/very/long/path/to/some/page.html'),
 	);
@@ -73,7 +71,7 @@ test('url shortening short path', function () {
 	$texy = new Texy\Texy;
 	// Short path should not be shortened
 	Assert::match(
-		'<p><a href="https://example.com/page">https://example.com/page</a></p>
+		'<p><a href="https://example.com/page">example.com/page</a></p>
 ',
 		$texy->process('https://example.com/page'),
 	);
@@ -84,7 +82,7 @@ test('url shortening with query', function () {
 	$texy = new Texy\Texy;
 	// Long query should be shortened to ?…
 	Assert::match(
-		'<p><a href="https://example.com/?query=long">https://example.com/?…</a></p>
+		'<p><a href="https://example.com/?query=long">example.com/?…</a></p>
 ',
 		$texy->process('https://example.com/?query=long'),
 	);

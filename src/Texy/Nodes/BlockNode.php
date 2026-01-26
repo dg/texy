@@ -7,17 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Texy\Modules;
+namespace Texy\Nodes;
 
 use Texy;
 
 
 /**
- * Table cell TD / TH.
+ * Base class for block-level nodes.
  */
-class TableCellElement extends Texy\HtmlElement
+abstract class BlockNode extends Texy\Node
 {
-	public int $colSpan = 1;
-	public int $rowSpan = 1;
-	public ?string $text = null;
 }

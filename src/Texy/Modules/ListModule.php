@@ -11,11 +11,13 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\BlockParser;
-use Texy\HtmlElement;
 use Texy\Modifier;
+use Texy\Nodes;
+use Texy\Output\Html\Generator;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Regexp;
-use function implode, ord, strlen;
+use function count, implode, ord, strlen;
 
 
 /**
@@ -43,6 +45,10 @@ final class ListModule extends Texy\Module
 	) {
 		$texy->allowed['list'] = true;
 		$texy->allowed['list/definition'] = true;
+		$texy->htmlGenerator->registerHandler($this->solveList(...));
+		$texy->htmlGenerator->registerHandler($this->solveItem(...));
+		$texy->htmlGenerator->registerHandler($this->solveDefList(...));
+		$texy->htmlGenerator->registerHandler($this->solveDefItem(...));
 	}
 
 
@@ -88,87 +94,90 @@ final class ListModule extends Texy\Module
 	/**
 	 * Parses list.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseList(BlockParser $parser, array $matches): ?HtmlElement
+	public function parseList(BlockParser $parser, array $matches, string $name, array $offsets): ?Texy\Nodes\ListNode
 	{
 		[, $mMod, $mBullet] = $matches;
-		// [1] => .(title)[class]{style}<>
-		// [2] => bullet * + - 1) a) A) IV)
 
-		$el = new HtmlElement;
+		$ordered = false;
+		$bullet = null;
+		$min = 1;
+		$start = null;
 
-		$bullet = $min = null;
 		foreach ($this->bullets as $type => $desc) {
 			if (Regexp::match($mBullet, '~' . $desc[0] . '~A')) {
 				$bullet = $desc[3] ?? $desc[0];
 				$min = isset($desc[3]) ? 2 : 1;
-				$el->setName($desc[1] ? 'ol' : 'ul');
-				$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-				$el->attrs['style']['list-style-type'] = $desc[2];
-				if ($desc[1]) { // ol
+				$ordered = (bool) $desc[1];
+				if ($ordered) {
 					if ($type[0] === '1' && (int) $mBullet > 1) {
-						$el->attrs['start'] = (int) $mBullet;
+						$start = (int) $mBullet;
 					} elseif ($type[0] === 'a' && $mBullet[0] > 'a') {
-						$el->attrs['start'] = ord($mBullet[0]) - 96;
+						$start = ord($mBullet[0]) - 96;
 					} elseif ($type[0] === 'A' && $mBullet[0] > 'A') {
-						$el->attrs['start'] = ord($mBullet[0]) - 64;
+						$start = ord($mBullet[0]) - 64;
 					}
 				}
-
 				break;
 			}
 		}
-		assert($bullet !== null);
 
-		$mod = Modifier::parse($mMod);
-		$mod->decorate($this->texy, $el);
-
-		$parser->moveBackward(1);
-
-		while ($elItem = $this->parseItem($parser, $bullet, false, 'li')) {
-			$el->add($elItem);
-		}
-
-		if ($el->count() < $min) {
+		if ($bullet === null) {
 			return null;
 		}
 
-		// event listener
-		$this->texy->invokeHandlers('afterList', [$parser, $el, $mod]);
+		$parser->moveBackward(1);
 
-		return $el;
+		$items = [];
+		while ($item = $this->parseItem($parser, $bullet, false)) {
+			$items[] = $item;
+		}
+
+		if (count($items) < $min) {
+			return null;
+		}
+
+		return new Texy\Nodes\ListNode(
+			$items,
+			$ordered,
+			$start,
+			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
+		);
 	}
 
 
 	/**
 	 * Parses definition list.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseDefList(BlockParser $parser, array $matches): HtmlElement
+	public function parseDefList(
+		BlockParser $parser,
+		array $matches,
+		string $name,
+		array $offsets,
+	): ?Texy\Nodes\DefinitionListNode
 	{
 		[, $mMod, , , , $mBullet] = $matches;
-		// [1] => .(title)[class]{style}<>
-		// [2] => ...
-		// [3] => .(title)[class]{style}<>
-		// [4] => space
-		// [5] => - * +
-
-		$texy = $this->texy;
 
 		$bullet = null;
+
 		foreach ($this->bullets as $desc) {
 			if (Regexp::match($mBullet, '~' . $desc[0] . '~A')) {
 				$bullet = $desc[3] ?? $desc[0];
 				break;
 			}
 		}
-		assert($bullet !== null);
 
-		$el = new HtmlElement('dl');
-		$mod = Modifier::parse($mMod);
-		$mod->decorate($texy, $el);
+		if ($bullet === null) {
+			return null;
+		}
+
 		$parser->moveBackward(2);
 
+		$items = [];
 		$patternTerm = '~^
 			\n?
 			( \S .* )                       # term content
@@ -177,39 +186,35 @@ final class ListModule extends Texy\Module
 		$~mUA';
 
 		while (true) {
-			if ($elItem = $this->parseItem($parser, $bullet, true, 'dd')) {
-				$el->add($elItem);
+			if ($item = $this->parseItem($parser, $bullet, true)) {
+				$items[] = new Texy\Nodes\DefinitionItemNode($item->content, false, $item->modifier);
 				continue;
 			}
 
-			if ($parser->next($patternTerm, $matches)) {
-				[, $mContent, $mMod] = $matches;
-				// [1] => ...
-				// [2] => .(title)[class]{style}<>
-
-				$elItem = new HtmlElement('dt');
-				$modItem = Modifier::parse($mMod);
-				$modItem->decorate($texy, $elItem);
-
-				$elItem->parseLine($texy, $mContent);
-				$el->add($elItem);
+			$termMatches = null;
+			if ($parser->next($patternTerm, $termMatches)) {
+				[, $mContent, $mTermMod] = $termMatches;
+				$termMod = Modifier::parse($mTermMod);
+				$termContent = $this->texy->createInlineParser()->parse($mContent);
+				$items[] = new Texy\Nodes\DefinitionItemNode($termContent, true, $termMod);
 				continue;
 			}
 
 			break;
 		}
 
-		// event listener
-		$texy->invokeHandlers('afterDefinitionList', [$parser, $el, $mod]);
-
-		return $el;
+		return new Texy\Nodes\DefinitionListNode(
+			$items,
+			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
+		);
 	}
 
 
 	/**
 	 * Parses single list item.
 	 */
-	private function parseItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
+	private function parseItem(BlockParser $parser, string $bullet, bool $indented): ?Texy\Nodes\ListItemNode
 	{
 		$spacesBase = $indented ? ('[\ \t]{1,}') : '';
 		$patternItem = "~^
@@ -221,24 +226,15 @@ final class ListModule extends Texy\Module
 			" . Patterns::MODIFIER_H . '?
 		$~mAU';
 
-		// first line with bullet
 		$matches = null;
 		if (!$parser->next($patternItem, $matches)) {
 			return null;
 		}
 
 		[, $mIndent, $mContent, $mMod] = $matches;
-		// [1] => indent
-		// [2] => ...
-		// [3] => .(title)[class]{style}<>
-
-		$elItem = new HtmlElement($tag);
-		$mod = Modifier::parse($mMod);
-		$mod->decorate($this->texy, $elItem);
-
 		// next lines
 		$spaces = '';
-		$content = ' ' . $mContent; // trick
+		$content = ' ' . ($mContent ?? '');
 		while ($parser->next('~^
 			(\n*)
 			' . Regexp::quote($mIndent) . '
@@ -246,9 +242,6 @@ final class ListModule extends Texy\Module
 			(.*)
 		$~Am', $matches)) {
 			[, $mBlank, $mSpaces, $mContent] = $matches;
-			// [1] => blank line?
-			// [2] => spaces
-			// [3] => ...
 
 			if ($spaces === '') {
 				$spaces = strlen($mSpaces);
@@ -257,13 +250,84 @@ final class ListModule extends Texy\Module
 			$content .= "\n" . $mBlank . $mContent;
 		}
 
-		// parse content
-		$elItem->parseBlock($this->texy, $content, true);
+		// Parse content as blocks
+		return new Texy\Nodes\ListItemNode(
+			$this->texy->createBlockParser()->parse(trim($content)),
+			Modifier::parse($mMod),
+		);
+	}
 
-		if (isset($elItem[0]) && $elItem[0] instanceof HtmlElement) {
-			$elItem[0]->setName(null);
+
+	public function solveList(Nodes\ListNode $node, Generator $generator): string
+	{
+		$tag = $node->ordered ? 'ol' : 'ul';
+		$attrs = $generator->generateModifierAttrs($node->modifier);
+		if ($node->start !== null && $node->start > 1) {
+			$attrs .= ' start="' . $node->start . '"';
 		}
 
-		return $elItem;
+		$items = [];
+		foreach ($node->items as $item) {
+			$items[] = $this->solveItem($item, $generator);
+		}
+
+		$nl = $this->texy->protect("\n", $this->texy::CONTENT_BLOCK);
+		$open = $this->texy->protect("<{$tag}{$attrs}>", $this->texy::CONTENT_BLOCK);
+		$close = $this->texy->protect("</{$tag}>", $this->texy::CONTENT_BLOCK);
+		return $open . $nl . implode($nl, $items) . $nl . $close;
+	}
+
+
+	public function solveItem(Nodes\ListItemNode $node, Generator $generator): string
+	{
+		$attrs = $generator->generateModifierAttrs($node->modifier);
+
+		// If first child is a simple ParagraphNode (no modifier), unwrap it
+		$content = $node->content;
+		if (
+			count($content) === 1
+			&& $content[0] instanceof Nodes\ParagraphNode
+			&& $content[0]->modifier === null
+		) {
+			$innerContent = $generator->generateInlineContent($content[0]->content);
+		} else {
+			$innerContent = $generator->generateBlockContent($content);
+		}
+
+		$open = $this->texy->protect("<li{$attrs}>", $this->texy::CONTENT_BLOCK);
+		$close = $this->texy->protect('</li>', $this->texy::CONTENT_BLOCK);
+		return $open . $innerContent . $close;
+	}
+
+
+	public function solveDefList(Nodes\DefinitionListNode $node, Generator $generator): string
+	{
+		$attrs = $generator->generateModifierAttrs($node->modifier);
+
+		$items = [];
+		foreach ($node->items as $item) {
+			$items[] = $this->solveDefItem($item, $generator);
+		}
+
+		$open = $this->texy->protect("<dl{$attrs}>\n", $this->texy::CONTENT_BLOCK);
+		$close = $this->texy->protect("\n</dl>", $this->texy::CONTENT_BLOCK);
+		return $open . implode("\n", $items) . $close;
+	}
+
+
+	public function solveDefItem(Nodes\DefinitionItemNode $node, Generator $generator): string
+	{
+		$attrs = $generator->generateModifierAttrs($node->modifier);
+		if ($node->term) {
+			$content = $generator->generateInlineContent($node->content);
+			$open = $this->texy->protect("<dt{$attrs}>", $this->texy::CONTENT_BLOCK);
+			$close = $this->texy->protect('</dt>', $this->texy::CONTENT_BLOCK);
+			return $open . $content . $close;
+		} else {
+			$content = $generator->generateBlockContent($node->content);
+			$open = $this->texy->protect("<dd{$attrs}>", $this->texy::CONTENT_BLOCK);
+			$close = $this->texy->protect('</dd>', $this->texy::CONTENT_BLOCK);
+			return $open . $content . $close;
+		}
 	}
 }

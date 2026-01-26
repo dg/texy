@@ -10,6 +10,9 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes;
+use Texy\Output\Html\Generator;
+use Texy\Position;
 use function max, strlen;
 
 
@@ -21,6 +24,7 @@ final class BlockQuoteModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -42,19 +46,19 @@ final class BlockQuoteModule extends Texy\Module
 	/**
 	 * Parses blockquote.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): ?Texy\HtmlElement
+	public function parse(
+		Texy\BlockParser $parser,
+		array $matches,
+		string $name,
+		array $offsets,
+	): ?Texy\Nodes\BlockQuoteNode
 	{
 		[, $mMod, $mPrefix, $mContent] = $matches;
-		// [1] => .(title)[class]{style}<>
-		// [2] => spaces |
-		// [3] => ... / LINK
 
-		$texy = $this->texy;
-
-		$el = new Texy\HtmlElement('blockquote');
-		$mod = Texy\Modifier::parse($mMod);
-		$mod->decorate($texy, $el);
+		$startOffset = $offsets[0];
+		$totalLength = strlen($matches[0]);
 
 		$content = '';
 		$spaces = '';
@@ -68,19 +72,30 @@ final class BlockQuoteModule extends Texy\Module
 				break;
 			}
 
+			$totalLength += strlen($matches[0]) + 1; // +1 for \n
 			[, $mPrefix, $mContent] = $matches;
 		} while (true);
 
-		$el->parseBlock($texy, $content, $parser->isIndented());
-
-		// no content?
-		if (!$el->count()) {
+		// Parse nested content
+		$parsed = $this->texy->createBlockParser()->parse(trim($content));
+		if (!$parsed) {
 			return null;
 		}
 
-		// event listener
-		$texy->invokeHandlers('afterBlockquote', [$parser, $el, $mod]);
+		return new Texy\Nodes\BlockQuoteNode(
+			$parsed,
+			Texy\Modifier::parse($mMod),
+			new Position($startOffset, $totalLength),
+		);
+	}
 
-		return $el;
+
+	public function solve(Nodes\BlockQuoteNode $node, Generator $generator): string
+	{
+		$content = $generator->generateBlockContent($node->content);
+		$attrs = $generator->generateModifierAttrs($node->modifier);
+		$open = $this->texy->protect("<blockquote{$attrs}>\n", $this->texy::CONTENT_BLOCK);
+		$close = $this->texy->protect("\n</blockquote>", $this->texy::CONTENT_BLOCK);
+		return $open . $content . $close;
 	}
 }

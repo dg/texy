@@ -10,8 +10,16 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\BlockParser;
+use Texy\Helpers;
+use Texy\Modifier;
+use Texy\Nodes\FigureNode;
+use Texy\Nodes\ImageNode;
+use Texy\Output\Html\Generator;
 use Texy\Patterns;
-use function trim;
+use Texy\Position;
+use function htmlspecialchars, strlen, trim;
+use const ENT_HTML5, ENT_QUOTES;
 
 
 /**
@@ -40,7 +48,7 @@ final class FigureModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('figure', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -74,92 +82,98 @@ final class FigureModule extends Texy\Module
 	/**
 	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(BlockParser $parser, array $matches, string $name, array $offsets): ?FigureNode
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
-		// [1] => URLs
-		// [2] => .(title)[class]{style}<>
-		// [3] => * < >
-		// [4] => url | [ref] | [*image*]
-		// [5] => ...
-		// [6] => .(title)[class]{style}<>
 
 		$texy = $this->texy;
-		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
-		$mod = Texy\Modifier::parse($mMod);
-		$mContent = trim($mContent ?? '');
 
-		if ($mLink) {
-			if ($mLink === ':') {
-				$link = new Texy\Link($image->linkedURL ?? $image->URL);
-				$link->raw = ':';
-				$link->type = $link::IMAGE;
-			} else {
-				$link = $texy->linkModule->factoryLink($mLink, null, null);
-			}
-		} else {
-			$link = null;
-		}
+		// Parse image content
+		$parsed = $texy->imageModule->parseImageContent($mURLs);
+		$modifier = Modifier::parse($mImgMod . $mAlign);
 
-		return $texy->invokeAroundHandlers('figure', $parser, [$image, $link, $mContent, $mod]);
-	}
-
-
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		Texy\Image $image,
-		?Texy\Link $link,
-		string $content,
-		Texy\Modifier $mod,
-	): ?Texy\HtmlElement
-	{
-		$texy = $this->texy;
-
-		$hAlign = $image->modifier->hAlign;
-		$image->modifier->hAlign = null;
-
-		$elImg = $texy->imageModule->solve(null, $image, $link); // returns Texy\HtmlElement or null!
-		if (!$elImg) {
+		if ($parsed['url'] === null) {
 			return null;
 		}
 
-		$el = new Texy\HtmlElement($this->tagName);
-		if (!empty($image->width) && $this->widthDelta !== false) {
-			$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-			$el->attrs['style']['max-width'] = ($image->width + $this->widthDelta) . 'px';
+		// Determine link URL
+		$linkUrl = null;
+		if ($mLink) {
+			if ($mLink === ':') {
+				// Use image's linked URL or main URL
+				$linkUrl = $parsed['linkedUrl'] ?? $parsed['url'];
+			} else {
+				// Direct URL or reference like [ref] or [*img*]
+				$linkUrl = $mLink;
+			}
 		}
 
-		$mod->decorate($texy, $el);
-
-		$el->add($elImg);
-
-		if ($content !== '') {
-			$el[1] = new Texy\HtmlElement($this->tagName === 'figure' ? 'figcaption' : 'p');
-			$el[1]->parseLine($texy, $content);
+		// Parse caption as inline content
+		$caption = [];
+		$mContent = trim($mContent ?? '');
+		if ($mContent !== '') {
+			$captionOffset = $offsets[5] ?? $offsets[0];
+			$caption = $texy->createInlineParser()->parse($mContent, $captionOffset);
 		}
+
+		return new FigureNode(
+			new ImageNode($parsed['url'], $parsed['width'], $parsed['height'], $parsed['linkedUrl'], $modifier),
+			$caption,
+			Modifier::parse($mMod),
+			$linkUrl,
+			new Position($offsets[0], strlen($matches[0])),
+		);
+	}
+
+
+	public function solve(FigureNode $node, Generator $generator): string
+	{
+		$imgHtml = $this->texy->imageModule->buildImageTag($node->image, $generator, includeModifierAttrs: false);
+
+		// Wrap in link if present
+		if ($node->linkUrl) {
+			$linkUrl = Helpers::prependRoot($node->linkUrl, $this->texy->imageModule->linkedRoot);
+			$linkUrl = htmlspecialchars($linkUrl, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+			$imgHtml = "<a href=\"{$linkUrl}\">{$imgHtml}</a>";
+		}
+
+		// Build figure attrs with class and alignment
+		$mod = $node->modifier ? clone $node->modifier : new Modifier;
+		$hAlign = $node->image->modifier?->hAlign;
 
 		$class = $this->class;
 		if ($hAlign) {
 			$var = $hAlign . 'Class'; // leftClass, rightClass
 			if (!empty($this->$var)) {
 				$class = $this->$var;
-
-			} elseif (empty($texy->alignClasses[$hAlign])) {
-				$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-				$el->attrs['style']['float'] = $hAlign;
-
+			} elseif (empty($this->texy->alignClasses[$hAlign])) {
+				// float style fallback
+				$mod->styles['float'] = $hAlign;
 			} else {
-				$class .= '-' . $texy->alignClasses[$hAlign];
+				$class .= '-' . $this->texy->alignClasses[$hAlign];
 			}
 		}
 
-		$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-		$el->attrs['class'][] = $class;
+		if ($class) {
+			$mod->classes[$class] = true;
+		}
+		$figureAttrs = $generator->generateModifierAttrs($mod);
 
-		return $el;
+		$caption = $generator->generateInlineContent($node->caption);
+		$captionTag = $this->tagName === 'figure' ? 'figcaption' : 'p';
+
+		$open = $this->texy->protect("<{$this->tagName}{$figureAttrs}>", $this->texy::CONTENT_BLOCK);
+		$close = $this->texy->protect("</{$this->tagName}>", $this->texy::CONTENT_BLOCK);
+		$imgProtected = $this->texy->protect($imgHtml, $this->texy::CONTENT_REPLACED);
+
+		if ($caption !== '') {
+			$captionOpen = $this->texy->protect("<{$captionTag}>", $this->texy::CONTENT_BLOCK);
+			$captionClose = $this->texy->protect("</{$captionTag}>", $this->texy::CONTENT_BLOCK);
+			return $open . $imgProtected . "\n\t" . $captionOpen . $caption . $captionClose . $close;
+		}
+
+		return $open . $imgProtected . $close;
 	}
 }

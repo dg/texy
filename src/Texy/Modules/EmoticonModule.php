@@ -10,7 +10,11 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use function implode, krsort;
+use Texy\InlineParser;
+use Texy\Nodes\EmoticonNode;
+use Texy\Output\Html\Generator;
+use Texy\Position;
+use function strlen;
 
 
 /**
@@ -39,7 +43,7 @@ final class EmoticonModule extends Texy\Module
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed['emoticon'] = false;
-		$texy->addHandler('emoticon', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -71,15 +75,16 @@ final class EmoticonModule extends Texy\Module
 	/**
 	 * Parses :-).
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parse(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(InlineParser $parser, array $matches, string $name, array $offsets): ?EmoticonNode
 	{
 		$match = $matches[0];
 
-		// find the closest match
-		foreach ($this->icons as $emoticon => $foo) {
+		// Find the closest match
+		foreach ($this->icons as $emoticon => $_) {
 			if (str_starts_with($match, $emoticon)) {
-				return $this->texy->invokeAroundHandlers('emoticon', $parser, [$emoticon, $match]);
+				return new EmoticonNode($emoticon, new Position($offsets[0], strlen($matches[0])));
 			}
 		}
 
@@ -87,14 +92,11 @@ final class EmoticonModule extends Texy\Module
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(Texy\HandlerInvocation $invocation, string $emoticon): Texy\HtmlElement|string
+	public function solve(EmoticonNode $node, Generator $generator): string
 	{
-		$emoji = $this->icons[$emoticon];
+		$emoji = $this->icons[$node->emoticon];
 		return $this->class
-			? (new Texy\HtmlElement('span', ['class' => $this->class]))->setText($emoji)
+			? (new Texy\HtmlElement('span', ['class' => $this->class]))->setText($emoji)->toString($this->texy)
 			: $emoji;
 	}
 }

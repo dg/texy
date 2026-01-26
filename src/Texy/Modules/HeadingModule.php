@@ -11,7 +11,10 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Modifier;
-use function array_flip, array_values, asort, count, is_array, max, min, reset, rtrim, strlen, trim;
+use Texy\Nodes;
+use Texy\Output\Html\Generator;
+use Texy\Position;
+use function array_flip, array_values, asort, max, min, rtrim, strlen, trim;
 
 
 /**
@@ -58,8 +61,8 @@ final class HeadingModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('heading', $this->solve(...));
 		$texy->addHandler('afterParse', $this->afterParse(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -92,79 +95,100 @@ final class HeadingModule extends Texy\Module
 	}
 
 
-	public function afterParse(Texy\HtmlElement $DOM, bool $isSingleLine): void
+	/**
+	 * Post-process AST headings - apply balancing and calculate final levels.
+	 */
+	public function afterParse(Texy\Nodes\DocumentNode $document): void
 	{
-		if ($isSingleLine) {
+		// Collect all heading nodes
+		$headings = $this->collectHeadings($document);
+		if (!$headings) {
 			return;
 		}
 
 		if ($this->balancing === self::DYNAMIC) {
-			$top = $this->top;
 			$map = [];
 			$min = 100;
-			foreach ($this->TOC as $item) {
-				$level = $item['level'];
-				if ($item['type'] === 'surrounded') {
-					$min = min($level, $min);
-					$top = $this->top - $min;
 
-				} elseif ($item['type'] === 'underlined') {
+			// First pass: collect level information
+			foreach ($headings as $node) {
+				$level = $node->level;
+				if ($node->type === Texy\Nodes\HeadingNode::Surrounded) {
+					$min = min($level, $min);
+				} elseif ($node->type === Texy\Nodes\HeadingNode::Underlined) {
 					$map[$level] = $level;
 				}
 			}
 
+			// Calculate top offset for surrounded headings
+			$top = $this->top - $min;
+
+			// Sort underlined levels and create mapping
 			asort($map);
 			$map = array_flip(array_values($map));
+
+			// Second pass: apply calculated levels
+			foreach ($headings as $node) {
+				if ($node->type === Texy\Nodes\HeadingNode::Surrounded) {
+					$level = $node->level + $top;
+				} elseif ($node->type === Texy\Nodes\HeadingNode::Underlined) {
+					$level = $map[$node->level] + $this->top;
+				} else {
+					$level = $node->level;
+				}
+
+				$node->level = min(6, max(1, $level));
+			}
+		} else {
+			// FIXED balancing - just add top
+			foreach ($headings as $node) {
+				$node->level = min(6, max(1, $node->level + $this->top));
+			}
 		}
 
-		foreach ($this->TOC as $key => $item) {
-			if ($this->balancing === self::DYNAMIC) {
-				if ($item['type'] === 'surrounded') {
-					$level = $item['level'] + $top;
-
-				} elseif ($item['type'] === 'underlined') {
-					$level = $map[$item['level']] + $this->top;
-
+		// Generate IDs if enabled
+		if ($this->generateID) {
+			foreach ($headings as $node) {
+				// Check for custom TOC title in style
+				$tocTitle = $node->modifier?->styles['toc'] ?? null;
+				if ($tocTitle !== null) {
+					unset($node->modifier->styles['toc']);
+					$title = $tocTitle;
 				} else {
-					$level = $item['level'];
+					$title = trim(Texy\Helpers::extractText($node));
 				}
 
-				$item['el']->setName('h' . min(6, max(1, $level)));
-				$this->TOC[$key]['level'] = $level;
-			}
-
-			if ($this->generateID) {
-				$style = $item['el']->attrs['style'] ?? null;
-				if (is_array($style) && !empty($style['toc'])) {
-					$title = (string) $style['toc'];
-					unset($item['el']->attrs['style']['toc']);
-				} else {
-					$title = trim($item['el']->toText($this->texy));
+				// Skip if ID already set in modifier
+				if ($node->modifier?->id) {
+					$this->usedID[$node->modifier->id] = true;
+					continue;
 				}
 
-				$this->TOC[$key]['title'] = $title;
-				if (empty($item['el']->attrs['id'])) {
-					$id = $this->idPrefix . Texy\Helpers::webalize($title);
-					$counter = '';
-					if (isset($this->usedID[$id . $counter])) {
-						$counter = 2;
-						while (isset($this->usedID[$id . '-' . $counter])) {
-							$counter++;
-						}
-
-						$id .= '-' . $counter;
+				$id = $this->idPrefix . Texy\Helpers::webalize($title);
+				$counter = '';
+				if (isset($this->usedID[$id . $counter])) {
+					$counter = 2;
+					while (isset($this->usedID[$id . '-' . $counter])) {
+						$counter++;
 					}
 
-					$this->usedID[$id] = true;
-					$item['el']->attrs['id'] = $id;
+					$id .= '-' . $counter;
 				}
+
+				$this->usedID[$id] = true;
+
+				// Create modifier if not exists
+				if ($node->modifier === null) {
+					$node->modifier = new Modifier;
+				}
+
+				$node->modifier->id = $id;
 			}
 		}
 
-		// document title
-		if ($this->title === null && count($this->TOC)) {
-			$item = reset($this->TOC);
-			$this->title = $item['title'] ?? trim($item['el']->toText($this->texy));
+		// Set document title from first heading
+		if ($this->title === null) {
+			$this->title = trim(Texy\Helpers::extractText($headings[0]));
 		}
 	}
 
@@ -172,63 +196,91 @@ final class HeadingModule extends Texy\Module
 	/**
 	 * Parses underlined heading.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseUnderline(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseUnderline(
+		Texy\BlockParser $parser,
+		array $matches,
+		string $name,
+		array $offsets,
+	): Texy\Nodes\HeadingNode
 	{
 		[, $mContent, $mMod, $mLine] = $matches;
-		// $matches:
-		// [1] => ...
-		// [2] => .(title)[class]{style}<>
-		// [3] => ...
-
-		$mod = Modifier::parse($mMod);
 		$level = $this->levels[$mLine[0]];
-		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, false]);
+		$contentOffset = $offsets[1] ?? $offsets[0];
+		return new Texy\Nodes\HeadingNode(
+			$this->texy->createInlineParser()->parse(trim($mContent), $contentOffset),
+			$level,
+			Texy\Nodes\HeadingNode::Underlined,
+			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
+		);
 	}
 
 
 	/**
 	 * Parses surrounded heading.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseSurround(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseSurround(
+		Texy\BlockParser $parser,
+		array $matches,
+		string $name,
+		array $offsets,
+	): Texy\Nodes\HeadingNode
 	{
 		[, $mLine, $mContent, $mMod] = $matches;
-		// [1] => ###
-		// [2] => ...
-		// [3] => .(title)[class]{style}<>
-
-		$mod = Modifier::parse($mMod);
 		$level = min(7, max(2, strlen($mLine)));
 		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
-		return $this->texy->invokeAroundHandlers('heading', $parser, [$level, $mContent, $mod, true]);
+		$contentOffset = $offsets[2] ?? $offsets[0];
+		return new Texy\Nodes\HeadingNode(
+			$this->texy->createInlineParser()->parse(trim($mContent), $contentOffset),
+			$level,
+			Texy\Nodes\HeadingNode::Surrounded,
+			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
+		);
+	}
+
+
+	public function solve(Nodes\HeadingNode $node, Generator $generator): string
+	{
+		// HeadingNode->level already contains the final level (1-6) after HeadingModule processing
+		$level = $node->level;
+		$content = $generator->generateInlineContent($node->content);
+		$attrs = $generator->generateModifierAttrs($node->modifier);
+		$open = $this->texy->protect("<h{$level}{$attrs}>", $this->texy::CONTENT_BLOCK);
+		$close = $this->texy->protect("</h{$level}>", $this->texy::CONTENT_BLOCK);
+		/*$el = new Texy\HtmlElement('h' . $node->level, $generator->generateInlineContent($node->content));
+		$generator->decorate($node->modifier, $el);
+		return $el->toString($this->texy);*/
+		return $open . $content . $close;
 	}
 
 
 	/**
-	 * Finish invocation.
+	 * Collect all HeadingNode from AST (excluding those inside texysource sections).
+	 * @return list<Texy\Nodes\HeadingNode>
 	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		int $level,
-		string $content,
-		Modifier $mod,
-		bool $isSurrounded,
-	): Texy\HtmlElement
+	private function collectHeadings(Texy\Node $node, bool $skip = false): array
 	{
-		// as fixed balancing, for block/texysource & correct decorating
-		$el = new Texy\HtmlElement('h' . min(6, max(1, $level + $this->top)));
-		$mod->decorate($this->texy, $el);
+		// Skip headings inside texysource sections
+		if ($node instanceof Texy\Nodes\SectionNode && $node->type === 'texysource') {
+			$skip = true;
+		}
 
-		$el->parseLine($this->texy, trim($content));
+		$headings = [];
 
-		$this->TOC[] = [
-			'el' => $el,
-			'level' => $level,
-			'type' => $isSurrounded ? 'surrounded' : 'underlined',
-		];
+		if ($node instanceof Texy\Nodes\HeadingNode && !$skip) {
+			$headings[] = $node;
+		}
 
-		return $el;
+		foreach ($node->getNodes() as $child) {
+			$headings = [...$headings, ...$this->collectHeadings($child, $skip)];
+		}
+
+		return $headings;
 	}
 }

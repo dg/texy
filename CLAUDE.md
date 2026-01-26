@@ -95,6 +95,13 @@ Protection marks (CONTENT_MARKUP, CONTENT_REPLACED, etc.) prevent re-processing 
 - Input Texy source files in `tests/Texy/sources/`
 - `tests/bootstrap.php` sets up test environment
 
+**Testing guidelines:**
+- **Never use `Assert::contains()`** - it leads to false positives and missed bugs
+- **Always test exact output** using `Assert::matchFile()` or `Assert::match()`
+- `Assert::match()` ignores line ending differences (`\r\n` vs `\n`)
+- Avoid wildcard patterns like `%a%` - test the complete output
+- For AST tests, create separate expected files (e.g., `paragraphs-ast.html`)
+
 Example test pattern:
 ```php
 $texy = new Texy\Texy;
@@ -251,7 +258,7 @@ $texy->addHandler('image', function(
 **Common elements**: `image`, `linkReference`, `linkEmail`, `linkURL`, `phrase`, `figure`, `heading`, `block`, `emoticon`
 
 ### Notification Handlers
-Called for side effects (logging, DOM modifications), don't return values:
+Called for side effects (logging, modifications), don't return values:
 
 ```php
 $texy->addHandler('beforeParse', function(
@@ -332,18 +339,62 @@ $texy->registerBlockPattern(
 
 ## Protection Marks and Nesting
 
-Texy uses special control characters to prevent re-processing of already-processed content:
+Texy uses special control characters to prevent re-processing of already-processed content. These are critical for typography and longwords modules.
 
-- `CONTENT_MARKUP` (\x17) - Regular HTML markup (tags, formatting)
-- `CONTENT_REPLACED` (\x16) - Replaced elements (images)
-- `CONTENT_TEXTUAL` (\x15) - Escaped/treated text (code blocks)
-- `CONTENT_BLOCK` (\x14) - Block elements
+### Protection Mark Types
 
-When creating raw HTML strings (not HtmlElement), protect them:
+| Mark | Hex | Constant | Usage | In longwords exclusion? |
+|------|-----|----------|-------|-------------------------|
+| `\x14` | 0x14 | `CONTENT_BLOCK` | Block elements (`<div>`, `<p>`, `<table>`) | YES - splits text processing |
+| `\x15` | 0x15 | `CONTENT_TEXTUAL` | Protected text (code, notexy) | YES - skipped entirely |
+| `\x16` | 0x16 | `CONTENT_REPLACED` | Replaced elements (`<img>`, `<br>`, URLs, emails) | YES - skipped entirely |
+| `\x17` | 0x17 | `CONTENT_MARKUP` | Inline markup (`<strong>`, `<em>`, `<a>`) | NO - text flows through |
+
+### How Protection Works
+
+1. **CONTENT_BLOCK** (`\x14`) - Splits text for post-processing. `invokePostLineHandlers()` uses `explode(CONTENT_BLOCK, $text)` and only processes even-indexed segments.
+
+2. **CONTENT_REPLACED/TEXTUAL** (`\x15`, `\x16`) - Excluded from longwords pattern `[^ \n\t\x14\x15\x16...]`. Content is completely skipped.
+
+3. **CONTENT_MARKUP** (`\x17`) - NOT excluded from longwords. This allows text to flow through inline tags for hyphenation: `<strong>very-long-word</strong>` can be hyphenated.
+
+### Protection Key Format
+
+Protection keys have format: `[TYPE][COUNTER][TYPE]` where:
+- TYPE is one of `\x14-\x17`
+- COUNTER uses `\x18-\x1F` for octal-encoded digits
+
+Example: `\x17\x18\x17` = CONTENT_MARKUP with counter 0
+
+### Usage in HtmlGenerator
+
 ```php
-$html = '<iframe src="..."></iframe>';
-return $texy->protect($html, Texy\Texy::CONTENT_BLOCK);
+// Block elements - use CONTENT_BLOCK
+$this->protect("<p>", self::ContentBlock);
+
+// Inline markup - use CONTENT_MARKUP
+$this->protect("<strong>", self::ContentMarkup);
+
+// Replaced elements - use CONTENT_REPLACED
+$this->protect("<img ...>", self::ContentReplaced);
+
+// Protected text - use CONTENT_TEXTUAL
+$this->protect($codeContent, self::ContentTextual);
 ```
+
+## Space Freezing in Attributes
+
+To prevent line wrapping inside HTML attributes, spaces are "frozen" using `Helpers::freezeSpaces()`:
+
+```php
+// Freezes spaces: " " → \x01, "\t" → \x02, "\r" → \x03, "\n" → \x04
+$value = Helpers::freezeSpaces($attrValue);
+
+// At the end, unfreeze: \x01 → " ", etc.
+$html = Helpers::unfreezeSpaces($html);
+```
+
+This ensures that `alt="long description with spaces"` won't be broken across lines by the formatter.
 
 **Patterns** should exclude already-processed content: `[^\x14-\x1F]` excludes all protected content.
 
@@ -365,19 +416,25 @@ return $texy->protect($html, Texy\Texy::CONTENT_BLOCK);
 Modifiers add attributes: `.(title)[class #id]{style:value}<align>^valign`
 
 ```php
-// Parsing
-$mod = new Texy\Modifier($modifierText);
+// Parsing (use static factory method)
+$mod = Texy\Modifier::parse($modifierText);
+$mod = Texy\Modifier::parse($modifierText, $offset);  // with position tracking
 
 // Access
 $mod->id;          // HTML id
 $mod->classes;     // array of classes
 $mod->styles;      // array of CSS properties
+$mod->attrs;       // custom attributes (data-*, aria-*, etc.)
 $mod->hAlign;      // left, right, center, justify
+$mod->vAlign;      // top, middle, bottom
 $mod->title;       // title attribute
+$mod->position;    // Position object
 
-// Apply to element
+// Apply to element (legacy, deprecated)
 $mod->decorate($texy, $element);
 ```
+
+**Note:** Constructor `new Modifier($text)` and `setProperties()` are deprecated. Use `Modifier::parse()` instead.
 
 ## Security Practices
 

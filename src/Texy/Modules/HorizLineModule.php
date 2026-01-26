@@ -10,6 +10,10 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes;
+use Texy\Output\Html\Generator;
+use Texy\Position;
+use function strlen;
 
 
 /**
@@ -27,7 +31,7 @@ final class HorizLineModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('horizline', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -48,32 +52,27 @@ final class HorizLineModule extends Texy\Module
 	/**
 	 * Parses -------
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
+	public function parse(
+		Texy\BlockParser $parser,
+		array $matches,
+		string $name,
+		array $offsets,
+	): Texy\Nodes\HorizontalRuleNode
 	{
 		[, $mType, $mMod] = $matches;
-		// [1] => ---
-		// [2] => .(title)[class]{style}<>
-
-		$mod = Texy\Modifier::parse($mMod);
-		return $this->texy->invokeAroundHandlers('horizline', $parser, [$mType, $mod]);
+		return new Texy\Nodes\HorizontalRuleNode(
+			$mType[0],
+			Texy\Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
+		);
 	}
 
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
+	public function solve(Nodes\HorizontalRuleNode $node, Generator $generator): string
 	{
-		$el = new Texy\HtmlElement('hr');
-		$modifier->decorate($invocation->getTexy(), $el);
-
-		$class = $this->classes[$type[0]];
-		if ($class && !isset($modifier->classes[$class])) {
-			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-			$el->attrs['class'][] = $class;
-		}
-
-		return $el;
+		$attrs = $generator->generateModifierAttrs($node->modifier);
+		return $this->texy->protect("<hr{$attrs}>", $this->texy::CONTENT_REPLACED);
 	}
 }

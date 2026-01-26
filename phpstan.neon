@@ -9,5 +9,22 @@ parameters:
 
 	checkMissingCallableSignature: true
 
+	ignoreErrors:
+		# Runtime type validation for generic arrays in Node constructors.
+		# PHP lacks native generic arrays, so we use: (fn(Foo ...$x) {})(...$items)
+		# to validate that all items are of type Foo. The result is intentionally unused.
+		-
+			identifier: expr.resultUnused
+			paths:
+				- src/Texy/Nodes/
+
+		# Empty generator pattern using `false && yield` to satisfy return type Generator
+		# while yielding nothing. PHPStan correctly sees left side is always false.
+		-
+			identifier: booleanAnd.leftAlwaysFalse
+			paths:
+				- src/Texy/Node.php
+				- src/Texy/Nodes/
+
 includes:
 	- phpstan-baseline.neon

@@ -10,13 +10,17 @@ declare(strict_types=1);
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use function max, strlen, substr, trim, usort;
+use Texy\Nodes\BlockNode;
+use Texy\Nodes\LineBreakNode;
+use Texy\Nodes\ParagraphNode;
+use Texy\Nodes\TextNode;
+use function count, explode, max, preg_match, strlen, strtolower, substr, trim, usort;
 
 
 /**
  * Parses block structures (paragraphs, headings, lists, tables, etc.).
  */
-class BlockParser extends Parser
+class BlockParser
 {
 	private string $text;
 	private int $offset;
@@ -24,16 +28,9 @@ class BlockParser extends Parser
 
 	public function __construct(
 		protected Texy $texy,
-		private bool $indented,
-		/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}> */
+		/** @var array<string, array{handler: \Closure(self, array<string>, string, array<int|string, int|null>): ?BlockNode, pattern: string}> */
 		public array $patterns,
 	) {
-	}
-
-
-	public function isIndented(): bool
-	{
-		return $this->indented;
 	}
 
 
@@ -93,33 +90,28 @@ class BlockParser extends Parser
 	}
 
 
-	/** @return list<HtmlElement|string> */
 	public function parse(string $text): array
 	{
-		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
-
 		$this->text = $text;
 		$this->offset = 0;
 		$matches = $this->match($text);
-		$matches[] = [strlen($text), null, null]; // terminal sentinel
+		$matches[] = [strlen($text), null, null, 0, null]; // terminal sentinel
 		$cursor = 0;
 		$res = [];
 
 		do {
 			do {
-				[$mOffset, $mName, $mMatches] = $matches[$cursor];
+				[$mOffset, $mName, $mMatches, , $mOffsets] = $matches[$cursor];
 				$cursor++;
 				if ($mName === null || $mOffset >= $this->offset) {
 					break;
 				}
-			} while (1);
+			} while (true);
 
-			// between-matches content
+			// between-matches content → paragraphs (split by blank lines)
 			if ($mOffset > $this->offset) {
-				$s = trim(substr($text, $this->offset, $mOffset - $this->offset));
-				if ($s !== '') {
-					$res = array_merge($res, $this->texy->paragraphModule->process($this, $s));
-				}
+				$s = substr($text, $this->offset, $mOffset - $this->offset);
+				$res = array_merge($res, $this->parseParagraphs($s));
 			}
 
 			if ($mName === null) {
@@ -128,27 +120,29 @@ class BlockParser extends Parser
 
 			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
 
-			$el = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
+			$handler = $this->patterns[$mName]['handler'];
+			$node = $handler($this, $mMatches, $mName, $mOffsets);
 
-			if ($el === null || $this->offset <= $mOffset) { // module rejects text
-				// asi by se nemelo stat, rozdeli generic block
-				$this->offset = $mOffset; // turn offset back
+			if ($node === null || $this->offset <= $mOffset) {
+				// handler rejects text
+				$this->offset = $mOffset;
 				continue;
-
-			} else {
-				$res[] = $el;
 			}
-		} while (1);
+
+			$res[] = $node;
+
+		} while (true);
 
 		return $res;
 	}
 
 
-	/** @return list<array{int, ?string, ?array<int|string, string|null>, int}> */
+	/** @return list<array{int, ?string, ?array<int|string, string|null>, int, ?array<int|string, int|null>}> */
 	private function match(string $text): array
 	{
 		$matches = [];
 		$priority = 0;
+
 		foreach ($this->patterns as $name => $pattern) {
 			$ms = Regexp::matchAll(
 				$text,
@@ -156,32 +150,162 @@ class BlockParser extends Parser
 				captureOffset: true,
 			);
 
-			foreach ((array) $ms as $m) {
+			foreach ($ms as $m) {
 				$offset = $m[0][1];
+				$offsets = [];
 				foreach ($m as $k => $v) {
+					$offsets[$k] = $v[1] >= 0 ? $v[1] : null;
 					$m[$k] = $v[0];
 				}
 
-				$matches[] = [$offset, $name, $m, $priority];
+				$matches[] = [$offset, $name, $m, $priority, $offsets];
 			}
 
 			$priority++;
 		}
-
-		unset($name, $pattern, $ms, $m, $k, $v);
 
 		usort($matches, function ($a, $b): int {
 			if ($a[0] === $b[0]) {
 				return $a[3] < $b[3] ? -1 : 1;
 			}
 
-			if ($a[0] < $b[0]) {
-				return -1;
-			}
-
-			return 1;
+			return $a[0] < $b[0] ? -1 : 1;
 		});
 
 		return $matches;
+	}
+
+
+	/**
+	 * Split text by blank lines and create paragraphs.
+	 * Handles HTML block elements specially - they don't get wrapped in <p>.
+	 */
+	private function parseParagraphs(string $text): array
+	{
+		// Split by two or more newlines (blank line)
+		$parts = Regexp::split($text, '~(\n{2,})~', skipEmpty: true);
+		$res = [];
+		foreach ($parts ?: [] as $part) {
+			$part = trim($part);
+			if ($part === '') {
+				continue;
+			}
+
+			// Check if this part starts with a block-level HTML tag
+			if ($this->startsWithBlockHtmlTag($part)) {
+				$node = $this->parseHtmlBlock($part);
+			} else {
+				$node = $this->parseParagraph($part);
+			}
+
+			// Skip empty paragraphs (only whitespace content)
+			if ($node instanceof ParagraphNode && $this->isEmptyParagraph($node)) {
+				continue;
+			}
+
+			$res[] = $node;
+		}
+
+		return $res;
+	}
+
+
+	/**
+	 * Check if text starts with a known block-level HTML tag.
+	 */
+	private function startsWithBlockHtmlTag(string $text): bool
+	{
+		// Match opening HTML tag at start
+		if (!preg_match('~^<([a-z][a-z0-9]*)\b~i', $text, $m)) {
+			return false;
+		}
+
+		$tagName = strtolower($m[1]);
+		return !isset(HtmlElement::$inlineElements[$tagName]);
+	}
+
+
+	/**
+	 * Parse text that starts with block HTML tag.
+	 * Returns ParagraphNode with blockHtml flag for special handling.
+	 */
+	private function parseHtmlBlock(string $text): ParagraphNode
+	{
+		$content = $this->texy->createInlineParser()->parse($text);
+
+		// Create paragraph without line break processing
+		// The block HTML content should preserve its structure
+		$node = new ParagraphNode($content);
+		$node->blockHtml = true;
+		return $node;
+	}
+
+
+	/**
+	 * Check if paragraph contains only whitespace.
+	 */
+	private function isEmptyParagraph(ParagraphNode $node): bool
+	{
+		foreach ($node->content as $child) {
+			if ($child instanceof TextNode) {
+				if (trim($child->content) !== '') {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+	private function parseParagraph(string $text): ParagraphNode
+	{
+		$inlineParser = $this->texy->createInlineParser();
+
+		// Extract modifier from paragraph (can appear at end of any line or at end of text)
+		$modifier = null;
+		if ($mx = Regexp::match($text, '~' . Patterns::MODIFIER_H . '(?= \n | \z)~sUm', captureOffset: true)) {
+			[$mMod] = $mx[1];
+			$text = trim(substr_replace($text, '', $mx[0][1], strlen($mx[0][0])));
+			if ($text !== '') {
+				$modifier = Modifier::parse($mMod);
+			}
+		}
+
+		// Process line breaks
+		// mergeLines: true (default) - line break only when next line starts with space
+		// mergeLines: false - every \n is a line break
+		if ($this->texy->mergeLines) {
+			// Mark line breaks (newline followed by space) with special char
+			$text = Regexp::replace($text, '~\n\ +(?=\S)~', "\r");
+			// Merge other newlines into spaces
+			$text = Regexp::replace($text, '~\n~', ' ');
+		} else {
+			// Every newline is a line break
+			$text = Regexp::replace($text, '~\n~', "\r");
+		}
+
+		// Split on line break markers
+		$parts = explode("\r", $text);
+		if (count($parts) === 1) {
+			// No line breaks
+			$content = $inlineParser->parse($text);
+			return new ParagraphNode($content, $modifier);
+		}
+
+		// Multiple parts - insert LineBreakNode between them
+		$content = [];
+		foreach ($parts as $i => $part) {
+			if ($i > 0) {
+				$content[] = new LineBreakNode;
+			}
+			$partNodes = $inlineParser->parse($part);
+			foreach ($partNodes as $node) {
+				$content[] = $node;
+			}
+		}
+
+		return new ParagraphNode($content, $modifier);
 	}
 }

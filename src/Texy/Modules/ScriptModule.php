@@ -10,8 +10,12 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\InlineParser;
+use Texy\Nodes\DirectiveNode;
+use Texy\Output\Html\Generator;
+use Texy\Position;
 use Texy\Regexp;
-use function trim;
+use function strlen;
 
 
 /**
@@ -26,7 +30,7 @@ final class ScriptModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('script', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -50,11 +54,11 @@ final class ScriptModule extends Texy\Module
 	/**
 	 * Parses {{...}}
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parse(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(InlineParser $parser, array $matches, string $name, array $offsets): ?DirectiveNode
 	{
 		[, $mContent] = $matches;
-		// [1] => ...
 
 		$cmd = trim($mContent);
 		if ($cmd === '') {
@@ -64,39 +68,21 @@ final class ScriptModule extends Texy\Module
 		$raw = null;
 		$args = [];
 		// function (arg, arg, ...) or function: arg, arg
-		if ($matches = Regexp::match($cmd, '~^ ([a-z_][a-z0-9_-]*) \s* (?: \( ([^()]*) \) | : (.*) )$~i')) {
-			$cmd = $matches[1];
-			$raw = trim($matches[3] ?? $matches[2]);
+		if ($m = Regexp::match($cmd, '~^ ([a-z_][a-z0-9_-]*) \s* (?: \( ([^()]*) \) | : (.*) )$~i')) {
+			$cmd = $m[1];
+			$raw = trim($m[3] ?? $m[2]);
 			if ($raw !== '') {
 				$args = Regexp::split($raw, '~\s*' . Regexp::quote($this->separator) . '\s*~');
 			}
 		}
 
-		return $this->texy->invokeAroundHandlers('script', $parser, [$cmd, $args, $raw]);
+		return new DirectiveNode($cmd, $raw, $args, new Position($offsets[0], strlen($matches[0])));
 	}
 
 
-	/**
-	 * Finish invocation.
-	 * @param ?list<string>  $args
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		string $cmd,
-		?array $args = null,
-		?string $raw = null,
-	): ?string
+	public function solve(DirectiveNode $node, Generator $generator): string
 	{
-		if ($cmd === 'texy' && $args) {
-			switch ($args[0]) {
-				case 'nofollow':
-					$this->texy->linkModule->forceNoFollow = true;
-					break;
-			}
-
-			return '';
-		}
-
-		return null;
+		// Directives don't produce output by default, they're processed by passes
+		return '';
 	}
 }

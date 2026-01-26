@@ -97,34 +97,32 @@ class Texy
 	public Modules\FigureModule $figureModule;
 	public Modules\TypographyModule $typographyModule;
 	public Modules\LongWordsModule $longWordsModule;
-	public Modules\HtmlOutputModule $htmlOutputModule;
+	public Output\Html\Formatter $htmlOutputModule;
+	public Output\Html\Generator $htmlGenerator;
 
 	/** @var Module[] */
 	private array $modules;
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(InlineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
+	 * @var array<string, array{handler: \Closure(InlineParser, array<string>, string, array<int>): ?Nodes\InlineNode, pattern: string, again: ?string}>
 	 */
 	private array $linePatterns = [];
 
-	/** @var array<string, array{handler: \Closure(InlineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(InlineParser, array<string>, string, array<int>): ?Nodes\InlineNode, pattern: string, again: ?string}> */
 	private array $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}>
+	 * @var array<string, array{handler: \Closure(BlockParser, array<string>, string, array<int>): ?Nodes\BlockNode, pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
-	/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}> */
+	/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string, array<int>): ?Nodes\BlockNode, pattern: string}> */
 	private array $_blockPatterns;
 
 	/** @var array<string, \Closure(string): string> */
 	private array $postHandlers = [];
-
-	/** DOM structure for parsed text */
-	private HtmlElement $DOM;
 
 	/** @var array<string, string>  Texy protect markup table */
 	private array $marks = [];
@@ -143,6 +141,7 @@ class Texy
 
 	public function __construct()
 	{
+		$this->htmlGenerator = new Output\Html\Generator($this);
 		$this->loadModules();
 		$this->initAllowedTags();
 	}
@@ -152,10 +151,10 @@ class Texy
 	{
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = [];
-		foreach (Modules\HtmlOutputModule::$inlineElements as $tag => $_) {
+		foreach (Output\Html\Formatter::$inlineElements as $tag => $_) {
 			$this->allowedTags[$tag] = self::ALL;
 		}
-		foreach (Modules\HtmlOutputModule::$emptyElements as $tag => $_) {
+		foreach (Output\Html\Formatter::$emptyElements as $tag => $_) {
 			$this->allowedTags[$tag] = self::ALL;
 		}
 		// common block elements
@@ -196,7 +195,7 @@ class Texy
 		// post process
 		$this->addModule($this->typographyModule = new Modules\TypographyModule($this));
 		$this->addModule($this->longWordsModule = new Modules\LongWordsModule($this));
-		$this->addModule($this->htmlOutputModule = new Modules\HtmlOutputModule($this));
+		$this->htmlOutputModule = new Output\Html\Formatter($this);
 	}
 
 
@@ -208,10 +207,10 @@ class Texy
 
 
 	/**
-	 * @param  callable(InlineParser, string[], string): (HtmlElement|string|null)  $handler
+	 * @param  \Closure(InlineParser, string[], string, int[]): ?Nodes\InlineNode  $handler
 	 */
 	final public function registerLinePattern(
-		callable $handler,
+		\Closure $handler,
 		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		string $name,
@@ -223,7 +222,7 @@ class Texy
 		}
 
 		$this->linePatterns[$name] = [
-			'handler' => $handler(...),
+			'handler' => $handler,
 			'pattern' => $pattern,
 			'again' => $againTest,
 		];
@@ -231,22 +230,21 @@ class Texy
 
 
 	/**
-	 * @param  callable(BlockParser, string[], string): (HtmlElement|string|null)  $handler
+	 * @param  \Closure(BlockParser, string[], string, int[]): ?Nodes\BlockNode  $handler
 	 */
 	final public function registerBlockPattern(
-		callable $handler,
+		\Closure $handler,
 		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		string $name,
 	): void
 	{
-		// if (!Regexp::match($pattern, '~(.)\^.*\$\1[a-z]*~is')) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = true;
 		}
 
 		$this->blockPatterns[$name] = [
-			'handler' => $handler(...),
+			'handler' => $handler,
 			'pattern' => $pattern . 'm', // force multiline
 		];
 	}
@@ -264,19 +262,51 @@ class Texy
 
 
 	/**
-	 * Converts document in Texy! to (X)HTML code.
+	 * Converts Texy text to HTML.
 	 */
 	public function process(string $text, bool $singleLine = false): string
 	{
-		if ($this->processing) {
-			throw new Exception('Processing is in progress yet.');
+		unset($this->_classes, $this->_styles, $this->_linePatterns, $this->_blockPatterns);
+		$text = $this->preprocess($text);
+		$node = $this->parse($text, $singleLine);
+		$html = $this->generate($node);
+		return $html;
+	}
+
+
+	/**
+	 * Parses text to AST.
+	 */
+	public function parse(string $text, bool $singleLine = false): Nodes\DocumentNode
+	{
+		foreach ($this->modules as $module) {
+			$module->beforeParse($text);
 		}
 
-		// initialization
-		$this->marks = [];
-		$this->processing = true;
-		unset($this->_classes, $this->_styles, $this->_linePatterns,$this->_blockPatterns);
+		$parser = $singleLine ? $this->createInlineParser() : $this->createBlockParser();
+		$document = new Nodes\DocumentNode($parser->parse($text));
 
+		$this->invokeHandlers('afterParse', [$document]);
+		return $document;
+	}
+
+
+	/**
+	 * Generates HTML from AST.
+	 */
+	public function generate(Nodes\DocumentNode $document): string
+	{
+		$this->marks = [];
+		$s = $this->htmlGenerator->generateNode($document);
+		return $this->stringToHtml($s);
+	}
+
+
+	/**
+	 * Preprocesses text (normalizes line endings, replaces tabs, removes soft hyphens).
+	 */
+	public function preprocess(string $text): string
+	{
 		if ($this->removeSoftHyphens) {
 			$text = str_replace("\u{AD}", '', $text);
 		}
@@ -295,37 +325,27 @@ class Texy
 			}
 		}
 
-		foreach ($this->modules as $module) {
-			$module->beforeParse($text);
-		}
-
-		// parse Texy! document into internal DOM structure
-		$this->DOM = new HtmlElement;
-		if ($singleLine) {
-			$this->DOM->parseLine($this, $text);
-		} else {
-			$this->DOM->parseBlock($this, $text);
-		}
-
-		$this->invokeHandlers('afterParse', [$this->DOM, $singleLine]);
-
-		// converts internal DOM structure to final HTML code
-		$html = $this->DOM->toHtml($this);
-
-		// created by ParagraphModule and then protected
-		$html = str_replace("\r", "\n", $html);
-
-		$this->processing = false;
-		return $html;
+		return $text;
 	}
 
 
 	/**
-	 * Converts single line in Texy! to (X)HTML code.
+	 * Converts single line in Texy! to HTML code.
 	 */
 	public function processLine(string $text): string
 	{
 		return $this->process($text, singleLine: true);
+	}
+
+
+	/**
+	 * Parses single line to AST.
+	 */
+	public function parseLine(string $text): Nodes\ParagraphNode
+	{
+		$text = $this->preprocess($text);
+		$inlineNodes = $this->createInlineParser()->parse($text);
+		return new Nodes\ParagraphNode($inlineNodes);
 	}
 
 
@@ -353,11 +373,7 @@ class Texy
 	 */
 	public function toText(): string
 	{
-		if (!isset($this->DOM)) {
-			throw new Exception('Call $texy->process() first.');
-		}
-
-		return $this->DOM->toText($this);
+		// TODO
 	}
 
 
@@ -392,7 +408,7 @@ class Texy
 		$s = $this->unProtect($s);
 
 		// wellform and reformat HTML
-		$this->invokeHandlers('postProcess', [&$s]);
+		$s = $this->htmlOutputModule->format($s);
 
 		// unfreeze spaces
 		$s = Helpers::unfreezeSpaces($s);
@@ -433,21 +449,6 @@ class Texy
 	final public function addHandler(string $event, callable $callback): void
 	{
 		$this->handlers[$event][] = $callback(...);
-	}
-
-
-	/**
-	 * Invoke registered around-handlers.
-	 * @param  mixed[]  $args
-	 */
-	final public function invokeAroundHandlers(string $event, Parser $parser, array $args): mixed
-	{
-		if (!isset($this->handlers[$event])) {
-			return null;
-		}
-
-		$invocation = new HandlerInvocation($this->handlers[$event], $parser, $args);
-		return $invocation->proceed();
 	}
 
 
@@ -505,14 +506,14 @@ class Texy
 	}
 
 
-	public function createBlockParser(bool $indented): BlockParser
+	public function createBlockParser(): BlockParser
 	{
 		$this->_blockPatterns ??= array_filter(
 			$this->blockPatterns,
 			fn($pattern, $name) => !empty($this->allowed[$name]),
 			ARRAY_FILTER_USE_BOTH,
 		);
-		return new BlockParser($this, $indented, $this->_blockPatterns);
+		return new BlockParser($this, $this->_blockPatterns);
 	}
 
 
@@ -524,12 +525,6 @@ class Texy
 			ARRAY_FILTER_USE_BOTH,
 		);
 		return new InlineParser($this, $this->_linePatterns);
-	}
-
-
-	final public function getDOM(): HtmlElement
-	{
-		return $this->DOM;
 	}
 
 

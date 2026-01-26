@@ -38,6 +38,7 @@ final class Modifier
 	public ?string $hAlign = null;
 	public ?string $vAlign = null;
 	public ?string $title = null;
+	public ?Position $position = null;
 
 	/** @var array<string, 1>  list of properties which are regarded as HTML element attributes */
 	public static array $elAttrs = [
@@ -52,12 +53,16 @@ final class Modifier
 	/**
 	 * Parses modifier string and returns new instance.
 	 */
-	public static function parse(?string $s): self
+	public static function parse(?string $s, ?int $offset = null): ?self
 	{
-		$modifier = new self;
-		if ($s !== null) {
-			$modifier->setProperties($s);
+		if ($s === null) {
+			return null;
 		}
+		$modifier = new self;
+		if ($offset !== null) {
+			$modifier->position = new Position($offset, strlen($s));
+		}
+		$modifier->setProperties($s);
 		return $modifier;
 	}
 
@@ -108,6 +113,7 @@ final class Modifier
 
 	/**
 	 * Decorates HtmlElement element.
+	 * @deprecated  use Html\Generator instead
 	 */
 	public function decorate(Texy $texy, HtmlElement $el): HtmlElement
 	{

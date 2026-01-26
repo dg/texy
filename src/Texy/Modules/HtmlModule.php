@@ -10,10 +10,15 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HtmlElement;
+use Texy\InlineParser;
+use Texy\Nodes\HtmlCommentNode;
+use Texy\Nodes\HtmlTagNode;
+use Texy\Output\Html\Generator;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Regexp;
-use function array_flip, count, explode, is_array, is_string, str_contains, str_ends_with, strtolower, strtr, substr, trim;
+use function htmlspecialchars, preg_replace, str_ends_with, strlen, strtolower, strtr, substr, trim;
+use const ENT_HTML5, ENT_QUOTES;
 
 
 /**
@@ -28,8 +33,8 @@ final class HtmlModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('htmlComment', $this->solveComment(...));
-		$texy->addHandler('htmlTag', $this->solveTag(...));
+		$texy->htmlGenerator->registerHandler($this->solveTag(...));
+		$texy->htmlGenerator->registerHandler($this->solveComment(...));
 	}
 
 
@@ -70,29 +75,27 @@ final class HtmlModule extends Texy\Module
 	/**
 	 * Parses <!-- comment -->
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseComment(Texy\InlineParser $parser, array $matches): HtmlElement|string|null
+	public function parseComment(InlineParser $parser, array $matches, string $name, array $offsets): HtmlCommentNode
 	{
-		[, $mComment] = $matches;
-		return $this->texy->invokeAroundHandlers('htmlComment', $parser, [$mComment]);
+		[, $mContent] = $matches;
+		return new HtmlCommentNode($mContent, new Position($offsets[0], strlen($matches[0])));
 	}
 
 
 	/**
 	 * Parses <tag attr="...">
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseTag(Texy\InlineParser $parser, array $matches): ?string
+	public function parseTag(InlineParser $parser, array $matches, string $name, array $offsets): ?HtmlTagNode
 	{
 		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
-		// [1] => /
-		// [2] => tag
-		// [3] => attributes
-		// [4] => /
 
 		$isStart = $mEnd !== '/';
 		$isEmpty = $mEmpty === '/';
-		if (!$isEmpty && str_ends_with($mAttr, '/')) { // uvizlo v $mAttr?
+		if (!$isEmpty && str_ends_with($mAttr, '/')) {
 			$mAttr = substr($mAttr, 0, -1);
 			$isEmpty = true;
 		}
@@ -102,223 +105,111 @@ final class HtmlModule extends Texy\Module
 			return null;
 		}
 
-		// error - end element with atttrs
+		// error - end element with attrs
 		$mAttr = trim(strtr($mAttr, "\n", ' '));
 		if ($mAttr && !$isStart) {
 			return null;
 		}
 
-		$el = new HtmlElement($mTag);
-		if ($isStart) {
-			$el->attrs = $this->parseAttributes($mAttr);
+		return new HtmlTagNode(
+			$mTag,
+			$isStart ? $this->parseAttributes($mAttr) : [],
+			closing: !$isStart,
+			selfClosing: $isEmpty,
+			position: new Position($offsets[0], strlen($matches[0])),
+		);
+	}
+
+
+	public function solveTag(HtmlTagNode $node, Generator $generator): string
+	{
+		$tagName = strtolower($node->name);
+
+		// Validate tag - reject if validation fails
+		if (!$this->validateTag($tagName, $node->attributes, $node->closing)) {
+			return $this->escapeTag($node);
 		}
 
-		$res = $this->texy->invokeAroundHandlers('htmlTag', $parser, [$el, $isStart, $isEmpty]);
-
-		if ($res instanceof HtmlElement) {
-			return $this->texy->protect($isStart ? $res->startTag() : $res->endTag(), $res->getContentType());
+		// Determine content type based on HtmlElement::$inlineElements
+		// Value 0 = inline markup, 1 = inline replaced, not present = block
+		$inlineType = Texy\HtmlElement::$inlineElements[$tagName] ?? null;
+		if ($inlineType === null) {
+			$type = $this->texy::CONTENT_BLOCK;
+		} elseif ($inlineType === 1) {
+			$type = $this->texy::CONTENT_REPLACED;
+		} else {
+			$type = $this->texy::CONTENT_MARKUP;
 		}
 
-		return $res;
+		if ($node->closing) {
+			$html = '</' . htmlspecialchars($tagName, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '>';
+			return $this->texy->protect($html, $type);
+		}
+
+		$html = '<' . htmlspecialchars($tagName, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+		$html .= $generator->generateAttrs($node->attributes);
+		$html .= '>';
+
+		return $this->texy->protect($html, $type);
 	}
 
 
 	/**
-	 * Finish invocation.
+	 * Validate HTML tag - returns false if tag should be rejected.
+	 * @param  array<string, string|bool>  $attrs
 	 */
-	private function solveTag(
-		Texy\HandlerInvocation $invocation,
-		HtmlElement $el,
-		bool $isStart,
-		?bool $forceEmpty = null,
-	): ?HtmlElement
+	private function validateTag(string $tagName, array $attrs, bool $closing): bool
 	{
-		$texy = $this->texy;
-
-		// tag & attibutes
-		$allowedTags = $texy->allowedTags; // speed-up
-		if (!$allowedTags) {
-			return null; // all tags are disabled
-		}
-
-		$name = strtolower($el->getName());
-		$el->setName($name);
-
-		if (is_array($allowedTags)) {
-			if (!isset($allowedTags[$name])) {
-				return null;
-			}
-		} else { // allowedTags === Texy\Texy::ALL
-			if ($forceEmpty) {
-				$el->setName($name, empty: true);
-			}
-		}
-
-		// end tag? we are finished
-		if (!$isStart) {
-			return $el;
-		}
-
-		$this->applyAttrs($el->attrs, is_array($allowedTags) ? $allowedTags[$name] : $texy::ALL);
-		$this->applyClasses($el->attrs, $texy->getAllowedProps()[0]);
-		$this->applyStyles($el->attrs, $texy->getAllowedProps()[1]);
-		if (!$this->validateAttrs($el, $texy)) {
-			return null;
-		}
-
-		return $el;
-	}
-
-
-	/**
-	 * Finish invocation.
-	 */
-	private function solveComment(Texy\HandlerInvocation $invocation, string $content): string
-	{
-		if (!$this->passComment) {
-			return '';
-		}
-
-		// sanitize comment
-		$content = Regexp::replace($content, '~-{2,}~', ' - ');
-		$content = trim($content, '-');
-
-		return $this->texy->protect('<!--' . $content . '-->', Texy\Texy::CONTENT_MARKUP);
-	}
-
-
-	/**
-	 * @param  array<string, array<string|int|bool>|string|int|bool|null>  $attrs
-	 * @param  bool|string[]  $allowedAttrs
-	 */
-	private function applyAttrs(array &$attrs, bool|array $allowedAttrs): void
-	{
-		if (!$allowedAttrs) {
-			$attrs = [];
-
-		} elseif (is_array($allowedAttrs)) {
-			// skip disabled
-			$allowedAttrs = array_flip($allowedAttrs);
-			foreach ($attrs as $key => $foo) {
-				if (!isset($allowedAttrs[$key])) {
-					unset($attrs[$key]);
-				}
-			}
-		}
-	}
-
-
-	/**
-	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
-	 * @param  array<string, int>|bool  $allowedClasses
-	 */
-	private function applyClasses(array &$attrs, bool|array $allowedClasses): void
-	{
-		if (!isset($attrs['class'])) {
-		} elseif (is_array($allowedClasses)) {
-			$attrs['class'] = is_string($attrs['class']) ? explode(' ', $attrs['class']) : (array) $attrs['class'];
-			foreach ($attrs['class'] as $key => $value) {
-				if (!isset($allowedClasses[$value])) {
-					unset($attrs['class'][$key]); // id & class are case-sensitive
-				}
-			}
-		} elseif ($allowedClasses !== Texy\Texy::ALL) {
-			$attrs['class'] = null;
-		}
-
-		if (!isset($attrs['id'])) {
-		} elseif (is_array($allowedClasses)) {
-			if (!is_string($attrs['id']) || !isset($allowedClasses['#' . $attrs['id']])) {
-				$attrs['id'] = null;
-			}
-
-		} elseif ($allowedClasses !== Texy\Texy::ALL) {
-			$attrs['id'] = null;
-		}
-	}
-
-
-	/**
-	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
-	 * @param  array<string, int>|bool  $allowedStyles
-	 */
-	private function applyStyles(array &$attrs, bool|array $allowedStyles): void
-	{
-		if (!isset($attrs['style'])) {
-		} elseif (is_array($allowedStyles)) {
-			if (is_string($attrs['style'])) {
-				$parts = explode(';', $attrs['style']);
-				$attrs['style'] = [];
-				foreach ($parts as $value) {
-					if (count($pair = explode(':', $value, 2)) === 2) {
-						$attrs['style'][trim($pair[0])] = trim($pair[1]);
-					}
-				}
-			} else {
-				$attrs['style'] = (array) $attrs['style'];
-			}
-
-			foreach ($attrs['style'] as $key => $value) {
-				if (!isset($allowedStyles[strtolower((string) $key)])) { // CSS is case-insensitive
-					unset($attrs['style'][$key]);
-				}
-			}
-		} elseif ($allowedStyles !== Texy\Texy::ALL) {
-			$attrs['style'] = null;
-		}
-	}
-
-
-	private function validateAttrs(HtmlElement $el, Texy\Texy $texy): bool
-	{
-		foreach (['src', 'href', 'name', 'id'] as $attr) {
-			if (isset($el->attrs[$attr])) {
-				$el->attrs[$attr] = is_string($el->attrs[$attr])
-					? trim($el->attrs[$attr])
-					: '';
-				if ($el->attrs[$attr] === '') {
-					unset($el->attrs[$attr]);
-				}
-			}
-		}
-
-		$name = $el->getName();
-		if ($name === 'img') {
-			if (!isset($el->attrs['src'])) {
+		// <a> requires href, name, or id
+		if ($tagName === 'a' && !$closing) {
+			if (!isset($attrs['href']) && !isset($attrs['name']) && !isset($attrs['id'])) {
 				return false;
 			}
+		}
 
-			assert(is_string($el->attrs['src']));
-			if (!$texy->checkURL($el->attrs['src'], $texy::FILTER_IMAGE)) {
+		// <img> requires src
+		if ($tagName === 'img') {
+			if (!isset($attrs['src']) || (is_string($attrs['src']) && trim($attrs['src']) === '')) {
 				return false;
 			}
-
-		} elseif ($name === 'a') {
-			if (!isset($el->attrs['href']) && !isset($el->attrs['name']) && !isset($el->attrs['id'])) {
-				return false;
-			}
-
-			if (isset($el->attrs['href'])) {
-				assert(is_string($el->attrs['href']));
-				if ($texy->linkModule->forceNoFollow && str_contains($el->attrs['href'], '//')) {
-					$el->attrs['rel'] = (array) ($el->attrs['rel'] ?? []);
-					$el->attrs['rel'][] = 'nofollow';
-				}
-
-				if (!$texy->checkURL($el->attrs['href'], $texy::FILTER_ANCHOR)) {
-					return false;
-				}
-			}
-
-		} elseif (Regexp::match($name, '~^h[1-6]~i')) {
-			$texy->headingModule->TOC[] = [
-				'el' => $el,
-				'level' => (int) substr($name, 1),
-				'type' => 'html',
-			];
 		}
 
 		return true;
+	}
+
+
+	/**
+	 * Escape tag as text (when validation fails).
+	 */
+	private function escapeTag(HtmlTagNode $node): string
+	{
+		// Reconstruct the original tag text and escape it
+		$tag = '<';
+		if ($node->closing) {
+			$tag .= '/';
+		}
+		$tag .= $node->name;
+		foreach ($node->attributes as $name => $value) {
+			$tag .= ' ' . $name;
+			if ($value !== true) {
+				$tag .= '="' . htmlspecialchars((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8') . '"';
+			}
+		}
+		if ($node->selfClosing) {
+			$tag .= '/';
+		}
+		$tag .= '>';
+
+		return htmlspecialchars($tag, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+	}
+
+
+	public function solveComment(HtmlCommentNode $node, Generator $generator): string
+	{
+		// Sanitize comment content
+		$content = preg_replace('~-{2,}~', ' - ', $node->content);
+		$content = trim($content, '-');
+		return $this->texy->protect('<!--' . $content . '-->', $this->texy::CONTENT_MARKUP);
 	}
 
 

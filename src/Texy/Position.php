@@ -10,17 +10,11 @@ declare(strict_types=1);
 namespace Texy;
 
 
-/**
- * Base class for BlockParser and LineParser.
- */
-class Parser
+final class Position
 {
-	protected Texy $texy;
-	protected HtmlElement $element;
-
-
-	public function getTexy(): Texy
-	{
-		return $this->texy;
+	public function __construct(
+		public readonly int $offset,
+		public readonly int $length,
+	) {
 	}
 }

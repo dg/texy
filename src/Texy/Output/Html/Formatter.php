@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Texy\Modules;
+namespace Texy\Output\Html;
 
 use Texy;
 use Texy\Regexp;
@@ -17,7 +17,7 @@ use function array_intersect, array_keys, array_unshift, max, reset, rtrim, str_
 /**
  * Formats and validates HTML output (well-forming, indentation, line wrapping).
  */
-final class HtmlOutputModule extends Texy\Module
+final class Formatter
 {
 	public const InnerTransparent = '%TRANS';
 	public const InnerText = '%TEXT';
@@ -114,17 +114,10 @@ final class HtmlOutputModule extends Texy\Module
 	private array $baseDTD = [];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$texy->addHandler('postProcess', $this->postProcess(...));
-	}
-
-
 	/**
-	 * Converts <strong><em> ... </strong> ... </em>.
-	 * into <strong><em> ... </em></strong><em> ... </em>
+	 * Format HTML string with indentation and line wrapping.
 	 */
-	private function postProcess(string &$s): void
+	public function format(string $s): string
 	{
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
@@ -167,12 +160,14 @@ final class HtmlOutputModule extends Texy\Module
 				$this->wrap(...),
 			);
 		}
+
+		return $s;
 	}
 
 
 	/**
 	 * Processes a fragment of HTML: text content followed by a tag or comment.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	private function processFragment(array $matches): string
 	{

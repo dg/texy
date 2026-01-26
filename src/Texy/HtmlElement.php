@@ -63,7 +63,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	{
 		$this->name = $name;
 		$this->isEmpty = $empty === null
-			? isset(Modules\HtmlOutputModule::$emptyElements[$name ?? ''])
+			? isset(Output\Html\Formatter::$emptyElements[$name ?? ''])
 			: (bool) $empty;
 		return $this;
 	}
@@ -318,24 +318,6 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/**
-	 * Renders to final HTML.
-	 */
-	final public function toHtml(Texy $texy): string
-	{
-		return $texy->stringToHtml($this->toString($texy));
-	}
-
-
-	/**
-	 * Renders to final text.
-	 */
-	final public function toText(Texy $texy): string
-	{
-		return $texy->stringToText($this->toString($texy));
-	}
-
-
-	/**
 	 * Returns element's start tag.
 	 */
 	public function startTag(): string
@@ -413,29 +395,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 	final public function getContentType(): string
 	{
-		$inlineType = Modules\HtmlOutputModule::$inlineElements[$this->name ?? ''] ?? null;
+		$inlineType = Output\Html\Formatter::$inlineElements[$this->name ?? ''] ?? null;
 		return $inlineType === null
 			? Texy::CONTENT_BLOCK
 			: ($inlineType ? Texy::CONTENT_REPLACED : Texy::CONTENT_MARKUP);
-	}
-
-
-	/**
-	 * Parses text as single line.
-	 */
-	final public function parseLine(Texy $texy, string $s): void
-	{
-		$parser = $texy->createInlineParser();
-		$this->children = [$parser->parse($s)];
-	}
-
-
-	/**
-	 * Parses text as block.
-	 */
-	final public function parseBlock(Texy $texy, string $s, bool $indented = false): void
-	{
-		$parser = $texy->createBlockParser($indented);
-		$this->children = $parser->parse($s);
 	}
 }

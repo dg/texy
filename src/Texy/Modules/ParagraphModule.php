@@ -10,8 +10,10 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Regexp;
-use function str_contains, str_replace, strlen, strtr, substr_replace, trim;
+use Texy\Nodes;
+use Texy\Nodes\ParagraphNode;
+use Texy\Output\Html\Generator;
+use function is_array, strtolower, trim;
 
 
 /**
@@ -22,114 +24,140 @@ final class ParagraphModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('paragraph', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
+		$texy->htmlGenerator->registerHandler(
+			fn(Nodes\LineBreakNode $node) => $this->texy->protect('<br>', $this->texy::CONTENT_REPLACED),
+		);
 	}
 
 
-	/** @return list<Texy\HtmlElement> */
-	public function process(Texy\BlockParser $parser, string $content): array
+	public function solve(ParagraphNode $node, Generator $generator): string
 	{
-		$res = [];
-		$parts = $parser->isIndented()
-			? Regexp::split($content, '~(\n (?! \ ) | \n{2,})~', skipEmpty: true)
-			: Regexp::split($content, '~(\n{2,})~', skipEmpty: true);
+		$content = $generator->generateInlineContent($node->content);
+		$attrs = $generator->generateModifierAttrs($node->modifier);
 
-		foreach ($parts ?: [] as $s) {
-			$s = trim($s);
-			if ($s === '') {
-				continue;
-			}
-
-			// try to find modifier
-			$mod = null;
-			if ($mx = Regexp::match($s, '~' . Texy\Patterns::MODIFIER_H . '(?= \n | \z)~sUm', captureOffset: true)) {
-				[$mMod] = $mx[1];
-				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
-				if ($s === '') {
-					continue;
-				}
-
-				$mod = Texy\Modifier::parse($mMod);
-			}
-
-			$el = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
-			if ($el) {
-				$res[] = $el;
-			}
+		// Block HTML content - skip <p> wrapper entirely
+		if ($node->blockHtml) {
+			return trim($content);
 		}
 
-		return $res;
+		// Check if paragraph contains only markup (HTML tags/comments) without text
+		// In that case, skip the <p> wrapper
+		if ($node->modifier === null && $this->isOnlyMarkupContent($node->content)) {
+			return trim($content);
+		}
+
+		// Check if paragraph contains only replaced elements (images)
+		// In that case, use nontextParagraph tag (default: div) instead of <p>
+		$tag = 'p';
+		if ($this->isOnlyReplacedContent($node->content)) {
+			$nontextParagraph = $this->texy->nontextParagraph;
+			if ($nontextParagraph instanceof Texy\HtmlElement) {
+				$el = clone $nontextParagraph;
+				// Merge paragraph modifier classes into the element
+				if ($node->modifier !== null) {
+					// Ensure class is array before appending
+					if (!is_array($el->attrs['class'] ?? null)) {
+						$existing = $el->attrs['class'] ?? null;
+						$el->attrs['class'] = $existing !== null ? [$existing] : [];
+					}
+					foreach ($node->modifier->classes as $class => $_) {
+						$el->attrs['class'][] = $class;
+					}
+					if ($node->modifier->id !== null) {
+						$el->attrs['id'] = $node->modifier->id;
+					}
+				}
+				return $this->texy->protect($el->startTag(), $this->texy::CONTENT_BLOCK)
+					. $content
+					. $this->texy->protect($el->endTag(), $this->texy::CONTENT_BLOCK);
+			}
+			$tag = $nontextParagraph;
+		}
+
+		$open = $this->texy->protect("<{$tag}{$attrs}>", $this->texy::CONTENT_BLOCK);
+		$close = $this->texy->protect("</{$tag}>", $this->texy::CONTENT_BLOCK);
+		return $open . $content . $close;
 	}
 
 
 	/**
-	 * Finish invocation.
+	 * Check if content contains only replaced elements (images) and no text.
+	 * @param array<Nodes\InlineNode> $content
 	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		string $content,
-		?Texy\Modifier $mod = null,
-	): Texy\HtmlElement
+	private function isOnlyReplacedContent(array $content): bool
 	{
-		$texy = $this->texy;
-
-		// find hard linebreaks
-		$content = $texy->mergeLines
-			// ....
-			// ... => \r means break line
-			? Regexp::replace($content, '~\n\ +(?= \S)~', "\r")
-			: Regexp::replace($content, '~\n~', "\r");
-
-		$el = new Texy\HtmlElement('p');
-		$el->parseLine($texy, $content);
-		$content = $el->getText();
-		assert($content !== null);
-
-		// check content type
-		// block contains block tag
-		if (str_contains($content, $texy::CONTENT_BLOCK)) {
-			$el->setName(null); // ignores modifier!
-
-		// block contains text (protected)
-		} elseif (str_contains($content, $texy::CONTENT_TEXTUAL)) {
-			// leave element p
-
-		// block contains text
-		} elseif (Regexp::match($content, '~[^\s' . Texy\Patterns::MARK . ']~')) {
-			// leave element p
-
-		// block contains only replaced element
-		} elseif (str_contains($content, $texy::CONTENT_REPLACED)) {
-			if ($texy->nontextParagraph instanceof Texy\HtmlElement) {
-				$el = (clone $texy->nontextParagraph)->setText($content);
+		$hasReplaced = false;
+		foreach ($content as $node) {
+			if ($node instanceof Nodes\ImageNode) {
+				$hasReplaced = true;
+			} elseif ($node instanceof Nodes\LinkNode) {
+				// Link containing only image is considered replaced
+				if ($this->isOnlyReplacedContent($node->content)) {
+					$hasReplaced = true;
+				} else {
+					return false;
+				}
+			} elseif ($node instanceof Nodes\HtmlTagNode) {
+				// Check if this is a replaced HTML element (img, etc.)
+				$tagName = strtolower($node->name);
+				$inlineType = Texy\HtmlElement::$inlineElements[$tagName] ?? null;
+				if ($inlineType === 1) {
+					// Inline replaced element (img, br, etc.)
+					$hasReplaced = true;
+				} elseif ($inlineType === 0) {
+					// Inline markup (a, span, etc.) - continue checking
+					// but don't mark as having replaced content
+				} elseif ($node->closing) {
+					// Closing tags don't affect the check
+				} else {
+					// Block element - not purely replaced content
+					return false;
+				}
+			} elseif ($node instanceof Nodes\TextNode) {
+				if (trim($node->content) !== '') {
+					return false;
+				}
 			} else {
-				$el->setName($texy->nontextParagraph);
-			}
-
-		// block contains only markup tags or spaces or nothing
-		} else {
-			// if {ignoreEmptyStuff} return null;
-			if (!$mod) {
-				$el->setName(null);
+				return false;
 			}
 		}
+		return $hasReplaced;
+	}
 
-		if ($el->getName()) {
-			// apply modifier
-			if ($mod) {
-				$mod->decorate($texy, $el);
-			}
 
-			// add <br>
-			if (str_contains($content, "\r")) {
-				$key = $texy->protect('<br>', $texy::CONTENT_REPLACED);
-				$content = str_replace("\r", $key, $content);
+	/**
+	 * Check if content contains only markup/block elements without actual text.
+	 * @param array<Nodes\InlineNode> $content
+	 */
+	private function isOnlyMarkupContent(array $content): bool
+	{
+		$hasMarkup = false;
+		foreach ($content as $node) {
+			if ($node instanceof Nodes\HtmlCommentNode) {
+				$hasMarkup = true;
+			} elseif ($node instanceof Nodes\HtmlTagNode) {
+				// Check tag type: inline markup (0), inline replaced (1), or block (not in list)
+				$tagName = strtolower($node->name);
+				$inlineType = Texy\HtmlElement::$inlineElements[$tagName] ?? null;
+				if ($inlineType === null) {
+					// Block element - skip <p> wrapper
+					$hasMarkup = true;
+				} elseif ($inlineType === 0) {
+					// Inline markup - skip <p> wrapper
+					$hasMarkup = true;
+				} else {
+					// Inline replaced (1) - not markup, needs wrapper
+					return false;
+				}
+			} elseif ($node instanceof Nodes\TextNode) {
+				if (trim($node->content) !== '') {
+					return false; // Has actual text content
+				}
+			} else {
+				return false; // Other content types (images, links, etc.)
 			}
 		}
-
-		$content = strtr($content, "\r\n", '  ');
-		$el->setText($content);
-
-		return $el;
+		return $hasMarkup;
 	}
 }

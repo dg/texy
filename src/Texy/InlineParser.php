@@ -9,149 +9,123 @@ declare(strict_types=1);
 
 namespace Texy;
 
-use function array_keys, strlen, substr_replace;
+use Texy\Nodes\InlineNode;
+use Texy\Nodes\TextNode;
+use function strlen;
 
 
 /**
  * Parses inline structures (links, images, formatting, etc.).
  */
-class InlineParser extends Parser
+class InlineParser
 {
-	public bool $again;
-
-
 	public function __construct(
 		protected Texy $texy,
-		/** @var array<string, array{handler: \Closure(InlineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+		/** @var array<string, array{handler: \Closure(InlineParser, array<string>, string, array<int|string, int|null>): ?InlineNode, pattern: string}> */
 		public array $patterns,
 	) {
 	}
 
 
-	public function parse(string $text): string
+	public function addPattern(string $name, string $pattern, \Closure $handler): void
 	{
-		if (!$this->patterns) { // nothing to do
-			return $text;
-		}
-
-		$offset = 0;
-		$names = array_keys($this->patterns);
-		/** @var array<string, array<string>> $matches */
-		$matches = $offsets = [];
-		foreach ($names as $name) {
-			$offsets[$name] = -1;
-		}
-
-		do {
-			$first = $this->match($text, $offset, $names, $offsets, $matches);
-			if ($first === null) {
-				break;
-			}
-
-			$px = $this->patterns[$first];
-			$offset = $start = $offsets[$first];
-
-			$this->again = false;
-			$res = $px['handler']($this, $matches[$first], $first);
-
-			if ($res instanceof HtmlElement) {
-				$res = $res->toString($this->texy);
-			} elseif ($res === null) {
-				$offsets[$first] = -2;
-				continue;
-			}
-
-			$len = strlen($matches[$first][0]);
-			$text = substr_replace(
-				$text,
-				(string) $res,
-				$start,
-				$len,
-			);
-
-			$delta = strlen($res) - $len;
-			foreach ($names as $name) {
-				if ($offsets[$name] < $start + $len) {
-					$offsets[$name] = -1;
-				} else {
-					$offsets[$name] += $delta;
-				}
-			}
-
-			if ($this->again) {
-				$offsets[$first] = -2;
-			} else {
-				$offsets[$first] = -1;
-				$offset += strlen($res);
-			}
-		} while (1);
-
-		return $text;
+		$this->patterns[$name] = [
+			'pattern' => $pattern,
+			'handler' => $handler,
+		];
 	}
 
 
 	/**
-	 * @param  array<int, string>  $names
-	 * @param  array<string, int>  $offsets
-	 * @param  array<string, array<string>>  $matches
+	 * @param int $baseOffset Base offset to add for absolute positions (for nested content)
+	 * @return array<InlineNode>
 	 */
-	private function match(string $text, int $offset, array &$names, array &$offsets, array &$matches): ?string
+	public function parse(string $text, int $baseOffset = 0): array
 	{
-		$first = null;
-		$minOffset = strlen($text);
-
-		foreach ($names as $index => $name) {
-			if ($offsets[$name] < $offset) {
-				$delta = 0;
-				if ($offsets[$name] === -2) {
-					do {
-						$delta++;
-					} while (
-						isset($text[$offset + $delta])
-						&& $text[$offset + $delta] >= "\x80"
-						&& $text[$offset + $delta] < "\xC0"
-					);
-				}
-
-				if ($offset + $delta > strlen($text)) {
-					unset($names[$index]);
-					continue;
-
-				} elseif ($m = Regexp::match(
-					$text,
-					$this->patterns[$name]['pattern'],
-					captureOffset: true,
-					offset: $offset + $delta,
-				)) {
-					/** @var array<int|string, array{string, int}> $m */
-					if (!strlen($m[0][0])) {
-						continue;
-					}
-
-					$offsets[$name] = $m[0][1];
-					$matches[$name] = [];
-					foreach ($m as $keyx => $value) {
-						$matches[$name][$keyx] = $value[0];
-					}
-				} else {
-					// try next time?
-					if (
-						!$this->patterns[$name]['again']
-						|| !Regexp::match($text, $this->patterns[$name]['again'], offset: $offset + $delta)
-					) {
-						unset($names[$index]);
-					}
-
-					continue;
-				}
+		if ($text === '' || !$this->patterns) {
+			if ($text === '') {
+				return [];
 			}
+			return [new TextNode($text, new Position($baseOffset, strlen($text)))];
+		}
 
-			if ($offsets[$name] < $minOffset) {
-				$minOffset = $offsets[$name];
-				$first = $name;
+		// Find all matches for all patterns
+		$allMatches = [];
+		foreach ($this->patterns as $name => $info) {
+			$matches = Regexp::matchAll($text, $info['pattern'], captureOffset: true);
+			foreach ($matches as $match) {
+				if ($match[0][0] === '') {
+					continue;
+				}
+				$flatten = $offsets = [];
+				foreach ($match as $key => $value) {
+					$flatten[$key] = $value[0];
+					$offsets[$key] = $value[1] >= 0 ? $value[1] : null;
+				}
+				$allMatches[] = [
+					'name' => $name,
+					'offset' => $match[0][1],
+					'length' => strlen($match[0][0]),
+					'match' => $flatten,
+					'offsets' => $offsets,
+					'handler' => $info['handler'],
+				];
 			}
 		}
 
-		return $first;
+		if (!$allMatches) {
+			return [new TextNode($text, new Position($baseOffset, strlen($text)))];
+		}
+
+		// Sort by offset, longer matches first for same offset
+		usort($allMatches, fn($a, $b) => $a['offset'] <=> $b['offset'] ?: $b['length'] <=> $a['length']);
+
+		// Process matches without overlapping
+		$res = [];
+		$pos = 0;
+
+		foreach ($allMatches as $m) {
+			if ($m['offset'] < $pos) {
+				continue; // Skip overlapping match
+			}
+
+			// Add text before this match
+			if ($m['offset'] > $pos) {
+				$res[] = new TextNode(
+					substr($text, $pos, $m['offset'] - $pos),
+					new Position($baseOffset + $pos, $m['offset'] - $pos),
+				);
+			}
+
+			// Adjust offsets to absolute positions
+			$absoluteOffsets = [];
+			foreach ($m['offsets'] as $key => $offset) {
+				$absoluteOffsets[$key] = $offset !== null ? $baseOffset + $offset : null;
+			}
+
+			// Call handler with offsets
+			$node = ($m['handler'])($this, $m['match'], $m['name'], $absoluteOffsets);
+			if ($node !== null) {
+				$res[] = $node;
+				$pos = $m['offset'] + $m['length'];
+			} else {
+				// Handler returned null, treat as text
+				$res[] = new TextNode(
+					substr($text, $m['offset'], $m['length']),
+					new Position($baseOffset + $m['offset'], $m['length']),
+				);
+				$pos = $m['offset'] + $m['length'];
+			}
+		}
+
+		// Add remaining text
+		if ($pos < strlen($text)) {
+			$res[] = new TextNode(
+				substr($text, $pos),
+				new Position($baseOffset + $pos, strlen($text)),
+			);
+		}
+
+		return $res;
 	}
 }

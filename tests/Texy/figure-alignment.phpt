@@ -54,7 +54,7 @@ test('figure with float fallback', function () {
 	$texy = new Texy\Texy;
 	// No leftClass, no alignClasses - should use float style
 	Assert::match(
-		'<div style="float:left" class="figure"><img src="images/image.jpg" alt="">
+		'<div class="figure" style="float:left"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
 </div>
 ',
