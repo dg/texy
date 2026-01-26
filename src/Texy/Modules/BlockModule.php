@@ -90,7 +90,7 @@ final class BlockModule extends Texy\Module
 		Texy\HandlerInvocation $invocation,
 		string $blocktype,
 		string $s,
-		$param,
+		?string $param,
 		Texy\Modifier $mod,
 	): HtmlElement|string|null
 	{
@@ -132,7 +132,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	private function blockTexySource(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param): string|HtmlElement
+	private function blockTexySource(string $s, Texy\Texy $texy, Texy\Modifier $mod, ?string $param): string|HtmlElement
 	{
 		$s = Helpers::outdent($s);
 		if ($s === '') {
@@ -151,7 +151,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	private function blockCode(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param): string|HtmlElement
+	private function blockCode(string $s, Texy\Texy $texy, Texy\Modifier $mod, ?string $param): string|HtmlElement
 	{
 		$s = Helpers::outdent($s);
 		if ($s === '') {
@@ -171,7 +171,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	private function blockDefault(string $s, Texy\Texy $texy, Texy\Modifier $mod, $param): string|HtmlElement
+	private function blockDefault(string $s, Texy\Texy $texy, Texy\Modifier $mod, ?string $param): string|HtmlElement
 	{
 		$s = Helpers::outdent($s);
 		if ($s === '') {
@@ -275,7 +275,12 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	private function blockDiv(string $s, Texy\Texy $texy, Texy\Modifier $mod, Texy\BlockParser $parser)
+	private function blockDiv(
+		string $s,
+		Texy\Texy $texy,
+		Texy\Modifier $mod,
+		Texy\BlockParser $parser,
+	): string|HtmlElement
 	{
 		$s = Helpers::outdent($s, firstLine: true);
 		if ($s === '') {

@@ -26,7 +26,7 @@ final class Helpers
 	/**
 	 * StrToLower in UTF-8.
 	 */
-	public static function toLower($s)
+	public static function toLower(string $s): string
 	{
 		return function_exists('mb_strtolower')
 			? mb_strtolower($s, 'UTF-8')

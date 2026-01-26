@@ -72,7 +72,7 @@ final class ScriptModule extends Texy\Module
 		string $cmd,
 		?array $args = null,
 		?string $raw = null,
-	): Texy\HtmlElement|string|null
+	): ?string
 	{
 		if ($cmd === 'texy' && $args) {
 			switch ($args[0]) {

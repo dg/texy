@@ -37,7 +37,7 @@ final class HandlerInvocation
 	/**
 	 * Invokes next handler in chain, or throws if none remain.
 	 */
-	public function proceed(...$args)
+	public function proceed(mixed ...$args): string|HtmlElement|null
 	{
 		if ($this->pos === 0) {
 			throw new \RuntimeException('No more handlers.');

@@ -51,7 +51,7 @@ final class TableModule extends Texy\Module
 	 * | aa | bb | cc |
 	 * @param  string[]  $matches
 	 */
-	public function patternTable(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
+	public function patternTable(Texy\BlockParser $parser, array $matches): ?HtmlElement
 	{
 		if ($this->disableTables) {
 			return null;

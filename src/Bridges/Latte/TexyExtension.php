@@ -58,7 +58,7 @@ class TexyExtension extends Latte\Extension
 	}
 
 
-	public function texyFilter(FilterInfo $info, string $text, ...$args): string
+	public function texyFilter(FilterInfo $info, string $text, mixed ...$args): string
 	{
 		$info->contentType ??= ContentType::Html;
 		return ($this->processor)($text, ...$args);

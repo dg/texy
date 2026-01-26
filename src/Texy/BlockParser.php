@@ -44,7 +44,7 @@ class BlockParser extends Parser
 	 * @param  ?array<string>  $matches
 	 * @param-out array<string> $matches
 	 */
-	public function next(string $pattern, &$matches): bool
+	public function next(string $pattern, ?array &$matches): bool
 	{
 		if ($this->offset > strlen($this->text)) {
 			return false;

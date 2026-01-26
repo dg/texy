@@ -62,7 +62,7 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Text pre-processing.
 	 */
-	private function beforeParse(Texy\Texy $texy, &$text): void
+	private function beforeParse(Texy\Texy $texy, string &$text): void
 	{
 		if (!empty($texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
@@ -194,7 +194,7 @@ final class ImageModule extends Texy\Module
 		?Texy\HandlerInvocation $invocation,
 		Image $image,
 		?Texy\Link $link = null,
-	): ?Texy\HtmlElement
+	): Texy\HtmlElement|string|null
 	{
 		if ($image->URL === null) {
 			return null;
