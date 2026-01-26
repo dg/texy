@@ -96,7 +96,7 @@ test('a lone image is not wrapped in a figure inside an item', function () {
 	Assert::match(
 		<<<'HTML'
 			<ul>
-				<li class="img"><img src="images/logo.webp" alt=""></li>
+				<li class="img"><img src="logo.webp" alt=""></li>
 
 				<li>text</li>
 			</ul>
@@ -116,9 +116,9 @@ test('an image with a caption keeps its figure inside an item', function () {
 		<<<'HTML'
 			<ul>
 				<li>
-					<div class="figure"><img src="images/logo.webp" alt="">
-						<p>Caption</p>
-					</div>
+					<figure><img src="logo.webp" alt="">
+						<figcaption>Caption</figcaption>
+					</figure>
 				</li>
 			</ul>
 			HTML,

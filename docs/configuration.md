@@ -109,10 +109,10 @@ $g->emoticonClass = null;               // CSS class wrapping emoticons (<span>)
 $g->passHtmlComments = true;            // keep HTML comments in output
 $g->linkBaseUrl = null;                 // prepended to relative link URLs
 $g->linkNoFollow = false;               // rel="nofollow" on absolute links
-$g->imageBaseUrl = 'images/';           // prepended to relative image URLs
+$g->imageBaseUrl = null;                // prepended to relative image URLs
 $g->imageBasePath = null;              // directory of the image files, sizes are read from them
-$g->figureTag = 'div';                  // 'figure' produces <figure>/<figcaption>
-$g->figureClass = 'figure';             // class of every figure, a floated one gets its float class too
+$g->figureTag = 'figure';               // <figure>/<figcaption>; another element puts the caption in <p>
+$g->figureClass = null;                 // class of every figure, a floated one gets its float class too
 $g->horizontalRuleClasses = ['-' => null, '*' => null];  // CSS class per HR type
 $g->phraseTags['strong'] = 'b';  // the tag of a phrase by what it means (PhraseType values), 'code' for inline code
 ```
