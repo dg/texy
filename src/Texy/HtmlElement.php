@@ -107,7 +107,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/** @param  array<string, mixed>|string|null  $attrs */
-	public static function el(?string $name = null, $attrs = null): static
+	public static function el(?string $name = null, array|string|null $attrs = null): static
 	{
 		return new self($name, $attrs);
 	}
@@ -147,7 +147,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Overloaded setter for element's attribute.
 	 */
-	final public function __set(string $name, $value): void
+	final public function __set(string $name, mixed $value): void
 	{
 		$this->attrs[$name] = $value;
 	}
@@ -156,7 +156,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Overloaded getter for element's attribute.
 	 */
-	final public function &__get(string $name)
+	final public function &__get(string $name): mixed
 	{
 		return $this->attrs[$name];
 	}
@@ -166,7 +166,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * Sets element's attribute.
 	 * @param  string|int|bool|string[]|null  $value
 	 */
-	final public function setAttribute(string $name, $value): static
+	final public function setAttribute(string $name, string|int|bool|array|null $value): static
 	{
 		$this->attrs[$name] = $value;
 		return $this;
@@ -177,7 +177,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * Returns element's attribute.
 	 * @return string|int|bool|array<string|int|bool>|null
 	 */
-	final public function getAttribute(string $name)
+	final public function getAttribute(string $name): string|int|bool|array|null
 	{
 		return $this->attrs[$name] ?? null;
 	}
@@ -281,7 +281,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * Returns child node (ArrayAccess implementation).
 	 * @param  int  $index
 	 */
-	final public function offsetGet($index): mixed
+	final public function offsetGet($index): self|string
 	{
 		return $this->children[$index];
 	}
@@ -496,7 +496,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/** @param  array<string, array{array<string, int>, array<string, int>}>  $dtd */
-	public function validateChild($child, array $dtd): bool
+	public function validateChild(self|string $child, array $dtd): bool
 	{
 		if (isset($dtd[$this->name])) {
 			if ($child instanceof self) {

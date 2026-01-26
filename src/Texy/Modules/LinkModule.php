@@ -83,7 +83,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Text pre-processing.
 	 */
-	private function beforeParse(Texy\Texy $texy, &$text): void
+	private function beforeParse(Texy\Texy $texy, string &$text): void
 	{
 		self::$livelock = [];
 
@@ -262,7 +262,7 @@ final class LinkModule extends Texy\Module
 		?HandlerInvocation $invocation,
 		Link $link,
 		Texy\HtmlElement|string|null $content = null,
-	): Texy\HtmlElement|string
+	): Texy\HtmlElement|string|null
 	{
 		if ($link->URL === null) {
 			return $content;
@@ -310,7 +310,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string
+	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string|null
 	{
 		$content = $this->textualUrl($link);
 		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
@@ -321,7 +321,7 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	private function solveNewReference(HandlerInvocation $invocation, string $name)
+	private function solveNewReference(HandlerInvocation $invocation, string $name): void
 	{
 		// no change
 	}

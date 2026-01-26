@@ -61,7 +61,7 @@ final class HtmlModule extends Texy\Module
 	 * Callback for: <tag attr="...">.
 	 * @param  string[]  $matches
 	 */
-	public function patternTag(Texy\LineParser $parser, array $matches): HtmlElement|string|null
+	public function patternTag(Texy\LineParser $parser, array $matches): ?string
 	{
 		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 		// [1] => /
@@ -110,7 +110,7 @@ final class HtmlModule extends Texy\Module
 		HtmlElement $el,
 		bool $isStart,
 		?bool $forceEmpty = null,
-	): HtmlElement|string|null
+	): ?HtmlElement
 	{
 		$texy = $this->texy;
 
@@ -178,7 +178,7 @@ final class HtmlModule extends Texy\Module
 	 * @param  array<string, array<string|int|bool>|string|int|bool|null>  $attrs
 	 * @param  bool|string[]  $allowedAttrs
 	 */
-	private function applyAttrs(&$attrs, $allowedAttrs): void
+	private function applyAttrs(array &$attrs, bool|array $allowedAttrs): void
 	{
 		if (!$allowedAttrs) {
 			$attrs = [];
@@ -199,7 +199,7 @@ final class HtmlModule extends Texy\Module
 	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
 	 * @param  array<string, int>|bool  $allowedClasses
 	 */
-	private function applyClasses(&$attrs, $allowedClasses): void
+	private function applyClasses(array &$attrs, bool|array $allowedClasses): void
 	{
 		if (!isset($attrs['class'])) {
 		} elseif (is_array($allowedClasses)) {
@@ -229,7 +229,7 @@ final class HtmlModule extends Texy\Module
 	 * @param  array<string, string|int|bool|array<string|int|bool>|null>  $attrs
 	 * @param  array<string, int>|bool  $allowedStyles
 	 */
-	private function applyStyles(&$attrs, $allowedStyles): void
+	private function applyStyles(array &$attrs, bool|array $allowedStyles): void
 	{
 		if (!isset($attrs['style'])) {
 		} elseif (is_array($allowedStyles)) {
