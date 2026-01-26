@@ -47,8 +47,6 @@ final class Link
 
 	public function __clone()
 	{
-		if ($this->modifier) {
-			$this->modifier = clone $this->modifier;
-		}
+		$this->modifier = clone $this->modifier;
 	}
 }

@@ -28,7 +28,7 @@ final class Image
 	/** image width and height are maximal */
 	public bool $asMax = false;
 
-	public ?Modifier $modifier;
+	public Modifier $modifier;
 
 	/** reference name (if is stored as reference) */
 	public ?string $name;
@@ -42,8 +42,6 @@ final class Image
 
 	public function __clone()
 	{
-		if ($this->modifier) {
-			$this->modifier = clone $this->modifier;
-		}
+		$this->modifier = clone $this->modifier;
 	}
 }
