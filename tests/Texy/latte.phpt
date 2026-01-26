@@ -35,6 +35,7 @@ $template = <<<'XX'
 	XX;
 
 
+// Static content is pre-rendered
 Assert::match(
 	<<<'XX'
 		%A%

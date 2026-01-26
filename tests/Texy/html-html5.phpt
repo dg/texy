@@ -10,22 +10,20 @@ use Texy\Texy;
 require __DIR__ . '/../bootstrap.php';
 
 
-test('', function () {
+test('data-* attributes', function () {
 	$texy = new Texy;
 	Assert::same("<div data-test=\"hello\"></div>\n", $texy->process('<div data-test=hello>'));
 });
 
-test('', function () {
+
+test('data-attr modifier', function () {
 	$texy = new Texy;
 	Assert::same("<p data-attr=\"val\">hello</p>\n", $texy->process('hello .{data-attr: val}'));
-});
-
-test('', function () {
-	$texy = new Texy;
 	Assert::same("<div data-test=\"hello\"></div>\n", $texy->process('<div data-test=hello>'));
 });
 
-test('', function () {
+
+test('aria-* attributes', function () {
 	$texy = new Texy;
 	Assert::same("<div aria-foo=\"hello\"></div>\n", $texy->process('<div aria-foo=hello>'));
 });

@@ -9,8 +9,9 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-test('', function () {
+test('disabled classes and styles', function () {
 	$texy = new Texy\Texy;
+	$texy->htmlOutputModule->lineWrap = 0;
 	$texy->allowedClasses = false;
 	$texy->allowedStyles = false;
 
@@ -26,9 +27,9 @@ test('', function () {
 });
 
 
-test('', function () {
+test('filtered classes and styles', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlOutputModule->lineWrap = 180;
+	$texy->htmlOutputModule->lineWrap = 0;
 	$texy->allowedClasses = ['one', '#id'];
 	$texy->allowedStyles = ['color'];
 

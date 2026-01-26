@@ -18,3 +18,9 @@ function test(string $title, Closure $function): void
 {
 	$function();
 }
+
+
+function normalizeNewlines(string $s): string
+{
+	return str_replace("\r\n", "\n", $s);
+}
