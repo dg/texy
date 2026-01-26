@@ -15,7 +15,7 @@ test('nontext paragraph', function () {
 	$texy->htmlOutput->lineWrap = 0;
 
 	Assert::match(
-		'<section class="n"><img src="images/a" alt=""> <img src="images/b" alt=""></section>',
+		'<section class="n"><img src="a" alt=""> <img src="b" alt=""></section>',
 		$texy->toHtml('[* a *] [* b *] .[n]'),
 	);
 });

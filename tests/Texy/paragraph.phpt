@@ -129,7 +129,7 @@ test('line break between replaced content and markup', function () {
 	// without a line break, or beside a block tag
 	Assert::same('<a href="x"><img src="a" alt=""></a>', $texy->toHtml("<a href=x><img src=a alt=''></a>"));
 	Assert::same(' <img src="a" alt="">', $texy->toHtml("</div>\n\t<img src=a alt=''>"));
-	Assert::same(' <img src="images/a" alt="">', $texy->toHtml("</div>\n\t[* a *]"));
+	Assert::same(' <img src="a" alt="">', $texy->toHtml("</div>\n\t[* a *]"));
 });
 
 

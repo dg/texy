@@ -53,10 +53,10 @@ class Config
 	public ?string $emoticonClass = null;
 
 	/** element wrapping an image with its caption; <figure> puts the caption in <figcaption>, other elements in <p> */
-	public string $figureTag = 'div';
+	public string $figureTag = 'figure';
 
 	/** class of every figure; a floated one gets the class of its float too */
-	public ?string $figureClass = 'figure';
+	public ?string $figureClass = null;
 
 	// horizontal rules
 	/** @var array<string, ?string>  default CSS class for HR types */
@@ -70,7 +70,7 @@ class Config
 	public bool $passHtmlComments = true;
 
 	/** base URL prepended to relative image URLs */
-	public ?string $imageBaseUrl = 'images/';
+	public ?string $imageBaseUrl = null;
 
 	/** base path of the image files on disk, where the dimensions of an image are read from */
 	public ?string $imageBasePath = null;

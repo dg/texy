@@ -199,7 +199,7 @@ test('bare reference does not swallow neighboring syntaxes', function () {
 	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
 
 	// image syntax
-	Assert::contains('<img src="images/photo.png"', $texy->toHtml('[* photo.png *]'));
+	Assert::contains('<img src="photo.png"', $texy->toHtml('[* photo.png *]'));
 	// modifier class
 	Assert::same("<p class=\"note\">text</p>\n", $texy->toHtml('text .[note]'));
 	// PHP attribute
