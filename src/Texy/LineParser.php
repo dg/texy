@@ -126,8 +126,8 @@ class LineParser extends Parser
 				} elseif ($m = Regexp::match(
 					$text,
 					$this->patterns[$name]['pattern'],
-					Regexp::OFFSET_CAPTURE,
-					$offset + $delta,
+					captureOffset: true,
+					offset: $offset + $delta,
 				)) {
 					/** @var array<int|string, array{string, int}> $m */
 					if (!strlen($m[0][0])) {
@@ -143,7 +143,7 @@ class LineParser extends Parser
 					// try next time?
 					if (
 						!$this->patterns[$name]['again']
-						|| !Regexp::match($text, $this->patterns[$name]['again'], 0, $offset + $delta)
+						|| !Regexp::match($text, $this->patterns[$name]['again'], offset: $offset + $delta)
 					) {
 						unset($names[$index]);
 					}
