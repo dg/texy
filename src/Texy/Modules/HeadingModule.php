@@ -126,8 +126,9 @@ final class HeadingModule extends Texy\Module
 			}
 
 			if ($this->generateID) {
-				if (!empty($item['el']->attrs['style']['toc']) && is_array($item['el']->attrs['style'])) {
-					$title = $item['el']->attrs['style']['toc'];
+				$style = $item['el']->attrs['style'] ?? null;
+				if (is_array($style) && !empty($style['toc'])) {
+					$title = (string) $style['toc'];
 					unset($item['el']->attrs['style']['toc']);
 				} else {
 					$title = trim($item['el']->toText($this->texy));

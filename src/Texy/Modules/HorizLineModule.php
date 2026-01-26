@@ -59,6 +59,7 @@ final class HorizLineModule extends Texy\Module
 		$modifier->decorate($invocation->getTexy(), $el);
 
 		$class = $this->classes[$type[0]];
+		settype($el->attrs['class'], 'array');
 		if ($class && !isset($modifier->classes[$class])) {
 			$el->attrs['class'][] = $class;
 		}

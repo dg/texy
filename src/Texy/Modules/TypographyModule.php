@@ -102,7 +102,7 @@ final class TypographyModule extends Texy\Module
 	 */
 	public function beforeParse(Texy\Texy $texy, &$text): void
 	{
-		$locale = self::$locales[$this->locale] ?: self::$locales['en'];
+		$locale = self::$locales[$this->locale] ?? self::$locales['en'];
 		$dq = $locale['doubleQuotes'];
 		$sq = $locale['singleQuotes'];
 		foreach (self::$patterns as $k => $v) {

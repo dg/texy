@@ -163,7 +163,8 @@ final class TableModule extends Texy\Module
 		$mod->decorate($texy, $elRow);
 
 		$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
-		if ($rowClass && !isset($mod->classes[$this->oddClass]) && !isset($mod->classes[$this->evenClass])) {
+		if ($rowClass && !isset($mod->classes[$this->oddClass ?? '']) && !isset($mod->classes[$this->evenClass ?? ''])) {
+			settype($elRow->attrs['class'], 'array');
 			$elRow->attrs['class'][] = $rowClass;
 		}
 

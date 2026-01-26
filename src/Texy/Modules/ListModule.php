@@ -94,6 +94,7 @@ final class ListModule extends Texy\Module
 				$bullet = $desc[3] ?? $desc[0];
 				$min = isset($desc[3]) ? 2 : 1;
 				$el->setName($desc[1] ? 'ol' : 'ul');
+				settype($el->attrs['style'], 'array');
 				$el->attrs['style']['list-style-type'] = $desc[2];
 				if ($desc[1]) { // ol
 					if ($type[0] === '1' && (int) $mBullet > 1) {
