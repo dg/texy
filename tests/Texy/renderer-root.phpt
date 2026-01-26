@@ -43,7 +43,7 @@ test('imageBaseUrl prepends to relative image URLs', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->imageBaseUrl = '../images/';
 	Assert::same(
-		"<div class=\"figure\"><img src=\"../images/photo.jpg\" alt=\"\"></div>\n",
+		"<figure><img src=\"../images/photo.jpg\" alt=\"\"></figure>\n",
 		$texy->toHtml('[* photo.jpg *]'),
 	);
 });
@@ -53,7 +53,7 @@ test('imageBaseUrl does not prepend to absolute URLs', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->imageBaseUrl = '../images/';
 	Assert::same(
-		"<div class=\"figure\"><img src=\"https://example.com/photo.jpg\" alt=\"\"></div>\n",
+		"<figure><img src=\"https://example.com/photo.jpg\" alt=\"\"></figure>\n",
 		$texy->toHtml('[* https://example.com/photo.jpg *]'),
 	);
 });

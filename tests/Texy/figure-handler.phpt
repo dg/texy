@@ -44,7 +44,7 @@ test('custom ImageNode handler is called for images in figures', function () {
 	Assert::contains('https://youtube.com/embed/abc123', $html);
 	Assert::contains('width="320"', $html);
 	Assert::contains('height="240"', $html);
-	Assert::contains('<div class="figure">', $html);
+	Assert::contains('<figure>', $html);
 });
 
 
@@ -77,7 +77,7 @@ test('figure alignment is applied to wrapper, not to image', function () {
 	$texy->htmlOutput->floatClasses['right'] = 'float-right';
 
 	Assert::same(
-		"<div class=\"figure float-right\"><img src=\"images/image.jpg\" alt=\"\"></div>\n",
+		"<figure class=\"float-right\"><img src=\"image.jpg\" alt=\"\"></figure>\n",
 		$texy->toHtml('[* image.jpg >]'),
 	);
 });

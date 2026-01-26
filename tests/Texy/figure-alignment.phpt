@@ -12,10 +12,11 @@ require __DIR__ . '/../bootstrap.php';
 test('figure floated left gets its float class besides the figure class', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->floatClasses['left'] = 'image-left';
+	$texy->htmlOutput->figureClass = 'figure';
 	Assert::match(
-		'<div class="figure image-left"><img src="images/image.jpg" alt="">
-	<p>Caption</p>
-</div>
+		'<figure class="figure image-left"><img src="image.jpg" alt="">
+	<figcaption>Caption</figcaption>
+</figure>
 ',
 		$texy->toHtml('[* image.jpg <] *** Caption'),
 	);
@@ -25,11 +26,10 @@ test('figure floated left gets its float class besides the figure class', functi
 test('figure floated right', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->floatClasses['right'] = 'image-right';
-	$texy->htmlOutput->figureClass = null;
 	Assert::match(
-		'<div class="image-right"><img src="images/image.jpg" alt="">
-	<p>Caption</p>
-</div>
+		'<figure class="image-right"><img src="image.jpg" alt="">
+	<figcaption>Caption</figcaption>
+</figure>
 ',
 		$texy->toHtml('[* image.jpg >] *** Caption'),
 	);
@@ -40,9 +40,9 @@ test('text alignment classes do not apply to the float', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->textAlignClasses['left'] = 'align-left';
 	Assert::match(
-		'<div class="figure" style="float:left"><img src="images/image.jpg" alt="">
-	<p>Caption</p>
-</div>
+		'<figure style="float:left"><img src="image.jpg" alt="">
+	<figcaption>Caption</figcaption>
+</figure>
 ',
 		$texy->toHtml('[* image.jpg <] *** Caption'),
 	);
@@ -52,9 +52,9 @@ test('text alignment classes do not apply to the float', function () {
 test('figure centered (no float)', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div class="figure"><img src="images/image.jpg" alt="">
-	<p>Caption</p>
-</div>
+		'<figure><img src="image.jpg" alt="">
+	<figcaption>Caption</figcaption>
+</figure>
 ',
 		$texy->toHtml('[* image.jpg *] *** Caption'),
 	);

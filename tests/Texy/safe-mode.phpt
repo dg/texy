@@ -50,7 +50,7 @@ test('images and figures can be kept, their definitions stay disabled', function
 	$texy = new Texy\Texy;
 	Texy\Configurator::safeMode($texy, images: true);
 	Assert::same(
-		"<p>x <img src=\"http://a.cz/a.jpg\" alt=\"\"></p>\n\n<div class=\"figure\"><img src=\"http://a.cz/b.jpg\" alt=\"\">\n\t<p>caption</p>\n</div>\n\n<p><img src=\"images/x\" alt=\"\">: a.jpg</p>",
+		"<p>x <img src=\"http://a.cz/a.jpg\" alt=\"\"></p>\n\n<figure><img src=\"http://a.cz/b.jpg\" alt=\"\">\n\t<figcaption>caption</figcaption>\n</figure>\n\n<p><img src=\"x\" alt=\"\">: a.jpg</p>",
 		trim($texy->toHtml("x [* http://a.cz/a.jpg *]\n\n[* http://a.cz/b.jpg *] *** caption\n\n[*x*]: a.jpg")),
 	);
 	Assert::same('<p>[* javascript:x *]</p>', trim($texy->toHtml('[* javascript:x *]')));

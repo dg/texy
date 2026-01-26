@@ -33,7 +33,7 @@ test('image auto-detect dimensions', function () {
 	$texy->htmlOutput->imageBasePath = __DIR__ . '/fixtures/';
 	$texy->htmlOutput->imageBaseUrl = '';
 	Assert::match(
-		'<div class="figure"><img src="logo.gif" alt="" width="176" height="104"></div>
+		'<figure><img src="logo.gif" alt="" width="176" height="104"></figure>
 ',
 		$texy->toHtml('[* logo.gif *]'),
 	);
@@ -48,7 +48,7 @@ test('image auto-detect dimensions with specified width', function () {
 	// Original: 176x104, ratio = 104/176 = 0.59
 	// With width=88: height = 88 * 0.59 = 52
 	Assert::match(
-		'<div class="figure"><img src="logo.gif" alt="" width="88" height="52"></div>
+		'<figure><img src="logo.gif" alt="" width="88" height="52"></figure>
 ',
 		$texy->toHtml('[* logo.gif 88x? *]'),
 	);
@@ -63,7 +63,7 @@ test('image auto-detect dimensions with specified height', function () {
 	// Original: 176x104, ratio = 176/104 = 1.69
 	// With height=52: width = 52 * 1.69 = 88
 	Assert::match(
-		'<div class="figure"><img src="logo.gif" alt="" width="88" height="52"></div>
+		'<figure><img src="logo.gif" alt="" width="88" height="52"></figure>
 ',
 		$texy->toHtml('[* logo.gif ?x52 *]'),
 	);
@@ -75,7 +75,7 @@ test('image dimensions not detected without fileRoot', function () {
 	$texy->htmlOutput->imageBaseUrl = '';
 	// No fileRoot set, dimensions should not be added
 	Assert::match(
-		'<div class="figure"><img src="logo.gif" alt=""></div>
+		'<figure><img src="logo.gif" alt=""></figure>
 ',
 		$texy->toHtml('[* logo.gif *]'),
 	);
@@ -90,12 +90,12 @@ test('image with a float class', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->floatClasses['right'] = 'float-right';
 	Assert::match(
-		'<div class="figure float-right"><img src="images/image.jpg" alt=""></div>
+		'<figure class="float-right"><img src="image.jpg" alt=""></figure>
 ',
 		$texy->toHtml('[* image.jpg >]'),
 	);
 	Assert::match(
-		'<p>a <img src="images/image.jpg" alt="" class="float-right"> b</p>
+		'<p>a <img src="image.jpg" alt="" class="float-right"> b</p>
 ',
 		$texy->toHtml('a [* image.jpg >] b'),
 	);
@@ -106,7 +106,7 @@ test('image with float fallback', function () {
 	$texy = new Texy\Texy;
 	// no float class - the float is an inline style on the container
 	Assert::match(
-		'<div class="figure" style="float:left"><img src="images/image.jpg" alt=""></div>
+		'<figure style="float:left"><img src="image.jpg" alt=""></figure>
 ',
 		$texy->toHtml('[* image.jpg <]'),
 	);
@@ -120,8 +120,7 @@ test('image with float fallback', function () {
 test('image with direct link', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div class="figure"><a href="https://example.com"><img src="images/image.jpg"
-alt=""></a></div>
+		'<figure><a href="https://example.com"><img src="image.jpg" alt=""></a></figure>
 ',
 		$texy->toHtml('[* image.jpg *]:https://example.com'),
 	);
@@ -131,8 +130,7 @@ alt=""></a></div>
 test('image with double colon link (uses main URL)', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div class="figure"><a href="images/image.jpg"><img src="images/image.jpg"
-alt=""></a></div>
+		'<figure><a href="image.jpg"><img src="image.jpg" alt=""></a></figure>
 ',
 		$texy->toHtml('[* image.jpg *]::'),
 	);

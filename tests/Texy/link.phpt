@@ -104,7 +104,7 @@ test('entities in link targets are decoded once', function () {
 	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->toHtml('"x":http://a.cz/?a=1&amp;b=2')));
 	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->toHtml("\"x\":[r]\n\n[r]: http://a.cz/?a=1&amp;b=2")));
 	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">http://a.cz/?…</a></p>', trim($texy->toHtml('http://a.cz/?a=1&amp;b=2')));
-	Assert::same('<p>x <img src="images/a.png?x=1&amp;y=2" alt=""></p>', trim($texy->toHtml('x [* a.png?x=1&amp;y=2 *]')));
+	Assert::same('<p>x <img src="a.png?x=1&amp;y=2" alt=""></p>', trim($texy->toHtml('x [* a.png?x=1&amp;y=2 *]')));
 });
 
 

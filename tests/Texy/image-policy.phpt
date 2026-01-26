@@ -59,7 +59,7 @@ test('rejected figure stays as source text', function () {
 
 test('reference to a definition with rejected URL acts as undefined', function () {
 	Assert::match(
-		'<p>a <img src="images/x" alt=""> b</p>',
+		'<p>a <img src="x" alt=""> b</p>',
 		createTexy()->toHtml("[*x*]: javascript:alert(1)\n\na [*x*] b"),
 	);
 });
@@ -67,7 +67,7 @@ test('reference to a definition with rejected URL acts as undefined', function (
 
 test('link to a definition with rejected URL acts as undefined', function () {
 	Assert::match(
-		'<p><a href="images/x">text</a></p>',
+		'<p><a href="x">text</a></p>',
 		createTexy()->toHtml("[*x*]: javascript:alert(1)\n\n\"text\":[*x*]"),
 	);
 });
@@ -75,7 +75,7 @@ test('link to a definition with rejected URL acts as undefined', function () {
 
 test('image linked to itself by a definition with rejected URL acts as undefined', function () {
 	Assert::match(
-		'<p>a <a href="images/x"><img src="images/x" alt=""></a> b</p>',
+		'<p>a <a href="x"><img src="x" alt=""></a> b</p>',
 		createTexy()->toHtml("[*x*]: javascript:alert(1)\n\na [*x*]:: b"),
 	);
 });
@@ -84,9 +84,9 @@ test('image linked to itself by a definition with rejected URL acts as undefined
 test('figure with a definition with rejected URL acts as undefined', function () {
 	Assert::match(
 		<<<'XX'
-			<div class="figure"><img src="images/x" alt="">
-				<p>caption</p>
-			</div>
+			<figure><img src="x" alt="">
+				<figcaption>caption</figcaption>
+			</figure>
 
 			XX,
 		createTexy()->toHtml("[*x*]: javascript:alert(1)\n\n[*x*] *** caption"),
@@ -98,7 +98,7 @@ test('definition with rejected URL does not overwrite a user-defined one', funct
 	$texy = createTexy();
 	$texy->config->addImageDefinition('x', 'logo.png');
 	Assert::match(
-		'<p>a <img src="images/logo.png" alt=""> b</p>',
+		'<p>a <img src="logo.png" alt=""> b</p>',
 		$texy->toHtml("[*x*]: javascript:alert(1)\n\na [*x*] b"),
 	);
 });
