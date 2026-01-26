@@ -261,7 +261,7 @@ final class LinkModule extends Texy\Module
 		Texy\HtmlElement|string|null $content = null,
 	): Texy\HtmlElement|string
 	{
-		if ($link->URL == null) {
+		if ($link->URL === null) {
 			return $content;
 		}
 
@@ -282,6 +282,7 @@ final class LinkModule extends Texy\Module
 			// image
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->linkedRoot);
 			if ($this->imageClass) {
+				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
 				$el->attrs['class'][] = $this->imageClass;
 			}
 		} else {

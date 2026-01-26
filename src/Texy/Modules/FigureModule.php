@@ -115,12 +115,13 @@ final class FigureModule extends Texy\Module
 
 		$el = new Texy\HtmlElement($this->tagName);
 		if (!empty($image->width) && $this->widthDelta !== false) {
+			$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
 			$el->attrs['style']['max-width'] = ($image->width + $this->widthDelta) . 'px';
 		}
 
 		$mod->decorate($texy, $el);
 
-		$el[0] = $elImg;
+		$el->add($elImg);
 
 		if ($content !== '') {
 			$el[1] = new Texy\HtmlElement($this->tagName === 'figure' ? 'figcaption' : 'p');
@@ -134,6 +135,7 @@ final class FigureModule extends Texy\Module
 				$class = $this->$var;
 
 			} elseif (empty($texy->alignClasses[$hAlign])) {
+				$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
 				$el->attrs['style']['float'] = $hAlign;
 
 			} else {
@@ -141,6 +143,7 @@ final class FigureModule extends Texy\Module
 			}
 		}
 
+		$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
 		$el->attrs['class'][] = $class;
 
 		return $el;

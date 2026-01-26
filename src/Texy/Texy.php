@@ -383,7 +383,7 @@ class Texy
 	 */
 	public function toText(): string
 	{
-		if (!$this->DOM) {
+		if (!isset($this->DOM)) {
 			throw new \RuntimeException('Call $texy->process() first.');
 		}
 

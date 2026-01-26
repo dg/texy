@@ -163,7 +163,10 @@ final class BlockModule extends Texy\Module
 		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 		$el = new HtmlElement('pre');
 		$mod->decorate($texy, $el);
-		$el->attrs['class'][] = $param; // lang
+		if ($param !== null) {
+			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
+			$el->attrs['class'][] = $param;
+		}
 		$el->create('code', $s);
 		return $el;
 	}
@@ -178,7 +181,10 @@ final class BlockModule extends Texy\Module
 
 		$el = new HtmlElement('pre');
 		$mod->decorate($texy, $el);
-		$el->attrs['class'][] = $param; // lang
+		if ($param !== null) {
+			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
+			$el->attrs['class'][] = $param;
+		}
 		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
 		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
 		$el->setText($s);

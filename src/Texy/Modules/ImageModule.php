@@ -196,7 +196,7 @@ final class ImageModule extends Texy\Module
 		?Texy\Link $link = null,
 	): ?Texy\HtmlElement
 	{
-		if ($image->URL == null) {
+		if ($image->URL === null) {
 			return null;
 		}
 
@@ -221,12 +221,15 @@ final class ImageModule extends Texy\Module
 		if ($hAlign) {
 			$var = $hAlign . 'Class'; // leftClass, rightClass
 			if (!empty($this->$var)) {
+				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
 				$el->attrs['class'][] = $this->$var;
 
 			} elseif (empty($texy->alignClasses[$hAlign])) {
+				$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
 				$el->attrs['style']['float'] = $hAlign;
 
 			} else {
+				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
 				$el->attrs['class'][] = $texy->alignClasses[$hAlign];
 			}
 		}
@@ -251,7 +254,7 @@ final class ImageModule extends Texy\Module
 	private function detectDimensions(Image $image): void
 	{
 		// absolute URL & security check for double dot
-		if (!Helpers::isRelative($image->URL) || str_contains($image->URL, '..')) {
+		if ($image->URL === null || !Helpers::isRelative($image->URL) || str_contains($image->URL, '..')) {
 			return;
 		}
 
