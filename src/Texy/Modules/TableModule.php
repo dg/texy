@@ -60,7 +60,7 @@ final class TableModule extends Texy\Module
 		$texy = $this->texy;
 
 		$el = new HtmlElement('table');
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$mod->decorate($texy, $el);
 
 		$parser->moveBackward();
@@ -83,7 +83,7 @@ final class TableModule extends Texy\Module
 			// [3] => .(title)[class]{style}<>
 
 			$caption = $el->create('caption');
-			$mod = new Modifier($mMod);
+			$mod = Modifier::parse($mMod);
 			$mod->decorate($texy, $caption);
 			$caption->parseLine($texy, $mContent);
 		}
@@ -173,7 +173,7 @@ final class TableModule extends Texy\Module
 	): HtmlElement
 	{
 		$elRow = new HtmlElement('tr');
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$mod->decorate($texy, $elRow);
 
 		$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
@@ -261,7 +261,7 @@ final class TableModule extends Texy\Module
 		// [4] => .(title)[class]{style}<>_
 
 		if ($mModCol) {
-			$cellModifier = new Modifier($mModCol);
+			$cellModifier = Modifier::parse($mModCol);
 		}
 
 		$mod = $cellModifier ? clone $cellModifier : new Modifier;

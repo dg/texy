@@ -121,7 +121,7 @@ final class ListModule extends Texy\Module
 		}
 		assert($bullet !== null);
 
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$mod->decorate($this->texy, $el);
 
 		$parser->moveBackward(1);
@@ -167,7 +167,7 @@ final class ListModule extends Texy\Module
 		assert($bullet !== null);
 
 		$el = new HtmlElement('dl');
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$mod->decorate($texy, $el);
 		$parser->moveBackward(2);
 
@@ -191,7 +191,7 @@ final class ListModule extends Texy\Module
 				// [2] => .(title)[class]{style}<>
 
 				$elItem = new HtmlElement('dt');
-				$modItem = new Modifier($mMod);
+				$modItem = Modifier::parse($mMod);
 				$modItem->decorate($texy, $elItem);
 
 				$elItem->parseLine($texy, $mContent);
@@ -237,7 +237,7 @@ final class ListModule extends Texy\Module
 		// [3] => .(title)[class]{style}<>
 
 		$elItem = new HtmlElement($tag);
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$mod->decorate($this->texy, $elItem);
 
 		// next lines

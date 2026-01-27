@@ -48,8 +48,7 @@ final class ParagraphModule extends Texy\Module
 					continue;
 				}
 
-				$mod = new Texy\Modifier;
-				$mod->setProperties($mMod);
+				$mod = Texy\Modifier::parse($mMod);
 			}
 
 			$el = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
