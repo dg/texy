@@ -63,7 +63,7 @@ $texy->registerBlockPattern(
 /**
  * Pattern handler for inline syntaxes
  */
-function userInlineHandler(Texy\LineParser $parser, array $matches, string $name): Texy\HtmlElement|string
+function userInlineHandler(Texy\InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string
 {
 	[, $mContent, $mMod] = $matches;
 

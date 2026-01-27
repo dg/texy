@@ -117,7 +117,7 @@ final class ImageModule extends Texy\Module
 	 * Callback for [* small.jpg 80x13 || big.jpg .(alternative text)[class]{style}>]:LINK.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternImage(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function patternImage(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		// [1] => URLs
