@@ -283,10 +283,11 @@ $texy->addHandler('afterParse', function(
 ## Custom Syntax Registration
 
 ### Line Syntax (Inline Elements)
+
 ```php
 $texy->registerLinePattern(
     function(
-        Texy\LineParser $parser,
+        Texy\InlineParser $parser,
         array $matches,
         string $name,
     ): Texy\HtmlElement|string|null {
