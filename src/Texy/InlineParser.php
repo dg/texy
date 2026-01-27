@@ -13,9 +13,9 @@ use function array_keys, is_string, strlen, substr_replace;
 /**
  * Parses inline structures (links, images, formatting, etc.).
  */
-class LineParser extends Parser
+class InlineParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	public array $patterns;
 	public bool $again;
 

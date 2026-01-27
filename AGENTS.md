@@ -46,7 +46,7 @@ composer phpstan
 ## Working in this repo
 
 - **Two parsers, in order:** `BlockParser` handles block structures (blocks never
-  overlap), then `LineParser` handles inline syntaxes (nesting via progressive
+  overlap), then `InlineParser` handles inline syntaxes (nesting via progressive
   expansion). See `docs/parsing.md`.
 - **Protection marks are a hierarchy, not just a mask.** Content-type bytes
   `\x14`-`\x1F` are ordered so `[\x17-\x1F]+` matches a whole MARKUP placeholder;

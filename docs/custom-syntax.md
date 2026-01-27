@@ -61,7 +61,7 @@ The parser calls the syntax handler when it finds a match. Its job: process the 
 ### For line syntaxes
 
 ```php
-function(Texy\LineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+function(Texy\InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 ```
 
 - `$parser->getTexy()` returns the `Texy` instance.
@@ -90,7 +90,7 @@ function(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlEleme
 
 ```php
 $texy->registerLinePattern(
-    function(Texy\LineParser $parser, array $matches, string $name): Texy\HtmlElement {
+    function(Texy\InlineParser $parser, array $matches, string $name): Texy\HtmlElement {
         $username = $matches[1];
         $el = new Texy\HtmlElement('a');
         $el->attrs['href'] = '/user/' . urlencode($username);
@@ -134,7 +134,7 @@ This is an important notice!
 
 ```php
 $texy->registerLinePattern(
-    function(Texy\LineParser $parser, array $matches, string $name): Texy\HtmlElement {
+    function(Texy\InlineParser $parser, array $matches, string $name): Texy\HtmlElement {
         $el = new Texy\HtmlElement('a');
         $el->attrs['href'] = '/tag/' . urlencode($matches[1]);
         $el->attrs['class'][] = 'hashtag';
@@ -156,7 +156,7 @@ $abbreviations = [
 ];
 
 $texy->registerLinePattern(
-    function(Texy\LineParser $parser, array $matches, string $name) use ($abbreviations): ?Texy\HtmlElement {
+    function(Texy\InlineParser $parser, array $matches, string $name) use ($abbreviations): ?Texy\HtmlElement {
         if (!isset($abbreviations[$matches[1]])) {
             return null;   // unknown abbreviation – leave the text alone
         }

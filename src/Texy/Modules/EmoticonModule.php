@@ -71,7 +71,7 @@ final class EmoticonModule extends Texy\Module
 	 * Callback for: :-))).
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function pattern(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string} $matches */
 		$match = $matches[0];
