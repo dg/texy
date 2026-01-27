@@ -58,7 +58,7 @@ final class EmoticonModule extends Texy\Module
 		}
 
 		$this->texy->registerLinePattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~
 				(?<= ^ | [\x00-\x20] )
 				(' . implode('|', $pattern) . ')
@@ -70,10 +70,10 @@ final class EmoticonModule extends Texy\Module
 
 
 	/**
-	 * Callback for: :-))).
+	 * Parses :-).
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		$match = $matches[0];
 

@@ -53,7 +53,7 @@ final class ImageModule extends Texy\Module
 
 		// [*image*]:LINK
 		$texy->registerLinePattern(
-			$this->patternImage(...),
+			$this->parseImage(...),
 			'~
 				\[\* \ *+                         # opening bracket with asterisk
 				([^\n' . Patterns::MARK . ']{1,1000}) # URLs (1)
@@ -90,17 +90,17 @@ final class ImageModule extends Texy\Module
 					' . Patterns::MODIFIER . '?       # modifier (3)
 					\s*
 				$~mU',
-				$this->patternReferenceDef(...),
+				$this->parseDefinition(...),
 			);
 		}
 	}
 
 
 	/**
-	 * Callback for: [*image*]: urls .(title)[class]{style}.
+	 * Parses [*image*]: urls .(title)[class]{style}
 	 * @param  array<?string>  $matches
 	 */
-	private function patternReferenceDef(array $matches): string
+	private function parseDefinition(array $matches): string
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		// [1] => [* (reference) *]
@@ -114,10 +114,10 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Callback for [* small.jpg 80x13 || big.jpg .(alternative text)[class]{style}>]:LINK.
+	 * Parses [* small.jpg 80x13 || big.jpg .(alternative text)[class]{style}>]:LINK
 	 * @param  array<?string>  $matches
 	 */
-	public function patternImage(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseImage(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		// [1] => URLs

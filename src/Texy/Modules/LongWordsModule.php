@@ -88,7 +88,7 @@ final class LongWordsModule extends Texy\Module
 
 
 	/**
-	 * Callback for long words.
+	 * Parses long words.
 	 * @param  string[]  $matches
 	 */
 	private function pattern(array $matches): string
