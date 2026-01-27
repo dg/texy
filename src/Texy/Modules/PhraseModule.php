@@ -63,7 +63,7 @@ final class PhraseModule extends Texy\Module
 
 		// ***strong+emphasis***
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
 				\*\*\*
@@ -80,7 +80,7 @@ final class PhraseModule extends Texy\Module
 
 		// **strong**
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [*\\\] )                     # not preceded by * or \
 				\*\*
@@ -97,7 +97,7 @@ final class PhraseModule extends Texy\Module
 
 		// //emphasis//
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [/:] )                       # not preceded by / or :
 				//
@@ -114,7 +114,7 @@ final class PhraseModule extends Texy\Module
 
 		// *emphasisAlt*
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [*\\\] )                    # not preceded by * or \
 				\*
@@ -131,7 +131,7 @@ final class PhraseModule extends Texy\Module
 
 		// *emphasisAlt2*
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [^\s.,;:<>()"\'' . Patterns::MARK . '-] )  # must be preceded by these chars
 				\*
@@ -148,7 +148,7 @@ final class PhraseModule extends Texy\Module
 
 		// ++inserted++
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! \+ )                        # not preceded by +
 				\+\+
@@ -164,7 +164,7 @@ final class PhraseModule extends Texy\Module
 
 		// --deleted--
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [<-] )                      # not preceded by < or -
 				--
@@ -180,7 +180,7 @@ final class PhraseModule extends Texy\Module
 
 		// ^^superscript^^
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! \^ )                        # not preceded by ^
 				\^\^
@@ -196,7 +196,7 @@ final class PhraseModule extends Texy\Module
 
 		// m^2 alternative superscript
 		$texy->registerLinePattern(
-			$this->patternSupSub(...),
+			$this->parseSupSub(...),
 			'~
 				(?<= [a-z0-9] )                  # preceded by letter or number
 				\^
@@ -208,7 +208,7 @@ final class PhraseModule extends Texy\Module
 
 		// __subscript__
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! _ )                         # not preceded by _
 				__
@@ -224,7 +224,7 @@ final class PhraseModule extends Texy\Module
 
 		// m_2 alternative subscript
 		$texy->registerLinePattern(
-			$this->patternSupSub(...),
+			$this->parseSupSub(...),
 			'~
 				(?<= [a-z] )                     # preceded by letter
 				_
@@ -236,7 +236,7 @@ final class PhraseModule extends Texy\Module
 
 		// "span"
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! " )                         # not preceded by "
 				"
@@ -253,7 +253,7 @@ final class PhraseModule extends Texy\Module
 
 		// ~alternative span~
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! \~ )
 				\~
@@ -270,7 +270,7 @@ final class PhraseModule extends Texy\Module
 
 		// >>quote
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! > )                         # not preceded by >
 				>>
@@ -287,7 +287,7 @@ final class PhraseModule extends Texy\Module
 
 		// acronym/abbr "et al."((and others))
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! " )                         # not preceded by "
 				"
@@ -306,7 +306,7 @@ final class PhraseModule extends Texy\Module
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [' . Patterns::CHAR . '] )  # not preceded by char
 				( [' . Patterns::CHAR . ']{2,} ) # at least 2 chars (1)
@@ -320,7 +320,7 @@ final class PhraseModule extends Texy\Module
 
 		// ''notexy''
 		$texy->registerLinePattern(
-			$this->patternNoTexy(...),
+			$this->parseNoTexy(...),
 			'~
 				(?<! \' )                         # not preceded by quote
 				\'\'
@@ -335,7 +335,7 @@ final class PhraseModule extends Texy\Module
 
 		// `code`
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				`
 				( \S (?: [^' . Patterns::MARK . '\r\n `]++ | [ `] )* )  # content (1)
@@ -349,7 +349,7 @@ final class PhraseModule extends Texy\Module
 
 		// ....:LINK
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				( [' . Patterns::CHAR . '0-9@#$%&.,_-]++ )  # allowed chars (1)
 				()                                    # modifier placeholder (2)
@@ -361,7 +361,7 @@ final class PhraseModule extends Texy\Module
 
 		// [text |link]
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! \[ )                        # not preceded by [
 				\[
@@ -379,7 +379,7 @@ final class PhraseModule extends Texy\Module
 
 		// [text](link)
 		$texy->registerLinePattern(
-			$this->patternPhrase(...),
+			$this->parsePhrase(...),
 			'~
 				(?<! [[.] )                     # not preceded by [ or .
 				\[
@@ -410,10 +410,10 @@ final class PhraseModule extends Texy\Module
 
 
 	/**
-	 * Callback for: **.... .(title)[class]{style}**:LINK.
+	 * Parses phrase patterns.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternPhrase(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
+	public function parsePhrase(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
 		[, $mContent, $mMod, $mLink] = $matches + [3 => null];
 		// [1] => ...
@@ -451,10 +451,10 @@ final class PhraseModule extends Texy\Module
 
 
 	/**
-	 * Callback for: any^2 any_2.
+	 * Parses: any^2 any_2.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternSupSub(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
+	public function parseSupSub(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
 		[, $mContent] = $matches;
 		$mod = new Modifier;
@@ -465,7 +465,7 @@ final class PhraseModule extends Texy\Module
 
 
 	/** @param  array<?string>  $matches */
-	public function patternNoTexy(InlineParser $parser, array $matches): string
+	public function parseNoTexy(InlineParser $parser, array $matches): string
 	{
 		[, $mContent] = $matches;
 		return $this->texy->protect(htmlspecialchars($mContent, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);

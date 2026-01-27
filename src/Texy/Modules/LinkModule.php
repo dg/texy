@@ -57,7 +57,7 @@ final class LinkModule extends Texy\Module
 
 		// [reference]
 		$texy->registerLinePattern(
-			$this->patternReference(...),
+			$this->parseReference(...),
 			'~(
 				\[
 				[^\[\]*\n' . Patterns::MARK . ']++  # reference
@@ -68,7 +68,7 @@ final class LinkModule extends Texy\Module
 
 		// direct url; characters not allowed in URL <>[\]^`{|}
 		$texy->registerLinePattern(
-			$this->patternUrlEmail(...),
+			$this->parseUrlEmail(...),
 			'~
 				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
 				(?: https?:// | www\. | ftp:// )   # protocol or www
@@ -90,7 +90,7 @@ final class LinkModule extends Texy\Module
 			[' . Patterns::CHAR . '\x{ad}]{2,19}     # TLD
 		';
 		$texy->registerLinePattern(
-			$this->patternUrlEmail(...),
+			$this->parseUrlEmail(...),
 			'~
 				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
 				' . self::$EMAIL . '
@@ -121,17 +121,17 @@ final class LinkModule extends Texy\Module
 					' . Patterns::MODIFIER . '?       # modifier (4)
 					\s*
 				$~mU',
-				$this->patternReferenceDef(...),
+				$this->parseDefinition(...),
 			);
 		}
 	}
 
 
 	/**
-	 * Callback for: [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}.
+	 * Parses [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 	 * @param  array<?string>  $matches
 	 */
-	private function patternReferenceDef(array $matches): string
+	private function parseDefinition(array $matches): string
 	{
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		// [1] => [ (reference) ]
@@ -149,10 +149,10 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Callback for: [ref].
+	 * Parses [ref]
 	 * @param  array<?string>  $matches
 	 */
-	public function patternReference(InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseReference(InlineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		[, $mRef] = $matches;
 		// [1] => [ref]
@@ -189,10 +189,10 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Callback for: http://davidgrudl.com david@grudl.com.
+	 * Parses http://davidgrudl.com david@grudl.com
 	 * @param  array<?string>  $matches
 	 */
-	public function patternUrlEmail(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+	public function parseUrlEmail(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 	{
 		[$mURL] = $matches;
 		// [0] => URL
