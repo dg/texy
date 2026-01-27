@@ -18,9 +18,9 @@ use const PREG_SPLIT_NO_EMPTY;
  */
 final class ParagraphModule extends Texy\Module
 {
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('paragraph', $this->solve(...));
 	}
 

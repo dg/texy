@@ -4,7 +4,7 @@ Modules are the basic organizational unit of Texy. Each module encapsulates the 
 
 ## Responsibilities of a module
 
-1. **Registering syntaxes.** In its constructor a module calls `Texy::registerLinePattern()`, `registerBlockPattern()`, or `registerPostLine()` for every syntax it handles. This tells the parser: "when you find these patterns, call me."
+1. **Registering syntaxes.** A module registers its line and block patterns in its `beforeParse()` method (called on every `process()`) via `Texy::registerLinePattern()` / `registerBlockPattern()`; post-line handlers are registered once in the constructor with `registerPostLine()`. This tells the parser: "when you find these patterns, call me."
 2. **Implementing element handlers.** The module registers default handlers (via `Texy::addHandler()`) for the elements its syntaxes produce. These handlers contain the logic that turns matched constructs into `HtmlElement` objects.
 3. **Providing configuration.** Public properties let users adjust the module's behavior without touching its code (e.g. `ImageModule::$root` for the image URL prefix).
 4. **Managing module-specific state.** E.g. `HeadingModule` collects headings into its `$TOC` array; `LinkModule` maintains the dictionary of link references. This state is private to the module.
@@ -13,25 +13,26 @@ Modules are designed as independent units: each can work on its own and must not
 
 ## Anatomy of a typical module
 
-Every module extends the base class `Texy\Module` (`src/Texy/Module.php`), which holds the protected `$texy` back-reference. All initialization happens in the constructor:
+Every module extends the base class `Texy\Module` (`src/Texy/Module.php`), which provides an overridable `beforeParse()` method; each module keeps its own `$texy` back-reference (constructor-promoted). The constructor wires up element handlers and defaults; line and block patterns are registered in `beforeParse()`, which runs on every `process()` call:
 
 ```php
 final class FooModule extends Texy\Module
 {
     public string $someOption = 'default';   // public configuration
 
-    public function __construct(Texy\Texy $texy)
+    public function __construct(
+        private Texy\Texy $texy,
+    ) {
+        $texy->allowed['foo/advanced'] = false;      // default off
+        $texy->addHandler('foo', $this->solve(...));  // default element handler
+    }
+
+    public function beforeParse(string &$text): void
     {
-        $this->texy = $texy;
-
-        $texy->allowed['foo/advanced'] = false;          // default off
-        $texy->addHandler('foo', $this->solve(...));      // default element handler
-        $texy->addHandler('beforeParse', $this->beforeParse(...)); // optional
-
-        $texy->registerLinePattern(
+        $this->texy->registerLinePattern(
             $this->parseFoo(...),   // syntax handler
-            '#...#U',                 // pattern
-            'foo',                    // syntax name
+            '~...~U',               // pattern
+            'foo',                  // syntax name
         );
     }
 }
