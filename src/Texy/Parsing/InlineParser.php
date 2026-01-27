@@ -5,17 +5,21 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy;
+namespace Texy\Parsing;
 
+use Texy\HtmlElement;
+use Texy\Parser;
+use Texy\Regexp;
+use Texy\Texy;
 use function is_string, strlen;
 
 
 /**
  * Parses inline structures (links, images, formatting, etc.).
  */
-class LineParser extends Parser
+class InlineParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	public array $patterns;
 	public bool $again;
 

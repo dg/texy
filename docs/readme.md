@@ -24,7 +24,7 @@ chain-of-responsibility handlers, and DTD validation — so it is split by seam:
 - **[architecture.md](architecture.md)** — the four processing phases, the terminology
   (syntax / pattern / syntax handler / element handler / notification handler), and how
   the `Texy` orchestrator wires it together.
-- **[parsing.md](parsing.md)** — `LineParser` vs `BlockParser`, the protection marks and
+- **[parsing.md](parsing.md)** — `InlineParser` vs `BlockParser`, the protection marks and
   their content-type hierarchy, syntax collisions, and post-line processing.
 - **[modules.md](modules.md)** — the module system, the anatomy of a module, the overview
   of the built-in modules, and how they cooperate.

@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\LineParser;
+use Texy\Parsing\InlineParser;
 use Texy\Modifier;
 use Texy\Patterns;
 use const ENT_NOQUOTES;
@@ -410,7 +410,7 @@ final class PhraseModule extends Texy\Module
 	 * Callback for: **.... .(title)[class]{style}**:LINK.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternPhrase(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
+	public function patternPhrase(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string, ?string, ?string} $matches */
 		[, $mContent, $mMod, $mLink] = $matches + [3 => null];
@@ -452,7 +452,7 @@ final class PhraseModule extends Texy\Module
 	 * Callback for: any^2 any_2.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternSupSub(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
+	public function patternSupSub(InlineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string} $matches */
 		[, $mContent] = $matches;
@@ -464,7 +464,7 @@ final class PhraseModule extends Texy\Module
 
 
 	/** @param  array<?string>  $matches */
-	public function patternNoTexy(LineParser $parser, array $matches): string
+	public function patternNoTexy(InlineParser $parser, array $matches): string
 	{
 		/** @var array{string, string} $matches */
 		[, $mContent] = $matches;
