@@ -213,4 +213,4 @@ When registering a custom syntax, watch out for collisions with built-in syntaxe
 - **Set `$parser->again` deliberately** – for line syntaxes whose content can contain more of the same syntax.
 - **Use prefixed names** (`custom/username`, `myapp/alert`) – both to avoid future collisions and to let users disable your syntax via `$texy->allowed`.
 - **Respect `$texy->allowed`** – the parser already skips disabled syntaxes, but if your handler serves several syntaxes or does extra work, check `$texy->allowed[$name]` where relevant.
-- **Support modifiers** – add `Texy\Patterns::MODIFIER . '?'` to your pattern and apply it with `(new Texy\Modifier($matches[n]))->decorate($texy, $el)` so users can style your construct like any other.
+- **Support modifiers** – add `Texy\Patterns::MODIFIER . '?'` to your pattern and apply it with `Texy\Modifier::parse($matches[n])->decorate($texy, $el)` so users can style your construct like any other.

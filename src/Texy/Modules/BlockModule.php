@@ -92,7 +92,7 @@ final class BlockModule extends Texy\Module
 		// [3] => .(title)[class]{style}<>
 		// [4] => ... content
 
-		$mod = new Texy\Modifier($mMod);
+		$mod = Texy\Modifier::parse($mMod);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
 		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];

@@ -87,7 +87,7 @@ final class FigureModule extends Texy\Module
 
 		$texy = $this->texy;
 		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
-		$mod = new Texy\Modifier($mMod);
+		$mod = Texy\Modifier::parse($mMod);
 		$mContent = trim($mContent ?? '');
 
 		if ($mLink) {
