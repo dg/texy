@@ -15,5 +15,7 @@ namespace Texy;
  */
 abstract class Module
 {
-	protected Texy $texy;
+	public function beforeParse(string &$text): void
+	{
+	}
 }
