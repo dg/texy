@@ -41,16 +41,18 @@ final class ImageModule extends Texy\Module
 	private array $references = [];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->allowed['image/definition'] = true;
 		$texy->addHandler('image', $this->solve(...));
-		$texy->addHandler('beforeParse', $this->beforeParse(...));
+	}
 
+
+	public function beforeParse(string &$text): void
+	{
 		// [*image*]:LINK
-		$texy->registerLinePattern(
+		$this->texy->registerLinePattern(
 			$this->parseImage(...),
 			'~
 				\[\* \ *+                         # opening bracket with asterisk
@@ -66,15 +68,7 @@ final class ImageModule extends Texy\Module
 			'image',
 		);
 
-	}
-
-
-	/**
-	 * Text pre-processing.
-	 */
-	private function beforeParse(Texy\Texy $texy, string &$text): void
-	{
-		if (!empty($texy->allowed['image/definition'])) {
+		if (!empty($this->texy->allowed['image/definition'])) {
 			// [*image*]: urls .(title)[class]{style}
 			$text = Texy\Regexp::replace(
 				$text,

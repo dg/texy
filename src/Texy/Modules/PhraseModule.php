@@ -44,12 +44,20 @@ final class PhraseModule extends Texy\Module
 	public bool $linksAllowed = true;
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
+		$texy->allowed['phrase/ins'] = false;
+		$texy->allowed['phrase/del'] = false;
+		$texy->allowed['phrase/sup'] = false;
+		$texy->allowed['phrase/sub'] = false;
 		$texy->addHandler('phrase', $this->solve(...));
+	}
 
+
+	public function beforeParse(string &$text): void
+	{
+		$texy = $this->texy;
 		/*
 		// UNIVERSAL
 		$texy->registerLinePattern(
@@ -399,11 +407,6 @@ final class PhraseModule extends Texy\Module
 			'~\\\\\*~',                      // \* -> *
 			'phrase/escaped-asterix',
 		);
-
-		$texy->allowed['phrase/ins'] = false;
-		$texy->allowed['phrase/del'] = false;
-		$texy->allowed['phrase/sup'] = false;
-		$texy->allowed['phrase/sub'] = false;
 	}
 
 

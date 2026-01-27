@@ -42,19 +42,21 @@ final class LinkModule extends Texy\Module
 	private static string $EMAIL;
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->allowed['link/definition'] = true;
 		$texy->addHandler('newReference', $this->solveNewReference(...));
 		$texy->addHandler('linkReference', $this->solve(...));
 		$texy->addHandler('linkEmail', $this->solveUrlEmail(...));
 		$texy->addHandler('linkURL', $this->solveUrlEmail(...));
-		$texy->addHandler('beforeParse', $this->beforeParse(...));
+	}
 
+
+	public function beforeParse(string &$text): void
+	{
 		// [reference]
-		$texy->registerLinePattern(
+		$this->texy->registerLinePattern(
 			$this->parseReference(...),
 			'~(
 				\[
@@ -65,7 +67,7 @@ final class LinkModule extends Texy\Module
 		);
 
 		// direct url; characters not allowed in URL <>[\]^`{|}
-		$texy->registerLinePattern(
+		$this->texy->registerLinePattern(
 			$this->parseUrlEmail(...),
 			'~
 				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
@@ -87,7 +89,7 @@ final class LinkModule extends Texy\Module
 			\.
 			[' . Patterns::CHAR . '\x{ad}]{2,19}     # TLD
 		';
-		$texy->registerLinePattern(
+		$this->texy->registerLinePattern(
 			$this->parseUrlEmail(...),
 			'~
 				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
@@ -96,18 +98,11 @@ final class LinkModule extends Texy\Module
 			'link/email',
 			'~' . self::$EMAIL . '~',
 		);
-	}
 
-
-	/**
-	 * Text pre-processing.
-	 */
-	private function beforeParse(Texy\Texy $texy, string &$text): void
-	{
 		self::$livelock = [];
 
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
-		if (!empty($texy->allowed['link/definition'])) {
+		if (!empty($this->texy->allowed['link/definition'])) {
 			$text = Texy\Regexp::replace(
 				$text,
 				'~^

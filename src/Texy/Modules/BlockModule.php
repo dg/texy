@@ -19,10 +19,9 @@ use const ENT_NOQUOTES;
  */
 final class BlockModule extends Texy\Module
 {
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		//$texy->allowed['blocks'] = true;
 		$texy->allowed['block/default'] = true;
 		$texy->allowed['block/pre'] = true;
@@ -35,8 +34,12 @@ final class BlockModule extends Texy\Module
 
 		$texy->addHandler('block', $this->solve(...));
 		$texy->addHandler('beforeBlockParse', $this->beforeBlockParse(...));
+	}
 
-		$texy->registerBlockPattern(
+
+	public function beforeParse(string &$text): void
+	{
+		$this->texy->registerBlockPattern(
 			$this->parse(...),
 			'~^
 				/--++ \ *+                    # opening tag /--

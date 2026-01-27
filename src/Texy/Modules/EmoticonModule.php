@@ -34,16 +34,15 @@ final class EmoticonModule extends Texy\Module
 	public ?string $class = null;
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->allowed['emoticon'] = false;
 		$texy->addHandler('emoticon', $this->solve(...));
-		$texy->addHandler('beforeParse', $this->beforeParse(...));
 	}
 
 
-	private function beforeParse(): void
+	public function beforeParse(string &$text): void
 	{
 		if (str_contains(implode('', $this->icons), '.')) {
 			trigger_error('EmoticonModule: using image files is deprecated, use Unicode characters instead.', E_USER_DEPRECATED);

@@ -28,11 +28,15 @@ final class TableModule extends Texy\Module
 	private ?bool $disableTables = null;
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
+	}
 
-		$texy->registerBlockPattern(
+
+	public function beforeParse(string &$text): void
+	{
+		$this->texy->registerBlockPattern(
 			$this->parseTable(...),
 			'~^
 				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)

@@ -21,13 +21,16 @@ final class ScriptModule extends Texy\Module
 	public string $separator = ',';
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('script', $this->solve(...));
+	}
 
-		$texy->registerLinePattern(
+
+	public function beforeParse(string &$text): void
+	{
+		$this->texy->registerLinePattern(
 			$this->parse(...),
 			'~
 				\{\{

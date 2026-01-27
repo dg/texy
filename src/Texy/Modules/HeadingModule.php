@@ -53,15 +53,17 @@ final class HeadingModule extends Texy\Module
 	private array $usedID = [];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('heading', $this->solve(...));
-		$texy->addHandler('beforeParse', $this->beforeParse(...));
 		$texy->addHandler('afterParse', $this->afterParse(...));
+	}
 
-		$texy->registerBlockPattern(
+
+	public function beforeParse(string &$text): void
+	{
+		$this->texy->registerBlockPattern(
 			$this->parseUnderline(...),
 			'~^
 				( \S .{0,1000} )                 # heading text (1)
@@ -72,7 +74,7 @@ final class HeadingModule extends Texy\Module
 			'heading/underlined',
 		);
 
-		$texy->registerBlockPattern(
+		$this->texy->registerBlockPattern(
 			$this->parseSurround(...),
 			'~^
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
@@ -81,18 +83,14 @@ final class HeadingModule extends Texy\Module
 			$~mU',
 			'heading/surrounded',
 		);
-	}
 
-
-	private function beforeParse(): void
-	{
 		$this->title = null;
 		$this->usedID = [];
 		$this->TOC = [];
 	}
 
 
-	private function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, bool $isSingleLine): void
+	public function afterParse(Texy\HtmlElement $DOM, bool $isSingleLine): void
 	{
 		if ($isSingleLine) {
 			return;

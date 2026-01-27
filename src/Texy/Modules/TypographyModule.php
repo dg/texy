@@ -94,16 +94,11 @@ final class TypographyModule extends Texy\Module
 
 	public function __construct(Texy\Texy $texy)
 	{
-		$this->texy = $texy;
 		$texy->registerPostLine($this->postLine(...), 'typography');
-		$texy->addHandler('beforeParse', $this->beforeParse(...));
 	}
 
 
-	/**
-	 * Text pre-processing.
-	 */
-	public function beforeParse(Texy\Texy $texy, string &$text): void
+	public function beforeParse(string &$text): void
 	{
 		$locale = self::$locales[$this->locale] ?? self::$locales['en'];
 		$dq = $locale['doubleQuotes'];
