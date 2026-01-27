@@ -33,7 +33,7 @@ final class TableModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->registerBlockPattern(
-			$this->patternTable(...),
+			$this->parseTable(...),
 			'~^
 				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)
 				\|                                   # table start
@@ -45,16 +45,10 @@ final class TableModule extends Texy\Module
 
 
 	/**
-	 * Callback for:.
-	 *
-	 * .(title)[class]{style}>
-	 * |------------------
-	 * | xxx | xxx | xxx | .(..){..}[..]
-	 * |------------------
-	 * | aa | bb | cc |
+	 * Parses tables.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternTable(Texy\BlockParser $parser, array $matches): ?HtmlElement
+	public function parseTable(Texy\BlockParser $parser, array $matches): ?HtmlElement
 	{
 		if ($this->disableTables) {
 			return null;

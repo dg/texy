@@ -46,7 +46,7 @@ final class FigureModule extends Texy\Module
 	private function beforeParse(): void
 	{
 		$this->texy->registerBlockPattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~^
 				(?>
 					\[\*\ *+                      # opening bracket with asterisk
@@ -71,10 +71,10 @@ final class FigureModule extends Texy\Module
 
 
 	/**
-	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
+	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string, ?string, string, ?string, ?string, ?string} $matches */
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;

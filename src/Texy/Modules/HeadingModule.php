@@ -62,7 +62,7 @@ final class HeadingModule extends Texy\Module
 		$texy->addHandler('afterParse', $this->afterParse(...));
 
 		$texy->registerBlockPattern(
-			$this->patternUnderline(...),
+			$this->parseUnderline(...),
 			'~^
 				( \S .{0,1000} )                 # heading text (1)
 				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
@@ -73,7 +73,7 @@ final class HeadingModule extends Texy\Module
 		);
 
 		$texy->registerBlockPattern(
-			$this->patternSurround(...),
+			$this->parseSurround(...),
 			'~^
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
 				(.+)                             # heading text (2)
@@ -170,13 +170,10 @@ final class HeadingModule extends Texy\Module
 
 
 	/**
-	 * Callback for underlined heading.
-	 *
-	 * Heading .(title)[class]{style}>
-	 * -------------------------------
+	 * Parses underlined heading.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternUnderline(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseUnderline(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string, ?string, string} $matches */
 		[, $mContent, $mMod, $mLine] = $matches;
@@ -192,12 +189,10 @@ final class HeadingModule extends Texy\Module
 
 
 	/**
-	 * Callback for surrounded heading.
-	 *
-	 * ### Heading .(title)[class]{style}>
+	 * Parses surrounded heading.
 	 * @param  array<?string>  $matches
 	 */
-	public function patternSurround(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parseSurround(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string, string, ?string} $matches */
 		[, $mLine, $mContent, $mMod] = $matches;

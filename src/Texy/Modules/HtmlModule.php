@@ -31,7 +31,7 @@ final class HtmlModule extends Texy\Module
 		$texy->addHandler('htmlTag', $this->solveTag(...));
 
 		$texy->registerLinePattern(
-			$this->patternTag(...),
+			$this->parseTag(...),
 			'~
 				< (/?)                          # tag begin
 				([a-z][a-z0-9_:-]{0,50})        # tag name
@@ -51,7 +51,7 @@ final class HtmlModule extends Texy\Module
 		);
 
 		$texy->registerLinePattern(
-			$this->patternComment(...),
+			$this->parseComment(...),
 			'~
 				<!--
 				( [^' . Patterns::MARK . ']*? )
@@ -63,10 +63,10 @@ final class HtmlModule extends Texy\Module
 
 
 	/**
-	 * Callback for: <!-- comment -->.
+	 * Parses <!-- comment -->
 	 * @param  array<?string>  $matches
 	 */
-	public function patternComment(Texy\InlineParser $parser, array $matches): HtmlElement|string|null
+	public function parseComment(Texy\InlineParser $parser, array $matches): HtmlElement|string|null
 	{
 		[, $mComment] = $matches;
 		return $this->texy->invokeAroundHandlers('htmlComment', $parser, [$mComment]);
@@ -74,10 +74,10 @@ final class HtmlModule extends Texy\Module
 
 
 	/**
-	 * Callback for: <tag attr="...">.
+	 * Parses <tag attr="...">
 	 * @param  array<?string>  $matches
 	 */
-	public function patternTag(Texy\InlineParser $parser, array $matches): ?string
+	public function parseTag(Texy\InlineParser $parser, array $matches): ?string
 	{
 		/** @var array{string, string, string, string, string} $matches */
 		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;

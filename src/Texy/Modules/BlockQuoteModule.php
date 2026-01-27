@@ -21,7 +21,7 @@ final class BlockQuoteModule extends Texy\Module
 		$this->texy = $texy;
 
 		$texy->registerBlockPattern(
-			$this->pattern(...),
+			$this->parse(...),
 			'~^
 				(?: ' . Texy\Patterns::MODIFIER_H . '\n)? # modifier (1)
 				>                                      # blockquote char
@@ -34,16 +34,10 @@ final class BlockQuoteModule extends Texy\Module
 
 
 	/**
-	 * Callback for:.
-	 *
-	 * > They went in single file, running like hounds on a strong scent,
-	 * and an eager light was in their eyes. Nearly due west the broad
-	 * swath of the marching Orcs tramped its ugly slot; the sweet grass
-	 * of Rohan had been bruised and blackened as they passed.
-	 * >:http://www.mycom.com/tolkien/twotowers.html
+	 * Parses blockquote.
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): ?Texy\HtmlElement
+	public function parse(Texy\BlockParser $parser, array $matches): ?Texy\HtmlElement
 	{
 		/** @var array{string, ?string, string, string} $matches */
 		[, $mMod, $mPrefix, $mContent] = $matches;
