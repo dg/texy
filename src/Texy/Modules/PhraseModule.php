@@ -424,7 +424,7 @@ final class PhraseModule extends Texy\Module
 		}
 
 		$texy = $this->texy;
-		$mod = new Modifier($mMod);
+		$mod = Modifier::parse($mMod);
 		$link = null;
 
 		$parser->again = $phrase !== 'phrase/code' && $phrase !== 'phrase/quicklink';
