@@ -95,7 +95,7 @@ $texy->registerBlockPattern(
  * @param array $matches           Regex matches [full, content, modifier]
  * @param string $name             Which syntax matched (myInlineSyntax1 or 2)
  */
-function userInlineHandler(Texy\LineParser $parser, array $matches, string $name): Texy\HtmlElement|string
+function userInlineHandler(Texy\InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string
 {
 	[, $mContent, $mMod] = $matches;
 

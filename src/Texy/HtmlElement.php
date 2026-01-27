@@ -511,9 +511,9 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Parses text as single line.
 	 */
-	final public function parseLine(Texy $texy, string $s): LineParser
+	final public function parseLine(Texy $texy, string $s): InlineParser
 	{
-		$parser = new LineParser($texy, $this);
+		$parser = new InlineParser($texy, $this);
 		$parser->parse($s);
 		return $parser;
 	}
