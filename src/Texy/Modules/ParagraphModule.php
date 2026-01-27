@@ -17,9 +17,9 @@ use function str_contains, str_replace, strlen, strtr, substr_replace, trim;
  */
 final class ParagraphModule extends Texy\Module
 {
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('paragraph', $this->solve(...));
 	}
 

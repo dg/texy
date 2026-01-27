@@ -35,15 +35,14 @@ final class FigureModule extends Texy\Module
 	public bool $requireCaption = true;
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('figure', $this->solve(...));
-		$texy->addHandler('beforeParse', $this->beforeParse(...));
 	}
 
 
-	private function beforeParse(): void
+	public function beforeParse(string &$text): void
 	{
 		$this->texy->registerBlockPattern(
 			$this->parse(...),

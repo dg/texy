@@ -157,14 +157,15 @@ Registered with the same `addHandler()`, but invoked via `invokeHandlers()`: all
 
 | Event | Signature | When |
 |---|---|---|
-| `beforeParse` | `function(Texy\Texy $texy, string &$text, bool $isSingleLine): void` | after preprocessing, before parsing; `$text` is by reference and may be modified |
-| `afterParse` | `function(Texy\Texy $texy, Texy\HtmlElement $dom, bool $isSingleLine): void` | after parsing, before serialization; `$dom` is the document root |
+| `afterParse` | `function(Texy\HtmlElement $dom, bool $isSingleLine): void` | after parsing, before serialization; `$dom` is the document root |
 | `beforeBlockParse` | `function(Texy\BlockParser $parser, string &$text): void` | before each block-level parse (including nested ones) |
 | `afterList` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<ul>`/`<ol>` is built |
 | `afterDefinitionList` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<dl>` is built |
 | `afterTable` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<table>` is built |
 | `afterBlockquote` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<blockquote>` is built |
 | `postProcess` | `function(Texy\Texy $texy, string &$s): void` | on the final HTML string (this is where `HtmlOutputModule` well-forms the output) |
+
+Preprocessing before parsing is no longer a notification event: it is the `Module::beforeParse(string &$text)` method, invoked on every registered module. Override it in a custom module instead of registering a `beforeParse` handler.
 
 ## Practical examples
 
@@ -243,7 +244,7 @@ $texy->addHandler('block', function($invocation, string $blocktype, string $cont
 ### Lazy loading via afterParse
 
 ```php
-$texy->addHandler('afterParse', function(Texy\Texy $texy, Texy\HtmlElement $dom, bool $isSingleLine) {
+$texy->addHandler('afterParse', function(Texy\HtmlElement $dom, bool $isSingleLine) {
     $walk = function(Texy\HtmlElement $el) use (&$walk) {
         foreach ($el->getChildren() as $child) {
             if ($child instanceof Texy\HtmlElement) {
@@ -261,11 +262,8 @@ $texy->addHandler('afterParse', function(Texy\Texy $texy, Texy\HtmlElement $dom,
 ### Collecting statistics
 
 ```php
-$stats = [];
+$stats = ['images' => 0, 'headings' => 0];
 
-$texy->addHandler('beforeParse', function($texy, &$text, $isSingleLine) use (&$stats) {
-    $stats = ['images' => 0, 'headings' => 0];
-});
 $texy->addHandler('image', function($invocation, $image, $link) use (&$stats) {
     $stats['images']++;
     return $invocation->proceed();

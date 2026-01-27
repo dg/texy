@@ -23,14 +23,17 @@ final class HtmlModule extends Texy\Module
 	public bool $passComment = true;
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('htmlComment', $this->solveComment(...));
 		$texy->addHandler('htmlTag', $this->solveTag(...));
+	}
 
-		$texy->registerLinePattern(
+
+	public function beforeParse(string &$text): void
+	{
+		$this->texy->registerLinePattern(
 			$this->parseTag(...),
 			'~
 				< (/?)                          # tag begin
@@ -50,7 +53,7 @@ final class HtmlModule extends Texy\Module
 			'html/tag',
 		);
 
-		$texy->registerLinePattern(
+		$this->texy->registerLinePattern(
 			$this->parseComment(...),
 			'~
 				<!--

@@ -43,9 +43,9 @@ final class HtmlOutputModule extends Texy\Module
 	private array $baseDTD = [];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->addHandler('postProcess', $this->postProcess(...));
 	}
 

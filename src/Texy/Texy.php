@@ -103,6 +103,9 @@ class Texy
 	public Modules\LongWordsModule $longWordsModule;
 	public Modules\HtmlOutputModule $htmlOutputModule;
 
+	/** @var Module[] */
+	private array $modules;
+
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
 	 * @var array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
@@ -193,27 +196,34 @@ class Texy
 	protected function loadModules(): void
 	{
 		// line parsing
-		$this->scriptModule = new Modules\ScriptModule($this);
-		$this->htmlModule = new Modules\HtmlModule($this);
-		$this->imageModule = new Modules\ImageModule($this);
-		$this->phraseModule = new Modules\PhraseModule($this);
-		$this->linkModule = new Modules\LinkModule($this);
-		$this->emoticonModule = new Modules\EmoticonModule($this);
+		$this->addModule($this->scriptModule = new Modules\ScriptModule($this));
+		$this->addModule($this->htmlModule = new Modules\HtmlModule($this));
+		$this->addModule($this->imageModule = new Modules\ImageModule($this));
+		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));
+		$this->addModule($this->linkModule = new Modules\LinkModule($this));
+		$this->addModule($this->emoticonModule = new Modules\EmoticonModule($this));
 
 		// block parsing
-		$this->paragraphModule = new Modules\ParagraphModule($this);
-		$this->blockModule = new Modules\BlockModule($this);
-		$this->figureModule = new Modules\FigureModule($this);
-		$this->horizLineModule = new Modules\HorizLineModule($this);
-		$this->blockQuoteModule = new Modules\BlockQuoteModule($this);
-		$this->tableModule = new Modules\TableModule($this);
-		$this->headingModule = new Modules\HeadingModule($this);
-		$this->listModule = new Modules\ListModule($this);
+		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
+		$this->addModule($this->blockModule = new Modules\BlockModule($this));
+		$this->addModule($this->figureModule = new Modules\FigureModule($this));
+		$this->addModule($this->horizLineModule = new Modules\HorizLineModule($this));
+		$this->addModule($this->blockQuoteModule = new Modules\BlockQuoteModule($this));
+		$this->addModule($this->tableModule = new Modules\TableModule($this));
+		$this->addModule($this->headingModule = new Modules\HeadingModule($this));
+		$this->addModule($this->listModule = new Modules\ListModule($this));
 
 		// post process
-		$this->typographyModule = new Modules\TypographyModule($this);
-		$this->longWordsModule = new Modules\LongWordsModule($this);
-		$this->htmlOutputModule = new Modules\HtmlOutputModule($this);
+		$this->addModule($this->typographyModule = new Modules\TypographyModule($this));
+		$this->addModule($this->longWordsModule = new Modules\LongWordsModule($this));
+		$this->addModule($this->htmlOutputModule = new Modules\HtmlOutputModule($this));
+	}
+
+
+	public function addModule(Module $module): static
+	{
+		$this->modules[] = $module;
+		return $this;
 	}
 
 
@@ -305,8 +315,9 @@ class Texy
 			}
 		}
 
-		// user before handler
-		$this->invokeHandlers('beforeParse', [$this, &$text, $singleLine]);
+		foreach ($this->modules as $module) {
+			$module->beforeParse($text);
+		}
 
 		// parse Texy! document into internal DOM structure
 		$this->DOM = new HtmlElement;
@@ -316,8 +327,7 @@ class Texy
 			$this->DOM->parseBlock($this, $text);
 		}
 
-		// user after handler
-		$this->invokeHandlers('afterParse', [$this, $this->DOM, $singleLine]);
+		$this->invokeHandlers('afterParse', [$this->DOM, $singleLine]);
 
 		// converts internal DOM structure to final HTML code
 		$html = $this->DOM->toHtml($this);
@@ -347,7 +357,7 @@ class Texy
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
 
-		$this->typographyModule->beforeParse($this, $text);
+		$this->typographyModule->beforeParse($text);
 		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
 
 		if (!empty($this->allowed['longwords'])) {

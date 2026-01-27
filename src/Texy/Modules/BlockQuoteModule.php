@@ -16,11 +16,15 @@ use function max, strlen;
  */
 final class BlockQuoteModule extends Texy\Module
 {
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
+	}
 
-		$texy->registerBlockPattern(
+
+	public function beforeParse(string &$text): void
+	{
+		$this->texy->registerBlockPattern(
 			$this->parse(...),
 			'~^
 				(?: ' . Texy\Patterns::MODIFIER_H . '\n)? # modifier (1)

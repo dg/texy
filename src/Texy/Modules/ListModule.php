@@ -36,17 +36,15 @@ final class ListModule extends Texy\Module
 	];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$this->texy = $texy;
-
-		$texy->addHandler('beforeParse', $this->beforeParse(...));
+	public function __construct(
+		private Texy\Texy $texy,
+	) {
 		$texy->allowed['list'] = true;
 		$texy->allowed['list/definition'] = true;
 	}
 
 
-	private function beforeParse(): void
+	public function beforeParse(string &$text): void
 	{
 		$RE = $REul = [];
 		foreach ($this->bullets as $desc) {
