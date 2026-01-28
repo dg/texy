@@ -137,7 +137,7 @@ function(HandlerInvocation $i, string $content): HtmlElement|string|null
 
 ### script
 
-Macros `{{command: args}}`. `$args` is the argument list split by `ScriptModule::$separator`; `$raw` the unparsed argument string. Texy has no default rendering for scripts – without a user handler the construct produces nothing, so this is the primary extension point for template-like macros.
+Macros `{{command: args}}`. `$args` is the argument list split by `DirectiveModule::$separator`; `$raw` the unparsed argument string. Texy has no default rendering for scripts – without a user handler the construct produces nothing, so this is the primary extension point for template-like macros.
 
 ```php
 function(HandlerInvocation $i, string $command, array $args, ?string $raw): HtmlElement|string|null

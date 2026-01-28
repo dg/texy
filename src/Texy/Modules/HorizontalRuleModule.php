@@ -13,7 +13,7 @@ use Texy;
 /**
  * Processes horizontal line syntax (---, ***).
  */
-final class HorizLineModule extends Texy\Module
+final class HorizontalRuleModule extends Texy\Module
 {
 	/** @var array<string, ?string>  default CSS class */
 	public array $classes = [
