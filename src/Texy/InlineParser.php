@@ -17,15 +17,14 @@ use function array_keys, strlen, substr_replace;
  */
 class InlineParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure(InlineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
-	public array $patterns;
 	public bool $again;
 
 
-	public function __construct(Texy $texy)
-	{
-		$this->texy = $texy;
-		$this->patterns = $texy->getLinePatterns();
+	public function __construct(
+		protected Texy $texy,
+		/** @var array<string, array{handler: \Closure(InlineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+		public array $patterns,
+	) {
 	}
 
 
