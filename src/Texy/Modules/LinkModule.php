@@ -137,7 +137,8 @@ final class LinkModule extends Texy\Module
 		$link->label = trim($mLabel ?? '');
 		$link->modifier->setProperties($mMod);
 		$this->checkLink($link);
-		$this->addReference($mRef, $link);
+		$link->name = Texy\Helpers::toLower($mRef);
+		$this->references[$link->name] = $link;
 		return '';
 	}
 
@@ -205,10 +206,15 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Adds new named reference.
+	 * Adds a user-defined link definition (persists across process() calls).
 	 */
-	public function addReference(string $name, Link $link): void
+	public function addDefinition(string $name, string $url, ?string $label = null, ?string $title = null): void
 	{
+		$link = new Link($url);
+		$link->label = $label ?? '';
+		if ($title !== null) {
+			$link->modifier->title = $title;
+		}
 		$link->name = Texy\Helpers::toLower($name);
 		$this->references[$link->name] = $link;
 	}
