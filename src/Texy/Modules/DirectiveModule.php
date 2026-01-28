@@ -17,7 +17,7 @@ use function trim;
 /**
  * Processes {{macro}} script commands.
  */
-final class ScriptModule extends Texy\Module
+final class DirectiveModule extends Texy\Module
 {
 	/** arguments separator */
 	public string $separator = ',';
