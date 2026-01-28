@@ -7,7 +7,7 @@
 
 namespace Texy;
 
-use function array_keys, strlen, substr_replace;
+use function array_keys, is_string, strlen, substr_replace;
 
 
 /**
@@ -15,7 +15,7 @@ use function array_keys, strlen, substr_replace;
  */
 class LineParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure(LineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	public array $patterns;
 	public bool $again;
 
@@ -64,6 +64,7 @@ class LineParser extends Parser
 				continue;
 			}
 
+			assert(is_string($matches[$first][0]));
 			$len = strlen($matches[$first][0]);
 			$text = substr_replace(
 				$text,
@@ -96,7 +97,7 @@ class LineParser extends Parser
 	/**
 	 * @param  array<int, string>  $names
 	 * @param  array<string, int>  $offsets
-	 * @param  array<string, array<string>>  $matches
+	 * @param  array<string, array<?string>>  $matches
 	 */
 	private function match(string $text, int $offset, array &$names, array &$offsets, array &$matches): ?string
 	{
@@ -126,7 +127,8 @@ class LineParser extends Parser
 					captureOffset: true,
 					offset: $offset + $delta,
 				)) {
-					/** @var non-empty-array<array{string, int}> $m */
+					/** @var non-empty-array<array{?string, int}> $m */
+					assert(is_string($m[0][0]));
 					if (!strlen($m[0][0])) {
 						continue;
 					}

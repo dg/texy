@@ -64,7 +64,7 @@ final class FigureModule extends Texy\Module
 					(.{0,2000})                   # caption (5)
 				)' . ($this->requireCaption ? '' : '?') . '
 				' . Patterns::MODIFIER_H . '?     # modifier (6)
-			()$~mU',
+			$~mU',
 			'figure',
 		);
 	}
@@ -72,10 +72,11 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Callback for [*image*]:link *** .... .(title)[class]{style}>.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
+		/** @var array{string, string, ?string, string, ?string, ?string, ?string} $matches */
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 		// [1] => URLs
 		// [2] => .(title)[class]{style}<>
@@ -87,7 +88,7 @@ final class FigureModule extends Texy\Module
 		$texy = $this->texy;
 		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
 		$mod = new Texy\Modifier($mMod);
-		$mContent = trim($mContent);
+		$mContent = trim($mContent ?? '');
 
 		if ($mLink) {
 			if ($mLink === ':') {

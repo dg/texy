@@ -53,3 +53,9 @@ parameters:
 			identifier: missingType.callable
 			count: 1
 			path: src/Texy/Texy.php
+
+		-
+			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Texy.php

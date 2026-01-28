@@ -78,7 +78,7 @@ final class HeadingModule extends Texy\Module
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
 				(.+)                             # heading text (2)
 				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
-			()$~mU',
+			$~mU',
 			'heading/surrounded',
 		);
 	}
@@ -174,10 +174,11 @@ final class HeadingModule extends Texy\Module
 	 *
 	 * Heading .(title)[class]{style}>
 	 * -------------------------------
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternUnderline(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
+		/** @var array{string, string, ?string, string} $matches */
 		[, $mContent, $mMod, $mLine] = $matches;
 		// $matches:
 		// [1] => ...
@@ -194,10 +195,11 @@ final class HeadingModule extends Texy\Module
 	 * Callback for surrounded heading.
 	 *
 	 * ### Heading .(title)[class]{style}>
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternSurround(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
+		/** @var array{string, string, string, ?string} $matches */
 		[, $mLine, $mContent, $mMod] = $matches;
 		// [1] => ###
 		// [2] => ...

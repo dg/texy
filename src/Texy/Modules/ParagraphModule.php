@@ -38,6 +38,7 @@ final class ParagraphModule extends Texy\Module
 
 			// try to find modifier
 			$mod = null;
+			/** @var array{array{string, int}, array{string, int}} $mx */
 			if ($mx = Regexp::match($s, '~' . Texy\Patterns::MODIFIER_H . '(?= \n | \z)~sUm', captureOffset: true)) {
 				[$mMod] = $mx[1];
 				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));

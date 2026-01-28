@@ -36,7 +36,7 @@ final class ScriptModule extends Texy\Module
 					}                                    # or single }
 				)+)
 				}}
-			()~U',
+			~U',
 			'script',
 		);
 	}
@@ -44,10 +44,11 @@ final class ScriptModule extends Texy\Module
 
 	/**
 	 * Callback for: {{...}}.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function pattern(Texy\LineParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
+		/** @var array{string, string} $matches */
 		[, $mContent] = $matches;
 		// [1] => ...
 
@@ -59,9 +60,10 @@ final class ScriptModule extends Texy\Module
 		$raw = null;
 		$args = [];
 		// function (arg, arg, ...) or function: arg, arg
+		/** @var array{string, string, ?string, ?string} $matches */
 		if ($matches = Regexp::match($cmd, '~^ ([a-z_][a-z0-9_-]*) \s* (?: \( ([^()]*) \) | : (.*) )$~i')) {
 			$cmd = $matches[1];
-			$raw = trim($matches[3] ?? $matches[2]);
+			$raw = trim((string) ($matches[3] ?? $matches[2]));
 			if ($raw !== '') {
 				$args = Regexp::split($raw, '~\s*' . Regexp::quote($this->separator) . '\s*~');
 			}

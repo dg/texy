@@ -34,7 +34,7 @@ final class HorizLineModule extends Texy\Module
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
 				[ \t]*                       # optional spaces
 				' . Texy\Patterns::MODIFIER . '? # modifier (2)
-			()$~mU',
+			$~mU',
 			'horizline',
 		);
 	}
@@ -42,7 +42,7 @@ final class HorizLineModule extends Texy\Module
 
 	/**
 	 * Callback for: -------.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
 	{
