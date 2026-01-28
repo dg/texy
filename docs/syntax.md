@@ -94,7 +94,7 @@ See the "documentation":[doc] and use [Nette].
 [Nette]: https://nette.org
 ```
 
-References can also be added programmatically with `$texy->linkModule->addReference()`. An unresolved `[ref]` triggers the `newReference` element handler.
+References can also be added programmatically with `$texy->linkModule->addDefinition()`. An unresolved `[ref]` triggers the `newReference` element handler.
 
 **Automatic links** *(`link/url`, `link/email`, LinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. Displayed URLs are shortened when `$texy->linkModule->shorten` is on; e-mails are obfuscated against bots when `$texy->obfuscateEmail` is on. A URL rejected by `$texy->urlSchemeFilters` produces no link.
 

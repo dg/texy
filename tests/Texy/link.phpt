@@ -27,9 +27,7 @@ test('link forceNoFollow', function () {
 test('link forceNoFollow does not affect relative URLs', function () {
 	$texy = new Texy\Texy;
 	$texy->linkModule->forceNoFollow = true;
-	$link = new Texy\Link('/local/page');
-	$link->label = 'Local';
-	$texy->linkModule->addReference('test', $link);
+	$texy->linkModule->addDefinition('test', '/local/page', 'Local');
 	// Relative URL should not get nofollow
 	Assert::match(
 		'<p><a href="/local/page">Local</a></p>

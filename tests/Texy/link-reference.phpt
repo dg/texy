@@ -83,15 +83,12 @@ test('case insensitive reference matching', function () {
 
 
 // =============================================================================
-// User-defined definitions via addReference()
+// User-defined definitions via addDefinition()
 // =============================================================================
 
 test('user-defined link definition works', function () {
 	$texy = new Texy\Texy;
-	$link = new Texy\Link('https://texy.nette.org/');
-	$link->modifier->title = 'The best converter';
-	$link->label = 'Texy!';
-	$texy->linkModule->addReference('texy', $link);
+	$texy->linkModule->addDefinition('texy', 'https://texy.nette.org/', 'Texy!', 'The best converter');
 	Assert::same(
 		"<p><a href=\"https://texy.nette.org/\" title=\"The best converter\">Texy!</a></p>\n",
 		$texy->process('[texy]'),
@@ -101,9 +98,7 @@ test('user-defined link definition works', function () {
 
 test('user-defined definition persists across process() calls', function () {
 	$texy = new Texy\Texy;
-	$link = new Texy\Link('https://texy.nette.org/');
-	$link->label = 'Texy!';
-	$texy->linkModule->addReference('texy', $link);
+	$texy->linkModule->addDefinition('texy', 'https://texy.nette.org/', 'Texy!');
 
 	// First process()
 	Assert::same(
@@ -136,9 +131,7 @@ test('document-defined reference leaks to next process() [BUG]', function () {
 
 test('user-defined definition is overwritten by document definition', function () {
 	$texy = new Texy\Texy;
-	$link = new Texy\Link('https://user-defined.com/');
-	$link->label = 'User Label';
-	$texy->linkModule->addReference('link', $link);
+	$texy->linkModule->addDefinition('link', 'https://user-defined.com/', 'User Label');
 
 	// Document defines same reference - it overwrites user-defined one
 	Assert::same(
