@@ -10,8 +10,14 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Modifier;
+use Texy\Nodes\ContentNode;
+use Texy\Nodes\FigureNode;
+use Texy\Nodes\ImageNode;
+use Texy\Nodes\LinkNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
 use Texy\Patterns;
-use function trim;
 
 
 /**
@@ -34,7 +40,7 @@ final class FigureModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('figure', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -69,85 +75,112 @@ final class FigureModule extends Texy\Module
 	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
 	 * @param  array<?string>  $matches
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function parse(ParseContext $context, array $matches): ?FigureNode
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
-		// [1] => URLs
-		// [2] => .(title)[class]{style}<>
-		// [3] => * < >
-		// [4] => url | [ref] | [*image*]
-		// [5] => ...
-		// [6] => .(title)[class]{style}<>
 
 		$texy = $this->texy;
-		$image = $texy->imageModule->factoryImage($mURLs, $mImgMod . $mAlign);
-		$mod = Texy\Modifier::parse($mMod);
-		$mContent = trim($mContent ?? '');
 
-		if ($mLink) {
-			if ($mLink === ':') {
-				$link = new Texy\Link($image->linkedURL ?? $image->URL);
-				$link->raw = ':';
-				$link->type = $link::IMAGE;
-			} else {
-				$link = $texy->linkModule->factoryLink($mLink, null, null);
-			}
-		} else {
-			$link = null;
-		}
+		// Parse image content
+		$parsed = $texy->imageModule->parseImageContent($mURLs);
+		$modifier = Modifier::parse($mImgMod . $mAlign);
 
-		return $texy->invokeAroundHandlers('figure', $parser, [$image, $link, $mContent, $mod]);
-	}
-
-
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		Texy\Image $image,
-		?Texy\Link $link,
-		string $content,
-		Texy\Modifier $mod,
-	): ?Texy\HtmlElement
-	{
-		$texy = $this->texy;
-
-		$hAlign = $image->modifier->hAlign;
-		$image->modifier->hAlign = null;
-
-		$elImg = $texy->imageModule->solve(null, $image, $link); // returns Texy\HtmlElement or null!
-		if (!$elImg) {
+		if ($parsed['url'] === null) {
 			return null;
 		}
 
-		$el = new Texy\HtmlElement($this->tagName);
-		$mod->decorate($texy, $el);
+		// Create ImageNode
+		$imageNode = new ImageNode(
+			$parsed['url'],
+			$parsed['width'],
+			$parsed['height'],
+			$modifier,
+		);
 
-		$el->add($elImg);
+		// If figure has link, wrap image in LinkNode
+		$image = $imageNode;
+		if ($mLink) {
+			if ($mLink === ':') {
+				// Link to image itself - use imageModule.root
+				$linkUrl = $parsed['linkedUrl'] ?? $parsed['url'];
+				$isImageLink = true;
+			} else {
+				// Direct URL or reference like [ref] or [*img*]
+				$linkUrl = $mLink;
+				// Check if it's an image reference [*...*] → use imageModule.root
+				$len = strlen($mLink);
+				$isImageLink = $len > 4 && $mLink[0] === '[' && $mLink[1] === '*'
+					&& $mLink[$len - 1] === ']' && $mLink[$len - 2] === '*';
+			}
 
-		if ($content !== '') {
-			$el[1] = new Texy\HtmlElement($this->tagName === 'figure' ? 'figcaption' : 'p');
-			$el[1]->parseLine($texy, $content);
+			$image = new LinkNode(
+				url: $linkUrl,
+				content: new ContentNode([$imageNode]),
+				isImageLink: $isImageLink,
+			);
 		}
 
+		// Parse caption as inline content
+		$caption = null;
+		$mContent = trim($mContent ?? '');
+		if ($mContent !== '') {
+			$caption = $context->parseInline($mContent);
+		}
+
+		return new FigureNode(
+			$image,
+			$caption,
+			Modifier::parse($mMod),
+		);
+	}
+
+
+	public function solve(FigureNode $node, Html\Generator $generator): Html\Element
+	{
+		$el = new Html\Element($this->tagName);
+
+		// Get the actual ImageNode (might be wrapped in LinkNode)
+		$image = $node->image;
+		$imageNode = $image instanceof LinkNode && isset($image->content->children[0]) && $image->content->children[0] instanceof ImageNode
+			? $image->content->children[0]
+			: $image;
+
+		// Extract alignment from ImageNode - we'll apply it to the figure wrapper instead
+		$hAlign = $imageNode instanceof ImageNode ? $imageNode->modifier?->hAlign : null;
+		if ($imageNode instanceof ImageNode && $imageNode->modifier) {
+			$imageNode->modifier->hAlign = null; // Clear so ImageModule won't add it to <img>
+		}
+
+		// Build image via generator - this allows custom ImageNode handlers to work
+		$el->children = $generator->renderNodes([$image]);
+
+		// Caption
+		if ($node->caption !== null) {
+			$el->create($this->tagName === 'figure' ? 'figcaption' : 'p')
+				->children = $generator->renderNodes($node->caption->children);
+		}
+
+		// Modifier classes/styles
+		$node->modifier?->decorate($this->texy, $el);
+
+		// Figure class based on alignment (extracted from ImageNode above)
 		$class = $this->class;
 		if ($hAlign) {
-			$var = $hAlign . 'Class'; // leftClass, rightClass
+			$var = $hAlign . 'Class';
 			if (!empty($this->$var)) {
 				$class = $this->$var;
-
-			} elseif (empty($texy->alignClasses[$hAlign])) {
+			} elseif (empty($this->texy->alignClasses[$hAlign])) {
 				$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
 				$el->attrs['style']['float'] = $hAlign;
-
 			} else {
-				$class .= '-' . $texy->alignClasses[$hAlign];
+				$class .= '-' . $this->texy->alignClasses[$hAlign];
 			}
 		}
 
-		$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-		$el->attrs['class'][] = $class;
+		if ($class) {
+			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
+			$el->attrs['class'][] = $class;
+		}
 
 		return $el;
 	}

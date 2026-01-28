@@ -10,9 +10,9 @@
  *   <dl><dt><img ...></dt><dd>caption</dd></dl>
  *
  * WHAT YOU'LL LEARN:
- * - How to register a custom handler for figures
- * - How to modify the HTML output that Texy generates
- * - How to work with HtmlElement (change tag names, rearrange children)
+ * - How to register a custom HTML handler for FigureNode
+ * - How to build HTML output from node data
+ * - How to work with Html\Element
  *
  * TEXY SYNTAX FOR FIGURES:
  * [* image.gif *] *** This is the caption
@@ -20,50 +20,38 @@
 
 declare(strict_types=1);
 
+use Texy\Nodes\FigureNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Custom handler that transforms figure output from <div> to <dl>
- *
- * Handler workflow:
- * 1. Call proceed() to get the default HTML output
- * 2. Modify the output as needed
- * 3. Return the modified element
- */
-function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link, $content, Texy\Modifier $modifier): Texy\HtmlElement|string|null
-{
-	// First, let Texy create the default output
-	$el = $invocation->proceed();
-
-	// Now modify it:
-	// Change the wrapper from <div> to <dl>
-	$el->setName('dl');
-
-	// Change the caption from <p> to <dd>
-	// (the caption is the second child, index 1)
-	$el[1]->setName('dd');
-
-	// Wrap the image in a <dt> element
-	// (the image is the first child, index 0)
-	$img = $el[0];
-	unset($el[0]);
-
-	$dt = new Texy\HtmlElement('dt');
-	$dt->add($img);
-	$el->insert(0, $dt);
-
-	return $el;
-}
-
-
 $texy = new Texy;
 
 // Register our custom handler for figures
-$texy->addHandler('figure', figureHandler(...));
+// The first parameter type (FigureNode) determines which node class the handler processes
+$texy->htmlGenerator->registerHandler(
+	function (FigureNode $node, Html\Generator $gen) use ($texy): Html\Element {
+		$el = new Html\Element('dl');
+
+		// Image in <dt> - use generator to handle ImageNode (and LinkNode if linked)
+		$dt = $el->create('dt');
+		$dt->children = $gen->renderNodes([$node->image]);
+
+		// Caption in <dd>
+		if ($node->caption) {
+			$dd = $el->create('dd');
+			$dd->children = $gen->renderNodes($node->caption->children);
+		}
+
+		// Apply modifier classes/styles if present
+		$node->modifier?->decorate($texy, $el);
+
+		return $el;
+	},
+);
 
 // You can also set CSS classes for figures (optional)
 // $texy->figureModule->class = 'figure';

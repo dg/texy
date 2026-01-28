@@ -10,11 +10,16 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HandlerInvocation;
-use Texy\Link;
+use Texy\Helpers;
+use Texy\Node;
+use Texy\Nodes;
+use Texy\Nodes\DocumentNode;
+use Texy\Nodes\LinkDefinitionNode;
+use Texy\NodeTraverser;
+use Texy\Output\Html;
+use Texy\ParseContext;
 use Texy\Patterns;
-use Texy\Regexp;
-use function str_contains, str_replace, strlen, strncasecmp, strpos, substr, trim, urlencode;
+use function in_array, strlen;
 
 
 /**
@@ -28,54 +33,56 @@ final class LinkModule extends Texy\Module
 	/** always use rel="nofollow" for absolute links? */
 	public bool $forceNoFollow = false;
 
-	/** @var array<string, Link> link references */
-	private array $references = [];
+	/** @var array<string, LinkDefinitionNode> link definitions */
+	private array $definitions = [];
+
+	/** @var array<string, LinkDefinitionNode> user-defined definitions (persist across process() calls) */
+	private array $userDefinitions = [];
 
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed['link/definition'] = true;
+		$texy->addHandler('afterParse', $this->resolveReferences(...));
+		$texy->htmlGenerator->registerHandler($this->solveLink(...));
+		$texy->htmlGenerator->registerHandler(fn(Nodes\LinkDefinitionNode $node) => '');
 	}
 
 
 	public function beforeParse(string &$text): void
 	{
-		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
-		if (!empty($this->texy->allowed['link/definition'])) {
-			$text = Texy\Regexp::replace(
-				$text,
-				'~^
-					\[
-					( [^\[\]#?*\n]{1,100} )           # reference (1)
-					] : \ ++
-					( \S{1,1000} )                    # URL (2)
-					( [ \t] .{1,1000} )?              # optional description (3)
-					' . Patterns::MODIFIER . '?       # modifier (4)
-					\s*
-				$~mU',
-				$this->parseDefinition(...),
-			);
-		}
+		// [ref]: url label .(title)[class]{style}
+		$this->texy->registerBlockPattern(
+			$this->parseDefinition(...),
+			'~^
+				\[
+				( [^\[\]#?*\n]{1,100} )           # reference (1)
+				] : \ ++
+				( \S{1,1000} )                    # URL (2)
+				( [ \t] .{1,1000} )?              # optional label (3)
+				' . Patterns::MODIFIER . '?       # modifier (4)
+				\s*
+			$~mU',
+			'link/definition',
+		);
 	}
 
 
 	/**
-	 * Parses [la trine]: http://www.latrine.cz/
+	 * Parses [ref]: url
 	 * @param  array<?string>  $matches
 	 */
-	private function parseDefinition(array $matches): string
+	public function parseDefinition(ParseContext $context, array $matches): LinkDefinitionNode
 	{
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		if ($mMod || $mLabel) {
 			trigger_error('Modifiers and label in link definitions are deprecated.', E_USER_DEPRECATED);
 		}
-
-		$link = new Link($mLink);
-		$this->checkLink($link);
-		$link->name = Texy\Helpers::toLower($mRef);
-		$this->references[$link->name] = $link;
-		return '';
+		return new LinkDefinitionNode(
+			$mRef,
+			$mLink,
+		);
 	}
 
 
@@ -84,34 +91,171 @@ final class LinkModule extends Texy\Module
 	 */
 	public function addDefinition(string $name, string $url): void
 	{
-		$link = new Link($url);
-		$link->name = Texy\Helpers::toLower($name);
-		$this->references[$link->name] = $link;
+		$this->userDefinitions[Helpers::toLower($name)] = new LinkDefinitionNode($name, $url);
 	}
 
 
 	/**
-	 * Returns named reference.
+	 * Resolve link references in the document.
+	 * Called via afterParse handler (after ImageModule).
 	 */
-	public function getReference(string $name): ?Link
+	public function resolveReferences(DocumentNode $doc): void
 	{
-		$name = Texy\Helpers::toLower($name);
-		if (isset($this->references[$name])) {
-			return clone $this->references[$name];
+		// Start with user-defined definitions
+		$this->definitions = $this->userDefinitions;
+		$traverser = new NodeTraverser;
 
-		} else {
-			$pos = strpos($name, '?');
-			if ($pos === false) {
-				$pos = strpos($name, '#');
+		// Pass 1: Collect document definitions (overwrites user-defined)
+		$traverser->traverse($doc, function (Node $node): ?int {
+			if ($node instanceof LinkDefinitionNode) {
+				$this->definitions[Helpers::toLower($node->identifier)] = $node;
+				return NodeTraverser::DontTraverseChildren;
 			}
+			return null;
+		});
 
-			if ($pos !== false) { // try to extract ?... #... part
-				$name2 = substr($name, 0, $pos);
-				if (isset($this->references[$name2])) {
-					$link = clone $this->references[$name2];
-					$link->URL .= substr($name, $pos);
-					return $link;
+		// Pass 2: Resolve references in LinkNode.url
+		$traverser->traverse($doc, function (Node $node): ?Node {
+			if ($node instanceof Nodes\LinkNode && $node->url !== null) {
+				$this->resolveLinkNodeUrl($node);
+			}
+			return null;
+		});
+	}
+
+
+	/**
+	 * Resolve URL in LinkNode that might be [ref] or [*img*].
+	 */
+	private function resolveLinkNodeUrl(Nodes\LinkNode $node): void
+	{
+		if ($node->url === null) {
+			return;
+		}
+
+		$len = strlen($node->url);
+
+		// [*img*], [*img <], [*img >] format - resolve to image URL
+		if ($len > 4 && $node->url[0] === '[' && $node->url[1] === '*'
+			&& $node->url[$len - 1] === ']'
+			&& in_array($node->url[$len - 2], ['*', '<', '>'], true)) {
+			$imgRef = trim(substr($node->url, 2, -2));
+			$imgDef = $this->texy->imageModule->getDefinition($imgRef);
+			if ($imgDef !== null && $imgDef->url !== null) {
+				$node->url = $imgDef->url;
+			} else {
+				// Image reference not found - use content as URL
+				$node->url = $imgRef;
+			}
+			$node->isImageLink = true;
+			return;
+		}
+
+		// [ref] format
+		if ($len > 2 && $node->url[0] === '[' && $node->url[$len - 1] === ']') {
+			$refName = substr($node->url, 1, -1);
+			$def = $this->resolveDefinition($refName);
+			if ($def !== null) {
+				$node->url = $def->url;
+				// Check if resolved URL is email
+				$this->convertEmailUrl($node);
+				return;
+			}
+			// Reference not found - use inner content as URL
+			$node->url = $refName;
+			// Check if it's an email
+			$this->convertEmailUrl($node);
+			return;
+		}
+
+		// For other URLs, resolve and check for email
+		$resolved = $this->resolveUrl($node->url);
+		if ($resolved !== $node->url) {
+			$node->url = $resolved;
+		}
+		$this->convertEmailUrl($node);
+	}
+
+
+	/**
+	 * Convert email-like URLs to mailto: scheme.
+	 */
+	private function convertEmailUrl(Nodes\LinkNode $node): void
+	{
+		if ($node->url !== null
+			&& !str_contains($node->url, '/')
+			&& !preg_match('~^[a-z][a-z0-9+.-]*:~i', $node->url)
+			&& preg_match('~.@.~', $node->url)) { // valid email needs chars before and after @
+			$node->url = 'mailto:' . $node->url;
+		}
+	}
+
+
+	/**
+	 * Resolve URL that might be [ref] or [*img*] format.
+	 */
+	private function resolveUrl(string $url): string
+	{
+		$len = strlen($url);
+
+		// [ref] or [*img*] format
+		if ($len > 2 && $url[0] === '[' && $url[$len - 1] === ']') {
+			// [*img*] → image URL
+			if ($url[1] === '*' && $url[$len - 2] === '*') {
+				$imgRef = trim(substr($url, 2, -2));
+				$imgDef = $this->texy->imageModule->getDefinition($imgRef);
+				if ($imgDef !== null && $imgDef->url !== null) {
+					return $imgDef->url;
 				}
+				// Image reference not found - return inner content as URL
+				return $imgRef;
+			} else {
+				// [ref] → link URL
+				$refName = substr($url, 1, -1);
+				$def = $this->resolveDefinition($refName);
+				if ($def !== null) {
+					return $def->url;
+				}
+				// Link reference not found - return inner content as URL
+				return $refName;
+			}
+		}
+
+		return $url;
+	}
+
+
+	/**
+	 * Find definition by identifier, supports #fragment and ?query.
+	 */
+	private function resolveDefinition(string $identifier): ?LinkDefinitionNode
+	{
+		$key = Helpers::toLower($identifier);
+
+		if (isset($this->definitions[$key])) {
+			return $this->definitions[$key];
+		}
+
+		// Support #fragment and ?query
+		$hashPos = strpos($key, '#');
+		$queryPos = strpos($key, '?');
+
+		// Find the earliest delimiter
+		$pos = null;
+		if ($hashPos !== false && $queryPos !== false) {
+			$pos = min($hashPos, $queryPos);
+		} elseif ($hashPos !== false) {
+			$pos = $hashPos;
+		} elseif ($queryPos !== false) {
+			$pos = $queryPos;
+		}
+
+		if ($pos !== null) {
+			$baseKey = substr($key, 0, $pos);
+			if (isset($this->definitions[$baseKey])) {
+				$def = clone $this->definitions[$baseKey];
+				$def->url .= substr($identifier, $pos);
+				return $def;
 			}
 		}
 
@@ -119,112 +263,49 @@ final class LinkModule extends Texy\Module
 	}
 
 
-	public function factoryLink(string $dest, ?string $mMod, ?string $label): Link
-	{
-		$texy = $this->texy;
-		$type = Link::COMMON;
-
-		// [ref]
-		if (strlen($dest) > 1 && $dest[0] === '[' && $dest[1] !== '*') {
-			$type = Link::BRACKET;
-			$dest = substr($dest, 1, -1);
-			$link = $this->getReference($dest);
-
-		// [* image *]
-		} elseif (strlen($dest) > 1 && $dest[0] === '[' && $dest[1] === '*') {
-			$type = Link::IMAGE;
-			$dest = trim(substr($dest, 2, -2));
-			$image = $texy->imageModule->getReference($dest);
-			if ($image) {
-				$link = new Link($image->linkedURL ?? $image->URL);
-			}
-		}
-
-		if (empty($link)) {
-			$link = new Link(trim($dest));
-			$this->checkLink($link);
-		}
-
-		if (str_contains((string) $link->URL, '%s')) {
-			$link->URL = str_replace('%s', urlencode($texy->stringToText($label)), $link->URL);
-		}
-
-		$link->modifier->setProperties($mMod);
-		$link->type = $type;
-		return $link;
-	}
-
-
 	/**
-	 * Generates <a> element from Link.
+	 * Generates HTML for LinkNode.
 	 */
-	public function solve(
-		?HandlerInvocation $invocation,
-		Link $link,
-		Texy\HtmlElement|string|null $content = null,
-	): Texy\HtmlElement|string|null
+	public function solveLink(Nodes\LinkNode $node, Html\Generator $generator): Html\Element|string
 	{
-		if ($link->URL === null) {
-			return $content;
+		// Check URL scheme (security - filter dangerous schemes like javascript:)
+		$rawUrl = $node->url ?? '';
+		if (!$this->texy->checkURL($rawUrl, Texy\Texy::FILTER_ANCHOR)) {
+			// URL fails scheme filter, return just the content without link
+			return $generator->serialize($generator->renderNodes($node->content->children));
 		}
 
-		$texy = $this->texy;
+		$el = new Html\Element('a');
 
-		$el = new Texy\HtmlElement('a');
-
-		if (empty($link->modifier)) {
-			$nofollow = false;
-		} else {
-			$nofollow = isset($link->modifier->classes['nofollow']);
-			unset($link->modifier->classes['nofollow']);
-			$el->attrs['href'] = null; // trick - move to front
-			$link->modifier->decorate($texy, $el);
+		// Handle nofollow class
+		$nofollow = false;
+		if ($node->modifier && isset($node->modifier->classes['nofollow'])) {
+			$nofollow = true;
+			unset($node->modifier->classes['nofollow']);
 		}
 
-		if ($link->type === Link::IMAGE) {
-			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->root);
-		} else {
-			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $this->root);
+		// Apply modifier (title, class, id, style, etc.) before href
+		$el->attrs['href'] = null; // trick - reserve position at front
+		$node->modifier?->decorate($this->texy, $el);
 
-			// rel="nofollow"
-			if ($nofollow || ($this->forceNoFollow && str_contains($el->attrs['href'], '//'))) {
-				$el->attrs['rel'] = 'nofollow';
-			}
+		// Normalize www. to http://
+		if (strncasecmp($rawUrl, 'www.', 4) === 0) {
+			$rawUrl = 'http://' . $rawUrl;
 		}
 
-		if ($content !== null) {
-			$el->add($content);
+		// Prepend root to relative URLs
+		// Use imageModule.root for image links, linkModule.root otherwise
+		$root = $node->isImageLink ? $this->texy->imageModule->root : $this->root;
+		$el->attrs['href'] = Helpers::prependRoot($rawUrl, $root);
+
+		// rel="nofollow"
+		if ($nofollow || ($this->forceNoFollow && str_contains($el->attrs['href'], '//'))) {
+			$el->attrs['rel'] = 'nofollow';
 		}
+
+		// Add content
+		$el->children = $generator->renderNodes($node->content->children);
 
 		return $el;
-	}
-
-
-	/**
-	 * Checks and corrects URL in Link.
-	 */
-	public function checkLink(Link $link): void
-	{
-		if ($link->URL === null) {
-			return;
-		}
-
-		// remove soft hyphens; if not removed by Texy\Texy::process()
-		$link->URL = str_replace("\u{AD}", '', $link->URL);
-
-		if (strncasecmp($link->URL, 'www.', 4) === 0) {
-			// special supported case
-			$link->URL = 'http://' . $link->URL;
-
-		} elseif (Regexp::match($link->URL, '~' . Patterns::EMAIL . '$~A')) {
-			// email
-			$link->URL = 'mailto:' . $link->URL;
-
-		} elseif (!$this->texy->checkURL($link->URL, Texy\Texy::FILTER_ANCHOR)) {
-			$link->URL = null;
-
-		} else {
-			$link->URL = str_replace('&amp;', '&', $link->URL); // replace unwanted &amp;
-		}
 	}
 }

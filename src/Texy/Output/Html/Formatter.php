@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Texy\Modules;
+namespace Texy\Output\Html;
 
 use Texy;
 use Texy\Regexp;
@@ -17,26 +17,10 @@ use function array_intersect, array_keys, array_unshift, max, reset, rtrim, str_
 /**
  * Formats and validates HTML output (well-forming, indentation, line wrapping).
  */
-final class HtmlOutputModule extends Texy\Module
+final class Formatter
 {
 	public const InnerTransparent = '%TRANS';
 	public const InnerText = '%TEXT';
-
-	/** @var array<string, 1>  void elements */
-	public static array $emptyElements = [
-		'area' => 1, 'base' => 1, 'br' => 1, 'col' => 1, 'embed' => 1, 'hr' => 1, 'img' => 1, 'input' => 1,
-		'link' => 1, 'meta' => 1, 'param' => 1, 'source' => 1, 'track' => 1, 'wbr' => 1,
-	];
-
-	/** @var array<string, int>  phrasing elements; replaced elements + br have value 1 */
-	public static array $inlineElements = [
-		'a' => 0, 'abbr' => 0, 'area' => 0, 'audio' => 0, 'b' => 0, 'bdi' => 0, 'bdo' => 0, 'br' => 1, 'button' => 1, 'canvas' => 1,
-		'cite' => 0, 'code' => 0, 'data' => 0, 'datalist' => 0, 'del' => 0, 'dfn' => 0, 'em' => 0, 'embed' => 1, 'i' => 0, 'iframe' => 1,
-		'img' => 1, 'input' => 1, 'ins' => 0, 'kbd' => 0, 'label' => 0, 'link' => 0, 'map' => 0, 'mark' => 0, 'math' => 1, 'meta' => 0,
-		'meter' => 1, 'noscript' => 1, 'object' => 1, 'output' => 1, 'picture' => 1, 'progress' => 1, 'q' => 0, 'ruby' => 0, 's' => 0,
-		'samp' => 0, 'script' => 1, 'select' => 1, 'slot' => 0, 'small' => 0, 'span' => 0, 'strong' => 0, 'sub' => 0, 'sup' => 0,
-		'svg' => 1, 'template' => 0, 'textarea' => 1, 'time' => 0, 'u' => 0, 'var' => 0, 'video' => 1, 'wbr' => 0,
-	];
 
 	/** @var array<string, 1>  elements with optional end tag in HTML */
 	public static array $optionalEnds = [
@@ -114,17 +98,10 @@ final class HtmlOutputModule extends Texy\Module
 	private array $baseDTD = [];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$texy->addHandler('postProcess', $this->postProcess(...));
-	}
-
-
 	/**
-	 * Converts <strong><em> ... </strong> ... </em>.
-	 * into <strong><em> ... </em></strong><em> ... </em>
+	 * Format HTML string with indentation and line wrapping.
 	 */
-	private function postProcess(string &$s): void
+	public function format(string $s): string
 	{
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
@@ -167,12 +144,17 @@ final class HtmlOutputModule extends Texy\Module
 				$this->wrap(...),
 			);
 		}
+
+		// unfreeze spaces
+		$s = Texy\Helpers::unfreezeSpaces($s);
+
+		return $s;
 	}
 
 
 	/**
 	 * Processes a fragment of HTML: text content followed by a tag or comment.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	private function processFragment(array $matches): string
 	{
@@ -206,7 +188,7 @@ final class HtmlOutputModule extends Texy\Module
 		}
 
 		// phase #3 - HTML tag
-		$mEmpty = $mEmpty || isset(self::$emptyElements[$mTag]);
+		$mEmpty = $mEmpty || isset(Element::$emptyElements[$mTag]);
 		if ($mEmpty && $mEnd) { // bad tag; /end/
 			return $s;
 		} elseif ($mEnd) {
@@ -257,7 +239,7 @@ final class HtmlOutputModule extends Texy\Module
 			if ($indent && $tag === 'br') {
 				return rtrim($s) . '<' . $tag . $attr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-			} elseif ($indent && !isset(self::$inlineElements[$tag])) {
+			} elseif ($indent && !isset(Element::$inlineElements[$tag])) {
 				$space = "\r" . str_repeat("\t", $this->space);
 				return $s . $space . '<' . $tag . $attr . '>' . $space;
 
@@ -279,7 +261,7 @@ final class HtmlOutputModule extends Texy\Module
 				: $dtdContent; // unknown tags keep inherited content model
 
 			// Format output with indentation for block elements
-			if ($this->indent && !isset(self::$inlineElements[$tag])) {
+			if ($this->indent && !isset(Element::$inlineElements[$tag])) {
 				$close = "\x08" . '</' . $tag . '>' . "\n" . str_repeat("\t", $this->space);
 				$s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
 				$indent = 1;
@@ -329,7 +311,7 @@ final class HtmlOutputModule extends Texy\Module
 			return $tagContent + [self::InnerText => 1];
 		}
 
-		if (isset(self::$inlineElements[$tag]) || isset(self::$phrasingElements[$tag])) {
+		if (isset(Element::$inlineElements[$tag]) || isset(self::$phrasingElements[$tag])) {
 			// Phrasing content only (e.g., <p>, <span>)
 			return self::getPhrasingContent();
 		}
@@ -355,7 +337,7 @@ final class HtmlOutputModule extends Texy\Module
 			$s .= $item['close'];
 			$this->space -= $item['indent'];
 			$this->tagUsed[$itemTag]--;
-			$back = $back && isset(self::$inlineElements[$itemTag]);
+			$back = $back && isset(Element::$inlineElements[$itemTag]);
 			unset($this->tagStack[$i]);
 			if ($itemTag === $tag) {
 				break;
@@ -405,7 +387,7 @@ final class HtmlOutputModule extends Texy\Module
 				$item['close']
 				&& (
 					!isset(self::$optionalEnds[$itemTag])
-					&& !isset(self::$inlineElements[$itemTag])
+					&& !isset(Element::$inlineElements[$itemTag])
 				)
 			) {
 				break;
@@ -436,8 +418,8 @@ final class HtmlOutputModule extends Texy\Module
 
 	private static function isKnownTag(string $tag): bool
 	{
-		return isset(self::$inlineElements[$tag])
-			|| isset(self::$emptyElements[$tag])
+		return isset(Element::$inlineElements[$tag])
+			|| isset(Element::$emptyElements[$tag])
 			|| isset(self::$optionalEnds[$tag])
 			|| isset(self::$contentModel[$tag])
 			|| isset(self::$prohibits[$tag])
@@ -450,7 +432,7 @@ final class HtmlOutputModule extends Texy\Module
 	private static function getFlowContent(): array
 	{
 		static $content;
-		return $content ??= self::$inlineElements
+		return $content ??= Element::$inlineElements
 			+ ['div' => 1, 'p' => 1, 'ul' => 1, 'ol' => 1, 'dl' => 1, 'table' => 1,
 				'blockquote' => 1, 'pre' => 1, 'figure' => 1, 'hr' => 1, 'address' => 1,
 				'h1' => 1, 'h2' => 1, 'h3' => 1, 'h4' => 1, 'h5' => 1, 'h6' => 1,
@@ -463,6 +445,6 @@ final class HtmlOutputModule extends Texy\Module
 	private static function getPhrasingContent(): array
 	{
 		static $content;
-		return $content ??= self::$inlineElements + [self::InnerText => 1];
+		return $content ??= Element::$inlineElements + [self::InnerText => 1];
 	}
 }

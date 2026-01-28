@@ -30,6 +30,9 @@
 
 declare(strict_types=1);
 
+use Texy\Helpers;
+use Texy\Nodes\CodeBlockNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
@@ -40,83 +43,62 @@ if (@!include __DIR__ . '/vendor/autoload.php') {
 }
 
 
-/**
- * Handler for standard /--code blocks (same as demo-fshl.php)
- */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): ?Texy\HtmlElement
-{
-	if ($blocktype !== 'block/code') {
-		return $invocation->proceed();
-	}
-
-	static $lexers = [
-		'html' => FSHL\Lexer\Html::class,
-		'javascript' => FSHL\Lexer\Javascript::class,
-		'php' => FSHL\Lexer\Php::class,
-		'sql' => FSHL\Lexer\Sql::class,
-	];
-
-	if (!isset($lexers[$lang])) {
-		return null;
-	}
-
-	$langClass = $lexers[$lang];
-	$texy = $invocation->getTexy();
-	$content = Texy\Helpers::outdent($content);
-
-	$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
-	$content = $fshl->highlight($content, new $langClass);
-	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
-
-	$elPre = new Texy\HtmlElement('pre');
-	if ($modifier) {
-		$modifier->decorate($texy, $elPre);
-	}
-	$elPre->attrs['class'] = strtolower($lang);
-	$elPre->create('code', $content);
-
-	return $elPre;
-}
-
-
-/**
- * Pattern handler for the NEW <?php ?> and <script> syntaxes
- *
- * This is called when our custom patterns match in the text.
- */
-function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
-{
-	[$content] = $matches;
-
-	// Choose the lexer based on which pattern matched
-	$langClass = $name === 'phpBlockSyntax'
-		? FSHL\Lexer\Php::class
-		: FSHL\Lexer\Html::class;  // HTML lexer handles <script> tags well
-
-	$texy = $parser->getTexy();
-
-	// Apply syntax highlighting
-	$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
-	$content = $fshl->highlight($content, new $langClass);
-	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
-
-	// Build the HTML
-	$elPre = new Texy\HtmlElement('pre');
-	$elPre->create('code', $content);
-
-	return $elPre;
-}
-
-
 $texy = new Texy;
 
-// Register the standard block handler for /--code syntax
-$texy->addHandler('block', blockHandler(...));
+
+// ============================================================
+// REGISTER HTML HANDLER FOR CODE BLOCKS
+// ============================================================
+
+// Custom handler for CodeBlockNode that applies FSHL syntax highlighting
+$texy->htmlGenerator->registerHandler(
+	function (CodeBlockNode $node, Html\Generator $gen) use ($texy): ?Html\Element {
+		static $lexers = [
+			'html' => FSHL\Lexer\Html::class,
+			'javascript' => FSHL\Lexer\Javascript::class,
+			'php' => FSHL\Lexer\Php::class,
+			'sql' => FSHL\Lexer\Sql::class,
+		];
+
+		$lang = $node->language;
+		if ($lang === null || !isset($lexers[$lang])) {
+			return null; // Let default handler process it
+		}
+
+		$langClass = $lexers[$lang];
+		$content = Helpers::outdent($node->content);
+
+		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
+		$content = $fshl->highlight($content, new $langClass);
+		$content = $texy->protect($content, $texy::CONTENT_BLOCK);
+
+		$elPre = new Html\Element('pre');
+		$node->modifier?->decorate($texy, $elPre);
+		$elPre->attrs['class'] = strtolower($lang);
+		$elPre->create('code', $content);
+
+		return $elPre;
+	},
+);
+
+
+// ============================================================
+// REGISTER NEW BLOCK PATTERNS
+// ============================================================
 
 // Register NEW syntax: recognize <?php ... ?​> blocks
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
 $texy->registerBlockPattern(
-	codeBlockHandler(...),
+	function (Texy\ParseContext $context, array $matches, string $name): CodeBlockNode {
+		[$content] = $matches;
+		$lang = $name === 'phpBlockSyntax' ? 'php' : 'javascript';
+
+		return new CodeBlockNode(
+			'block/code',
+			$content,
+			$lang,
+		);
+	},
 	'~^
 		<\?php \n .+? \n \?>
 	$~ms', // Must be multiline (m) and single-line mode (s)
@@ -125,7 +107,15 @@ $texy->registerBlockPattern(
 
 // Register NEW syntax: recognize <script> ... </script> blocks
 $texy->registerBlockPattern(
-	codeBlockHandler(...),
+	function (Texy\ParseContext $context, array $matches, string $name): CodeBlockNode {
+		[$content] = $matches;
+
+		return new CodeBlockNode(
+			'block/code',
+			$content,
+			'html', // HTML lexer handles <script> tags well
+		);
+	},
 	'~^
 		<script (?: type=.?text/javascript.?)? > \n
 		.+? \n

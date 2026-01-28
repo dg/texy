@@ -10,8 +10,9 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Regexp;
-use function trim;
+use Texy\Nodes\DirectiveNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
 
 
 /**
@@ -19,21 +20,19 @@ use function trim;
  */
 final class DirectiveModule extends Texy\Module
 {
-	/** arguments separator */
-	public string $separator = ',';
-
-
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('script', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
 	public function beforeParse(string &$text): void
 	{
 		$this->texy->registerLinePattern(
-			$this->parse(...),
+			fn(ParseContext $context, array $matches) => trim($matches[1]) === ''
+					? null
+					: new DirectiveNode($matches[1]),
 			'~
 				\{\{
 				((?:
@@ -47,56 +46,22 @@ final class DirectiveModule extends Texy\Module
 	}
 
 
-	/**
-	 * Parses {{...}}
-	 * @param  array<?string>  $matches
-	 */
-	public function parse(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function solve(DirectiveNode $node, Html\Generator $generator): string
 	{
-		[, $mContent] = $matches;
-		// [1] => ...
+		$parsed = $node->parseContent();
 
-		$cmd = trim($mContent);
-		if ($cmd === '') {
-			return null;
-		}
-
-		$raw = null;
-		$args = [];
-		// function (arg, arg, ...) or function: arg, arg
-		if ($matches = Regexp::match($cmd, '~^ ([a-z_][a-z0-9_-]*) \s* (?: \( ([^()]*) \) | : (.*) )$~i')) {
-			$cmd = $matches[1];
-			$raw = trim($matches[3] ?? $matches[2]);
-			if ($raw !== '') {
-				$args = Regexp::split($raw, '~\s*' . Regexp::quote($this->separator) . '\s*~');
-			}
-		}
-
-		return $this->texy->invokeAroundHandlers('script', $parser, [$cmd, $args, $raw]);
-	}
-
-
-	/**
-	 * Finish invocation.
-	 * @param ?list<string>  $args
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		string $cmd,
-		?array $args = null,
-		?string $raw = null,
-	): ?string
-	{
-		if ($cmd === 'texy' && $args) {
-			switch ($args[0]) {
+		// Handle special directives
+		if ($parsed['name'] === 'texy' && $parsed['args']) {
+			switch ($parsed['args'][0]) {
 				case 'nofollow':
 					$this->texy->linkModule->forceNoFollow = true;
 					break;
 			}
-
+			// texy directive with args returns empty
 			return '';
 		}
 
-		return null;
+		// Unknown directives - preserve original text
+		return '{{' . $node->content . '}}';
 	}
 }

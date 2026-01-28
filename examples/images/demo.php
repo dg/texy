@@ -10,7 +10,7 @@
  * - Transform special image names (like "user" -> "profile.jpg")
  *
  * WHAT YOU'LL LEARN:
- * - How to intercept and modify images using a handler
+ * - How to intercept and modify images using an HTML handler
  * - How to set image folder paths
  * - How to add CSS classes for left/right aligned images
  * - How to set a default alt text
@@ -25,42 +25,15 @@
 
 declare(strict_types=1);
 
+use Texy\Nodes\ImageNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Custom handler for images
- *
- * This handler intercepts the special image name "user" and transforms it
- * into an actual image file. This allows you to use shortcut names in your
- * Texy text that get expanded to real paths.
- */
-function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null): Texy\HtmlElement|string|null
-{
-	// Check if the image URL is our special keyword "user"
-	if ($image->URL == 'user') {
-		// Transform it to an actual image file
-		$image->URL = 'image.gif';
-		$image->modifier->title = 'Texy! logo';
-
-		// If the image is a link, set the link destination too
-		if ($link) {
-			$link->URL = 'big.gif';
-		}
-	}
-
-	// Let Texy continue with the (possibly modified) image
-	return $invocation->proceed($image, $link);
-}
-
-
 $texy = new Texy;
-
-// Register our custom image handler
-$texy->addHandler('image', imageHandler(...));
 
 // Configure image paths
 $texy->imageModule->root = 'imagesdir/';  // Base folder for images
@@ -68,6 +41,26 @@ $texy->imageModule->root = 'imagesdir/';  // Base folder for images
 // CSS classes for aligned images
 $texy->imageModule->leftClass = 'my-left-class';   // Class for [*< ... *] (left-aligned)
 $texy->imageModule->rightClass = 'my-right-class'; // Class for [*> ... *] (right-aligned)
+
+
+// Register our custom image handler
+// The first parameter type (ImageNode) determines which node class the handler processes
+$texy->htmlGenerator->registerHandler(
+	function (ImageNode $node, Html\Generator $gen, ?Closure $previous): Html\Element|string|null {
+		// Check if the image URL is our special keyword "user"
+		if ($node->url === 'user') {
+			// Transform it to an actual image file
+			$node->url = 'image.gif';
+			if ($node->modifier === null) {
+				$node->modifier = new Texy\Modifier;
+			}
+			$node->modifier->title = 'Texy! logo';
+		}
+
+		// Call the previous handler (default or another custom one) to build the image
+		return $previous ? $previous($node, $gen) : null;
+	},
+);
 
 
 // Process the text

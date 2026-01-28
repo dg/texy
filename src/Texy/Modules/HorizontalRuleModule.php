@@ -10,6 +10,9 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes\HorizontalRuleNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
 
 
 /**
@@ -27,14 +30,17 @@ final class HorizontalRuleModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('horizline', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
 	public function beforeParse(string &$text): void
 	{
 		$this->texy->registerBlockPattern(
-			$this->parse(...),
+			fn(ParseContext $context, array $matches) => new HorizontalRuleNode(
+				$matches[1][0],
+				Texy\Modifier::parse($matches[2]),
+			),
 			'~^
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
 				[ \t]*                       # optional spaces
@@ -45,31 +51,14 @@ final class HorizontalRuleModule extends Texy\Module
 	}
 
 
-	/**
-	 * Parses -------
-	 * @param  array<?string>  $matches
-	 */
-	public function parse(Texy\BlockParser $parser, array $matches): Texy\HtmlElement
+	public function solve(HorizontalRuleNode $node, Html\Generator $generator): Html\Element
 	{
-		[, $mType, $mMod] = $matches;
-		// [1] => ---
-		// [2] => .(title)[class]{style}<>
+		$el = new Html\Element('hr');
+		$node->modifier?->decorate($this->texy, $el);
 
-		$mod = Texy\Modifier::parse($mMod);
-		return $this->texy->invokeAroundHandlers('horizline', $parser, [$mType, $mod]);
-	}
-
-
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(Texy\HandlerInvocation $invocation, string $type, Texy\Modifier $modifier): Texy\HtmlElement
-	{
-		$el = new Texy\HtmlElement('hr');
-		$modifier->decorate($invocation->getTexy(), $el);
-
-		$class = $this->classes[$type[0]];
-		if ($class && !isset($modifier->classes[$class])) {
+		// Add default class if not already set via modifier
+		$class = $this->classes[$node->type] ?? null;
+		if ($class && empty($node->modifier?->classes[$class])) {
 			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
 			$el->attrs['class'][] = $class;
 		}

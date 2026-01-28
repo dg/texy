@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Texy is a text-to-HTML converter library that transforms plain text in Texy syntax into valid (X)HTML. It's a mature PHP library (currently v3.2.6) that supports typography, images, links, tables, lists, and integrates with Latte templating engine.
+Texy is a text-to-HTML converter library that transforms plain text in Texy syntax into valid (X)HTML. It's a PHP library (v4.0-dev) with an AST-based architecture that supports typography, images, links, tables, lists, and integrates with Latte templating engine.
+
+**Architecture**: Texy 4.0 uses a two-phase AST architecture:
+1. **Parsing phase** - Converts Texy text into an Abstract Syntax Tree (34 node types)
+2. **Generation phase** - Converts AST to HTML via pluggable handlers
 
 ## Essential Commands
 
@@ -33,59 +37,190 @@ vendor/bin/phpstan analyse --no-progress
 
 **src/Texy/** - Main parsing engine
 - `Texy.php` - Main converter class with configuration and processing
-- `Parser.php` - Base parser interface
-- `BlockParser.php` - Parses block-level elements
-- `LineParser.php` - Parses inline/line-level elements
-- `HtmlElement.php` - HTML element representation and manipulation
+- `Node.php` - Base class for all AST nodes
+- `BlockParser.php` - Parses block-level elements into AST nodes
+- `InlineParser.php` - Parses inline elements into AST nodes
+- `ParseContext.php` - Context for parsing operations
+- `Position.php` - Source position tracking
+- `NodeTraverser.php` - AST traversal utility
 - `Modifier.php` - Handles CSS classes, IDs, and styling modifiers
 - `Helpers.php` - Utility functions
 - `Regexp.php` - Regular expression utilities
 - `Patterns.php` - Common regex patterns
-- `DTD.php` - HTML Document Type Definition rules
 
-**src/Texy/Modules/** - Processing modules (each handles specific syntax)
-- `BlockModule.php` - Special blocks (code, html, text blocks with `/--` syntax)
-- `HeadingModule.php` - Headings
+**src/Texy/Nodes/** - AST node classes (34 types)
+- Base classes: `BlockNode`, `InlineNode`, `ContentNode`
+- Document: `DocumentNode`, `SectionNode`
+- Block: `ParagraphNode`, `HeadingNode`, `CodeBlockNode`, `BlockQuoteNode`, `HorizontalRuleNode`
+- Lists: `ListNode`, `ListItemNode`, `DefinitionListNode`
+- Tables: `TableNode`, `TableRowNode`, `TableCellNode`
+- Figures: `FigureNode`
+- Inline: `TextNode`, `PhraseNode`, `LinkNode`, `ImageNode`, `EmoticonNode`, `LineBreakNode`
+- Links/URLs: `UrlNode`, `EmailNode`, `LinkReferenceNode`
+- Definitions: `LinkDefinitionNode`, `ImageDefinitionNode`
+- HTML: `HtmlTagNode`, `HtmlCommentNode`, `RawTextNode`
+- Special: `DirectiveNode`, `AnnotationNode`, `CommentNode`
+
+**src/Texy/Output/Html/** - HTML generation
+- `Generator.php` - AST→HTML dispatcher with handler registration
+- `Element.php` - Lightweight HTML element builder
+- `Formatter.php` - Output formatting and well-forming
+- `Validator.php` - Tag/attribute validation
+
+**src/Texy/Modules/** - Processing modules
+- `BlockModule.php` - Special blocks (code, html, text with `/--` syntax)
+- `HeadingModule.php` - Headings (uses afterParse for TOC)
 - `ParagraphModule.php` - Paragraphs
 - `ListModule.php` - Ordered and unordered lists
 - `TableModule.php` - Tables
 - `FigureModule.php` - Figures with images
-- `ImageModule.php` - Images
-- `LinkModule.php` - Hyperlinks
+- `ImageModule.php` - Images (uses afterParse for reference resolution)
+- `LinkModule.php` - Hyperlinks (uses afterParse for reference resolution)
+- `AutolinkModule.php` - Auto-detection of URLs and emails
 - `PhraseModule.php` - Inline formatting (bold, italic, etc.)
-- `TypographyModule.php` - Typography corrections (quotes, dashes, etc.)
+- `TypographyModule.php` - Typography corrections (post-processing)
 - `EmoticonModule.php` - Emoticons/smileys
 - `BlockQuoteModule.php` - Block quotes
-- `HorizLineModule.php` - Horizontal lines
+- `HorizontalRuleModule.php` - Horizontal lines
 - `HtmlModule.php` - Inline HTML tags
-- `HtmlOutputModule.php` - HTML output formatting
-- `ScriptModule.php` - Script/style tag handling
-- `LongWordsModule.php` - Long word hyphenation
+- `DirectiveModule.php` - Script/directive handling
+- `LongWordsModule.php` - Long word hyphenation (post-processing)
 
 **src/Bridges/Latte/** - Latte templating integration
 - `TexyExtension.php` - Latte v3 extension providing `{texy}` tag and `|texy` filter
 - `TexyNode.php` - AST node for Latte compilation
 
+### AST Node Hierarchy
+
+All nodes inherit from `Texy\Node` which provides:
+- `position: ?Position` - Source location tracking
+- `getNodes(): Generator` - Child node iteration for traversal
+
+**Node categories:**
+- `BlockNode` - Block-level elements (paragraphs, headings, lists, tables)
+- `InlineNode` - Inline elements (text, phrases, links, images)
+- `ContentNode` - Container for child nodes (`children: array`)
+
+**Key node properties:**
+```php
+// Most nodes have:
+public ?Modifier $modifier;   // CSS classes, IDs, styles
+public ?Position $position;   // Source location
+
+// ContentNode (container):
+public array $children;       // Child nodes (InlineNode|BlockNode)
+
+// Specific nodes have semantic properties:
+ImageNode: url, width, height
+LinkNode: url, content (ContentNode), isImageLink
+PhraseNode: content (ContentNode), type ('strong', 'em', etc.)
+HeadingNode: content (ContentNode), level (1-6)
+```
+
 ### Module System
 
-Each module is a self-contained processor that:
-1. Registers patterns via `registerBlockPattern()` or `registerLinePattern()`
-2. Provides handler callbacks for matched patterns
-3. Returns `HtmlElement` instances or HTML strings
-4. Can be enabled/disabled via `$texy->allowed[]` configuration
+Modules handle both parsing and HTML generation:
 
-Modules communicate through the `HandlerInvocation` system, allowing modules to wrap or modify each other's output.
+1. **Pattern Registration** - In `beforeParse()`, modules register patterns:
+   ```php
+   $texy->registerBlockPattern($this->parseHeading(...), $pattern, Syntax::Heading);
+   $texy->registerLinePattern($this->parseImage(...), $pattern, Syntax::Image);
+   ```
 
-### Processing Flow
+2. **Parsing** - Pattern handlers create AST nodes:
+   ```php
+   public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode
+   {
+       return new ImageNode($url, $width, $height, $modifier, $position);
+   }
+   ```
 
-1. **Input** → `Texy::process(string $text)`
-2. **Block parsing** → `BlockParser` splits text into block-level elements
-3. **Module processing** → Each module's patterns are matched and processed
-4. **Line parsing** → `LineParser` processes inline elements within blocks
-5. **HTML generation** → `HtmlElement` objects are converted to HTML strings
-6. **Output** → Valid (X)HTML
+3. **HTML Generation** - Modules register solve() handlers with the Generator:
+   ```php
+   // In constructor:
+   $texy->htmlGenerator->registerHandler($this->solve(...));
 
-Protection marks (CONTENT_MARKUP, CONTENT_REPLACED, etc.) prevent re-processing of already-processed content.
+   // Handler:
+   public function solve(ImageNode $node, Html\Generator $generator): Html\Element
+   {
+       $el = new Html\Element('img');
+       $el->attrs['src'] = $node->url;
+       return $el;
+   }
+   ```
+
+4. **afterParse Processing** - Some modules process the complete AST:
+   ```php
+   $texy->addHandler('afterParse', $this->resolveReferences(...));
+   ```
+
+### Processing Pipeline
+
+```
+1. Preprocessing
+   └── Normalize line endings, tabs, remove soft hyphens
+
+2. beforeParse()
+   └── Modules register patterns
+
+3. Parsing → AST
+   ├── BlockParser creates BlockNode instances
+   └── InlineParser creates InlineNode instances
+
+4. afterParse(DocumentNode)
+   ├── HeadingModule: Build TOC
+   ├── LinkModule: Resolve references
+   └── ImageModule: Resolve references
+
+5. HTML Generation
+   └── Generator dispatches to module solve() handlers
+
+6. Post-processing
+   ├── Typography fixes (TypographyModule.postLine)
+   ├── Long word hyphenation (LongWordsModule.postLine)
+   └── Formatter ensures well-formed HTML
+```
+
+### Handler System
+
+**HTML Generation Handlers** - Registered via `$texy->htmlGenerator->registerHandler()`:
+
+```php
+// Register handler (node type detected from first parameter)
+$texy->htmlGenerator->registerHandler(function(
+    ImageNode $node,
+    Html\Generator $generator,
+    ?\Closure $previous,  // Previous handler in chain
+): Html\Element|string|null {
+    // Return null to delegate to previous handler
+    if ($node->url === null) {
+        return null;
+    }
+
+    // Or return Element/string to handle
+    $el = new Html\Element('img');
+    $el->attrs['src'] = $node->url;
+    return $el;
+});
+```
+
+**Notification Handlers** - For side effects (logging, AST modification):
+
+```php
+$texy->addHandler('beforeParse', function(string &$text) {
+    // Preprocess text
+});
+
+$texy->addHandler('afterParse', function(Nodes\DocumentNode $doc) {
+    // Traverse and modify AST
+    $traverser = new NodeTraverser;
+    $traverser->traverse($doc, function(Node $node) {
+        // Process each node
+    });
+});
+```
+
+**Events**: `beforeParse`, `afterParse`
 
 ### Testing Architecture
 
@@ -94,6 +229,13 @@ Protection marks (CONTENT_MARKUP, CONTENT_REPLACED, etc.) prevent re-processing 
 - Tests compare output against expected HTML files in `tests/Texy/expected/`
 - Input Texy source files in `tests/Texy/sources/`
 - `tests/bootstrap.php` sets up test environment
+
+**Testing guidelines:**
+- **Never use `Assert::contains()`** - it leads to false positives and missed bugs
+- **Always test exact output** using `Assert::matchFile()` or `Assert::match()`
+- `Assert::match()` ignores line ending differences (`\r\n` vs `\n`)
+- Avoid wildcard patterns like `%a%` - test the complete output
+- For AST tests, create separate expected files (e.g., `paragraphs-ast.html`)
 
 Example test pattern:
 ```php
@@ -127,7 +269,7 @@ Assert::matchFile(
 
 ## PHP Requirements
 
-- PHP 8.1 - 8.5 supported
+- PHP 8.2 - 8.5 supported
 - All files must include `declare(strict_types=1);`
 - Follows Nette Coding Standard (PSR-12 based)
 - Uses modern PHP syntax (constructor property promotion, match expressions, etc.)
@@ -135,10 +277,11 @@ Assert::matchFile(
 ## Key Configuration Properties
 
 The `Texy` class exposes module instances for configuration:
-- `$texy->headingModule` - Heading settings
+- `$texy->headingModule` - Heading settings, TOC access
 - `$texy->linkModule` - Link processing (root paths, references)
 - `$texy->imageModule` - Image processing (root paths, file checking)
-- `$texy->htmlOutputModule` - HTML output settings (line wrap, doctype)
+- `$texy->htmlGenerator` - HTML generation handlers
+- `$texy->htmlOutputModule` - HTML output formatting (Formatter)
 - `$texy->allowed[]` - Enable/disable specific syntax features
 
 ## Integration Notes
@@ -153,14 +296,13 @@ Both accept a `Texy` instance or callable processor during construction.
 ### Typical Usage
 ```php
 $texy = new Texy\Texy();
-$texy->setOutputMode(Texy\Texy::HTML5);
 $html = $texy->process($texyText);
 ```
 
 ## CI/CD
 
 Three GitHub Actions workflows:
-1. **tests.yml** - Runs Nette Tester on PHP 8.1-8.5, generates code coverage
+1. **tests.yml** - Runs Nette Tester on PHP 8.2-8.5, generates code coverage
 2. **static-analysis.yml** - Runs PHPStan (informative only, can fail)
 3. **coding-style.yml** - Validates code style with Nette Code Checker and Coding Standard
 
@@ -213,170 +355,168 @@ $title = $texy->headingModule->title;
 $toc = $texy->headingModule->TOC;
 ```
 
-## Handler System (Chain of Responsibility)
-
-Texy uses a sophisticated handler system allowing customization at two levels:
-
-### Element Handlers
-Modify behavior of existing elements (images, links, headings, etc.):
-
-```php
-$texy->addHandler('image', function(
-    Texy\HandlerInvocation $invocation,
-    Texy\Image $image,
-    ?Texy\Link $link,
-) {
-    // Option 1: Modify input before processing
-    $image->width ??= 800;
-
-    // Option 2: Delegate to default handler
-    $element = $invocation->proceed();
-
-    // Option 3: Modify output
-    if ($element) {
-        $element->attrs['loading'] = 'lazy';
-    }
-
-    // Option 4: Replace completely (e.g., YouTube embed)
-    if (str_starts_with($image->URL, 'youtube:')) {
-        return $this->createYouTubeEmbed($image);
-    }
-
-    return $element;
-});
-```
-
-**Execution order**: Last registered handler runs first, can call `$invocation->proceed()` to delegate to next handler or module's default implementation.
-
-**Common elements**: `image`, `linkReference`, `linkEmail`, `linkURL`, `phrase`, `figure`, `heading`, `block`, `emoticon`
-
-### Notification Handlers
-Called for side effects (logging, DOM modifications), don't return values:
-
-```php
-$texy->addHandler('beforeParse', function(
-    Texy\Texy $texy,
-    string &$text,
-    bool $isSingleLine,
-) {
-    // Preprocess text, load reference definitions
-});
-
-$texy->addHandler('afterParse', function(
-    Texy\Texy $texy,
-    Texy\HtmlElement $DOM,
-    bool $isSingleLine,
-) {
-    // Traverse and modify DOM tree
-    foreach ($DOM->getIterator() as $child) {
-        // Add attributes, build TOC, etc.
-    }
-});
-```
-
-**Common events**: `beforeParse`, `afterParse`, `afterList`, `afterTable`, `afterBlockquote`
-
 ## Custom Syntax Registration
 
-### Line Syntax (Inline Elements)
+### Inline Syntax
 
 ```php
 $texy->registerLinePattern(
     function(
-        Texy\InlineParser $parser,
+        Texy\ParseContext $context,
         array $matches,
-        string $name,
-    ): Texy\HtmlElement|string|null {
+        array $offsets,
+    ): Texy\Nodes\InlineNode {
         $username = $matches[1];
+        $position = new Texy\Position($offsets[0], strlen($matches[0]));
 
-        $el = new Texy\HtmlElement('a');
-        $el->attrs['href'] = '/user/' . urlencode($username);
-        $el->setText('@' . $username);
-
-        return $el;
+        // Create a LinkNode wrapping the username
+        return new Texy\Nodes\LinkNode(
+            url: '/user/' . urlencode($username),
+            content: new Texy\Nodes\ContentNode([
+                new Texy\Nodes\TextNode('@' . $username),
+            ]),
+            position: $position,
+        );
     },
-    '#@@([a-z0-9_]+)#i',      // Pattern (not anchored)
+    '~@@([a-z0-9_]+)~i',      // Pattern
     'custom/username',         // Unique syntax name
-    '#@@#'                     // Optional optimization test
 );
+
+// Register HTML generation handler
+$texy->htmlGenerator->registerHandler(function(
+    Texy\Nodes\LinkNode $node,
+    Texy\Output\Html\Generator $generator,
+    ?\Closure $previous,
+): Texy\Output\Html\Element|string|null {
+    // Let default handler process unless this is our custom link
+    if (!str_starts_with($node->url ?? '', '/user/')) {
+        return null; // Delegate to previous handler
+    }
+
+    $el = new Texy\Output\Html\Element('a');
+    $el->attrs['href'] = $node->url;
+    $el->attrs['class'] = 'user-mention';
+    $el->children = $generator->generateChildren($node->content->children);
+    return $el;
+});
 ```
 
-### Block Syntax (Multi-line Elements)
+### Block Syntax
+
 ```php
 $texy->registerBlockPattern(
     function(
-        Texy\BlockParser $parser,
+        Texy\ParseContext $context,
         array $matches,
-        string $name,
-    ): Texy\HtmlElement|string|null {
+        array $offsets,
+    ): Texy\Nodes\BlockNode {
         $type = $matches[1];
         $content = $matches[2];
-
-        $el = new Texy\HtmlElement('div');
-        $el->attrs['class'][] = 'alert-' . $type;
+        $position = new Texy\Position($offsets[0], strlen($matches[0]));
 
         // Parse content with Texy syntax
-        $el->parseBlock($parser->getTexy(), trim($content));
+        $innerContent = $context->parseBlock(trim($content));
 
-        return $el;
+        // Create a custom block node (or use existing node types)
+        return new Texy\Nodes\BlockQuoteNode(
+            content: $innerContent,
+            modifier: Texy\Modifier::parse('[alert-' . $type . ']'),
+            position: $position,
+        );
     },
-    '#^:::(warning|info|danger)\n(.+?)(?=\n:::|$)#s',  // Pattern (anchored with ^)
-    'custom/alert'
+    '~^:::(warning|info|danger)\n(.+?)(?=\n:::|$)~s',
+    'custom/alert',
 );
 ```
 
-**BlockParser API**:
-- `$parser->next($pattern, &$matches)` - Match next line, advance position
-- `$parser->moveBackward($lines)` - Move back N lines
-- `$parser->isIndented()` - Check if current block is indented
+## Protection Marks
 
-## Protection Marks and Nesting
+Texy uses special control characters to prevent re-processing of already-processed content. These are critical for typography and longwords modules.
 
-Texy uses special control characters to prevent re-processing of already-processed content:
+### Protection Mark Types
 
-- `CONTENT_MARKUP` (\x17) - Regular HTML markup (tags, formatting)
-- `CONTENT_REPLACED` (\x16) - Replaced elements (images)
-- `CONTENT_TEXTUAL` (\x15) - Escaped/treated text (code blocks)
-- `CONTENT_BLOCK` (\x14) - Block elements
+| Mark | Hex | Constant | Usage |
+|------|-----|----------|-------|
+| `\x14` | 0x14 | `CONTENT_BLOCK` | Block elements (`<div>`, `<p>`, `<table>`) |
+| `\x15` | 0x15 | `CONTENT_TEXTUAL` | Protected text (code, notexy) |
+| `\x16` | 0x16 | `CONTENT_REPLACED` | Replaced elements (`<img>`, `<br>`, URLs) |
+| `\x17` | 0x17 | `CONTENT_MARKUP` | Inline markup (`<strong>`, `<em>`, `<a>`) |
 
-When creating raw HTML strings (not HtmlElement), protect them:
+### Usage in Element.toString()
+
 ```php
-$html = '<iframe src="..."></iframe>';
-return $texy->protect($html, Texy\Texy::CONTENT_BLOCK);
+// Element determines content type automatically:
+$el = new Html\Element('p');      // CONTENT_BLOCK
+$el = new Html\Element('strong'); // CONTENT_MARKUP
+$el = new Html\Element('img');    // CONTENT_REPLACED
 ```
 
-**Patterns** should exclude already-processed content: `[^\x14-\x1F]` excludes all protected content.
+## Space Freezing in Attributes
+
+To prevent line wrapping inside HTML attributes, spaces are "frozen" using `Helpers::freezeSpaces()`:
+
+```php
+// Freezes spaces: " " → \x01, "\t" → \x02, "\r" → \x03, "\n" → \x04
+$value = Helpers::freezeSpaces($attrValue);
+
+// At the end, unfreeze: \x01 → " ", etc.
+$html = Helpers::unfreezeSpaces($html);
+```
 
 ## Key Architectural Concepts
 
 ### Terminology
 - **Syntax**: Named construct (e.g., `phrase/strong`, `image`)
 - **Pattern**: Regular expression defining syntax appearance
-- **Syntax Handler**: Function called when pattern matches, invokes element handlers
-- **Element**: Type of processable item (e.g., `image`, `linkURL`)
-- **Element Handler**: Function processing specific element type, uses `proceed()` for chaining
-- **Notification Handler**: Event callback, doesn't return value or affect processing
+- **AST Node**: Structured representation of parsed content
+- **Generator Handler**: Function converting specific node type to HTML
 
 ### Two Parser Types
-- **BlockParser**: Processes block structures (paragraphs, headings, lists). Blocks never overlap.
-- **LineParser**: Processes inline syntaxes (formatting, links, images). Allows nesting via progressive expansion.
+- **BlockParser**: Processes block structures (paragraphs, headings, lists). Creates `BlockNode` instances.
+- **InlineParser**: Processes inline syntaxes (formatting, links, images). Creates `InlineNode` instances.
+
+### Position Tracking
+
+Position tracks source location with `offset` (byte position from document start) and `length` (byte length).
+
+**Key principles:**
+- Positions are **absolute** - relative to original document, not to extracted/transformed content
+- Positions are **byte-based** - important for UTF-8 (日 = 3 bytes, not 1 character)
+- `substr($source, $position->offset, $position->length)` should extract the original syntax
+
+**For nested content** (blockquote, list, table cells):
+- Content is extracted and transformed (prefixes like "> " or "- " removed)
+- Modules must fix positions in parsed content using offset mapping
+- `parseBlock()` and `parseInline()` accept optional `$baseOffset` parameter
+
+**Example - verifying positions:**
+```php
+$doc = $texy->parse($source);
+foreach ($doc->getNodes() as $node) {
+    if ($node->position) {
+        $extracted = substr($source, $node->position->offset, $node->position->length);
+        // $extracted should match the original syntax that created this node
+    }
+}
+```
 
 ### Modifier System
 Modifiers add attributes: `.(title)[class #id]{style:value}<align>^valign`
 
 ```php
-// Parsing
-$mod = new Texy\Modifier($modifierText);
+// Parsing (use static factory method)
+$mod = Texy\Modifier::parse($modifierText);
+$mod = Texy\Modifier::parse($modifierText, $offset);  // with position tracking
 
 // Access
 $mod->id;          // HTML id
 $mod->classes;     // array of classes
 $mod->styles;      // array of CSS properties
+$mod->attrs;       // custom attributes (data-*, aria-*, etc.)
 $mod->hAlign;      // left, right, center, justify
+$mod->vAlign;      // top, middle, bottom
 $mod->title;       // title attribute
-
-// Apply to element
-$mod->decorate($texy, $element);
+$mod->position;    // Position object
 ```
 
 ## Security Practices
@@ -398,12 +538,14 @@ $texy->urlSchemeFilters[Texy\Texy::FILTER_ANCHOR] = '#https?:#Ai';
 
 ## Important Implementation Details
 
-1. **Module Registration**: Modules register patterns and handlers in their constructors. Registration order matters - earlier patterns have priority when multiple match at same position.
+1. **Module Registration**: Modules register patterns in `beforeParse()`. Registration order matters - earlier patterns have priority when multiple match at same position.
 
-2. **DOM Construction**: `HtmlElement` builds DOM tree. Use `parseLine()` or `parseBlock()` methods to recursively parse content with Texy syntax.
+2. **AST Construction**: Parsing creates a tree of `Node` objects. Use `ContentNode` to hold child nodes. The `getNodes()` method enables traversal.
 
-3. **Well-formed HTML**: `HtmlOutputModule` ensures valid HTML by auto-closing tags, fixing nesting, and formatting output.
+3. **HTML Generation**: `Generator` dispatches to registered handlers based on node class. Return `null` to delegate to previous handler (chain of responsibility).
 
-4. **Typography**: `TypographyModule` post-processes text for typographic correctness (quotes, dashes, non-breaking spaces). Locale-aware (`cs`, `en`, `fr`, `de`, `pl`).
+4. **afterParse Processing**: `HeadingModule`, `LinkModule`, and `ImageModule` use afterParse to process the complete AST (build TOC, resolve references).
 
-5. **Reference System**: LinkModule and ImageModule support reference definitions separated from usage. References stored in module's internal dictionary.
+5. **Typography**: `TypographyModule` post-processes text for typographic correctness (quotes, dashes, non-breaking spaces). Locale-aware (`cs`, `en`, `fr`, `de`, `pl`).
+
+6. **Reference System**: LinkModule and ImageModule support reference definitions. References are collected in afterParse and resolved via `NodeTraverser`.

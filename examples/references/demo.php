@@ -20,45 +20,43 @@
 
 declare(strict_types=1);
 
+use Texy\Nodes\LinkReferenceNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Handler for undefined references
- *
- * When Texy finds a reference like [1] that isn't defined elsewhere,
- * it calls this handler. We use it to create links to comment anchors.
- */
-function newReferenceHandler(Texy\HandlerInvocation $parser, $refName): Texy\HtmlElement|string|null
-{
-	// Map of comment IDs to author names
-	$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
-
-	// Only handle numeric references that exist in our list
-	if (!isset($names[$refName])) {
-		return null; // Let Texy handle it (will show as plain text)
-	}
-
-	$name = $names[$refName];
-
-	// Create a link to the comment anchor
-	$el = new Texy\HtmlElement('a');
-	$el->attrs['href'] = '#comm-' . $refName;  // Links to <div id="comm-1">
-	$el->attrs['class'][] = 'comment';
-	$el->attrs['rel'] = 'nofollow';            // Important for SEO/spam prevention
-	$el->setText("[$refName] $name:");
-
-	return $el;
-}
-
-
 $texy = new Texy;
 
+
 // Register our reference handler
-$texy->addHandler('newReference', newReferenceHandler(...));
+// The first parameter type (LinkReferenceNode) determines which node class the handler processes
+$texy->htmlGenerator->registerHandler(
+	function (LinkReferenceNode $node, Html\Generator $gen) use ($texy): Html\Element|string {
+		// Map of comment IDs to author names
+		$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
+		$refName = $node->identifier;
+
+		// Only handle numeric references that exist in our list
+		if (!isset($names[$refName])) {
+			// Not found - render as plain text [identifier]
+			return '[' . htmlspecialchars($refName, ENT_QUOTES | ENT_HTML5, 'UTF-8') . ']';
+		}
+
+		$name = $names[$refName];
+
+		// Create a link to the comment anchor
+		$el = new Html\Element('a');
+		$el->attrs['href'] = '#comm-' . $refName;  // Links to <div id="comm-1">
+		$el->attrs['class'][] = 'comment';
+		$el->attrs['rel'] = 'nofollow';            // Important for SEO/spam prevention
+		$el->setText("[$refName] $name:");
+
+		return $el;
+	},
+);
 
 // IMPORTANT: Use safe mode for user-submitted content!
 // This prevents XSS attacks by:

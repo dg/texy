@@ -10,12 +10,12 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HandlerInvocation;
-use Texy\InlineParser;
-use Texy\Link;
+use Texy\Nodes\EmailNode;
+use Texy\Nodes\UrlNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
 use Texy\Patterns;
-use Texy\Regexp;
-use function iconv_strlen, iconv_substr, str_replace, strncasecmp;
+use function iconv_strlen, iconv_substr, str_contains, str_replace, strncasecmp;
 
 
 /**
@@ -30,8 +30,8 @@ final class AutolinkModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('linkEmail', $this->solveUrlEmail(...));
-		$texy->addHandler('linkURL', $this->solveUrlEmail(...));
+		$texy->htmlGenerator->registerHandler($this->solveUrl(...));
+		$texy->htmlGenerator->registerHandler($this->solveEmail(...));
 	}
 
 
@@ -39,114 +39,116 @@ final class AutolinkModule extends Texy\Module
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
 		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
+			fn(ParseContext $context, array $matches) => new UrlNode($matches[0]),
 			'~
-				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
+				(?<= ^ | [\s([<:] )                # must be preceded by these chars
 				(?: https?:// | www\. | ftp:// )   # protocol or www
 				[0-9.' . Patterns::CHAR . '-]      # first char
 				[/\d' . Patterns::CHAR . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
 				[/\d' . Patterns::CHAR . '+\~?@=_#$*]  # last char
 			~',
 			'link/url',
-			'~(?: https?:// | www\. | ftp://)~',
 		);
 
 		// direct email
 		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
+			fn(ParseContext $context, array $matches) => new EmailNode($matches[0]),
 			'~
-				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
-				' . Patterns::EMAIL . '
+				(?<= ^ | [\s([<] )                  # must be preceded by these chars
+				[' . Patterns::CHAR . ']                 # first char
+				[0-9.+_' . Patterns::CHAR . '-]{0,63}    # local part
+				@
+				[0-9.+_' . Patterns::CHAR . '\x{ad}-]{1,252} # domain
+				\.
+				[' . Patterns::CHAR . '\x{ad}]{2,19}     # TLD
 			~',
 			'link/email',
-			'~' . Patterns::EMAIL . '~',
 		);
 	}
 
 
 	/**
-	 * Parses http://davidgrudl.com david@grudl.com
-	 * @param  array<?string>  $matches
+	 * Generates HTML for UrlNode.
 	 */
-	public function parseUrlEmail(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+	public function solveUrl(UrlNode $node, Html\Generator $generator): Html\Element
 	{
-		[$mURL] = $matches;
-		// [0] => URL
+		$url = strncasecmp($node->url, 'www.', 4) === 0
+			? 'http://' . $node->url
+			: $node->url;
 
-		$link = new Link($mURL);
-		$this->texy->linkModule->checkLink($link);
+		$el = new Html\Element('a', ['href' => $url]);
+		if ($this->texy->linkModule->forceNoFollow && str_contains($url, '//')) {
+			$el->attrs['rel'] = 'nofollow';
+		}
 
-		return $this->texy->invokeAroundHandlers(
-			$name === 'link/email' ? 'linkEmail' : 'linkURL',
-			$parser,
-			[$link],
-		);
+		// Protect URL text from typography/longwords processing
+		return $el->add($this->texy->protect($this->textualUrl($node->url), $this->texy::CONTENT_TEXTUAL));
 	}
 
 
 	/**
-	 * Handler for URL/email - creates textual content and link element.
+	 * Generates HTML for EmailNode.
 	 */
-	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string|null
+	public function solveEmail(EmailNode $node, Html\Generator $generator): Html\Element
 	{
-		$content = $this->textualUrl($link);
-		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
-		return $this->texy->linkModule->solve(null, $link, $content);
+		$el = new Html\Element('a', ['href' => 'mailto:' . $node->email]);
+		$text = $this->texy->obfuscateEmail
+			? $this->texy->protect(str_replace('@', '&#64;<!-- -->', $node->email), $this->texy::CONTENT_TEXTUAL)
+			: $node->email;
+		return $el->add($text);
 	}
 
 
 	/**
-	 * Returns textual representation of URL.
+	 * Returns textual representation of URL (shortened for display).
 	 */
-	public function textualUrl(Link $link): string
+	public function textualUrl(string $url): string
 	{
-		if ($this->texy->obfuscateEmail && Regexp::match($link->raw, '~^' . Patterns::EMAIL . '$~')) { // email
-			return str_replace('@', '&#64;<!-- -->', $link->raw);
+		// Only shorten URLs that start with http://, https://, ftp://, www., or /
+		if (!$this->shorten || !preg_match('~^(https?://|ftp://|www\.|/)~i', $url)) {
+			return $url;
 		}
 
-		if ($this->shorten && Regexp::match($link->raw, '~^(https?://|ftp://|www\.|/)~i')) {
-			$raw = strncasecmp($link->raw, 'www.', 4) === 0
-				? 'none://' . $link->raw
-				: $link->raw;
+		$raw = strncasecmp($url, 'www.', 4) === 0
+			? 'none://' . $url
+			: $url;
 
-			// parse_url() in PHP damages UTF-8 - use regular expression
-			if (!($parts = Regexp::match($raw, '~^
-				(?: (?P<scheme> [a-z]+ ) : )?
-				(?: // (?P<host> [^/?#]+ ) )?
-				(?P<path> (?: / | ^ ) (?! / ) [^?#]* )?
-				(?: \? (?P<query> [^#]* ) )?
-				(?: \# (?P<fragment> .* ) )?
-				$
-			~'))) {
-				return $link->raw;
-			}
-
-			$res = '';
-			if ($parts['scheme'] !== null && $parts['scheme'] !== 'none') {
-				$res .= $parts['scheme'] . '://';
-			}
-
-			if ($parts['host'] !== null) {
-				$res .= $parts['host'];
-			}
-
-			if ($parts['path'] !== null) {
-				$res .= (iconv_strlen($parts['path'], 'UTF-8') > 16 ? ("/\u{2026}" . iconv_substr($parts['path'], -12, 12, 'UTF-8')) : $parts['path']);
-			}
-
-			if ($parts['query'] > '') {
-				$res .= iconv_strlen($parts['query'], 'UTF-8') > 4
-					? "?\u{2026}"
-					: ('?' . $parts['query']);
-			} elseif ($parts['fragment'] > '') {
-				$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4
-					? "#\u{2026}"
-					: ('#' . $parts['fragment']);
-			}
-
-			return $res;
+		// parse_url() in PHP damages UTF-8 - use regular expression
+		if (!preg_match('~^
+			(?: (?P<scheme> [a-z]+ ) : )?
+			(?: // (?P<host> [^/?#]+ ) )?
+			(?P<path> (?: / | ^ ) (?! / ) [^?#]* )?
+			(?: \? (?P<query> [^#]* ) )?
+			(?: \# (?P<fragment> .* ) )?
+			$
+		~x', $raw, $parts)) {
+			return $url;
 		}
 
-		return $link->raw;
+		$res = '';
+		// Add scheme if not 'none' (www. URLs are mapped to none://)
+		if (($parts['scheme'] ?? null) !== null && $parts['scheme'] !== 'none') {
+			$res .= $parts['scheme'] . '://';
+		}
+
+		if (($parts['host'] ?? null) !== null) {
+			$res .= $parts['host'];
+		}
+
+		if (($parts['path'] ?? null) !== null) {
+			$res .= (iconv_strlen($parts['path'], 'UTF-8') > 16 ? ("/\u{2026}" . iconv_substr($parts['path'], -12, 12, 'UTF-8')) : $parts['path']);
+		}
+
+		if (($parts['query'] ?? '') > '') {
+			$res .= iconv_strlen($parts['query'], 'UTF-8') > 4
+				? "?\u{2026}"
+				: ('?' . $parts['query']);
+		} elseif (($parts['fragment'] ?? '') > '') {
+			$res .= iconv_strlen($parts['fragment'], 'UTF-8') > 4
+				? "#\u{2026}"
+				: ('#' . $parts['fragment']);
+		}
+
+		return $res;
 	}
 }

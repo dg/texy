@@ -10,42 +10,32 @@ declare(strict_types=1);
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use function max, strlen, substr, trim, usort;
 
 
 /**
  * Parses block structures (paragraphs, headings, lists, tables, etc.).
  */
-class BlockParser extends Parser
+class BlockParser
 {
 	private string $text;
 	private int $offset;
 
 
 	public function __construct(
-		protected Texy $texy,
-		private bool $indented,
-		/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}> */
-		public array $patterns,
+		/** @var array<string, array{handler: \Closure(ParseContext, array<string>, string): ?Nodes\BlockNode, pattern: string}> */
+		private array $patterns,
+		/** @var \Closure(ParseContext, string): array<Nodes\BlockNode> gap handler receives (context, text) */
+		private \Closure $gapHandler,
 	) {
 	}
 
 
-	public function isIndented(): bool
+	public function parse(ParseContext $context, string $text): Nodes\ContentNode
 	{
-		return $this->indented;
-	}
-
-
-	/** @return list<HtmlElement|string> */
-	public function parse(string $text): array
-	{
-		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
-
 		$this->text = $text;
 		$this->offset = 0;
 		$matches = $this->match($text);
-		$matches[] = [strlen($text), null, null]; // terminal sentinel
+		$matches[] = [strlen($text), null, null, 0]; // terminal sentinel
 		$cursor = 0;
 		$res = [];
 
@@ -56,14 +46,12 @@ class BlockParser extends Parser
 				if ($mName === null || $mOffset >= $this->offset) {
 					break;
 				}
-			} while (1);
+			} while (true);
 
-			// between-matches content
+			// between-matches content → delegate to gap handler
 			if ($mOffset > $this->offset) {
-				$s = trim(substr($text, $this->offset, $mOffset - $this->offset));
-				if ($s !== '') {
-					$res = array_merge($res, $this->texy->paragraphModule->process($this, $s));
-				}
+				$s = substr($text, $this->offset, $mOffset - $this->offset);
+				$res = array_merge($res, ($this->gapHandler)($context, $s));
 			}
 
 			if ($mName === null) {
@@ -72,18 +60,19 @@ class BlockParser extends Parser
 
 			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
 
-			$el = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
+			// call handler
+			$handler = $this->patterns[$mName]['handler'];
+			$node = $handler($context, $mMatches, $mName);
 
-			if ($el === null || $this->offset <= $mOffset) { // module rejects text
-				// asi by se nemelo stat, rozdeli generic block
-				$this->offset = $mOffset; // turn offset back
-
-			} else {
-				$res[] = $el;
+			if ($node === null || $this->offset <= $mOffset) { // handler rejects text
+				$this->offset = $mOffset;
+				continue;
 			}
-		} while (1);
 
-		return $res;
+			$res[] = $node;
+		} while (true);
+
+		return new Nodes\ContentNode($res);
 	}
 
 
@@ -148,6 +137,7 @@ class BlockParser extends Parser
 	{
 		$matches = [];
 		$priority = 0;
+
 		foreach ($this->patterns as $name => $pattern) {
 			$ms = Regexp::matchAll(
 				$text,

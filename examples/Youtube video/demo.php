@@ -24,35 +24,32 @@
 
 declare(strict_types=1);
 
+use Texy\Nodes\ImageNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Custom handler for images
- *
- * Checks if the image URL uses our custom "youtube:" scheme.
- * If so, creates a YouTube embed iframe instead of an <img> tag.
- */
-function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null): Texy\HtmlElement|string|null
-{
-	// Check if the URL has a custom scheme (like "youtube:VIDEO_ID")
-	$parts = explode(':', $image->URL);
-	if (count($parts) !== 2) {
-		// Not a custom scheme, let Texy handle it normally
-		return $invocation->proceed();
-	}
+$texy = new Texy;
 
-	$scheme = $parts[0];
-	$videoId = $parts[1];
 
-	// Handle YouTube videos
-	if ($scheme === 'youtube') {
-		// Use the image dimensions for the video size, or defaults
-		$width = $image->width ?: 425;
-		$height = $image->height ?: 350;
+// Register our custom image handler
+// This works for both inline images AND images in figures,
+// because FigureModule delegates to the generator for ImageNode processing.
+$texy->htmlGenerator->registerHandler(
+	function (ImageNode $node, Html\Generator $gen, ?Closure $previous) use ($texy): Html\Element|string|null {
+		// Check if the URL has our custom "youtube:" scheme
+		$url = $node->url ?? '';
+		if (!str_starts_with($url, 'youtube:')) {
+			// Not a YouTube video, let default handler process it
+			return $previous ? $previous($node, $gen) : null;
+		}
+
+		$videoId = substr($url, 8); // Remove "youtube:" prefix
+		$width = $node->width ?: 425;
+		$height = $node->height ?: 350;
 
 		// Create the YouTube embed iframe
 		$code = '<iframe'
@@ -65,19 +62,9 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Te
 			. '</iframe>';
 
 		// Tell Texy this is ready-to-use HTML (don't process it further)
-		$texy = $invocation->getTexy();
 		return $texy->protect($code, $texy::CONTENT_BLOCK);
-	}
-
-	// Unknown scheme, let Texy handle it normally
-	return $invocation->proceed();
-}
-
-
-$texy = new Texy;
-
-// Register our custom image handler
-$texy->addHandler('image', imageHandler(...));
+	},
+);
 
 
 // Process the text

@@ -7,8 +7,8 @@
  * using the FSHL library.
  *
  * WHAT YOU'LL LEARN:
- * - How to intercept code blocks using a handler
- * - How to detect the programming language from the block type
+ * - How to intercept code blocks using an HTML handler
+ * - How to detect the programming language from the node
  * - How to integrate a syntax highlighting library
  *
  * TEXY CODE BLOCK SYNTAX:
@@ -24,6 +24,9 @@
 
 declare(strict_types=1);
 
+use Texy\Helpers;
+use Texy\Nodes\CodeBlockNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
@@ -34,62 +37,49 @@ if (@!include __DIR__ . '/vendor/autoload.php') {
 }
 
 
-/**
- * Custom handler for code blocks
- *
- * This handler intercepts /--code blocks and applies syntax highlighting
- * based on the specified language.
- */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): ?Texy\HtmlElement
-{
-	// Only handle code blocks, let other blocks pass through
-	if ($blocktype !== 'block/code') {
-		return $invocation->proceed();
-	}
-
-	// Map of supported languages to FSHL lexer classes
-	static $lexers = [
-		'html' => FSHL\Lexer\Html::class,
-		'javascript' => FSHL\Lexer\Javascript::class,
-		'php' => FSHL\Lexer\Php::class,
-		'sql' => FSHL\Lexer\Sql::class,
-	];
-
-	// If we don't support this language, skip highlighting
-	if (!isset($lexers[$lang])) {
-		return null;
-	}
-
-	$langClass = $lexers[$lang];
-	$texy = $invocation->getTexy();
-
-	// Remove common indentation from the code
-	$content = Texy\Helpers::outdent($content);
-
-	// Apply syntax highlighting
-	$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
-	$content = $fshl->highlight($content, new $langClass);
-
-	// Tell Texy not to process the highlighted HTML further
-	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
-
-	// Build the HTML structure: <pre class="php"><code>...</code></pre>
-	$elPre = new Texy\HtmlElement('pre');
-	if ($modifier) {
-		$modifier->decorate($texy, $elPre);
-	}
-	$elPre->attrs['class'] = strtolower($lang);
-
-	$elPre->create('code', $content);
-
-	return $elPre;
-}
-
-
 $texy = new Texy;
 
 // Register our code block handler
-$texy->addHandler('block', blockHandler(...));
+// The first parameter type (CodeBlockNode) determines which node class the handler processes
+$texy->htmlGenerator->registerHandler(
+	function (CodeBlockNode $node, Html\Generator $gen, ?Closure $previous) use ($texy): Html\Element|string|null {
+		// Map of supported languages to FSHL lexer classes
+		static $lexers = [
+			'html' => FSHL\Lexer\Html::class,
+			'javascript' => FSHL\Lexer\Javascript::class,
+			'php' => FSHL\Lexer\Php::class,
+			'sql' => FSHL\Lexer\Sql::class,
+		];
+
+		$lang = $node->language;
+
+		// If we don't support this language, delegate to default handler
+		if ($lang === null || !isset($lexers[$lang])) {
+			return null;
+		}
+
+		$langClass = $lexers[$lang];
+
+		// Remove common indentation from the code
+		$content = Helpers::outdent($node->content);
+
+		// Apply syntax highlighting
+		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
+		$content = $fshl->highlight($content, new $langClass);
+
+		// Tell Texy not to process the highlighted HTML further
+		$content = $texy->protect($content, $texy::CONTENT_BLOCK);
+
+		// Build the HTML structure: <pre class="php"><code>...</code></pre>
+		$elPre = new Html\Element('pre');
+		$node->modifier?->decorate($texy, $elPre);
+		$elPre->attrs['class'] = strtolower($lang);
+
+		$elPre->create('code', $content);
+
+		return $elPre;
+	},
+);
 
 
 // Process the text

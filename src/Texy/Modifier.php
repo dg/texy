@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Texy;
 
+use Texy\Output\Html;
 use function array_flip, explode, is_array, settype, str_replace, str_starts_with, strlen, strpos, strtolower, substr, trim;
 
 
@@ -52,12 +53,13 @@ final class Modifier
 	/**
 	 * Parses modifier string and returns new instance.
 	 */
-	public static function parse(?string $s): self
+	public static function parse(?string $s): ?self
 	{
-		$modifier = new self;
-		if ($s !== null) {
-			$modifier->setProperties($s);
+		if ($s === null) {
+			return null;
 		}
+		$modifier = new self;
+		$modifier->setProperties($s);
 		return $modifier;
 	}
 
@@ -107,11 +109,12 @@ final class Modifier
 
 
 	/**
-	 * Decorates HtmlElement element.
+	 * Decorates Html\Element element.
+	 * @deprecated  use Html\Generator instead
 	 */
-	public function decorate(Texy $texy, HtmlElement $el): HtmlElement
+	public function decorate(Texy $texy, Html\Element $el): Html\Element
 	{
-		$this->decorateAttrs($texy, $el->attrs, $el->getName() ?? '');
+		$this->decorateAttrs($texy, $el->attrs, $el->name ?? '');
 		$this->decorateClasses($texy, $el->attrs);
 		$this->decorateStyles($texy, $el->attrs);
 		$this->decorateAligns($texy, $el->attrs);

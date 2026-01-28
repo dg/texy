@@ -10,7 +10,7 @@
  * - Add tracking parameters to external links
  *
  * WHAT YOU'LL LEARN:
- * - How to intercept and modify links using a handler
+ * - How to intercept and modify links using an HTML handler
  * - How to detect relative vs. absolute URLs
  * - How to handle custom URL schemes
  * - How to get a list of all links in the document
@@ -23,48 +23,65 @@
 
 declare(strict_types=1);
 
+use Texy\Helpers;
+use Texy\Nodes\LinkNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Custom handler for links
- *
- * This handler transforms links based on their URL:
- * - Relative links (like "page-name") become "index?page=page-name"
- * - Links starting with "wiki:" become Wikipedia search URLs
- */
-function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, ?Texy\Link $link = null): Texy\HtmlElement|string|null
-{
-	// Only process if there's actually a link
-	if (!$link) {
-		return $invocation->proceed();
-	}
-
-	// Check if this is a relative link (doesn't contain "://")
-	if (Texy\Helpers::isRelative($link->URL)) {
-		// Transform relative links to your CMS URL format
-		// "my-page" becomes "index?page=my-page"
-		$link->URL = 'index?page=' . urlencode($link->URL);
-
-	} elseif (substr($link->URL, 0, 5) === 'wiki:') {
-		// Handle our custom "wiki:" URL scheme
-		// "wiki:texy" becomes a Wikipedia search link
-		$searchTerm = substr($link->URL, 5);  // Remove "wiki:" prefix
-		$link->URL = 'https://en.wikipedia.org/wiki/Special:Search?search=' . urlencode($searchTerm);
-	}
-
-	// Continue processing with the modified link
-	return $invocation->proceed();
-}
-
-
 $texy = new Texy;
 
+
 // Register our custom link handler
-$texy->addHandler('phrase', phraseHandler(...));
+// The first parameter type (LinkNode) determines which node class the handler processes
+$texy->htmlGenerator->registerHandler(
+	function (LinkNode $node, Html\Generator $gen) use ($texy): Html\Element {
+		$url = $node->url ?? '';
+
+		// Check if this is a relative link (doesn't contain "://")
+		if (Helpers::isRelative($url)) {
+			// Transform relative links to your CMS URL format
+			// "my-page" becomes "index?page=my-page"
+			$url = 'index?page=' . urlencode($url);
+
+		} elseif (str_starts_with($url, 'wiki:')) {
+			// Handle our custom "wiki:" URL scheme
+			// "wiki:texy" becomes a Wikipedia search link
+			$searchTerm = substr($url, 5);  // Remove "wiki:" prefix
+			$url = 'https://en.wikipedia.org/wiki/Special:Search?search=' . urlencode($searchTerm);
+		}
+
+		// Build the link element
+		$el = new Html\Element('a');
+
+		// Handle nofollow class
+		$nofollow = false;
+		if ($node->modifier && isset($node->modifier->classes['nofollow'])) {
+			$nofollow = true;
+			unset($node->modifier->classes['nofollow']);
+		}
+
+		// Apply modifier (title, class, id, style, etc.)
+		$el->attrs['href'] = null; // Reserve position at front
+		$node->modifier?->decorate($texy, $el);
+
+		// Set the URL
+		$el->attrs['href'] = $url;
+
+		// rel="nofollow"
+		if ($nofollow || ($texy->linkModule->forceNoFollow && str_contains($url, '//'))) {
+			$el->attrs['rel'] = 'nofollow';
+		}
+
+		// Add content
+		$el->children = $gen->renderNodes($node->content->children);
+
+		return $el;
+	},
+);
 
 
 // Process the text

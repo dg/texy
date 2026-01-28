@@ -47,6 +47,7 @@ test('url shortening', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutputModule->lineWrap = 500; // disable line wrapping for this test
 	// Long path should be shortened (keeps last 12 chars of path)
+	// For non-www URLs, scheme is kept
 	Assert::match(
 		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/…me/page.html</a></p>
 ',
@@ -69,7 +70,7 @@ test('url shortening disabled', function () {
 
 test('url shortening short path', function () {
 	$texy = new Texy\Texy;
-	// Short path should not be shortened
+	// Short path should not be shortened, scheme is kept for non-www
 	Assert::match(
 		'<p><a href="https://example.com/page">https://example.com/page</a></p>
 ',
@@ -80,7 +81,7 @@ test('url shortening short path', function () {
 
 test('url shortening with query', function () {
 	$texy = new Texy\Texy;
-	// Long query should be shortened to ?…
+	// Long query should be shortened to ?…, scheme kept for non-www
 	Assert::match(
 		'<p><a href="https://example.com/?query=long">https://example.com/?…</a></p>
 ',

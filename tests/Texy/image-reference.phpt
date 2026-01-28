@@ -94,12 +94,12 @@ height="100"></div>
 });
 
 
-// Note: Dimensions in usage don't override reference - "logo 50x25" is treated as
-// a different reference name than "logo", so it falls back to direct URL behavior
-test('image reference with dimensions in usage falls back to direct URL', function () {
+// Dimensions in usage override those from definition
+test('image reference with dimensions in usage overrides definition', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div class="figure"><img src="images/logo" alt="" width="50" height="25"></div>
+		'<div class="figure"><img src="images/image.jpg" alt="" width="50"
+height="25"></div>
 ',
 		$texy->process("[* logo 50x25 *]\n\n[*logo*]: image.jpg 200x100"),
 	);
@@ -352,17 +352,16 @@ test('user-defined image definition persists across process() calls', function (
 });
 
 
-test('document-defined image reference leaks to next process() [BUG]', function () {
+test('document-defined image reference does NOT leak to next process()', function () {
 	$texy = new Texy\Texy;
 
 	// First process() defines a reference
 	$texy->process("[*logo*]: image.jpg\n\n[* logo *]");
 
-	// Second process() - reference should NOT be available, but it is (BUG)
-	// This documents the current buggy behavior
+	// Second process() - reference should NOT be available
+	// Falls back to using "logo" as direct URL
 	Assert::match(
-		'<div class="figure"><img src="images/image.jpg" alt=""></div>
-',
+		'<div class="figure"><img src="images/logo" alt=""></div>',
 		$texy->process('[* logo *]'),
 	);
 });

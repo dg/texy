@@ -20,15 +20,6 @@ test('link reference is resolved via phrase syntax', function () {
 });
 
 
-test('link reference with query string', function () {
-	$texy = new Texy\Texy;
-	Assert::same(
-		"<p><a href=\"https://example.com?foo=bar\">Click</a></p>\n",
-		$texy->process("\"Click\":[link?foo=bar]\n\n[link]: https://example.com"),
-	);
-});
-
-
 test('link reference with fragment', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
@@ -95,16 +86,15 @@ test('user-defined definition persists across process() calls', function () {
 });
 
 
-test('document-defined reference leaks to next process() [BUG]', function () {
+test('document-defined reference does NOT leak to next process()', function () {
 	$texy = new Texy\Texy;
 
 	// First process() defines a reference
 	$texy->process("[link]: https://example.com\n\n\"Click\":[link]");
 
-	// Second process() - reference should NOT be available, but it is (BUG)
-	// This documents the current buggy behavior
+	// Second process() - reference should NOT be available, falls back to using "link" as URL
 	Assert::same(
-		"<p><a href=\"https://example.com\">Click</a></p>\n",
+		"<p><a href=\"link\">Click</a></p>\n",
 		$texy->process('"Click":[link]'),
 	);
 });

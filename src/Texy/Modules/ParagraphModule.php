@@ -10,8 +10,17 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Modifier;
+use Texy\Nodes;
+use Texy\Nodes\ContentNode;
+use Texy\Nodes\LineBreakNode;
+use Texy\Nodes\ParagraphNode;
+use Texy\Nodes\TextNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
+use Texy\Patterns;
 use Texy\Regexp;
-use function str_contains, str_replace, strlen, strtr, substr_replace, trim;
+use function str_contains;
 
 
 /**
@@ -22,40 +31,43 @@ final class ParagraphModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('paragraph', $this->solve(...));
+		$texy->htmlGenerator->registerHandler($this->solve(...));
+		$texy->htmlGenerator->registerHandler(
+			fn(Nodes\LineBreakNode $node) => $this->texy->protect('<br>', $this->texy::CONTENT_REPLACED),
+		);
 	}
 
 
-	/** @return list<Texy\HtmlElement> */
-	public function process(Texy\BlockParser $parser, string $content): array
+	/**
+	 * Parse text into paragraphs (split by blank lines).
+	 * @return array<ParagraphNode>
+	 */
+	public function parseText(ParseContext $context, string $text): array
 	{
+		$parts = Regexp::split($text, '~(\n{2,})~', skipEmpty: true);
 		$res = [];
-		$parts = $parser->isIndented()
-			? Regexp::split($content, '~(\n (?! \ ) | \n{2,})~', skipEmpty: true)
-			: Regexp::split($content, '~(\n{2,})~', skipEmpty: true);
-
-		foreach ($parts ?: [] as $s) {
-			$s = trim($s);
-			if ($s === '') {
+		foreach ($parts ?: [] as $part) {
+			$trimmed = trim($part);
+			if ($trimmed === '') {
 				continue;
 			}
 
-			// try to find modifier
-			$mod = null;
-			if ($mx = Regexp::match($s, '~' . Texy\Patterns::MODIFIER_H . '(?= \n | \z)~sUm', captureOffset: true)) {
-				[$mMod] = $mx[1];
-				$s = trim(substr_replace($s, '', $mx[0][1], strlen($mx[0][0])));
-				if ($s === '') {
-					continue;
+			// Text starting with known block element - parse without soft line breaks
+			if ($this->startsWithBlockElement($trimmed)) {
+				$node = $this->parseBlockHtml($context, $trimmed);
+			} else {
+				$node = $this->parseParagraph($context, $trimmed);
+				// Check if parsed content contains block-level HTML tags
+				if ($this->containsBlockHtmlTag($node->content->children)) {
+					$node->blockHtml = true;
 				}
-
-				$mod = Texy\Modifier::parse($mMod);
 			}
 
-			$el = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
-			if ($el) {
-				$res[] = $el;
+			if ($this->isEmptyParagraph($node)) {
+				continue;
 			}
+
+			$res[] = $node;
 		}
 
 		return $res;
@@ -63,73 +75,230 @@ final class ParagraphModule extends Texy\Module
 
 
 	/**
-	 * Finish invocation.
+	 * Check if text starts with a known block-level HTML element.
 	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		string $content,
-		?Texy\Modifier $mod = null,
-	): Texy\HtmlElement
+	private function startsWithBlockElement(string $text): bool
 	{
-		$texy = $this->texy;
+		if (!preg_match('~^<([a-z][a-z0-9]*)\b~i', $text, $m)) {
+			return false;
+		}
+		// Not in inline elements = block element
+		return !isset(Html\Element::$inlineElements[strtolower($m[1])]);
+	}
 
-		// find hard linebreaks
-		$content = $texy->mergeLines
-			// ....
-			// ... => \r means break line
-			? Regexp::replace($content, '~\n\ +(?= \S)~', "\r")
-			: Regexp::replace($content, '~\n~', "\r");
 
-		$el = new Texy\HtmlElement('p');
-		$el->parseLine($texy, $content);
-		$content = $el->getText();
-		assert($content !== null);
+	/**
+	 * Parse text that starts with block HTML element (no soft line break processing).
+	 */
+	private function parseBlockHtml(ParseContext $context, string $text): ParagraphNode
+	{
+		$content = $context->parseInline($text);
+		$node = new ParagraphNode($content);
+		$node->blockHtml = true;
+		return $node;
+	}
 
-		// check content type
-		// block contains block tag
-		if (str_contains($content, $texy::CONTENT_BLOCK)) {
-			$el->setName(null); // ignores modifier!
 
-		// block contains text (protected)
-		} elseif (str_contains($content, $texy::CONTENT_TEXTUAL)) {
-			// leave element p
+	/**
+	 * Check if content contains a block-level HtmlTagNode.
+	 * Block = any HtmlTagNode that is NOT an inline element.
+	 * @param  array<Texy\Node>  $content
+	 */
+	private function containsBlockHtmlTag(array $content): bool
+	{
+		foreach ($content as $node) {
+			if ($node instanceof Nodes\HtmlTagNode && !$node->closing) {
+				$tagName = strtolower($node->name);
+				// Not an inline element = block element (includes custom elements)
+				if (!isset(Html\Element::$inlineElements[$tagName])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-		// block contains text
-		} elseif (Regexp::match($content, '~[^\s' . Texy\Patterns::MARK . ']~')) {
-			// leave element p
 
-		// block contains only replaced element
-		} elseif (str_contains($content, $texy::CONTENT_REPLACED)) {
-			if ($texy->nontextParagraph instanceof Texy\HtmlElement) {
-				$el = (clone $texy->nontextParagraph)->setText($content);
+	/**
+	 * Check if paragraph contains only whitespace.
+	 */
+	private function isEmptyParagraph(ParagraphNode $node): bool
+	{
+		foreach ($node->content->children as $child) {
+			if ($child instanceof TextNode) {
+				if (trim($child->content) !== '') {
+					return false;
+				}
 			} else {
-				$el->setName($texy->nontextParagraph);
+				return false;
 			}
+		}
+		return true;
+	}
 
-		// block contains only markup tags or spaces or nothing
+
+	private function parseParagraph(ParseContext $context, string $text): ParagraphNode
+	{
+		// Extract modifier from paragraph
+		$modifier = null;
+		if ($mx = Regexp::match($text, '~' . Patterns::MODIFIER_H . '(?= \n | \z)~sUm', captureOffset: true)) {
+			[$mMod] = $mx[1];
+			$text = trim(substr_replace($text, '', $mx[0][1], strlen($mx[0][0])));
+			if ($text !== '') {
+				$modifier = Modifier::parse($mMod);
+			}
+		}
+
+		// Process line breaks
+		if ($this->texy->mergeLines) {
+			$text = Regexp::replace($text, '~\n\ +(?=\S)~', "\r");
+			$text = Regexp::replace($text, '~\n~', ' ');
 		} else {
-			// if {ignoreEmptyStuff} return null;
-			if (!$mod) {
-				$el->setName(null);
-			}
+			$text = Regexp::replace($text, '~\n~', "\r");
 		}
 
-		if ($el->getName()) {
-			// apply modifier
-			if ($mod) {
-				$mod->decorate($texy, $el);
-			}
+		$content = $context->parseInline($text);
 
-			// add <br>
-			if (str_contains($content, "\r")) {
-				$key = $texy->protect('<br>', $texy::CONTENT_REPLACED);
-				$content = str_replace("\r", $key, $content);
+		return new ParagraphNode(
+			new ContentNode($this->expandLineBreaks($content->children)),
+			$modifier,
+		);
+	}
+
+
+	/**
+	 * Expand \r markers in TextNode content into LineBreakNode.
+	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $nodes
+	 * @return array<Nodes\InlineNode|Nodes\BlockNode>
+	 */
+	private function expandLineBreaks(array $nodes): array
+	{
+		$result = [];
+		foreach ($nodes as $node) {
+			if ($node instanceof TextNode && str_contains($node->content, "\r")) {
+				foreach (explode("\r", $node->content) as $i => $part) {
+					if ($i > 0) {
+						$result[] = new LineBreakNode;
+					}
+					if ($part !== '') {
+						$result[] = new TextNode($part);
+					}
+				}
+			} elseif ($node instanceof Nodes\PhraseNode) {
+				$node->content->children = $this->expandLineBreaks($node->content->children);
+				$result[] = $node;
+			} elseif ($node instanceof Nodes\LinkNode) {
+				$node->content->children = $this->expandLineBreaks($node->content->children);
+				$result[] = $node;
+			} else {
+				$result[] = $node;
 			}
 		}
+		return $result;
+	}
 
-		$content = strtr($content, "\r\n", '  ');
-		$el->setText($content);
 
+	public function solve(ParagraphNode $node, Html\Generator $generator): Html\Element
+	{
+		$children = $generator->renderNodes($node->content->children);
+
+		// Block HTML content - skip <p> wrapper entirely
+		if ($node->blockHtml) {
+			return $this->wrapChildren($children);
+		}
+
+		$info = $this->analyzeContent($node->content->children);
+
+		// Only markup (HTML tags/comments) without text → no <p> wrapper
+		if (!$info['hasText'] && !$info['hasOther'] && $info['hasMarkup'] && $node->modifier === null) {
+			return $this->wrapChildren($children);
+		}
+
+		// Only replaced content (images) → use nontextParagraph
+		if (!$info['hasText'] && !$info['hasOther'] && $info['hasReplaced']) {
+			return $this->createNontextParagraph($children, $node->modifier);
+		}
+
+		// Normal paragraph
+		$el = new Html\Element('p');
+		$node->modifier?->decorate($this->texy, $el);
+		$el->children = $children;
 		return $el;
+	}
+
+
+	/** @param list<Html\Element|string> $children */
+	private function wrapChildren(array $children): Html\Element
+	{
+		$el = new Html\Element(null);
+		$el->children = $children;
+		return $el;
+	}
+
+
+	/** @param list<Html\Element|string> $children */
+	private function createNontextParagraph(array $children, ?Modifier $modifier): Html\Element
+	{
+		$nontextParagraph = $this->texy->nontextParagraph;
+		if ($nontextParagraph instanceof Html\Element) {
+			$el = clone $nontextParagraph;
+			$modifier?->decorate($this->texy, $el);
+			$el->children = $children;
+			return $el;
+		}
+		$el = new Html\Element($nontextParagraph);
+		$modifier?->decorate($this->texy, $el);
+		$el->children = $children;
+		return $el;
+	}
+
+
+	/**
+	 * Analyze content to determine what types of nodes it contains.
+	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $content
+	 * @return array{hasText: bool, hasReplaced: bool, hasMarkup: bool, hasOther: bool}
+	 */
+	private function analyzeContent(array $content): array
+	{
+		$hasText = false;
+		$hasReplaced = false;
+		$hasMarkup = false;
+		$hasOther = false;
+
+		foreach ($content as $node) {
+			if ($node instanceof Nodes\TextNode) {
+				$hasText = $hasText || trim($node->content) !== '';
+
+			} elseif ($node instanceof Nodes\ImageNode) {
+				$hasReplaced = true;
+
+			} elseif ($node instanceof Nodes\HtmlCommentNode) {
+				$hasMarkup = true;
+
+			} elseif ($node instanceof Nodes\HtmlTagNode) {
+				if ($node->closing) {
+					continue;
+				}
+				$inlineType = Html\Element::$inlineElements[strtolower($node->name)] ?? null;
+				if ($inlineType === 1) {
+					$hasReplaced = true;    // replaced element (img, br, input, ...)
+				} else {
+					$hasMarkup = true;      // inline markup or block element
+				}
+
+			} elseif ($node instanceof Nodes\LinkNode) {
+				$inner = $this->analyzeContent($node->content->children);
+				if ($inner['hasText'] || $inner['hasOther']) {
+					$hasOther = true;
+				} elseif ($inner['hasReplaced']) {
+					$hasReplaced = true;
+				}
+
+			} else {
+				$hasOther = true;
+			}
+		}
+
+		return compact('hasText', 'hasReplaced', 'hasMarkup', 'hasOther');
 	}
 }

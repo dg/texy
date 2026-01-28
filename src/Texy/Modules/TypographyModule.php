@@ -100,6 +100,9 @@ final class TypographyModule extends Texy\Module
 	}
 
 
+	/**
+	 * Text pre-processing.
+	 */
 	public function beforeParse(string &$text): void
 	{
 		$locale = self::$locales[$this->locale] ?? self::$locales['en'];

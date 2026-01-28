@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Tester\Assert;
+use Texy\Nodes\HeadingType;
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -32,13 +33,13 @@ test('TOC structure - underlined headings', function () {
 
 	// First heading
 	Assert::same('Title', $texy->headingModule->TOC[0]['title']);
-	Assert::same(1, $texy->headingModule->TOC[0]['level']);
-	Assert::same('underlined', $texy->headingModule->TOC[0]['type']);
+	Assert::same(1, $texy->headingModule->TOC[0]['node']->level);
+	Assert::same(HeadingType::Underlined, $texy->headingModule->TOC[0]['node']->type);
 
 	// Second heading
 	Assert::same('Subtitle', $texy->headingModule->TOC[1]['title']);
-	Assert::same(2, $texy->headingModule->TOC[1]['level']);
-	Assert::same('underlined', $texy->headingModule->TOC[1]['type']);
+	Assert::same(2, $texy->headingModule->TOC[1]['node']->level);
+	Assert::same(HeadingType::Underlined, $texy->headingModule->TOC[1]['node']->type);
 });
 
 
@@ -51,13 +52,13 @@ test('TOC structure - surrounded headings', function () {
 
 	// First heading (### = h1, more # = higher level)
 	Assert::same('Title', $texy->headingModule->TOC[0]['title']);
-	Assert::same(1, $texy->headingModule->TOC[0]['level']);
-	Assert::same('surrounded', $texy->headingModule->TOC[0]['type']);
+	Assert::same(1, $texy->headingModule->TOC[0]['node']->level);
+	Assert::same(HeadingType::Surrounded, $texy->headingModule->TOC[0]['node']->type);
 
 	// Second heading (## = h2)
 	Assert::same('Subtitle', $texy->headingModule->TOC[1]['title']);
-	Assert::same(2, $texy->headingModule->TOC[1]['level']);
-	Assert::same('surrounded', $texy->headingModule->TOC[1]['type']);
+	Assert::same(2, $texy->headingModule->TOC[1]['node']->level);
+	Assert::same(HeadingType::Surrounded, $texy->headingModule->TOC[1]['node']->type);
 });
 
 

@@ -11,8 +11,13 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Helpers;
-use Texy\HtmlElement;
-use function assert, htmlspecialchars, str_replace, trim;
+use Texy\Nodes\BlockNode;
+use Texy\Nodes\CodeBlockNode;
+use Texy\Nodes\CommentNode;
+use Texy\Nodes\SectionNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
+use function htmlspecialchars, trim;
 use const ENT_NOQUOTES;
 
 
@@ -24,7 +29,6 @@ final class BlockModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		//$texy->allowed['blocks'] = true;
 		$texy->allowed['block/default'] = true;
 		$texy->allowed['block/pre'] = true;
 		$texy->allowed['block/code'] = true;
@@ -33,9 +37,9 @@ final class BlockModule extends Texy\Module
 		$texy->allowed['block/texysource'] = true;
 		$texy->allowed['block/comment'] = true;
 		$texy->allowed['block/div'] = true;
-
-		$texy->addHandler('block', $this->solve(...));
-		$texy->addHandler('beforeBlockParse', $this->beforeBlockParse(...));
+		$texy->htmlGenerator->registerHandler($this->solveCodeBlock(...));
+		$texy->htmlGenerator->registerHandler($this->solveSection(...));
+		$texy->htmlGenerator->registerHandler(fn(CommentNode $node) => '');
 	}
 
 
@@ -63,256 +67,149 @@ final class BlockModule extends Texy\Module
 
 
 	/**
-	 * Single block pre-processing.
-	 */
-	private function beforeBlockParse(Texy\BlockParser $parser, string &$text): void
-	{
-		// autoclose exclusive blocks
-		$text = Texy\Regexp::replace(
-			$text,
-			'~^
-				( /--++ \ *+ (?! div|texysource ) .* )  # opening tag except div/texysource (1)
-				$
-				((?: \n.*+ )*?)                 # content (2)
-				(?:
-					\n \\\--.* $ |              # closing tag
-					(?= (\n /--.* $))           # or next block starts (3)
-				)
-			~mi',
-			"\$1\$2\n\\--",                 // add closing tag
-		);
-	}
-
-
-	/**
 	 * Parses blocks /--foo
 	 * @param  array<?string>  $matches
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
+	public function parse(ParseContext $context, array $matches): ?BlockNode
 	{
 		[, $mParam, $mMod, $mContent] = $matches;
-		// [1] => code | text | ...
-		// [2] => ... additional parameters
-		// [3] => .(title)[class]{style}<>
-		// [4] => ... content
 
 		$mod = Texy\Modifier::parse($mMod);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
 		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];
 
-		return $this->texy->invokeAroundHandlers('block', $parser, [$blocktype, $mContent, $param, $mod]);
-	}
+		$content = Helpers::outdent($mContent);
 
+		if ($blocktype === 'block/code') {
+			return new CodeBlockNode('code', $content, $param, $mod);
 
-	/**
-	 * Finish invocation.
-	 */
-	private function solve(
-		Texy\HandlerInvocation $invocation,
-		string $blocktype,
-		string $s,
-		?string $param,
-		Texy\Modifier $mod,
-	): HtmlElement|string|null
-	{
-		$texy = $this->texy;
-		$parser = $invocation->getParser();
-		assert($parser instanceof Texy\BlockParser);
+		} elseif ($blocktype === 'block/default' || $blocktype === 'block/pre') {
+			return new CodeBlockNode($blocktype === 'block/pre' ? 'pre' : 'default', $content, $param, $mod);
 
-		if ($blocktype === 'block/texy') {
-			return $this->blockTexy($s, $texy, $parser);
-		} elseif (empty($texy->allowed[$blocktype])) {
-			return null;
-		} elseif ($blocktype === 'block/texysource') {
-			return $this->blockTexySource($s, $texy, $mod, $param);
-		} elseif ($blocktype === 'block/code') {
-			return $this->blockCode($s, $texy, $mod, $param);
-		} elseif ($blocktype === 'block/default') {
-			return $this->blockDefault($s, $texy, $mod, $param);
-		} elseif ($blocktype === 'block/pre') {
-			return $this->blockPre($s, $texy, $mod);
-		} elseif ($blocktype === 'block/html') {
-			return $this->blockHtml($s, $texy);
-		} elseif ($blocktype === 'block/text') {
-			return $this->blockText($s, $texy);
 		} elseif ($blocktype === 'block/comment') {
-			return $this->blockComment();
+			return new CommentNode($content);
+
+		} elseif ($blocktype === 'block/html') {
+			// html/text blocks don't use outdent - preserve original indentation
+			return new CodeBlockNode('html', trim($mContent, "\n"), null, $mod);
+
+		} elseif ($blocktype === 'block/text') {
+			// html/text blocks don't use outdent - preserve original indentation
+			return new CodeBlockNode('text', trim($mContent, "\n"), null, $mod);
+
 		} elseif ($blocktype === 'block/div') {
-			return $this->blockDiv($s, $texy, $mod, $parser);
+			$content = Helpers::outdent($mContent, firstLine: true);
+			if ($content === '') {
+				return null;
+			}
+			return new SectionNode($context->parseBlock($content), 'div', $mod);
+
+		} elseif ($blocktype === 'block/texysource') {
+			// Store raw texy content, will be parsed and displayed as HTML source in handler
+			$content = Helpers::outdent($mContent);
+			if ($content === '') {
+				return null;
+			}
+			return new CodeBlockNode('texysource', $content, null, $mod);
 		}
 
 		return null;
 	}
 
 
-	private function blockTexy(string $s, Texy\Texy $texy, Texy\BlockParser $parser): HtmlElement
+	public function solveCodeBlock(CodeBlockNode $node, Html\Generator $generator): Html\Element|string
 	{
-		$el = new HtmlElement;
-		$el->parseBlock($texy, $s, $parser->isIndented());
-		return $el;
-	}
+		// block/texysource - parse as texy, then display resulting HTML as source code
+		if ($node->type === 'texysource') {
+			$context = $this->texy->createParseContext();
+			$parsed = $context->parseBlock($node->content);
+			$content = $generator->serialize($generator->renderNodes($parsed->children), "\n");
+			$html = Helpers::unescapeHtml($content);
+			$html = htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8');
+			$html = $this->texy->unprotect($html);
+			$html = $this->texy->htmlOutputModule->format($html);
+			$html = Helpers::unfreezeSpaces($html);
+			$html = trim($html);
+			// Now escape the final HTML to show as source code
+			$escaped = htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8');
+			$escaped = $this->texy->protect($escaped, $this->texy::CONTENT_TEXTUAL);
 
-
-	private function blockTexySource(string $s, Texy\Texy $texy, Texy\Modifier $mod, ?string $param): string|HtmlElement
-	{
-		$s = Helpers::outdent($s);
-		if ($s === '') {
-			return "\n";
+			$el = new Html\Element('pre');
+			$node->modifier?->decorate($this->texy, $el);
+			$el->attrs['class'] = array_merge(['html'], (array) ($el->attrs['class'] ?? []));
+			$el->create('code', $escaped);
+			return $el;
 		}
 
-		$el = new HtmlElement;
-		if ($param === 'line') {
-			$el->parseLine($texy, $s);
+		// block/html - parse HTML tags/comments, escape unknown ones
+		if ($node->type === 'html') {
+			$content = $node->content;
+			if ($content === '') {
+				return "\n";
+			}
+
+			$parsed = $this->parseHtmlOnly($generator, $content);
+			return $this->texy->protect($parsed . ' ', $this->texy::CONTENT_BLOCK);
+		}
+
+		// block/text - plain text with <br> for newlines (no wrapper)
+		// Include trailing space inside protection for proper separation from next block
+		if ($node->type === 'text') {
+			$content = htmlspecialchars($node->content, ENT_NOQUOTES, 'UTF-8');
+			$content = str_replace("\n", '<br>', $content);
+			return $this->texy->protect($content . ' ', $this->texy::CONTENT_BLOCK);
+		}
+
+		// Types that use <pre> wrapper
+		$el = new Html\Element('pre');
+		$node->modifier?->decorate($this->texy, $el);
+
+		// Language class prepended before modifier classes
+		if ($node->language) {
+			$el->attrs['class'] = array_merge([$node->language], (array) ($el->attrs['class'] ?? []));
+		}
+
+		// PRE block - parse HTML tags, unescape entities
+		if ($node->type === 'pre') {
+			$parsed = $this->parseHtmlOnly($generator, $node->content);
+			$content = $this->texy->protect($parsed, $this->texy::CONTENT_BLOCK);
+			$el->setText($content);
+			return $el;
+		}
+
+		$content = htmlspecialchars($node->content, ENT_NOQUOTES, 'UTF-8');
+		$content = $this->texy->protect($content, $this->texy::CONTENT_TEXTUAL);
+
+		if ($node->type === 'code') {
+			$el->create('code', $content);
 		} else {
-			$el->parseBlock($texy, $s);
+			$el->setText($content);
 		}
 
-		$s = $el->toHtml($texy);
-		return $this->blockCode($s, $texy, $mod, 'html');
-	}
-
-
-	private function blockCode(string $s, Texy\Texy $texy, Texy\Modifier $mod, ?string $param): string|HtmlElement
-	{
-		$s = Helpers::outdent($s);
-		if ($s === '') {
-			return "\n";
-		}
-
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
-		$el = new HtmlElement('pre');
-		$mod->decorate($texy, $el);
-		if ($param !== null) {
-			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-			$el->attrs['class'][] = $param;
-		}
-		$el->create('code', $s);
 		return $el;
 	}
 
 
-	private function blockDefault(string $s, Texy\Texy $texy, Texy\Modifier $mod, ?string $param): string|HtmlElement
+	public function solveSection(SectionNode $node, Html\Generator $generator): Html\Element
 	{
-		$s = Helpers::outdent($s);
-		if ($s === '') {
-			return "\n";
-		}
-
-		$el = new HtmlElement('pre');
-		$mod->decorate($texy, $el);
-		if ($param !== null) {
-			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-			$el->attrs['class'][] = $param;
-		}
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
-		$el->setText($s);
+		$el = new Html\Element($node->type === 'div' ? 'div' : 'section');
+		$node->modifier?->decorate($this->texy, $el);
+		$el->children = $generator->renderNodes($node->content->children);
 		return $el;
 	}
 
 
-	private function blockPre(string $s, Texy\Texy $texy, Texy\Modifier $mod): string|HtmlElement
+	/**
+	 * Parse content with only HTML tag/comment patterns.
+	 */
+	private function parseHtmlOnly(Html\Generator $generator, string $content): string
 	{
-		$s = Helpers::outdent($s);
-		if ($s === '') {
-			return "\n";
-		}
-
-		$el = new HtmlElement('pre');
-		$mod->decorate($texy, $el);
-		$lineParser = $texy->createInlineParser();
-		// special mode - parse only html tags
-		$tmp = $lineParser->patterns;
-		$lineParser->patterns = [];
-		if (isset($tmp['html/tag'])) {
-			$lineParser->patterns['html/tag'] = $tmp['html/tag'];
-		}
-
-		if (isset($tmp['html/comment'])) {
-			$lineParser->patterns['html/comment'] = $tmp['html/comment'];
-		}
-
-		unset($tmp);
-
-		$el->setText($lineParser->parse($s));
-		$s = $el->getText();
-		assert($s !== null);
-		$s = Helpers::unescapeHtml($s);
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-		$s = $texy->unprotect($s);
-		$s = $texy->protect($s, $texy::CONTENT_BLOCK);
-		$el->setText($s);
-		return $el;
-	}
-
-
-	private function blockHtml(string $s, Texy\Texy $texy): string
-	{
-		$s = trim($s, "\n");
-		if ($s === '') {
-			return "\n";
-		}
-
-		$lineParser = $texy->createInlineParser();
-		// special mode - parse only html tags
-		$tmp = $lineParser->patterns;
-		$lineParser->patterns = [];
-		if (isset($tmp['html/tag'])) {
-			$lineParser->patterns['html/tag'] = $tmp['html/tag'];
-		}
-
-		if (isset($tmp['html/comment'])) {
-			$lineParser->patterns['html/comment'] = $tmp['html/comment'];
-		}
-
-		unset($tmp);
-
-		$el = new HtmlElement(null, $lineParser->parse($s));
-		$s = $el->getText();
-		assert($s !== null);
-		$s = Helpers::unescapeHtml($s);
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-		$s = $texy->unprotect($s);
-		return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
-	}
-
-
-	private function blockText(string $s, Texy\Texy $texy): string
-	{
-		$s = trim($s, "\n");
-		if ($s === '') {
-			return "\n";
-		}
-
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-		$s = str_replace("\n", (new HtmlElement('br'))->startTag(), $s); // nl2br
-		return $texy->protect($s, $texy::CONTENT_BLOCK) . "\n";
-	}
-
-
-	private function blockComment(): string
-	{
-		return "\n";
-	}
-
-
-	private function blockDiv(
-		string $s,
-		Texy\Texy $texy,
-		Texy\Modifier $mod,
-		Texy\BlockParser $parser,
-	): string|HtmlElement
-	{
-		$s = Helpers::outdent($s, firstLine: true);
-		if ($s === '') {
-			return "\n";
-		}
-
-		$el = new HtmlElement('div');
-		$mod->decorate($texy, $el);
-		$el->parseBlock($texy, $s, $parser->isIndented()); // TODO: INDENT or NORMAL ?
-		return $el;
+		$context = $this->texy->createParseContext();
+		$htmlParser = $context->getInlineParser()->withPatterns(['html/tag', 'html/comment']);
+		$parsed = $generator->serialize($generator->renderNodes($htmlParser->parse(null, $content)->children));
+		$parsed = Helpers::unescapeHtml($parsed);
+		$parsed = htmlspecialchars($parsed, ENT_NOQUOTES, 'UTF-8');
+		return $this->texy->unprotect($parsed);
 	}
 }

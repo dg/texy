@@ -82,7 +82,7 @@ test('HTML comment with dashes sanitized', function () {
 
 test('orphan closing tag - ignored by well-forming', function () {
 	Assert::match(
-		'text',
+		'<p>text</p>',
 		process('text</div>'),
 	);
 });

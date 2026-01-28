@@ -7,7 +7,6 @@
 declare(strict_types=1);
 
 use Tester\Assert;
-use Texy\Texy;
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -18,7 +17,7 @@ function processHtml(string $html, ?array $allowedTags = null): string
 	$texy = new Texy;
 	$texy->htmlOutputModule->indent = false;
 	$texy->htmlOutputModule->lineWrap = 0;
-	$texy->allowed['typography'] = false;
+	$texy->allowed[Texy\Syntax::Typography] = false;
 
 	if ($allowedTags !== null) {
 		$texy->allowedTags = $allowedTags;
@@ -274,7 +273,7 @@ test('unknown: inherits table restrictions', function () {
 test('allowedTags: NONE disables all tags', function () {
 	$texy = new Texy;
 	$texy->allowedTags = Texy::NONE;
-	$texy->allowed['typography'] = false;
+	$texy->allowed[Texy\Syntax::Typography] = false;
 	$html = trim($texy->process('<strong>Bold</strong>'));
 	Assert::notContains('<strong>', $html);
 	Assert::contains('Bold', $html);

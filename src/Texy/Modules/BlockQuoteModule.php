@@ -10,6 +10,9 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Nodes\BlockQuoteNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
 use function max, strlen;
 
 
@@ -21,6 +24,7 @@ final class BlockQuoteModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
+		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -43,44 +47,48 @@ final class BlockQuoteModule extends Texy\Module
 	 * Parses blockquote.
 	 * @param  array<?string>  $matches
 	 */
-	public function parse(Texy\BlockParser $parser, array $matches): ?Texy\HtmlElement
+	public function parse(ParseContext $context, array $matches): ?BlockQuoteNode
 	{
 		[, $mMod, $mPrefix, $mContent] = $matches;
-		// [1] => .(title)[class]{style}<>
-		// [2] => spaces |
-		// [3] => ... / LINK
 
-		$texy = $this->texy;
-
-		$el = new Texy\HtmlElement('blockquote');
-		$mod = Texy\Modifier::parse($mMod);
-		$mod->decorate($texy, $el);
-
-		$content = '';
+		// Collect lines
+		$lines = [$mContent ?? ''];
 		$spaces = '';
+
 		do {
 			if ($spaces === '') {
 				$spaces = max(1, strlen($mPrefix));
 			}
-			$content .= $mContent . "\n";
 
-			if (!$parser->next("~^>(?: | ([ \\t]{1,$spaces} | :) (.*))$~mA", $matches)) {
+			if (!$context->getBlockParser()->next("~^>(?: | ([ \\t]{1,$spaces} | :) (.*))$~mA", $matches)) {
 				break;
 			}
 
 			[, $mPrefix, $mContent] = $matches;
+			$lines[] = $mContent ?? '';
 		} while (true);
 
-		$el->parseBlock($texy, $content, $parser->isIndented());
+		// Join content for parsing
+		$content = implode("\n", $lines);
 
-		// no content?
-		if (!$el->count()) {
+		// Parse nested content
+		$parsed = $context->parseBlock(trim($content));
+		if (!$parsed->children) {
 			return null;
 		}
 
-		// event listener
-		$texy->invokeHandlers('afterBlockquote', [$parser, $el, $mod]);
+		return new BlockQuoteNode(
+			$parsed,
+			Texy\Modifier::parse($mMod),
+		);
+	}
 
+
+	public function solve(BlockQuoteNode $node, Html\Generator $generator): Html\Element
+	{
+		$el = new Html\Element('blockquote');
+		$node->modifier?->decorate($this->texy, $el);
+		$el->children = $generator->renderNodes($node->content->children);
 		return $el;
 	}
 }

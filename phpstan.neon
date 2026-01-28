@@ -10,12 +10,31 @@ parameters:
 	checkMissingCallableSignature: true
 
 	ignoreErrors:
-		-	# Event handlers have different signatures per event type (around vs after handlers),
-			# so we cannot specify a single signature for the $callback parameter
-			identifier: missingType.callable
+		# Runtime type validation for generic arrays in Node constructors.
+		# PHP lacks native generic arrays, so we use: (fn(Foo ...$x) {})(...$items)
+		# to validate that all items are of type Foo. The result is intentionally unused.
+		-
+			identifier: expr.resultUnused
 			paths:
-				- src/Texy/Texy.php
-				- src/Bridges/Latte/TexyExtension.php
+				- src/Texy/Nodes/
+
+		# Empty generator pattern using `false && yield` to satisfy return type Generator
+		# while yielding nothing. PHPStan correctly sees left side is always false.
+		# Note: by-ref generators cannot use `yield from []`, hence this workaround.
+		-
+			identifier: booleanAnd.leftAlwaysFalse
+			paths:
+				- src/Texy/Node.php
+		-
+			identifier: generator.valueType
+			paths:
+				- src/Texy/Node.php
+
+		# array_filter in getNodes() removes nulls added during traversal (NodeTraverser may set to null)
+		-
+			identifier: arrayFilter.same
+			paths:
+				- src/Texy/Nodes/
 
 includes:
 	- phpstan-baseline.neon
