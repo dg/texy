@@ -323,7 +323,7 @@ Texy itself renders nothing for scripts – the construct exists solely for user
 $texy->allowed['emoticon'] = true;
 ```
 
-Recognized emoticons and replacements come from `$texy->emoticonModule->icons` (default: `:-)` 🙂, `:-(` ☹, `;-)` 😉, `:-D` 😁, `8-O` 😮, `8-)` 😄, `:-?` 😕, `:-x` 😶, `:-P` 😛, `:-|` 😐). A replacement with an image extension renders `<img>` instead of text. The pattern is registered lazily in `beforeParse`, only when the syntax is enabled.
+Recognized emoticons and replacements come from `$texy->emoticonModule->icons` (default: `:-)` 🙂, `:-(` ☹, `;-)` 😉, `:-D` 😁, `8-O` 😮, `8-)` 😄, `:-?` 😕, `:-x` 😶, `:-P` 😛, `:-|` 😐). Replacements are rendered as text (wrapped in a `<span>` when `$texy->emoticonModule->class` is set); image-file emoticons are no longer supported. The pattern is registered in `beforeParse`.
 
 ## Typography
 

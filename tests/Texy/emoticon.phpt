@@ -20,20 +20,14 @@ test('emoticon with unicode', function () {
 });
 
 
-test('emoticon with custom images', function () {
+test('emoticon with custom class', function () {
 	$texy = new Texy\Texy;
 	$texy->allowed['emoticon'] = true;
 	$texy->htmlOutputModule->lineWrap = 180;
-	$texy->emoticonModule->root = 'images/images/';
 	$texy->emoticonModule->class = 'smiley';
-	$texy->emoticonModule->icons = [
-		':-)' => 'smile.gif',
-		':-(' => 'sad.gif',
-		'8-O' => 'eek.gif',
-	];
 
-	Assert::matchFile(
-		__DIR__ . '/expected/emoticon-old.html',
-		$texy->process(file_get_contents(__DIR__ . '/sources/emoticon.texy')),
+	Assert::match(
+		'<p>I fell <span class="smiley">🙂</span></p>',
+		$texy->process('I fell :-)'),
 	);
 });
