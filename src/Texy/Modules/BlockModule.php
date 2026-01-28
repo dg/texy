@@ -221,7 +221,7 @@ final class BlockModule extends Texy\Module
 
 		$el = new HtmlElement('pre');
 		$mod->decorate($texy, $el);
-		$lineParser = new Texy\Parsing\InlineParser($texy, $el);
+		$lineParser = new Texy\Parsing\InlineParser($texy);
 		// special mode - parse only html tags
 		$tmp = $lineParser->patterns;
 		$lineParser->patterns = [];
@@ -235,7 +235,7 @@ final class BlockModule extends Texy\Module
 
 		unset($tmp);
 
-		$lineParser->parse($s);
+		$el->setText($lineParser->parse($s));
 		$s = $el->getText();
 		assert($s !== null);
 		$s = Helpers::unescapeHtml($s);
@@ -254,8 +254,7 @@ final class BlockModule extends Texy\Module
 			return "\n";
 		}
 
-		$el = new HtmlElement;
-		$lineParser = new Texy\Parsing\InlineParser($texy, $el);
+		$lineParser = new Texy\Parsing\InlineParser($texy);
 		// special mode - parse only html tags
 		$tmp = $lineParser->patterns;
 		$lineParser->patterns = [];
@@ -269,7 +268,7 @@ final class BlockModule extends Texy\Module
 
 		unset($tmp);
 
-		$lineParser->parse($s);
+		$el = new HtmlElement(null, $lineParser->parse($s));
 		$s = $el->getText();
 		assert($s !== null);
 		$s = Helpers::unescapeHtml($s);
