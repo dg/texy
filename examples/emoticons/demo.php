@@ -40,8 +40,8 @@ $texy->allowed['emoticon'] = true;
 $texy->emoticonModule->class = 'smilie';
 
 // Add your own custom emoticon
-// When someone types :oops: in the text, it will show redface.gif
-$texy->emoticonModule->icons[':oops:'] = 'redface.gif';
+// When someone types :oops: in the text, it will show this emoji
+$texy->emoticonModule->icons[':oops:'] = '🙈';
 
 
 // Process the text
