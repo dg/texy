@@ -126,13 +126,3 @@ test('image with double colon link (uses main URL)', function () {
 		$texy->process('[* image.jpg *]::'),
 	);
 });
-
-
-test('image with double colon link (uses linked URL)', function () {
-	$texy = new Texy\Texy;
-	Assert::match(
-		'<div><a href="images/big.jpg"><img src="images/small.jpg" alt=""></a></div>
-',
-		$texy->process('[* small.jpg || big.jpg *]::'),
-	);
-});

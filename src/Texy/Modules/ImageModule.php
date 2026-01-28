@@ -11,7 +11,7 @@ use Texy;
 use Texy\Helpers;
 use Texy\Image;
 use Texy\Patterns;
-use function explode, getimagesize, is_file, is_int, min, round, rtrim, str_contains, trim;
+use function count, explode, getimagesize, is_file, is_int, min, round, rtrim, str_contains, trim;
 
 
 /**
@@ -108,7 +108,7 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Parses [* small.jpg 80x13 || big.jpg .(alternative text)[class]{style}>]:LINK
+	 * Parses [* small.jpg 80x13 .(alternative text)[class]{style}>]:LINK
 	 * @param  array<?string>  $matches
 	 */
 	public function parseImage(Texy\InlineParser $parser, array $matches): Texy\HtmlElement|string|null
@@ -176,7 +176,7 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Parses image's syntax. Input: small.jpg 80x13 || linked.jpg
+	 * Parses image's syntax. Input: small.jpg 80x13
 	 */
 	public function factoryImage(string $content, ?string $mod, bool $tryRef = true): Image
 	{
@@ -184,31 +184,27 @@ final class ImageModule extends Texy\Module
 
 		if (!$image) {
 			$texy = $this->texy;
-			$content = explode('|', $content);
+			$parts = explode('|', $content);
 			$image = new Image;
+
+			if (count($parts) > 1) {
+				trigger_error("Image syntax with '|' or '||' inside brackets is deprecated. Use [* image *]:url for linked images.", E_USER_DEPRECATED);
+			}
 
 			// dimensions
 			$matches = null;
-			if ($matches = Texy\Regexp::match($content[0], '~^(.*)\ (\d+|\?)\ *([Xx])\ *(\d+|\?)\ *$~U')) {
+			if ($matches = Texy\Regexp::match($parts[0], '~^(.*)\ (\d+|\?)\ *([Xx])\ *(\d+|\?)\ *$~U')) {
 				/** @var array{string, string, string, string, string} $matches */
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';
 				$image->width = $matches[2] === '?' ? null : (int) $matches[2];
 				$image->height = $matches[4] === '?' ? null : (int) $matches[4];
 			} else {
-				$image->URL = trim($content[0]);
+				$image->URL = trim($parts[0]);
 			}
 
 			if (!$texy->checkURL($image->URL, $texy::FILTER_IMAGE)) {
 				$image->URL = null;
-			}
-
-			// linked image
-			if (isset($content[2])) {
-				$tmp = trim($content[2]);
-				if ($tmp !== '' && $texy->checkURL($tmp, $texy::FILTER_ANCHOR)) {
-					$image->linkedURL = $tmp;
-				}
 			}
 		}
 
