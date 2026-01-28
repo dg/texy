@@ -56,7 +56,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 | **ImageModule** | Images `[* url *]` including dimensions and alignment; maintains image reference definitions (`image/definition`, collected in `beforeParse`); invokes the `image` element. |
 | **PhraseModule** | All inline formatting – bold, italic, code, spans, acronyms, sub/sup, quotes, and the alternative link syntaxes (wikilink, markdown, quicklink). Maps syntax names to HTML tags via its `$tags` property; a single `phrase` element handler serves all of them. |
 | **LinkModule** | Reference links `[ref]`, autodetected URLs and e-mails; maintains the reference dictionary (`link/definition`, collected in `beforeParse`); provides `factoryLink()`; invokes `linkReference`, `linkURL`, `linkEmail`, and `newReference` elements. |
-| **EmoticonModule** | Emoticons `:-)` → Unicode or images. Disabled by default; registers its pattern lazily in `beforeParse` only when `$allowed['emoticon']` is true. |
+| **EmoticonModule** | Emoticons `:-)` → Unicode characters (or a `<span>` when a CSS class is set). Disabled by default; registers its pattern in `beforeParse`. |
 
 ### Block modules
 
