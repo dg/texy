@@ -39,9 +39,9 @@ test('table: tr allowed inside table', function () {
 
 
 test('table: td/th only allowed inside tr', function () {
-	// td outside tr is rejected (tag and content removed)
+	// td outside tr is rejected
 	Assert::same(
-		'<table></table>',
+		'<table>cell</table>',
 		processHtml('<table><td>cell</td></table>'),
 	);
 });
@@ -357,10 +357,9 @@ test('edge: deeply nested', function () {
 // TAGS NOT IN DEFAULT ALLOWED TAGS
 // =============================================================================
 
-test('head: allowed by default', function () {
-	// head is now allowed by default
+test('not-allowed: head escaped', function () {
 	$html = processHtml('<head><title>T</title></head>');
-	Assert::same('<head><title>T</title></head>', $html);
+	Assert::contains('&lt;head&gt;', $html);
 });
 
 

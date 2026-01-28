@@ -144,22 +144,11 @@ class Texy
 	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
 	private array $handlers = [];
 
-	/**
-	 * DTD descriptor.
-	 *   $dtd[element][0] - allowed attributes (as array keys)
-	 *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
-	 *                    - array of allowed elements (as keys)
-	 *                    - false - empty element
-	 *                    - 0 - transparent
-	 * @var array<string, array{array<string, int>, array<string, int>}>
-	 */
-	private static array $dtd;
-
 
 	public function __construct()
 	{
 		$this->loadModules();
-		$this->initDTD();
+		$this->initAllowedTags();
 
 		// examples of link references ;-)
 		$link = new Link('https://texy.nette.org/');
@@ -175,15 +164,22 @@ class Texy
 	}
 
 
-	private function initDTD(): void
+	private function initAllowedTags(): void
 	{
-		if (empty(self::$dtd)) {
-			self::$dtd = require __DIR__ . '/DTD.php';
-		}
-
 		// accept all valid HTML tags and attributes by default
 		$this->allowedTags = [];
-		foreach (self::$dtd as $tag => $dtd) {
+		foreach (Modules\HtmlOutputModule::$inlineElements as $tag => $_) {
+			$this->allowedTags[$tag] = self::ALL;
+		}
+		foreach (Modules\HtmlOutputModule::$emptyElements as $tag => $_) {
+			$this->allowedTags[$tag] = self::ALL;
+		}
+		// common block elements
+		foreach (['div', 'p', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'table', 'thead', 'tbody',
+			'tfoot', 'tr', 'th', 'td', 'caption', 'colgroup', 'col', 'blockquote',
+			'pre', 'figure', 'figcaption', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+			'header', 'footer', 'main', 'article', 'section', 'nav', 'aside', 'address',
+			'form', 'fieldset', 'legend'] as $tag) {
 			$this->allowedTags[$tag] = self::ALL;
 		}
 	}
@@ -412,7 +408,7 @@ class Texy
 		$s = $this->unprotect($s);
 
 		// wellform and reformat HTML
-		$this->invokeHandlers('postProcess', [$this, &$s]);
+		$this->invokeHandlers('postProcess', [&$s]);
 
 		// unfreeze spaces
 		$s = Helpers::unfreezeSpaces($s);
@@ -550,16 +546,6 @@ class Texy
 	final public function getDOM(): HtmlElement
 	{
 		return $this->DOM;
-	}
-
-
-	/**
-	 * @internal
-	 * @return array<string, array{array<string, int>, array<string, int>}>
-	 */
-	public static function getDTD(): array
-	{
-		return self::$dtd;
 	}
 
 
