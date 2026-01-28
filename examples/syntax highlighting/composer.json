@@ -1,0 +1,5 @@
+{
+	"require": {
+		"kukulich/fshl": "^2.1"
+	}
+}
