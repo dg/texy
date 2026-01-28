@@ -332,8 +332,6 @@ final class LinkModule extends Texy\Module
 			$el->add($content);
 		}
 
-		$texy->summary['links'][] = $el->attrs['href'];
-
 		return $el;
 	}
 
