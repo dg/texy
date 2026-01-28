@@ -49,7 +49,7 @@ parameters:
 			path: src/Texy/Modules/LinkModule.php
 
 		-
-			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
+			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for Closure\.$#'
 			identifier: missingType.callable
 			count: 1
 			path: src/Texy/Texy.php

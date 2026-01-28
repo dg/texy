@@ -87,7 +87,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 $texy = new Texy;
 
 // Register our code block handler
-$texy->addHandler('block', 'blockHandler');
+$texy->addHandler('block', blockHandler(...));
 
 
 // Process the text
