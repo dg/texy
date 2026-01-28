@@ -8,7 +8,7 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, link, ltrim, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
+use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, ltrim, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
 use const ARRAY_FILTER_USE_BOTH, ENT_NOQUOTES;
 
 
@@ -149,18 +149,6 @@ class Texy
 	{
 		$this->loadModules();
 		$this->initAllowedTags();
-
-		// examples of link references ;-)
-		$link = new Link('https://texy.nette.org/');
-		$link->modifier->title = 'The best text -> HTML converter and formatter';
-		$link->label = 'Texy!';
-		$this->linkModule->addReference('texy', $link);
-
-		$link = new Link('https://www.google.com/search?q=%s');
-		$this->linkModule->addReference('google', $link);
-
-		$link = new Link('https://en.wikipedia.org/wiki/Special:Search?search=%s');
-		$this->linkModule->addReference('wikipedia', $link);
 	}
 
 
