@@ -211,10 +211,6 @@ $title = $texy->headingModule->title;
 
 // Table of contents
 $toc = $texy->headingModule->TOC;
-
-// All used links and images
-$links = $texy->summary['links'];
-$images = $texy->summary['images'];
 ```
 
 ## Handler System (Chain of Responsibility)

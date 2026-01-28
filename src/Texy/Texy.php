@@ -66,12 +66,6 @@ class Texy
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
 
-	/** @var array{images: list<string>, links: list<string>}  Parsing summary */
-	public array $summary = [
-		'images' => [],
-		'links' => [],
-	];
-
 	/** @var array<string, ?string>  CSS classes for align modifiers */
 	public array $alignClasses = [
 		'left' => null,

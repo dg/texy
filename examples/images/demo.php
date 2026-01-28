@@ -88,12 +88,3 @@ echo '<hr>';
 echo '<pre>';
 echo htmlspecialchars($html);
 echo '</pre>';
-
-
-// Show all images that were used in the document
-// This is useful for dependency tracking or cache invalidation
-echo '<hr />';
-echo '<pre>';
-echo 'Used images:';
-//print_r($texy->summary['images']);
-echo '</pre>';

@@ -76,14 +76,6 @@ echo '<link rel="stylesheet" href="../style.css">';
 echo $html;
 
 
-// Show all links found in the document
-// This is useful for building sitemaps or checking for broken links
-echo '<hr />';
-echo '<pre>';
-//print_r($texy->summary['links']);
-echo '</pre>';
-
-
 // Show the generated HTML source code
 echo '<hr>';
 echo '<pre>';
