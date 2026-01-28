@@ -141,8 +141,6 @@ $texy->linkModule->addReference('example', $link);
 $texy->linkModule->getReference('example');   // ?Link
 ```
 
-The constructor pre-registers three demo references: `texy`, `google`, `wikipedia` (the latter two use `%s` substitution of the reference label).
-
 ### ImageModule
 
 ```php
