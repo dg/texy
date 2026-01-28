@@ -58,16 +58,16 @@ final class ListModule extends Texy\Module
 
 		$this->texy->registerBlockPattern(
 			$this->patternList(...),
-			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color: red}
-			. '(' . implode('|', $RE) . ')[\ \t]*+\S.*$#mU', // item (unmatched)
+			'~^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color: red}
+			. '(' . implode('|', $RE) . ')[\ \t]*+\S.*$~mU', // item (unmatched)
 			'list',
 		);
 
 		$this->texy->registerBlockPattern(
 			$this->patternDefList(...),
-			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color:red}
+			'~^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color:red}
 			. '(\S.{0,2000})\:[\ \t]*' . Patterns::MODIFIER_H . '?\n' // Term:
-			. '([\ \t]++)(' . implode('|', $REul) . ')[\ \t]*+\S.*$#mU', // - description
+			. '([\ \t]++)(' . implode('|', $REul) . ')[\ \t]*+\S.*$~mU', // - description
 			'list/definition',
 		);
 	}
@@ -93,7 +93,7 @@ final class ListModule extends Texy\Module
 
 		$bullet = $min = null;
 		foreach ($this->bullets as $type => $desc) {
-			if (Regexp::match($mBullet, '#' . $desc[0] . '#A')) {
+			if (Regexp::match($mBullet, '~' . $desc[0] . '~A')) {
 				$bullet = $desc[3] ?? $desc[0];
 				$min = isset($desc[3]) ? 2 : 1;
 				$el->setName($desc[1] ? 'ol' : 'ul');
@@ -156,7 +156,7 @@ final class ListModule extends Texy\Module
 
 		$bullet = null;
 		foreach ($this->bullets as $desc) {
-			if (Regexp::match($mBullet, '#' . $desc[0] . '#A')) {
+			if (Regexp::match($mBullet, '~' . $desc[0] . '~A')) {
 				$bullet = $desc[3] ?? $desc[0];
 				break;
 			}
@@ -168,7 +168,7 @@ final class ListModule extends Texy\Module
 		$mod->decorate($texy, $el);
 		$parser->moveBackward(2);
 
-		$patternTerm = '#^\n?(\S.*)\:[\ \t]*' . Patterns::MODIFIER_H . '?()$#mUA';
+		$patternTerm = '~^\n?(\S.*)\:[\ \t]*' . Patterns::MODIFIER_H . '?()$~mUA';
 
 		while (true) {
 			if ($elItem = $this->patternItem($parser, $bullet, true, 'dd')) {
@@ -206,7 +206,7 @@ final class ListModule extends Texy\Module
 	private function patternItem(BlockParser $parser, string $bullet, bool $indented, string $tag): ?HtmlElement
 	{
 		$spacesBase = $indented ? ('[\ \t]{1,}') : '';
-		$patternItem = "#^\n?($spacesBase){$bullet}[ \\t]*(\\S.*)?" . Patterns::MODIFIER_H . '?()$#mAU';
+		$patternItem = "~^\n?($spacesBase){$bullet}[ \\t]*(\\S.*)?" . Patterns::MODIFIER_H . '?()$~mAU';
 
 		// first line with bullet
 		$matches = null;
@@ -226,7 +226,7 @@ final class ListModule extends Texy\Module
 		// next lines
 		$spaces = '';
 		$content = ' ' . $mContent; // trick
-		while ($parser->next('#^(\n*)' . $mIndent . '([\ \t]{1,' . $spaces . '})(.*)()$#Am', $matches)) {
+		while ($parser->next('~^(\n*)' . $mIndent . '([\ \t]{1,' . $spaces . '})(.*)()$~Am', $matches)) {
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 			// [1] => blank line?
 			// [2] => spaces

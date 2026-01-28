@@ -243,7 +243,7 @@ class Texy
 	 */
 	final public function registerBlockPattern(callable $handler, string $pattern, string $name): void
 	{
-		// if (!Regexp::match($pattern, '#(.)\^.*\$\1[a-z]*#is')) die("Texy: Not a block pattern $name");
+		// if (!Regexp::match($pattern, '~(.)\^.*\$\1[a-z]*~is')) die("Texy: Not a block pattern $name");
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = true;
 		}
@@ -299,7 +299,7 @@ class Texy
 			while (str_contains($text, "\t")) {
 				$text = Regexp::replace(
 					$text,
-					'#^([^\t\n]*+)\t#mU',
+					'~^([^\t\n]*+)\t~mU',
 					fn($m) => $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth),
 				);
 			}
@@ -435,9 +435,9 @@ class Texy
 		$s = $this->stringToHtml($s);
 
 		// remove tags
-		$s = Regexp::replace($s, '#<(script|style)(.*)</\1>#Uis', '');
+		$s = Regexp::replace($s, '~<(script|style)(.*)</\1>~Uis', '');
 		$s = strip_tags($s);
-		$s = Regexp::replace($s, '#\n\s*\n\s*\n[\n\s]*\n#', "\n\n");
+		$s = Regexp::replace($s, '~\n\s*\n\s*\n[\n\s]*\n~', "\n\n");
 
 		// entities -> chars
 		$s = Helpers::unescapeHtml($s);
@@ -519,7 +519,7 @@ class Texy
 	{
 		// absolute URL with scheme? check scheme!
 		return empty($this->urlSchemeFilters[$type])
-			|| !Regexp::match($URL, '#\s*[a-z][a-z0-9+.-]{0,20}:#Ai') // http: | mailto:
+			|| !Regexp::match($URL, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // http: | mailto:
 			|| Regexp::match($URL, $this->urlSchemeFilters[$type]);
 	}
 

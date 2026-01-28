@@ -17,12 +17,12 @@
  * - How to apply modifiers to your elements
  *
  * CUSTOM SYNTAX WE CREATE:
- * *bold text*        → <b class="myclass">bold text</b>
- * _italic text_      → <i class="myclass">italic text</i>
+ * *bold text*        ? <b class="myclass">bold text</b>
+ * _italic text_      ? <i class="myclass">italic text</i>
  * .h1
- * Title              → <h1>Title</h1>
+ * Title              ? <h1>Title</h1>
  * .perex
- * Text               → <div class="perex">Text</div>
+ * Text               ? <div class="perex">Text</div>
  */
 
 
@@ -50,14 +50,14 @@ $texy->allowed['phrase/em-alt2'] = false;    // Disables *text*
 // The pattern captures the text between asterisks
 $texy->registerLinePattern(
 	'userInlineHandler',                      // Handler function to call
-	'#(?<!\*)\*(?!\ |\*)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |\*)\*(?!\*)()#U',
+	'~(?<!\*)\*(?!\ |\*)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |\*)\*(?!\*)()~U',
 	'myInlineSyntax1',                        // Unique name for this syntax
 );
 
 // Add new syntax: _italic_
 $texy->registerLinePattern(
 	'userInlineHandler',                      // Same handler, different name
-	'#(?<!_)_(?!\ |_)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |_)_(?!_)()#U',
+	'~(?<!_)_(?!\ |_)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |_)_(?!_)()~U',
 	'myInlineSyntax2',
 );
 
@@ -70,7 +70,7 @@ $texy->registerLinePattern(
 // Examples: .h1, .h2, .perex, etc.
 $texy->registerBlockPattern(
 	'userBlockHandler',
-	'#^\.([a-z0-9]+)\n(.+)$#m',  // Match .tagname\ncontent
+	'~^\.([a-z0-9]+)\n(.+)$~m',  // Match .tagname\ncontent
 	'myBlockSyntax1',
 );
 
@@ -128,7 +128,7 @@ function userBlockHandler(Texy\BlockParser $parser, array $matches, string $name
 		$el = new Texy\HtmlElement('div');
 		$el->attrs['class'][] = 'perex';
 	} else {
-		// Otherwise, use the tag name directly (.h1 → <h1>)
+		// Otherwise, use the tag name directly (.h1 ? <h1>)
 		$el = new Texy\HtmlElement($mTag);
 	}
 
