@@ -69,10 +69,10 @@ final class Helpers
 		$s = strtr($s, "\r", "\n"); // Mac
 
 		// remove special chars; leave \t + \n
-		$s = Regexp::replace($s, '#[\x00-\x08\x0B-\x1F]+#', '');
+		$s = Regexp::replace($s, '~[\x00-\x08\x0B-\x1F]+~', '');
 
 		// right trim
-		$s = Regexp::replace($s, "#[\t ]+$#m", '');
+		$s = Regexp::replace($s, "~[\t ]+$~m", '');
 
 		// trailing spaces
 		$s = trim($s, "\n");
@@ -114,7 +114,7 @@ final class Helpers
 	{
 		$s = self::toAscii($s);
 		$s = strtolower($s);
-		$s = Regexp::replace($s, '#[^a-z0-9' . Regexp::quote($charlist) . ']+#', '-');
+		$s = Regexp::replace($s, '~[^a-z0-9' . Regexp::quote($charlist) . ']+~', '-');
 		$s = trim($s, '-');
 		return $s;
 	}
@@ -130,13 +130,13 @@ final class Helpers
 			$min = strspn($s, ' ');
 		} else {
 			$min = strlen($s);
-			foreach (Regexp::matchAll($s, '#^ *\S#m') as $m) {
+			foreach (Regexp::matchAll($s, '~^ *\S~m') as $m) {
 				$min = min($min, strlen($m[0]) - 1);
 			}
 		}
 
 		if ($min) {
-			$s = Regexp::replace($s, "#^ {1,$min}#m", '');
+			$s = Regexp::replace($s, "~^ {1,$min}~m", '');
 		}
 
 		return $s;
@@ -149,7 +149,7 @@ final class Helpers
 	public static function isRelative(string $URL): bool
 	{
 		// check for scheme, or absolute path, or absolute URL
-		return !Regexp::match($URL, '#[a-z][a-z0-9+.-]{0,20}:|[\#/?]#Ai');
+		return !Regexp::match($URL, '~[a-z][a-z0-9+.-]{0,20}:|[#/?]~Ai');
 	}
 
 

@@ -52,8 +52,8 @@ final class ImageModule extends Texy\Module
 		// [*image*]:LINK
 		$texy->registerLinePattern(
 			$this->patternImage(...),
-			'#\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
-			. '(?::(' . Patterns::LINK_URL . '|:))??()#U',
+			'~\[\*\ *+([^\n' . Patterns::MARK . ']{1,1000})' . Patterns::MODIFIER . '?\ *+(\*|(?<!<)>|<)\]' // [* urls .(title)[class]{style} >]
+			. '(?::(' . Patterns::LINK_URL . '|:))??()~U',
 			'image',
 		);
 	}
@@ -68,7 +68,7 @@ final class ImageModule extends Texy\Module
 			// [*image*]: urls .(title)[class]{style}
 			$text = Texy\Regexp::replace(
 				$text,
-				'#^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$#mU',
+				'~^\[\*([^\n]{1,100})\*\]:[\ \t]+(.{1,1000})[\ \t]*' . Patterns::MODIFIER . '?\s*()$~mU',
 				$this->patternReferenceDef(...),
 			);
 		}
@@ -160,7 +160,7 @@ final class ImageModule extends Texy\Module
 
 			// dimensions
 			$matches = null;
-			if ($matches = Texy\Regexp::match($content[0], '#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U')) {
+			if ($matches = Texy\Regexp::match($content[0], '~^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$~U')) {
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';
 				$image->width = $matches[2] === '?' ? null : (int) $matches[2];
