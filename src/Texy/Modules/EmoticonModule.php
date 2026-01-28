@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Texy\Modules;
 
 use Texy;
-use function getimagesize, implode, is_array, is_file, krsort, preg_quote, rtrim, str_contains;
+use function implode, krsort, preg_quote;
 
 
 /**
@@ -18,7 +18,7 @@ use function getimagesize, implode, is_array, is_file, krsort, preg_quote, rtrim
  */
 final class EmoticonModule extends Texy\Module
 {
-	/** @var array<string, string>  supported emoticons and image files / chars */
+	/** @var array<string, string> */
 	public array $icons = [
 		':-)' => '🙂',
 		':-(' => '☹',
@@ -32,14 +32,7 @@ final class EmoticonModule extends Texy\Module
 		':-|' => '😐',
 	];
 
-	/** @deprecated */
 	public ?string $class = null;
-
-	/** @deprecated */
-	public ?string $root = null;
-
-	/** @deprecated */
-	public ?string $fileRoot = null;
 
 
 	public function __construct(Texy\Texy $texy)
@@ -95,33 +88,11 @@ final class EmoticonModule extends Texy\Module
 	/**
 	 * Finish invocation.
 	 */
-	private function solve(Texy\HandlerInvocation $invocation, string $emoticon, string $raw): Texy\HtmlElement|string
+	private function solve(Texy\HandlerInvocation $invocation, string $emoticon): Texy\HtmlElement|string
 	{
-		$texy = $this->texy;
-		$file = $this->icons[$emoticon];
-		if (!str_contains($file, '.')) {
-			return $file;
-		}
-
-		$el = new Texy\HtmlElement('img');
-		$el->attrs['src'] = Texy\Helpers::prependRoot($file, $this->root ?? $texy->imageModule->root);
-		$el->attrs['alt'] = $raw;
-		if ($this->class !== null) {
-			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-			$el->attrs['class'][] = $this->class;
-		}
-
-		// file path
-		$file = rtrim($this->fileRoot ?? (string) $texy->imageModule->fileRoot, '/\\') . '/' . $file;
-		if (@is_file($file)) { // intentionally @
-			$size = @getimagesize($file); // intentionally @
-			if (is_array($size)) {
-				$el->attrs['width'] = $size[0];
-				$el->attrs['height'] = $size[1];
-			}
-		}
-
-		$texy->summary['images'][] = $el->attrs['src'];
-		return $el;
+		$emoji = $this->icons[$emoticon];
+		return $this->class
+			? (new Texy\HtmlElement('span', ['class' => $this->class]))->setText($emoji)
+			: $emoji;
 	}
 }
