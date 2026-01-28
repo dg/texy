@@ -13,7 +13,7 @@ use Texy;
 use Texy\HtmlElement;
 use Texy\Patterns;
 use Texy\Regexp;
-use function array_flip, count, explode, is_array, is_string, str_contains, str_ends_with, strtolower, strtoupper, strtr, substr, trim;
+use function array_flip, count, explode, is_array, is_string, str_contains, str_ends_with, strtolower, strtr, substr, trim;
 
 
 /**
@@ -141,14 +141,8 @@ final class HtmlModule extends Texy\Module
 			return null; // all tags are disabled
 		}
 
-		// convert case
-		$name = $el->getName();
-		$lower = strtolower($name);
-		if (isset($texy->getDTD()[$lower]) || $name === strtoupper($name)) {
-			// complete UPPER convert to lower
-			$name = $lower;
-			$el->setName($name);
-		}
+		$name = strtolower($el->getName());
+		$el->setName($name);
 
 		if (is_array($allowedTags)) {
 			if (!isset($allowedTags[$name])) {
@@ -171,8 +165,6 @@ final class HtmlModule extends Texy\Module
 		if (!$this->validateAttrs($el, $texy)) {
 			return null;
 		}
-
-		$el->validateAttrs($texy->getDTD());
 
 		return $el;
 	}
