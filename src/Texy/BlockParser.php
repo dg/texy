@@ -149,7 +149,7 @@ class BlockParser extends Parser
 	}
 
 
-	/** @return list<array{int, ?string, ?array<int|string, string>, int}> */
+	/** @return list<array{int, ?string, ?array<int|string, string|null>, int}> */
 	private function match(string $text): array
 	{
 		$matches = [];

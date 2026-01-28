@@ -87,7 +87,7 @@ final class BlockModule extends Texy\Module
 	 * ....
 	 * ....
 	 * \----
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function pattern(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
 	{

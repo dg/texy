@@ -95,7 +95,7 @@ final class ListModule extends Texy\Module
 	 *   + ...
 	 *   + ...
 	 * 3) ....
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternList(BlockParser $parser, array $matches): ?HtmlElement
 	{
@@ -155,7 +155,7 @@ final class ListModule extends Texy\Module
 	 * - description 1
 	 * - description 2
 	 * - description 3
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternDefList(BlockParser $parser, array $matches): HtmlElement
 	{
@@ -187,7 +187,7 @@ final class ListModule extends Texy\Module
 			( \S .* )                       # term content
 			: [ \t]*                        # colon separator
 			' . Patterns::MODIFIER_H . '?
-		()$~mUA';
+		$~mUA';
 
 		while (true) {
 			if ($elItem = $this->patternItem($parser, $bullet, true, 'dd')) {
@@ -232,7 +232,7 @@ final class ListModule extends Texy\Module
 			[ \\t]*
 			( \\S .* )?                              # content
 			" . Patterns::MODIFIER_H . '?
-		()$~mAU';
+		$~mAU';
 
 		// first line with bullet
 		$matches = null;
@@ -257,7 +257,7 @@ final class ListModule extends Texy\Module
 			' . Regexp::quote($mIndent) . '
 			([ \t]{1,' . $spaces . '})
 			(.*)
-		()$~Am', $matches)) {
+		$~Am', $matches)) {
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 			// [1] => blank line?
 			// [2] => spaces

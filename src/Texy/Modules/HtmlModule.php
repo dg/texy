@@ -66,7 +66,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <!-- comment -->.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternComment(Texy\LineParser $parser, array $matches): HtmlElement|string|null
 	{
@@ -77,7 +77,7 @@ final class HtmlModule extends Texy\Module
 
 	/**
 	 * Callback for: <tag attr="...">.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternTag(Texy\LineParser $parser, array $matches): ?string
 	{
@@ -349,7 +349,7 @@ final class HtmlModule extends Texy\Module
 						[^'"\s]+               # unquoted value
 					)
 				)?
-				()~is
+				~is
 				X,
 		);
 
