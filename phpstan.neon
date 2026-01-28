@@ -9,5 +9,13 @@ parameters:
 
 	checkMissingCallableSignature: true
 
+	ignoreErrors:
+		-	# Event handlers have different signatures per event type (around vs after handlers),
+			# so we cannot specify a single signature for the $callback parameter
+			identifier: missingType.callable
+			paths:
+				- src/Texy/Texy.php
+				- src/Bridges/Latte/TexyExtension.php
+
 includes:
 	- phpstan-baseline.neon

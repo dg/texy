@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Method Texy\\Bridges\\Latte\\TexyExtension\:\:getFilters\(\) return type has no signature specified for callable\.$#'
-			identifier: missingType.callable
-			count: 1
-			path: src/Bridges/Latte/TexyExtension.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 1
@@ -17,9 +11,3 @@ parameters:
 			identifier: foreach.emptyArray
 			count: 1
 			path: src/Texy/Modules/HtmlOutputModule.php
-
-		-
-			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
-			identifier: missingType.callable
-			count: 1
-			path: src/Texy/Texy.php

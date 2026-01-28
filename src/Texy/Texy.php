@@ -208,10 +208,10 @@ class Texy
 
 
 	/**
-	 * @param  callable(InlineParser, string[], string): (HtmlElement|string|null)  $handler
+	 * @param  \Closure(InlineParser, string[], string): (HtmlElement|string|null)  $handler
 	 */
 	final public function registerLinePattern(
-		callable $handler,
+		\Closure $handler,
 		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		string $name,
@@ -223,7 +223,7 @@ class Texy
 		}
 
 		$this->linePatterns[$name] = [
-			'handler' => $handler(...),
+			'handler' => $handler,
 			'pattern' => $pattern,
 			'again' => $againTest,
 		];
@@ -231,10 +231,10 @@ class Texy
 
 
 	/**
-	 * @param  callable(BlockParser, string[], string): (HtmlElement|string|null)  $handler
+	 * @param  \Closure(BlockParser, string[], string): (HtmlElement|string|null)  $handler
 	 */
 	final public function registerBlockPattern(
-		callable $handler,
+		\Closure $handler,
 		#[Language('PhpRegExpXTCommentMode')]
 		string $pattern,
 		string $name,
@@ -246,20 +246,20 @@ class Texy
 		}
 
 		$this->blockPatterns[$name] = [
-			'handler' => $handler(...),
+			'handler' => $handler,
 			'pattern' => $pattern . 'm', // force multiline
 		];
 	}
 
 
-	/** @param  callable(string): string  $handler */
-	final public function registerPostLine(callable $handler, string $name): void
+	/** @param  \Closure(string): string  $handler */
+	final public function registerPostLine(\Closure $handler, string $name): void
 	{
 		if (!isset($this->allowed[$name])) {
 			$this->allowed[$name] = true;
 		}
 
-		$this->postHandlers[$name] = $handler(...);
+		$this->postHandlers[$name] = $handler;
 	}
 
 
@@ -430,9 +430,9 @@ class Texy
 	/**
 	 * Add new event handler.
 	 */
-	final public function addHandler(string $event, callable $callback): void
+	final public function addHandler(string $event, \Closure $callback): void
 	{
-		$this->handlers[$event][] = $callback(...);
+		$this->handlers[$event][] = $callback;
 	}
 
 
