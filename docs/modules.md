@@ -53,7 +53,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 | Module | Purpose |
 |---|---|
 | **ScriptModule** | `{{command: args}}` macro calls; delegates entirely to user handlers of the `script` element. |
-| **HtmlModule** | HTML tags (`html/tag`) and comments (`html/comment`) written directly in the input; validates them against `$allowedTags` and the DTD. |
+| **HtmlModule** | HTML tags (`html/tag`) and comments (`html/comment`) written directly in the input; validates them against `$allowedTags` and the content model. |
 | **ImageModule** | Images `[* url *]` including dimensions and alignment; maintains image reference definitions (`image/definition`, collected in `beforeParse`); invokes the `image` element. |
 | **PhraseModule** | All inline formatting – bold, italic, code, spans, acronyms, sub/sup, quotes, and the alternative link syntaxes (wikilink, markdown, quicklink). Maps syntax names to HTML tags via its `$tags` property; a single `phrase` element handler serves all of them. |
 | **LinkModule** | Reference links `[ref]`, autodetected URLs and e-mails; maintains the reference dictionary (`link/definition`, collected in `beforeParse`); provides `factoryLink()`; invokes `linkReference`, `linkURL`, `linkEmail`, and `newReference` elements. |
@@ -78,7 +78,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 |---|---|
 | **TypographyModule** | Post-line handler `typography`: locale-aware quotes, en/em dashes, ellipsis, non-breaking spaces, arrows, ©®™, multiplication sign. Prepares locale patterns in `beforeParse`. |
 | **LongWordsModule** | Post-line handler `longwords`: inserts `&shy;` soft hyphens into words longer than `$wordLimit`, using Czech-oriented syllable heuristics. |
-| **HtmlOutputModule** | `postProcess` handler: makes the output well-formed (auto-closes tags, fixes nesting against the DTD), indents, and wraps long lines. |
+| **HtmlOutputModule** | `postProcess` handler: makes the output well-formed (auto-closes tags, fixes nesting against the content model), indents, and wraps long lines. |
 
 ## Interactions between modules
 

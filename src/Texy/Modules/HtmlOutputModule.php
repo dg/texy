@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HtmlElement;
+use Texy\Output\Html\Schema;
 use Texy\Regexp;
 use function array_intersect, array_keys, array_unshift, is_string, max, reset, rtrim, str_repeat, str_replace, strtr, wordwrap;
 
@@ -43,9 +43,8 @@ final class HtmlOutputModule extends Texy\Module
 	private array $baseDTD = [];
 
 
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
+	public function __construct(Texy\Texy $texy)
+	{
 		$texy->addHandler('postProcess', $this->postProcess(...));
 	}
 
@@ -54,15 +53,13 @@ final class HtmlOutputModule extends Texy\Module
 	 * Converts <strong><em> ... </strong> ... </em>.
 	 * into <strong><em> ... </em></strong><em> ... </em>
 	 */
-	private function postProcess(Texy\Texy $texy, string &$s): void
+	private function postProcess(string &$s): void
 	{
 		$this->space = $this->baseIndent;
 		$this->tagStack = [];
 		$this->tagUsed = [];
 
-		// special "base content"
-		$dtd = $texy->getDTD();
-		$this->baseDTD = $dtd['div'][1] + $dtd['html'][1] /*+ $dtd['head'][1]*/ + $dtd['body'][1] + ['html' => 1];
+		$this->baseDTD = Schema::flowContent();
 
 		// wellform and reformat
 		$s = Regexp::replace(
@@ -71,7 +68,7 @@ final class HtmlOutputModule extends Texy\Module
 				( [^<]*+ )
 				< (?: (!--.*--) | (/?) ([a-z][a-z0-9._:-]*) (|[ \n].*) \s* (/?) ) >
 			~Uisx',
-			$this->cb(...),
+			$this->processFragment(...),
 		);
 
 		// empty out stack
@@ -103,10 +100,10 @@ final class HtmlOutputModule extends Texy\Module
 
 
 	/**
-	 * Callback function: <tag> | </tag> | ....
+	 * Processes a fragment of HTML: text content followed by a tag or comment.
 	 * @param  array<?string>  $matches
 	 */
-	private function cb(array $matches): string
+	private function processFragment(array $matches): string
 	{
 		// html tag
 		/** @var array{string, string, ?string, ?string, ?string, ?string, ?string} $matches */
@@ -123,7 +120,7 @@ final class HtmlOutputModule extends Texy\Module
 		// phase #1 - stuff between tags
 		if ($mText !== '') {
 			$item = reset($this->tagStack);
-			if ($item && !isset($item['dtdContent'][HtmlElement::InnerText])) {  // text not allowed?
+			if ($item && !isset($item['dtdContent'][Schema::Text])) {  // text not allowed?
 
 			} elseif (array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
 				$s = Texy\Helpers::freezeSpaces($mText);
@@ -140,7 +137,7 @@ final class HtmlOutputModule extends Texy\Module
 
 		// phase #3 - HTML tag
 		assert(is_string($mTag) && is_string($mAttr));
-		$mEmpty = $mEmpty || isset(HtmlElement::$emptyElements[$mTag]);
+		$mEmpty = $mEmpty || isset(Schema::voidElements()[$mTag]);
 		if ($mEmpty && $mEnd) { // bad tag; /end/
 			return $s;
 		} elseif ($mEnd) {
@@ -154,24 +151,24 @@ final class HtmlOutputModule extends Texy\Module
 	private function processStartTag(string $tag, bool $empty, string $attr, string $s): string
 	{
 		$dtdContent = $this->baseDTD;
-		$dtd = $this->texy->getDTD();
 
-		if (!isset($dtd[$tag])) {
-			// unknown (non-html) tag
+		if (!Schema::isKnown($tag)) {
+			// Unknown tags (custom elements) are always allowed and inherit content model
+			// from parent - they act as transparent wrappers that don't restrict children
 			$allowed = true;
 			$item = reset($this->tagStack);
 			if ($item) {
 				$dtdContent = $item['dtdContent'];
 			}
 		} else {
+			// Known HTML tags must respect content model rules
 			$s .= $this->closeOptionalTags($tag, $dtdContent);
-
-			// is tag allowed in this content?
 			$allowed = isset($dtdContent[$tag]);
 
-			// check deep element prohibitions
-			if ($allowed && isset(HtmlElement::$prohibits[$tag])) {
-				foreach (HtmlElement::$prohibits[$tag] as $pTag) {
+			// Deep prohibitions: certain elements cannot be nested anywhere inside others
+			// (e.g., <a> cannot contain <a> or <button> at any depth)
+			if ($allowed) {
+				foreach (Schema::prohibitedAncestors($tag) as $pTag) {
 					if (!empty($this->tagUsed[$pTag])) {
 						$allowed = false;
 						break;
@@ -180,7 +177,7 @@ final class HtmlOutputModule extends Texy\Module
 			}
 		}
 
-		// empty elements se neukladaji do zasobniku
+		// Void elements don't go on stack - they have no closing tag
 		if ($empty) {
 			if (!$allowed) {
 				return $s;
@@ -188,10 +185,10 @@ final class HtmlOutputModule extends Texy\Module
 
 			$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->preserveSpaces);
 
-			if ($indent && $tag === 'br') { // formatting exception
+			if ($indent && $tag === 'br') {
 				return rtrim($s) . '<' . $tag . $attr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
 
-			} elseif ($indent && !isset(HtmlElement::$inlineElements[$tag])) {
+			} elseif ($indent && !isset(Schema::inlineElements()[$tag])) {
 				$space = "\r" . str_repeat("\t", $this->space);
 				return $s . $space . '<' . $tag . $attr . '>' . $space;
 
@@ -207,18 +204,13 @@ final class HtmlOutputModule extends Texy\Module
 		if ($allowed) {
 			$open = '<' . $tag . $attr . '>';
 
-			// receive new content
-			if ($tagDTD = $dtd[$tag] ?? null) {
-				if (isset($tagDTD[1][HtmlElement::InnerTransparent])) {
-					$dtdContent += $tagDTD[1];
-					unset($dtdContent[HtmlElement::InnerTransparent]);
-				} else {
-					$dtdContent = $tagDTD[1];
-				}
-			}
+			// Determine what children this tag can contain
+			$dtdContent = Schema::isKnown($tag)
+				? Schema::childContent($tag, $dtdContent)
+				: $dtdContent; // unknown tags keep inherited content model
 
-			// format output
-			if ($this->indent && !isset(HtmlElement::$inlineElements[$tag])) {
+			// Format output with indentation for block elements
+			if ($this->indent && !isset(Schema::inlineElements()[$tag])) {
 				$close = "\x08" . '</' . $tag . '>' . "\n" . str_repeat("\t", $this->space);
 				$s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
 				$indent = 1;
@@ -226,11 +218,9 @@ final class HtmlOutputModule extends Texy\Module
 				$close = '</' . $tag . '>';
 				$s .= $open;
 			}
-
-			// TODO: problematic formatting of select / options, object / params
 		}
 
-		// open tag, put to stack, increase counter
+		// Push tag to stack for tracking open elements
 		$item = [
 			'tag' => $tag,
 			'open' => $open,
@@ -262,7 +252,7 @@ final class HtmlOutputModule extends Texy\Module
 			$s .= $item['close'];
 			$this->space -= $item['indent'];
 			$this->tagUsed[$itemTag]--;
-			$back = $back && isset(HtmlElement::$inlineElements[$itemTag]);
+			$back = $back && isset(Schema::inlineElements()[$itemTag]);
 			unset($this->tagStack[$i]);
 			if ($itemTag === $tag) {
 				break;
@@ -311,8 +301,8 @@ final class HtmlOutputModule extends Texy\Module
 			if (
 				$item['close']
 				&& (
-					!isset(HtmlElement::$optionalEnds[$itemTag])
-					&& !isset(HtmlElement::$inlineElements[$itemTag])
+					!Schema::hasOptionalEnd($itemTag)
+					&& !isset(Schema::inlineElements()[$itemTag])
 				)
 			) {
 				break;

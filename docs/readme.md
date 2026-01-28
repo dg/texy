@@ -19,7 +19,7 @@ extending Texy, plus how it converts its markup to HTML underneath.
 ## Internals (how it works)
 
 The core is non-trivial — a two-parser pipeline, a protection-mark hierarchy,
-chain-of-responsibility handlers, and DTD validation — so it is split by seam:
+chain-of-responsibility handlers, and content-model well-forming — so it is split by seam:
 
 - **[architecture.md](architecture.md)** — the four processing phases, the terminology
   (syntax / pattern / syntax handler / element handler / notification handler), and how
@@ -28,5 +28,5 @@ chain-of-responsibility handlers, and DTD validation — so it is split by seam:
   their content-type hierarchy, syntax collisions, and post-line processing.
 - **[modules.md](modules.md)** — the module system, the anatomy of a module, the overview
   of the built-in modules, and how they cooperate.
-- **[html-element.md](html-element.md)** — the `HtmlElement` DOM tree and DTD validation.
+- **[html-element.md](html-element.md)** — the `HtmlElement` DOM tree, its serialization, and the content model.
 - **[modifiers.md](modifiers.md)** — the `.(…)[…]{…}<>` modifier system and `decorate()`.
