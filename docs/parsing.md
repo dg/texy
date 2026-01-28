@@ -120,7 +120,7 @@ After the DOM tree is serialized, `Texy::stringToHtml()` performs the final tran
 2. The string is split by the `CONTENT_BLOCK` mark and every *textual* segment (even-indexed, i.e. outside protected blocks) is run through the registered **post-line handlers** in order: `typography` (`TypographyModule::postLine()` – quotes, dashes, non-breaking spaces, symbols) and `longwords` (`LongWordsModule::postLine()` – inserting `&shy;` soft hyphens). Each handler is skipped if disabled in `$allowed`.
 3. `<`, `>`, `&` are HTML-escaped (protected content is immune – it is still masked at this point).
 4. `unprotect()` replaces all protection marks with the stored HTML.
-5. The `postProcess` event fires; `HtmlOutputModule` well-forms and reformats the HTML here (auto-closing tags, fixing invalid nesting per DTD, indentation, line wrapping).
+5. The `postProcess` event fires; `HtmlOutputModule` well-forms and reformats the HTML here (auto-closing tags, fixing invalid nesting against the content model, indentation, line wrapping).
 6. Frozen attribute spaces are restored (`Helpers::unfreezeSpaces()`).
 
 `Texy::processTypo()` is a shortcut that runs only steps of typographic correction (and long words, if enabled) on plain text, without any Texy parsing.

@@ -299,7 +299,7 @@ Each subtype (except `block/texy`) is individually switchable in `$allowed`; the
 
 *(`html/tag`, `html/comment` – HtmlModule)*
 
-HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->allowedTags` and the DTD; disallowed tags/attributes are removed, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlModule->passComment` is on.
+HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->allowedTags` and the content model; disallowed tags/attributes are removed, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlModule->passComment` is on.
 
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.

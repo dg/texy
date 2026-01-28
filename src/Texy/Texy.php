@@ -146,22 +146,11 @@ class Texy
 	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
 	private array $handlers = [];
 
-	/**
-	 * DTD descriptor.
-	 *   $dtd[element][0] - allowed attributes (as array keys)
-	 *   $dtd[element][1] - allowed content for an element (content model) (as array keys)
-	 *                    - array of allowed elements (as keys)
-	 *                    - false - empty element
-	 *                    - 0 - transparent
-	 * @var array<string, array{array<string, int>, array<string, int>}>
-	 */
-	private static array $dtd;
-
 
 	public function __construct()
 	{
 		$this->loadModules();
-		$this->initDTD();
+		$this->initAllowedTags();
 
 		// examples of link references ;-)
 		$link = new Link('https://texy.nette.org/');
@@ -177,17 +166,10 @@ class Texy
 	}
 
 
-	private function initDTD(): void
+	private function initAllowedTags(): void
 	{
-		if (empty(self::$dtd)) {
-			self::$dtd = require __DIR__ . '/DTD.php';
-		}
-
 		// accept all valid HTML tags and attributes by default
-		$this->allowedTags = [];
-		foreach (self::$dtd as $tag => $dtd) {
-			$this->allowedTags[$tag] = self::ALL;
-		}
+		$this->allowedTags = Output\Html\Schema::defaultAllowedTags();
 	}
 
 
@@ -414,7 +396,7 @@ class Texy
 		$s = $this->unprotect($s);
 
 		// wellform and reformat HTML
-		$this->invokeHandlers('postProcess', [$this, &$s]);
+		$this->invokeHandlers('postProcess', [&$s]);
 
 		// unfreeze spaces
 		$s = Helpers::unfreezeSpaces($s);
@@ -552,16 +534,6 @@ class Texy
 	final public function getDOM(): HtmlElement
 	{
 		return $this->DOM;
-	}
-
-
-	/**
-	 * @internal
-	 * @return array<string, array{array<string, int>, array<string, int>}>
-	 */
-	public static function getDTD(): array
-	{
-		return self::$dtd;
 	}
 
 

@@ -10,9 +10,9 @@ Consult it before non-trivial changes; it is the source of truth from which the
 public manual is distilled.
 
 The core is non-trivial - a two-parser pipeline, a protection-mark hierarchy,
-chain-of-responsibility handlers, and DTD validation. Read the relevant
+chain-of-responsibility handlers, and content-model well-forming. Read the relevant
 `docs/` seam before editing. Note the internals describe the current
-**Texy 3.x** line; 4.0 will be AST-based and change most of it.
+**4.0-dev** line (still the two-parser design); the eventual AST rewrite will change most of it.
 
 ## Project Overview
 
@@ -58,8 +58,8 @@ composer phpstan
 - **The handler chain runs last-registered-first**, with the module's default
   implementation last; a handler calls `$invocation->proceed()` to delegate.
 - **Modules are wired one-directionally through value objects** (`Link`/`Image`);
-  `HtmlOutputModule` fixes nesting/auto-closing, `Modifier::decorate` filters against
-  the `allowed*` whitelists, and `HtmlElement` is DTD-validated.
+  `HtmlOutputModule` fixes nesting/auto-closing against a built-in content model, and
+  `Modifier::decorate` filters attributes/classes/styles against the `allowed*` whitelists.
 - **Security: always run `Configurator::safeMode($texy)` for untrusted input** - it
   restricts HTML to a safe subset, disables classes/IDs/styles and images, filters
   URL schemes, and adds `rel="nofollow"`.
