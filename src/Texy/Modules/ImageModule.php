@@ -101,7 +101,8 @@ final class ImageModule extends Texy\Module
 		// [3] => .(title)[class]{style}<>
 
 		$image = $this->factoryImage($mURLs, $mMod, tryRef: false);
-		$this->addReference($mRef, $image);
+		$image->name = Helpers::toLower($mRef);
+		$this->references[$image->name] = $image;
 		return '';
 	}
 
@@ -138,10 +139,23 @@ final class ImageModule extends Texy\Module
 
 
 	/**
-	 * Adds new named reference to image.
+	 * Adds a user-defined image definition (persists across process() calls).
 	 */
-	public function addReference(string $name, Image $image): void
+	public function addDefinition(
+		string $name,
+		string $url,
+		?int $width = null,
+		?int $height = null,
+		?string $alt = null,
+	): void
 	{
+		$image = new Image;
+		$image->URL = $url;
+		$image->width = $width;
+		$image->height = $height;
+		if ($alt !== null) {
+			$image->modifier->title = $alt;
+		}
 		$image->name = Helpers::toLower($name);
 		$this->references[$image->name] = $image;
 	}
