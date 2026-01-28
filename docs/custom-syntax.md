@@ -10,7 +10,7 @@ Inline constructs inside lines of text:
 
 ```php
 $texy->registerLinePattern(
-    callable $handler,
+    \Closure $handler,
     string $pattern,
     string $name,
     ?string $againTest = null,
@@ -38,7 +38,7 @@ Multi-line block constructs:
 
 ```php
 $texy->registerBlockPattern(
-    callable $handler,
+    \Closure $handler,
     string $pattern,
     string $name,
 );
