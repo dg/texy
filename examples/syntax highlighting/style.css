@@ -1,109 +1,180 @@
 /**
- * FSHL 2.1.0                                  | Fast Syntax HighLighter |
- * -----------------------------------------------------------------------
- *
- * LICENSE
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * Texy! Syntax Highlighting Demo
  */
 
-/* Copyright (c) 2002 Martin Cohen */
-/* Copyright (c) 2011-2012 Jaroslav Hanslík */
+:root {
+	--color-bg: #0f172a;
+	--color-surface: #1e293b;
+	--color-border: #334155;
+	--color-text: #e2e8f0;
+	--color-text-muted: #94a3b8;
+	--color-primary: #38bdf8;
+	--color-accent: #a78bfa;
+	--font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--font-mono: 'Fira Code', 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+	--radius: 8px;
+	--shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+}
 
-/* Common */
-.xlang {color: #ff0000; font-weight: bold;}
-.line {color: #000000; background-color: #ffffff;}
+* {
+	box-sizing: border-box;
+}
 
-/* CSS */
-.css-at-rule {color: #004a80; font-weight: bold;}
-.css-tag {color: #004a80;}
-.css-id {color: #7da7d9; font-weight: bold;}
-.css-class {color: #004a80;}
-.css-pseudo {color: #004a80;}
-.css-property {color: #003663; font-weight: bold;}
-.css-value {color: #448ccb;}
-.css-func {color: #448ccb; font-weight: bold;}
-.css-color {color: #0076a3;}
-.css-comment {background-color: #e5f8ff; color: #999999;}
+body {
+	font-family: var(--font-sans);
+	font-size: 16px;
+	line-height: 1.7;
+	color: var(--color-text);
+	background: var(--color-bg);
+	margin: 0;
+	padding: 2rem;
+	min-height: 100vh;
+}
 
-/* CPP */
-.cpp-keywords1 {color: #0000ff; font-weight: bold;}
-.cpp-num {color: #ff0000;}
-.cpp-quote {color: #a52a2a; font-weight: bold;}
-.cpp-comment {color: #00ff00;}
-.cpp-preproc {color: #c0c0c0;}
+h1, h2, h3, h4, h5, h6 {
+	color: #f8fafc;
+	font-weight: 600;
+	line-height: 1.3;
+	margin: 2rem 0 1rem;
+}
 
-/* HTML */
-.html-tag {color: #598527; font-weight: bold;}
-.html-tagin {color: #89a315}
-.html-quote {color: #598527; font-weight: bold;}
-.html-comment {color: #999999; background-color: #f1fae4;}
-.html-entity {color: #89a315;}
+h1 {
+	font-size: 2.25rem;
+	background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	margin-top: 0;
+}
 
-/* Java */
-.java-keywords1 {color: #0000ff; font-weight: bold;}
-.java-num {color: #ff0000;}
-.java-quote {color: #a52a2a; font-weight: bold;}
-.java-comment {color: #009900;}
-.java-preproc {color: #c0c0c0;}
+h2 {
+	font-size: 1.5rem;
+	color: var(--color-primary);
+	border-bottom: 2px solid var(--color-border);
+	padding-bottom: 0.5rem;
+}
 
-/* Javascript */
-.js-out {color: #898993;}
-.js-keywords1 {color: #575757; font-weight: bold;}
-.js-num {color: #575757;}
-.js-quote {color: #575757; font-weight: bold;}
-.js-comment {color: #898993; background-color: #f4f4f4;}
+h3 {
+	font-size: 1.25rem;
+	color: var(--color-accent);
+}
 
-/* Neon */
-.neon-section {color: #598527;}
-.neon-sep {color: #ff0000;}
-.neon-key {color: #0000ff;}
-.neon-comment {color: #999999;}
-.neon-value {color: #000000;}
-.neon-quote {color: #884433;}
-.neon-num {color: #448ccb;}
-.neon-var {color: #ffaa00;}
-.neon-ref {color: #884433;}
+p {
+	margin: 1rem 0;
+	color: var(--color-text-muted);
+}
 
-/* PHP */
-.php-keyword1 {color: #dd2244; font-weight: bold;}
-.php-keyword2 {color: #dd2244;}
-.php-var {color: #ffaa00; font-weight: bold;}
-.php-num {color: #ff0000;}
-.php-quote {color: #884433; font-weight: bold;}
-.php-comment {color: #999999; background-color: #ffffee;}
+a {
+	color: var(--color-primary);
+	text-decoration: none;
+	transition: color 0.2s;
+}
 
-/* Python */
-.py-keyword1 {color: #0033cc; font-weight: bold;}
-.py-keyword2 {color: #ce3333; font-weight: bold;}
-.py-keyword3 {color: #660066; font-weight: bold;}
-.py-num {color: #993300;}
-.py-docstring {color: #e86a18;}
-.py-quote {color: #878787; font-weight: bold;}
-.py-comment {color: #009900; font-style: italic;}
+a:hover {
+	color: var(--color-accent);
+	text-decoration: underline;
+}
 
-/* SQL */
-.sql-keyword1 {color: #dd0000; font-weight: bold;}
-.sql-keyword2 {color: #dd2222;}
-.sql-keyword3 {color: #0000ff; font-weight: bold;}
-.sql-value {color: #5674b9;}
-.sql-comment {color: #ffaa00;}
-.sql-num {color: #ff0000;}
-.sql-option {color: #004a80; font-weight: bold;}
+code {
+	font-family: var(--font-mono);
+	font-size: 0.9em;
+	background: var(--color-surface);
+	padding: 0.2em 0.4em;
+	border-radius: 4px;
+	color: var(--color-primary);
+}
 
-/* Texy */
-.texy-hlead {color: #4444bb; font-weight: bold;}
-.texy-hbody {background-color: #eeeeff; color: #4444bb;}
-.texy-hr {color: #bb4444;}
-.texy-code {color: #666666;}
-.texy-html {color: #66aa66;}
-.texy-text {color: #6666aa;}
-.texy-err {background-color: #ff0000; color: #ffffff;}
+/* Code blocks */
+pre {
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	line-height: 1.6;
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius);
+	padding: 1.5rem;
+	margin: 1.5rem 0;
+	overflow-x: auto;
+	box-shadow: var(--shadow);
+}
+
+pre code {
+	background: none;
+	padding: 0;
+	font-size: inherit;
+	color: inherit;
+}
+
+/* Language badges */
+pre.php::before,
+pre.javascript::before,
+pre.html::before,
+pre.sql::before {
+	display: inline-block;
+	float: right;
+	font-family: var(--font-sans);
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 0.25rem 0.75rem;
+	border-radius: 4px;
+	margin-bottom: 1rem;
+	position: relative;
+	top: -0.5rem;
+}
+
+pre.php::before {
+	content: 'PHP';
+	background: linear-gradient(135deg, #7b68ee, #4f46e5);
+	color: white;
+}
+
+pre.javascript::before {
+	content: 'JavaScript';
+	background: linear-gradient(135deg, #f7df1e, #eab308);
+	color: #1a1a1a;
+}
+
+pre.html::before {
+	content: 'HTML';
+	background: linear-gradient(135deg, #e44d26, #f16529);
+	color: white;
+}
+
+pre.sql::before {
+	content: 'SQL';
+	background: linear-gradient(135deg, #00758f, #0891b2);
+	color: white;
+}
+
+/* Horizontal rule */
+hr {
+	border: none;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+	margin: 3rem 0;
+}
+
+/* Debug output */
+body > pre:last-of-type {
+	background: #0c0c0c;
+	border-color: #222;
+	color: #6b7280;
+	font-size: 0.75rem;
+	max-height: 400px;
+	overflow: auto;
+}
+
+body > pre:last-of-type::before {
+	content: 'Generated HTML';
+	display: block;
+	font-family: var(--font-sans);
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: #4b5563;
+	margin-bottom: 1rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid #222;
+}
