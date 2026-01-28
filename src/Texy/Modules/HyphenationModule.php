@@ -14,7 +14,7 @@ use function count, ord;
 /**
  * Breaks long words with soft hyphens for better line wrapping.
  */
-final class LongWordsModule extends Texy\Module
+final class HyphenationModule extends Texy\Module
 {
 	private const
 		Dont = 0, // don't hyphenate
