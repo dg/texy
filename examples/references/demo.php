@@ -61,16 +61,6 @@ header('Content-type: text/html; charset=utf-8');
 echo $html;
 
 
-// do some antispam filtering - this is just very simple example ;-)
-$spam = false;
-foreach ($texy->summary['links'] as $link) {
-	if (strpos($link, 'casino')) {
-		$spam = true;
-		break;
-	}
-}
-
-
 // and echo generated HTML code
 echo '<hr />';
 echo '<pre>';

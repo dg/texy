@@ -54,11 +54,3 @@ echo '<hr />';
 echo '<pre>';
 echo htmlspecialchars($html);
 echo '</pre>';
-
-
-// echo all used images
-echo '<hr />';
-echo '<pre>';
-echo 'used images:';
-print_r($texy->summary['images']);
-echo '</pre>';

@@ -47,13 +47,6 @@ header('Content-type: text/html; charset=utf-8');
 echo $html;
 
 
-// echo all embedded links
-echo '<hr />';
-echo '<pre>';
-print_r($texy->summary['links']);
-echo '</pre>';
-
-
 // and echo generated HTML code
 echo '<hr />';
 echo '<pre>';

@@ -293,8 +293,6 @@ final class HtmlModule extends Texy\Module
 				return false;
 			}
 
-			$texy->summary['images'][] = $el->attrs['src'];
-
 		} elseif ($name === 'a') {
 			if (!isset($el->attrs['href']) && !isset($el->attrs['name']) && !isset($el->attrs['id'])) {
 				return false;
@@ -310,8 +308,6 @@ final class HtmlModule extends Texy\Module
 				if (!$texy->checkURL($el->attrs['href'], $texy::FILTER_ANCHOR)) {
 					return false;
 				}
-
-				$texy->summary['links'][] = $el->attrs['href'];
 			}
 
 		} elseif (Regexp::match($name, '~^h[1-6]~i')) {
