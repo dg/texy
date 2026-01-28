@@ -30,7 +30,7 @@ final class EmoticonModule extends Texy\Module
 		':-|' => '😐',
 	];
 
-	/** @deprecated */
+	/** CSS class for emoticons */
 	public ?string $class = null;
 
 	/** @deprecated */

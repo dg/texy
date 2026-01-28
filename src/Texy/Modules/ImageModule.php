@@ -22,7 +22,7 @@ final class ImageModule extends Texy\Module
 	/** root of relative images (http) */
 	public ?string $root = 'images/';
 
-	/** root of linked images (http) */
+	/** @deprecated */
 	public ?string $linkedRoot = 'images/';
 
 	/** physical location of images on server */
@@ -34,7 +34,7 @@ final class ImageModule extends Texy\Module
 	/** right-floated images CSS class */
 	public ?string $rightClass = null;
 
-	/** default alternative text */
+	/** @deprecated */
 	public ?string $defaultAlt = '';
 
 	/** @var array<string, Image> image references */

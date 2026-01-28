@@ -23,7 +23,7 @@ final class LinkModule extends Texy\Module
 	/** root of relative links */
 	public ?string $root = null;
 
-	/** linked image class */
+	/** @deprecated */
 	public ?string $imageClass = null;
 
 	/** always use rel="nofollow" for absolute links? */

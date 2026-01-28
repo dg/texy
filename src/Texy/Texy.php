@@ -41,7 +41,7 @@ class Texy
 		FILTER_ANCHOR = 'anchor',
 		FILTER_IMAGE = 'image';
 
-	/** @deprecated  */
+	#[\Deprecated]
 	public const
 		HTML4_TRANSITIONAL = 0,
 		HTML4_STRICT = 1,

@@ -28,10 +28,10 @@ final class FigureModule extends Texy\Module
 	/** right-floated box CSS class */
 	public ?string $rightClass = null;
 
-	/** how calculate div's width */
+	/** @deprecated */
 	public int|false $widthDelta = 10;
 
-	/** caption after *** is required */
+	/** @deprecated */
 	public bool $requireCaption = true;
 
 
