@@ -36,9 +36,6 @@ final class ImageModule extends Texy\Module
 	/** right-floated images CSS class */
 	public ?string $rightClass = null;
 
-	/** @deprecated */
-	public ?string $defaultAlt = '';
-
 	/** @var array<string, Image> image references */
 	private array $references = [];
 
@@ -238,9 +235,7 @@ final class ImageModule extends Texy\Module
 		$mod->decorate($texy, $el);
 		$el->attrs['src'] = Helpers::prependRoot($image->URL, $this->root);
 		if (!isset($el->attrs['alt'])) {
-			$el->attrs['alt'] = $alt === null
-				? $this->defaultAlt
-				: $texy->typographyModule->postLine($alt);
+			$el->attrs['alt'] = $alt === null ? '' : $texy->typographyModule->postLine($alt);
 		}
 
 		if ($hAlign) {
