@@ -511,11 +511,10 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/**
 	 * Parses text as single line.
 	 */
-	final public function parseLine(Texy $texy, string $s): InlineParser
+	final public function parseLine(Texy $texy, string $s): void
 	{
-		$parser = new InlineParser($texy, $this);
-		$parser->parse($s);
-		return $parser;
+		$parser = new InlineParser($texy);
+		$this->children = [$parser->parse($s)];
 	}
 
 
@@ -524,7 +523,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 */
 	final public function parseBlock(Texy $texy, string $s, bool $indented = false): void
 	{
-		$parser = new BlockParser($texy, $this, $indented);
-		$parser->parse($s);
+		$parser = new BlockParser($texy, $indented);
+		$this->children = $parser->parse($s);
 	}
 }

@@ -24,8 +24,10 @@ final class ParagraphModule extends Texy\Module
 	}
 
 
-	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
+	/** @return list<Texy\HtmlElement> */
+	public function process(Texy\BlockParser $parser, string $content): array
 	{
+		$res = [];
 		$parts = $parser->isIndented()
 			? Regexp::split($content, '~(\n (?! \ ) | \n{2,})~', skipEmpty: true)
 			: Regexp::split($content, '~(\n{2,})~', skipEmpty: true);
@@ -50,11 +52,13 @@ final class ParagraphModule extends Texy\Module
 				$mod->setProperties($mMod);
 			}
 
-			$res = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
-			if ($res) {
-				$el->insert(null, $res);
+			$el = $this->texy->invokeAroundHandlers('paragraph', $parser, [$s, $mod]);
+			if ($el) {
+				$res[] = $el;
 			}
 		}
+
+		return $res;
 	}
 
 
