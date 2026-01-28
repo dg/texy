@@ -105,20 +105,20 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(LineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
+	 * @var array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}>
 	 */
 	private array $linePatterns = [];
 
-	/** @var array<string, array{handler: \Closure(LineParser, array<string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @var array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	private array $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}>
+	 * @var array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
-	/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}> */
+	/** @var array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}> */
 	private array $_blockPatterns;
 
 	/** @var array<string, \Closure(string): string> */
@@ -218,7 +218,7 @@ class Texy
 
 
 	/**
-	 * @param  callable(LineParser, string[], string): (HtmlElement|string|null)  $handler
+	 * @param  callable(LineParser, array<?string>, string): (HtmlElement|string|null)  $handler
 	 */
 	final public function registerLinePattern(
 		callable $handler,
@@ -241,7 +241,7 @@ class Texy
 
 
 	/**
-	 * @param  callable(BlockParser, string[], string): (HtmlElement|string|null)  $handler
+	 * @param  callable(BlockParser, array<?string>, string): (HtmlElement|string|null)  $handler
 	 */
 	final public function registerBlockPattern(
 		callable $handler,
@@ -537,14 +537,14 @@ class Texy
 	}
 
 
-	/** @return array<string, array{handler: \Closure(LineParser, string[], string): (HtmlElement|string|null), pattern: string, again: ?string}> */
+	/** @return array<string, array{handler: \Closure(LineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
 	final public function getLinePatterns(): array
 	{
 		return $this->_linePatterns;
 	}
 
 
-	/** @return array<string, array{handler: \Closure(BlockParser, string[], string): (HtmlElement|string|null), pattern: string}> */
+	/** @return array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}> */
 	final public function getBlockPatterns(): array
 	{
 		return $this->_blockPatterns;

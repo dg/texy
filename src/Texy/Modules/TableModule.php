@@ -37,7 +37,7 @@ final class TableModule extends Texy\Module
 				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)
 				\|                                   # table start
 				.*                                   # content
-			()$~mUx',
+			$~mUx',
 			'table',
 		);
 	}
@@ -51,7 +51,7 @@ final class TableModule extends Texy\Module
 	 * | xxx | xxx | xxx | .(..){..}[..]
 	 * |------------------
 	 * | aa | bb | cc |
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternTable(Texy\BlockParser $parser, array $matches): ?HtmlElement
 	{
@@ -78,9 +78,10 @@ final class TableModule extends Texy\Module
 				\1*                              # matching closing chars
 				\|? \ *                              # optional closing pipe and spaces
 				' . Patterns::MODIFIER_H . '?    # modifier (3)
-			()$~Umx',
+			$~Umx',
 			$matches,
 		)) {
+			/** @var array{string, string, string, ?string} $matches */
 			[, , $mContent, $mMod] = $matches;
 			// [1] => # / =
 			// [2] => ....
@@ -106,7 +107,7 @@ final class TableModule extends Texy\Module
 				continue;
 			}
 
-			if ($parser->next('~^ \| (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)()$~Ux', $matches)) {
+			if ($parser->next('~^ \| (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)$~Ux', $matches)) {
 				// smarter head detection
 				if ($rowCounter === 0 && !$isHead && $parser->next('~^ \| [=-] [+|=-]{2,} $~Umx', $foo)) {
 					$isHead = true;
@@ -121,6 +122,7 @@ final class TableModule extends Texy\Module
 					$elPart = $el->create('tbody');
 				}
 
+				/** @var array{string, string, ?string} $matches */
 				[, $mContent, $mMod] = $matches;
 				// [1] => ....
 				// [2] => .(title)[class]{style}<>_
@@ -166,7 +168,7 @@ final class TableModule extends Texy\Module
 	 */
 	private function processRow(
 		string $content,
-		string $mMod,
+		?string $mMod,
 		bool $isHead,
 		Texy\Texy $texy,
 		array &$prevRow,
@@ -252,7 +254,7 @@ final class TableModule extends Texy\Module
 			(.*)                              # content (3)
 			' . Patterns::MODIFIER_HV . '?    # modifier (4)
 			[ \t]*
-		()$~AUx');
+		$~AUx');
 		if (!$matches) {
 			return null;
 		}

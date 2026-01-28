@@ -53,7 +53,7 @@ final class PhraseModule extends Texy\Module
 		// UNIVERSAL
 		$texy->registerLinePattern(
 			array($this, 'patternPhrase'),
-			'~((?>([*+/^_"\~`-])+?))(?!\s)(.*(?!\2).)'.Texy\Patterns::MODIFIER.'?(?<!\s)\1(?!\2)(?::('.Texy\Patterns::LINK_URL.'))??()~Us',
+			'~((?>([*+/^_"\~`-])+?))(?!\s)(.*(?!\2).)'.Texy\Patterns::MODIFIER.'?(?<!\s)\1(?!\2)(?::('.Texy\Patterns::LINK_URL.'))??~Us',
 			'phrase/strong'
 		);
 		*/
@@ -71,7 +71,7 @@ final class PhraseModule extends Texy\Module
 				\*\*\*
 				(?! \* )                          # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Usx',
+			~Usx',
 			'phrase/strong+em',
 		);
 
@@ -88,7 +88,7 @@ final class PhraseModule extends Texy\Module
 				\*\*
 				(?! \* )                          # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Usx',
+			~Usx',
 			'phrase/strong',
 		);
 
@@ -105,7 +105,7 @@ final class PhraseModule extends Texy\Module
 				//
 				(?! / )                           # not followed by /
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Usx',
+			~Usx',
 			'phrase/em',
 		);
 
@@ -122,7 +122,7 @@ final class PhraseModule extends Texy\Module
 				\*
 				(?! \* )                         # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Usx',
+			~Usx',
 			'phrase/em-alt',
 		);
 
@@ -139,7 +139,7 @@ final class PhraseModule extends Texy\Module
 				\*
 				(?! [^\s.,;:<>()"?!\'-] )        # must be followed by these chars
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Usx',
+			~Usx',
 			'phrase/em-alt2',
 		);
 
@@ -155,7 +155,7 @@ final class PhraseModule extends Texy\Module
 				(?<! [\s+] )                     # not preceded by space or +
 				\+\+
 				(?! \+ )                         # not followed by +
-			()~Ux',
+			~Ux',
 			'phrase/ins',
 		);
 
@@ -171,7 +171,7 @@ final class PhraseModule extends Texy\Module
 				(?<! [\s<-] )                    # not preceded by space, < or -
 				--
 				(?! [>-] )                       # not followed by > or -
-			()~Ux',
+			~Ux',
 			'phrase/del',
 		);
 
@@ -187,7 +187,7 @@ final class PhraseModule extends Texy\Module
 				(?<! [\s^] )                     # not preceded by space or ^
 				\^\^
 				(?! \^ )                         # not followed by ^
-			()~Ux',
+			~Ux',
 			'phrase/sup',
 		);
 
@@ -215,7 +215,7 @@ final class PhraseModule extends Texy\Module
 				(?<! [\s_] )                     # not preceded by space or _
 				__
 				(?! _ )                          # not followed by _
-			()~Ux',
+			~Ux',
 			'phrase/sub',
 		);
 
@@ -244,7 +244,7 @@ final class PhraseModule extends Texy\Module
 				"
 				(?! " )                          # not followed by "
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Ux',
+			~Ux',
 			'phrase/span',
 		);
 
@@ -261,7 +261,7 @@ final class PhraseModule extends Texy\Module
 				\~
 				(?! \~ )
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Ux',
+			~Ux',
 			'phrase/span-alt',
 		);
 
@@ -278,7 +278,7 @@ final class PhraseModule extends Texy\Module
 				<<
 				(?! < )                          # not followed by <
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Ux',
+			~Ux',
 			'phrase/quote',
 		);
 
@@ -297,7 +297,7 @@ final class PhraseModule extends Texy\Module
 				\(\(
 				( .+ )                           # explanation (3)
 				\)\)
-			()~Ux',
+			~Ux',
 			'phrase/acronym',
 		);
 
@@ -326,7 +326,7 @@ final class PhraseModule extends Texy\Module
 				(?<! [\s\'] )                     # not preceded by space or quote
 				\'\'
 				(?! \' )                          # not followed by quote
-			()~Ux',
+			~Ux',
 			'phrase/notexy',
 		);
 
@@ -340,7 +340,7 @@ final class PhraseModule extends Texy\Module
 				(?<! \s )                               # not preceded by space
 				`
 				(?: : (' . Patterns::LINK_URL . ') )??  # optional link (3)
-			()~Ux',
+			~Ux',
 			'phrase/code',
 		);
 
@@ -352,7 +352,7 @@ final class PhraseModule extends Texy\Module
 				()                                    # modifier placeholder (2)
 				: (?= \[ )                            # followed by :[
 				(' . Patterns::LINK_URL . ')          # link (3)
-			()~Ux',
+			~Ux',
 			'phrase/quicklink',
 		);
 
@@ -370,7 +370,7 @@ final class PhraseModule extends Texy\Module
 				(?<! \s )                        # not preceded by space
 				]
 				(?! ] )                          # not followed by ]
-			()~Ux',
+			~Ux',
 			'phrase/wikilink',
 		);
 
@@ -388,7 +388,7 @@ final class PhraseModule extends Texy\Module
 				\(
 				( (?: [^' . Patterns::MARK . '\r )]++ | [ ] )+ )  # link (3)
 				\)
-			()~Ux',
+			~Ux',
 			'phrase/markdown',
 		);
 
@@ -408,15 +408,15 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: **.... .(title)[class]{style}**:LINK.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternPhrase(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
-		[, $mContent, $mMod, $mLink] = $matches;
-		// [1] => **
-		// [2] => ...
-		// [3] => .(title)[class]{style}
-		// [4] => LINK
+		/** @var array{string, string, ?string, ?string} $matches */
+		[, $mContent, $mMod, $mLink] = $matches + [3 => null];
+		// [1] => ...
+		// [2] => .(title)[class]{style}
+		// [3] => LINK
 
 		if ($phrase === 'phrase/wikilink') {
 			[$mLink, $mMod] = [$mMod, $mLink];
@@ -438,7 +438,7 @@ final class PhraseModule extends Texy\Module
 				$link = $texy->linkModule->factoryLink($mLink, $mMod, $mContent);
 			}
 		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
-			$mod->title = trim(Texy\Helpers::unescapeHtml($mLink));
+			$mod->title = trim(Texy\Helpers::unescapeHtml((string) $mLink));
 
 		} elseif ($mLink != null) {
 			$link = $texy->linkModule->factoryLink($mLink, null, $mContent);
@@ -450,10 +450,11 @@ final class PhraseModule extends Texy\Module
 
 	/**
 	 * Callback for: any^2 any_2.
-	 * @param  string[]  $matches
+	 * @param  array<?string>  $matches
 	 */
 	public function patternSupSub(LineParser $parser, array $matches, string $phrase): Texy\HtmlElement|string|null
 	{
+		/** @var array{string, string} $matches */
 		[, $mContent] = $matches;
 		$mod = new Modifier;
 		$link = null;
@@ -462,9 +463,10 @@ final class PhraseModule extends Texy\Module
 	}
 
 
-	/** @param  string[]  $matches */
+	/** @param  array<?string>  $matches */
 	public function patternNoTexy(LineParser $parser, array $matches): string
 	{
+		/** @var array{string, string} $matches */
 		[, $mContent] = $matches;
 		return $this->texy->protect(htmlspecialchars($mContent, ENT_NOQUOTES, 'UTF-8'), Texy\Texy::CONTENT_TEXTUAL);
 	}

@@ -8,7 +8,7 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use function is_array, strlen;
+use function is_array, is_string, strlen;
 
 
 /**
@@ -16,7 +16,7 @@ use function is_array, strlen;
  */
 class BlockParser extends Parser
 {
-	/** @var array<string, array{handler: \Closure(BlockParser, array<string>, string): (HtmlElement|string|null), pattern: string}> */
+	/** @var array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}> */
 	public array $patterns;
 	private string $text;
 	private int $offset;
@@ -41,8 +41,8 @@ class BlockParser extends Parser
 	/**
 	 * Match current line against RE.
 	 * If successful, increments current position and returns true.
-	 * @param  ?array<string>  $matches
-	 * @param-out array<string> $matches
+	 * @param  ?array<?string>  $matches
+	 * @param-out array<?string> $matches
 	 */
 	public function next(
 		#[Language('RegExp')]
@@ -55,7 +55,7 @@ class BlockParser extends Parser
 		}
 
 		$matches = [];
-		/** @var ?array<array{string, int}> $m */
+		/** @var ?array<array{?string, int}> $m */
 		$m = Regexp::match(
 			$this->text,
 			$pattern . 'Am', // anchored & multiline
@@ -64,6 +64,7 @@ class BlockParser extends Parser
 		);
 
 		if ($m) {
+			assert(is_string($m[0][0]));
 			$this->offset += strlen($m[0][0]) + 1; // 1 = "\n"
 			foreach ($m as $key => $value) {
 				$matches[$key] = $value[0];
@@ -128,7 +129,7 @@ class BlockParser extends Parser
 				break; // finito
 			}
 
-			assert(is_array($mMatches));
+			assert(is_array($mMatches) && is_string($mMatches[0]));
 			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
 
 			$res = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
@@ -146,7 +147,7 @@ class BlockParser extends Parser
 	}
 
 
-	/** @return list<array{int, ?string, ?array<int|string, string>, int}> */
+	/** @return list<array{int, ?string, ?array<?string>, int}> */
 	private function match(string $text): array
 	{
 		$matches = [];
