@@ -9,11 +9,13 @@ namespace Texy;
 
 use JetBrains\PhpStorm\Language;
 use function array_keys, array_values, in_array, is_array, is_string, preg_last_error, preg_last_error_msg, strlen;
-use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SPLIT_NO_EMPTY, PREG_SPLIT_OFFSET_CAPTURE;
+use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SPLIT_NO_EMPTY, PREG_SPLIT_OFFSET_CAPTURE, PREG_UNMATCHED_AS_NULL;
 
 
 /**
  * Regular expression utilities with error handling.
+ * Patterns run with the 'u' flag; extended mode is declared per pattern.
+ * Use Regexp::quote() instead of preg_quote().
  */
 class Regexp
 {
@@ -38,7 +40,8 @@ class Regexp
 	/**
 	 * Searches the string for the part matching the regular expression and returns
 	 * an array with the found expression and individual subexpressions, or null.
-	 * @return ($captureOffset is true ? array<int|string, array{string, int}> : array<int|string, string>)|null
+	 * Unmatched groups return null.
+	 * @return ($captureOffset is true ? array<int|string, array{?string, int}> : array<int|string, ?string>)|null
 	 */
 	public static function match(
 		string $subject,
@@ -48,7 +51,7 @@ class Regexp
 		int $offset = 0,
 	): ?array
 	{
-		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_UNMATCHED_AS_NULL;
 		if ($offset > strlen($subject)) {
 			return null;
 		}
@@ -63,7 +66,8 @@ class Regexp
 	/**
 	 * Searches the string for all occurrences matching the regular expression and
 	 * returns an array of arrays containing the found expression and each subexpression.
-	 * @return ($captureOffset is true ? list<array<int|string, array{string, int}>> : list<array<int|string, string>>)
+	 * Unmatched groups return null.
+	 * @return ($captureOffset is true ? list<array<int|string, array{?string, int}>> : list<array<int|string, ?string>>)
 	 */
 	public static function matchAll(
 		string $subject,
@@ -78,7 +82,7 @@ class Regexp
 		}
 
 		$m = [];
-		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_SET_ORDER;
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_UNMATCHED_AS_NULL | PREG_SET_ORDER;
 		self::pcre('preg_match_all', [$pattern . 'u', $subject, &$m, $flags, $offset]);
 		return $m;
 	}
@@ -86,8 +90,9 @@ class Regexp
 
 	/**
 	 * Replaces all occurrences matching regular expression $pattern which can be string or array in the form `pattern => replacement`.
+	 * Closure receives null for unmatched groups.
 	 * @param  string|string[]  $pattern
-	 * @param  string|\Closure(string[]): string  $replacement
+	 * @param  string|\Closure(array<?string>): string  $replacement
 	 */
 	public static function replace(
 		string $subject,
@@ -108,7 +113,7 @@ class Regexp
 			: $pattern . 'u';
 
 		if ($replacement instanceof \Closure) {
-			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
+			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_UNMATCHED_AS_NULL;
 			return self::pcre('preg_replace_callback', [$pattern, $replacement, $subject, $limit, 0, $flags]);
 		} else {
 			return self::pcre('preg_replace', [$pattern, $replacement, $subject, $limit]);
@@ -116,6 +121,9 @@ class Regexp
 	}
 
 
+	/**
+	 * Escapes string for use in a regular expression. Unlike preg_quote(), also escapes spaces and '#' for extended mode.
+	 */
 	public static function quote(string $s): string
 	{
 		return addcslashes($s, "\x00..\x20-.\\+*?[^]$(){}=!<>|:-#");
