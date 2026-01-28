@@ -9,7 +9,7 @@ namespace Texy;
 
 use JetBrains\PhpStorm\Language;
 use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, link, ltrim, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
-use const ENT_NOQUOTES;
+use const ARRAY_FILTER_USE_BOTH, ENT_NOQUOTES;
 
 
 /**
@@ -285,14 +285,7 @@ class Texy
 		// initialization
 		$this->marks = [];
 		$this->processing = true;
-
-		// speed-up
-		$this->_classes = is_array($this->allowedClasses)
-			? array_flip($this->allowedClasses)
-			: $this->allowedClasses;
-		$this->_styles = is_array($this->allowedStyles)
-			? array_flip($this->allowedStyles)
-			: $this->allowedStyles;
+		unset($this->_classes, $this->_styles, $this->_linePatterns,$this->_blockPatterns);
 
 		if ($this->removeSoftHyphens) {
 			$text = str_replace("\u{AD}", '', $text);
@@ -314,21 +307,6 @@ class Texy
 
 		// user before handler
 		$this->invokeHandlers('beforeParse', [$this, &$text, $singleLine]);
-
-		// select patterns
-		$this->_linePatterns = $this->linePatterns;
-		$this->_blockPatterns = $this->blockPatterns;
-		foreach ($this->_linePatterns as $name => $foo) {
-			if (empty($this->allowed[$name])) {
-				unset($this->_linePatterns[$name]);
-			}
-		}
-
-		foreach ($this->_blockPatterns as $name => $foo) {
-			if (empty($this->allowed[$name])) {
-				unset($this->_blockPatterns[$name]);
-			}
-		}
 
 		// parse Texy! document into internal DOM structure
 		$this->DOM = new HtmlElement;
@@ -537,17 +515,25 @@ class Texy
 	}
 
 
-	/** @return array<string, array{handler: \Closure(InlineParser, array<?string>, string): (HtmlElement|string|null), pattern: string, again: ?string}> */
-	final public function getLinePatterns(): array
+	public function createBlockParser(bool $indented): BlockParser
 	{
-		return $this->_linePatterns;
+		$this->_blockPatterns ??= array_filter(
+			$this->blockPatterns,
+			fn($pattern, $name) => !empty($this->allowed[$name]),
+			ARRAY_FILTER_USE_BOTH,
+		);
+		return new BlockParser($this, $indented, $this->_blockPatterns);
 	}
 
 
-	/** @return array<string, array{handler: \Closure(BlockParser, array<?string>, string): (HtmlElement|string|null), pattern: string}> */
-	final public function getBlockPatterns(): array
+	public function createInlineParser(): InlineParser
 	{
-		return $this->_blockPatterns;
+		$this->_linePatterns ??= array_filter(
+			$this->linePatterns,
+			fn($pattern, $name) => !empty($this->allowed[$name]),
+			ARRAY_FILTER_USE_BOTH,
+		);
+		return new InlineParser($this, $this->_linePatterns);
 	}
 
 
@@ -573,6 +559,12 @@ class Texy
 	 */
 	final public function getAllowedProps(): array
 	{
+		$this->_classes ??= is_array($this->allowedClasses)
+			? array_flip($this->allowedClasses)
+			: $this->allowedClasses;
+		$this->_styles ??= is_array($this->allowedStyles)
+			? array_flip($this->allowedStyles)
+			: $this->allowedStyles;
 		return [$this->_classes, $this->_styles];
 	}
 
