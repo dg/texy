@@ -31,12 +31,12 @@
 declare(strict_types=1);
 
 
-if (@!include __DIR__ . '/../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
 }
 
-if (!class_exists('FSHL\Highlighter')) {
-	die('Install FSHL using `composer require kukulich/fshl`');
+if (@!include __DIR__ . '/vendor/autoload.php') {
+	die('Install packages using `composer install`');
 }
 
 
