@@ -48,21 +48,13 @@ class Texy
 	public bool $mergeLines = true;
 
 	public bool $removeSoftHyphens = true;
-	public Modules\DirectiveModule $scriptModule;
 	public Modules\ParagraphModule $paragraphModule;
-	public Modules\HtmlModule $htmlModule;
 	public Modules\ImageModule $imageModule;
 	public Modules\LinkReferenceModule $linkModule;
-	public Modules\AutolinkModule $autolinkModule;
 	public Modules\PhraseModule $phraseModule;
 	public Modules\EmoticonModule $emoticonModule;
-	public Modules\BlockModule $blockModule;
 	public Modules\HeadingModule $headingModule;
-	public Modules\HorizontalRuleModule $horizLineModule;
-	public Modules\BlockQuoteModule $blockQuoteModule;
 	public Modules\ListModule $listModule;
-	public Modules\TableModule $tableModule;
-	public Modules\FigureModule $figureModule;
 	public Modules\TypographyModule $typographyModule;
 	public Modules\HyphenationModule $longWordsModule;
 
@@ -114,21 +106,21 @@ class Texy
 	protected function loadModules(): void
 	{
 		// line parsing
-		$this->addModule($this->scriptModule = new Modules\DirectiveModule($this));
-		$this->addModule($this->htmlModule = new Modules\HtmlModule($this));
+		$this->addModule(new Modules\DirectiveModule($this));
+		$this->addModule(new Modules\HtmlModule($this));
 		$this->addModule($this->imageModule = new Modules\ImageModule($this));
 		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));
 		$this->addModule($this->linkModule = new Modules\LinkReferenceModule($this));
-		$this->addModule($this->autolinkModule = new Modules\AutolinkModule($this));
+		$this->addModule(new Modules\AutolinkModule($this));
 		$this->addModule($this->emoticonModule = new Modules\EmoticonModule($this));
 
 		// block parsing
 		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
-		$this->addModule($this->blockModule = new Modules\BlockModule($this));
-		$this->addModule($this->figureModule = new Modules\FigureModule($this));
-		$this->addModule($this->horizLineModule = new Modules\HorizontalRuleModule($this));
-		$this->addModule($this->blockQuoteModule = new Modules\BlockQuoteModule($this));
-		$this->addModule($this->tableModule = new Modules\TableModule($this));
+		$this->addModule(new Modules\BlockModule($this));
+		$this->addModule(new Modules\FigureModule($this));
+		$this->addModule(new Modules\HorizontalRuleModule($this));
+		$this->addModule(new Modules\BlockQuoteModule($this));
+		$this->addModule(new Modules\TableModule($this));
 		$this->addModule($this->headingModule = new Modules\HeadingModule($this));
 		$this->addModule($this->listModule = new Modules\ListModule($this));
 
