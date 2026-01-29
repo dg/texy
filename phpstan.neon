@@ -59,7 +59,7 @@ parameters:
 			count: 1
 			path: src/Texy/Output/Html/WellFormer.php
 
-		# HTML output handlers are intentionally polymorphic: the type of the first
+		# Output handlers are intentionally polymorphic: the type of the first
 		# parameter decides which node class the handler serves (read via reflection),
 		# so any concrete Closure signature would be contravariantly narrower and
 		# would reject every real handler.
@@ -69,6 +69,7 @@ parameters:
 			paths:
 				- src/Texy/Output/Html/Config.php
 				- src/Texy/Output/Html/Renderer.php
+				- src/Texy/Output/Markdown/Renderer.php
 
 		# Pattern handlers are intentionally polymorphic: each declares the exact capture
 		# shape of its own regexp, so no single Closure signature fits them all -- a
@@ -85,9 +86,19 @@ parameters:
 		# $node::class, so a handler is never called with a foreign node type.
 		-
 			identifier: assign.propertyType
-			message: '#^Property Texy\\Output\\Html\\Renderer\:\:\$handlers \(array<class\-string#'
+			message: '#^Property Texy\\Output\\(Html|Markdown)\\Renderer\:\:\$handlers \(array<class\-string#'
+			paths:
+				- src/Texy/Output/Html/Renderer.php
+				- src/Texy/Output/Markdown/Renderer.php
+
+		# Link references are filled by addLinkReference() during renderNode(), which
+		# dispatches through handler closures. PHPStan cannot follow that indirection,
+		# so it still sees the empty array assigned at the top of render().
+		-
+			identifier: if.alwaysFalse
+			message: '#^If condition is always false\.$#'
 			count: 1
-			path: src/Texy/Output/Html/Renderer.php
+			path: src/Texy/Output/Markdown/Renderer.php
 
 		# The traversal writes null through a reference yielded by getChildren().
 		# Nodes that yield a non-nullable typed property (e.g. `yield $this->content`)
