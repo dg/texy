@@ -24,9 +24,6 @@ final class ImageModule extends Texy\Module
 	/** root of relative images (http) */
 	public ?string $root = 'images/';
 
-	/** @deprecated */
-	public ?string $linkedRoot = 'images/';
-
 	/** physical location of images on server */
 	public ?string $fileRoot = null;
 

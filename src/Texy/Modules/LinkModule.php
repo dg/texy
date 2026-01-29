@@ -313,7 +313,7 @@ final class LinkModule extends Texy\Module
 
 		if ($link->type === Link::IMAGE) {
 			// image
-			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->linkedRoot);
+			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->root);
 			if ($this->imageClass) {
 				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
 				$el->attrs['class'][] = $this->imageClass;
