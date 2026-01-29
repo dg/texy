@@ -11,6 +11,7 @@ use Texy\Helpers;
 use Texy\Modifier;
 use Texy\Node;
 use Texy\Nodes;
+use Texy\Output\NodeRenderer;
 use Texy\Syntax;
 use Texy\Texy;
 use function array_slice, count, in_array, is_array, is_string;
@@ -19,8 +20,9 @@ use function array_slice, count, in_array, is_array, is_string;
 /**
  * Renders the AST to the output HTML string. Created per render() call;
  * configuration is read from the Config object.
+ * @extends NodeRenderer<Element|string>
  */
-final class Renderer
+final class Renderer extends NodeRenderer
 {
 	// types of protection marks
 	public const
@@ -28,9 +30,6 @@ final class Renderer
 		ContentReplaced = "\x16",
 		ContentTextual = "\x15",
 		ContentBlock = "\x14";
-
-	/** @var array<class-string<Node>, \Closure(Node, self): (Element|string)> */
-	private array $handlers = [];
 
 	private ElementDecorator $decorator;
 
@@ -143,40 +142,6 @@ final class Renderer
 		$s = ltrim($s, "\n");
 
 		return $s;
-	}
-
-
-	/**
-	 * Register a handler for a node class.
-	 * Return null to delegate to previous handler.
-	 * @param \Closure(Node, self, ?\Closure): (Element|string|null) $handler
-	 */
-	public function registerHandler(\Closure $handler): void
-	{
-		/** @var class-string<Node> $nodeClass */
-		$nodeClass = (string) (new \ReflectionFunction($handler))->getParameters()[0]->getType();
-		$previous = $this->handlers[$nodeClass] ?? null;
-		$this->handlers[$nodeClass] = static function (Node $node, self $gen) use ($handler, $previous): Element|string {
-			$result = $handler($node, $gen, $previous);
-			if ($result !== null) {
-				return $result;
-			}
-			if ($previous === null) {
-				throw new \LogicException('No handler for node class ' . $node::class);
-			}
-			return $previous($node, $gen);
-		};
-	}
-
-
-	/**
-	 * Render node to HTML Element or string.
-	 */
-	public function renderNode(Node $node): Element|string
-	{
-		$handler = $this->handlers[$node::class]
-			?? throw new \LogicException('No handler for node class ' . $node::class);
-		return $handler($node, $this);
 	}
 
 
@@ -1018,6 +983,12 @@ final class Renderer
 		$el = new Element(null);
 		$el->children = $children;
 		return $el;
+	}
+
+
+	protected function renderUnknown(Node $node): Element
+	{
+		return $this->wrapChildren($this->renderChildrenOf($node));
 	}
 
 

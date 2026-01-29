@@ -7,6 +7,7 @@
 
 namespace Texy\Output\Html;
 
+use Texy\Output\NodeRenderer;
 use Texy\Syntax;
 
 
@@ -124,12 +125,14 @@ class Config
 
 
 	/**
-	 * Register a handler for a node class (determined by the type of its
-	 * first parameter). Return null to delegate to the previous handler.
+	 * Registers how a node class is rendered; the class is taken from the type of
+	 * the first parameter. Return null to pass the node to the previous renderer.
 	 */
-	public function registerHandler(\Closure $handler): void
+	public function registerHandler(callable $renderer): void
 	{
-		$this->userHandlers[] = $handler;
+		$renderer = $renderer(...);
+		NodeRenderer::renderedClass($renderer); // fail here, not at render time
+		$this->userHandlers[] = $renderer;
 	}
 
 
