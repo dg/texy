@@ -55,7 +55,7 @@ test('url shortening', function () {
 
 test('url shortening disabled', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->shorten = false;
+	$texy->autolinkModule->shorten = false;
 	$texy->htmlOutputModule->lineWrap = 500;
 	Assert::match(
 		'<p><a href="https://example.com/very/long/path/to/some/page.html">https://example.com/very/long/path/to/some/page.html</a></p>

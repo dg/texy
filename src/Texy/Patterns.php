@@ -94,4 +94,12 @@ class Patterns
 			[^:);,.!?\s\x14-\x1F]            # URL must not end with these chars
 		)
 		X;
+	public const EMAIL = '
+		[' . self::CHAR . ']                 # first char
+		[0-9.+_' . self::CHAR . '-]{0,63}    # local part
+		@
+		[0-9.+_' . self::CHAR . '\x{ad}-]{1,252} # domain
+		\.
+		[' . self::CHAR . '\x{ad}]{2,19}     # TLD
+	';
 }
