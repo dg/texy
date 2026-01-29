@@ -17,7 +17,8 @@ use Texy\Nodes\CommentNode;
 use Texy\Nodes\SectionNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
-use function htmlspecialchars, trim;
+use Texy\Syntax;
+use function htmlspecialchars, strlen, trim;
 use const ENT_NOQUOTES;
 
 
@@ -29,14 +30,14 @@ final class BlockModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['block/default'] = true;
-		$texy->allowed['block/pre'] = true;
-		$texy->allowed['block/code'] = true;
-		$texy->allowed['block/html'] = true;
-		$texy->allowed['block/text'] = true;
-		$texy->allowed['block/texysource'] = true;
-		$texy->allowed['block/comment'] = true;
-		$texy->allowed['block/div'] = true;
+		$texy->allowed[Syntax::BlockDefault] = true;
+		$texy->allowed[Syntax::BlockPre] = true;
+		$texy->allowed[Syntax::BlockCode] = true;
+		$texy->allowed[Syntax::BlockHtml] = true;
+		$texy->allowed[Syntax::BlockText] = true;
+		$texy->allowed[Syntax::BlockTexySource] = true;
+		$texy->allowed[Syntax::BlockComment] = true;
+		$texy->allowed[Syntax::BlockDiv] = true;
 		$texy->htmlGenerator->registerHandler($this->solveCodeBlock(...));
 		$texy->htmlGenerator->registerHandler($this->solveSection(...));
 		$texy->htmlGenerator->registerHandler(fn(CommentNode $node) => '');
@@ -61,7 +62,7 @@ final class BlockModule extends Texy\Module
 					\z                       # or end of input
 				)
 			~mUi',
-			'blocks',
+			Syntax::Blocks,
 		);
 	}
 
@@ -76,36 +77,36 @@ final class BlockModule extends Texy\Module
 
 		$mod = Texy\Modifier::parse($mMod);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
-		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
+		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];
 
 		$content = Helpers::outdent($mContent);
 
-		if ($blocktype === 'block/code') {
+		if ($blocktype === Syntax::BlockCode) {
 			return new CodeBlockNode('code', $content, $param, $mod);
 
-		} elseif ($blocktype === 'block/default' || $blocktype === 'block/pre') {
-			return new CodeBlockNode($blocktype === 'block/pre' ? 'pre' : 'default', $content, $param, $mod);
+		} elseif ($blocktype === Syntax::BlockDefault || $blocktype === Syntax::BlockPre) {
+			return new CodeBlockNode($blocktype === Syntax::BlockPre ? 'pre' : 'default', $content, $param, $mod);
 
-		} elseif ($blocktype === 'block/comment') {
+		} elseif ($blocktype === Syntax::BlockComment) {
 			return new CommentNode($content);
 
-		} elseif ($blocktype === 'block/html') {
+		} elseif ($blocktype === Syntax::BlockHtml) {
 			// html/text blocks don't use outdent - preserve original indentation
 			return new CodeBlockNode('html', trim($mContent, "\n"), null, $mod);
 
-		} elseif ($blocktype === 'block/text') {
+		} elseif ($blocktype === Syntax::BlockText) {
 			// html/text blocks don't use outdent - preserve original indentation
 			return new CodeBlockNode('text', trim($mContent, "\n"), null, $mod);
 
-		} elseif ($blocktype === 'block/div') {
+		} elseif ($blocktype === Syntax::BlockDiv) {
 			$content = Helpers::outdent($mContent, firstLine: true);
 			if ($content === '') {
 				return null;
 			}
 			return new SectionNode($context->parseBlock($content), 'div', $mod);
 
-		} elseif ($blocktype === 'block/texysource') {
+		} elseif ($blocktype === Syntax::BlockTexySource) {
 			// Store raw texy content, will be parsed and displayed as HTML source in handler
 			$content = Helpers::outdent($mContent);
 			if ($content === '') {
@@ -206,7 +207,7 @@ final class BlockModule extends Texy\Module
 	private function parseHtmlOnly(Html\Generator $generator, string $content): string
 	{
 		$context = $this->texy->createParseContext();
-		$htmlParser = $context->getInlineParser()->withPatterns(['html/tag', 'html/comment']);
+		$htmlParser = $context->getInlineParser()->withPatterns([Syntax::HtmlTag, Syntax::HtmlComment]);
 		$parsed = $generator->serialize($generator->renderNodes($htmlParser->parse(null, $content)->children));
 		$parsed = Helpers::unescapeHtml($parsed);
 		$parsed = htmlspecialchars($parsed, ENT_NOQUOTES, 'UTF-8');

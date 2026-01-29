@@ -19,6 +19,7 @@ use Texy\NodeTraverser;
 use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Syntax;
 use function in_array, strlen;
 
 
@@ -43,7 +44,7 @@ final class LinkModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['link/definition'] = true;
+		$texy->allowed[Syntax::LinkDefinition] = true;
 		$texy->addHandler('afterParse', $this->resolveReferences(...));
 		$texy->htmlGenerator->registerHandler($this->solveLink(...));
 		$texy->htmlGenerator->registerHandler(fn(Nodes\LinkDefinitionNode $node) => '');
@@ -64,7 +65,7 @@ final class LinkModule extends Texy\Module
 				' . Patterns::MODIFIER . '?       # modifier (4)
 				\s*
 			$~mU',
-			'link/definition',
+			Syntax::LinkDefinition,
 		);
 	}
 

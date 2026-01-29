@@ -35,7 +35,7 @@ $texy = new Texy;
 
 // Enable hyphenation of long words
 // Long words will get soft hyphens (­) for better text wrapping
-$texy->allowed['longwords'] = true;
+$texy->allowed[Texy\Syntax::Hyphenation] = true;
 
 // Optional: Change the locale for typography rules
 // $texy->typographyModule->locale = 'en';  // English quotes: "text"

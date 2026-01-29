@@ -13,6 +13,7 @@ use Texy;
 use Texy\Nodes\HorizontalRuleNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
+use Texy\Syntax;
 
 
 /**
@@ -46,7 +47,7 @@ final class HorizontalRuleModule extends Texy\Module
 				[ \t]*                       # optional spaces
 				' . Texy\Patterns::MODIFIER . '? # modifier (2)
 			$~mU',
-			'horizline',
+			Syntax::HorizontalRule,
 		);
 	}
 

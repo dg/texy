@@ -15,7 +15,8 @@ use Texy\Nodes\UrlNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
-use function iconv_strlen, iconv_substr, str_contains, str_replace, strncasecmp;
+use Texy\Syntax;
+use function iconv_strlen, iconv_substr, str_contains, str_replace, strlen, strncasecmp;
 
 
 /**
@@ -47,7 +48,7 @@ final class AutolinkModule extends Texy\Module
 				[/\d' . Patterns::CHAR . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
 				[/\d' . Patterns::CHAR . '+\~?@=_#$*]  # last char
 			~',
-			'link/url',
+			Syntax::AutolinkUrl,
 		);
 
 		// direct email
@@ -62,7 +63,7 @@ final class AutolinkModule extends Texy\Module
 				\.
 				[' . Patterns::CHAR . '\x{ad}]{2,19}     # TLD
 			~',
-			'link/email',
+			Syntax::AutolinkEmail,
 		);
 	}
 

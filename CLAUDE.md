@@ -327,11 +327,11 @@ $texy->imageModule->fileRoot = __DIR__ . '/public/images/';
 $texy->linkModule->root = '/articles/';
 
 // Disable specific syntax features
-$texy->allowed['image'] = false;
-$texy->allowed['html/tag'] = false;
+$texy->allowed[Texy\Syntax::Image] = false;
+$texy->allowed[Texy\Syntax::HtmlTag] = false;
 
 // Enable emoticons (disabled by default)
-$texy->allowed['emoticon'] = true;
+$texy->allowed[Texy\Syntax::Emoticon] = true;
 ```
 
 ### Safe Mode for User Content

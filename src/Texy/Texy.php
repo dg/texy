@@ -359,7 +359,7 @@ class Texy
 		$this->typographyModule->beforeParse($text);
 		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
 
-		if (!empty($this->allowed['longwords'])) {
+		if (!empty($this->allowed[Syntax::Hyphenation])) {
 			$text = $this->longWordsModule->postLine($text);
 		}
 

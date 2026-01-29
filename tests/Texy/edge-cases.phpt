@@ -17,7 +17,7 @@ test('special cases and edge cases', function () {
 	$texy->imageModule->root = '../images/';
 	$texy->imageModule->leftClass = 'left';
 	$texy->htmlOutputModule->lineWrap = 180;
-	$texy->allowed['longwords'] = false;
+	$texy->allowed[Texy\Syntax::Hyphenation] = false;
 	$texy->typographyModule->locale = 'en';
 
 	Assert::matchFile(

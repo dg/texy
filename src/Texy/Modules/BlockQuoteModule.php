@@ -13,6 +13,7 @@ use Texy;
 use Texy\Nodes\BlockQuoteNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
+use Texy\Syntax;
 use function max, strlen;
 
 
@@ -38,7 +39,7 @@ final class BlockQuoteModule extends Texy\Module
 				( [ \t]++ | : )                        # space/tab or colon (2)
 				( \S.*+ )                              # content (3)
 			$~mU',
-			'blockquote',
+			Syntax::Blockquote,
 		);
 	}
 

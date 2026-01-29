@@ -18,6 +18,8 @@ use Texy\Nodes\LinkNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Syntax;
+use function strlen;
 
 
 /**
@@ -66,7 +68,7 @@ final class FigureModule extends Texy\Module
 				)?
 				' . Patterns::MODIFIER_H . '?     # modifier (6)
 			$~mU',
-			'figure',
+			Syntax::Figure,
 		);
 	}
 

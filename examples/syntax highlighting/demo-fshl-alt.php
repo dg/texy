@@ -94,7 +94,7 @@ $texy->registerBlockPattern(
 		$lang = $name === 'phpBlockSyntax' ? 'php' : 'javascript';
 
 		return new CodeBlockNode(
-			'block/code',
+			'code',
 			$content,
 			$lang,
 		);
@@ -111,7 +111,7 @@ $texy->registerBlockPattern(
 		[$content] = $matches;
 
 		return new CodeBlockNode(
-			'block/code',
+			'code',
 			$content,
 			'html', // HTML lexer handles <script> tags well
 		);

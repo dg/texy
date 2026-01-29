@@ -20,6 +20,7 @@ use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
+use Texy\Syntax;
 use function count, implode, ord, strlen;
 
 
@@ -45,8 +46,8 @@ final class ListModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['list'] = true;
-		$texy->allowed['list/definition'] = true;
+		$texy->allowed[Syntax::List] = true;
+		$texy->allowed[Syntax::DefinitionList] = true;
 		$texy->htmlGenerator->registerHandler($this->solveList(...));
 		$texy->htmlGenerator->registerHandler($this->solveItem(...));
 		$texy->htmlGenerator->registerHandler($this->solveDefList(...));
@@ -72,7 +73,7 @@ final class ListModule extends Texy\Module
 				[ \t]*+
 				\S .*                               # content
 			$~mU',
-			'list',
+			Syntax::List,
 		);
 
 		$this->texy->registerBlockPattern(
@@ -88,7 +89,7 @@ final class ListModule extends Texy\Module
 				[ \t]*+
 				\S .*                                 # content
 			$~mU',
-			'list/definition',
+			Syntax::DefinitionList,
 		);
 	}
 

@@ -66,9 +66,9 @@ $texy->htmlGenerator->registerHandler(
 Texy\Configurator::safeMode($texy);
 
 // Alternative: If you want to disable specific features manually:
-// $texy->allowed['image'] = false;
-// $texy->allowed['figure'] = false;
-// $texy->allowed['linkURL'] = false;
+// $texy->allowed[Texy\Syntax::Image] = false;
+// $texy->allowed[Texy\Syntax::Figure] = false;
+// $texy->allowed[Texy\Syntax::AutolinkUrl] = false;
 
 
 // Process the comment text

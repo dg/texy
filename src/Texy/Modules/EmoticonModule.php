@@ -13,6 +13,7 @@ use Texy;
 use Texy\Nodes\EmoticonNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
+use Texy\Syntax;
 
 
 /**
@@ -41,7 +42,7 @@ final class EmoticonModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['emoticon'] = false;
+		$texy->allowed[Syntax::Emoticon] = false;
 		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
@@ -64,7 +65,7 @@ final class EmoticonModule extends Texy\Module
 				(?<= ^ | [\x00-\x20] )
 				(' . implode('|', $pattern) . ')
 			~',
-			'emoticon',
+			Syntax::Emoticon,
 		);
 	}
 
