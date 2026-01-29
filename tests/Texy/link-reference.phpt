@@ -125,7 +125,7 @@ test('bare reference syntax is off by default', function () {
 
 test('bare reference resolves against definitions when enabled', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed['link/reference'] = true;
+	$texy->allowed[Texy\Syntax::LinkReference] = true;
 	Assert::same(
 		"<p>viz <a href=\"https://example.com\">home</a> stranka</p>\n",
 		$texy->process("viz [home] stranka\n\n[home]: https://example.com"),
@@ -135,7 +135,7 @@ test('bare reference resolves against definitions when enabled', function () {
 
 test('unresolved bare reference keeps name as URL and in ref', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed['link/reference'] = true;
+	$texy->allowed[Texy\Syntax::LinkReference] = true;
 	$doc = $texy->parse('viz [wiki#kotva] stranka');
 	$link = null;
 	(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $n) use (&$link): ?int {
@@ -170,7 +170,7 @@ test('LinkNode keeps the written reference name after resolution', function () {
 
 test('bare reference does not swallow neighboring syntaxes', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed['link/reference'] = true;
+	$texy->allowed[Texy\Syntax::LinkReference] = true;
 
 	// image syntax
 	Assert::contains('<img src="images/photo.png"', $texy->process('[* photo.png *]'));

@@ -18,6 +18,7 @@ use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
+use Texy\Syntax;
 use function count, implode, is_array, ord, strlen;
 
 
@@ -43,8 +44,8 @@ final class ListModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['list'] = true;
-		$texy->allowed['list/definition'] = true;
+		$texy->allowed[Syntax::List] = true;
+		$texy->allowed[Syntax::DefinitionList] = true;
 		$texy->htmlOutput->registerHandler($this->solveList(...));
 		$texy->htmlOutput->registerHandler($this->solveItem(...));
 		$texy->htmlOutput->registerHandler($this->solveDefList(...));
@@ -70,7 +71,7 @@ final class ListModule extends Texy\Module
 				[ \t]*+
 				\S .*                               # content
 			$~mUx',
-			'list',
+			Syntax::List,
 		);
 
 		$this->texy->registerBlockPattern(
@@ -86,7 +87,7 @@ final class ListModule extends Texy\Module
 				[ \t]*+
 				\S .*                                 # content
 			$~mUx',
-			'list/definition',
+			Syntax::DefinitionList,
 		);
 	}
 

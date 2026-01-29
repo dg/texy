@@ -17,6 +17,7 @@ use Texy\NodeTraverser;
 use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Syntax;
 use function in_array, strlen;
 
 
@@ -41,8 +42,8 @@ final class LinkReferenceModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['link/definition'] = true;
-		$texy->allowed['link/reference'] = false;
+		$texy->allowed[Syntax::LinkDefinition] = true;
+		$texy->allowed[Syntax::LinkReference] = false;
 		$texy->addHandler('afterParse', $this->resolveReferences(...));
 		$texy->htmlOutput->registerHandler($this->solveLink(...));
 		$texy->htmlOutput->registerHandler(fn(Nodes\LinkDefinitionNode $node) => '');
@@ -63,7 +64,7 @@ final class LinkReferenceModule extends Texy\Module
 				' . Patterns::MODIFIER . '?       # modifier (4)
 				\s*
 			$~mUx',
-			'link/definition',
+			Syntax::LinkDefinition,
 		);
 
 		// [reference] - bare reference link (opt-in); the raw target is kept in
@@ -76,7 +77,7 @@ final class LinkReferenceModule extends Texy\Module
 				( [^\[\]*|\n' . Patterns::MARK . ']++ )  # reference name (1); * would be an image, | a labeled form
 				]
 			~Ux',
-			'link/reference',
+			Syntax::LinkReference,
 		);
 	}
 

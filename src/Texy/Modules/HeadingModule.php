@@ -13,6 +13,7 @@ use Texy\Nodes\HeadingNode;
 use Texy\Nodes\HeadingType;
 use Texy\Output\Html;
 use Texy\ParseContext;
+use Texy\Syntax;
 use function array_flip, array_values, asort, max, min, rtrim, strlen, trim;
 
 
@@ -75,7 +76,7 @@ final class HeadingModule extends Texy\Module
 				\n
 				( \#{3,}+ | \*{3,}+ | ={3,}+ | -{3,}+ )  # underline characters (3)
 			$~mUx',
-			'heading/underlined',
+			Syntax::HeadingUnderlined,
 		);
 
 		$this->texy->registerBlockPattern(
@@ -85,7 +86,7 @@ final class HeadingModule extends Texy\Module
 				(.+)                             # heading text (2)
 				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
 			$~mUx',
-			'heading/surrounded',
+			Syntax::HeadingSurrounded,
 		);
 
 		$this->title = null;

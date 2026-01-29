@@ -14,6 +14,7 @@ use Texy\Nodes\UrlNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Syntax;
 use function str_replace;
 
 
@@ -46,7 +47,7 @@ final class AutolinkModule extends Texy\Module
 				[/\d' . Patterns::CHAR . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
 				[/\d' . Patterns::CHAR . '+\~?@=_#$*]  # last char
 			~x',
-			'link/url',
+			Syntax::AutolinkUrl,
 		);
 
 		// direct email
@@ -56,7 +57,7 @@ final class AutolinkModule extends Texy\Module
 				(?<= ^ | [\s([<] )                  # must be preceded by these chars
 				' . Patterns::Email . '
 			~x',
-			'link/email',
+			Syntax::AutolinkEmail,
 		);
 	}
 

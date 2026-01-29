@@ -18,6 +18,7 @@ use Texy\Nodes\TextNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Syntax;
 use function htmlspecialchars, str_replace, trim;
 use const ENT_HTML5, ENT_NOQUOTES;
 
@@ -29,23 +30,23 @@ final class PhraseModule extends Texy\Module
 {
 	/** @var array<string, string> */
 	public array $tags = [
-		'phrase/strong' => 'strong', // or 'b'
-		'phrase/em' => 'em', // or 'i'
-		'phrase/em-alt' => 'em',
-		'phrase/em-alt2' => 'em',
-		'phrase/ins' => 'ins',
-		'phrase/del' => 'del',
-		'phrase/sup' => 'sup',
-		'phrase/sup-alt' => 'sup',
-		'phrase/sub' => 'sub',
-		'phrase/sub-alt' => 'sub',
-		'phrase/span' => 'span',
-		'phrase/span-alt' => 'span',
-		'phrase/acronym' => 'abbr',
-		'phrase/acronym-alt' => 'abbr',
-		'phrase/code' => 'code',
-		'phrase/quote' => 'q',
-		'phrase/quicklink' => 'a',
+		Syntax::Strong => 'strong', // or 'b'
+		Syntax::Emphasis => 'em', // or 'i'
+		Syntax::EmphasisSingleAsterisk => 'em',
+		Syntax::EmphasisSingleAsterisk2 => 'em',
+		Syntax::Inserted => 'ins',
+		Syntax::Deleted => 'del',
+		Syntax::Superscript => 'sup',
+		Syntax::SuperscriptShort => 'sup',
+		Syntax::Subscript => 'sub',
+		Syntax::SubscriptShort => 'sub',
+		Syntax::SpanQuotes => 'span',
+		Syntax::SpanTilde => 'span',
+		Syntax::AbbreviationQuotes => 'abbr',
+		Syntax::Abbreviation => 'abbr',
+		Syntax::Code => 'code',
+		Syntax::Quote => 'q',
+		Syntax::QuickLink => 'a',
 	];
 
 	public bool $linksAllowed = true;
@@ -54,10 +55,10 @@ final class PhraseModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['phrase/ins'] = false;
-		$texy->allowed['phrase/del'] = false;
-		$texy->allowed['phrase/sup'] = false;
-		$texy->allowed['phrase/sub'] = false;
+		$texy->allowed[Syntax::Inserted] = false;
+		$texy->allowed[Syntax::Deleted] = false;
+		$texy->allowed[Syntax::Superscript] = false;
+		$texy->allowed[Syntax::Subscript] = false;
 		$texy->htmlOutput->registerHandler($this->solvePhrase(...));
 		$texy->htmlOutput->registerHandler($this->solveAnnotation(...));
 		$texy->htmlOutput->registerHandler($this->solveRawText(...));
@@ -90,7 +91,7 @@ final class PhraseModule extends Texy\Module
 				(?! \* )                          # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/strong+em',
+			Syntax::StrongEmphasis,
 		);
 
 		// **strong**
@@ -107,7 +108,7 @@ final class PhraseModule extends Texy\Module
 				(?! \* )                          # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/strong',
+			Syntax::Strong,
 		);
 
 		// //emphasis//
@@ -124,7 +125,7 @@ final class PhraseModule extends Texy\Module
 				(?! / )                           # not followed by /
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/em',
+			Syntax::Emphasis,
 		);
 
 		// *emphasisAlt*
@@ -141,7 +142,7 @@ final class PhraseModule extends Texy\Module
 				(?! \* )                         # not followed by *
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/em-alt',
+			Syntax::EmphasisSingleAsterisk,
 		);
 
 		// *emphasisAlt2*
@@ -158,7 +159,7 @@ final class PhraseModule extends Texy\Module
 				(?! [^\s.,;:<>()"?!\'-] )        # must be followed by these chars
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Usx',
-			'phrase/em-alt2',
+			Syntax::EmphasisSingleAsterisk2,
 		);
 
 		// ++inserted++
@@ -174,7 +175,7 @@ final class PhraseModule extends Texy\Module
 				\+\+
 				(?! \+ )                         # not followed by +
 			~Ux',
-			'phrase/ins',
+			Syntax::Inserted,
 		);
 
 		// --deleted--
@@ -190,7 +191,7 @@ final class PhraseModule extends Texy\Module
 				--
 				(?! [>-] )                       # not followed by > or -
 			~Ux',
-			'phrase/del',
+			Syntax::Deleted,
 		);
 
 		// ^^superscript^^
@@ -206,7 +207,7 @@ final class PhraseModule extends Texy\Module
 				\^\^
 				(?! \^ )                         # not followed by ^
 			~Ux',
-			'phrase/sup',
+			Syntax::Superscript,
 		);
 
 		// m^2 alternative superscript
@@ -218,7 +219,7 @@ final class PhraseModule extends Texy\Module
 				( [n0-9+-]{1,4}? )               # 1-4 digits, n, + or - (1)
 				(?! [a-z0-9] )                   # not followed by letter or number
 			~Uix',
-			'phrase/sup-alt',
+			Syntax::SuperscriptShort,
 		);
 
 		// __subscript__
@@ -234,7 +235,7 @@ final class PhraseModule extends Texy\Module
 				__
 				(?! _ )                          # not followed by _
 			~Ux',
-			'phrase/sub',
+			Syntax::Subscript,
 		);
 
 		// m_2 alternative subscript
@@ -246,7 +247,7 @@ final class PhraseModule extends Texy\Module
 				( [n0-9]{1,3} )                  # 1-3 digits or n (1)
 				(?! [a-z0-9] )                   # not followed by letter or number
 			~Uix',
-			'phrase/sub-alt',
+			Syntax::SubscriptShort,
 		);
 
 		// "span"
@@ -263,7 +264,7 @@ final class PhraseModule extends Texy\Module
 				(?! " )                          # not followed by "
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/span',
+			Syntax::SpanQuotes,
 		);
 
 		// ~alternative span~
@@ -280,7 +281,7 @@ final class PhraseModule extends Texy\Module
 				(?! \~ )
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/span-alt',
+			Syntax::SpanTilde,
 		);
 
 		// >>quote<<
@@ -297,7 +298,7 @@ final class PhraseModule extends Texy\Module
 				(?! < )                          # not followed by <
 				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/quote',
+			Syntax::Quote,
 		);
 
 		// acronym/abbr "et al."((and others))
@@ -316,7 +317,7 @@ final class PhraseModule extends Texy\Module
 				( .+ )                           # explanation (3)
 				\)\)
 			~Ux',
-			'phrase/acronym',
+			Syntax::AbbreviationQuotes,
 		);
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
@@ -330,7 +331,7 @@ final class PhraseModule extends Texy\Module
 				( (?: [^\n )]++ | [ )] )+ )      # explanation (3)
 				\)\)
 			~Ux',
-			'phrase/acronym-alt',
+			Syntax::Abbreviation,
 		);
 
 		// ''notexy''
@@ -345,7 +346,7 @@ final class PhraseModule extends Texy\Module
 				\'\'
 				(?! \' )                          # not followed by quote
 			~Ux',
-			'phrase/notexy',
+			Syntax::Raw,
 		);
 
 		// `code`
@@ -359,7 +360,7 @@ final class PhraseModule extends Texy\Module
 				`
 				(?: : (' . Patterns::LINK_URL . ') )??  # optional link (3)
 			~Ux',
-			'phrase/code',
+			Syntax::Code,
 		);
 
 		// ....:LINK
@@ -371,7 +372,7 @@ final class PhraseModule extends Texy\Module
 				: (?= \[ )                            # followed by :[
 				(' . Patterns::LINK_URL . ')          # link (3)
 			~Ux',
-			'phrase/quicklink',
+			Syntax::QuickLink,
 		);
 
 		// [text |link]
@@ -389,7 +390,7 @@ final class PhraseModule extends Texy\Module
 				]
 				(?! ] )                          # not followed by ]
 			~Ux',
-			'phrase/wikilink',
+			Syntax::WikiLink,
 		);
 
 		// [text](link)
@@ -407,14 +408,14 @@ final class PhraseModule extends Texy\Module
 				( (?: [^' . Patterns::MARK . '\r )]++ | [ ] )+ )  # link (3)
 				\)
 			~Ux',
-			'phrase/markdown',
+			Syntax::MarkdownLink,
 		);
 
 		// \* escaped asterisk
 		$texy->registerLinePattern(
 			fn($context, $matches) => new TextNode('*'),
 			'~\\\\\*~',
-			'phrase/escaped-asterix',
+			Syntax::EscapedAsterisk,
 		);
 	}
 
@@ -433,7 +434,7 @@ final class PhraseModule extends Texy\Module
 		[, $mContent, $mMod, $mLink] = $matches + [2 => null, 3 => null];
 
 		// For phrase/span and phrase/span-alt, URL makes it a link
-		if ($phrase === 'phrase/span' || $phrase === 'phrase/span-alt') {
+		if ($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) {
 			if ($mLink !== null) {
 				$content = $context->parseInline(trim($mContent));
 				return new LinkNode($mLink, $content, Modifier::parse($mMod));
@@ -557,16 +558,16 @@ final class PhraseModule extends Texy\Module
 	{
 		$tag = $this->tags[$node->type] ?? 'span';
 
-		if ($node->type === 'phrase/strong+em') {
-			$el = new Html\Element($this->tags['phrase/strong'] ?? 'strong');
+		if ($node->type === Syntax::StrongEmphasis) {
+			$el = new Html\Element($this->tags[Syntax::Strong] ?? 'strong');
 			$node->modifier?->decorate($this->texy, $el);
-			$inner = $el->create($this->tags['phrase/em'] ?? 'em');
+			$inner = $el->create($this->tags[Syntax::Emphasis] ?? 'em');
 			$inner->children = $generator->renderNodes($node->content->children);
 			return $el;
 		}
 
 		// Code phrases - escape and protect content from typography
-		if ($node->type === 'phrase/code') {
+		if ($node->type === Syntax::Code) {
 			$el = new Html\Element($tag);
 			$node->modifier?->decorate($this->texy, $el);
 			$content = $generator->serialize($generator->renderNodes($node->content->children));

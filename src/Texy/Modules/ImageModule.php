@@ -21,6 +21,7 @@ use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
+use Texy\Syntax;
 use function count, strlen;
 
 
@@ -51,7 +52,7 @@ final class ImageModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->allowed['image/definition'] = true;
+		$texy->allowed[Syntax::ImageDefinition] = true;
 		$texy->addHandler('afterParse', $this->resolveReferences(...));
 		$texy->htmlOutput->registerHandler($this->solve(...));
 		$texy->htmlOutput->registerHandler(fn(ImageDefinitionNode $node) => '');
@@ -74,7 +75,7 @@ final class ImageModule extends Texy\Module
 					:(' . Patterns::LINK_URL . ' | : ) # link or just colon (4)
 				)??
 			~Ux',
-			'image',
+			Syntax::Image,
 		);
 
 		// [*ref*]: url .(title)[class]{style}
@@ -90,7 +91,7 @@ final class ImageModule extends Texy\Module
 				' . Patterns::MODIFIER . '?       # modifier (3)
 				\s*
 			$~mUx',
-			'image/definition',
+			Syntax::ImageDefinition,
 		);
 	}
 

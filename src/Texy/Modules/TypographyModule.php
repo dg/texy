@@ -9,6 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Patterns;
+use Texy\Syntax;
 use function strtr;
 
 
@@ -94,7 +95,7 @@ final class TypographyModule extends Texy\Module
 
 	public function __construct(Texy\Texy $texy)
 	{
-		$texy->registerPostLine($this->postLine(...), 'typography');
+		$texy->registerPostLine($this->postLine(...), Syntax::Typography);
 	}
 
 

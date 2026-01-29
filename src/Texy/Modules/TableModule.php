@@ -17,6 +17,7 @@ use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
+use Texy\Syntax;
 use function count, ltrim, rtrim, str_contains;
 
 
@@ -46,7 +47,7 @@ final class TableModule extends Texy\Module
 				\|                                   # table start
 				.*                                   # content
 			$~mUx',
-			'table',
+			Syntax::Table,
 		);
 	}
 

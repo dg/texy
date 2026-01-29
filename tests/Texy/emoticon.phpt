@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('emoticon with unicode', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed['emoticon'] = true;
+	$texy->allowed[Texy\Syntax::Emoticon] = true;
 
 	Assert::matchFile(
 		__DIR__ . '/expected/emoticon.html',
@@ -22,7 +22,7 @@ test('emoticon with unicode', function () {
 
 test('emoticon with custom class', function () {
 	$texy = new Texy\Texy;
-	$texy->allowed['emoticon'] = true;
+	$texy->allowed[Texy\Syntax::Emoticon] = true;
 	$texy->htmlOutput->lineWrap = 180;
 	$texy->emoticonModule->class = 'smiley';
 

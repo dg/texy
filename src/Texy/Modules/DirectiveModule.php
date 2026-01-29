@@ -11,6 +11,7 @@ use Texy;
 use Texy\Nodes\DirectiveNode;
 use Texy\Output\Html;
 use Texy\ParseContext;
+use Texy\Syntax;
 
 
 /**
@@ -37,7 +38,7 @@ final class DirectiveModule extends Texy\Module
 				)+)
 				}}
 			~Ux',
-			'script',
+			Syntax::Directive,
 		);
 	}
 

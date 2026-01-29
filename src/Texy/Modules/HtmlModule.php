@@ -14,6 +14,7 @@ use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
+use Texy\Syntax;
 use function explode, htmlspecialchars, implode, in_array, is_array, is_string, preg_replace, str_contains, str_ends_with, str_replace, strtolower, strtr, substr, trim;
 use const ENT_HTML5, ENT_QUOTES;
 
@@ -54,7 +55,7 @@ final class HtmlModule extends Texy\Module
 				(/?)                             # self-closing slash
 				>
 			~isx',
-			'html/tag',
+			Syntax::HtmlTag,
 		);
 
 		$this->texy->registerLinePattern(
@@ -64,7 +65,7 @@ final class HtmlModule extends Texy\Module
 				( [^' . Patterns::MARK . ']*? )
 				-->
 			~isx',
-			'html/comment',
+			Syntax::HtmlComment,
 		);
 	}
 
