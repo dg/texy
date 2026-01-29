@@ -8,7 +8,7 @@
 namespace Texy;
 
 use Nette\Utils\Strings;
-use function class_exists, function_exists, html_entity_decode, iconv, mb_strtolower, min, rtrim, str_replace, strlen, strspn, strtolower, strtr, trim;
+use function class_exists, function_exists, html_entity_decode, iconv, mb_strlen, mb_strtolower, mb_substr, min, preg_match, rtrim, str_replace, strlen, strncasecmp, strspn, strtolower, strtr, trim;
 use const ENT_HTML5, ENT_QUOTES, ICONV_IMPL;
 
 
@@ -164,5 +164,55 @@ final class Helpers
 		}
 
 		return rtrim($root, '/\\') . '/' . $URL;
+	}
+
+
+	/**
+	 * Returns shortened URL for display (e.g., in autolinks).
+	 */
+	public static function shortenUrl(string $url): string
+	{
+		$raw = strncasecmp($url, 'www.', 4) === 0
+			? 'none://' . $url
+			: $url;
+
+		// parse_url() in PHP damages UTF-8 - use regular expression
+		if (!preg_match('~^
+			(?: (?P<scheme> [a-z]+ ) : )?
+			(?: // (?P<host> [^/?#]+ ) )?
+			(?P<path> (?: / | ^ ) (?! / ) [^?#]* )?
+			(?: \? (?P<query> [^#]* ) )?
+			(?: \# (?P<fragment> .* ) )?
+			$
+		~x', $raw, $parts)) {
+			return $url;
+		}
+
+		$res = '';
+		if (($parts['scheme'] ?? '') !== '' && $parts['scheme'] !== 'none') {
+			$res .= $parts['scheme'] . '://';
+		}
+
+		if (($parts['host'] ?? '') !== '') {
+			$res .= $parts['host'];
+		}
+
+		if (($parts['path'] ?? '') !== '') {
+			$res .= mb_strlen($parts['path']) > 16
+				? "/\u{2026}" . mb_substr($parts['path'], -12)
+				: $parts['path'];
+		}
+
+		if (($parts['query'] ?? '') !== '') {
+			$res .= mb_strlen($parts['query']) > 4
+				? "?\u{2026}"
+				: '?' . $parts['query'];
+		} elseif (($parts['fragment'] ?? '') !== '') {
+			$res .= mb_strlen($parts['fragment']) > 4
+				? "#\u{2026}"
+				: '#' . $parts['fragment'];
+		}
+
+		return $res;
 	}
 }

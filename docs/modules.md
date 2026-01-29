@@ -7,7 +7,7 @@ Modules are the basic organizational unit of Texy. Each module encapsulates the 
 1. **Registering syntaxes.** A module registers its line and block patterns in its `beforeParse()` method (called on every `process()`) via `Texy::registerLinePattern()` / `registerBlockPattern()`; post-line handlers are registered once in the constructor with `registerPostLine()`. This tells the parser: "when you find these patterns, call me."
 2. **Implementing element handlers.** The module registers default handlers (via `Texy::addHandler()`) for the elements its syntaxes produce. These handlers contain the logic that turns matched constructs into `HtmlElement` objects.
 3. **Providing configuration.** Public properties let users adjust the module's behavior without touching its code (e.g. `ImageModule::$root` for the image URL prefix).
-4. **Managing module-specific state.** E.g. `HeadingModule` collects headings into its `$TOC` array; `LinkModule` maintains the dictionary of link references. This state is private to the module.
+4. **Managing module-specific state.** E.g. `HeadingModule` collects headings into its `$TOC` array; `LinkReferenceModule` maintains the dictionary of link references. This state is private to the module.
 
 Modules are designed as independent units: each can work on its own and must not depend on the implementation details of other modules. Communication happens through shared value objects (`Texy\Link`, `Texy\Image`), not through direct method calls.
 
@@ -56,7 +56,8 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 | **HtmlModule** | HTML tags (`html/tag`) and comments (`html/comment`) written directly in the input; validates them against `$allowedTags` and the content model. |
 | **ImageModule** | Images `[* url *]` including dimensions and alignment; maintains image reference definitions (`image/definition`, collected in `beforeParse`); invokes the `image` element. |
 | **PhraseModule** | All inline formatting – bold, italic, code, spans, acronyms, sub/sup, quotes, and the alternative link syntaxes (wikilink, markdown, quicklink). Maps syntax names to HTML tags via its `$tags` property; a single `phrase` element handler serves all of them. |
-| **LinkModule** | Reference links `[ref]`, autodetected URLs and e-mails; maintains the reference dictionary (`link/definition`, collected in `beforeParse`); provides `factoryLink()`; invokes `linkReference`, `linkURL`, `linkEmail`, and `newReference` elements. |
+| **LinkReferenceModule** | Reference links `[ref]` and their definitions (`link/definition`, collected in `beforeParse`); provides `factoryLink()`; invokes `linkReference` and `newReference` elements. |
+| **AutolinkModule** | Autodetected URLs and e-mails (`link/url`, `link/email`); shortens displayed URLs (`shorten`); invokes `linkURL` and `linkEmail` elements. |
 | **EmoticonModule** | Emoticons `:-)` → Unicode characters (or a `<span>` when a CSS class is set). Disabled by default; registers its pattern in `beforeParse`. |
 
 ### Block modules
@@ -84,10 +85,10 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 
 Although modules are independent, some cooperation is necessary:
 
-**Shared value objects** are the main mechanism. A `Texy\Link` created by `LinkModule` can be handed to `ImageModule` to build a clickable image; a `Texy\Image` created by `ImageModule` is passed to `FigureModule` for a captioned figure. The objects carry the URL, modifier, and metadata, and expose a common interface.
+**Shared value objects** are the main mechanism. A `Texy\Link` created by `LinkReferenceModule` can be handed to `ImageModule` to build a clickable image; a `Texy\Image` created by `ImageModule` is passed to `FigureModule` for a captioned figure. The objects carry the URL, modifier, and metadata, and expose a common interface.
 
-**The reference system** separates definition from use. `LinkModule::addDefinition()` / `getReference()` manage the dictionary of named links; `ImageModule` has the same pair for images. Factory methods (`factoryLink()`, `factoryImage()`) check whether the given value is a reference name or a direct value.
+**The reference system** separates definition from use. `LinkReferenceModule::addDefinition()` / `getReference()` manage the dictionary of named links; `ImageModule` has the same pair for images. Factory methods (`factoryLink()`, `factoryImage()`) check whether the given value is a reference name or a direct value.
 
-**Element handler delegation.** `PhraseModule`, when processing e.g. `"text":url` (`phrase/span` with a link), creates a `Link` object and calls `LinkModule`'s handler to build the `<a>` element, delegating responsibility to the specialized module.
+**Element handler delegation.** `PhraseModule`, when processing e.g. `"text":url` (`phrase/span` with a link), creates a `Link` object and calls `LinkReferenceModule`'s handler to build the `<a>` element, delegating responsibility to the specialized module.
 
-Relations are one-directional: `PhraseModule` knows about `LinkModule` and `ImageModule`, but not vice versa. This keeps dependencies simple and modules replaceable.
+Relations are one-directional: `PhraseModule` knows about `LinkReferenceModule` and `ImageModule`, but not vice versa. This keeps dependencies simple and modules replaceable.

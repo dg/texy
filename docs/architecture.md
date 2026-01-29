@@ -43,7 +43,7 @@ The distinction is crucial: a syntax handler is tightly coupled to the parser an
 
 When `Texy::process()` receives input text, the following happens (`src/Texy/Texy.php`, method `process()`):
 
-1. **Preprocessing.** Soft hyphens (U+00AD) are removed (if `$removeSoftHyphens` is on), line endings and spaces are normalized (`Helpers::normalize()`), and tabs are expanded to spaces according to `$tabWidth`. Then each module's `beforeParse()` method is invoked with the text passed by reference – modules register their line and block patterns here and can preprocess data, e.g. `LinkModule` and `ImageModule` extract reference definitions and `TypographyModule` prepares locale-specific patterns.
+1. **Preprocessing.** Soft hyphens (U+00AD) are removed (if `$removeSoftHyphens` is on), line endings and spaces are normalized (`Helpers::normalize()`), and tabs are expanded to spaces according to `$tabWidth`. Then each module's `beforeParse()` method is invoked with the text passed by reference – modules register their line and block patterns here and can preprocess data, e.g. `LinkReferenceModule` and `ImageModule` extract reference definitions and `TypographyModule` prepares locale-specific patterns.
 
 2. **Pattern selection.** The registered line and block patterns are filtered by the `$allowed` array. This happens once per `process()` call, so changing `$allowed` during processing has no effect.
 
