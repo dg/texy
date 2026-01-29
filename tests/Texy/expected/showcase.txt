@@ -94,10 +94,6 @@ Links
 using references
 
 
-	Look at Texy!
-
-	My address is me@example.com
-
 	What about this site?
 
 

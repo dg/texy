@@ -69,7 +69,6 @@ class Configurator
 	 */
 	public static function disableLinks(Texy $texy): void
 	{
-		$texy->allowed['link/reference'] = false;
 		$texy->allowed['link/email'] = false;
 		$texy->allowed['link/url'] = false;
 		$texy->allowed['link/definition'] = false;

@@ -9,7 +9,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\HandlerInvocation;
-use Texy\InlineParser;
 use Texy\Link;
 use Texy\Patterns;
 use Texy\Regexp;
@@ -30,34 +29,16 @@ final class LinkModule extends Texy\Module
 	/** @var array<string, Link> link references */
 	private array $references = [];
 
-	/** @var array<string, true> */
-	private static array $livelock;
-
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed['link/definition'] = true;
-		$texy->addHandler('newReference', $this->solveNewReference(...));
-		$texy->addHandler('linkReference', $this->solve(...));
 	}
 
 
 	public function beforeParse(string &$text): void
 	{
-		// [reference]
-		$this->texy->registerLinePattern(
-			$this->parseReference(...),
-			'~(
-				\[
-				[^\[\]*\n' . Patterns::MARK . ']++  # reference
-				]
-			)~U',
-			'link/reference',
-		);
-
-		self::$livelock = [];
-
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 		if (!empty($this->texy->allowed['link/definition'])) {
 			$text = Texy\Regexp::replace(
@@ -97,47 +78,6 @@ final class LinkModule extends Texy\Module
 		$link->name = Texy\Helpers::toLower($mRef);
 		$this->references[$link->name] = $link;
 		return '';
-	}
-
-
-	/**
-	 * Parses [ref]
-	 * @param  array<?string>  $matches
-	 */
-	public function parseReference(InlineParser $parser, array $matches): Texy\HtmlElement|string|null
-	{
-		/** @var array{string, string} $matches */
-		[, $mRef] = $matches;
-		// [1] => [ref]
-
-		$texy = $this->texy;
-		$name = substr($mRef, 1, -1);
-		$link = $this->getReference($name);
-
-		if (!$link) {
-			return $texy->invokeAroundHandlers('newReference', $parser, [$name]);
-		}
-
-		$link->type = $link::BRACKET;
-
-		if ($link->label != '') { // null or ''
-			// prevent circular references
-			assert($link->name !== null);
-			if (isset(self::$livelock[$link->name])) {
-				$content = $link->label;
-			} else {
-				self::$livelock[$link->name] = true;
-				$lineParser = $texy->createInlineParser();
-				$el = new Texy\HtmlElement(null, $lineParser->parse($link->label));
-				$content = $el->toString($texy);
-				unset(self::$livelock[$link->name]);
-			}
-		} else {
-			$content = $texy->autolinkModule->textualUrl($link);
-			$content = $texy->protect($content, $texy::CONTENT_TEXTUAL);
-		}
-
-		return $texy->invokeAroundHandlers('linkReference', $parser, [$link, $content]);
 	}
 
 
@@ -223,7 +163,7 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Finish invocation - generates <a> element.
+	 * Generates <a> element from Link.
 	 */
 	public function solve(
 		?HandlerInvocation $invocation,
@@ -264,15 +204,6 @@ final class LinkModule extends Texy\Module
 		}
 
 		return $el;
-	}
-
-
-	/**
-	 * Handler for undefined references.
-	 */
-	private function solveNewReference(HandlerInvocation $invocation, string $name): void
-	{
-		// no change
 	}
 
 

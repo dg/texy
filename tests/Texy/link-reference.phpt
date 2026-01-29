@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /**
- * Test: Reference resolution
+ * Test: Link reference definitions
  */
 
 use Tester\Assert;
@@ -9,58 +9,38 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-test('link reference is resolved', function () {
+test('link reference is resolved via phrase syntax', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
 		"<p><a href=\"https://example.com\">Click here</a></p>\n",
-		$texy->process("[link]\n\n[link]: https://example.com Click here"),
-	);
-});
-
-
-test('link reference with label', function () {
-	$texy = new Texy\Texy;
-	Assert::same(
-		"<p><a href=\"https://example.com\">Click here</a></p>\n",
-		$texy->process("[link]\n\n[link]: https://example.com Click here"),
-	);
-});
-
-
-test('link reference without label uses identifier', function () {
-	$texy = new Texy\Texy;
-	Assert::same(
-		"<p><a href=\"https://example.com\">https://example.com</a></p>\n",
-		$texy->process("[link]\n\n[link]: https://example.com"),
+		$texy->process("\"Click here\":[link]\n\n[link]: https://example.com"),
 	);
 });
 
 
 test('link reference with query string', function () {
 	$texy = new Texy\Texy;
-	// When using [ref?query], the URL is used as label
 	Assert::same(
-		"<p><a href=\"https://example.com?foo=bar\">https://example.com</a></p>\n",
-		$texy->process("[link?foo=bar]\n\n[link]: https://example.com"),
+		"<p><a href=\"https://example.com?foo=bar\">Click</a></p>\n",
+		$texy->process("\"Click\":[link?foo=bar]\n\n[link]: https://example.com"),
 	);
 });
 
 
 test('link reference with fragment', function () {
 	$texy = new Texy\Texy;
-	// When using [ref#fragment], the URL is used as label
 	Assert::same(
-		"<p><a href=\"https://example.com#section\">https://example.com</a></p>\n",
-		$texy->process("[link#section]\n\n[link]: https://example.com"),
+		"<p><a href=\"https://example.com#section\">Click</a></p>\n",
+		$texy->process("\"Click\":[link#section]\n\n[link]: https://example.com"),
 	);
 });
 
 
-test('undefined reference stays as is', function () {
+test('undefined reference uses destination as URL', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
-		"<p>[undefined]</p>\n",
-		$texy->process('[undefined]'),
+		"<p><a href=\"undefined\">Click</a></p>\n",
+		$texy->process('"Click":[undefined]'),
 	);
 });
 
@@ -74,10 +54,9 @@ test('link definition is removed from output', function () {
 
 test('case insensitive reference matching', function () {
 	$texy = new Texy\Texy;
-	// Reference matching is case-insensitive, URL is used as label
 	Assert::same(
-		"<p><a href=\"https://example.com\">https://example.com</a></p>\n",
-		$texy->process("[LINK]\n\n[link]: https://example.com"),
+		"<p><a href=\"https://example.com\">Click</a></p>\n",
+		$texy->process("\"Click\":[LINK]\n\n[link]: https://example.com"),
 	);
 });
 
@@ -90,26 +69,26 @@ test('user-defined link definition works', function () {
 	$texy = new Texy\Texy;
 	$texy->linkModule->addDefinition('texy', 'https://texy.nette.org/', 'Texy!', 'The best converter');
 	Assert::same(
-		"<p><a href=\"https://texy.nette.org/\" title=\"The best converter\">Texy!</a></p>\n",
-		$texy->process('[texy]'),
+		"<p><a href=\"https://texy.nette.org/\" title=\"The best converter\">Visit</a></p>\n",
+		$texy->process('"Visit":[texy]'),
 	);
 });
 
 
 test('user-defined definition persists across process() calls', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->addDefinition('texy', 'https://texy.nette.org/', 'Texy!');
+	$texy->linkModule->addDefinition('texy', 'https://texy.nette.org/');
 
 	// First process()
 	Assert::same(
-		"<p><a href=\"https://texy.nette.org/\">Texy!</a></p>\n",
-		$texy->process('[texy]'),
+		"<p><a href=\"https://texy.nette.org/\">Texy</a></p>\n",
+		$texy->process('"Texy":[texy]'),
 	);
 
 	// Second process() - definition should still work
 	Assert::same(
-		"<p><a href=\"https://texy.nette.org/\">Texy!</a></p>\n",
-		$texy->process('[texy]'),
+		"<p><a href=\"https://texy.nette.org/\">Texy</a></p>\n",
+		$texy->process('"Texy":[texy]'),
 	);
 });
 
@@ -118,24 +97,24 @@ test('document-defined reference leaks to next process() [BUG]', function () {
 	$texy = new Texy\Texy;
 
 	// First process() defines a reference
-	$texy->process("[link]: https://example.com Click here\n\n[link]");
+	$texy->process("[link]: https://example.com\n\n\"Click\":[link]");
 
 	// Second process() - reference should NOT be available, but it is (BUG)
 	// This documents the current buggy behavior
 	Assert::same(
-		"<p><a href=\"https://example.com\">Click here</a></p>\n",
-		$texy->process('[link]'),
+		"<p><a href=\"https://example.com\">Click</a></p>\n",
+		$texy->process('"Click":[link]'),
 	);
 });
 
 
 test('user-defined definition is overwritten by document definition', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->addDefinition('link', 'https://user-defined.com/', 'User Label');
+	$texy->linkModule->addDefinition('link', 'https://user-defined.com/');
 
 	// Document defines same reference - it overwrites user-defined one
 	Assert::same(
-		"<p><a href=\"https://document.com\">Document Label</a></p>\n",
-		$texy->process("[link]\n\n[link]: https://document.com Document Label"),
+		"<p><a href=\"https://document.com\">Click</a></p>\n",
+		$texy->process("\"Click\":[link]\n\n[link]: https://document.com"),
 	);
 });

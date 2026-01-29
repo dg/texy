@@ -13,12 +13,6 @@ parameters:
 			path: src/Bridges/Latte/TexyNode.php
 
 		-
-			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Texy/Modules/FigureModule.php
-
-		-
 			message: '#^Parameter \#1 \$string of function substr expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29,18 +23,6 @@ parameters:
 			identifier: foreach.emptyArray
 			count: 1
 			path: src/Texy/Modules/HtmlOutputModule.php
-
-		-
-			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Texy/Modules/ImageModule.php
-
-		-
-			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Texy/Modules/LinkModule.php
 
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|null given\.$#'

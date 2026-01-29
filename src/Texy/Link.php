@@ -37,10 +37,10 @@ final class Link
 	public ?string $name = null;
 
 
-	public function __construct(string $URL)
+	public function __construct(?string $URL)
 	{
 		$this->URL = $URL;
-		$this->raw = $URL;
+		$this->raw = $URL ?? '';
 		$this->modifier = new Modifier;
 	}
 
