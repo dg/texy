@@ -14,7 +14,7 @@ test('nontext paragraph', function () {
 	$texy->nontextParagraph = new Texy\HtmlElement('div', ['class' => 'figure']);
 
 	Assert::match(
-		'<div class="figure note"><img src="images/image.gif" alt=""></div>',
+		'<div class="note figure"><img src="images/image.gif" alt=""></div>',
 		$texy->process('
 [* image.gif *] .[note]
 '),

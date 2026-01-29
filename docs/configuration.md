@@ -154,8 +154,6 @@ $texy->figureModule->tagName = 'div';      // 'figure' produces <figure>/<figcap
 $texy->figureModule->class = 'figure';     // CSS class of the wrapper
 $texy->figureModule->leftClass = null;     // class for left-floated figures
 $texy->figureModule->rightClass = null;
-$texy->figureModule->widthDelta = 10;      // (deprecated) width padding added to wrapper; false = off
-$texy->figureModule->requireCaption = true;// (deprecated) pattern requires " *** caption"
 ```
 
 When `leftClass`/`rightClass` are `null`, alignment falls back to `$texy->alignClasses['left'|'right']` or an inline style.
