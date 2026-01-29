@@ -61,8 +61,7 @@ $texy = new Texy;
 $texy->addHandler('image', imageHandler(...));
 
 // Configure image paths
-$texy->imageModule->root = 'imagesdir/';           // Base folder for images
-$texy->imageModule->linkedRoot = 'imagesdir/big/'; // Folder for linked/full-size images
+$texy->imageModule->root = 'imagesdir/';  // Base folder for images
 
 // CSS classes for aligned images
 $texy->imageModule->leftClass = 'my-left-class';   // Class for [*< ... *] (left-aligned)
