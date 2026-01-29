@@ -26,9 +26,6 @@ final class LinkModule extends Texy\Module
 	/** root of relative links */
 	public ?string $root = null;
 
-	/** @deprecated */
-	public ?string $imageClass = null;
-
 	/** always use rel="nofollow" for absolute links? */
 	public bool $forceNoFollow = false;
 
@@ -312,12 +309,7 @@ final class LinkModule extends Texy\Module
 		}
 
 		if ($link->type === Link::IMAGE) {
-			// image
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $texy->imageModule->root);
-			if ($this->imageClass) {
-				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-				$el->attrs['class'][] = $this->imageClass;
-			}
 		} else {
 			$el->attrs['href'] = Texy\Helpers::prependRoot($link->URL, $this->root);
 
