@@ -60,12 +60,7 @@ class InlineParser extends Parser
 
 			assert(is_string($matches[$first][0]));
 			$len = strlen($matches[$first][0]);
-			$text = substr_replace(
-				$text,
-				(string) $res,
-				$start,
-				$len,
-			);
+			$text = substr_replace($text, $res, $start, $len);
 
 			$delta = strlen($res) - $len;
 			foreach ($names as $name) {
