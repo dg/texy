@@ -19,11 +19,6 @@ use Texy\Regexp;
  */
 final class TableModule extends Texy\Module
 {
-	/** @deprecated */
-	public ?string $oddClass = null;
-
-	/** @deprecated */
-	public ?string $evenClass = null;
 	private ?bool $disableTables = null;
 
 
@@ -125,7 +120,7 @@ final class TableModule extends Texy\Module
 				// [1] => ....
 				// [2] => .(title)[class]{style}<>_
 
-				$elRow = $this->processRow($mContent, $mMod, $isHead, $texy, $prevRow, $colModifier, $colCounter, $rowCounter);
+				$elRow = $this->processRow($mContent, $mMod, $isHead, $texy, $prevRow, $colModifier, $colCounter);
 
 				if ($elRow->count()) {
 					$elPart->add($elRow);
@@ -172,18 +167,11 @@ final class TableModule extends Texy\Module
 		array &$prevRow,
 		array &$colModifier,
 		int &$colCounter,
-		int $rowCounter,
 	): HtmlElement
 	{
 		$elRow = new HtmlElement('tr');
 		$mod = Modifier::parse($mMod);
 		$mod->decorate($texy, $elRow);
-
-		$rowClass = $rowCounter % 2 === 0 ? $this->oddClass : $this->evenClass;
-		if ($rowClass && !isset($mod->classes[$this->oddClass ?? '']) && !isset($mod->classes[$this->evenClass ?? ''])) {
-			settype($elRow->attrs['class'], 'array');
-			$elRow->attrs['class'][] = $rowClass;
-		}
 
 		$col = 0;
 		$elCell = null;
