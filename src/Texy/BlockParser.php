@@ -36,6 +36,57 @@ class BlockParser extends Parser
 	}
 
 
+	/** @return list<HtmlElement|string> */
+	public function parse(string $text): array
+	{
+		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
+
+		$this->text = $text;
+		$this->offset = 0;
+		$matches = $this->match($text);
+		$matches[] = [strlen($text), null, null]; // terminal sentinel
+		$cursor = 0;
+		$res = [];
+
+		do {
+			do {
+				[$mOffset, $mName, $mMatches] = $matches[$cursor];
+				$cursor++;
+				if ($mName === null || $mOffset >= $this->offset) {
+					break;
+				}
+			} while (1);
+
+			// between-matches content
+			if ($mOffset > $this->offset) {
+				$s = trim(substr($text, $this->offset, $mOffset - $this->offset));
+				if ($s !== '') {
+					$res = array_merge($res, $this->texy->paragraphModule->process($this, $s));
+				}
+			}
+
+			if ($mName === null) {
+				break; // finito
+			}
+
+			assert(is_array($mMatches) && is_string($mMatches[0]));
+			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
+
+			$el = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
+
+			if ($el === null || $this->offset <= $mOffset) { // module rejects text
+				// asi by se nemelo stat, rozdeli generic block
+				$this->offset = $mOffset; // turn offset back
+
+			} else {
+				$res[] = $el;
+			}
+		} while (1);
+
+		return $res;
+	}
+
+
 	/**
 	 * Match current line against RE.
 	 * If successful, increments current position and returns true.
@@ -93,59 +144,6 @@ class BlockParser extends Parser
 	}
 
 
-	/** @return list<HtmlElement|string> */
-	public function parse(string $text): array
-	{
-		$this->texy->invokeHandlers('beforeBlockParse', [$this, &$text]);
-
-		$this->text = $text;
-		$this->offset = 0;
-		$matches = $this->match($text);
-		$matches[] = [strlen($text), null, null]; // terminal sentinel
-		$cursor = 0;
-		$res = [];
-
-		do {
-			do {
-				[$mOffset, $mName, $mMatches] = $matches[$cursor];
-				$cursor++;
-				if ($mName === null || $mOffset >= $this->offset) {
-					break;
-				}
-			} while (1);
-
-			// between-matches content
-			if ($mOffset > $this->offset) {
-				$s = trim(substr($text, $this->offset, $mOffset - $this->offset));
-				if ($s !== '') {
-					$res = array_merge($res, $this->texy->paragraphModule->process($this, $s));
-				}
-			}
-
-			if ($mName === null) {
-				break; // finito
-			}
-
-			assert(is_array($mMatches) && is_string($mMatches[0]));
-			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
-
-			$el = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
-
-			if ($el === null || $this->offset <= $mOffset) { // module rejects text
-				// asi by se nemelo stat, rozdeli generic block
-				$this->offset = $mOffset; // turn offset back
-				continue;
-
-			} else {
-				$res[] = $el;
-			}
-
-		} while (1);
-
-		return $res;
-	}
-
-
 	/** @return list<array{int, ?string, ?array<?string>, int}> */
 	private function match(string $text): array
 	{
@@ -158,7 +156,7 @@ class BlockParser extends Parser
 				captureOffset: true,
 			);
 
-			foreach ((array) $ms as $m) {
+			foreach ($ms as $m) {
 				$offset = $m[0][1];
 				foreach ($m as $k => $v) {
 					$m[$k] = $v[0];
@@ -170,20 +168,7 @@ class BlockParser extends Parser
 			$priority++;
 		}
 
-		unset($name, $pattern, $ms, $m, $k, $v);
-
-		usort($matches, function ($a, $b): int {
-			if ($a[0] === $b[0]) {
-				return $a[3] < $b[3] ? -1 : 1;
-			}
-
-			if ($a[0] < $b[0]) {
-				return -1;
-			}
-
-			return 1;
-		});
-
+		usort($matches, fn($a, $b): int => $a[0] <=> $b[0] ?: $a[3] <=> $b[3]);
 		return $matches;
 	}
 }
