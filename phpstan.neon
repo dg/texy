@@ -68,5 +68,20 @@ parameters:
 			paths:
 				- src/Texy/Modules/
 
+		# Generator->linkStyle is a public property that users can set to 'reference'
+		# before calling render(). PHPStan sees the default 'inline' and concludes
+		# linkReferences will always be empty, but this is a false positive.
+		-
+			identifier: if.alwaysFalse
+			path: src/Texy/Output/Markdown/Generator.php
+
+		# registerHandler() accepts a closure with variable signature (polymorphic based on node type).
+		# PHP's type system cannot express this pattern natively. The closure signature is validated
+		# at runtime via reflection. Users extending the generator will see full type hints in their IDE.
+		-
+			identifier: missingType.callable
+			path: src/Texy/Output/Markdown/Generator.php
+			message: '#registerHandler\(\) has parameter \$handler with no signature specified#'
+
 includes:
 	- phpstan-baseline.neon

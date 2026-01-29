@@ -360,6 +360,7 @@ $toc = $texy->headingModule->TOC;
 ```
 
 ### Markdown Output (GFM)
+
 ```php
 $texy = new Texy\Texy;
 $ast = $texy->parse($text);
@@ -368,7 +369,7 @@ $generator = new Texy\Output\Markdown\Generator($texy);
 $generator->headingStyle = 'atx';       // 'atx' (###) or 'setext' (===)
 $generator->codeBlockStyle = 'fenced';  // 'fenced' (```) or 'indented'
 $generator->linkStyle = 'inline';       // 'inline' or 'reference'
-$markdown = $generator->generate($ast);
+$markdown = $generator->render($ast);
 ```
 
 **Limitations**: Modifiers (classes, IDs, styles) are lost. Superscript/subscript and abbreviations use HTML fallback.
