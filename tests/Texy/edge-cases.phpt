@@ -13,7 +13,6 @@ test('special cases and edge cases', function () {
 	$texy = new Texy\Texy;
 	$texy->linkModule->root = 'xxx/';
 	$texy->imageModule->root = '../images/';
-	$texy->imageModule->linkedRoot = '../images/big/';
 	$texy->imageModule->leftClass = 'left';
 	$texy->htmlOutputModule->lineWrap = 180;
 	$texy->allowed['longwords'] = false;
