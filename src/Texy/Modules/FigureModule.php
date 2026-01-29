@@ -30,12 +30,6 @@ final class FigureModule extends Texy\Module
 	/** right-floated box CSS class */
 	public ?string $rightClass = null;
 
-	/** @deprecated */
-	public int|false $widthDelta = 10;
-
-	/** @deprecated */
-	public bool $requireCaption = true;
-
 
 	public function __construct(
 		private Texy\Texy $texy,
@@ -63,7 +57,7 @@ final class FigureModule extends Texy\Module
 				(?:
 					\ ++ \*\*\* \ ++              # separator
 					(.{0,2000})                   # caption (5)
-				)' . ($this->requireCaption ? '' : '?') . '
+				)?
 				' . Patterns::MODIFIER_H . '?     # modifier (6)
 			$~mU',
 			'figure',
@@ -128,11 +122,6 @@ final class FigureModule extends Texy\Module
 		}
 
 		$el = new Texy\HtmlElement($this->tagName);
-		if (!empty($image->width) && $this->widthDelta !== false) {
-			$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-			$el->attrs['style']['max-width'] = ($image->width + $this->widthDelta) . 'px';
-		}
-
 		$mod->decorate($texy, $el);
 
 		$el->add($elImg);

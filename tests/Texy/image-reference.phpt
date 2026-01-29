@@ -18,7 +18,7 @@ require __DIR__ . '/../bootstrap.php';
 test('image reference is resolved', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt=""></div>
+		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process("[*logo*]\n\n[*logo*]: image.jpg"),
 	);
@@ -28,7 +28,7 @@ test('image reference is resolved', function () {
 test('forward image reference is resolved', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt=""></div>
+		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process("[*logo*]: image.jpg\n\n[* logo *]"),
 	);
@@ -48,7 +48,7 @@ test('image definition is removed from output', function () {
 test('undefined image reference shows as direct URL', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/undefined" alt=""></div>
+		'<div class="figure"><img src="images/undefined" alt=""></div>
 ',
 		$texy->process('[* undefined *]'),
 	);
@@ -58,7 +58,7 @@ test('undefined image reference shows as direct URL', function () {
 test('case insensitive image reference matching', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt=""></div>
+		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process("[* LOGO *]\n\n[*logo*]: image.jpg"),
 	);
@@ -69,9 +69,9 @@ test('multiple references to same image definition', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
 		<<<'XX'
-			<div><img src="images/image.jpg" alt=""></div>
+			<div class="figure"><img src="images/image.jpg" alt=""></div>
 
-			<div><img src="images/image.jpg" alt=""></div>
+			<div class="figure"><img src="images/image.jpg" alt=""></div>
 
 			XX,
 		$texy->process("[* logo *]\n\n[* logo *]\n\n[*logo*]: image.jpg"),
@@ -86,7 +86,8 @@ test('multiple references to same image definition', function () {
 test('image reference inherits dimensions from definition', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt="" width="200" height="100"></div>
+		'<div class="figure"><img src="images/image.jpg" alt="" width="200"
+height="100"></div>
 ',
 		$texy->process("[* logo *]\n\n[*logo*]: image.jpg 200x100"),
 	);
@@ -98,7 +99,7 @@ test('image reference inherits dimensions from definition', function () {
 test('image reference with dimensions in usage falls back to direct URL', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/logo" alt="" width="50" height="25"></div>
+		'<div class="figure"><img src="images/logo" alt="" width="50" height="25"></div>
 ',
 		$texy->process("[* logo 50x25 *]\n\n[*logo*]: image.jpg 200x100"),
 	);
@@ -112,7 +113,7 @@ test('image reference with dimensions in usage falls back to direct URL', functi
 test('image reference inherits alt text from definition', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt="Default alt"></div>
+		'<div class="figure"><img src="images/image.jpg" alt="Default alt"></div>
 ',
 		$texy->process("[* logo *]\n\n[*logo*]: image.jpg .(Default alt)"),
 	);
@@ -122,7 +123,7 @@ test('image reference inherits alt text from definition', function () {
 test('image reference can override alt text', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt="Local alt"></div>
+		'<div class="figure"><img src="images/image.jpg" alt="Local alt"></div>
 ',
 		$texy->process("[* logo .(Local alt) *]\n\n[*logo*]: image.jpg .(Default alt)"),
 	);
@@ -136,7 +137,8 @@ test('image reference can override alt text', function () {
 test('image reference with alignment override', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt="" style="float:right"></div>
+		'<div style="float:right" class="figure"><img src="images/image.jpg"
+alt=""></div>
 ',
 		$texy->process("[* logo >]\n\n[*logo*]: image.jpg"),
 	);
@@ -146,7 +148,7 @@ test('image reference with alignment override', function () {
 test('image reference with left alignment', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt="" style="float:left"></div>
+		'<div style="float:left" class="figure"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process("[* logo <]\n\n[*logo*]: image.jpg"),
 	);
@@ -271,7 +273,7 @@ test('figure with direct image and image link reference', function () {
 test('direct image works', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt=""></div>
+		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process('[* image.jpg *]'),
 	);
@@ -281,7 +283,8 @@ test('direct image works', function () {
 test('direct image with dimensions works', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt="" width="100" height="50"></div>
+		'<div class="figure"><img src="images/image.jpg" alt="" width="100"
+height="50"></div>
 ',
 		$texy->process('[* image.jpg 100x50 *]'),
 	);
@@ -291,7 +294,7 @@ test('direct image with dimensions works', function () {
 test('direct image with alt text works', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<div><img src="images/image.jpg" alt="Alt text"></div>
+		'<div class="figure"><img src="images/image.jpg" alt="Alt text"></div>
 ',
 		$texy->process('[* image.jpg .(Alt text) *]'),
 	);
@@ -321,7 +324,7 @@ test('user-defined image definition works', function () {
 	$texy->imageModule->addDefinition('logo', 'logo.png', 100, 50, 'Company Logo');
 	// alt parameter is used as alt text for images
 	Assert::match(
-		'<div><img src="images/logo.png" alt="Company Logo" width="100"
+		'<div class="figure"><img src="images/logo.png" alt="Company Logo" width="100"
 height="50"></div>
 ',
 		$texy->process('[* logo *]'),
@@ -335,14 +338,14 @@ test('user-defined image definition persists across process() calls', function (
 
 	// First process()
 	Assert::match(
-		'<div><img src="images/logo.png" alt=""></div>
+		'<div class="figure"><img src="images/logo.png" alt=""></div>
 ',
 		$texy->process('[* logo *]'),
 	);
 
 	// Second process() - definition should still work
 	Assert::match(
-		'<div><img src="images/logo.png" alt=""></div>
+		'<div class="figure"><img src="images/logo.png" alt=""></div>
 ',
 		$texy->process('[* logo *]'),
 	);
@@ -358,7 +361,7 @@ test('document-defined image reference leaks to next process() [BUG]', function 
 	// Second process() - reference should NOT be available, but it is (BUG)
 	// This documents the current buggy behavior
 	Assert::match(
-		'<div><img src="images/image.jpg" alt=""></div>
+		'<div class="figure"><img src="images/image.jpg" alt=""></div>
 ',
 		$texy->process('[* logo *]'),
 	);
@@ -371,7 +374,8 @@ test('user-defined image definition is overwritten by document definition', func
 
 	// Document defines same reference - it overwrites user-defined one
 	Assert::match(
-		'<div><img src="images/document-logo.jpg" alt="" width="200" height="100"></div>
+		'<div class="figure"><img src="images/document-logo.jpg" alt="" width="200"
+height="100"></div>
 ',
 		$texy->process("[* logo *]\n\n[*logo*]: document-logo.jpg 200x100"),
 	);
