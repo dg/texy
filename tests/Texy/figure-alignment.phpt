@@ -13,7 +13,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('figure with leftClass', function () {
 	$texy = new Texy\Texy;
-	$texy->figureModule->leftClass = 'image-left';
+	$texy->htmlGenerator->figureLeftClass = 'image-left';
 	Assert::match(
 		'<div class="image-left"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
@@ -26,7 +26,7 @@ test('figure with leftClass', function () {
 
 test('figure with rightClass', function () {
 	$texy = new Texy\Texy;
-	$texy->figureModule->rightClass = 'image-right';
+	$texy->htmlGenerator->figureRightClass = 'image-right';
 	Assert::match(
 		'<div class="image-right"><img src="images/image.jpg" alt="">
 	<p>Caption</p>
@@ -39,7 +39,7 @@ test('figure with rightClass', function () {
 
 test('figure with alignClasses', function () {
 	$texy = new Texy\Texy;
-	$texy->alignClasses['left'] = 'align-left';
+	$texy->htmlGenerator->alignClasses['left'] = 'align-left';
 	Assert::match(
 		'<div class="figure-align-left"><img src="images/image.jpg" alt="">
 	<p>Caption</p>

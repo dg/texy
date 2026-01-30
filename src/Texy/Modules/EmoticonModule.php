@@ -11,7 +11,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\EmoticonNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Syntax;
 
@@ -21,7 +20,7 @@ use Texy\Syntax;
  */
 final class EmoticonModule extends Texy\Module
 {
-	/** @var array<string, string> */
+	/** @var array<string, string> emoticon → emoji/image mapping */
 	public array $icons = [
 		':-)' => '🙂',
 		':-(' => '☹',
@@ -35,15 +34,11 @@ final class EmoticonModule extends Texy\Module
 		':-|' => '😐',
 	];
 
-	/** CSS class for emoticons */
-	public ?string $class = null;
-
 
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed[Syntax::Emoticon] = false;
-		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -53,9 +48,10 @@ final class EmoticonModule extends Texy\Module
 			trigger_error('EmoticonModule: using image files is deprecated, use Unicode characters instead.', E_USER_DEPRECATED);
 		}
 
-		krsort($this->icons);
+		$icons = $this->icons;
+		krsort($icons);
 		$pattern = [];
-		foreach ($this->icons as $key => $foo) {
+		foreach ($icons as $key => $foo) {
 			$pattern[] = Texy\Regexp::quote($key) . '+'; // last char can be repeated
 		}
 
@@ -86,14 +82,5 @@ final class EmoticonModule extends Texy\Module
 		}
 
 		return null;
-	}
-
-
-	public function solve(EmoticonNode $node, Html\Generator $generator): Html\Element|string
-	{
-		$emoji = $this->icons[$node->emoticon];
-		return $this->class
-			? (new Html\Element('span', ['class' => $this->class]))->setText($emoji)
-			: $emoji;
 	}
 }

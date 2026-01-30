@@ -70,10 +70,10 @@ $texy->htmlGenerator->registerHandler(
 
 		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
 		$content = $fshl->highlight($content, new $langClass);
-		$content = $texy->protect($content, $texy::CONTENT_BLOCK);
+		$content = $gen->protect($content, $gen::ContentBlock);
 
 		$elPre = new Html\Element('pre');
-		$node->modifier?->decorate($texy, $elPre);
+		$gen->decorateElement($node->modifier, $elPre);
 		$elPre->attrs['class'] = strtolower($lang);
 		$elPre->create('code', $content);
 
@@ -94,7 +94,7 @@ $texy->registerBlockPattern(
 		$lang = $name === 'phpBlockSyntax' ? 'php' : 'javascript';
 
 		return new CodeBlockNode(
-			'code',
+			'block/code',
 			$content,
 			$lang,
 		);
@@ -111,7 +111,7 @@ $texy->registerBlockPattern(
 		[$content] = $matches;
 
 		return new CodeBlockNode(
-			'code',
+			'block/code',
 			$content,
 			'html', // HTML lexer handles <script> tags well
 		);

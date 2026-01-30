@@ -15,7 +15,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('custom image handler', function () {
 	$texy = new Texy\Texy;
-	$texy->imageModule->root = '../images/';
+	$texy->htmlGenerator->imageRoot = '../images/';
 	$texy->htmlOutputModule->lineWrap = 180;
 
 	// Use afterParse handler to modify ImageNodes in the AST
@@ -31,7 +31,7 @@ test('custom image handler', function () {
 				$imageNode->modifier ??= new Texy\Modifier;
 				$imageNode->modifier->title = 'Texy! logo';
 				$node->url = 'image-big.gif';  // Update link URL (root added during generation)
-				$node->isImageLink = true;  // Use imageModule->root
+				$node->isImageLink = true;  // Use imageRoot for link href
 			}
 			// Handle ImageNode directly (image without link)
 			elseif ($node instanceof ImageNode && $node->url === 'user') {

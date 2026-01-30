@@ -66,13 +66,13 @@ $texy->htmlGenerator->registerHandler(
 
 		// Apply modifier (title, class, id, style, etc.)
 		$el->attrs['href'] = null; // Reserve position at front
-		$node->modifier?->decorate($texy, $el);
+		$gen->decorateElement($node->modifier, $el);
 
 		// Set the URL
 		$el->attrs['href'] = $url;
 
 		// rel="nofollow"
-		if ($nofollow || ($texy->linkModule->forceNoFollow && str_contains($url, '//'))) {
+		if ($nofollow || ($gen->linkNoFollow && str_contains($url, '//'))) {
 			$el->attrs['rel'] = 'nofollow';
 		}
 

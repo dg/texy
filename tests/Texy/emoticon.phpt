@@ -26,7 +26,7 @@ test('emoticon with custom class', function () {
 	$texy = new Texy\Texy;
 	$texy->allowed[Texy\Syntax::Emoticon] = true;
 	$texy->htmlOutputModule->lineWrap = 180;
-	$texy->emoticonModule->class = 'smiley';
+	$texy->htmlGenerator->emoticonClass = 'smiley';
 
 	Assert::match(
 		'<p>I fell <span class="smiley">🙂</span></p>',

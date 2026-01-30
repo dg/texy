@@ -68,11 +68,11 @@ $texy->htmlGenerator->registerHandler(
 		$content = $fshl->highlight($content, new $langClass);
 
 		// Tell Texy not to process the highlighted HTML further
-		$content = $texy->protect($content, $texy::CONTENT_BLOCK);
+		$content = $gen->protect($content, $gen::ContentBlock);
 
 		// Build the HTML structure: <pre class="php"><code>...</code></pre>
 		$elPre = new Html\Element('pre');
-		$node->modifier?->decorate($texy, $elPre);
+		$gen->decorateElement($node->modifier, $elPre);
 		$elPre->attrs['class'] = strtolower($lang);
 
 		$elPre->create('code', $content);

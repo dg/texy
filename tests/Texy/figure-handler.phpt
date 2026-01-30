@@ -19,7 +19,7 @@ test('custom ImageNode handler is called for images in figures', function () {
 
 	// Register custom handler that transforms youtube: URLs to iframes
 	$texy->htmlGenerator->registerHandler(
-		function (ImageNode $node, Html\Generator $gen, ?Closure $previous) use ($texy): Html\Element|string|null {
+		function (ImageNode $node, Html\Generator $gen, ?Closure $previous): Html\Element|string|null {
 			if (!str_starts_with($node->url ?? '', 'youtube:')) {
 				return $previous ? $previous($node, $gen) : null;
 			}
@@ -28,9 +28,9 @@ test('custom ImageNode handler is called for images in figures', function () {
 			$width = $node->width ?: 640;
 			$height = $node->height ?: 360;
 
-			return $texy->protect(
+			return $gen->protect(
 				'<iframe src="https://youtube.com/embed/' . htmlspecialchars($videoId) . '" width="' . $width . '" height="' . $height . '"></iframe>',
-				$texy::CONTENT_BLOCK,
+				$gen::ContentBlock,
 			);
 		},
 	);
@@ -49,15 +49,15 @@ test('custom ImageNode handler is called for inline images', function () {
 	$texy = new Texy\Texy;
 
 	$texy->htmlGenerator->registerHandler(
-		function (ImageNode $node, Html\Generator $gen, ?Closure $previous) use ($texy): Html\Element|string|null {
+		function (ImageNode $node, Html\Generator $gen, ?Closure $previous): Html\Element|string|null {
 			if (!str_starts_with($node->url ?? '', 'youtube:')) {
 				return $previous ? $previous($node, $gen) : null;
 			}
 
 			$videoId = substr($node->url, 8);
-			return $texy->protect(
+			return $gen->protect(
 				'<iframe src="https://youtube.com/embed/' . htmlspecialchars($videoId) . '"></iframe>',
-				$texy::CONTENT_REPLACED,
+				$gen::ContentReplaced,
 			);
 		},
 	);
@@ -72,7 +72,7 @@ test('custom ImageNode handler is called for inline images', function () {
 
 test('figure alignment is applied to wrapper, not to image', function () {
 	$texy = new Texy\Texy;
-	$texy->figureModule->rightClass = 'float-right';
+	$texy->htmlGenerator->figureRightClass = 'float-right';
 
 	// Right-aligned figure (alignment inside brackets)
 	$html = $texy->process('[* image.jpg >]');

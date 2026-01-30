@@ -19,7 +19,6 @@ use Texy\Nodes\ImageDefinitionNode;
 use Texy\Nodes\ImageNode;
 use Texy\Nodes\LinkNode;
 use Texy\NodeTraverser;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
@@ -32,18 +31,6 @@ use function count, strlen;
  */
 final class ImageModule extends Texy\Module
 {
-	/** root of relative images (http) */
-	public ?string $root = 'images/';
-
-	/** physical location of images on server */
-	public ?string $fileRoot = null;
-
-	/** left-floated images CSS class */
-	public ?string $leftClass = null;
-
-	/** right-floated images CSS class */
-	public ?string $rightClass = null;
-
 	/** @var array<string, ImageDefinitionNode> collected image definitions */
 	private array $definitions = [];
 
@@ -56,8 +43,6 @@ final class ImageModule extends Texy\Module
 	) {
 		$texy->allowed[Syntax::ImageDefinition] = true;
 		$texy->addHandler('afterParse', $this->resolveReferences(...));
-		$texy->htmlGenerator->registerHandler($this->solve(...));
-		$texy->htmlGenerator->registerHandler(fn(ImageDefinitionNode $node) => '');
 	}
 
 
@@ -293,101 +278,5 @@ final class ImageModule extends Texy\Module
 	public function getDefinition(string $name): ?ImageDefinitionNode
 	{
 		return $this->definitions[Helpers::toLower($name)] ?? null;
-	}
-
-
-	public function solve(ImageNode $node, Html\Generator $generator): Html\Element
-	{
-		$this->detectDimensions($node);
-
-		$el = new Html\Element('img');
-		$mod = $node->modifier;
-
-		// Extract and clear title/hAlign before decorate
-		$alt = $mod?->title;
-		$hAlign = $mod?->hAlign;
-		if ($mod) {
-			$mod->title = null;
-			$mod->hAlign = null;
-		}
-
-		// Custom attrs from modifier (like {alt:...; title:...})
-		$hasCustomAlt = isset($mod?->attrs['alt']);
-		if ($hasCustomAlt) {
-			$el->attrs['alt'] = $mod->attrs['alt'];
-		}
-		if (isset($mod?->attrs['title'])) {
-			$el->attrs['title'] = $mod->attrs['title'];
-		}
-
-		// Reserve src position (decorate() may overwrite attrs array)
-		$el->attrs['src'] = null;
-
-		// class/style from modifier
-		$mod?->decorate($this->texy, $el);
-
-		// src
-		$el->attrs['src'] = $node->url !== null ? Helpers::prependRoot($node->url, $this->root) : null;
-
-		// alt: from title or empty (if not set by custom attrs)
-		if (!$hasCustomAlt && !isset($el->attrs['alt'])) {
-			$el->attrs['alt'] = $alt !== null
-				? $this->texy->typographyModule->postLine($alt)
-				: '';
-		}
-
-		// hAlign → float class or style
-		if ($hAlign) {
-			$class = match ($hAlign) {
-				'left' => $this->leftClass,
-				'right' => $this->rightClass,
-				default => null,
-			};
-			if ($class) {
-				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-				$el->attrs['class'][] = $class;
-			} elseif (!empty($this->texy->alignClasses[$hAlign])) {
-				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-				$el->attrs['class'][] = $this->texy->alignClasses[$hAlign];
-			} else {
-				$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-				$el->attrs['style']['float'] = $hAlign;
-			}
-		}
-
-		// dimensions
-		$el->attrs['width'] = $node->width;
-		$el->attrs['height'] = $node->height;
-
-		return $el;
-	}
-
-
-	/**
-	 * Detects image dimensions from file system.
-	 */
-	private function detectDimensions(ImageNode $node): void
-	{
-		if ($node->url === null || !Helpers::isRelative($node->url) || str_contains($node->url, '..')) {
-			return;
-		}
-
-		if ($this->fileRoot === null) {
-			return;
-		}
-
-		$file = rtrim($this->fileRoot, '/\\') . '/' . $node->url;
-		if (!@is_file($file) || !($size = @getimagesize($file))) { // intentionally @
-			return;
-		}
-
-		if ($node->width === null && $node->height === null) {
-			$node->width = $size[0];
-			$node->height = $size[1];
-		} elseif ($node->width !== null && $node->height === null) {
-			$node->height = (int) round($size[1] / $size[0] * $node->width);
-		} elseif ($node->height !== null && $node->width === null) {
-			$node->width = (int) round($size[0] / $size[1] * $node->height);
-		}
 	}
 }

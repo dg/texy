@@ -16,9 +16,11 @@ namespace Texy\Nodes;
  */
 class HtmlTagNode extends InlineNode
 {
+	/**
+	 * @param array<string, string|bool|null> $attributes
+	 */
 	public function __construct(
 		public string $name,
-		/** @var array<string, string|bool> */
 		public array $attributes = [],
 		public bool $closing = false,
 		public bool $selfClosing = false,

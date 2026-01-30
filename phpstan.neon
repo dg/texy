@@ -19,18 +19,25 @@ parameters:
 				- src/Texy/Nodes/
 
 		# Empty generator pattern using `false && yield` to satisfy return type Generator
-		# while yielding nothing. PHPStan correctly sees left side is always false.
-		# Note: by-ref generators cannot use `yield from []`, hence this workaround.
+		# while yielding nothing. PHPStan correctly sees issues with this pattern.
 		-
 			identifier: booleanAnd.leftAlwaysFalse
-			paths:
-				- src/Texy/Node.php
+			path: src/Texy/Node.php
 		-
 			identifier: generator.valueType
-			paths:
-				- src/Texy/Node.php
+			path: src/Texy/Node.php
 
-		# array_filter in getNodes() removes nulls added during traversal (NodeTraverser may set to null)
+		# Regex capture groups return null when not matched, ?? handles this correctly.
+		# PHPStan sees variable as "always existing" from list() assignment.
+		-
+			identifier: nullCoalesce.variable
+			paths:
+				- src/Texy/Modules/BlockQuoteModule.php
+				- src/Texy/Modules/ListModule.php
+
+		# Runtime validation of array items using array_filter. PHPStan sees the filter
+		# as unnecessary because typed arrays can't contain falsy values, but this
+		# validates runtime data that may not match the declared types.
 		-
 			identifier: arrayFilter.same
 			paths:

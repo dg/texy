@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace Texy;
 
-use Texy\Output\Html;
-use function array_flip, explode, is_array, settype, str_replace, str_starts_with, strlen, strpos, strtolower, substr, trim;
 
 
 /**
@@ -103,124 +101,6 @@ final class Modifier
 				$p++;
 			} else {
 				break;
-			}
-		}
-	}
-
-
-	/**
-	 * Decorates Html\Element element.
-	 * @deprecated  use Html\Generator instead
-	 */
-	public function decorate(Texy $texy, Html\Element $el): Html\Element
-	{
-		$this->decorateAttrs($texy, $el->attrs, $el->name ?? '');
-		$this->decorateClasses($texy, $el->attrs);
-		$this->decorateStyles($texy, $el->attrs);
-		$this->decorateAligns($texy, $el->attrs);
-		return $el;
-	}
-
-
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateAttrs(Texy $texy, array &$attrs, string $name): void
-	{
-		if (!$this->attrs) {
-		} elseif ($texy->allowedTags === $texy::ALL) {
-			$attrs = $this->attrs;
-
-		} elseif (is_array($texy->allowedTags)) {
-			$tmp = $texy->allowedTags[$name] ?? [];
-
-			if ($tmp === $texy::ALL) {
-				$attrs = $this->attrs;
-
-			} elseif (is_array($tmp)) {
-				$attrs = array_flip($tmp);
-				foreach ($this->attrs as $key => $value) {
-					if (isset($attrs[$key])) {
-						$attrs[$key] = $value;
-					}
-				}
-			}
-		}
-
-		if ($this->title !== null) {
-			$attrs['title'] = $texy->typographyModule->postLine($this->title);
-		}
-	}
-
-
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateClasses(Texy $texy, array &$attrs): void
-	{
-		if ($this->classes || $this->id !== null) {
-			[$allowedClasses] = $texy->getAllowedProps();
-			settype($attrs['class'], 'array');
-			if ($allowedClasses === $texy::ALL) {
-				foreach ($this->classes as $value => $foo) {
-					$attrs['class'][] = $value;
-				}
-
-				$attrs['id'] = $this->id;
-			} elseif (is_array($allowedClasses)) {
-				foreach ($this->classes as $value => $foo) {
-					if (isset($allowedClasses[$value])) {
-						$attrs['class'][] = $value;
-					}
-				}
-
-				if (isset($allowedClasses['#' . $this->id])) {
-					$attrs['id'] = $this->id;
-				}
-			}
-		}
-	}
-
-
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateStyles(Texy $texy, array &$attrs): void
-	{
-		if ($this->styles) {
-			[, $allowedStyles] = $texy->getAllowedProps();
-			settype($attrs['style'], 'array');
-			if ($allowedStyles === $texy::ALL) {
-				foreach ($this->styles as $prop => $value) {
-					$attrs['style'][$prop] = $value;
-				}
-			} elseif (is_array($allowedStyles)) {
-				foreach ($this->styles as $prop => $value) {
-					if (isset($allowedStyles[$prop])) {
-						$attrs['style'][$prop] = $value;
-					}
-				}
-			}
-		}
-	}
-
-
-	/** @param  array<string, mixed>  $attrs */
-	private function decorateAligns(Texy $texy, array &$attrs): void
-	{
-		if ($this->hAlign) {
-			$class = $texy->alignClasses[$this->hAlign] ?? null;
-			if ($class) {
-				settype($attrs['class'], 'array');
-				$attrs['class'][] = $class;
-			} else {
-				settype($attrs['style'], 'array');
-				$attrs['style']['text-align'] = $this->hAlign;
-			}
-		}
-
-		if ($this->vAlign) {
-			$class = $texy->alignClasses[$this->vAlign] ?? null;
-			if ($class) {
-				settype($attrs['class'], 'array');
-				$attrs['class'][] = $class;
-			} else {
-				settype($attrs['style'], 'array');
-				$attrs['style']['vertical-align'] = $this->vAlign;
 			}
 		}
 	}

@@ -31,10 +31,6 @@ final class ParagraphModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlGenerator->registerHandler($this->solve(...));
-		$texy->htmlGenerator->registerHandler(
-			fn(Nodes\LineBreakNode $node) => $this->texy->protect('<br>', $this->texy::CONTENT_REPLACED),
-		);
 	}
 
 
@@ -44,9 +40,9 @@ final class ParagraphModule extends Texy\Module
 	 */
 	public function parseText(ParseContext $context, string $text): array
 	{
-		$parts = Regexp::split($text, '~(\n{2,})~', skipEmpty: true);
+		$parts = Regexp::split($text, '~(\n{2,})~', captureOffset: true, skipEmpty: true);
 		$res = [];
-		foreach ($parts ?: [] as $part) {
+		foreach ($parts ?: [] as [$part]) {
 			$trimmed = trim($part);
 			if ($trimmed === '') {
 				continue;
@@ -168,8 +164,8 @@ final class ParagraphModule extends Texy\Module
 
 	/**
 	 * Expand \r markers in TextNode content into LineBreakNode.
-	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $nodes
-	 * @return array<Nodes\InlineNode|Nodes\BlockNode>
+	 * @param  array<Nodes\BlockNode|Nodes\InlineNode>  $nodes
+	 * @return array<Nodes\BlockNode|Nodes\InlineNode>
 	 */
 	private function expandLineBreaks(array $nodes): array
 	{
@@ -195,110 +191,5 @@ final class ParagraphModule extends Texy\Module
 			}
 		}
 		return $result;
-	}
-
-
-	public function solve(ParagraphNode $node, Html\Generator $generator): Html\Element
-	{
-		$children = $generator->renderNodes($node->content->children);
-
-		// Block HTML content - skip <p> wrapper entirely
-		if ($node->blockHtml) {
-			return $this->wrapChildren($children);
-		}
-
-		$info = $this->analyzeContent($node->content->children);
-
-		// Only markup (HTML tags/comments) without text → no <p> wrapper
-		if (!$info['hasText'] && !$info['hasOther'] && $info['hasMarkup'] && $node->modifier === null) {
-			return $this->wrapChildren($children);
-		}
-
-		// Only replaced content (images) → use nontextParagraph
-		if (!$info['hasText'] && !$info['hasOther'] && $info['hasReplaced']) {
-			return $this->createNontextParagraph($children, $node->modifier);
-		}
-
-		// Normal paragraph
-		$el = new Html\Element('p');
-		$node->modifier?->decorate($this->texy, $el);
-		$el->children = $children;
-		return $el;
-	}
-
-
-	/** @param list<Html\Element|string> $children */
-	private function wrapChildren(array $children): Html\Element
-	{
-		$el = new Html\Element(null);
-		$el->children = $children;
-		return $el;
-	}
-
-
-	/** @param list<Html\Element|string> $children */
-	private function createNontextParagraph(array $children, ?Modifier $modifier): Html\Element
-	{
-		$nontextParagraph = $this->texy->nontextParagraph;
-		if ($nontextParagraph instanceof Html\Element) {
-			$el = clone $nontextParagraph;
-			$modifier?->decorate($this->texy, $el);
-			$el->children = $children;
-			return $el;
-		}
-		$el = new Html\Element($nontextParagraph);
-		$modifier?->decorate($this->texy, $el);
-		$el->children = $children;
-		return $el;
-	}
-
-
-	/**
-	 * Analyze content to determine what types of nodes it contains.
-	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $content
-	 * @return array{hasText: bool, hasReplaced: bool, hasMarkup: bool, hasOther: bool}
-	 */
-	private function analyzeContent(array $content): array
-	{
-		$hasText = false;
-		$hasReplaced = false;
-		$hasMarkup = false;
-		$hasOther = false;
-
-		foreach ($content as $node) {
-			if ($node instanceof Nodes\TextNode) {
-				$hasText = $hasText || trim($node->content) !== '';
-
-			} elseif ($node instanceof Nodes\ImageNode) {
-				$hasReplaced = true;
-
-			} elseif ($node instanceof Nodes\HtmlCommentNode) {
-				$hasMarkup = true;
-
-			} elseif ($node instanceof Nodes\HtmlTagNode) {
-				if ($node->closing) {
-					continue;
-				}
-				$inlineType = Html\Element::$inlineElements[strtolower($node->name)] ?? null;
-				if ($inlineType === 1) {
-					$hasReplaced = true;    // replaced element (img, br, input, ...)
-				} else {
-					$hasMarkup = true;      // inline markup or block element
-				}
-
-			} elseif ($node instanceof Nodes\LinkNode) {
-				$inner = $this->analyzeContent($node->content->children);
-				if ($inner['hasText'] || $inner['hasOther']) {
-					$hasOther = true;
-				} elseif ($inner['hasReplaced']) {
-					$hasReplaced = true;
-				}
-
-			} else {
-				$hasOther = true;
-			}
-		}
-
-		return compact('hasText', 'hasReplaced', 'hasMarkup', 'hasOther');
 	}
 }

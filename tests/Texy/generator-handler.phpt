@@ -20,7 +20,7 @@ test('registerHandler replaces default handler', function () {
 
 	// Register custom handler for paragraphs
 	$texy->htmlGenerator->registerHandler(
-		fn(Nodes\ParagraphNode $node, Generator $g) => $texy->protect('<div>custom</div>', Texy::CONTENT_BLOCK),
+		fn(Nodes\ParagraphNode $node, Generator $g) => $g->protect('<div>custom</div>', Generator::ContentBlock),
 	);
 
 	Assert::match('<div>custom</div>', trim($texy->htmlGenerator->render($ast)));
@@ -29,14 +29,14 @@ test('registerHandler replaces default handler', function () {
 
 test('handler receives node data', function () {
 	$texy = new Texy;
-	$texy->imageModule->root = '/img/';
+	$texy->htmlGenerator->imageRoot = '/img/';
 	$ast = $texy->parse('[* image.jpg *]');
 
 	// Custom handler that accesses node properties
 	$texy->htmlGenerator->registerHandler(
-		fn(Nodes\FigureNode $node, Generator $g) => $texy->protect(
+		fn(Nodes\FigureNode $node, Generator $g) => $g->protect(
 			'<figure><img src="/img/' . htmlspecialchars($node->image->url ?? '') . '" alt="custom"></figure>',
-			Texy::CONTENT_REPLACED,
+			Generator::ContentReplaced,
 		),
 	);
 
@@ -50,11 +50,12 @@ test('handler can access Texy configuration', function () {
 	$ast = $texy->parse("Title\n=====");
 	$texy->headingModule->afterParse($ast);
 
-	// Custom handler that uses Texy config
+	// Custom handler that modifies result of default handler
 	$texy->htmlGenerator->registerHandler(
-		function (Nodes\HeadingNode $node, Generator $g) use ($texy) {
-			$content = $g->serialize($g->renderNodes($node->content->children));
-			return $texy->protect("<h{$node->level} class=\"custom\">{$content}</h{$node->level}>", Texy::CONTENT_BLOCK);
+		function (Nodes\HeadingNode $node, Generator $g, ?Closure $previous) {
+			$element = $previous($node, $g);
+			$element->attrs['class'] = 'custom';
+			return $element;
 		},
 	);
 

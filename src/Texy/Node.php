@@ -15,12 +15,9 @@ namespace Texy;
  */
 abstract class Node
 {
-	/** @return \Generator<int, self, mixed, void> */
+	/** @return \Generator<self> */
 	public function &getNodes(): \Generator
 	{
-		// Empty generator - base implementation yields nothing
-		// Subclasses override to yield their child nodes
-		// Note: by-ref generator cannot use yield from, so use false && yield
 		false && yield;
 	}
 }

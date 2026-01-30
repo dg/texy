@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 use Tester\Assert;
+use Texy\Helpers;
 use Texy\Nodes;
 use Texy\Output\Html;
 use Texy\Texy;
@@ -57,12 +58,13 @@ test('handler chain with conditional delegation', function () {
 	$texy->htmlGenerator->registerHandler(
 		function (Nodes\ParagraphNode $node, Html\Generator $gen, ?Closure $previous) use (&$customCount): Html\Element|string|null {
 			// Only handle paragraphs containing "hello"
-			$content = $gen->serialize($gen->renderNodes($node->content->children));
-			if (str_contains($content, 'hello')) {
+			$text = Helpers::extractText($node);
+			if (str_contains($text, 'hello')) {
 				$customCount++;
-				$el = new Html\Element('div');
+				// Delegate to default handler and modify result
+				$el = $previous($node, $gen);
+				$el->name = 'div';
 				$el->attrs['class'] = 'custom';
-				$el->children = [$content];
 				return $el;
 			}
 			// Delegate other paragraphs to previous handler
@@ -86,9 +88,9 @@ test('multiple handlers form a chain', function () {
 	$texy->htmlGenerator->registerHandler(
 		function (Nodes\ParagraphNode $node, Html\Generator $gen, ?Closure $previous) use (&$calls): Html\Element|string {
 			$calls[] = 'first';
-			$el = new Html\Element('p');
+			// Delegate to default handler and modify result
+			$el = $previous($node, $gen);
 			$el->attrs['data-first'] = '1';
-			$el->children = $gen->renderNodes($node->content->children);
 			return $el;
 		},
 	);

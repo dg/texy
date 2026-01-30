@@ -16,7 +16,6 @@ use Texy\Nodes;
 use Texy\Nodes\DocumentNode;
 use Texy\Nodes\LinkDefinitionNode;
 use Texy\NodeTraverser;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Syntax;
@@ -28,12 +27,6 @@ use function in_array, strlen;
  */
 final class LinkModule extends Texy\Module
 {
-	/** root of relative links */
-	public ?string $root = null;
-
-	/** always use rel="nofollow" for absolute links? */
-	public bool $forceNoFollow = false;
-
 	/** @var array<string, LinkDefinitionNode> link definitions */
 	private array $definitions = [];
 
@@ -46,8 +39,6 @@ final class LinkModule extends Texy\Module
 	) {
 		$texy->allowed[Syntax::LinkDefinition] = true;
 		$texy->addHandler('afterParse', $this->resolveReferences(...));
-		$texy->htmlGenerator->registerHandler($this->solveLink(...));
-		$texy->htmlGenerator->registerHandler(fn(Nodes\LinkDefinitionNode $node) => '');
 	}
 
 
@@ -261,52 +252,5 @@ final class LinkModule extends Texy\Module
 		}
 
 		return null;
-	}
-
-
-	/**
-	 * Generates HTML for LinkNode.
-	 */
-	public function solveLink(Nodes\LinkNode $node, Html\Generator $generator): Html\Element|string
-	{
-		// Check URL scheme (security - filter dangerous schemes like javascript:)
-		$rawUrl = $node->url ?? '';
-		if (!$this->texy->checkURL($rawUrl, Texy\Texy::FILTER_ANCHOR)) {
-			// URL fails scheme filter, return just the content without link
-			return $generator->serialize($generator->renderNodes($node->content->children));
-		}
-
-		$el = new Html\Element('a');
-
-		// Handle nofollow class
-		$nofollow = false;
-		if ($node->modifier && isset($node->modifier->classes['nofollow'])) {
-			$nofollow = true;
-			unset($node->modifier->classes['nofollow']);
-		}
-
-		// Apply modifier (title, class, id, style, etc.) before href
-		$el->attrs['href'] = null; // trick - reserve position at front
-		$node->modifier?->decorate($this->texy, $el);
-
-		// Normalize www. to http://
-		if (strncasecmp($rawUrl, 'www.', 4) === 0) {
-			$rawUrl = 'http://' . $rawUrl;
-		}
-
-		// Prepend root to relative URLs
-		// Use imageModule.root for image links, linkModule.root otherwise
-		$root = $node->isImageLink ? $this->texy->imageModule->root : $this->root;
-		$el->attrs['href'] = Helpers::prependRoot($rawUrl, $root);
-
-		// rel="nofollow"
-		if ($nofollow || ($this->forceNoFollow && str_contains($el->attrs['href'], '//'))) {
-			$el->attrs['rel'] = 'nofollow';
-		}
-
-		// Add content
-		$el->children = $generator->renderNodes($node->content->children);
-
-		return $el;
 	}
 }

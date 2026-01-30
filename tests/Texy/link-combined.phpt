@@ -14,9 +14,9 @@ require __DIR__ . '/../bootstrap.php';
 function createTexy()
 {
 	$texy = new Texy\Texy;
-	$texy->linkModule->root = 'xxx/';
-	$texy->imageModule->root = '../images/';
-	$texy->imageModule->leftClass = 'left';
+	$texy->htmlGenerator->linkRoot = 'xxx/';
+	$texy->htmlGenerator->imageRoot = '../images/';
+	$texy->htmlGenerator->imageLeftClass = 'left';
 	$texy->htmlOutputModule->lineWrap = 180;
 	return $texy;
 }
@@ -34,7 +34,7 @@ test('links and images', function () {
 test('links and images in safe mode', function () {
 	$texy = createTexy();
 	Texy\Configurator::safeMode($texy);
-	$texy->allowedTags['a'][] = 'rel';
+	$texy->htmlGenerator->allowedTags['a'][] = 'rel';
 	Assert::matchFile(
 		__DIR__ . '/expected/link-combined-safe.html',
 		$texy->process(file_get_contents(__DIR__ . '/sources/link-combined.texy')),

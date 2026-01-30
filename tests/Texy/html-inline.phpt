@@ -14,7 +14,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text): string
 {
 	$texy = new Texy\Texy;
-	$texy->allowedTags = Texy\Texy::ALL;
+	$texy->htmlGenerator->allowedTags = Texy\Texy::ALL;
 	return $texy->process($text);
 }
 

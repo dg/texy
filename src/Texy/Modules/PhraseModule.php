@@ -11,18 +11,15 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Modifier;
-use Texy\Nodes\AnnotationNode;
 use Texy\Nodes\ContentNode;
 use Texy\Nodes\LinkNode;
 use Texy\Nodes\PhraseNode;
 use Texy\Nodes\RawTextNode;
 use Texy\Nodes\TextNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Syntax;
-use function htmlspecialchars, str_replace, strlen, trim;
-use const ENT_HTML5, ENT_NOQUOTES;
+use function str_replace, strlen, trim;
 
 
 /**
@@ -30,27 +27,6 @@ use const ENT_HTML5, ENT_NOQUOTES;
  */
 final class PhraseModule extends Texy\Module
 {
-	/** @var array<string, string> */
-	public array $tags = [
-		Syntax::Strong => 'strong', // or 'b'
-		Syntax::Emphasis => 'em', // or 'i'
-		Syntax::EmphasisSingleAsterisk => 'em',
-		Syntax::EmphasisSingleAsterisk2 => 'em',
-		Syntax::Inserted => 'ins',
-		Syntax::Deleted => 'del',
-		Syntax::Superscript => 'sup',
-		Syntax::SuperscriptShort => 'sup',
-		Syntax::Subscript => 'sub',
-		Syntax::SubscriptShort => 'sub',
-		Syntax::SpanQuotes => 'span',
-		Syntax::SpanTilde => 'span',
-		Syntax::AbbreviationQuotes => 'abbr',
-		Syntax::Abbreviation => 'abbr',
-		Syntax::Code => 'code',
-		Syntax::Quote => 'q',
-		Syntax::QuickLink => 'a',
-	];
-
 	public bool $linksAllowed = true;
 
 
@@ -61,9 +37,6 @@ final class PhraseModule extends Texy\Module
 		$texy->allowed[Syntax::Deleted] = false;
 		$texy->allowed[Syntax::Superscript] = false;
 		$texy->allowed[Syntax::Subscript] = false;
-		$texy->htmlGenerator->registerHandler($this->solvePhrase(...));
-		$texy->htmlGenerator->registerHandler($this->solveAnnotation(...));
-		$texy->htmlGenerator->registerHandler($this->solveRawText(...));
 	}
 
 
@@ -546,48 +519,5 @@ final class PhraseModule extends Texy\Module
 			trim($mLink),
 			$context->parseInline(trim($mContent)),
 		);
-	}
-
-
-	public function solvePhrase(PhraseNode $node, Html\Generator $generator): Html\Element
-	{
-		$tag = $this->tags[$node->type] ?? 'span';
-
-		if ($node->type === Syntax::StrongEmphasis) {
-			$el = new Html\Element($this->tags[Syntax::Strong] ?? 'strong');
-			$node->modifier?->decorate($this->texy, $el);
-			$inner = $el->create($this->tags[Syntax::Emphasis] ?? 'em');
-			$inner->children = $generator->renderNodes($node->content->children);
-			return $el;
-		}
-
-		// Code phrases - escape and protect content from typography
-		if ($node->type === Syntax::Code) {
-			$el = new Html\Element($tag);
-			$node->modifier?->decorate($this->texy, $el);
-			$content = $generator->serialize($generator->renderNodes($node->content->children));
-			// Only escape <, >, & - not quotes (ENT_NOQUOTES)
-			$content = htmlspecialchars($content, ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
-			$el->children = [$this->texy->protect($content, $this->texy::CONTENT_TEXTUAL)];
-			return $el;
-		}
-
-		// Normal phrases
-		$el = new Html\Element($tag);
-		$node->modifier?->decorate($this->texy, $el);
-		$el->children = $generator->renderNodes($node->content->children);
-		return $el;
-	}
-
-
-	public function solveAnnotation(AnnotationNode $node, Html\Generator $generator): Html\Element
-	{
-		return (new Html\Element('abbr', ['title' => $node->annotation]))->setText($node->content);
-	}
-
-
-	public function solveRawText(RawTextNode $node): string
-	{
-		return htmlspecialchars($node->content, ENT_NOQUOTES, 'UTF-8');
 	}
 }

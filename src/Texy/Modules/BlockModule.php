@@ -15,11 +15,8 @@ use Texy\Nodes\BlockNode;
 use Texy\Nodes\CodeBlockNode;
 use Texy\Nodes\CommentNode;
 use Texy\Nodes\SectionNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Syntax;
-use function htmlspecialchars, strlen, trim;
-use const ENT_NOQUOTES;
 
 
 /**
@@ -38,9 +35,6 @@ final class BlockModule extends Texy\Module
 		$texy->allowed[Syntax::BlockTexySource] = true;
 		$texy->allowed[Syntax::BlockComment] = true;
 		$texy->allowed[Syntax::BlockDiv] = true;
-		$texy->htmlGenerator->registerHandler($this->solveCodeBlock(...));
-		$texy->htmlGenerator->registerHandler($this->solveSection(...));
-		$texy->htmlGenerator->registerHandler(fn(CommentNode $node) => '');
 	}
 
 
@@ -116,101 +110,5 @@ final class BlockModule extends Texy\Module
 		}
 
 		return null;
-	}
-
-
-	public function solveCodeBlock(CodeBlockNode $node, Html\Generator $generator): Html\Element|string
-	{
-		// block/texysource - parse as texy, then display resulting HTML as source code
-		if ($node->type === 'texysource') {
-			$context = $this->texy->createParseContext();
-			$parsed = $context->parseBlock($node->content);
-			$content = $generator->serialize($generator->renderNodes($parsed->children), "\n");
-			$html = Helpers::unescapeHtml($content);
-			$html = htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8');
-			$html = $this->texy->unprotect($html);
-			$html = $this->texy->htmlOutputModule->format($html);
-			$html = Helpers::unfreezeSpaces($html);
-			$html = trim($html);
-			// Now escape the final HTML to show as source code
-			$escaped = htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8');
-			$escaped = $this->texy->protect($escaped, $this->texy::CONTENT_TEXTUAL);
-
-			$el = new Html\Element('pre');
-			$node->modifier?->decorate($this->texy, $el);
-			$el->attrs['class'] = array_merge(['html'], (array) ($el->attrs['class'] ?? []));
-			$el->create('code', $escaped);
-			return $el;
-		}
-
-		// block/html - parse HTML tags/comments, escape unknown ones
-		if ($node->type === 'html') {
-			$content = $node->content;
-			if ($content === '') {
-				return "\n";
-			}
-
-			$parsed = $this->parseHtmlOnly($generator, $content);
-			return $this->texy->protect($parsed . ' ', $this->texy::CONTENT_BLOCK);
-		}
-
-		// block/text - plain text with <br> for newlines (no wrapper)
-		// Include trailing space inside protection for proper separation from next block
-		if ($node->type === 'text') {
-			$content = htmlspecialchars($node->content, ENT_NOQUOTES, 'UTF-8');
-			$content = str_replace("\n", '<br>', $content);
-			return $this->texy->protect($content . ' ', $this->texy::CONTENT_BLOCK);
-		}
-
-		// Types that use <pre> wrapper
-		$el = new Html\Element('pre');
-		$node->modifier?->decorate($this->texy, $el);
-
-		// Language class prepended before modifier classes
-		if ($node->language) {
-			$el->attrs['class'] = array_merge([$node->language], (array) ($el->attrs['class'] ?? []));
-		}
-
-		// PRE block - parse HTML tags, unescape entities
-		if ($node->type === 'pre') {
-			$parsed = $this->parseHtmlOnly($generator, $node->content);
-			$content = $this->texy->protect($parsed, $this->texy::CONTENT_BLOCK);
-			$el->setText($content);
-			return $el;
-		}
-
-		$content = htmlspecialchars($node->content, ENT_NOQUOTES, 'UTF-8');
-		$content = $this->texy->protect($content, $this->texy::CONTENT_TEXTUAL);
-
-		if ($node->type === 'code') {
-			$el->create('code', $content);
-		} else {
-			$el->setText($content);
-		}
-
-		return $el;
-	}
-
-
-	public function solveSection(SectionNode $node, Html\Generator $generator): Html\Element
-	{
-		$el = new Html\Element($node->type === 'div' ? 'div' : 'section');
-		$node->modifier?->decorate($this->texy, $el);
-		$el->children = $generator->renderNodes($node->content->children);
-		return $el;
-	}
-
-
-	/**
-	 * Parse content with only HTML tag/comment patterns.
-	 */
-	private function parseHtmlOnly(Html\Generator $generator, string $content): string
-	{
-		$context = $this->texy->createParseContext();
-		$htmlParser = $context->getInlineParser()->withPatterns([Syntax::HtmlTag, Syntax::HtmlComment]);
-		$parsed = $generator->serialize($generator->renderNodes($htmlParser->parse(null, $content)->children));
-		$parsed = Helpers::unescapeHtml($parsed);
-		$parsed = htmlspecialchars($parsed, ENT_NOQUOTES, 'UTF-8');
-		return $this->texy->unprotect($parsed);
 	}
 }

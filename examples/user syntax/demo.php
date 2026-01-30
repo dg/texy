@@ -106,7 +106,7 @@ $texy->registerLinePattern(
 // Add new syntax: .tagname followed by content on next line
 // Examples: .h1, .h2, .perex, etc.
 $texy->registerBlockPattern(
-	function (Texy\ParseContext $context, array $matches, string $name) use ($texy): ParagraphNode {
+	function (Texy\ParseContext $context, array $matches, string $name): ParagraphNode {
 		[, $mTag, $mText] = $matches;
 
 		// Parse the content with inline parser

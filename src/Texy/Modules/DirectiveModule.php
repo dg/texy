@@ -11,7 +11,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\DirectiveNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Syntax;
 
@@ -24,7 +23,6 @@ final class DirectiveModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -44,25 +42,5 @@ final class DirectiveModule extends Texy\Module
 			~U',
 			Syntax::Directive,
 		);
-	}
-
-
-	public function solve(DirectiveNode $node, Html\Generator $generator): string
-	{
-		$parsed = $node->parseContent();
-
-		// Handle special directives
-		if ($parsed['name'] === 'texy' && $parsed['args']) {
-			switch ($parsed['args'][0]) {
-				case 'nofollow':
-					$this->texy->linkModule->forceNoFollow = true;
-					break;
-			}
-			// texy directive with args returns empty
-			return '';
-		}
-
-		// Unknown directives - preserve original text
-		return '{{' . $node->content . '}}';
 	}
 }

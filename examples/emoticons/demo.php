@@ -37,7 +37,7 @@ $texy = new Texy;
 $texy->allowed[Texy\Syntax::Emoticon] = true;
 
 // Set a CSS class that will be added to all emoticon images
-$texy->emoticonModule->class = 'smilie';
+$texy->htmlGenerator->emoticonClass = 'smilie';
 
 // Add your own custom emoticon
 // When someone types :oops: in the text, it will show this emoji

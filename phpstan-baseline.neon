@@ -13,27 +13,19 @@ parameters:
 			path: src/Bridges/Latte/TexyNode.php
 
 		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: src/Texy/Output/Html/Formatter.php
+
+		-
 			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
 			identifier: missingType.callable
 			count: 1
 			path: src/Texy/Texy.php
 
-		# Defensive null coalescing for optional regex capture groups
 		-
-			identifier: nullCoalesce.variable
-			paths:
-				- src/Texy/Modules/BlockQuoteModule.php
-				- src/Texy/Modules/ListModule.php
-
-		# tagStack is populated by processFragment callback during Regexp::replace
-		-
-			identifier: foreach.emptyArray
-			path: src/Texy/Output/Html/Formatter.php
-
-		# Generator handlers have varied signatures (different node types, optional previous)
-		-
-			identifier: missingType.iterableValue
-			path: src/Texy/Output/Html/Generator.php
-		-
+			message: '#^Method Texy\\Output\\Html\\Generator\:\:registerHandler\(\) has parameter \$handler with no signature specified for Closure\.$#'
 			identifier: missingType.callable
+			count: 1
 			path: src/Texy/Output/Html/Generator.php

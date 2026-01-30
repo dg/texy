@@ -11,7 +11,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\HorizontalRuleNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Syntax;
 
@@ -21,17 +20,9 @@ use Texy\Syntax;
  */
 final class HorizontalRuleModule extends Texy\Module
 {
-	/** @var array<string, ?string>  default CSS class */
-	public array $classes = [
-		'-' => null,
-		'*' => null,
-	];
-
-
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -49,21 +40,5 @@ final class HorizontalRuleModule extends Texy\Module
 			$~mU',
 			Syntax::HorizontalRule,
 		);
-	}
-
-
-	public function solve(HorizontalRuleNode $node, Html\Generator $generator): Html\Element
-	{
-		$el = new Html\Element('hr');
-		$node->modifier?->decorate($this->texy, $el);
-
-		// Add default class if not already set via modifier
-		$class = $this->classes[$node->type] ?? null;
-		if ($class && empty($node->modifier?->classes[$class])) {
-			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-			$el->attrs['class'][] = $class;
-		}
-
-		return $el;
 	}
 }

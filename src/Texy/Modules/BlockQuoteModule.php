@@ -11,7 +11,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\BlockQuoteNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Syntax;
 use function max, strlen;
@@ -25,7 +24,6 @@ final class BlockQuoteModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlGenerator->registerHandler($this->solve(...));
 	}
 
 
@@ -82,14 +80,5 @@ final class BlockQuoteModule extends Texy\Module
 			$parsed,
 			Texy\Modifier::parse($mMod),
 		);
-	}
-
-
-	public function solve(BlockQuoteNode $node, Html\Generator $generator): Html\Element
-	{
-		$el = new Html\Element('blockquote');
-		$node->modifier?->decorate($this->texy, $el);
-		$el->children = $generator->renderNodes($node->content->children);
-		return $el;
 	}
 }

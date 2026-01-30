@@ -15,7 +15,6 @@ use Texy\Nodes\ContentNode;
 use Texy\Nodes\TableCellNode;
 use Texy\Nodes\TableNode;
 use Texy\Nodes\TableRowNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
@@ -34,9 +33,6 @@ final class TableModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlGenerator->registerHandler($this->solveTable(...));
-		$texy->htmlGenerator->registerHandler($this->solveRow(...));
-		$texy->htmlGenerator->registerHandler($this->solveCell(...));
 	}
 
 
@@ -74,7 +70,7 @@ final class TableModule extends Texy\Module
 		$prevRow = [];
 		$colModifier = [];
 		$colCounter = 0;
-		/** @var \SplObjectStorage<TableCellNode, array{text: string}> $cellTexts */
+		/** @var \SplObjectStorage<TableCellNode, string> $cellTexts */
 		$cellTexts = new \SplObjectStorage;
 
 		while (true) {
@@ -102,7 +98,6 @@ final class TableModule extends Texy\Module
 				$lastCell = null;
 
 				foreach (explode('|', $content) as $cell) {
-					$originalCell = $cell;
 					$cell = strtr($cell, "\x13", '|');
 
 					// rowSpan: ^ at end of cell or cell is just ^
@@ -110,9 +105,7 @@ final class TableModule extends Texy\Module
 						$prevRow[$col]['node']->rowspan++;
 						$cellText = $m[1] ?? '';
 						// Append text to the cell above
-						$data = $cellTexts[$prevRow[$col]['node']];
-						$data['text'] .= "\n" . $cellText;
-						$cellTexts[$prevRow[$col]['node']] = $data;
+						$cellTexts[$prevRow[$col]['node']] .= "\n" . $cellText;
 						$col += $prevRow[$col]['node']->colspan;
 						$lastCell = null;
 						continue;
@@ -134,13 +127,13 @@ final class TableModule extends Texy\Module
 						(.*)                              # content (3)
 						' . Patterns::MODIFIER_HV . '?    # modifier (4)
 						[ \t]*
-					$~AU', captureOffset: true);
+					$~AU');
 
 					if ($cellMatches) {
-						$mHead = $cellMatches[1][0];
-						$mModCol = $cellMatches[2][0];
-						$mCellContent = $cellMatches[3][0];
-						$mCellMod = $cellMatches[4][0];
+						$mHead = $cellMatches[1];
+						$mModCol = $cellMatches[2];
+						$mCellContent = $cellMatches[3];
+						$mCellMod = $cellMatches[4];
 
 						$cellIsHeader = $isHead || ($mHead === '*');
 
@@ -154,8 +147,8 @@ final class TableModule extends Texy\Module
 						// Create cell node - text will be parsed later
 						$lastCell = new TableCellNode(new ContentNode, 1, 1, $cellIsHeader, $cellMod);
 						$cells[] = $lastCell;
-						$cellTexts[$lastCell] = ['text' => $mCellContent ?? ''];
-						$prevRow[$col] = ['node' => $lastCell, 'text' => $mCellContent ?? ''];
+						$cellTexts[$lastCell] = $mCellContent ?? '';
+						$prevRow[$col] = ['node' => $lastCell, 'text' => $mCellContent];
 						$col++;
 					}
 				}
@@ -165,7 +158,7 @@ final class TableModule extends Texy\Module
 					$cellMod = isset($colModifier[$col]) ? clone $colModifier[$col] : new Modifier;
 					$emptyCell = new TableCellNode(new ContentNode, 1, 1, $isHead, $cellMod);
 					$cells[] = $emptyCell;
-					$cellTexts[$emptyCell] = ['text' => ''];
+					$cellTexts[$emptyCell] = '';
 					$prevRow[$col] = ['node' => $emptyCell, 'text' => ''];
 					$col++;
 				}
@@ -196,8 +189,7 @@ final class TableModule extends Texy\Module
 		foreach ($rows as $row) {
 			foreach ($row->cells as $cell) {
 				if (isset($cellTexts[$cell])) {
-					$data = $cellTexts[$cell];
-					$text = rtrim((string) $data['text']);
+					$text = rtrim((string) $cellTexts[$cell]);
 
 					if (str_contains($text, "\n")) {
 						// multiline - parse as block (disable nested tables)
@@ -206,8 +198,7 @@ final class TableModule extends Texy\Module
 						$this->disableTables = false;
 					} else {
 						// single line - parse as inline
-						$trimmed = ltrim($text);
-						$cell->content->children = $context->parseInline($trimmed)->children;
+						$cell->content->children = $context->parseInline(ltrim($text))->children;
 					}
 
 					// empty cell gets &nbsp;
@@ -222,60 +213,5 @@ final class TableModule extends Texy\Module
 			$rows,
 			Modifier::parse($mMod),
 		);
-	}
-
-
-	public function solveTable(TableNode $node, Html\Generator $generator): Html\Element
-	{
-		$el = new Html\Element('table');
-		$node->modifier?->decorate($this->texy, $el);
-
-		$elPart = null;
-		foreach ($node->rows as $row) {
-			if ($elPart === null) {
-				$elPart = new Html\Element($row->header ? 'thead' : 'tbody');
-				$el->add($elPart);
-			} elseif (!$row->header && $elPart->name === 'thead') {
-				// switch from thead to tbody
-				$elPart = new Html\Element('tbody');
-				$el->add($elPart);
-			}
-			$elPart->add($this->solveRow($row, $generator));
-		}
-
-		// if only thead without tbody, rename to tbody (tbody is required, thead is optional)
-		if ($elPart !== null && $elPart->name === 'thead') {
-			$elPart->name = 'tbody';
-		}
-
-		return $el;
-	}
-
-
-	public function solveRow(TableRowNode $node, Html\Generator $generator): Html\Element
-	{
-		$el = new Html\Element('tr');
-		$node->modifier?->decorate($this->texy, $el);
-		foreach ($node->cells as $cell) {
-			$el->add($this->solveCell($cell, $generator));
-		}
-		return $el;
-	}
-
-
-	public function solveCell(TableCellNode $node, Html\Generator $generator): Html\Element
-	{
-		$el = new Html\Element($node->header ? 'th' : 'td');
-		$node->modifier?->decorate($this->texy, $el);
-
-		if ($node->colspan > 1) {
-			$el->attrs['colspan'] = $node->colspan;
-		}
-		if ($node->rowspan > 1) {
-			$el->attrs['rowspan'] = $node->rowspan;
-		}
-
-		$el->children = $generator->renderNodes($node->content->children);
-		return $el;
 	}
 }
