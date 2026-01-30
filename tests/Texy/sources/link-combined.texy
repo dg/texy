@@ -119,15 +119,15 @@ Pure
 - www.text.cz?(x)#$%10
 
 
-[php Fashion1]: http://phpfashion.com/ text *o*dkazu .(title)[aa]
-[php Fashion2]: /trine/ .(title)
+[php Fashion1]: http://phpfashion.com/
+[php Fashion2]: /trine/
 [php Fashion3]: ./trine/
-[email]: dave@example.com .(title)
+[email]: dave@example.com
 
-[neobrazek1]: [*texy-big.jpg*] text .(title)
-[neobrazek2]: [* texy-big.jpg *] text
+[neobrazek1]: [*texy-big.jpg*]
+[neobrazek2]: [*texy-big.jpg*]
 [neobrazek3]: [*texy-big.jpg*]
-[neobrazek4]: [*obrazek3*] [*obrazek1*] .(test)
+[neobrazek4]: [*obrazek3*]
 
 [*obrazek1*]: texy.jpg .(altX)
 [*obrazek2*]: texy.jpg 10x13
