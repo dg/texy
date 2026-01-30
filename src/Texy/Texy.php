@@ -9,7 +9,6 @@ namespace Texy;
 
 use JetBrains\PhpStorm\Language;
 use function strlen;
-use const ARRAY_FILTER_USE_BOTH;
 
 
 /**
@@ -48,6 +47,8 @@ class Texy
 	public bool $mergeLines = true;
 
 	public bool $removeSoftHyphens = true;
+
+	// Modules with runtime state (kept as-is)
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\ImageModule $imageModule;
 	public Modules\LinkReferenceModule $linkModule;
@@ -67,25 +68,12 @@ class Texy
 	public array $postHandlers = [];
 
 	/** @var Module[] */
-	private array $modules;
+	private array $modules = [];
 
 	/**
-	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>
+	 * The parsing engine - configured once, reused for multiple parse operations.
 	 */
-	private array $linePatterns = [];
-
-	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}> */
-	private array $_linePatterns;
-
-	/**
-	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>
-	 */
-	private array $blockPatterns = [];
-
-	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}> */
-	private array $_blockPatterns;
+	private Engine $engine;
 
 	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
 	private array $handlers = [];
@@ -93,6 +81,7 @@ class Texy
 
 	public function __construct()
 	{
+		$this->engine = new Engine;
 		$this->htmlPolicy = new HtmlPolicy($this);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->loadModules();
@@ -156,10 +145,7 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->linePatterns[$name] = [
-			'handler' => $handler,
-			'pattern' => $pattern,
-		];
+		$this->engine->registerLinePattern($handler, $pattern, $name);
 	}
 
 
@@ -175,10 +161,7 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->blockPatterns[$name] = [
-			'handler' => $handler,
-			'pattern' => $pattern . 'm', // force multiline
-		];
+		$this->engine->registerBlockPattern($handler, $pattern, $name);
 	}
 
 
@@ -190,6 +173,7 @@ class Texy
 		}
 
 		$this->postHandlers[$name] = $handler;
+		$this->engine->registerPostLine($handler, $name);
 	}
 
 
@@ -199,7 +183,6 @@ class Texy
 	public function process(string $text, bool $singleLine = false): string
 	{
 		$this->htmlPolicy->resetCache();
-		unset($this->_linePatterns, $this->_blockPatterns);
 		$text = $this->preprocess($text);
 		$node = $this->parse($text, $singleLine);
 		$html = (new Output\Html\Renderer($this->htmlOutput, $this))->render($node);
@@ -212,15 +195,18 @@ class Texy
 	 */
 	public function parse(string $text, bool $singleLine = false): Nodes\DocumentNode
 	{
+		// Let modules do per-parse initialization (pattern registration, state reset, text preprocessing)
 		foreach ($this->modules as $module) {
 			$module->beforeParse($text);
 		}
 
-		$context = $this->createParseContext();
-		$content = $singleLine
-			? $context->parseInline($text)
-			: $context->parseBlock($text);
-		$document = new Nodes\DocumentNode($content);
+		// Set gap handler for paragraphs
+		$this->engine->setGapHandler(
+			fn(ParseContext $context, string $gapText, int $offset) => $this->paragraphModule->parseText($context, $gapText, $offset),
+		);
+
+		// Parse using the engine with current allowed settings
+		$document = $this->engine->parse($text, $this->allowed, $singleLine);
 
 		$this->invokeHandlers('afterParse', [$document]);
 		return $document;
@@ -269,7 +255,14 @@ class Texy
 	public function parseLine(string $text): Nodes\ParagraphNode
 	{
 		$text = $this->preprocess($text);
-		$context = $this->createParseContext();
+
+		// Initialize modules (pattern registration, state reset)
+		foreach ($this->modules as $module) {
+			$module->beforeParse($text);
+		}
+
+		// Create context using engine
+		$context = $this->engine->createParseContext($this->allowed);
 		$inlineNodes = $context->parseInline($text);
 		return new Nodes\ParagraphNode($inlineNodes);
 	}
@@ -341,37 +334,23 @@ class Texy
 	}
 
 
+	/**
+	 * Creates parse context (for advanced usage).
+	 * Note: Modules must be initialized via parse() first for patterns to be available.
+	 */
 	public function createParseContext(): ParseContext
 	{
-		return new ParseContext(
-			$this->createInlineParser(),
-			$this->createBlockParser(),
-		);
+		return $this->engine->createParseContext($this->allowed);
 	}
 
 
-	private function createBlockParser(): BlockParser
+	/**
+	 * Get the underlying parsing engine.
+	 * @internal
+	 */
+	public function getEngine(): Engine
 	{
-		$this->_blockPatterns ??= array_filter(
-			$this->blockPatterns,
-			fn($pattern, $name) => !empty($this->allowed[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-		return new BlockParser(
-			$this->_blockPatterns,
-			fn(ParseContext $context, string $text, int $offset) => $this->paragraphModule->parseText($context, $text, $offset),
-		);
-	}
-
-
-	private function createInlineParser(): InlineParser
-	{
-		$this->_linePatterns ??= array_filter(
-			$this->linePatterns,
-			fn($pattern, $name) => !empty($this->allowed[$name]),
-			ARRAY_FILTER_USE_BOTH,
-		);
-		return new InlineParser($this->_linePatterns);
+		return $this->engine;
 	}
 
 
