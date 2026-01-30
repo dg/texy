@@ -59,21 +59,18 @@ final class LinkModule extends Texy\Module
 
 
 	/**
-	 * Parses [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
+	 * Parses [la trine]: http://www.latrine.cz/
 	 * @param  array<?string>  $matches
 	 */
 	private function parseDefinition(array $matches): string
 	{
 		/** @var array{string, string, string, ?string, ?string} $matches */
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
-		// [1] => [ (reference) ]
-		// [2] => link
-		// [3] => ...
-		// [4] => .(title)[class]{style}
+		if ($mMod || $mLabel) {
+			trigger_error('Modifiers and label in link definitions are deprecated.', E_USER_DEPRECATED);
+		}
 
 		$link = new Link($mLink);
-		$link->label = trim($mLabel ?? '');
-		$link->modifier->setProperties($mMod);
 		$this->checkLink($link);
 		$link->name = Texy\Helpers::toLower($mRef);
 		$this->references[$link->name] = $link;
@@ -84,13 +81,9 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Adds a user-defined link definition (persists across process() calls).
 	 */
-	public function addDefinition(string $name, string $url, ?string $label = null, ?string $title = null): void
+	public function addDefinition(string $name, string $url): void
 	{
 		$link = new Link($url);
-		$link->label = $label ?? '';
-		if ($title !== null) {
-			$link->modifier->title = $title;
-		}
 		$link->name = Texy\Helpers::toLower($name);
 		$this->references[$link->name] = $link;
 	}
@@ -143,7 +136,6 @@ final class LinkModule extends Texy\Module
 			$image = $texy->imageModule->getReference($dest);
 			if ($image) {
 				$link = new Link($image->linkedURL ?? $image->URL);
-				$link->modifier = $image->modifier;
 			}
 		}
 

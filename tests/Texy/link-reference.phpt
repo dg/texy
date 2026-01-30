@@ -67,9 +67,9 @@ test('case insensitive reference matching', function () {
 
 test('user-defined link definition works', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->addDefinition('texy', 'https://texy.nette.org/', 'Texy!', 'The best converter');
+	$texy->linkModule->addDefinition('texy', 'https://texy.nette.org/');
 	Assert::same(
-		"<p><a href=\"https://texy.nette.org/\" title=\"The best converter\">Visit</a></p>\n",
+		"<p><a href=\"https://texy.nette.org/\">Visit</a></p>\n",
 		$texy->process('"Visit":[texy]'),
 	);
 });
