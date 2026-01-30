@@ -199,7 +199,6 @@ class Generator
 	 */
 	public function registerHandler(\Closure $handler): void
 	{
-		/** @var class-string<Node> $nodeClass */
 		$nodeClass = (string) (new \ReflectionFunction($handler))->getParameters()[0]->getType();
 		$previous = $this->handlers[$nodeClass] ?? null;
 		$this->handlers[$nodeClass] = static function (Node $node, self $gen) use ($handler, $previous): Element|string {
@@ -657,7 +656,6 @@ class Generator
 		}
 
 		if ($style = $node->type->getStyleType()) {
-			$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
 			$el->attrs['style']['list-style-type'] = $style;
 		}
 
@@ -1084,7 +1082,7 @@ class Generator
 
 		// Handle special directives
 		if ($parsed['name'] === 'texy' && $parsed['args']) {
-			switch ($parsed['args'][0]) {
+			switch ($parsed['args'][0] ?? null) {
 				case 'nofollow':
 					$this->linkNoFollow = true;
 					break;

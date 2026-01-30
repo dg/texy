@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Annotation.
@@ -19,6 +21,7 @@ class AnnotationNode extends InlineNode
 	public function __construct(
 		public string $content,
 		public string $annotation,
+		public ?Position $position = null,
 	) {
 	}
 }

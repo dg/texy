@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * URL.
@@ -18,6 +20,7 @@ class UrlNode extends InlineNode
 {
 	public function __construct(
 		public string $url,
+		public ?Position $position = null,
 	) {
 	}
 }

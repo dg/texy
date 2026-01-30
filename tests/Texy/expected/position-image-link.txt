@@ -1,0 +1,12 @@
+DocumentNode
+  ContentNode
+    ParagraphNode
+      ContentNode
+        LinkNode [0,31] url=https://example.com
+          ContentNode
+            TextNode [1,9] "link text"
+    FigureNode [33,15]
+      ImageNode src=image.jpg
+    ImageDefinitionNode [50,18]
+    FigureNode [70,9]
+      ImageNode src=photo.png

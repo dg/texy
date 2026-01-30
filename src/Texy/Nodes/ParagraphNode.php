@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Position;
 
 
 /**
@@ -24,6 +25,7 @@ class ParagraphNode extends BlockNode
 	public function __construct(
 		public ContentNode $content = new ContentNode,
 		public ?Texy\Modifier $modifier = null,
+		public ?Position $position = null,
 	) {
 	}
 

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy\Modifier;
+use Texy\Position;
 
 
 /**
@@ -22,6 +23,7 @@ class PhraseNode extends InlineNode
 		public ContentNode $content,
 		public string $type,
 		public ?Modifier $modifier = null,
+		public ?Position $position = null,
 	) {
 	}
 

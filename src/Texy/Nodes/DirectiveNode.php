@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
 use Texy\Regexp;
 
 
@@ -20,6 +21,7 @@ class DirectiveNode extends InlineNode
 {
 	public function __construct(
 		public string $content,
+		public ?Position $position = null,
 	) {
 	}
 

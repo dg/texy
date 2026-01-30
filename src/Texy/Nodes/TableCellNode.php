@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Position;
 
 
 /**
@@ -23,6 +24,7 @@ class TableCellNode extends BlockNode
 		public int $rowspan = 1,
 		public bool $header = false,
 		public ?Texy\Modifier $modifier = null,
+		public ?Position $position = null,
 	) {
 	}
 

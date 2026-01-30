@@ -18,6 +18,7 @@ use Texy\Nodes\RawTextNode;
 use Texy\Nodes\TextNode;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Syntax;
 use function str_replace, strlen, trim;
 
@@ -388,7 +389,7 @@ final class PhraseModule extends Texy\Module
 
 		// \* escaped asterisk
 		$texy->registerLinePattern(
-			fn($context, $matches) => new TextNode('*'),
+			fn($context, $matches, $offsets) => new TextNode('*', new Position($offsets[0], 2)),
 			'~\\\\\*~',
 			Syntax::EscapedAsterisk,
 		);
@@ -398,19 +399,23 @@ final class PhraseModule extends Texy\Module
 	/**
 	 * Parses phrase patterns.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
 	public function parsePhrase(
 		ParseContext $context,
 		array $matches,
+		array $offsets,
 		string $phrase,
 	): PhraseNode|LinkNode|null
 	{
 		[, $mContent, $mMod, $mLink] = $matches + [2 => null, 3 => null];
+		$position = new Position($offsets[0], strlen($matches[0]));
+		$contentOffset = $offsets[1] ?? $offsets[0];
 
 		// For phrase/span and phrase/span-alt, URL makes it a link
 		if (($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) && $mLink !== null) {
-			$content = $context->parseInline(trim($mContent));
-			return new LinkNode($mLink, $content, Modifier::parse($mMod));
+			$content = $context->parseInline(trim($mContent), $contentOffset);
+			return new LinkNode($mLink, $content, Modifier::parse($mMod), $position);
 		}
 
 		// For phrase/span without URL and without modifier, return null (means "...")
@@ -419,32 +424,35 @@ final class PhraseModule extends Texy\Module
 		}
 
 		$mod = Modifier::parse($mMod);
-		$content = $context->parseInline(trim($mContent));
+		$content = $context->parseInline(trim($mContent), $contentOffset);
 
 		// Other phrases with link
 		if ($mLink !== null) {
 			// Wrap phrase in link
-			$phraseNode = new PhraseNode($content, $phrase, $mod);
-			return new LinkNode($mLink, new ContentNode([$phraseNode]));
+			$phraseNode = new PhraseNode($content, $phrase, $mod, $position);
+			return new LinkNode($mLink, new ContentNode([$phraseNode]), null, $position);
 		}
 
-		return new PhraseNode($content, $phrase, $mod);
+		return new PhraseNode($content, $phrase, $mod, $position);
 	}
 
 
 	/**
 	 * Parses code phrase.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseCode(ParseContext $context, array $matches, string $phrase): PhraseNode
+	public function parseCode(ParseContext $context, array $matches, array $offsets, string $phrase): PhraseNode
 	{
 		[, $mContent, $mMod] = $matches + [2 => null];
+		$contentOffset = $offsets[1] ?? $offsets[0];
 		// Code content is not parsed recursively
-		$content = [new TextNode($mContent)];
+		$content = [new TextNode($mContent, new Position($contentOffset, strlen($mContent)))];
 		return new PhraseNode(
 			new ContentNode($content),
 			$phrase,
 			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -452,15 +460,18 @@ final class PhraseModule extends Texy\Module
 	/**
 	 * Parses superscript/subscript alternative (m^2, H_2O).
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseSupSub(ParseContext $context, array $matches, string $phrase): PhraseNode
+	public function parseSupSub(ParseContext $context, array $matches, array $offsets, string $phrase): PhraseNode
 	{
 		[, $mContent] = $matches;
 		$mContent = str_replace('-', "\u{2212}", $mContent); // &minus;
-		$content = [new TextNode($mContent)];
+		$content = [new TextNode($mContent, new Position($offsets[1] ?? $offsets[0], strlen($matches[1])))];
 		return new PhraseNode(
 			new ContentNode($content),
 			$phrase,
+			null,
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -468,27 +479,30 @@ final class PhraseModule extends Texy\Module
 	/**
 	 * Parses acronym/abbr.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseAcronym(ParseContext $context, array $matches, string $phrase): PhraseNode
+	public function parseAcronym(ParseContext $context, array $matches, array $offsets, string $phrase): PhraseNode
 	{
 		[, $mContent, $mMod, $mTitle] = $matches + [2 => null, 3 => ''];
+		$contentOffset = $offsets[1] ?? $offsets[0];
 
 		$mod = Modifier::parse($mMod) ?? new Modifier;
 		$mod->title = trim(Texy\Helpers::unescapeHtml($mTitle));
-		$content = [new TextNode(trim($mContent))];
+		$content = [new TextNode(trim($mContent), new Position($contentOffset, strlen(trim($mContent))))];
 
-		return new PhraseNode(new ContentNode($content), $phrase, $mod);
+		return new PhraseNode(new ContentNode($content), $phrase, $mod, new Position($offsets[0], strlen($matches[0])));
 	}
 
 
 	/**
 	 * Parses ''notexy''.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseNoTexy(ParseContext $context, array $matches): RawTextNode
+	public function parseNoTexy(ParseContext $context, array $matches, array $offsets): RawTextNode
 	{
 		[, $mContent] = $matches;
-		return new RawTextNode($mContent);
+		return new RawTextNode($mContent, new Position($offsets[0], strlen($matches[0])));
 	}
 
 
@@ -496,13 +510,16 @@ final class PhraseModule extends Texy\Module
 	 * Parses links (phrase/quicklink, phrase/markdown).
 	 * Note: Markdown links don't support modifiers - modifier is intentionally ignored.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseLink(ParseContext $context, array $matches): LinkNode
+	public function parseLink(ParseContext $context, array $matches, array $offsets): LinkNode
 	{
 		[, $mContent, $mMod, $mLink] = $matches + [2 => null, 3 => null];
 		return new LinkNode(
 			trim($mLink ?? ''),
-			$context->parseInline(trim($mContent)),
+			$context->parseInline(trim($mContent), $offsets[1] ?? $offsets[0]),
+			null,  // quicklink and markdown links don't support modifiers
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -511,13 +528,16 @@ final class PhraseModule extends Texy\Module
 	 * Parses wikilink [text|link].
 	 * Note: Wikilinks don't support modifiers - modifier is intentionally ignored.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseWikilink(ParseContext $context, array $matches): LinkNode
+	public function parseWikilink(ParseContext $context, array $matches, array $offsets): LinkNode
 	{
 		[, $mContent, $mLink] = $matches;
 		return new LinkNode(
 			trim($mLink),
-			$context->parseInline(trim($mContent)),
+			$context->parseInline(trim($mContent), $offsets[1] ?? $offsets[0]),
+			null,  // wikilinks don't support modifiers
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 }

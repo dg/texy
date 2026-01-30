@@ -1,0 +1,9 @@
+DocumentNode
+  ContentNode
+    BlockQuoteNode [0,33]
+      ContentNode
+        ParagraphNode
+          ContentNode
+            TextNode [2,31] "Quote line one Quote line two"
+    HorizontalRuleNode [35,3]
+    CodeBlockNode [40,29] lang=php

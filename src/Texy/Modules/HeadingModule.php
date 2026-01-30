@@ -14,6 +14,7 @@ use Texy\Modifier;
 use Texy\Nodes\HeadingNode;
 use Texy\Nodes\HeadingType;
 use Texy\ParseContext;
+use Texy\Position;
 use Texy\Syntax;
 use function array_flip, array_values, asort, max, min, rtrim, strlen, trim;
 
@@ -215,16 +216,19 @@ final class HeadingModule extends Texy\Module
 	/**
 	 * Parses underlined heading.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseUnderline(ParseContext $context, array $matches): HeadingNode
+	public function parseUnderline(ParseContext $context, array $matches, array $offsets): HeadingNode
 	{
 		[, $mContent, $mMod, $mLine] = $matches;
 		$level = $this->levels[$mLine[0]];
+		$contentOffset = $offsets[1] ?? $offsets[0];
 		return new HeadingNode(
-			$context->parseInline(trim($mContent)),
+			$context->parseInline(trim($mContent), $contentOffset),
 			$level,
 			HeadingType::Underlined,
 			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -232,19 +236,27 @@ final class HeadingModule extends Texy\Module
 	/**
 	 * Parses surrounded heading.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseSurround(ParseContext $context, array $matches): HeadingNode
+	public function parseSurround(ParseContext $context, array $matches, array $offsets): HeadingNode
 	{
 		[, $mLine, $mContent, $mMod] = $matches;
 		$level = min(7, max(2, strlen($mLine)));
 		$level = $this->moreMeansHigher ? 7 - $level : $level - 2;
 		$mContent = rtrim($mContent, $mLine[0] . ' ');
+		$contentOffset = $offsets[2] ?? $offsets[0];
+
+		// Adjust offset for leading whitespace removed by trim
+		$trimmed = ltrim($mContent);
+		$leadingSpaces = strlen($mContent) - strlen($trimmed);
+		$contentOffset += $leadingSpaces;
 
 		return new HeadingNode(
-			$context->parseInline(trim($mContent)),
+			$context->parseInline(trim($mContent), $contentOffset),
 			$level,
 			HeadingType::Surrounded,
 			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 

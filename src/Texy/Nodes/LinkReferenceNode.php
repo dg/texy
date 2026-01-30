@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Link reference.
@@ -18,6 +20,7 @@ class LinkReferenceNode extends InlineNode
 {
 	public function __construct(
 		public string $identifier,
+		public ?Position $position = null,
 	) {
 	}
 }

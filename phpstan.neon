@@ -19,29 +19,54 @@ parameters:
 				- src/Texy/Nodes/
 
 		# Empty generator pattern using `false && yield` to satisfy return type Generator
-		# while yielding nothing. PHPStan correctly sees issues with this pattern.
+		# while yielding nothing. PHPStan correctly sees left side is always false.
+		# This is the default getNodes() implementation that child classes can override.
 		-
 			identifier: booleanAnd.leftAlwaysFalse
 			path: src/Texy/Node.php
+
 		-
 			identifier: generator.valueType
 			path: src/Texy/Node.php
 
-		# Regex capture groups return null when not matched, ?? handles this correctly.
-		# PHPStan sees variable as "always existing" from list() assignment.
-		-
-			identifier: nullCoalesce.variable
-			paths:
-				- src/Texy/Modules/BlockQuoteModule.php
-				- src/Texy/Modules/ListModule.php
-
-		# Runtime validation of array items using array_filter. PHPStan sees the filter
-		# as unnecessary because typed arrays can't contain falsy values, but this
-		# validates runtime data that may not match the declared types.
+		# Node classes use getNodes() pattern where children are yielded by reference
+		# and can be set to null during iteration. array_filter removes nulls afterward.
+		# PHPStan doesn't understand this pattern and thinks array_filter is redundant.
 		-
 			identifier: arrayFilter.same
 			paths:
 				- src/Texy/Nodes/
+
+		# Element::$children is typed as list<> but is often constructed as array<>.
+		# These are all sequential arrays but PHPStan can't verify they don't have gaps.
+		# The arrays are used immediately for rendering so any gaps would be visible.
+		-
+			identifier: assign.propertyType
+			message: '#Element::\$children \(list<.*>\) does not accept array<#'
+			paths:
+				- src/Texy/Output/Html/
+
+		# ContentNode is used for both inline and block content. Methods like
+		# generateInlineContent() and analyzeContent() expect only InlineNode children,
+		# but the ContentNode type is array<InlineNode|BlockNode>. At runtime, these
+		# ContentNodes only contain InlineNodes in these contexts.
+		-
+			identifier: argument.type
+			message: '#(analyzeContent|generateInlineContent|generateBlockContent).*expects array<Texy\\Nodes\\(Inline|Block)Node>#'
+			paths:
+				- src/Texy/Output/Html/
+
+		-
+			identifier: argument.type
+			message: '#ContentNode constructor expects array<.*BlockNode\|.*InlineNode>#'
+			paths:
+				- src/Texy/Modules/
+
+		-
+			identifier: assign.propertyType
+			message: '#ContentNode::\$children.*does not accept array<#'
+			paths:
+				- src/Texy/Modules/
 
 includes:
 	- phpstan-baseline.neon

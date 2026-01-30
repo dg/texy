@@ -18,6 +18,7 @@ use Texy\Nodes\LinkDefinitionNode;
 use Texy\NodeTraverser;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Syntax;
 use function in_array, strlen;
 
@@ -64,8 +65,9 @@ final class LinkModule extends Texy\Module
 	/**
 	 * Parses [ref]: url
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseDefinition(ParseContext $context, array $matches): LinkDefinitionNode
+	public function parseDefinition(ParseContext $context, array $matches, array $offsets): LinkDefinitionNode
 	{
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
 		if ($mMod || $mLabel) {
@@ -74,6 +76,7 @@ final class LinkModule extends Texy\Module
 		return new LinkDefinitionNode(
 			$mRef,
 			$mLink,
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 

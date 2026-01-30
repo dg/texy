@@ -41,6 +41,7 @@ vendor/bin/phpstan analyse --no-progress
 - `BlockParser.php` - Parses block-level elements into AST nodes
 - `InlineParser.php` - Parses inline elements into AST nodes
 - `ParseContext.php` - Context for parsing operations
+- `Position.php` - Source position tracking
 - `NodeTraverser.php` - AST traversal utility
 - `Modifier.php` - Handles CSS classes, IDs, and styling modifiers
 - `Helpers.php` - Utility functions
@@ -96,6 +97,7 @@ vendor/bin/phpstan analyse --no-progress
 ### AST Node Hierarchy
 
 All nodes inherit from `Texy\Node` which provides:
+- `position: ?Position` - Source location tracking
 - `getNodes(): Generator` - Child node iteration for traversal
 
 **Node categories:**
@@ -107,6 +109,7 @@ All nodes inherit from `Texy\Node` which provides:
 ```php
 // Most nodes have:
 public ?Modifier $modifier;   // CSS classes, IDs, styles
+public ?Position $position;   // Source location
 
 // ContentNode (container):
 public array $children;       // Child nodes (InlineNode|BlockNode)
@@ -130,9 +133,9 @@ Modules handle both parsing and HTML generation:
 
 2. **Parsing** - Pattern handlers create AST nodes:
    ```php
-   public function parseImage(ParseContext $context, array $matches, string $name): ImageNode
+   public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode
    {
-       return new ImageNode($url, $width, $height, $modifier);
+       return new ImageNode($url, $width, $height, $modifier, $position);
    }
    ```
 
@@ -379,9 +382,10 @@ $texy->registerLinePattern(
     function(
         Texy\ParseContext $context,
         array $matches,
-        string $name,
+        array $offsets,
     ): Texy\Nodes\InlineNode {
         $username = $matches[1];
+        $position = new Texy\Position($offsets[0], strlen($matches[0]));
 
         // Create a LinkNode wrapping the username
         return new Texy\Nodes\LinkNode(
@@ -389,6 +393,7 @@ $texy->registerLinePattern(
             content: new Texy\Nodes\ContentNode([
                 new Texy\Nodes\TextNode('@' . $username),
             ]),
+            position: $position,
         );
     },
     '~@@([a-z0-9_]+)~i',      // Pattern
@@ -420,10 +425,11 @@ $texy->registerBlockPattern(
     function(
         Texy\ParseContext $context,
         array $matches,
-        string $name,
+        array $offsets,
     ): Texy\Nodes\BlockNode {
         $type = $matches[1];
         $content = $matches[2];
+        $position = new Texy\Position($offsets[0], strlen($matches[0]));
 
         // Parse content with Texy syntax
         $innerContent = $context->parseBlock(trim($content));
@@ -432,6 +438,7 @@ $texy->registerBlockPattern(
         return new Texy\Nodes\BlockQuoteNode(
             content: $innerContent,
             modifier: Texy\Modifier::parse('[alert-' . $type . ']'),
+            position: $position,
         );
     },
     '~^:::(warning|info|danger)\n(.+?)(?=\n:::|$)~s',
@@ -485,12 +492,38 @@ $html = Helpers::unfreezeSpaces($html);
 - **BlockParser**: Processes block structures (paragraphs, headings, lists). Creates `BlockNode` instances.
 - **InlineParser**: Processes inline syntaxes (formatting, links, images). Creates `InlineNode` instances.
 
+### Position Tracking
+
+Position tracks source location with `offset` (byte position from document start) and `length` (byte length).
+
+**Key principles:**
+- Positions are **absolute** - relative to original document, not to extracted/transformed content
+- Positions are **byte-based** - important for UTF-8 (日 = 3 bytes, not 1 character)
+- `substr($source, $position->offset, $position->length)` should extract the original syntax
+
+**For nested content** (blockquote, list, table cells):
+- Content is extracted and transformed (prefixes like "> " or "- " removed)
+- Modules must fix positions in parsed content using offset mapping
+- `parseBlock()` and `parseInline()` accept optional `$baseOffset` parameter
+
+**Example - verifying positions:**
+```php
+$doc = $texy->parse($source);
+foreach ($doc->getNodes() as $node) {
+    if ($node->position) {
+        $extracted = substr($source, $node->position->offset, $node->position->length);
+        // $extracted should match the original syntax that created this node
+    }
+}
+```
+
 ### Modifier System
 Modifiers add attributes: `.(title)[class #id]{style:value}<align>^valign`
 
 ```php
 // Parsing (use static factory method)
 $mod = Texy\Modifier::parse($modifierText);
+$mod = Texy\Modifier::parse($modifierText, $offset);  // with position tracking
 
 // Access
 $mod->id;          // HTML id
@@ -500,6 +533,7 @@ $mod->attrs;       // custom attributes (data-*, aria-*, etc.)
 $mod->hAlign;      // left, right, center, justify
 $mod->vAlign;      // top, middle, bottom
 $mod->title;       // title attribute
+$mod->position;    // Position object
 ```
 
 ## Security Practices

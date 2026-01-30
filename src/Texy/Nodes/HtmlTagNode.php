@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * HTML tag.
@@ -17,13 +19,14 @@ namespace Texy\Nodes;
 class HtmlTagNode extends InlineNode
 {
 	/**
-	 * @param array<string, string|bool|null> $attributes
+	 * @param array<string, string|bool|null> $attributes HTML attributes
 	 */
 	public function __construct(
 		public string $name,
 		public array $attributes = [],
 		public bool $closing = false,
 		public bool $selfClosing = false,
+		public ?Position $position = null,
 	) {
 	}
 }

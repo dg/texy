@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Comment.
@@ -19,6 +21,7 @@ class CommentNode extends BlockNode
 {
 	public function __construct(
 		public string $content,
+		public ?Position $position = null,
 	) {
 	}
 }

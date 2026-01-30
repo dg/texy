@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy\Modifier;
+use Texy\Position;
 
 
 /**
@@ -23,6 +24,7 @@ class ImageNode extends InlineNode
 		public ?int $width = null,
 		public ?int $height = null,
 		public ?Modifier $modifier = null,
+		public ?Position $position = null,
 	) {
 	}
 }

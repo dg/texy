@@ -12,6 +12,7 @@ use Texy\Nodes\ContentNode;
 use Texy\Nodes\PhraseNode;
 use Texy\Nodes\TextNode;
 use Texy\ParseContext;
+use Texy\Position;
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -21,11 +22,14 @@ require __DIR__ . '/../bootstrap.php';
  */
 function createPhraseHandler(string $type): Closure
 {
-	return function (?ParseContext $context, array $matches, string $name) use ($type): PhraseNode {
+	return function (?ParseContext $context, array $matches, array $offsets, string $name) use ($type): PhraseNode {
 		$content = $matches[1];
+		$contentOffset = $offsets[1] ?? $offsets[0];
 		return new PhraseNode(
-			new ContentNode([new TextNode($content)]),
+			new ContentNode([new TextNode($content, new Position($contentOffset, strlen($content)))]),
 			$type,
+			null,
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	};
 }
@@ -260,11 +264,13 @@ test('null tries alternative pattern at same position', function () {
 		],
 		'second' => [
 			'pattern' => '~\*\*(.+?)\*\*~', // same pattern, same match
-			'handler' => function ($context, $matches, $name) use (&$secondHandlerCalled) {
+			'handler' => function ($context, $matches, $offsets, $name) use (&$secondHandlerCalled) {
 				$secondHandlerCalled = true;
 				return new PhraseNode(
 					new ContentNode([new TextNode($matches[1])]),
 					'second',
+					null,
+					new Position($offsets[0], strlen($matches[0])),
 				);
 			},
 		],
@@ -303,8 +309,67 @@ test('null does not block non-overlapping patterns', function () {
 
 
 // =============================================================================
-// D. Handler receives correct pattern name
+// D. Position and offset tracking
 // =============================================================================
+
+test('positions are correct', function () {
+	$parser = new InlineParser([
+		'bold' => [
+			'pattern' => '~\*\*(.+?)\*\*~',
+			'handler' => createPhraseHandler('phrase/strong'),
+		],
+	]);
+
+	$nodes = $parser->parse(null, 'aa**bb**cc');
+
+	Assert::same(0, $nodes->children[0]->position->offset);
+	Assert::same(2, $nodes->children[0]->position->length);
+
+	Assert::same(2, $nodes->children[1]->position->offset);
+	Assert::same(6, $nodes->children[1]->position->length);
+
+	Assert::same(8, $nodes->children[2]->position->offset);
+	Assert::same(2, $nodes->children[2]->position->length);
+});
+
+
+test('base offset is applied', function () {
+	$parser = new InlineParser([
+		'bold' => [
+			'pattern' => '~\*\*(.+?)\*\*~',
+			'handler' => createPhraseHandler('phrase/strong'),
+		],
+	]);
+
+	$nodes = $parser->parse(null, 'aa**bb**cc', baseOffset: 100);
+
+	Assert::same(100, $nodes->children[0]->position->offset);
+	Assert::same(102, $nodes->children[1]->position->offset);
+	Assert::same(108, $nodes->children[2]->position->offset);
+});
+
+
+test('capture group offsets passed to handler', function () {
+	$receivedOffsets = null;
+
+	$parser = new InlineParser([
+		'test' => [
+			'pattern' => '~(\*\*)(.+?)(\*\*)~',
+			'handler' => function ($context, $matches, $offsets, $name) use (&$receivedOffsets) {
+				$receivedOffsets = $offsets;
+				return new TextNode($matches[2], new Position($offsets[2], strlen($matches[2])));
+			},
+		],
+	]);
+
+	$parser->parse(null, '**test**');
+
+	Assert::same(0, $receivedOffsets[0]); // whole match
+	Assert::same(0, $receivedOffsets[1]); // first **
+	Assert::same(2, $receivedOffsets[2]); // content "test"
+	Assert::same(6, $receivedOffsets[3]); // last **
+});
+
 
 test('handler receives correct pattern name', function () {
 	$receivedName = null;
@@ -312,7 +377,7 @@ test('handler receives correct pattern name', function () {
 	$parser = new InlineParser([
 		'my/custom-pattern' => [
 			'pattern' => '~\*\*(.+?)\*\*~',
-			'handler' => function ($context, $matches, $name) use (&$receivedName) {
+			'handler' => function ($context, $matches, $offsets, $name) use (&$receivedName) {
 				$receivedName = $name;
 				return new TextNode($matches[1]);
 			},
@@ -410,8 +475,76 @@ test('UTF-8 content in match', function () {
 });
 
 
+test('UTF-8 positions are byte-based', function () {
+	$parser = new InlineParser([
+		'bold' => [
+			'pattern' => '~\*\*(.+?)\*\*~u',
+			'handler' => createPhraseHandler('phrase/strong'),
+		],
+	]);
+
+	// "日" is 3 bytes in UTF-8
+	$nodes = $parser->parse(null, '日**a**');
+
+	Assert::same(0, $nodes->children[0]->position->offset);
+	Assert::same(3, $nodes->children[0]->position->length); // "日" = 3 bytes
+
+	Assert::same(3, $nodes->children[1]->position->offset); // **a** starts at byte 3
+	Assert::same(5, $nodes->children[1]->position->length); // **a** = 5 bytes
+});
+
+
 // =============================================================================
-// G. Empty matches
+// G. Optional capture groups
+// =============================================================================
+
+test('optional capture group that matches', function () {
+	$receivedOffsets = null;
+
+	$parser = new InlineParser([
+		'test' => [
+			'pattern' => '~\*\*(.+?)(\s+mod)?\*\*~',
+			'handler' => function ($context, $matches, $offsets, $name) use (&$receivedOffsets) {
+				$receivedOffsets = $offsets;
+				return new TextNode($matches[1]);
+			},
+		],
+	]);
+
+	$parser->parse(null, '**text mod**');
+
+	Assert::same(0, $receivedOffsets[0]);  // whole match
+	Assert::same(2, $receivedOffsets[1]);  // content "text"
+	Assert::same(6, $receivedOffsets[2]);  // " mod"
+});
+
+
+test('optional capture group that does not match', function () {
+	$receivedOffsets = null;
+	$receivedMatches = null;
+
+	$parser = new InlineParser([
+		'test' => [
+			'pattern' => '~\*\*(.+?)(\s+mod)?\*\*~',
+			'handler' => function ($context, $matches, $offsets, $name) use (&$receivedOffsets, &$receivedMatches) {
+				$receivedOffsets = $offsets;
+				$receivedMatches = $matches;
+				return new TextNode($matches[1]);
+			},
+		],
+	]);
+
+	$parser->parse(null, '**text**');
+
+	Assert::same(0, $receivedOffsets[0]);    // whole match
+	Assert::same(2, $receivedOffsets[1]);    // content "text"
+	Assert::null($receivedOffsets[2]);       // optional group didn't match - offset is null
+	Assert::null($receivedMatches[2]);       // match is also null (not empty string)
+});
+
+
+// =============================================================================
+// H. Empty matches
 // =============================================================================
 
 test('pattern matching empty string is skipped', function () {

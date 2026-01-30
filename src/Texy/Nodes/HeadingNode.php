@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Position;
 
 
 /**
@@ -25,6 +26,7 @@ class HeadingNode extends BlockNode
 		public int $level,
 		public HeadingType $type,
 		public ?Texy\Modifier $modifier = null,
+		public ?Position $position = null,
 	) {
 	}
 

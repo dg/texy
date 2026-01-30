@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Position;
 
 
 /**
@@ -23,6 +24,7 @@ class SectionNode extends BlockNode
 		public ContentNode $content = new ContentNode,
 		public ?string $type = null,
 		public ?Texy\Modifier $modifier = null,
+		public ?Position $position = null,
 	) {
 	}
 

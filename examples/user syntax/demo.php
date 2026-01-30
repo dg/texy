@@ -31,6 +31,7 @@ use Texy\Modifier;
 use Texy\Nodes\ParagraphNode;
 use Texy\Nodes\PhraseNode;
 use Texy\Output\Html;
+use Texy\Position;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
@@ -55,16 +56,18 @@ $texy->allowed[Texy\Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks
 $texy->registerLinePattern(
-	function (Texy\ParseContext $context, array $matches, string $name) use ($texy): PhraseNode {
+	function (Texy\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
 		// Parse the content recursively (allows nesting like *bold _and italic_ text*)
-		$content = $context->parseInline(trim($mContent));
+		$content = $context->parseInline(trim($mContent), $offsets[1] ?? $offsets[0]);
 
 		return new PhraseNode(
 			$content,
 			$name, // 'myInlineSyntax1' or 'myInlineSyntax2'
 			Modifier::parse($mMod),
+			null,
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	},
 	'~
@@ -78,15 +81,17 @@ $texy->registerLinePattern(
 
 // Add new syntax: _italic_
 $texy->registerLinePattern(
-	function (Texy\ParseContext $context, array $matches, string $name) use ($texy): PhraseNode {
+	function (Texy\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
-		$content = $context->parseInline(trim($mContent));
+		$content = $context->parseInline(trim($mContent), $offsets[1] ?? $offsets[0]);
 
 		return new PhraseNode(
 			$content,
 			$name,
 			Modifier::parse($mMod),
+			null,
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	},
 	'~
@@ -106,11 +111,11 @@ $texy->registerLinePattern(
 // Add new syntax: .tagname followed by content on next line
 // Examples: .h1, .h2, .perex, etc.
 $texy->registerBlockPattern(
-	function (Texy\ParseContext $context, array $matches, string $name): ParagraphNode {
+	function (Texy\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): ParagraphNode {
 		[, $mTag, $mText] = $matches;
 
 		// Parse the content with inline parser
-		$content = $context->parseInline($mText);
+		$content = $context->parseInline($mText, $offsets[2] ?? $offsets[0]);
 
 		// Create a paragraph node with modifier containing our tag info
 		$modifier = new Modifier;

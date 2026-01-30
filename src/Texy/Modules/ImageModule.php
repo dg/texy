@@ -21,6 +21,7 @@ use Texy\Nodes\LinkNode;
 use Texy\NodeTraverser;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Regexp;
 use Texy\Syntax;
 use function count, strlen;
@@ -86,8 +87,9 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Parses [*image*]: urls .(title)[class]{style}
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseDefinition(ParseContext $context, array $matches): ImageDefinitionNode
+	public function parseDefinition(ParseContext $context, array $matches, array $offsets): ImageDefinitionNode
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
@@ -99,6 +101,7 @@ final class ImageModule extends Texy\Module
 			$parsed['width'],
 			$parsed['height'],
 			$modifier,
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -106,18 +109,21 @@ final class ImageModule extends Texy\Module
 	/**
 	 * Parses [* small.jpg 80x13 .(alternative text)[class]{style}>]:LINK
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseImage(ParseContext $context, array $matches): ImageNode|LinkNode
+	public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode|LinkNode
 	{
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
 		$modifier = Modifier::parse($mMod . $mAlign);
+		$position = new Position($offsets[0], strlen($matches[0]));
 
 		$imageNode = new ImageNode(
 			$parsed['url'],
 			$parsed['width'],
 			$parsed['height'],
 			$modifier,
+			$position,
 		);
 
 		// If image has link, wrap in LinkNode
@@ -138,6 +144,7 @@ final class ImageModule extends Texy\Module
 			return new LinkNode(
 				url: $linkUrl,
 				content: new ContentNode([$imageNode]),
+				position: $position,
 				isImageLink: $isImageLink,
 			);
 		}
@@ -219,7 +226,7 @@ final class ImageModule extends Texy\Module
 		});
 
 		// Pass 2: Resolve ImageNode references (NodeTraverser visits all nodes including FigureNode.image)
-		$traverser->traverse($doc, function (Node $node): ?int {
+		$traverser->traverse($doc, function (Node $node): void {
 			if ($node instanceof ImageNode) {
 				$this->resolveImageNode($node);
 			} elseif (
@@ -238,7 +245,6 @@ final class ImageModule extends Texy\Module
 					$node->url = $this->definitions[$imageKey]->url;
 				}
 			}
-			return null;
 		});
 	}
 

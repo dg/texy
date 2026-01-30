@@ -28,9 +28,9 @@ class ParseContext
 	/**
 	 * Parse text as inline content.
 	 */
-	public function parseInline(string $text): ContentNode
+	public function parseInline(string $text, int $baseOffset = 0): ContentNode
 	{
-		return $this->inlineParser->parse($this, $text);
+		return $this->inlineParser->parse($this, $text, $baseOffset);
 	}
 
 
@@ -38,11 +38,11 @@ class ParseContext
 	 * Parse text as block content.
 	 * Creates a cloned parser for isolated recursive parsing.
 	 */
-	public function parseBlock(string $text): ContentNode
+	public function parseBlock(string $text, int $baseOffset = 0): ContentNode
 	{
 		$clonedParser = clone $this->blockParser;
 		$newContext = new self($this->inlineParser, $clonedParser);
-		return $clonedParser->parse($newContext, $text);
+		return $clonedParser->parse($newContext, $text, $baseOffset);
 	}
 
 

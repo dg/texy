@@ -17,13 +17,20 @@ use Texy;
  */
 class ContentNode extends Texy\Node
 {
+	/**
+	 * @param array<InlineNode|BlockNode> $children
+	 */
 	public function __construct(
-		/** @var array<InlineNode|BlockNode> */
 		public array $children = [],
 	) {
 	}
 
 
+	/**
+	 * Yields children by reference. Children can be set to null during iteration.
+	 * After iteration, null children are filtered out and array is re-indexed.
+	 * @return \Generator<InlineNode|BlockNode|null>
+	 */
 	public function &getNodes(): \Generator
 	{
 		foreach ($this->children as &$item) {

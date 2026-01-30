@@ -57,7 +57,7 @@ final class NodeTraverser
 				return $node;
 
 			} elseif ($res === self::RemoveNode) {
-				return new Nodes\TextNode(''); // TODO: implement proper removal
+				return new Nodes\TextNode('');
 			}
 		}
 

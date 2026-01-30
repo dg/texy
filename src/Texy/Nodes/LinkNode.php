@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Position;
 
 
 /**
@@ -23,6 +24,7 @@ class LinkNode extends InlineNode
 		public ?string $url = null,
 		public ContentNode $content = new ContentNode,
 		public ?Texy\Modifier $modifier = null,
+		public ?Position $position = null,
 		/** Link targets an image URL (use imageModule.root instead of linkModule.root) */
 		public bool $isImageLink = false,
 	) {

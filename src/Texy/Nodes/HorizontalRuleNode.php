@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Position;
 
 
 /**
@@ -21,6 +22,7 @@ class HorizontalRuleNode extends BlockNode
 	public function __construct(
 		public string $type,
 		public ?Texy\Modifier $modifier = null,
+		public ?Position $position = null,
 	) {
 	}
 }

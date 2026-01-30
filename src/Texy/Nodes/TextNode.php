@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Text.
@@ -17,6 +19,7 @@ class TextNode extends InlineNode
 {
 	public function __construct(
 		public string $content,
+		public ?Position $position = null,
 	) {
 	}
 }

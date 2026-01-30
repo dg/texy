@@ -44,7 +44,7 @@ class Element
 	/** @var array<string, string|int|bool|array<string|int|bool>|null>  element's attributes */
 	public array $attrs = [];
 
-	/** @var array<Element|string> */
+	/** @var list<Element|string> */
 	public array $children = [];
 
 	private bool $isEmpty;

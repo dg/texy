@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Link definition.
@@ -19,6 +21,7 @@ class LinkDefinitionNode extends BlockNode
 	public function __construct(
 		public string $identifier,
 		public string $url,
+		public ?Position $position = null,
 	) {
 	}
 }

@@ -15,6 +15,9 @@ namespace Texy;
  */
 abstract class Node
 {
+	public ?Position $position = null;
+
+
 	/** @return \Generator<self> */
 	public function &getNodes(): \Generator
 	{

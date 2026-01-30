@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Root document node.
@@ -17,6 +19,7 @@ class DocumentNode extends BlockNode
 {
 	public function __construct(
 		public ContentNode $content = new ContentNode,
+		public ?Position $position = null,
 	) {
 	}
 

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Raw text.
@@ -18,6 +20,7 @@ class RawTextNode extends InlineNode
 {
 	public function __construct(
 		public string $content,
+		public ?Position $position = null,
 	) {
 	}
 }

@@ -13,19 +13,85 @@ parameters:
 			path: src/Bridges/Latte/TexyNode.php
 
 		-
+			message: '#^Variable \$mContent on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: src/Texy/Modules/BlockQuoteModule.php
+
+		-
+			message: '#^Parameter \#2 \$enter of method Texy\\NodeTraverser\:\:traverse\(\) expects \(Closure\(Texy\\Node\)\: \(int\|Texy\\Node\|null\)\)\|null, Closure\(Texy\\Node\)\: void given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Modules/ImageModule.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: src/Texy/Modules/ListModule.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between string and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: src/Texy/Modules/ListModule.php
+
+		-
+			message: '#^Variable \$mContent on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: src/Texy/Modules/ListModule.php
+
+		-
+			message: '#^Call to function is_array\(\) with array\{string, int\} will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Texy/Modules/ParagraphModule.php
+
+		-
+			message: '#^SplObjectStorage\<Texy\\Nodes\\TableCellNode, array\{text\: string, offset\: int\}\> does not accept array\<string, int\|string\|null\>\.$#'
+			identifier: offsetAssign.valueType
+			count: 1
+			path: src/Texy/Modules/TableModule.php
+
+		-
 			message: '#^Empty array passed to foreach\.$#'
 			identifier: foreach.emptyArray
 			count: 1
 			path: src/Texy/Output/Html/Formatter.php
 
 		-
-			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
-			identifier: missingType.callable
+			message: '#^Cannot access offset ''list\-style\-type'' on array\<bool\|int\|string\>\|bool\|int\|string\|null\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Texy/Texy.php
+			path: src/Texy/Output/Html/Generator.php
 
 		-
 			message: '#^Method Texy\\Output\\Html\\Generator\:\:registerHandler\(\) has parameter \$handler with no signature specified for Closure\.$#'
 			identifier: missingType.callable
 			count: 1
 			path: src/Texy/Output/Html/Generator.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Texy/Output/Html/Generator.php
+
+		-
+			message: '#^Property Texy\\Output\\Html\\Generator\:\:\$handlers \(array\<class\-string\<Texy\\Node\>, Closure\(Texy\\Node, Texy\\Output\\Html\\Generator\)\: \(string\|Texy\\Output\\Html\\Element\)\>\) does not accept non\-empty\-array\<string, Closure\(Texy\\Node, Texy\\Output\\Html\\Generator\)\: \(string\|Texy\\Output\\Html\\Element\)\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Texy/Output/Html/Generator.php
+
+		-
+			message: '#^Match expression does not handle remaining values\: int\<min, \-1\>\|int\<2, max\>$#'
+			identifier: match.unhandled
+			count: 1
+			path: src/Texy/Output/Html/Support.php
+
+		-
+			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
+			identifier: missingType.callable
+			count: 1
+			path: src/Texy/Texy.php

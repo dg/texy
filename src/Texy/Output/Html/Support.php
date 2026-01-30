@@ -28,7 +28,7 @@ final class Support
 
 	/**
 	 * Analyze paragraph content to determine what types of nodes it contains.
-	 * @param  array<Nodes\BlockNode|Nodes\InlineNode>  $content
+	 * @param  array<Nodes\InlineNode>  $content
 	 * @return array{hasText: bool, hasReplaced: bool, hasMarkup: bool, hasOther: bool}
 	 */
 	public function analyzeContent(array $content): array
@@ -56,7 +56,7 @@ final class Support
 				match ($inlineType) {
 					1 => $hasReplaced = true,    // replaced element (img, br, input, ...)
 					0 => $hasMarkup = true,      // inline markup (span, a, strong, ...)
-					default => $hasMarkup = true,   // block element or unknown
+					null => $hasMarkup = true,   // block element
 				};
 
 			} elseif ($node instanceof Nodes\LinkNode) {

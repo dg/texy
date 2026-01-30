@@ -17,6 +17,7 @@ use Texy\Nodes\ListNode;
 use Texy\Nodes\ListType;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Regexp;
 use Texy\Syntax;
 use function count, implode, ord, strlen;
@@ -91,8 +92,9 @@ final class ListModule extends Texy\Module
 	/**
 	 * Parses list.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseList(ParseContext $context, array $matches): ?ListNode
+	public function parseList(ParseContext $context, array $matches, array $offsets): ?ListNode
 	{
 		[, $mMod, $mBullet] = $matches;
 
@@ -139,6 +141,7 @@ final class ListModule extends Texy\Module
 			$listType,
 			$start,
 			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -146,8 +149,9 @@ final class ListModule extends Texy\Module
 	/**
 	 * Parses definition list.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parseDefList(ParseContext $context, array $matches): ?DefinitionListNode
+	public function parseDefList(ParseContext $context, array $matches, array $offsets): ?DefinitionListNode
 	{
 		[, $mMod, , , , $mBullet] = $matches;
 
@@ -181,10 +185,12 @@ final class ListModule extends Texy\Module
 			}
 
 			$termMatches = null;
-			if ($context->getBlockParser()->next($patternTerm, $termMatches)) {
+			$termOffsets = null;
+			if ($context->getBlockParser()->next($patternTerm, $termMatches, $termOffsets)) {
 				[, $mContent, $mTermMod] = $termMatches;
 				$termMod = Modifier::parse($mTermMod);
-				$termContent = $context->parseInline($mContent);
+				$contentOffset = $termOffsets[1] ?? 0;
+				$termContent = $context->parseInline($mContent, $contentOffset);
 				$items[] = new ListItemNode($termContent, true, $termMod);
 				continue;
 			}
@@ -195,6 +201,7 @@ final class ListModule extends Texy\Module
 		return new DefinitionListNode(
 			$items,
 			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -215,11 +222,19 @@ final class ListModule extends Texy\Module
 		$~mAU';
 
 		$matches = null;
-		if (!$context->getBlockParser()->next($patternItem, $matches)) {
+		$offsets = null;
+		if (!$context->getBlockParser()->next($patternItem, $matches, $offsets)) {
 			return null;
 		}
 
 		[, $mIndent, $mContent, $mMod] = $matches;
+
+		// Collect lines with their absolute offsets
+		$lines = [];
+		$contentOffset = $offsets[2] ?? $offsets[0]; // offset of first line content
+		if ($mContent !== null) {
+			$lines[] = ['content' => $mContent, 'offset' => $contentOffset];
+		}
 
 		// next lines
 		$spaces = '';
@@ -229,7 +244,7 @@ final class ListModule extends Texy\Module
 			' . Regexp::quote($mIndent) . '
 			([ \t]{1,' . $spaces . '})
 			(.*)                                     # content (3)
-		$~Am', $matches)) {
+		$~Am', $matches, $offsets)) {
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 
 			if ($spaces === '') {
@@ -237,15 +252,64 @@ final class ListModule extends Texy\Module
 			}
 
 			$content .= "\n" . $mBlank . $mContent;
+
+			// Track content offset
+			if ($mContent !== '' && $offsets[3] !== null) {
+				$lines[] = ['content' => $mContent, 'offset' => $offsets[3]];
+			}
 		}
 
 		// Parse content as blocks
 		$parsed = $context->parseBlock(trim($content));
+
+		// Fix positions in parsed content using offset mapping
+		if ($lines) {
+			$this->fixPositions($parsed, $lines);
+		}
 
 		return new ListItemNode(
 			$parsed,
 			false,
 			Modifier::parse($mMod),
 		);
+	}
+
+
+	/**
+	 * Fix positions in parsed content using offset mapping.
+	 * @param array<array{content: string, offset: int}> $lines
+	 */
+	private function fixPositions(Texy\Node $node, array $lines): void
+	{
+		if ($node->position !== null) {
+			$localOffset = $node->position->offset;
+
+			// Find which line this position starts on
+			$offsetMap = [];
+			$localPos = 0;
+			foreach ($lines as $line) {
+				$offsetMap[$localPos] = $line['offset'];
+				$localPos += strlen($line['content']) + 1; // +1 for \n
+			}
+
+			$lineStart = 0;
+			$lineKeys = array_keys($offsetMap);
+			foreach ($lineKeys as $localLineStart) {
+				if ($localLineStart <= $localOffset) {
+					$lineStart = $localLineStart;
+				} else {
+					break;
+				}
+			}
+
+			$absoluteStart = $offsetMap[$lineStart] ?? $lines[0]['offset'];
+			$newOffset = $absoluteStart + ($localOffset - $lineStart);
+
+			$node->position = new Position($newOffset, $node->position->length);
+		}
+
+		foreach ($node->getNodes() as $child) {
+			$this->fixPositions($child, $lines);
+		}
 	}
 }

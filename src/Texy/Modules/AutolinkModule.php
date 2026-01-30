@@ -14,7 +14,9 @@ use Texy\Nodes\EmailNode;
 use Texy\Nodes\UrlNode;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Syntax;
+use function strlen;
 
 
 /**
@@ -32,7 +34,7 @@ final class AutolinkModule extends Texy\Module
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
 		$this->texy->registerLinePattern(
-			fn(ParseContext $context, array $matches) => new UrlNode($matches[0]),
+			fn(ParseContext $context, array $matches, array $offsets) => new UrlNode($matches[0], new Position($offsets[0], strlen($matches[0]))),
 			'~
 				(?<= ^ | [\s([<:] )                # must be preceded by these chars
 				(?: https?:// | www\. | ftp:// )   # protocol or www
@@ -45,7 +47,7 @@ final class AutolinkModule extends Texy\Module
 
 		// direct email
 		$this->texy->registerLinePattern(
-			fn(ParseContext $context, array $matches) => new EmailNode($matches[0]),
+			fn(ParseContext $context, array $matches, array $offsets) => new EmailNode($matches[0], new Position($offsets[0], strlen($matches[0]))),
 			'~
 				(?<= ^ | [\s([<] )                  # must be preceded by these chars
 				[' . Patterns::CHAR . ']                 # first char

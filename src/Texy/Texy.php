@@ -83,20 +83,20 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<int|string, ?string>, string): ?Nodes\InlineNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<int|string, string>, array<int|string, int|null>, string): ?Nodes\InlineNode, pattern: string, again?: ?string}>
 	 */
 	private array $linePatterns = [];
 
-	/** @var array<string, array{handler: \Closure(ParseContext, array<int|string, ?string>, string): ?Nodes\InlineNode, pattern: string}> */
+	/** @var array<string, array{handler: \Closure(ParseContext, array<int|string, string>, array<int|string, int|null>, string): ?Nodes\InlineNode, pattern: string, again?: ?string}> */
 	private array $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<int|string, string>, array<int|string, int|null>, string): ?Nodes\BlockNode, pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
-	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}> */
+	/** @var array<string, array{handler: \Closure(ParseContext, array<int|string, string>, array<int|string, int|null>, string): ?Nodes\BlockNode, pattern: string}> */
 	private array $_blockPatterns;
 
 	/** @var array<string, int>|bool  for internal usage */
@@ -162,7 +162,9 @@ class Texy
 	}
 
 
-	/** @param \Closure(ParseContext, array<int|string, ?string>, string): ?Nodes\InlineNode $handler */
+	/**
+	 * @param  \Closure(ParseContext, array<int|string, string>, array<int|string, int|null>, string): ?Nodes\InlineNode  $handler
+	 */
 	final public function registerLinePattern(
 		\Closure $handler,
 		#[Language('PhpRegExpXTCommentMode')]
@@ -181,7 +183,9 @@ class Texy
 	}
 
 
-	/** @param \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode $handler */
+	/**
+	 * @param  \Closure(ParseContext, array<int|string, string>, array<int|string, int|null>, string): ?Nodes\BlockNode  $handler
+	 */
 	final public function registerBlockPattern(
 		\Closure $handler,
 		#[Language('PhpRegExpXTCommentMode')]
@@ -314,9 +318,9 @@ class Texy
 	/**
 	 * Converts DOM structure to pure text.
 	 */
-	public function toText(): string
+	public function toText(): never
 	{
-		throw new \LogicException('Not implemented');
+		throw new \LogicException('Not implemented yet.');
 	}
 
 
@@ -376,7 +380,7 @@ class Texy
 		);
 		return new BlockParser(
 			$this->_blockPatterns,
-			fn(ParseContext $context, string $text) => $this->paragraphModule->parseText($context, $text),
+			fn(ParseContext $context, string $text, int $offset) => $this->paragraphModule->parseText($context, $text, $offset),
 		);
 	}
 

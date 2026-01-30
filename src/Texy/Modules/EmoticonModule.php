@@ -12,7 +12,9 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\EmoticonNode;
 use Texy\ParseContext;
+use Texy\Position;
 use Texy\Syntax;
+use function strlen;
 
 
 /**
@@ -69,15 +71,16 @@ final class EmoticonModule extends Texy\Module
 	/**
 	 * Parses :-).
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): ?EmoticonNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?EmoticonNode
 	{
 		$match = $matches[0];
 
 		// Find the closest match
 		foreach ($this->icons as $emoticon => $_) {
 			if (str_starts_with($match, $emoticon)) {
-				return new EmoticonNode($emoticon);
+				return new EmoticonNode($emoticon, new Position($offsets[0], strlen($matches[0])));
 			}
 		}
 

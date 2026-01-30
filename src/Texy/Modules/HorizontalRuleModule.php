@@ -12,7 +12,9 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\HorizontalRuleNode;
 use Texy\ParseContext;
+use Texy\Position;
 use Texy\Syntax;
+use function strlen;
 
 
 /**
@@ -29,9 +31,10 @@ final class HorizontalRuleModule extends Texy\Module
 	public function beforeParse(string &$text): void
 	{
 		$this->texy->registerBlockPattern(
-			fn(ParseContext $context, array $matches) => new HorizontalRuleNode(
+			fn(ParseContext $context, array $matches, array $offsets) => new HorizontalRuleNode(
 				$matches[1][0],
 				Texy\Modifier::parse($matches[2]),
+				new Position($offsets[0], strlen($matches[0])),
 			),
 			'~^
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)

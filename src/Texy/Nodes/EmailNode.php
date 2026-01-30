@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Email link.
@@ -18,6 +20,7 @@ class EmailNode extends InlineNode
 {
 	public function __construct(
 		public string $email,
+		public ?Position $position = null,
 	) {
 	}
 }

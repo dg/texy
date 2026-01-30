@@ -17,6 +17,7 @@ use Texy\Nodes\ImageNode;
 use Texy\Nodes\LinkNode;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Position;
 use Texy\Syntax;
 use function strlen;
 
@@ -62,8 +63,9 @@ final class FigureModule extends Texy\Module
 	/**
 	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
 	 * @param  array<?string>  $matches
+	 * @param  array<?int>  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): ?FigureNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?FigureNode
 	{
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 
@@ -112,13 +114,15 @@ final class FigureModule extends Texy\Module
 		$caption = null;
 		$mContent = trim($mContent ?? '');
 		if ($mContent !== '') {
-			$caption = $context->parseInline($mContent);
+			$captionOffset = $offsets[5] ?? $offsets[0];
+			$caption = $context->parseInline($mContent, $captionOffset);
 		}
 
 		return new FigureNode(
 			$image,
 			$caption,
 			Modifier::parse($mMod),
+			new Position($offsets[0], strlen($matches[0])),
 		);
 	}
 }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Texy\Nodes;
 
+use Texy\Position;
+
 
 /**
  * Line break.
@@ -17,4 +19,8 @@ namespace Texy\Nodes;
  */
 class LineBreakNode extends InlineNode
 {
+	public function __construct(
+		public ?Position $position = null,
+	) {
+	}
 }
