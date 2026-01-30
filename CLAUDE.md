@@ -65,11 +65,11 @@ vendor/bin/phpstan analyse --no-progress
 - `Generator.php` - AST→HTML dispatcher with handler registration
 - `Element.php` - Lightweight HTML element builder
 - `Formatter.php` - Output formatting and well-forming
-- `Validator.php` - Tag/attribute validation
+- `Support.php` - Helper methods for rendering (content analysis, HTML tag validation)
+  - *Previously documented as `Validator.php` which never existed*
 
-**src/Texy/Output/Markdown/** - Markdown (GFM) generation
-- `Generator.php` - AST→Markdown dispatcher with handler registration
-- `Helpers.php` - Static escaping and formatting helpers
+**src/Texy/Output/Markdown/** - Markdown (GFM) generation *(planned, not yet implemented)*
+- Directory structure prepared but implementation is pending
 
 **src/Texy/Modules/** - Processing modules
 - `BlockModule.php` - Special blocks (code, html, text with `/--` syntax)
@@ -139,19 +139,20 @@ Modules handle both parsing and HTML generation:
    }
    ```
 
-3. **HTML Generation** - Modules register solve() handlers with the Generator:
+3. **HTML Generation** - Register handlers with the Generator:
    ```php
-   // In constructor:
-   $texy->htmlGenerator->registerHandler($this->solve(...));
-
-   // Handler:
-   public function solve(ImageNode $node, Html\Generator $generator): Html\Element
-   {
+   // Handler closure (node type detected from first parameter)
+   $texy->htmlGenerator->registerHandler(function(
+       ImageNode $node,
+       Html\Generator $generator,
+       ?\Closure $previous,  // Previous handler in chain
+   ): Html\Element|string|null {
        $el = new Html\Element('img');
        $el->attrs['src'] = $node->url;
        return $el;
-   }
+   });
    ```
+   > *Note: Earlier documentation mentioned `solve()` method - handlers are anonymous closures, not named methods.*
 
 4. **afterParse Processing** - Some modules process the complete AST:
    ```php
@@ -177,7 +178,7 @@ Modules handle both parsing and HTML generation:
    └── ImageModule: Resolve references
 
 5. HTML Generation
-   └── Generator dispatches to module solve() handlers
+   └── Generator dispatches to registered handlers
 
 6. Post-processing
    ├── Typography fixes (TypographyModule.postLine)
@@ -211,20 +212,24 @@ $texy->htmlGenerator->registerHandler(function(
 **Notification Handlers** - For side effects (logging, AST modification):
 
 ```php
-$texy->addHandler('beforeParse', function(string &$text) {
-    // Preprocess text
-});
-
 $texy->addHandler('afterParse', function(Nodes\DocumentNode $doc) {
     // Traverse and modify AST
     $traverser = new NodeTraverser;
-    $traverser->traverse($doc, function(Node $node) {
-        // Process each node
-    });
+    $traverser->traverse($doc,
+        enter: function(Node $node) {
+            // Called when entering a node
+            // Return: Node (replace), DontTraverseChildren, StopTraversal, RemoveNode, or null
+        },
+        leave: function(Node $node) {
+            // Called after processing children
+        },
+    );
 });
 ```
 
-**Events**: `beforeParse`, `afterParse`
+**Events**: `afterParse`
+
+> *Note: There is no `beforeParse` event. Text preprocessing is done via Module classes which have a `beforeParse(string &$text)` method called automatically.*
 
 ### Testing Architecture
 
@@ -244,7 +249,7 @@ $texy->addHandler('afterParse', function(Nodes\DocumentNode $doc) {
 Example test pattern:
 ```php
 $texy = new Texy\Texy;
-$texy->linkModule->root = 'xxx/';
+$texy->htmlGenerator->linkRoot = 'xxx/';
 Assert::matchFile(
     __DIR__ . '/expected/output.html',
     $texy->process(file_get_contents(__DIR__ . '/sources/input.texy')),
@@ -282,11 +287,56 @@ Assert::matchFile(
 
 The `Texy` class exposes module instances for configuration:
 - `$texy->headingModule` - Heading settings, TOC access
-- `$texy->linkModule` - Link processing (root paths, references)
-- `$texy->imageModule` - Image processing (root paths, file checking)
-- `$texy->htmlGenerator` - HTML generation handlers
+- `$texy->linkModule` - Link reference definitions
+- `$texy->imageModule` - Image reference definitions
+- `$texy->phraseModule` - Inline phrase settings (e.g., `linksAllowed`)
+- `$texy->emoticonModule` - Emoticon icons configuration
+- `$texy->typographyModule` - Typography locale settings
+- `$texy->longWordsModule` - Word hyphenation settings
+- `$texy->htmlGenerator` - HTML generation handlers and output configuration
 - `$texy->htmlOutputModule` - HTML output formatting (Formatter)
 - `$texy->allowed[]` - Enable/disable specific syntax features
+
+### HTML Generator Properties
+
+The `$texy->htmlGenerator` exposes many configuration options:
+
+**Image handling:**
+- `imageRoot` - Base path for image URLs (default: `'images/'`)
+- `imageFileRoot` - File system path for dimension detection
+- `imageLeftClass` - CSS class for left-aligned images
+- `imageRightClass` - CSS class for right-aligned images
+
+**Link handling:**
+- `linkRoot` - Base path for relative link URLs
+- `linkNoFollow` - Add `rel="nofollow"` to external links (default: `false`)
+
+**Figure handling:**
+- `figureTagName` - Wrapper tag (default: `'div'`, can use `'figure'`)
+- `figureClass` - CSS class for figures (default: `'figure'`)
+- `figureLeftClass` / `figureRightClass` - Classes for aligned figures
+
+**Alignment:**
+- `alignClasses` - Map alignment to CSS classes instead of inline styles:
+  ```php
+  $texy->htmlGenerator->alignClasses = [
+      'left' => 'text-left',
+      'right' => 'text-right',
+      'center' => 'text-center',
+  ];
+  ```
+
+**Other options:**
+- `obfuscateEmail` - Obfuscate email addresses (default: `true`)
+- `shortenUrls` - Shorten displayed URLs (default: `true`)
+- `nontextParagraph` - Element for image-only paragraphs (default: `'div'`)
+- `passHtmlComments` - Pass HTML comments to output (default: `true`)
+- `emoticonClass` - CSS class wrapper for emoticons
+- `horizontalRuleClasses` - CSS classes for HR types (`'-'`, `'*'`)
+- `phraseTags` - Syntax to HTML tag mapping (`Syntax::Strong` → `'strong'`, etc.)
+- `allowedTags` - Whitelist of allowed HTML tags for passthrough
+
+> **Migration note:** In earlier versions (Texy 3.x), image/link paths were configured on modules (`$texy->imageModule->root`, `$texy->linkModule->root`). In Texy 4.0, use `$texy->htmlGenerator->imageRoot`, `$texy->htmlGenerator->linkRoot` etc.
 
 ## Integration Notes
 
@@ -317,18 +367,19 @@ Three GitHub Actions workflows:
 $texy = new Texy\Texy;
 $html = $texy->process($text);        // Full document with blocks
 $html = $texy->processLine($text);    // Single line without <p> wrapper
+$html = $texy->processTypo($text);    // Typography corrections only (no Texy markup)
 ```
 
 ### Configuration Example
 ```php
 $texy = new Texy\Texy;
 
-// Image paths
-$texy->imageModule->root = '/images/';
-$texy->imageModule->fileRoot = __DIR__ . '/public/images/';
+// Image paths (configured on htmlGenerator)
+$texy->htmlGenerator->imageRoot = '/images/';
+$texy->htmlGenerator->imageFileRoot = __DIR__ . '/public/images/';
 
-// Link paths
-$texy->linkModule->root = '/articles/';
+// Link paths (configured on htmlGenerator)
+$texy->htmlGenerator->linkRoot = '/articles/';
 
 // Disable specific syntax features
 $texy->allowed[Texy\Syntax::Image] = false;
@@ -359,7 +410,9 @@ $title = $texy->headingModule->title;
 $toc = $texy->headingModule->TOC;
 ```
 
-### Markdown Output (GFM)
+### Markdown Output (GFM) - NOT YET IMPLEMENTED
+
+> **Note:** The Markdown generator is planned but not yet implemented. The API below shows the intended design.
 
 ```php
 $texy = new Texy\Texy;
@@ -372,7 +425,7 @@ $generator->linkStyle = 'inline';       // 'inline' or 'reference'
 $markdown = $generator->render($ast);
 ```
 
-**Limitations**: Modifiers (classes, IDs, styles) are lost. Superscript/subscript and abbreviations use HTML fallback.
+**Planned limitations**: Modifiers (classes, IDs, styles) will be lost. Superscript/subscript and abbreviations will use HTML fallback.
 
 ## Custom Syntax Registration
 
@@ -548,7 +601,7 @@ Always use `Configurator::safeMode()` for user-generated content. It:
 
 Additional security controls:
 ```php
-$texy->allowedTags = Texy\Texy::NONE;  // Disable all HTML
+$texy->htmlGenerator->allowedTags = Texy\Texy::NONE;  // Disable all HTML
 $texy->allowedClasses = ['highlight', 'important'];  // Whitelist classes
 $texy->allowedStyles = ['color', 'background-color'];  // Whitelist CSS
 $texy->urlSchemeFilters[Texy\Texy::FILTER_ANCHOR] = '#https?:#Ai';
