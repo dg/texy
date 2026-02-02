@@ -231,7 +231,7 @@ Exactly what it does:
 
 - `$htmlPolicy->allowedClasses = false` – no classes or IDs,
 - `$htmlPolicy->allowedStyles = false` – no inline styles,
-- `$htmlPolicy->allowedTags = Configurator::$safeTags + ['*' => ['title', 'lang', 'dir']]` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
+- `$htmlPolicy->allowedTags = Configurator::SafeTags + ['*' => ['title', 'lang', 'dir']]` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
 - URL scheme filters: links `~https?:|ftp:|mailto:~A`, images `~https?:~A`,
 - `disableImages()` – no images, figures or image definitions; `safeMode($texy, images: true)` keeps images and figures, the definitions stay disabled,
 - `$allowedSyntax['link/definition'] = false` – no reference definitions,
