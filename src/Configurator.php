@@ -20,8 +20,8 @@ use function is_array;
  */
 class Configurator
 {
-	/** @var array<string, list<string>> */
-	public static array $safeTags = [
+	/** tag => list of allowed attributes */
+	public const SafeTags = [
 		'a' => ['href', 'title'],
 		'abbr' => ['title'],
 		'b' => [],
@@ -73,7 +73,7 @@ class Configurator
 		$htmlPolicy->allowedStyles = false; // style modifiers are disabled
 		// only some "safe" HTML tags and attributes are allowed; the '*' list names
 		// attributes acceptable on any element and is the only source for modifiers
-		$htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];
+		$htmlPolicy->allowedTags = self::SafeTags + ['*' => ['title', 'lang', 'dir']];
 		$htmlPolicy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
 		$htmlPolicy->urlPolicy->imagePattern = '~https?:~A';
 		$htmlOutput->linkNoFollow = true; // force rel="nofollow"
