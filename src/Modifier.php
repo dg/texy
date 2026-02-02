@@ -23,6 +23,15 @@ use function strlen;
  */
 final class Modifier
 {
+	/** list of properties which are regarded as HTML element attributes */
+	public const ElAttrs = [
+		'abbr' => 1, 'accesskey' => 1, 'alt' => 1, 'cite' => 1, 'colspan' => 1, 'contenteditable' => 1, 'crossorigin' => 1,
+		'datetime' => 1, 'decoding' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1, 'hidden' => 1,
+		'href' => 1, 'hreflang' => 1, 'id' => 1, 'itemid' => 1, 'itemprop' => 1, 'itemref' => 1, 'itemscope' => 1, 'itemtype' => 1,
+		'lang' => 1, 'name' => 1, 'ping' => 1, 'referrerpolicy' => 1, 'rel' => 1, 'reversed' => 1, 'rowspan' => 1, 'scope' => 1,
+		'slot' => 1, 'src' => 1, 'srcset' => 1, 'start' => 1, 'target' => 1, 'title' => 1, 'translate' => 1, 'type' => 1, 'value' => 1,
+	];
+
 	public ?string $id = null;
 
 	/** @var array<string, true> of classes (as keys) */
@@ -37,15 +46,6 @@ final class Modifier
 	public ?string $vAlign = null;
 	public ?string $title = null;
 	public ?Range $range = null;
-
-	/** @var array<string, 1>  list of properties which are regarded as HTML element attributes */
-	public static array $elAttrs = [
-		'abbr' => 1, 'accesskey' => 1, 'alt' => 1, 'cite' => 1, 'colspan' => 1, 'contenteditable' => 1, 'crossorigin' => 1,
-		'datetime' => 1, 'decoding' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1, 'hidden' => 1,
-		'href' => 1, 'hreflang' => 1, 'id' => 1, 'itemid' => 1, 'itemprop' => 1, 'itemref' => 1, 'itemscope' => 1, 'itemtype' => 1,
-		'lang' => 1, 'name' => 1, 'ping' => 1, 'referrerpolicy' => 1, 'rel' => 1, 'reversed' => 1, 'rowspan' => 1, 'scope' => 1,
-		'slot' => 1, 'src' => 1, 'srcset' => 1, 'start' => 1, 'target' => 1, 'title' => 1, 'translate' => 1, 'type' => 1, 'value' => 1,
-	];
 
 
 	/**
@@ -121,7 +121,7 @@ final class Modifier
 			$value = trim($pair[1]);
 
 			if (
-				isset(self::$elAttrs[$prop])
+				isset(self::ElAttrs[$prop])
 				|| str_starts_with($prop, 'data-')
 				|| str_starts_with($prop, 'aria-')
 			) { // attribute
