@@ -6,7 +6,7 @@
 
 use Tester\Assert;
 use Texy\{Nodes, Texy};
-use Texy\Output\Html\Renderer;
+use Texy\Output\Html\{Raw, Renderer};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -17,7 +17,7 @@ test('registerHandler replaces default handler', function () {
 
 	// Register custom handler for paragraphs
 	$texy->htmlOutput->registerHandler(
-		fn(Nodes\ParagraphNode $node, Renderer $g) => $g->protect('<div>custom</div>', Renderer::ContentBlock),
+		fn(Nodes\ParagraphNode $node, Renderer $g) => new Raw('<div>custom</div>'),
 	);
 
 	Assert::match('<div>custom</div>', trim($texy->createHtmlRenderer()->render($ast)));
@@ -31,9 +31,8 @@ test('handler receives node data', function () {
 
 	// Custom handler that accesses node properties
 	$texy->htmlOutput->registerHandler(
-		fn(Nodes\FigureNode $node, Renderer $g) => $g->protect(
+		fn(Nodes\FigureNode $node, Renderer $g) => new Raw(
 			'<figure><img src="/img/' . htmlspecialchars($node->image->url ?? '') . '" alt="custom"></figure>',
-			Renderer::ContentReplaced,
 		),
 	);
 

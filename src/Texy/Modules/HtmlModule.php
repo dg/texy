@@ -10,7 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\{HtmlCommentNode, HtmlTagNode, TextNode};
 use Texy\Parsing\ParseContext;
-use Texy\{Patterns, Range, Regexp, Syntax};
+use Texy\{Range, Regexp, Syntax};
 use function strlen;
 
 
@@ -52,10 +52,10 @@ final class HtmlModule extends Texy\Module
 				(?= [\s/>] )
 				(
 					(?:
-						\s++ [a-z0-9_:-]++ |   # attribute name
-						= \s*+ " [^"' . Patterns::MARK . ']*+ " |     # attribute value in double quotes
-						= \s*+ \' [^\'' . Patterns::MARK . ']*+ \' |  # attribute value in single quotes
-						= [^\s>' . Patterns::MARK . ']++              # attribute value without quotes
+						\s++ [a-z0-9_:-]++ |          # attribute name
+						= \s*+ " [^"]*+ " |           # attribute value in double quotes
+						= \s*+ \' [^\']*+ \' |        # attribute value in single quotes
+						= [^\s>]++                    # attribute value without quotes
 					)*
 				)
 				\s*+
@@ -69,7 +69,7 @@ final class HtmlModule extends Texy\Module
 			$this->parseComment(...),
 			'~
 				<!--
-				( [^' . Patterns::MARK . ']*? )
+				( .*? )
 				-->
 			~isx',
 			Syntax::HtmlComment,

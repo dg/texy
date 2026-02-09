@@ -13,6 +13,12 @@ test('removed methods throw with a pointer to the successor', function () {
 	$texy = new Texy\Texy;
 
 	Assert::exception(
+		fn() => $texy->protect('<b>x</b>', 'block'),
+		LogicException::class,
+		'%a%Texy\Output\Html\Element or Raw%a%',
+	);
+
+	Assert::exception(
 		fn() => $texy->checkURL('http://example.com', 'a'),
 		LogicException::class,
 		'%a%urlPolicy->isLinkAllowed()%a%',
