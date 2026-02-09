@@ -80,6 +80,35 @@ final class WellFormer
 
 
 	/**
+	 * Feeds a rendered tree node: tags, display text (entity-decoded since
+	 * the parse phase) and raw HTML islands.
+	 */
+	public function feed(Element|Raw|string $child): void
+	{
+		if ($child instanceof Raw) {
+			$this->raw($child->html);
+
+		} elseif (!$child instanceof Element) {
+			$this->text($child);
+
+		} elseif ($child->name === null || $child->name === '') {
+			foreach ($child->children as $inner) {
+				$this->feed($inner); // transparent wrapper
+			}
+		} else {
+			$this->startTag($child->name, Element::formatAttrs($child->attrs), $child->isVoid());
+			if (!$child->isVoid()) {
+				foreach ($child->children as $inner) {
+					$this->feed($inner);
+				}
+
+				$this->endTag($child->name);
+			}
+		}
+	}
+
+
+	/**
 	 * Plain (unescaped) text.
 	 */
 	public function text(string $s): void

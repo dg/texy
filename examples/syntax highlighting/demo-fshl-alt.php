@@ -69,12 +69,11 @@ $texy->htmlOutput->registerHandler(
 
 		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
 		$content = $fshl->highlight($content, new $langClass);
-		$content = $gen->protect($content, $gen::ContentBlock);
 
 		$elPre = new Html\Element('pre');
 		$gen->decorateElement($node->modifier, $elPre);
 		$elPre->attrs['class'] = strtolower($lang);
-		$elPre->create('code', $content);
+		$elPre->create('code')->add(new Html\Raw($content)); // Raw = do not process further
 
 		return $elPre;
 	},

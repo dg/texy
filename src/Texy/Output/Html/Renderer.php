@@ -7,7 +7,7 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, Regexp, Syntax, UrlPolicy};
+use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, Syntax, UrlPolicy};
 use Texy\Output\NodeRenderer;
 use function count, is_array, is_string;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
@@ -22,13 +22,6 @@ use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
  */
 final class Renderer extends NodeRenderer
 {
-	// types of protection marks
-	public const
-		ContentMarkup = "\x17",
-		ContentReplaced = "\x16",
-		ContentTextual = "\x15",
-		ContentBlock = "\x14";
-
 	private ElementDecorator $decorator;
 
 	private bool $noFollow;
@@ -36,9 +29,6 @@ final class Renderer extends NodeRenderer
 	private bool $titleTypography = true;
 
 	private ImageDimensions $imageDimensions;
-
-	/** @var array<string, string>  Protection markup table */
-	private array $marks = [];
 
 
 	public function __construct(
@@ -121,7 +111,6 @@ final class Renderer extends NodeRenderer
 	{
 		$this->noFollow = $this->config->linkNoFollow || !empty($document->meta['nofollow']);
 		$this->titleTypography = empty($document->meta['typographed']);
-		$this->marks = [];
 		return $this->finalize($this->renderNode($document));
 	}
 
@@ -178,7 +167,7 @@ final class Renderer extends NodeRenderer
 	private function finalize(Element|Raw|string $root): string
 	{
 		$wellFormer = new WellFormer($this->config);
-		$this->walk([$root], $wellFormer);
+		$wellFormer->feed($root);
 		return ltrim($wellFormer->finish(), "\n");
 	}
 
@@ -196,86 +185,10 @@ final class Renderer extends NodeRenderer
 				$wellFormer->text("\n");
 			}
 			$first = false;
-			$this->walk([$child], $wellFormer);
+			$wellFormer->feed($child);
 		}
 
 		return trim($wellFormer->finish());
-	}
-
-
-	/**
-	 * Feeds rendered content (Elements and strings with protection marks)
-	 * to the well-forming engine as tags, text and raw HTML islands.
-	 * @param array<Element|Raw|string> $content
-	 */
-	private function walk(array $content, WellFormer $wellFormer): void
-	{
-		foreach ($content as $child) {
-			if ($child instanceof Raw) {
-				$wellFormer->raw($child->html);
-
-			} elseif (!$child instanceof Element) {
-				$this->walkString($child, $wellFormer);
-
-			} elseif ($child->name === null || $child->name === '') {
-				$this->walk($child->children, $wellFormer); // transparent wrapper
-
-			} else {
-				$wellFormer->startTag($child->name, Element::formatAttrs($child->attrs), $child->isVoid());
-				if (!$child->isVoid()) {
-					$this->walk($child->children, $wellFormer);
-					$wellFormer->endTag($child->name);
-				}
-			}
-		}
-	}
-
-
-	/**
-	 * Splits a rendered string into protection-mark islands (raw HTML) and
-	 * display text (TextNode content is entity-decoded since the parse phase).
-	 */
-	private function walkString(string $s, WellFormer $wellFormer): void
-	{
-		foreach (Regexp::split($s, '~([\x14-\x17][\x18-\x1F]++[\x14-\x17])~') as $part) {
-			if ($part === '') {
-			} elseif (isset($this->marks[$part])) {
-				$wellFormer->raw($this->marks[$part]);
-			} else {
-				$wellFormer->text($part);
-			}
-		}
-	}
-
-
-	/********************* protection mechanism ****************d*g**/
-
-
-	/**
-	 * Generate unique mark - useful for freezing (folding) some substrings.
-	 */
-	public function protect(string $child, string $contentType): string
-	{
-		if ($child === '') {
-			return '';
-		}
-
-		$key = $contentType
-			. strtr(base_convert((string) count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
-			. $contentType;
-
-		$this->marks[$key] = $child;
-
-		return $key;
-	}
-
-
-	/**
-	 * Replace protection marks back to original content.
-	 */
-	public function unprotect(string $html): string
-	{
-		return strtr($html, $this->marks);
 	}
 
 

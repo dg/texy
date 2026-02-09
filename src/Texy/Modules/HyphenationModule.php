@@ -76,9 +76,11 @@ final class HyphenationModule extends Texy\Module
 
 	public function postLine(string $text): string
 	{
+		// \x15 (protected text) and \x16 (replaced content) break words,
+		// \x17 (markup boundary) is transparent - see the TextRunPass image alphabet
 		return Texy\Regexp::replace(
 			$text,
-			'~[^ \n\t\x14\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}~',
+			'~[^ \n\t\x15\x16\x{2013}\x{2014}\x{ad}-]{' . $this->wordLimit . ',}~',
 			$this->pattern(...),
 		);
 	}
@@ -100,7 +102,7 @@ final class HyphenationModule extends Texy\Module
 
 		$chars = Texy\Regexp::matchAll(
 			$mWord,
-			'~[' . Texy\Patterns::MARK . ']+|.~',
+			'~[\x15-\x17]+|.~', // a run of image marker bytes counts as one pseudo-character
 		);
 
 		/** @var list<string> */

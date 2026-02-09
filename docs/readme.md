@@ -29,7 +29,6 @@ passes, and content-model well-forming — so it is split by seam:
 - **[modules.md](modules.md)** — the module system, the anatomy of a module, and
   the overview of the built-in modules.
 - **[rendering.md](rendering.md)** — the `Output` layer: generators, the
-  `Element`/`Raw` tree, sanitization, well-forming, and the deprecated
-  protection-mark bridge.
+  `Element`/`Raw` tree, sanitization, and well-forming.
 - **[modifiers.md](modifiers.md)** — the `.(…)[…]{…}<>` modifier system and how
   modifiers decorate output elements.

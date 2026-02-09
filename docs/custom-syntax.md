@@ -27,7 +27,7 @@ $texy->registerLinePattern($handler, '~
 ~x', 'custom/mention');
 ```
 
-`Texy\Patterns` fragments (`MODIFIER`, `IMAGE`, `LINK_URL`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
+`Texy\Patterns` fragments (`MODIFIER`, `LINK_URL`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
 
 ## The syntax handler
 
