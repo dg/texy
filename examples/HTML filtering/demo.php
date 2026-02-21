@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * This demo shows how Texy! control inline html tags
@@ -7,8 +7,6 @@
  *     - (X)HTML reformatting
  *     - well formed output
  */
-
-declare(strict_types=1);
 
 
 if (@!include __DIR__ . '/../vendor/autoload.php') {

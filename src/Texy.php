@@ -1,12 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Texy! is human-readable text to HTML converter (https://texy.nette.org)
  *
  * Copyright (c) 2004, 2014 David Grudl (https://davidgrudl.com)
  */
-
-declare(strict_types=1);
 
 
 if (false) {

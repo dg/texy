@@ -1,10 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * TEXY! SUPPORT FOR FLASH
  */
-
-declare(strict_types=1);
 
 
 if (@!include __DIR__ . '/../vendor/autoload.php') {

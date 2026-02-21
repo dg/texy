@@ -1,10 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Test: HTML tags.
  */
-
-declare(strict_types=1);
 
 use Tester\Assert;
 

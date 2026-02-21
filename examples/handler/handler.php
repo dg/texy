@@ -1,10 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * TEXY! USER HANDLER DEMO
  */
-
-declare(strict_types=1);
 
 
 

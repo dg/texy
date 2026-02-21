@@ -1,11 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * This demo shows how combine Texy! with syntax highlighter FSHL
  *       - define user callback (for /--code elements)
  */
-
-declare(strict_types=1);
 
 
 // include libs

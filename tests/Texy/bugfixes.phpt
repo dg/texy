@@ -1,10 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Test: bugfixes
  */
-
-declare(strict_types=1);
 
 use Tester\Assert;
 use Texy\Configurator;

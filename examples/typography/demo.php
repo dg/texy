@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * This demo shows how to use Texy! to
@@ -6,8 +6,6 @@
  *     - insert non-breaking spaces
  *     - make typographic corrections
  */
-
-declare(strict_types=1);
 
 
 if (@!include __DIR__ . '/../vendor/autoload.php') {

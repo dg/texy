@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * This demo shows how implement Texy! as comment formatter
@@ -6,8 +6,6 @@
  *     - rel="nofollow"
  *     - used links checking (antispam)
  */
-
-declare(strict_types=1);
 
 
 if (@!include __DIR__ . '/../vendor/autoload.php') {
