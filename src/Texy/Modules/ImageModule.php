@@ -241,7 +241,7 @@ final class ImageModule extends Texy\Module
 		$el->attrs['width'] = $image->width;
 		$el->attrs['height'] = $image->height;
 
-		$texy->summary['images'][] = $el->attrs['src'];
+		$texy->summary['images'][] = (string) $el->attrs['src'];
 
 		if ($link) {
 			return $texy->linkModule->solve(null, $link, $el);

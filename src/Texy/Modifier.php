@@ -63,8 +63,10 @@ final class Modifier
 
 			if ($ch === '(') { // title
 				preg_match('#(?:\\\\\)|[^)\n])++\)#', $s, $m, 0, $p);
-				$this->title = Helpers::unescapeHtml(str_replace('\)', ')', trim(substr($m[0], 1, -1))));
-				$p += strlen($m[0]);
+				if (isset($m[0])) {
+					$this->title = Helpers::unescapeHtml(str_replace('\)', ')', trim(substr($m[0], 1, -1))));
+					$p += strlen($m[0]);
+				}
 
 			} elseif ($ch === '{') { // style & attributes
 				$a = strpos($s, '}', $p) + 1;
@@ -99,7 +101,7 @@ final class Modifier
 	 */
 	public function decorate(Texy $texy, HtmlElement $el): HtmlElement
 	{
-		$this->decorateAttrs($texy, $el->attrs, $el->getName());
+		$this->decorateAttrs($texy, $el->attrs, $el->getName() ?? '');
 		$el->validateAttrs($texy->getDTD());
 		$this->decorateClasses($texy, $el->attrs);
 		$this->decorateStyles($texy, $el->attrs);

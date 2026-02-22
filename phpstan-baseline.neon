@@ -1,0 +1,61 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Texy\\Bridges\\Latte\\TexyExtension\:\:getFilters\(\) return type has no signature specified for callable\.$#'
+			identifier: missingType.callable
+			count: 1
+			path: src/Bridges/Latte/TexyExtension.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Bridges/Latte/TexyNode.php
+
+		-
+			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Modules/FigureModule.php
+
+		-
+			message: '#^Parameter \#1 \$string of function substr expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Modules/HtmlModule.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: src/Texy/Modules/HtmlOutputModule.php
+
+		-
+			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Modules/ImageModule.php
+
+		-
+			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Modules/LinkModule.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Texy/Modules/LinkModule.php
+
+		-
+			message: '#^Method Texy\\Regexp\:\:replace\(\) should return string but returns string\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Texy/Regexp.php
+
+		-
+			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
+			identifier: missingType.callable
+			count: 1
+			path: src/Texy/Texy.php

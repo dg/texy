@@ -29,8 +29,9 @@ class Regexp
 	{
 		$reFlags = (($flags & self::OFFSET_CAPTURE) ? PREG_SPLIT_OFFSET_CAPTURE : 0) | PREG_SPLIT_DELIM_CAPTURE;
 		$res = preg_split($pattern, $subject, -1, $reFlags);
-		if (preg_last_error()) { // run-time error
+		if ($res === false || preg_last_error()) { // run-time error
 			trigger_error(preg_last_error_msg(), E_USER_WARNING);
+			return [];
 		}
 
 		return $res;
@@ -79,14 +80,14 @@ class Regexp
 				trigger_error(preg_last_error_msg(), E_USER_WARNING);
 			}
 
-			return $res;
+			return $res ?? '';
 
 		} elseif ($replacement === null && is_array($pattern)) {
 			$replacement = array_values($pattern);
 			$pattern = array_keys($pattern);
 		}
 
-		$res = preg_replace($pattern, $replacement, $subject);
+		$res = preg_replace($pattern, $replacement ?? '', $subject);
 		if (preg_last_error()) { // run-time error
 			trigger_error(preg_last_error_msg(), E_USER_WARNING);
 		}

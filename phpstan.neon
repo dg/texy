@@ -1,5 +1,11 @@
 parameters:
-	level: 5
+	level: 8
 
 	paths:
 		- src
+
+	excludePaths:
+		- src/Texy.php  # compatibility file with if (false) block
+
+includes:
+	- phpstan-baseline.neon

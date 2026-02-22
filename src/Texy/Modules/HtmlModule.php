@@ -120,6 +120,7 @@ final class HtmlModule extends Texy\Module
 
 		// convert case
 		$name = $el->getName();
+		assert($name !== null);
 		$lower = strtolower($name);
 		if (isset($texy->getDTD()[$lower]) || $name === strtoupper($name)) {
 			// complete UPPER convert to lower
@@ -299,7 +300,7 @@ final class HtmlModule extends Texy\Module
 				$texy->summary['links'][] = $el->attrs['href'];
 			}
 
-		} elseif (preg_match('#^h[1-6]#i', $name)) {
+		} elseif (preg_match('#^h[1-6]#i', $name ?? '')) {
 			$texy->headingModule->TOC[] = [
 				'el' => $el,
 				'level' => (int) substr($name, 1),

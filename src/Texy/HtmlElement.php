@@ -105,7 +105,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 
 
 	/** @param  array<string, mixed>|string|null  $attrs */
-	public static function el(?string $name = null, array|string|null $attrs = null): static
+	public static function el(?string $name = null, array|string|null $attrs = null): self
 	{
 		return new self($name, $attrs);
 	}
@@ -241,7 +241,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	 * Creates and adds a new HtmlElement child.
 	 * @param  array<string, mixed>|string|null  $attrs
 	 */
-	final public function create(string $name, array|string|null $attrs = null): static
+	final public function create(string $name, array|string|null $attrs = null): self
 	{
 		$this->insert(null, $child = new self($name, $attrs));
 		return $child;
@@ -478,7 +478,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/** @param  array<string, array{array<string, int>, array<string, int>}>  $dtd */
 	final public function validateAttrs(array $dtd): void
 	{
-		$allowed = $dtd[$this->name][0] ?? null;
+		$allowed = $dtd[$this->name ?? ''][0] ?? null;
 		if (is_array($allowed)) {
 			foreach ($this->attrs as $attr => $foo) {
 				if (
@@ -496,12 +496,12 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 	/** @param  array<string, array{array<string, int>, array<string, int>}>  $dtd */
 	public function validateChild(self|string $child, array $dtd): bool
 	{
-		if (isset($dtd[$this->name])) {
+		if ($this->name !== null && isset($dtd[$this->name])) {
 			if ($child instanceof self) {
 				$child = $child->name;
 			}
 
-			return isset($dtd[$this->name][1][$child]);
+			return $child !== null && isset($dtd[$this->name][1][$child]);
 		} else {
 			return true; // unknown element
 		}

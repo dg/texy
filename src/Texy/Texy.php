@@ -134,7 +134,7 @@ class Texy
 	private array $postHandlers = [];
 
 	/** DOM structure for parsed text */
-	private ?HtmlElement $DOM;
+	private HtmlElement $DOM;
 
 	/** @var array<string, string>  Texy protect markup table */
 	private array $marks = [];

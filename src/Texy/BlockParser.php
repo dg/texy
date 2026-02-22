@@ -7,7 +7,7 @@
 
 namespace Texy;
 
-use function strlen;
+use function is_array, strlen;
 
 
 
@@ -50,17 +50,18 @@ class BlockParser extends Parser
 			return false;
 		}
 
-		/** @var ?array<int, array{string, int}> $matches */
-		$matches = Regexp::match(
+		$matches = [];
+		/** @var ?array<array{string, int}> $m */
+		$m = Regexp::match(
 			$this->text,
 			$pattern . 'Am', // anchored & multiline
 			Regexp::OFFSET_CAPTURE,
 			$this->offset,
 		);
 
-		if ($matches) {
-			$this->offset += strlen($matches[0][0]) + 1; // 1 = "\n"
-			foreach ($matches as $key => $value) {
+		if ($m) {
+			$this->offset += strlen($m[0][0]) + 1; // 1 = "\n"
+			foreach ($m as $key => $value) {
 				$matches[$key] = $value[0];
 			}
 
@@ -123,6 +124,7 @@ class BlockParser extends Parser
 				break; // finito
 			}
 
+			assert(is_array($mMatches));
 			$this->offset = $mOffset + strlen($mMatches[0]) + 1; // 1 = \n
 
 			$res = $this->patterns[$mName]['handler']($this, $mMatches, $mName);
