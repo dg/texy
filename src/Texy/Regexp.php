@@ -7,8 +7,9 @@
 
 namespace Texy;
 
-use function array_keys, array_values, is_array, preg_last_error, preg_last_error_msg, preg_match, preg_match_all, preg_replace, preg_replace_callback, preg_split, strlen;
-use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SPLIT_OFFSET_CAPTURE;
+use JetBrains\PhpStorm\Language;
+use function array_keys, array_values, in_array, is_array, is_string, preg_last_error, preg_last_error_msg, strlen;
+use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SPLIT_NO_EMPTY, PREG_SPLIT_OFFSET_CAPTURE;
 
 
 /**
@@ -16,80 +17,112 @@ use const PREG_OFFSET_CAPTURE, PREG_SET_ORDER, PREG_SPLIT_DELIM_CAPTURE, PREG_SP
  */
 class Regexp
 {
-	public const ALL = 1;
-	public const OFFSET_CAPTURE = 2;
+	/**
+	 * Splits string by a regular expression. Subpatterns in parentheses will be captured and returned as well.
+	 * @return ($captureOffset is true ? list<array{string, int}> : list<string>)
+	 */
+	public static function split(
+		string $subject,
+		#[Language('RegExp')]
+		string $pattern,
+		bool $captureOffset = false,
+		bool $skipEmpty = false,
+		int $limit = -1,
+	): array
+	{
+		$flags = ($captureOffset ? PREG_SPLIT_OFFSET_CAPTURE : 0) | ($skipEmpty ? PREG_SPLIT_NO_EMPTY : 0);
+		return self::pcre('preg_split', [$pattern, $subject, $limit, $flags | PREG_SPLIT_DELIM_CAPTURE]);
+	}
 
 
 	/**
-	 * Splits string by a regular expression.
-	 * @param  int  $flags  OFFSET_CAPTURE
-	 * @return list<string|array{string, int}>
+	 * Searches the string for the part matching the regular expression and returns
+	 * an array with the found expression and individual subexpressions, or null.
+	 * @return ($captureOffset is true ? array<int|string, array{string, int}> : array<int|string, string>)|null
 	 */
-	public static function split(string $subject, string $pattern, int $flags = 0): array
+	public static function match(
+		string $subject,
+		#[Language('RegExp')]
+		string $pattern,
+		bool $captureOffset = false,
+		int $offset = 0,
+	): ?array
 	{
-		$reFlags = (($flags & self::OFFSET_CAPTURE) ? PREG_SPLIT_OFFSET_CAPTURE : 0) | PREG_SPLIT_DELIM_CAPTURE;
-		$res = preg_split($pattern, $subject, -1, $reFlags);
-		if ($res === false || preg_last_error()) { // run-time error
-			trigger_error(preg_last_error_msg(), E_USER_WARNING);
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
+		if ($offset > strlen($subject)) {
+			return null;
+		}
+
+		$m = [];
+		return self::pcre('preg_match', [$pattern, $subject, &$m, $flags, $offset])
+			? $m
+			: null;
+	}
+
+
+	/**
+	 * Searches the string for all occurrences matching the regular expression and
+	 * returns an array of arrays containing the found expression and each subexpression.
+	 * @return ($captureOffset is true ? list<array<int|string, array{string, int}>> : list<array<int|string, string>>)
+	 */
+	public static function matchAll(
+		string $subject,
+		#[Language('RegExp')]
+		string $pattern,
+		bool $captureOffset = false,
+		int $offset = 0,
+	): array
+	{
+		if ($offset > strlen($subject)) {
 			return [];
 		}
 
-		return $res;
+		$m = [];
+		$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0) | PREG_SET_ORDER;
+		self::pcre('preg_match_all', [$pattern, $subject, &$m, $flags, $offset]);
+		return $m;
 	}
 
 
 	/**
-	 * Performs a regular expression match.
-	 * @param  int  $flags  OFFSET_CAPTURE, ALL
-	 */
-	public static function match(string $subject, string $pattern, int $flags = 0, int $offset = 0): mixed
-	{
-		$empty = $flags & self::ALL ? [] : null;
-		if ($offset > strlen($subject)) {
-			return $empty;
-		}
-
-		$reFlags = ($flags & self::OFFSET_CAPTURE) ? PREG_OFFSET_CAPTURE : 0;
-		$res = $flags & self::ALL
-			? preg_match_all($pattern, $subject, $m, $reFlags | PREG_SET_ORDER, $offset)
-			: preg_match($pattern, $subject, $m, $reFlags, $offset);
-		if (preg_last_error()) { // run-time error
-			trigger_error(preg_last_error_msg(), E_USER_WARNING);
-		} elseif ($res) {
-			return $m;
-		}
-
-		return $empty;
-	}
-
-
-	/**
-	 * Perform a regular expression search and replace.
+	 * Replaces all occurrences matching regular expression $pattern which can be string or array in the form `pattern => replacement`.
 	 * @param  string|string[]  $pattern
-	 * @param  string|\Closure(string[]): string|null  $replacement
+	 * @param  string|\Closure(string[]): string  $replacement
 	 */
 	public static function replace(
 		string $subject,
+		#[Language('RegExp')]
 		string|array $pattern,
-		string|\Closure|null $replacement = null,
+		string|\Closure $replacement = '',
+		int $limit = -1,
+		bool $captureOffset = false,
 	): string
 	{
 		if ($replacement instanceof \Closure) {
-			$res = preg_replace_callback($pattern, $replacement, $subject);
-			if ($res === null && preg_last_error()) { // run-time error
-				trigger_error(preg_last_error_msg(), E_USER_WARNING);
-			}
+			$flags = ($captureOffset ? PREG_OFFSET_CAPTURE : 0);
+			return self::pcre('preg_replace_callback', [$pattern, $replacement, $subject, $limit, 0, $flags]);
 
-			return $res ?? '';
+		} elseif (is_array($pattern) && is_string(key($pattern))) {
+			return self::pcre('preg_replace', [array_keys($pattern), array_values($pattern), $subject, $limit]);
 
-		} elseif ($replacement === null && is_array($pattern)) {
-			$replacement = array_values($pattern);
-			$pattern = array_keys($pattern);
+		} else {
+			return self::pcre('preg_replace', [$pattern, $replacement, $subject, $limit]);
 		}
+	}
 
-		$res = preg_replace($pattern, $replacement ?? '', $subject);
-		if (preg_last_error()) { // run-time error
-			trigger_error(preg_last_error_msg(), E_USER_WARNING);
+
+	/**
+	 * @internal
+	 * @param  array<mixed>  $args
+	 */
+	public static function pcre(string $func, array $args): mixed
+	{
+		assert(is_callable($func));
+		$res = @$func(...$args);
+		if (($code = preg_last_error()) // run-time error, but preg_last_error & return code are liars
+			&& ($res === null || !in_array($func, ['preg_replace_callback', 'preg_replace'], true))
+		) {
+			throw new RegexpException(preg_last_error_msg() . ' (pattern: ' . implode(' or ', (array) $args[0]) . ')', $code);
 		}
 
 		return $res;

@@ -49,12 +49,6 @@ parameters:
 			path: src/Texy/Modules/LinkModule.php
 
 		-
-			message: '#^Method Texy\\Regexp\:\:replace\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Texy/Regexp.php
-
-		-
 			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
 			identifier: missingType.callable
 			count: 1

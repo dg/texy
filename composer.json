@@ -19,7 +19,8 @@
 		"latte/latte": "^3.0.14",
 		"phpstan/phpstan": "^2.1@stable",
 		"phpstan/extension-installer": "^1.4@stable",
-		"nette/phpstan-rules": "^1.0"
+		"nette/phpstan-rules": "^1.0",
+		"jetbrains/phpstorm-attributes": "^1.2"
 	},
 	"conflict": {
 		"latte/latte": ">=3.0.0 <3.0.14"
