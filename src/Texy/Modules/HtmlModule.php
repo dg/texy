@@ -10,6 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\HtmlElement;
 use Texy\Patterns;
+use Texy\Regexp;
 use function count, is_array, is_string;
 use const PREG_SET_ORDER;
 
@@ -166,7 +167,7 @@ final class HtmlModule extends Texy\Module
 		}
 
 		// sanitize comment
-		$content = Texy\Regexp::replace($content, '#-{2,}#', ' - ');
+		$content = Regexp::replace($content, '#-{2,}#', ' - ');
 		$content = trim($content, '-');
 
 		return $this->texy->protect('<!--' . $content . '-->', Texy\Texy::CONTENT_MARKUP);
@@ -300,7 +301,7 @@ final class HtmlModule extends Texy\Module
 				$texy->summary['links'][] = $el->attrs['href'];
 			}
 
-		} elseif (preg_match('#^h[1-6]#i', $name ?? '')) {
+		} elseif (Regexp::match($name ?? '', '#^h[1-6]#i')) {
 			$texy->headingModule->TOC[] = [
 				'el' => $el,
 				'level' => (int) substr($name, 1),
@@ -315,12 +316,10 @@ final class HtmlModule extends Texy\Module
 	/** @return array<string, string|bool> */
 	private function parseAttributes(string $attrs): array
 	{
-		$matches = $res = [];
-		preg_match_all(
-			'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
+		$res = [];
+		$matches = Regexp::matchAll(
 			$attrs,
-			$matches,
-			PREG_SET_ORDER,
+			'#([a-z0-9\_:-]+)\s*(?:=\s*(\'[^\']*\'|"[^"]*"|[^\'"\s]+))?()#isu',
 		);
 
 		foreach ($matches as $m) {
