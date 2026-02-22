@@ -9,8 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Regexp;
-use function preg_match, preg_split, str_contains, str_replace, strlen, strtr, substr_replace, trim;
-use const PREG_SPLIT_NO_EMPTY;
+use function str_contains, str_replace, strlen, strtr, substr_replace, trim;
 
 
 /**
@@ -28,8 +27,8 @@ final class ParagraphModule extends Texy\Module
 	public function process(Texy\BlockParser $parser, string $content, Texy\HtmlElement $el): void
 	{
 		$parts = $parser->isIndented()
-			? preg_split('#(\n(?!\ )|\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY)
-			: preg_split('#(\n{2,})#', $content, -1, PREG_SPLIT_NO_EMPTY);
+			? Regexp::split($content, '#(\n(?!\ )|\n{2,})#', skipEmpty: true)
+			: Regexp::split($content, '#(\n{2,})#', skipEmpty: true);
 
 		foreach ($parts ?: [] as $s) {
 			$s = trim($s);
@@ -91,7 +90,7 @@ final class ParagraphModule extends Texy\Module
 			// leave element p
 
 		// block contains text
-		} elseif (preg_match('#[^\s' . Texy\Patterns::MARK . ']#u', $content)) {
+		} elseif (Regexp::match($content, '#[^\s' . Texy\Patterns::MARK . ']#u')) {
 			// leave element p
 
 		// block contains only replaced element

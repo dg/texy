@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use function implode, krsort, preg_quote, str_contains, trigger_error;
+use function implode, krsort, str_contains, trigger_error;
 
 
 /**
@@ -52,7 +52,7 @@ final class EmoticonModule extends Texy\Module
 		krsort($this->icons);
 		$pattern = [];
 		foreach ($this->icons as $key => $foo) {
-			$pattern[] = preg_quote($key, '#') . '+'; // last char can be repeated
+			$pattern[] = Texy\Regexp::quote($key) . '+'; // last char can be repeated
 		}
 
 		$this->texy->registerLinePattern(

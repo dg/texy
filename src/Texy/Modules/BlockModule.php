@@ -10,7 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Helpers;
 use Texy\HtmlElement;
-use function assert, htmlspecialchars, preg_split, str_replace, trim;
+use function assert, htmlspecialchars, str_replace, trim;
 use const ENT_NOQUOTES;
 
 
@@ -75,7 +75,7 @@ final class BlockModule extends Texy\Module
 		// [4] => ... content
 
 		$mod = new Texy\Modifier($mMod);
-		$parts = preg_split('#\s+#u', $mParam, 2);
+		$parts = Texy\Regexp::split($mParam, '#\s+#u', limit: 2);
 		$blocktype = empty($parts[0]) ? 'block/default' : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];
 

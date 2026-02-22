@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use function array_flip, array_pop, array_splice, count, end, iconv_strlen, implode, ord, preg_match_all;
+use function array_flip, array_pop, array_splice, count, end, iconv_strlen, implode, ord;
 
 
 /**
@@ -98,14 +98,12 @@ final class LongWordsModule extends Texy\Module
 			return $mWord;
 		}
 
-		$chars = [];
-		preg_match_all(
-			'#[' . Texy\Patterns::MARK . ']+|.#u',
+		$chars = Texy\Regexp::matchAll(
 			$mWord,
-			$chars,
+			'#[' . Texy\Patterns::MARK . ']+|.#u',
 		);
 
-		$chars = $chars[0];
+		$chars = array_column($chars, 0);
 		if (count($chars) < $this->wordLimit) {
 			return $mWord;
 		}
