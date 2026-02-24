@@ -10,7 +10,7 @@ namespace Texy;
 
 /**
  * A part of a language: the syntaxes of one topic. Used by the implementations of languages,
- * an application extends a language by registerLinePattern(), registerBlockPattern() and addHandler().
+ * an application extends a language by addInlineSyntax(), addBlockSyntax() and addPass().
  */
 abstract class Module
 {

@@ -124,31 +124,31 @@ class Texy
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
+	 * @param  callable  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
 	 */
-	final public function registerLinePattern(
-		callable $handler,
+	final public function addInlineSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		callable $parser,
 	): void
 	{
-		$this->engine->addInlineSyntax($name, $pattern, $handler(...));
+		$this->engine->addInlineSyntax($name, $pattern, $parser(...));
 		$this->allowedSyntax[$name] ??= true;
 	}
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
+	 * @param  callable  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
 	 */
-	final public function registerBlockPattern(
-		callable $handler,
+	final public function addBlockSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		callable $parser,
 	): void
 	{
-		$this->engine->addBlockSyntax($name, $pattern, $handler(...));
+		$this->engine->addBlockSyntax($name, $pattern, $parser(...));
 		$this->allowedSyntax[$name] ??= true;
 	}
 
@@ -285,7 +285,7 @@ class Texy
 	 * parse(), do the work, and then transform().
 	 * @param  callable(Nodes\DocumentNode): void  $pass
 	 */
-	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
+	final public function addPass(callable $pass, Stage $stage = Stage::Transform): void
 	{
 		$this->engine->addPass($pass(...), $stage);
 	}

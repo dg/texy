@@ -99,8 +99,8 @@ final class Renderer extends NodeRenderer
 			Nodes\CommentNode::class => fn() => '',
 		];
 
-		foreach ($config->getRenderers() as $handler) {
-			$this->addRenderer($handler);
+		foreach ($config->getRenderers() as $renderer) {
+			$this->addRenderer($renderer);
 		}
 	}
 

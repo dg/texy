@@ -103,7 +103,7 @@ class Config
 		Syntax::QuickLink => 'a',
 	];
 
-	/** @var list<\Closure>  user node handlers (see addRenderer) */
+	/** @var list<\Closure>  user node renderers (see addRenderer) */
 	private array $userRenderers = [];
 
 

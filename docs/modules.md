@@ -2,7 +2,7 @@
 
 Modules are the internal organization of a language in the parse and transform phases. Each module encapsulates one area of the markup: it declares the syntax names, registers the patterns and turns matches into AST nodes. Modules do **not** render – all output generation lives in `Texy\Output` (see [rendering.md](rendering.md)).
 
-Modules are not an API of an application. A language consists of them, and they can be split, merged or rebuilt at will. An application extends Texy with `registerLinePattern()`, `registerBlockPattern()`, `addHandler()` and `$texy->htmlOutput->addRenderer()`, and configures it on `$texy->config`.
+Modules are not an API of an application. A language consists of them, and they can be split, merged or rebuilt at will. An application extends Texy with `addInlineSyntax()`, `addBlockSyntax()`, `addPass()` and `$texy->htmlOutput->addRenderer()`, and configures it on `$texy->config`.
 
 ## The contract
 

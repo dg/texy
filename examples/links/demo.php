@@ -37,7 +37,7 @@ $texy = new Texy\Texy;
 
 
 // The pass runs in transform(), after references like [wiki:topic] are resolved
-$texy->addHandler(function (DocumentNode $document): void {
+$texy->addPass(function (DocumentNode $document): void {
 	foreach ($document->find(LinkNode::class, fn(LinkNode $link) => $link->url !== null) as $link) {
 		$link->url = rewriteUrl($link->url);
 	}

@@ -33,7 +33,7 @@ $names = [1 => 'Punkrats', 2 => 'Servats', 3 => 'Bonifats'];
 
 // Where a mention points and what it says is the meaning of the document, so a pass sets it.
 // A bare reference like [1] becomes a LinkNode whose $ref keeps the written name.
-$texy->addHandler(function (DocumentNode $document) use ($names): void {
+$texy->addPass(function (DocumentNode $document) use ($names): void {
 	foreach ($document->find(LinkNode::class, fn(LinkNode $link) => isset($names[$link->ref])) as $link) {
 		$link->url = '#comm-' . $link->ref;  // links to <div id="comm-1">
 		$link->content = ContentNode::fromText("[$link->ref] {$names[$link->ref]}:");
