@@ -12,9 +12,9 @@ extending Texy, plus how it converts its markup to HTML underneath.
   and security (safe mode).
 - **[custom-handlers.md](custom-handlers.md)** — changing how existing constructs
   are rendered (`addRenderer()`) and transforming the parsed document
-  (`addHandler()` + `$node->find()` / `traverse()`).
+  (`addPass()` + `$node->find()` / `traverse()`).
 - **[custom-syntax.md](custom-syntax.md)** — adding brand-new markup constructs with
-  `registerLinePattern()` / `registerBlockPattern()`.
+  `addInlineSyntax()` / `addBlockSyntax()`.
 
 ## Internals (how it works)
 

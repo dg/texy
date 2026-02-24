@@ -126,7 +126,7 @@ test('linked image node with rejected URL keeps the link', function () {
 
 test('image node without URL renders as its alternative text', function () {
 	$texy = createTexy();
-	$texy->registerLinePattern(fn() => new Texy\Nodes\ImageNode(alt: 'Logo'), '~@@~', 'myimage');
+	$texy->addInlineSyntax('myimage', '~@@~', fn() => new Texy\Nodes\ImageNode(alt: 'Logo'));
 	Assert::match(
 		'<p>a Logo b</p>',
 		$texy->toHtml('a @@ b'),

@@ -100,7 +100,7 @@ class Config
 		'code' => 'code',
 	];
 
-	/** @var list<\Closure>  user node handlers (see addRenderer) */
+	/** @var list<\Closure>  user node renderers (see addRenderer) */
 	private array $userRenderers = [];
 
 

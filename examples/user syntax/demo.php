@@ -10,8 +10,8 @@
  * - .h1 and .perex block syntax
  *
  * WHAT YOU'LL LEARN:
- * - How to register inline patterns with registerLinePattern()
- * - How to register block patterns with registerBlockPattern()
+ * - How to register inline syntaxes with addInlineSyntax()
+ * - How to register block syntaxes with addBlockSyntax()
  * - How to disable conflicting default syntax
  * - How to parse content inside your custom elements
  * - How to apply modifiers to your elements
@@ -51,7 +51,14 @@ $texy->allowedSyntax[Texy\Syntax::EmphasisSingleAsterisk2] = false; // Disables 
 
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks
-$texy->registerLinePattern(
+$texy->addInlineSyntax(
+	'myInlineSyntax1', // Unique name for this syntax
+	'~
+		(?<! \* ) \* (?! [ *] )
+		(.+)
+		' . Texy\Patterns::Modifier . '?
+		(?<! [ *] ) \* (?! \* )
+	~Ux', // regular expression
 	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
@@ -66,17 +73,17 @@ $texy->registerLinePattern(
 			$name, // 'myInlineSyntax1' or 'myInlineSyntax2'
 		);
 	},
-	'~
-		(?<! \* ) \* (?! [ *] )
-		(.+)
-		' . Texy\Patterns::Modifier . '?
-		(?<! [ *] ) \* (?! \* )
-	~Ux', // regular expression
-	'myInlineSyntax1', // Unique name for this syntax
 );
 
 // Add new syntax: _italic_
-$texy->registerLinePattern(
+$texy->addInlineSyntax(
+	'myInlineSyntax2',
+	'~
+		(?<! _ ) _ (?! [ _] )
+		(.+)
+		' . Texy\Patterns::Modifier . '?
+		(?<! [ _] ) _ (?! _ )
+	~Ux',
 	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
@@ -90,13 +97,6 @@ $texy->registerLinePattern(
 			$name,
 		);
 	},
-	'~
-		(?<! _ ) _ (?! [ _] )
-		(.+)
-		' . Texy\Patterns::Modifier . '?
-		(?<! [ _] ) _ (?! _ )
-	~Ux',
-	'myInlineSyntax2',
 );
 
 
@@ -106,7 +106,12 @@ $texy->registerLinePattern(
 
 // Add new syntax: .tagname followed by content on next line
 // Examples: .h1, .h2, .perex, etc.
-$texy->registerBlockPattern(
+$texy->addBlockSyntax( // Match .tagname\ncontent
+	'myBlockSyntax1',
+	'~^
+		\. ([a-z0-9]+) \n
+		(.+)
+	$~x',
 	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets): ParagraphNode {
 		[, $mTag, $mText] = $matches;
 
@@ -119,11 +124,6 @@ $texy->registerBlockPattern(
 
 		return new ParagraphNode($content, $modifier);
 	},
-	'~^
-		\. ([a-z0-9]+) \n
-		(.+)
-	$~x', // Match .tagname\ncontent
-	'myBlockSyntax1',
 );
 
 
