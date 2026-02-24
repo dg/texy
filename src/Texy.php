@@ -246,31 +246,31 @@ class Texy
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
+	 * @param  \Closure  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
 	 */
-	final public function registerLinePattern(
-		callable $handler,
+	final public function addInlineSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		\Closure $parser,
 	): void
 	{
-		$this->engine->addInline($name, $pattern, $handler(...), application: true);
+		$this->engine->addInline($name, $pattern, $parser, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
+	 * @param  \Closure  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
 	 */
-	final public function registerBlockPattern(
-		callable $handler,
+	final public function addBlockSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		\Closure $parser,
 	): void
 	{
-		$this->engine->addBlock($name, $pattern, $handler(...), application: true);
+		$this->engine->addBlock($name, $pattern, $parser, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
@@ -280,11 +280,11 @@ class Texy
 	 * The AST may be freely modified there; return values are ignored. A Transform pass
 	 * (the default) runs in transform(), a Syntax pass already in parse(), where it may
 	 * only finish recognizing the source and keeps ranges exact. Passes of a stage run in registration order.
-	 * @param  callable(Nodes\DocumentNode): void  $pass
+	 * @param  \Closure(Nodes\DocumentNode): void  $pass
 	 */
-	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
+	final public function addPass(\Closure $pass, Stage $stage = Stage::Transform): void
 	{
-		$this->engine->addPass($pass(...), $stage);
+		$this->engine->addPass($pass, $stage);
 	}
 
 

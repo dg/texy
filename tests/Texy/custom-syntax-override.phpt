@@ -13,10 +13,10 @@ require __DIR__ . '/../bootstrap.php';
 
 test('overriding a built-in line syntax survives repeated parsing', function () {
 	$texy = new Texy;
-	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('CUSTOM-IMAGE'),
-		'~\[\*(.+)\*\]~U',
+	$texy->addInlineSyntax(
 		Syntax::Image,
+		'~\[\*(.+)\*\]~U',
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('CUSTOM-IMAGE'),
 	);
 
 	Assert::contains('CUSTOM-IMAGE', $texy->toHtml('see [* logo.gif *] here'));
@@ -26,12 +26,12 @@ test('overriding a built-in line syntax survives repeated parsing', function () 
 
 test('overriding a built-in block syntax survives repeated parsing', function () {
 	$texy = new Texy;
-	$texy->registerBlockPattern(
+	$texy->addBlockSyntax(
+		Syntax::HorizontalRule,
+		'~^-{4,}$~m',
 		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\ParagraphNode(
 			$context->parseInline('CUSTOM-RULE', $offsets[0]),
 		),
-		'~^-{4,}$~m',
-		Syntax::HorizontalRule,
 	);
 
 	Assert::contains('CUSTOM-RULE', $texy->toHtml('----'));
@@ -41,15 +41,15 @@ test('overriding a built-in block syntax survives repeated parsing', function ()
 
 test('the last consumer registration of a name wins', function () {
 	$texy = new Texy;
-	$texy->registerLinePattern(
+	$texy->addInlineSyntax(
+		'custom/foo',
+		'~@@(.+)@@~U',
 		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('FIRST'),
-		'~@@(.+)@@~U',
-		'custom/foo',
 	);
-	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('SECOND'),
-		'~@@(.+)@@~U',
+	$texy->addInlineSyntax(
 		'custom/foo',
+		'~@@(.+)@@~U',
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('SECOND'),
 	);
 
 	Assert::contains('SECOND', $texy->toHtml('@@x@@'));
@@ -58,10 +58,10 @@ test('the last consumer registration of a name wins', function () {
 
 test('allowed[] still disables a consumer-registered syntax', function () {
 	$texy = new Texy;
-	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('ACTIVE'),
-		'~@@(.+)@@~U',
+	$texy->addInlineSyntax(
 		'custom/foo',
+		'~@@(.+)@@~U',
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('ACTIVE'),
 	);
 	$texy->allowedSyntax['custom/foo'] = false;
 
@@ -72,10 +72,10 @@ test('allowed[] still disables a consumer-registered syntax', function () {
 test('a custom syntax registered after the first parse precedes built-ins on a tie as well', function () {
 	$texy = new Texy;
 	$texy->toHtml('**text**');
-	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('WON'),
-		'~\*\*(.+)\*\*~U',
+	$texy->addInlineSyntax(
 		'custom/strong',
+		'~\*\*(.+)\*\*~U',
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('WON'),
 	);
 
 	Assert::contains('WON', $texy->toHtml('**text**'));
@@ -84,10 +84,10 @@ test('a custom syntax registered after the first parse precedes built-ins on a t
 
 test('a custom syntax registered before the first parse precedes built-ins on a tie', function () {
 	$texy = new Texy;
-	$texy->registerLinePattern(
-		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('WON'),
-		'~\*\*(.+)\*\*~U',
+	$texy->addInlineSyntax(
 		'custom/strong',
+		'~\*\*(.+)\*\*~U',
+		fn(ParseContext $context, array $matches, array $offsets) => new Nodes\TextNode('WON'),
 	);
 
 	Assert::contains('WON', $texy->toHtml('**text**'));

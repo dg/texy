@@ -8,7 +8,7 @@
  * will recognize.
  *
  * WHAT YOU'LL LEARN:
- * - How to register new block syntax using registerBlockPattern()
+ * - How to register new block syntax using addBlockSyntax()
  * - Recognize <?php ... ?> blocks automatically
  * - Recognize <script> ... </script> blocks automatically
  * - Combine pattern-based and handler-based approaches
@@ -83,7 +83,11 @@ $texy->htmlOutput->addRenderer(
 
 // Register NEW syntax: recognize blocks starting with <?php
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
-$texy->registerBlockPattern(
+$texy->addBlockSyntax( // Block patterns are always multiline (m), s lets .+? span lines
+	'phpBlockSyntax',
+	'~^
+		<\?php \n .+? \n \?>
+	$~sx',
 	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets): CodeBlockNode {
 		[$content] = $matches;
 
@@ -93,14 +97,16 @@ $texy->registerBlockPattern(
 			range: new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~^
-		<\?php \n .+? \n \?>
-	$~sx', // Block patterns are always multiline (m), s lets .+? span lines
-	'phpBlockSyntax',
 );
 
 // Register NEW syntax: recognize <script> ... </script> blocks
-$texy->registerBlockPattern(
+$texy->addBlockSyntax( // block patterns must be line-anchored
+	'scriptBlockSyntax',
+	'~^
+		<script (?: \s+ type=.?text/javascript.? )? > \n
+		.+? \n
+		</script>
+	$~sx',
 	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets): CodeBlockNode {
 		[$content] = $matches;
 
@@ -110,12 +116,6 @@ $texy->registerBlockPattern(
 			range: new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~^
-		<script (?: \s+ type=.?text/javascript.? )? > \n
-		.+? \n
-		</script>
-	$~sx', // block patterns must be line-anchored
-	'scriptBlockSyntax',
 );
 
 

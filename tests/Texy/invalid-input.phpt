@@ -37,7 +37,7 @@ test('valid UTF-8 including edge characters passes', function () {
 
 test('what the text causes is a Texy\Exception, what the program does a LogicException', function () {
 	$texy = new Texy\Texy;
-	$texy->registerLinePattern(fn() => null, '~(~', 'custom/broken');
+	$texy->addInlineSyntax('custom/broken', '~(~', fn() => null);
 	$e = Assert::exception(fn() => $texy->toHtml('a'), LogicException::class, 'Compilation failed: %a%');
 	Assert::false($e instanceof Texy\Exception);
 

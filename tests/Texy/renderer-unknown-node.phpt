@@ -30,12 +30,12 @@ class AlertNode extends Nodes\BlockNode
 function texyWithAlert(): Texy
 {
 	$texy = new Texy;
-	$texy->registerBlockPattern(
+	$texy->addBlockSyntax(
+		'custom/alert',
+		'~^!!!\ (.+)$~',
 		fn(ParseContext $context, array $matches, array $offsets) => new AlertNode(
 			$context->parseInline($matches[1], $offsets[1]),
 		),
-		'~^!!!\ (.+)$~',
-		'custom/alert',
 	);
 	$texy->htmlOutput->addRenderer(
 		fn(AlertNode $node, Output\Html\Renderer $gen) => new Output\Html\Element('div', ['class' => 'alert'])

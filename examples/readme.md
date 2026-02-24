@@ -76,7 +76,7 @@ $html = $texy->toHtml($userInput);
 
 ```php
 $texy = new Texy\Texy;
-$texy->addHandler(function (Texy\Nodes\DocumentNode $document): void {
+$texy->addPass(function (Texy\Nodes\DocumentNode $document): void {
     foreach ($document->find(Texy\Nodes\LinkNode::class) as $link) {
         // change the link, every output format (HTML, text) gets it
     }
@@ -99,10 +99,10 @@ $texy->htmlOutput->addRenderer(
 
 ```php
 $texy = new Texy\Texy;
-$texy->registerLinePattern(
-    $parser,               // fn(ParseContext, array $matches, array $offsets): ?Node
-    '#@@(\w+)#',           // regex pattern
+$texy->addInlineSyntax(
     'custom/username',     // syntax name
+    '#@@(\w+)#',           // regex pattern
+    $parser,               // fn(ParseContext, array $matches, array $offsets): ?Node
 );
 ```
 

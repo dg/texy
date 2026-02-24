@@ -7,8 +7,8 @@ You define what the construct looks like (a regular expression) and write a synt
 ## Registering
 
 ```php
-$texy->registerLinePattern(callable $handler, string $pattern, string $name);
-$texy->registerBlockPattern(callable $handler, string $pattern, string $name);
+$texy->addInlineSyntax(string $name, string $pattern, \Closure $parser);
+$texy->addBlockSyntax(string $name, string $pattern, \Closure $parser);
 ```
 
 - **Inline patterns** recognize inline constructs; the pattern is searched anywhere in the text, so it must **not** be anchored with `^`.
@@ -23,9 +23,9 @@ Registering under a built-in name (a `Syntax::*` constant) **replaces** that syn
 Your pattern behaves exactly as written: Texy adds only the `u` (UTF-8) flag, and to a block pattern also `m`, so that `^` and `$` mean the edges of a line; what you verify in a regex tester with these flags works after registration. Flags of your own – including extended mode `x`, which lets you lay the pattern out over several lines with `#` comments – belong after the closing delimiter, as usual:
 
 ```php
-$texy->registerLinePattern($handler, '~
+$texy->addInlineSyntax('custom/mention', '~
 	@ ([a-z0-9_]{2,30})   # user name
-~x', 'custom/mention');
+~x', $parser);
 ```
 
 `Texy\Patterns` fragments (`Modifier`, `LinkUrl`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
@@ -51,7 +51,9 @@ Collision resolution ([parsing.md](parsing.md#inlineparser)): at the same positi
 ```php
 use Texy\Nodes;
 
-$texy->registerLinePattern(
+$texy->addInlineSyntax(
+    'custom/username',
+    '~@@([a-z0-9_]+)~i',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\LinkNode {
         $username = $matches[1];
         return new Nodes\LinkNode(
@@ -60,8 +62,6 @@ $texy->registerLinePattern(
             range: new Texy\Range($offsets[0], strlen($matches[0])),
         );
     },
-    '~@@([a-z0-9_]+)~i',
-    'custom/username',
 );
 ```
 
@@ -72,7 +72,9 @@ Check out the profile of @@johndoe.
 ### Alert boxes (block, with nested Texy content)
 
 ```php
-$texy->registerBlockPattern(
+$texy->addBlockSyntax(
+    'custom/alert',
+    '~^:::(warning|info|danger)\n(.+?)\n:::$~s',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\DivNode {
         [, $type, $content] = $matches;
         $mod = new Texy\Modifier;
@@ -82,8 +84,6 @@ $texy->registerBlockPattern(
             $mod,
         );
     },
-    '~^:::(warning|info|danger)\n(.+?)\n:::$~s',
-    'custom/alert',
 );
 ```
 
@@ -101,15 +101,15 @@ $abbreviations = [
     'CSS' => 'Cascading Style Sheets',
 ];
 
-$texy->registerLinePattern(
+$texy->addInlineSyntax(
+    'custom/abbreviation',
+    '~\b([A-Z]{2,})\b~',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets) use ($abbreviations): ?Nodes\AnnotationNode {
         if (!isset($abbreviations[$matches[1]])) {
             return null;   // unknown abbreviation - leave the text alone
         }
         return new Nodes\AnnotationNode($matches[1], $abbreviations[$matches[1]]);
     },
-    '~\b([A-Z]{2,})\b~',
-    'custom/abbreviation',
 );
 ```
 
@@ -118,7 +118,9 @@ $texy->registerLinePattern(
 For structures whose full extent the registered pattern cannot capture, use the block parser's navigation API:
 
 ```php
-$texy->registerBlockPattern(
+$texy->addBlockSyntax(
+    'custom/note',
+    '~^NOTE:\s*(.+)$~',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\BlockQuoteNode {
         $parser = $context->getBlockParser();
         $parser->moveBackward();   // pattern matched the first line; re-read from it
@@ -130,8 +132,6 @@ $texy->registerBlockPattern(
 
         return new Nodes\BlockQuoteNode($context->parseBlock(trim($content)));
     },
-    '~^NOTE:\s*(.+)$~',
-    'custom/note',
 );
 ```
 

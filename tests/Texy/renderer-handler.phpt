@@ -11,7 +11,7 @@ use Texy\Output\Html\{Raw, Renderer};
 require __DIR__ . '/../bootstrap.php';
 
 
-test('addRenderer() replaces the default handler', function () {
+test('addRenderer() replaces the default renderer', function () {
 	$texy = new Texy;
 	$ast = $texy->parse('hello');
 

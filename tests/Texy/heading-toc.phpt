@@ -55,7 +55,7 @@ test('{toc:} style overrides the title and the ID slug', function () {
 test('a title override set before the heading pass is kept', function () {
 	$texy = new Texy\Texy;
 	$texy->config->headingIds = true;
-	$texy->addHandler(function (Texy\Nodes\DocumentNode $document) {
+	$texy->addPass(function (Texy\Nodes\DocumentNode $document) {
 		$document->findFirst(HeadingNode::class)->titleOverride = 'mine';
 	}, Texy\Stage::Syntax);
 	$document = $texy->parse("Title .{toc: custom}\n=====");

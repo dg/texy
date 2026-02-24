@@ -9,7 +9,7 @@
  * - _italic_ (instead of Texy's default //italic//)
  *
  * WHAT YOU'LL LEARN:
- * - How to register inline patterns with registerLinePattern()
+ * - How to register inline syntaxes with addInlineSyntax()
  * - How to disable conflicting default syntax
  * - How to parse content inside your custom elements
  * - How to apply modifiers to your elements
@@ -53,7 +53,14 @@ $texy->htmlOutput->phraseTags[PhraseType::Emphasis->value] = 'i';
 
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks and an optional modifier
-$texy->registerLinePattern(
+$texy->addInlineSyntax(
+	'custom/bold', // Unique name for this syntax
+	'~
+		(?<! \* ) \* (?! [ *] )
+		(.+)
+		' . Texy\Patterns::Modifier . '?
+		(?<! [ *] ) \* (?! \* )
+	~Ux', // regular expression
 	function (ParseContext $context, array $matches, array $offsets): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
@@ -67,17 +74,17 @@ $texy->registerLinePattern(
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~
-		(?<! \* ) \* (?! [ *] )
-		(.+)
-		' . Texy\Patterns::Modifier . '?
-		(?<! [ *] ) \* (?! \* )
-	~Ux', // regular expression
-	'custom/bold', // Unique name for this syntax
 );
 
 // Add new syntax: _italic_
-$texy->registerLinePattern(
+$texy->addInlineSyntax(
+	'custom/italic',
+	'~
+		(?<! _ ) _ (?! [ _] )
+		(.+)
+		' . Texy\Patterns::Modifier . '?
+		(?<! [ _] ) _ (?! _ )
+	~Ux',
 	function (ParseContext $context, array $matches, array $offsets): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
@@ -90,13 +97,6 @@ $texy->registerLinePattern(
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~
-		(?<! _ ) _ (?! [ _] )
-		(.+)
-		' . Texy\Patterns::Modifier . '?
-		(?<! [ _] ) _ (?! _ )
-	~Ux',
-	'custom/italic',
 );
 
 

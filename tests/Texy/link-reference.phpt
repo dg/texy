@@ -171,7 +171,7 @@ test('a %s in the target is the link text', function () {
 
 test('a pass rewrites the target of a code phrase like that of any link', function () {
 	$texy = new Texy\Texy;
-	$texy->addHandler(function (Texy\Nodes\DocumentNode $doc) {
+	$texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
 		foreach ($doc->find(Texy\Nodes\LinkNode::class) as $link) {
 			$link->url = 'http://wiki/' . $link->ref;
 		}
