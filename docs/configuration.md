@@ -87,6 +87,7 @@ $texy->removeSoftHyphens = true;   // strip U+00AD from input (deprecated)
 $html = $texy->toHtml($text);     // parse + transform + render HTML
 $ast = $texy->parse($text);        // the syntax tree, a Nodes\DocumentNode
 $texy->transform($ast);            // turns it into the document, in place
+$html = $texy->renderHtml($ast);   // render a document transformed earlier
 $plain = $texy->toText($text);     // plain-text rendition
 $ast->getHeadings();          // headings in document order
 $ast->getHeadings()[0]?->getTitle(); // document title (for <title>)

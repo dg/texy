@@ -158,7 +158,7 @@ class Texy
 	 */
 	public function toHtml(string $text): string
 	{
-		return $this->createHtmlRenderer()->render($this->transform($this->parse($text)));
+		return $this->renderHtml($this->transform($this->parse($text)));
 	}
 
 
@@ -167,7 +167,17 @@ class Texy
 	 */
 	public function toInlineHtml(string $text): string
 	{
-		return $this->createHtmlRenderer()->render($this->transform($this->parseInline($text)));
+		return $this->renderHtml($this->transform($this->parseInline($text)));
+	}
+
+
+	/**
+	 * Renders a transformed document to HTML. Separate from parse() and transform()
+	 * so a consumer can read or change the AST in between.
+	 */
+	public function renderHtml(Nodes\DocumentNode $document): string
+	{
+		return $this->createHtmlRenderer()->render($document);
 	}
 
 
@@ -270,6 +280,15 @@ class Texy
 	{
 		$document = $this->parse($text);
 		$this->transform($document);
+		return $this->renderText($document);
+	}
+
+
+	/**
+	 * Renders a transformed document to plain text.
+	 */
+	public function renderText(Nodes\DocumentNode $document): string
+	{
 		return (new Output\Text\Renderer)->render($document);
 	}
 
