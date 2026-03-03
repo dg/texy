@@ -166,5 +166,5 @@ test('a tag without its written form is rebuilt from its attributes', function (
 	$texy->htmlPolicy->allowedTags = false;
 	$tag = new Nodes\HtmlTagNode('key', ['a' => 'b', 'c' => true]);
 	$doc = new Nodes\DocumentNode(new Nodes\ContentNode([new Nodes\ParagraphNode(new Nodes\ContentNode([$tag]))]));
-	Assert::same('&lt;key a="b" c&gt;', $texy->createHtmlRenderer()->render($doc));
+	Assert::same('&lt;key a="b" c&gt;', $texy->renderHtml($doc));
 });

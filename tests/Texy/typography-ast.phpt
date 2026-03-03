@@ -52,7 +52,7 @@ test('the content of an unknown inline node gets typography', function () {
 		}
 	};
 
-	Assert::same("<p>outside „quoted“ … and inside „quoted“ …</p>\n", $texy->createHtmlRenderer()->render($texy->transform($doc)));
+	Assert::same("<p>outside „quoted“ … and inside „quoted“ …</p>\n", $texy->renderHtml($texy->transform($doc)));
 });
 
 

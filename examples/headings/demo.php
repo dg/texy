@@ -45,7 +45,7 @@ $texy->config->headingBalancing = Texy\HeadingBalancing::Dynamic;
 $texy->config->headingIds = true;
 
 $document = $texy->transform($texy->parse($text));
-$html = $texy->createHtmlRenderer()->render($document);
+$html = $texy->renderHtml($document);
 
 echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';

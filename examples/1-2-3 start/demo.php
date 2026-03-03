@@ -45,7 +45,7 @@ $texy->allowedSyntax[Texy\Syntax::Subscript] = true;
 // STEP 3: Process your Texy text
 $text = file_get_contents(__DIR__ . '/syntax.texy');
 $document = $texy->transform($texy->parse($text));
-$html = $texy->createHtmlRenderer()->render($document);  // That's it!
+$html = $texy->renderHtml($document);  // That's it!
 
 
 // Display the result

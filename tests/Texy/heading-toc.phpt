@@ -181,7 +181,7 @@ test('an explicit ID the policy rejects is replaced by a generated one', functio
 	Assert::same(['toc-title', 'allowed'], array_map(fn($h) => $h->id, $document->getHeadings()));
 	Assert::same(
 		"<h1 id=\"toc-title\">Title</h1>\n\n<h1 id=\"allowed\">Other</h1>\n",
-		$texy->createHtmlRenderer()->render($document),
+		$texy->renderHtml($document),
 	);
 
 	$texy->htmlPolicy->allowedClasses = false;
