@@ -58,3 +58,12 @@ test('the other formats keep the content', function () {
 
 	Assert::same("Intro.\n\nWatch out\n\nOutro.\n", (new Output\Text\Renderer)->render($document));
 });
+
+
+test('toText() on the same instance works too', function () {
+	$texy = texyWithAlert();
+
+	// the trap this guards: a consumer registers an HTML renderer and a syntax,
+	// then calls toText() on the very same object
+	Assert::contains('Watch out', $texy->toText('!!! Watch out'));
+});

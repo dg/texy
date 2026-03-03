@@ -122,7 +122,7 @@ $texy->addBlockSyntax( // block patterns must be line-anchored
 // Process the text
 $text = file_get_contents(__DIR__ . '/sample2.texy');
 $document = $texy->transform($texy->parse($text));
-$html = $texy->createHtmlRenderer()->render($document);
+$html = $texy->renderHtml($document);
 
 
 // Display the result with stylesheets

@@ -77,7 +77,7 @@ $texy->htmlOutput->addRenderer(
 // Process the text
 $text = file_get_contents(__DIR__ . '/sample.texy');
 $document = $texy->transform($texy->parse($text));
-$html = $texy->createHtmlRenderer()->render($document);
+$html = $texy->renderHtml($document);
 
 
 // Display the result with stylesheets

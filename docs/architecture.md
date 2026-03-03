@@ -36,7 +36,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
 ## Processing flow
 
-`Texy::toHtml($text)` is `preprocess()`, `parse()`, `transform()` and `Output\Html\Renderer::render()` in a row. In detail:
+`Texy::toHtml($text)` is `preprocess()`, `parse()`, `transform()` and `renderHtml()` in a row. In detail:
 
 1. **Preprocess** (`Texy::preprocess()`): removes soft hyphens (if `$removeSoftHyphens`), normalizes line endings and strips control characters (`Helpers::normalize()` – this is why control bytes can never reach patterns from input), expands tabs per `$tabWidth`.
 
@@ -54,7 +54,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
    The order above is a contract, not an accident: the HTML policy must run before typography (rejected tags become literal text that typography leaves alone), `ImageModule` must resolve before `LinkReferenceModule` (image references used as link targets), and `HeadingPass` generates IDs before consumer handlers read the headings. Consumer passes are registered later, so they always run **after** the built-in passes of their stage: new headings and plain text belong to `Stage::Syntax` or between `parse()` and `transform()`, a pass of a later stage gets no ID, policy or typography for what it inserts.
 
-5. **Render.** a fresh `Output\Html\Renderer` (configured by `$texy->htmlOutput`) produces the final HTML string (see [rendering.md](rendering.md)). Any renderer can render the same document; `parse()` and `transform()` can equally be called alone and the AST rendered later or elsewhere.
+5. **Render.** a fresh `Output\Html\Renderer` (configured by `$texy->htmlOutput`) produces the final HTML string (see [rendering.md](rendering.md)). Any renderer can render the same document; `parse()` and `transform()` can equally be called alone and the AST rendered later or elsewhere – that is what `Texy::renderHtml()` does.
 
 `toInlineHtml($text)` is the single-line (inline-only) variant, `parseInline()` its parsing; `processTypo()` applies only typography/hyphenation to plain text without parsing.
 

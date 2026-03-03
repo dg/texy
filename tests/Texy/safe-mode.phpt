@@ -90,7 +90,7 @@ test('the address of an autolink built by code is escaped', function () {
 	]))]));
 	Assert::match(
 		'<p><a href="mailto:a&#64;b.cz&lt;i&gt;">a&#64;<!-- -->b.cz&lt;i&gt;</a></p>',
-		$texy->createHtmlRenderer()->render($doc),
+		$texy->renderHtml($doc),
 	);
 });
 

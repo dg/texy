@@ -15,7 +15,7 @@ function renderSafe(Texy\Node ...$inline): string
 	$texy = new Texy\Texy;
 	Texy\Configurator::safeMode($texy);
 	$texy->htmlOutput->lineWrap = 0;
-	return $texy->createHtmlRenderer()->render(new Nodes\DocumentNode(new Nodes\ContentNode([
+	return $texy->renderHtml(new Nodes\DocumentNode(new Nodes\ContentNode([
 		new Nodes\ParagraphNode(new Nodes\ContentNode($inline)),
 	])));
 }
@@ -34,7 +34,7 @@ test('an e-mail obeys the URL policy', function () {
 	$texy = new Texy\Texy;
 	$texy->urlPolicy->linkPattern = '~https?:~A';
 	Assert::same("<p>a&#64;<!-- -->b.cz</p>\n", $texy->toHtml('a@b.cz'));
-	Assert::same("<p>a&#64;<!-- -->b.cz</p>\n", $texy->createHtmlRenderer()->render(new Nodes\DocumentNode(new Nodes\ContentNode([
+	Assert::same("<p>a&#64;<!-- -->b.cz</p>\n", $texy->renderHtml(new Nodes\DocumentNode(new Nodes\ContentNode([
 		new Nodes\ParagraphNode(new Nodes\ContentNode([new Nodes\EmailNode('a@b.cz')])),
 	]))));
 });
