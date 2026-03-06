@@ -50,9 +50,9 @@ test('a custom whitelist names both the tags and their attributes', function () 
 });
 
 
-test('Texy::ALL on a tag lets every attribute through', function () {
+test('Texy::All on a tag lets every attribute through', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags = ['b' => Texy::ALL];
+	$texy->htmlPolicy->allowedTags = ['b' => Texy::All];
 
 	Assert::contains('onmouseover', $texy->process('<b onmouseover="x">tuk</b>'));
 });

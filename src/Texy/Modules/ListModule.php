@@ -54,7 +54,7 @@ final class ListModule extends Texy\Module
 		$this->texy->registerBlockPattern(
 			$this->parseList(...),
 			'~^
-				(?:' . Patterns::MODIFIER_H . '\n)? # modifier (1)
+				(?:' . Patterns::ModifierHAlign . '\n)? # modifier (1)
 				(' . implode('|', $re) . ')         # list marker (2)
 				[ \t]*+
 				\S .*                               # content
@@ -65,10 +65,10 @@ final class ListModule extends Texy\Module
 		$this->texy->registerBlockPattern(
 			$this->parseDefList(...),
 			'~^
-				(?:' . Patterns::MODIFIER_H . '\n)?   # modifier (1)
+				(?:' . Patterns::ModifierHAlign . '\n)?   # modifier (1)
 				( \S .{0,2000} )                      # definition term (2)
 				: [ \t]*                              # colon separator
-				' . Patterns::MODIFIER_H . '?         # modifier (3)
+				' . Patterns::ModifierHAlign . '?         # modifier (3)
 				\n
 				([ \t]++)                             # indentation (4)
 				(' . implode('|', $reUl) . ')         # description marker (5)
@@ -166,7 +166,7 @@ final class ListModule extends Texy\Module
 			\n?
 			( \S .* )                       # term content
 			: [ \t]*                        # colon separator
-			' . Patterns::MODIFIER_H . '?
+			' . Patterns::ModifierHAlign . '?
 		$~mUAx';
 
 		while (true) {
@@ -216,7 +216,7 @@ final class ListModule extends Texy\Module
 			({$bullet})                              # bullet character (2)
 			[ \\t]*
 			( \\S .* )?                              # content (3)
-			" . Patterns::MODIFIER_H . '?           # modifier (4)
+			" . Patterns::ModifierHAlign . '?           # modifier (4)
 		$~mAUx';
 
 		$matches = null;

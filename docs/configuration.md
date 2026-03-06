@@ -28,10 +28,10 @@ The array is consulted once at the start of `process()`; changing it during proc
 
 ### $htmlPolicy->allowedClasses, $htmlPolicy->allowedStyles
 
-Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `Texy::ALL`.
+Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `Texy::All`.
 
 ```php
-$texy->htmlPolicy->allowedClasses = Texy\Texy::NONE;          // no classes/IDs
+$texy->htmlPolicy->allowedClasses = Texy\Texy::None;          // no classes/IDs
 $texy->htmlPolicy->allowedClasses = ['highlight', '#main'];   // whitelist; IDs prefixed with #
 $texy->htmlPolicy->allowedStyles = ['color'];
 ```
@@ -73,12 +73,12 @@ Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->getTitle(); // document title (fo
 Controls which HTML tags may pass through from the input. Default: an array whitelist of the common HTML tags (inline, void, block), each with all attributes.
 
 ```php
-$texy->htmlPolicy->allowedTags = Texy\Texy::ALL;    // any tag whatsoever
-$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;   // no HTML tags at all
+$texy->htmlPolicy->allowedTags = Texy\Texy::All;    // any tag whatsoever
+$texy->htmlPolicy->allowedTags = Texy\Texy::None;   // no HTML tags at all
 $texy->htmlPolicy->allowedTags = [
     'strong' => [],                     // <strong> without attributes
     'a' => ['href', 'title'],           // <a> with these attributes only
-    'img' => Texy\Texy::ALL,            // <img> with any attributes
+    'img' => Texy\Texy::All,            // <img> with any attributes
 ];
 ```
 
@@ -140,11 +140,11 @@ $texy->headingModule->top = 1;                // level of the top heading (1..6)
 $texy->headingModule->generateID = false;     // autogenerate id attributes
 $texy->headingModule->idPrefix = 'toc-';      // prefix for generated IDs
 $texy->headingModule->moreMeansHigher = true; // surrounded: more #'s = higher heading
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::DYNAMIC; // or ::FIXED
-$texy->headingModule->levels = ['#' => 0, '*' => 1, '=' => 2, '-' => 3]; // used with FIXED
+$texy->headingModule->balancing = Texy\Modules\HeadingModule::Dynamic; // or ::Fixed
+$texy->headingModule->levels = ['#' => 0, '*' => 1, '=' => 2, '-' => 3]; // used with Fixed
 ```
 
-With `DYNAMIC` balancing the most important heading found becomes `$top`; with `FIXED` each underline character maps to a fixed level via `$levels` (level = `$levels[$char] + $top`).
+With `Dynamic` balancing the most important heading found becomes `$top`; with `Fixed` each underline character maps to a fixed level via `$levels` (level = `$levels[$char] + $top`).
 
 The results are facts about the document, so they are read from the AST, not from the module:
 
@@ -227,8 +227,8 @@ Texy\Configurator::safeMode($texy);
 
 Exactly what it does:
 
-- `$htmlPolicy->allowedClasses = Texy::NONE` – no classes or IDs,
-- `$htmlPolicy->allowedStyles = Texy::NONE` – no inline styles,
+- `$htmlPolicy->allowedClasses = Texy::None` – no classes or IDs,
+- `$htmlPolicy->allowedStyles = Texy::None` – no inline styles,
 - `$htmlPolicy->allowedTags = Configurator::$safeTags` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
 - URL scheme filters: links `~https?:|ftp:|mailto:~A`, images `~https?:~A`,
 - `$allowed['image'] = false` – no images (note: the `figure` syntax is *not* disabled by safeMode; combine with `disableImages()` if needed),

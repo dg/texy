@@ -161,7 +161,7 @@ Second-level heading
 ********************
 ```
 
-**Surrounded** – the text is prefixed (and optionally suffixed) by 2–7 `#` or `=` characters; by default more characters mean a *higher* heading (`$moreMeansHigher`, applies to `DYNAMIC` balancing):
+**Surrounded** – the text is prefixed (and optionally suffixed) by 2–7 `#` or `=` characters; by default more characters mean a *higher* heading (`$moreMeansHigher`, applies to `Dynamic` balancing):
 
 ```texy
 ==== Top-level heading
@@ -169,7 +169,7 @@ Second-level heading
 === Lower level
 ```
 
-Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->headingModule->balancing` (`DYNAMIC` auto-levels relative to `$top`; `FIXED` maps characters via `$levels`). Optional automatic `id` attributes: `$generateID`, `$idPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the title used in the table of contents, and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `Texy\Nodes\HeadingNode::collectFrom($document)` returns them in document order, each carrying `$level`, `getTitle()` and `$id` (the anchor, explicit or generated); the document title is `collectFrom($document)[0]?->getTitle()`. Without the modifier the title comes from the heading's own content, so unlike the ID it reflects typography.
+Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->headingModule->balancing` (`Dynamic` auto-levels relative to `$top`; `Fixed` maps characters via `$levels`). Optional automatic `id` attributes: `$generateID`, `$idPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the title used in the table of contents, and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `Texy\Nodes\HeadingNode::collectFrom($document)` returns them in document order, each carrying `$level`, `getTitle()` and `$id` (the anchor, explicit or generated); the document title is `collectFrom($document)[0]?->getTitle()`. Without the modifier the title comes from the heading's own content, so unlike the ID it reflects typography.
 
 ## Lists
 
@@ -221,7 +221,7 @@ Rows start with `|`, cells are separated by `|`:
 - **Colspan:** end the cell with `||` (empty following cell merges left).
 - **Rowspan:** a cell containing `^` merges with the cell above.
 - **Literal pipe:** write `\|` to put a `|` character inside a cell; pipes inside `[…]` (wikilinks) need no escaping.
-- **Modifiers:** before the table (whole table, uses `MODIFIER_HV` – vertical alignment allowed), at the end of a row (row), at the start of the first cell of a column (whole column), inside a cell (cell).
+- **Modifiers:** before the table (whole table, uses `ModifierHVAlign` – vertical alignment allowed), at the end of a row (row), at the start of the first cell of a column (whole column), inside a cell (cell).
 
 ```texy
 .[data-table]
