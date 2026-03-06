@@ -52,8 +52,8 @@ class Configurator
 	 */
 	public static function safeMode(Texy $texy): void
 	{
-		$texy->htmlPolicy->allowedClasses = $texy::NONE; // no class or ID are allowed
-		$texy->htmlPolicy->allowedStyles = $texy::NONE; // style modifiers are disabled
+		$texy->htmlPolicy->allowedClasses = $texy::None; // no class or ID are allowed
+		$texy->htmlPolicy->allowedStyles = $texy::None; // style modifiers are disabled
 		// only some "safe" HTML tags and attributes are allowed; the '*' list names
 		// attributes acceptable on any element and is the only source for modifiers
 		$texy->htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];

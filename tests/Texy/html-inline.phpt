@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text): string
 {
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = Texy\Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy\Texy::All;
 	return $texy->process($text);
 }
 
@@ -54,7 +54,7 @@ test('line break inside a tag is a space', function () {
 	Assert::match('<p>x <a href="x" title="a b">y</a> z</p>', process("x <a href=x title=\"a\n  b\">y</a> z"));
 
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;
+	$texy->htmlPolicy->allowedTags = Texy\Texy::None;
 	Assert::notContains("\r", $texy->process("x <a href=x title=\"a\n  b\">y</a> z"));
 });
 

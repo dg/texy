@@ -24,9 +24,9 @@ Parts may appear in any order and any may be omitted: `.[highlight]`, `.(Note)`,
 
 Not every construct accepts every part. Three pattern building blocks in `src/Texy/Patterns.php` define what a given syntax accepts:
 
-- `Patterns::MODIFIER` – title, classes/ID, styles (typical for inline phrases),
-- `Patterns::MODIFIER_H` – additionally horizontal alignment (paragraphs, headings, lists, blocks),
-- `Patterns::MODIFIER_HV` – additionally vertical alignment (tables and cells).
+- `Patterns::Modifier` – title, classes/ID, styles (typical for inline phrases),
+- `Patterns::ModifierHAlign` – additionally horizontal alignment (paragraphs, headings, lists, blocks),
+- `Patterns::ModifierHVAlign` – additionally vertical alignment (tables and cells).
 
 ## The Modifier class
 
@@ -50,7 +50,7 @@ Note that `$classes` is an associative array with the class names as *keys* (`is
 
 The modifier is a **semantic part of the AST node** (`$node->modifier`); it takes effect only in the render phase. `Output\Html\ElementDecorator` (invoked through `Renderer::decorateElement($modifier, $el)`) applies it to the rendered `Element`, respecting configuration. In order:
 
-1. **Attributes** (`$mod->attrs`) are copied only if allowed: with `$htmlPolicy->allowedTags === Texy::ALL` all of them; with an array configuration only those listed for the element's tag (or all if the tag maps to `Texy::ALL`).
+1. **Attributes** (`$mod->attrs`) are copied only if allowed: with `$htmlPolicy->allowedTags === Texy::All` all of them; with an array configuration only those listed for the element's tag (or all if the tag maps to `Texy::All`).
 2. **Title** is applied if set; the text is typographically corrected (by the AST typography pass, or on the fly when rendering a hand-built tree).
 3. **Classes and ID** are filtered by `$texy->htmlPolicy->allowedClasses`: with `ALL` everything is applied; with a whitelist, only listed classes, and the ID only when the whitelist contains `'#' . $id`.
 4. **Styles** are filtered analogously by `$texy->htmlPolicy->allowedStyles`.

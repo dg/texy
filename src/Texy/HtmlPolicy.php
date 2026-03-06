@@ -22,10 +22,10 @@ final class HtmlPolicy
 	public bool|array $allowedTags;
 
 	/** @var bool|array<int, string>  allowed classes and IDs */
-	public bool|array $allowedClasses = Texy::ALL;
+	public bool|array $allowedClasses = Texy::All;
 
 	/** @var bool|array<int, string>  allowed inline CSS styles */
-	public bool|array $allowedStyles = Texy::ALL;
+	public bool|array $allowedStyles = Texy::All;
 
 
 	public function __construct(
@@ -102,7 +102,7 @@ final class HtmlPolicy
 
 		$names = [];
 		foreach ([$this->allowedTags[$tagName] ?? [], $this->allowedTags['*'] ?? []] as $allowed) {
-			if ($allowed === Texy::ALL) {
+			if ($allowed === Texy::All) {
 				return $attrs;
 			} elseif (is_array($allowed)) {
 				$names = [...$names, ...$allowed];

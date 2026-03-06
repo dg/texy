@@ -275,7 +275,7 @@ test('text-only: textarea content as text', function () {
 
 test('unknown: inherits flow content', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::All;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -288,7 +288,7 @@ test('unknown: inherits flow content', function () {
 
 test('unknown: inherits phrasing content', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::All;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -301,7 +301,7 @@ test('unknown: inherits phrasing content', function () {
 
 test('unknown: inherits table restrictions', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::All;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -318,7 +318,7 @@ test('unknown: inherits table restrictions', function () {
 
 test('allowedTags: NONE disables all tags', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags = Texy::NONE;
+	$texy->htmlPolicy->allowedTags = Texy::None;
 	$texy->allowed['typography'] = false;
 	$html = trim($texy->process('<strong>Bold</strong>'));
 	Assert::notContains('<strong>', $html);
@@ -328,7 +328,7 @@ test('allowedTags: NONE disables all tags', function () {
 
 test('allowedTags: selective', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags = ['strong' => Texy::ALL, 'em' => Texy::ALL];
+	$texy->htmlPolicy->allowedTags = ['strong' => Texy::All, 'em' => Texy::All];
 	$texy->htmlOutput->indent = false;
 
 	$html = trim($texy->process('<strong>A</strong> <b>B</b> <em>C</em>'));
@@ -340,7 +340,7 @@ test('allowedTags: selective', function () {
 
 test('allowedTags: ALL enables everything', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::All;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -419,8 +419,8 @@ test('not-allowed: custom element escaped', function () {
 
 test('allowed: head when added to allowedTags', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags['head'] = Texy::ALL;
-	$texy->htmlPolicy->allowedTags['title'] = Texy::ALL;
+	$texy->htmlPolicy->allowedTags['head'] = Texy::All;
+	$texy->htmlPolicy->allowedTags['title'] = Texy::All;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -433,7 +433,7 @@ test('allowed: head when added to allowedTags', function () {
 
 test('allowed: custom element when added', function () {
 	$texy = new Texy;
-	$texy->htmlPolicy->allowedTags['x-w'] = Texy::ALL;
+	$texy->htmlPolicy->allowedTags['x-w'] = Texy::All;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 

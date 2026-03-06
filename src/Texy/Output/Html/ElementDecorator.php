@@ -101,7 +101,7 @@ final class ElementDecorator
 				? array_flip($this->policy->allowedClasses)
 				: $this->policy->allowedClasses;
 			settype($attrs['class'], 'array');
-			if ($allowedClasses === Texy::ALL) {
+			if ($allowedClasses === Texy::All) {
 				foreach ($modifier->classes as $value => $foo) {
 					$attrs['class'][] = $value;
 				}
@@ -131,7 +131,7 @@ final class ElementDecorator
 				? array_flip($this->policy->allowedStyles)
 				: $this->policy->allowedStyles;
 			settype($attrs['style'], 'array');
-			if ($allowedStyles === Texy::ALL) {
+			if ($allowedStyles === Texy::All) {
 				foreach ($modifier->styles as $prop => $value) {
 					$attrs['style'][$prop] = $value;
 				}
