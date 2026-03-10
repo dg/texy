@@ -8,11 +8,11 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\{Helpers, Range, Syntax};
 use Texy\Nodes\{
 	BlockNode, CodeBlockNode, CommentNode, ContentNode, DivNode, HtmlBlockNode, PreformattedNode, TextBlockNode, TexySourceNode,
 };
 use Texy\Parsing\{OffsetMap, ParseContext};
-use Texy\{Range, Syntax};
 use function strlen;
 
 
@@ -114,14 +114,17 @@ final class BlockModule extends Texy\Module
 
 		$mod = Texy\Modifier::parse($mMod, $offsets[2] ?? null);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
-		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . $parts[0];
+		// the opening pattern matches case-insensitively, so /--PRE must mean the same
+		// as /--pre; only the type is lowercased, a language name keeps its spelling
+		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . Helpers::toLower($parts[0]);
 		$param = empty($parts[1]) ? null : $parts[1];
 
 		[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]));
 		$range = new Range($offsets[0], strlen($matches[0]));
 
-		// a disallowed type stays as source text
-		if (empty($context->allowedSyntaxes[$blocktype])) {
+		// a disallowed type stays as source text; /--php and friends are code blocks
+		$allowedAs = isset($context->allowedSyntaxes[$blocktype]) ? $blocktype : Syntax::BlockCode;
+		if (empty($context->allowedSyntaxes[$allowedAs])) {
 			return null;
 		}
 
@@ -165,7 +168,11 @@ final class BlockModule extends Texy\Module
 			return new TexySourceNode($content, $parsed, $mod, $range, $map);
 		}
 
-		return null;
+		// /--php and friends: a code block in that language. Anything that does not look
+		// like a language name stays refused and degrades to visible text.
+		return Texy\Regexp::match($parts[0], '~^[a-z][a-z0-9_+#-]*$~i')
+			? new CodeBlockNode($content, $parts[0], $mod, $range, $map)
+			: null;
 	}
 
 

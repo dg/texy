@@ -295,6 +295,8 @@ Displayed literally, both Texy and HTML markup escaped.
 | `block/div` | `<div>`, content parsed as Texy blocks; may nest |
 | `block/default` | plain `/--` without a type; `<pre>` with escaped content, unlike `/--pre` no HTML tags or entities are read in it |
 
+An unknown type that looks like a language name is read as a code block in that language – `/--php` means the same as `/--code php`. Anything else (a malformed modifier, punctuation) degrades to visible text.
+
 Each subtype (except `block/texy`) is individually switchable in `$allowedSyntax`; the whole feature via `blocks`.
 
 **Markdown-style fenced code blocks** *(`block/fenced`)* are also supported: three or more backticks, optionally followed by a language (the first word of the info string) and a Texy modifier (`` ```php .{file: config.php} ``), closed by a fence of at least the same length. Content is verbatim; a longer fence can embed shorter backtick runs.
