@@ -106,9 +106,10 @@ test('test sources', function () {
 
 
 test('the code map of a verbatim block points every line of the code at its source', function () {
-	$src = "- item\n\n  /--code php\n    \$a = 1;\n      \$b = 2;\n  \\--\n\n> ```\n> x\n>   y\n> ```\n\n/--html\n<b>z</b>\n\\--";
+	$src = "- item\n\n  /--code php\n    \$a = 1;\n      \$b = 2;\n  \\--\n\n> ```\n> x\n>   y\n> ```\n\n/--html\n<b>z</b>\n\\--"
+		. "\n\n> /--foo\n>   a\n> \\--";
 	$blocks = (new Texy\Texy)->parse($src)->find(Nodes\VerbatimBlockNode::class);
-	Assert::count(3, $blocks);
+	Assert::count(4, $blocks);
 
 	foreach ($blocks as $block) {
 		$local = 0;

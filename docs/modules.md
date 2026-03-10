@@ -61,7 +61,7 @@ All modules live in `src/Modules/`; syntax names are catalogued on `Texy\Syntax`
 | Module | Purpose |
 |---|---|
 | **ParagraphModule** | Not pattern-based: the block parser's *gap handler*. Splits inter-block text into `ParagraphNode`s, handles hard line breaks and the paragraph modifier (see [parsing.md](parsing.md#paragraphmodule-the-gap-handler)). |
-| **DelimitedBlockModule** | Delimited blocks `/-- type … \--` → a `VerbatimBlockNode` per type (`CodeBlockNode` for code, `PreformattedNode` for `/--pre` and a bare `/--`, `HtmlBlockNode`, `TextBlockNode`, `TexySourceNode`), `DivNode`, `CommentNode`; nested Texy for `block/texy`. |
+| **DelimitedBlockModule** | Delimited blocks `/-- type … \--` → a `VerbatimBlockNode` per type (`CodeBlockNode` for code, `PreformattedNode` for `/--pre` and a bare `/--`, `HtmlBlockNode`, `TextBlockNode`, `TexySourceNode`, `UnknownDelimitedNode` holding the whole source of a type it does not know), `DivNode`, `CommentNode`; nested Texy for `block/texy`. |
 | **FencedCodeModule** | Fenced code blocks ```` ```language ```` → `CodeBlockNode` with verbatim content. |
 | **HorizontalRuleModule** | `---` / `***` → `HorizontalRuleNode`. |
 | **BlockQuoteModule** | `>` quotations → `BlockQuoteNode`, including nested content and citation link. |

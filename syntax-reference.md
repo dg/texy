@@ -15,6 +15,7 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::DelimitedTexySource` | DelimitedBlockModule | `TexySourceNode` | `/--texysource` (off by default) | `<pre class="language-html"><code>` |
 | `Syntax::DelimitedComment` | DelimitedBlockModule | `CommentNode` | `/--comment` | (nothing) |
 | `Syntax::DelimitedDiv` | DelimitedBlockModule | `DivNode` | `/--div` | `<div>` |
+| — | DelimitedBlockModule | `UnknownDelimitedNode` | `/--foo` | `<pre>` (the source of the block) |
 | `Syntax::FencedCode` | FencedCodeModule | `CodeBlockNode` | ```` ```php ```` | `<pre class="language-php"><code>` |
 | `Syntax::BlockQuote` | BlockQuoteModule | `BlockQuoteNode` | `> quote` | `<blockquote>` |
 | `Syntax::Figure` | ImageModule | `FigureNode` | `[*img*] *** caption` | `<figure>` |

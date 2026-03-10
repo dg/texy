@@ -8,11 +8,11 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\{Helpers, Range, Syntax};
 use Texy\Nodes\{
-	BlockNode, CodeBlockNode, CommentNode, ContentNode, DivNode, HtmlBlockNode, PreformattedNode, TextBlockNode, TexySourceNode,
+	BlockNode, CodeBlockNode, CommentNode, ContentNode, DivNode, HtmlBlockNode, PreformattedNode, TextBlockNode, TexySourceNode, UnknownDelimitedNode,
 };
 use Texy\Parsing\{OffsetMap, ParseContext};
-use Texy\{Range, Syntax};
 use function strlen;
 
 
@@ -69,7 +69,8 @@ final class DelimitedBlockModule extends Texy\Module
 	public function parse(ParseContext $context, array $matches, array $offsets): ?BlockNode
 	{
 		$parts = Texy\Regexp::split($matches[1], '~\s+~', limit: 2);
-		$type = $parts[0];
+		// the opening pattern matches case-insensitively, so /--PRE must mean the same as /--pre
+		$type = Helpers::toLower($parts[0]);
 		if (isset(self::Types[$type]) && empty($context->allowedSyntaxes[self::Types[$type]])) {
 			return null;
 		}
@@ -129,7 +130,12 @@ final class DelimitedBlockModule extends Texy\Module
 				return new TexySourceNode($content, $parsed, $mod, $range, $map);
 
 			default:
-				return null; // an unknown type stays as source text
+				return new UnknownDelimitedNode(
+					$matches[0],
+					$type,
+					$range,
+					OffsetMap::fromLines(OffsetMap::linesOf($matches[0], $offsets[0])),
+				);
 		}
 	}
 

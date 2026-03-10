@@ -58,6 +58,7 @@ final class Renderer extends NodeRenderer
 			Nodes\HtmlBlockNode::class => fn(Nodes\HtmlBlockNode $n, self $g) => $g->renderHtmlBlock($n),
 			Nodes\TextBlockNode::class => fn(Nodes\TextBlockNode $n, self $g) => $g->renderTextBlock($n),
 			Nodes\TexySourceNode::class => fn(Nodes\TexySourceNode $n, self $g) => $g->renderTexySource($n),
+			Nodes\UnknownDelimitedNode::class => fn(Nodes\UnknownDelimitedNode $n) => new Element('pre')->setText($n->code),
 			Nodes\DivNode::class => fn(Nodes\DivNode $n, self $g) => $g->renderDiv($n),
 			Nodes\HorizontalRuleNode::class => fn(Nodes\HorizontalRuleNode $n, self $g) => $g->renderHorizontalRule($n),
 			Nodes\FigureNode::class => fn(Nodes\FigureNode $n, self $g) => $g->renderFigure($n),
