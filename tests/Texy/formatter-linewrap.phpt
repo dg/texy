@@ -25,3 +25,18 @@ test('long line wrapping (variant)', function () {
 		$texy->toHtml(file_get_contents(__DIR__ . '/sources/formatter-linewrap-alt.texy')),
 	);
 });
+
+
+test('a value of an attribute of raw HTML is not wrapped, inside <pre> neither', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->addRenderer(
+		fn(Texy\Nodes\CodeBlockNode $node, Texy\Output\Html\Renderer $renderer, Closure $previous) => new Texy\Output\Html\Raw(
+			'<pre><code style="color: #000000"><span style="color: #0000BB">' . htmlspecialchars($node->code) . '</span></code></pre>',
+		),
+	);
+	$html = $texy->toHtml("/--php\n" . str_repeat('$a = 1; ', 12) . "\n\\--");
+	Assert::contains('<code style="color: #000000"><span style="color: #0000BB">', $html);
+
+	$html = $texy->toHtml(str_repeat('slovo ', 12) . '<span title="a title of a span long enough to be wrapped somewhere">x</span>');
+	Assert::contains('title="a title of a span long enough to be wrapped somewhere"', $html);
+});
