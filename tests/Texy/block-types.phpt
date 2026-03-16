@@ -96,7 +96,7 @@ test('text block with line breaks', function () {
 
 test('texysource block', function () {
 	Assert::match(
-		'<pre%A%class="html"><code>%a%</code></pre>',
+		'<pre%A%class="language-html"><code>%a%</code></pre>',
 		process(<<<'XX'
 			/--texysource
 			**bold** and //italic//
@@ -119,7 +119,7 @@ test('comment block - no output', function () {
 test('code block with language', function () {
 	// Language class goes on <pre>, not <code>
 	Assert::match(
-		'<pre class="php"><code>echo \'hello\';</code></pre>',
+		'<pre class="language-php"><code>echo \'hello\';</code></pre>',
 		process(<<<'XX'
 			/--code php
 			echo 'hello';

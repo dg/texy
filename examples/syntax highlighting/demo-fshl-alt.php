@@ -11,7 +11,7 @@
  * - How to register new block syntax using addBlockSyntax()
  * - Recognize <?php ... ?> blocks automatically
  * - Recognize <script> ... </script> blocks automatically
- * - Combine pattern-based and handler-based approaches
+ * - Combine pattern-based and renderer-based approaches
  *
  * NEW SYNTAX ADDED:
  * <?php
@@ -45,12 +45,12 @@ $texy = new Texy\Texy;
 
 
 // ============================================================
-// REGISTER HTML HANDLER FOR CODE BLOCKS
+// REGISTER HTML RENDERER FOR CODE BLOCKS
 // ============================================================
 
-// Custom handler for CodeBlockNode that applies FSHL syntax highlighting
+// Custom renderer for CodeBlockNode that applies FSHL syntax highlighting
 $texy->htmlOutput->addRenderer(
-	function (CodeBlockNode $node, Html\Renderer $gen): ?Html\Element {
+	function (CodeBlockNode $node, Html\Renderer $renderer, Closure $previous): ?Html\Element {
 		static $lexers = [
 			'html' => FSHL\Lexer\Html::class,
 			'javascript' => FSHL\Lexer\Javascript::class,
@@ -60,21 +60,16 @@ $texy->htmlOutput->addRenderer(
 
 		$lang = $node->language;
 		if ($lang === null || !isset($lexers[$lang])) {
-			return null; // Let default handler process it
+			return null; // Let default renderer process it
 		}
 
 		$langClass = $lexers[$lang];
-		$content = Helpers::outdent($node->code);
-
 		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
-		$content = $fshl->highlight($content, new $langClass);
+		$content = $fshl->highlight($node->code, new $langClass);
 
-		$elPre = new Html\Element('pre');
-		$gen->decorateElement($node->modifier, $elPre);
-		$elPre->addClass(strtolower($lang));
-		$elPre->create('code')->add(new Html\Raw($content)); // Raw = do not process further
-
-		return $elPre;
+		$el = $previous($node); // <pre class="language-php"><code>...</code></pre>
+		$el->children[0]->children = [new Html\Raw($content)]; // Raw = do not escape
+		return $el;
 	},
 );
 
@@ -85,11 +80,11 @@ $texy->htmlOutput->addRenderer(
 
 // Register NEW syntax: recognize blocks starting with <?php
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
-$texy->addBlockSyntax( // Must be multiline (m) and single-line mode (s)
+$texy->addBlockSyntax( // Block patterns are always multiline (m), s lets .+? span lines
 	'phpBlockSyntax',
 	'~^
 		<\?php \n .+? \n \?>
-	$~ms',
+	$~sx',
 	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets): CodeBlockNode {
 		[$content] = $matches;
 
@@ -102,13 +97,13 @@ $texy->addBlockSyntax( // Must be multiline (m) and single-line mode (s)
 );
 
 // Register NEW syntax: recognize <script> ... </script> blocks
-$texy->addBlockSyntax( // block patterns must be multiline and line-anchored
+$texy->addBlockSyntax( // block patterns must be line-anchored
 	'scriptBlockSyntax',
 	'~^
-		<script (?: type=.?text/javascript.?)? > \n
+		<script (?: \s+ type=.?text/javascript.? )? > \n
 		.+? \n
 		</script>
-	$~ms',
+	$~sx',
 	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets): CodeBlockNode {
 		[$content] = $matches;
 

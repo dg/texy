@@ -106,10 +106,10 @@ pre code {
 }
 
 /* Language badges */
-pre.php::before,
-pre.javascript::before,
-pre.html::before,
-pre.sql::before {
+pre.language-php::before,
+pre.language-javascript::before,
+pre.language-html::before,
+pre.language-sql::before {
 	display: inline-block;
 	float: right;
 	font-family: var(--font-sans);
@@ -124,25 +124,25 @@ pre.sql::before {
 	top: -0.5rem;
 }
 
-pre.php::before {
+pre.language-php::before {
 	content: 'PHP';
 	background: linear-gradient(135deg, #7b68ee, #4f46e5);
 	color: white;
 }
 
-pre.javascript::before {
+pre.language-javascript::before {
 	content: 'JavaScript';
 	background: linear-gradient(135deg, #f7df1e, #eab308);
 	color: #1a1a1a;
 }
 
-pre.html::before {
+pre.language-html::before {
 	content: 'HTML';
 	background: linear-gradient(135deg, #e44d26, #f16529);
 	color: white;
 }
 
-pre.sql::before {
+pre.language-sql::before {
 	content: 'SQL';
 	background: linear-gradient(135deg, #00758f, #0891b2);
 	color: white;

@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 test('code block', function () {
 	$texy = new Texy\Texy;
 	Assert::match(
-		'<pre class="php"><code>echo \'hello\';</code></pre>',
+		'<pre class="language-php"><code>echo \'hello\';</code></pre>',
 		$texy->toHtml(<<<'XX'
 			/--code php
 			echo 'hello';
