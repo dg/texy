@@ -9,10 +9,10 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::Blocks` | BlockModule | — | `/--xxx` | (master pattern) |
 | `Syntax::BlockDefault` | BlockModule | `PreformattedNode` | `/-- text` | `<pre>` |
 | `Syntax::BlockPre` | BlockModule | `PreformattedNode` | `/--pre` | `<pre>` |
-| `Syntax::BlockCode` | BlockModule | `CodeBlockNode` | `/--code php` | `<pre><code>` |
+| `Syntax::BlockCode` | BlockModule | `CodeBlockNode` | `/--code php` | `<pre class="language-php"><code>` |
 | `Syntax::BlockHtml` | BlockModule | `HtmlBlockNode` | `/--html` | (raw HTML) |
 | `Syntax::BlockText` | BlockModule | `TextBlockNode` | `/--text` | (escaped text) |
-| `Syntax::BlockTexySource` | BlockModule | `TexySourceNode` | `/--texysource` | `<pre><code>` |
+| `Syntax::BlockTexySource` | BlockModule | `TexySourceNode` | `/--texysource` | `<pre class="language-html"><code>` |
 | `Syntax::BlockComment` | BlockModule | `CommentNode` | `/--comment` | (nothing) |
 | `Syntax::BlockDiv` | BlockModule | `DivNode` | `/--div` | `<div>` |
 | `Syntax::Blockquote` | BlockQuoteModule | `BlockQuoteNode` | `> quote` | `<blockquote>` |

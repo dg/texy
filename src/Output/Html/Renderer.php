@@ -256,9 +256,9 @@ final class Renderer extends NodeRenderer
 	{
 		$el = new Element('pre');
 		$this->decorateElement($node->modifier, $el);
-		// Language class prepended before modifier classes
+		// language class, the one highlighters read, prepended before modifier classes
 		if ($node->language) {
-			$el->attrs['class'] = [$node->language, ...(array) ($el->attrs['class'] ?? [])];
+			$el->attrs['class'] = ['language-' . Helpers::toLower($node->language), ...(array) ($el->attrs['class'] ?? [])];
 		}
 		$el->create('code')->add(new Raw(htmlspecialchars($node->code, ENT_NOQUOTES, 'UTF-8')));
 		return $el;
@@ -303,7 +303,7 @@ final class Renderer extends NodeRenderer
 		$html = $this->finalizeFragment($this->renderNodes($node->content->children));
 		$el = new Element('pre');
 		$this->decorateElement($node->modifier, $el);
-		$el->attrs['class'] = ['html', ...(array) ($el->attrs['class'] ?? [])];
+		$el->attrs['class'] = ['language-html', ...(array) ($el->attrs['class'] ?? [])];
 		$el->create('code')->add(new Raw(htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8')));
 		return $el;
 	}

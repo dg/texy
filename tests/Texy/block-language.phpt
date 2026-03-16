@@ -29,7 +29,7 @@ test('an unknown type becomes a code block in that language', function () {
 test('content is verbatim, so typography does not touch it', function () {
 	$texy = new Texy;
 	Assert::same(
-		"<pre class=\"neon\"><code>a: 'b'</code></pre>\n",
+		"<pre class=\"language-neon\"><code>a: 'b'</code></pre>\n",
 		$texy->toHtml("/--neon\na: 'b'\n\\--\n"),
 	);
 });
