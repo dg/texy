@@ -7,9 +7,10 @@
  * using the FSHL library.
  *
  * WHAT YOU'LL LEARN:
- * - How to intercept code blocks using an HTML handler
+ * - How to intercept code blocks using an HTML renderer
  * - How to detect the programming language from the node
  * - How to integrate a syntax highlighting library
+ * - How to change only the content of the element the default renderer builds
  *
  * TEXY CODE BLOCK SYNTAX:
  * /--php
@@ -36,10 +37,10 @@ if (@!include __DIR__ . '/vendor/autoload.php') { // @ dependencies may not be i
 
 $texy = new Texy\Texy;
 
-// Register our code block handler
-// The first parameter type (CodeBlockNode) determines which node class the handler processes
+// Register our code block renderer
+// The first parameter type (CodeBlockNode) determines which node class the renderer processes
 $texy->htmlOutput->addRenderer(
-	function (CodeBlockNode $node, Html\Renderer $gen): Html\Element|string|null {
+	function (CodeBlockNode $node, Html\Renderer $renderer, Closure $previous): ?Html\Element {
 		// Map of supported languages to FSHL lexer classes
 		static $lexers = [
 			'html' => FSHL\Lexer\Html::class,
@@ -50,7 +51,7 @@ $texy->htmlOutput->addRenderer(
 
 		$lang = $node->language;
 
-		// If we don't support this language, delegate to default handler
+		// If we don't support this language, delegate to default renderer
 		if ($lang === null || !isset($lexers[$lang])) {
 			return null;
 		}
@@ -61,15 +62,11 @@ $texy->htmlOutput->addRenderer(
 		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
 		$content = $fshl->highlight($node->code, new $langClass);
 
-		// Build the HTML structure: <pre class="php"><code>...</code></pre>
-		$elPre = new Html\Element('pre');
-		$gen->decorateElement($node->modifier, $elPre);
-		$elPre->addClass(strtolower($lang));
-
-		// Raw tells Texy not to process the highlighted HTML further
-		$elPre->create('code')->add(new Html\Raw($content));
-
-		return $elPre;
+		// The default renderer builds <pre class="language-php"><code>...</code></pre> with the modifier applied,
+		// we only replace the content of <code>; Raw tells Texy not to escape the highlighted HTML
+		$el = $previous($node);
+		$el->children[0]->children = [new Html\Raw($content)];
+		return $el;
 	},
 );
 

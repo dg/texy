@@ -26,11 +26,11 @@ test('line break between block HTML tags', function () {
 		<table>
 			<tr>
 				<td>
-					<pre class="neon"><code>items: 1</code></pre>
+					<pre class="language-neon"><code>items: 1</code></pre>
 				</td>
 
 				<td>
-					<pre class="neon"><code>items: 2</code></pre>
+					<pre class="language-neon"><code>items: 2</code></pre>
 				</td>
 			</tr>
 		</table>
@@ -190,11 +190,11 @@ test('line break between block HTML tags in a list item', function () {
 				<table>
 					<tr>
 						<td>
-							<pre class="neon"><code>a</code></pre>
+							<pre class="language-neon"><code>a</code></pre>
 						</td>
 
 						<td>
-							<pre class="neon"><code>b</code></pre>
+							<pre class="language-neon"><code>b</code></pre>
 						</td>
 					</tr>
 				</table>

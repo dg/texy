@@ -98,7 +98,7 @@ test('texysource block', function () {
 	$texy = new Texy\Texy;
 	$texy->allowedSyntax[Texy\Syntax::DelimitedTexySource] = true;
 	Assert::same(
-		"<pre\nclass=\"html\"><code>&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt;&lt;/p&gt;</code></pre>\n",
+		"<pre\nclass=\"language-html\"><code>&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; and &lt;em&gt;italic&lt;/em&gt;&lt;/p&gt;</code></pre>\n",
 		$texy->toHtml(<<<'XX'
 			/--texysource
 			**bold** and //italic//
@@ -129,7 +129,7 @@ test('comment block - no output', function () {
 test('code block with language', function () {
 	// Language class goes on <pre>, not <code>
 	Assert::match(
-		'<pre class="php"><code>echo \'hello\';</code></pre>',
+		'<pre class="language-php"><code>echo \'hello\';</code></pre>',
 		process(<<<'XX'
 			/--code php
 			echo 'hello';

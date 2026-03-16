@@ -285,7 +285,7 @@ Displayed literally, both Texy and HTML markup escaped.
 
 | Subtype | Output |
 |---|---|
-| `block/code` | `<pre class="xxx"><code>` with escaped content, the language as the class of `<pre>`; it is stored on `CodeBlockNode` for custom renderer handlers (syntax highlighting) |
+| `block/code` | `<pre class="language-xxx"><code>` with escaped content, the class syntax highlighters read, lowercased; the language is stored on `CodeBlockNode` as written |
 | `block/pre` | `<pre>`; content is escaped, but HTML tags written inside are recognized and validated |
 | `block/html` | content parsed as HTML (tags validated against `$allowedTags`), Texy markup off, no wrapper element |
 | `block/text` | content escaped literally, line breaks become `<br>` |

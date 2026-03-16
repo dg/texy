@@ -67,7 +67,7 @@ test('code phrase content is protected from typography', function () {
 
 test('code block content is protected from typography', function () {
 	Assert::same(
-		"<pre class=\"php\"><code>echo \"hello\" -- x...;</code></pre>\n",
+		"<pre class=\"language-php\"><code>echo \"hello\" -- x...;</code></pre>\n",
 		convert("/--code php\necho \"hello\" -- x...;\n\\--"),
 	);
 });
