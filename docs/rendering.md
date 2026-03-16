@@ -1,6 +1,8 @@
 # Rendering – the Output Layer
 
-Everything under `src/Texy/Output/` turns a finished AST into a string. The layer is split between a **shared dispatch base** and **format-specific renderers**; the HTML side additionally owns well-forming and formatting.
+Everything under `src/Texy/Output/` turns a finished AST into a string. The layer is split between a **shared dispatch base** and **format-specific renderers**; the HTML side additionally owns well-forming and formatting, configured through a single options object.
+
+Security policies are exposed on the `Texy` object: `Texy\UrlPolicy` (URL scheme filtering) and `Texy\HtmlPolicy` as `$texy->htmlPolicy` (tag/class/style whitelists and passthrough tag validation), because the sanitize pass they drive changes the AST and therefore protects **every** output format.
 
 ```
 Output/
@@ -19,7 +21,7 @@ Output/
 
 ## NodeRenderer – dispatch and extensibility
 
-`NodeRenderer` keeps a map `class-string<Node> => renderer`. Generators seed it with their built-in renderers in the constructor; `registerHandler()` lets users override rendering per node class. A class with no renderer of its own falls back to one registered for an ancestor, so a subclass of a built-in node renders without extra work. The chain works last-registered-first: a custom renderer receives `($node, $renderer, $previous)` and either returns a result or returns `null` / calls `$previous($node, $renderer)` to delegate (see [custom-handlers.md](custom-handlers.md)).
+`NodeRenderer` keeps a map `class-string<Node> => renderer`. Generators seed it with their built-in renderers in the constructor; `registerHandler()` lets users override rendering per node class. A class with no renderer of its own falls back to one registered for an ancestor, so a subclass of a built-in node renders without extra work. The chain works last-registered-first: a custom renderer receives `($node, $renderer, $previous)` and either returns a result or returns `null` / calls `$previous($node, $renderer)` to delegate (see [custom-handlers.md](custom-handlers.md)). For HTML, custom renderers are registered on the config (`$texy->htmlOutput->registerHandler()`) and applied to every renderer built from it.
 
 ## HTML Config and Renderer
 
