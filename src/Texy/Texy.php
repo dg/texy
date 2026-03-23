@@ -62,7 +62,6 @@ class Texy
 	public Modules\EmoticonModule $emoticonModule;
 	public Modules\HeadingModule $headingModule;
 	public Modules\ListModule $listModule;
-	public Modules\FigureModule $figureModule;
 	public Modules\TypographyModule $typographyModule;
 	public Modules\HyphenationModule $longWordsModule;
 
@@ -121,7 +120,6 @@ class Texy
 		// block parsing
 		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
 		$this->addModule(new Modules\BlockModule($this));
-		$this->addModule($this->figureModule = new Modules\FigureModule($this));
 		$this->addModule(new Modules\HorizontalRuleModule($this));
 		$this->addModule(new Modules\BlockQuoteModule($this));
 		$this->addModule(new Modules\TableModule($this));
