@@ -11,7 +11,7 @@ A module extends `Texy\Module`, whose single method is `register(Parsing\Registr
 - `register()` runs in the constructor of the facade and again before every parse in Texy, because patterns depend on the configuration (`TexyConfig::$listBullets`); a name keeps its position, and the state declared first holds.
 - A module gets in the constructor only what it needs: the configuration, a policy, another module. It holds no reference to the facade.
 - A module registers no passes. What it does over the whole document is a public method and the facade lists it among the passes, whose order is thus one explicit list in `Texy::createModules()`.
-- Configuration lives on `TexyConfig`, permanent registrations of the application too (`addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
+- Configuration lives on `TexyConfig`, permanent registrations of the application too (`addDirective()`, `addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
 
 ## Anatomy of a typical module
 
@@ -48,7 +48,7 @@ All modules live in `src/Modules/`; syntax names are catalogued on `Texy\Syntax`
 
 | Module | Purpose |
 |---|---|
-| **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` in the transform phase. |
+| **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` and dispatches other directives to the handlers of `TexyConfig::addDirective()` in the first transform pass. |
 | **HtmlModule** | HTML tags and comments written in the input → `HtmlTagNode` / `HtmlCommentNode`; the pairing and the sanitization are common passes ([rendering.md](rendering.md#html-passthrough-transform-passes)). |
 | **ImageModule** | Images `[* url *]` → `ImageNode` (wrapped in `LinkNode` when clickable); the block form with caption → `FigureNode`; collects `[*ref*]:` definitions and resolves references in the transform phase. |
 | **PhraseModule** | All inline formatting → `PhraseNode` (`$type` the meaning, `$syntax` the syntax name), `` `code` `` → `InlineCodeNode`; acronyms → `AnnotationNode`, `''notexy''` → `RawTextNode`; the alternative link syntaxes (wikilink, markdown, quicklink) → `LinkNode`. |

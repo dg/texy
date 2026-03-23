@@ -75,7 +75,7 @@ class Texy
 
 	private function createModules(): void
 	{
-		$directive = new Modules\DirectiveModule;
+		$directive = new Modules\DirectiveModule($this->config);
 		$image = new Modules\ImageModule($this->config, $this->urlPolicy);
 		$link = new Modules\LinkReferenceModule($this->config, $image);
 		$heading = new Modules\HeadingModule($this->config);
@@ -102,7 +102,7 @@ class Texy
 
 		$this->engine->addPass($link->recognizeReferences(...), Stage::Syntax);
 
-		$this->engine->addPass($directive->processDirectives(...));
+		$this->engine->addPass($directive->processDirectives(...)); // first, a handler may change the configuration
 		$this->engine->addPass($image->resolveReferences(...));
 		$this->engine->addPass($link->resolveReferences(...));
 		$this->engine->addPass($heading->processHeadings(...));

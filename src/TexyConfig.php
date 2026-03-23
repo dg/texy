@@ -63,6 +63,18 @@ final class TexyConfig extends Config
 	];
 
 	/**
+	 * @var array<string, \Closure(Nodes\DirectiveNode): mixed>
+	 * @internal
+	 */
+	public private(set) array $directives = [];
+
+	/**
+	 * @var ?\Closure(Nodes\DirectiveNode): mixed
+	 * @internal
+	 */
+	public private(set) ?\Closure $directiveFallback = null;
+
+	/**
 	 * @var array<string, Nodes\ImageDefinitionNode>
 	 * @internal
 	 */
@@ -91,6 +103,30 @@ final class TexyConfig extends Config
 				throw new InvalidArgumentException("TexyConfig::\$headingLevels['$char'] must be 1..6, $level given.");
 			}
 		}
+	}
+
+
+	/**
+	 * Registers the handler of {{name ...}}. The directive is replaced by the node the handler
+	 * returns; anything else, nothing included, removes it.
+	 * @param  callable(Nodes\DirectiveNode): mixed  $handler
+	 */
+	public function addDirective(string $name, callable $handler): void
+	{
+		$this->directives[Helpers::toLower($name)] = $handler(...);
+	}
+
+
+	/**
+	 * Registers a handler for directives that have no named handler.
+	 *
+	 * Without it an unhandled directive stays in the document and renders as the author
+	 * wrote it, and the consumer has no way of learning about it. To keep it, return the node.
+	 * @param  ?callable(Nodes\DirectiveNode): mixed  $handler
+	 */
+	public function setDirectiveFallback(?callable $handler): void
+	{
+		$this->directiveFallback = $handler === null ? null : $handler(...);
 	}
 
 

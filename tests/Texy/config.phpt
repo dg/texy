@@ -98,6 +98,13 @@ test('an underline character missing from the table is refused when it is read',
 });
 
 
+test('a directive changes the configuration before the heading pass of the same document', function () {
+	$texy = new Texy;
+	$texy->config->addDirective('deep', function () use ($texy) { $texy->config->headingTop = 3; });
+	Assert::contains('<h3>', $texy->toHtml("{{deep}}\n\nTitle\n====="));
+});
+
+
 test('two instances of a facade do not share definitions read from their documents', function () {
 	$texy = new Texy;
 	$first = $texy->toHtml("[x]: https://one.cz\n\n\"a\":[x]");

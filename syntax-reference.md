@@ -58,7 +58,7 @@ All Texy syntaxes with the AST node they produce and the HTML they render to.
 | `Syntax::Emoticon` | EmoticonModule | `EmoticonNode` | `:-)` | 🙂 / `<span>` |
 | `Syntax::HtmlTag` | HtmlModule | `HtmlTagNode` | `<br>` | (any) |
 | `Syntax::HtmlComment` | HtmlModule | `HtmlCommentNode` | `<!-- text -->` | `<!-- -->` |
-| `Syntax::Directive` | DirectiveModule | `DirectiveNode` | `{{texy}}` | (nothing) |
+| `Syntax::Directive` | DirectiveModule | `DirectiveNode` | `{{name: value}}` | (the node of its handler, or as written) |
 
 Typography and hyphenation are not syntaxes: they are switched by `$texy->config->typography`
 and `$texy->config->hyphenation`.

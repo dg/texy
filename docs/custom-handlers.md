@@ -134,6 +134,32 @@ $texy->addPass(function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
 });
 ```
 
+## Directives
+
+`{{name: value}}` in the document is a directive. Register a handler for one with `config->addDirective()`; it receives the `DirectiveNode` with its `$name`, `$value` and comma-separated `$args`. The directive is replaced by the node the handler returns, and removed when it returns anything else, nothing included:
+
+```php
+$texy->config->addDirective('include', fn(Texy\Nodes\DirectiveNode $d) => new Texy\Nodes\HtmlCommentNode("include $d->value"));
+```
+
+A directive nobody handles is left in the document and renders as the text the author wrote. To learn about those, register a fallback; it works like a named handler, and returning the node keeps the directive:
+
+```php
+$texy->config->setDirectiveFallback(function (Texy\Nodes\DirectiveNode $directive) {
+    echo 'Unknown directive ', $directive->name;   // returns nothing, so the directive is dropped
+});
+```
+
+Handlers run in the **first** pass, before the built-in ones. That is what makes them the right place for a directive that configures how the rest of the document is processed – a plain `addPass()` would come too late, because the built-in passes always run first:
+
+```php
+$texy->config->addDirective('title', function () use ($texy) {
+    $texy->config->headingTop = 2;   // HeadingPass has not run yet
+});
+```
+
+Configuration belongs to the instance, not to the document. A handler changing it applies to the rest of the document because the passes read the configuration when they run, but the change also stays for the next document and for every instance sharing the configuration objects. Where a directive changes the configuration, use an instance per document, with configuration objects of its own.
+
 ## Which extension point to choose
 
-Apply the configuration placement test from [architecture.md](architecture.md): if the change affects the *document's meaning for every output format* (dropping links, rewriting URLs, restructuring), do it in a transform pass – every output format then gets it for free. If it only affects the *look of one output format* (tags, attributes, wrappers), use a renderer handler.
+Apply the configuration placement test from [architecture.md](architecture.md): if the change affects the *document's meaning for every output format* (dropping links, rewriting URLs, restructuring), do it in a transform pass – every output format then gets it for free. If it only affects the *look of one output format* (tags, attributes, wrappers), use a renderer handler. A `{{directive}}` written by the author is served by `config->addDirective()`.
