@@ -19,6 +19,12 @@ use function strlen;
  */
 final class DirectiveModule extends Texy\Module
 {
+	public function __construct(
+		private Texy\Config $config,
+	) {
+	}
+
+
 	public function register(Texy\Parsing\Engine $engine): void
 	{
 		$engine->addInline(
@@ -50,13 +56,14 @@ final class DirectiveModule extends Texy\Module
 
 
 	/**
-	 * Consumes {{texy: ...}} directives: stores document-level options into
-	 * DocumentNode::$meta and removes the directive nodes from the AST, so all
-	 * output generators see the same document.
+	 * Consumes {{texy: ...}} into DocumentNode::$meta and hands the rest to the directive
+	 * handler. Runs as the first pass, so the handler may still change configuration the
+	 * later ones depend on. A handled directive is removed unless the handler returns
+	 * a replacement.
 	 */
 	public function processDirectives(Texy\Nodes\DocumentNode $doc): void
 	{
-		(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) use ($doc): ?Texy\TraverseAction {
+		(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) use ($doc): Texy\Node|Texy\TraverseAction|null {
 			if (!$node instanceof DirectiveNode) {
 				return null;
 			}
@@ -68,7 +75,13 @@ final class DirectiveModule extends Texy\Module
 				return Texy\TraverseAction::Remove;
 			}
 
-			return null;
+			$handler = $this->config->directiveHandler;
+			if ($handler === null) {
+				return null;
+			}
+
+			$result = $handler($node);
+			return $result instanceof Texy\Node ? $result : Texy\TraverseAction::Remove;
 		});
 	}
 }

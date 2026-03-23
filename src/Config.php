@@ -73,6 +73,14 @@ final class Config
 	];
 
 	/**
+	 * Handler of every directive {{name ...}} except {{texy: ...}}. The directive is replaced
+	 * by the node the handler returns, so returning the directive keeps it; anything else, nothing
+	 * included, removes it. Without a handler directives stay and render as the author wrote them.
+	 * @var ?\Closure(Nodes\DirectiveNode): mixed
+	 */
+	public ?\Closure $directiveHandler = null;
+
+	/**
 	 * @var array<string, Nodes\ImageDefinitionNode>
 	 * @internal
 	 */
