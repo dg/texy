@@ -132,7 +132,7 @@ $texy->htmlOutput->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp'
 
 ## `$texy->config`: what the document means
 
-The configuration objects are constant: `$texy->config = …` fails, their values can be changed. Passes read them when they run. Values are validated at the start of parsing and transformation.
+The configuration objects are constant: `$texy->config = …` fails, their values can be changed. Passes read them when they run, so a value changed by a directive handler applies to that document. Values are validated at the start of parsing and transformation.
 
 ### Headings
 

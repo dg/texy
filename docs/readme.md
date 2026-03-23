@@ -11,8 +11,8 @@ extending Texy, plus how it converts its markup to HTML underneath.
   `$texy->config` and `$texy->htmlOutput` with defaults, the `Configurator` presets,
   and security (safe mode).
 - **[custom-handlers.md](custom-handlers.md)** — changing how existing constructs
-  are rendered (`addRenderer()`) and transforming the parsed document
-  (`addPass()` + `$node->find()` / `traverse()`).
+  are rendered (`addRenderer()`), transforming the parsed document
+  (`addPass()` + `$node->find()` / `traverse()`) and serving `{{directives}}` (`config->addDirective()`).
 - **[custom-syntax.md](custom-syntax.md)** — adding brand-new markup constructs with
   `addInlineSyntax()` / `addBlockSyntax()`.
 
