@@ -11,7 +11,7 @@ use Texy\Texy;
 
 
 /**
- * Stands in for a v3 module that no longer exists, so that $texy->horizLineModule->classes
+ * Stands in for a v3 module that no longer exists, so that $texy->figureModule->class
  * and friends keep configuring their new home. Created lazily by Texy::__get().
  * @internal
  */

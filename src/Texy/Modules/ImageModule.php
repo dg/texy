@@ -9,16 +9,31 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\{Compat, Helpers, Modifier, Node, NodeHelpers, NodeTraverser, Patterns, Range, Regexp, Syntax};
-use Texy\Nodes\{ContentNode, DocumentNode, ImageDefinitionNode, ImageNode, LinkNode};
+use Texy\Nodes\{ContentNode, DocumentNode, FigureNode, ImageDefinitionNode, ImageNode, LinkNode};
 use Texy\Parsing\ParseContext;
 use function count, strlen;
 
 
 /**
- * Processes image syntax and detects image dimensions.
+ * Processes image and figure (image with caption) syntax.
  */
 final class ImageModule extends Texy\Module
 {
+	/** the [* url .(title) alignment ] part, shared by the image and figure syntaxes */
+	private const ImagePattern = '
+			\[\* \ *+                         # opening bracket with asterisk
+			([^\n]{1,1000})                   # URLs (1)
+			' . Patterns::Modifier . '?       # modifier (2)
+			\ *+
+			( \* | (?<! < ) > | < )           # alignment (3)
+			]';
+
+	/** the optional :LINK (or :: self link) suffix */
+	private const LinkPattern = '
+			(?:
+				:(' . Patterns::LinkUrl . ' | : ) # link or just colon (4)
+			)??';
+
 	/** @var array<string, ImageDefinitionNode> collected image definitions */
 	private array $definitions = [];
 
@@ -39,16 +54,7 @@ final class ImageModule extends Texy\Module
 		// [*image*]:LINK
 		$this->texy->registerLinePattern(
 			$this->parseImage(...),
-			'~
-				\[\* \ *+                         # opening bracket with asterisk
-				([^\n]{1,1000})                   # URLs (1)
-				' . Patterns::Modifier . '?       # modifier (2)
-				\ *+
-				( \* | (?<! < ) > | < )           # alignment (3)
-				]
-				(?:
-					:(' . Patterns::LinkUrl . ' | : ) # link or just colon (4)
-				)??
+			'~' . self::ImagePattern . self::LinkPattern . '
 			~Ux',
 			Syntax::Image,
 		);
@@ -67,6 +73,20 @@ final class ImageModule extends Texy\Module
 				\s*
 			$~mUx',
 			Syntax::ImageDefinition,
+		);
+
+		// [*image*]:link *** caption
+		$this->texy->registerBlockPattern(
+			$this->parseFigure(...),
+			'~^
+				(?>' . self::ImagePattern . ')' . self::LinkPattern . '
+				(?:
+					\ ++ \*\*\* \ ++              # separator
+					(.{0,2000})                   # caption (5)
+				)?
+				' . Patterns::ModifierHAlign . '?     # modifier (6)
+			$~mUx',
+			Syntax::Figure,
 		);
 	}
 
@@ -126,6 +146,58 @@ final class ImageModule extends Texy\Module
 	}
 
 
+	/**
+	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
+	 * @param  array{string, string, ?string, string, ?string, ?string, ?string}  $matches
+	 * @param  array{int, int, ?int, int, ?int, ?int, ?int}  $offsets
+	 */
+	public function parseFigure(ParseContext $context, array $matches, array $offsets): ?FigureNode
+	{
+		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
+
+		$parsed = $this->parseImageContent($mURLs, $offsets[1]);
+		$modifier = Modifier::parse($mImgMod . $mAlign);
+
+		if ($parsed['url'] === null) {
+			return null;
+		}
+
+		// ImageNode source span is "[* ... <alignment>]"
+		$imageNode = new ImageNode(
+			$parsed['url'],
+			$parsed['width'],
+			$parsed['height'],
+			$modifier,
+			new Range($offsets[0], $offsets[3] + strlen($mAlign) + 1 - $offsets[0]), // 1 = "]"
+			urlRange: $parsed['urlRange'],
+		);
+
+		$image = $mLink
+			? $this->wrapInLink(
+				$imageNode,
+				$mLink,
+				$offsets[0],
+				$offsets[4] ?? throw new \LogicException('Link without group 4.'),
+				Syntax::Figure,
+			)
+			: $imageNode;
+
+		// Parse caption as inline content
+		$caption = null;
+		$mContent = trim($mContent ?? '');
+		if ($mContent !== '') {
+			$caption = $context->parseInline($mContent, $offsets[5] ?? $offsets[0]);
+		}
+
+		return new FigureNode(
+			$image,
+			$caption,
+			Modifier::parse($mMod, $offsets[6] ?? null),
+			new Range($offsets[0], strlen($matches[0])),
+		);
+	}
+
+
 	/** Wraps the image written at $offset in the link written after it at $linkOffset. */
 	private function wrapInLink(ImageNode $imageNode, string $mLink, int $offset, int $linkOffset, string $syntax): LinkNode
 	{
@@ -144,7 +216,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Parse image content: "image.jpg 100x200"; $offset is where the content is written.
-	 * @return array{url: ?string, width: ?int, height: ?int, linkedUrl: ?string, urlRange: ?Range}
+	 * @return array{url: ?string, width: ?int, height: ?int, urlRange: ?Range}
 	 */
 	public function parseImageContent(string $content, ?int $offset = null): array
 	{
@@ -178,7 +250,6 @@ final class ImageModule extends Texy\Module
 			'url' => $url,
 			'width' => $width,
 			'height' => $height,
-			'linkedUrl' => null,
 			'urlRange' => $offset === null ? null : new Range($offset + strlen($parts[0]) - strlen(ltrim($parts[0])), strlen($written)),
 		];
 	}

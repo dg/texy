@@ -32,6 +32,14 @@ final class Legacy
 
 	public const OfModule = [
 		// modules that no longer exist; $texy->NAME is served by LegacyModuleProxy
+		'figureModule' => [
+			'tagName' => ['htmlOutput', 'figureTagName'],
+			'class' => ['htmlOutput', 'figureClass'],
+			'leftClass' => ['htmlOutput', 'figureLeftClass'],
+			'rightClass' => ['htmlOutput', 'figureRightClass'],
+			'widthDelta' => null,
+			'requireCaption' => null,
+		],
 		'horizLineModule' => [
 			'classes' => ['htmlOutput', 'horizontalRuleClasses'],
 		],
