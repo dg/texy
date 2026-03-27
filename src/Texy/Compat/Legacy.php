@@ -30,6 +30,11 @@ final class Legacy
 		'summary' => null,
 	];
 
+	/** module properties of Texy that were only renamed; the module itself still exists */
+	public const RenamedModules = [
+		'longWordsModule' => 'hyphenationModule',
+	];
+
 	public const OfModule = [
 		// modules that no longer exist; $texy->NAME is served by LegacyModuleProxy
 		'figureModule' => [

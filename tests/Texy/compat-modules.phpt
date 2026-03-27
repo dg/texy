@@ -124,6 +124,16 @@ test('removed properties warn and writes are ignored', function () {
 });
 
 
+test('renamed module keeps working under the old name', function () {
+	$texy = new Texy\Texy;
+
+	Assert::error(function () use ($texy) {
+		$texy->longWordsModule->wordLimit = 20;
+	}, E_USER_DEPRECATED, 'Property $texy->longWordsModule is deprecated, use $texy->hyphenationModule instead.');
+	Assert::same(20, $texy->hyphenationModule->wordLimit);
+});
+
+
 test('unknown properties throw', function () {
 	$texy = new Texy\Texy;
 
