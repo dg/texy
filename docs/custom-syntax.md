@@ -30,6 +30,23 @@ $texy->addInlineSyntax('custom/mention', '~
 
 `Texy\Patterns` fragments (`Modifier`, `LinkUrl`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
 
+## A block type of /--
+
+A delimited block written as `/--gallery … \--` needs no pattern of its own: one handler on the configuration serves every type of delimited block. It is called for each type that is switched on, built-in or not, the bare `/--` included. It gets the type in lower case (`''` for a bare `/--`; the source keeps the spelling), the content with its shared indentation stripped, the parameter written after the type, the modifier, and `$next`, which returns what Texy itself makes of the block. The handler returns the node of the block, or `null` to leave the block as text in the paragraph around it. Whatever it parses from the content with `$context` is mapped back to the source; nesting and modifiers work as in any delimited block:
+
+```php
+$texy->config->delimitedBlockHandler = fn(ParseContext $context, string $type, string $content, ?string $param, ?Modifier $modifier, \Closure $next) => match ($type) {
+    'gallery' => new Nodes\DivNode($context->parseBlock($content), $modifier),
+    'html' => new Nodes\CodeBlockNode($content, 'html', $modifier),      // a built-in type redefined
+    'php', 'neon' => new Nodes\CodeBlockNode($content, $type, $modifier), // /--php as code in that language
+    default => $next(),
+};
+```
+
+`$next()` takes no arguments and returns the node of a built-in type (`null` where a built-in type refuses, such as an empty `/--div`), or an `UnknownDelimitedNode` for a type Texy does not know. So a handler can redefine a built-in type for the AST and every output, wrap the node Texy makes, or notice a type nobody serves (`$next() instanceof Nodes\UnknownDelimitedNode`, a typo or a missing handler). The node `$next()` returns is already mapped to the source, whether the handler returns it as it is or wrapped.
+
+An unknown type is shown as written: `UnknownDelimitedNode` holds the whole source of the block, from the line `/--foo` to the line `\--`, which HTML output shows in a `<pre>` without any markup or typography. A built-in type switched off in `$texy->allowedSyntax` does not reach the handler and stays text; whether a type of your own is off is up to the handler.
+
 ## The syntax handler
 
 ```php

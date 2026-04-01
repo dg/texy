@@ -92,7 +92,7 @@ class Texy
 
 			// block
 			new Modules\ParagraphModule($this->config, $this->htmlPolicy),
-			new Modules\DelimitedBlockModule,
+			new Modules\DelimitedBlockModule($this->config),
 			new Modules\FencedCodeModule,
 			new Modules\HorizontalRuleModule,
 			new Modules\BlockQuoteModule,

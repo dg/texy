@@ -7,24 +7,29 @@
  * We'll create:
  * - *bold* (instead of Texy's default **bold**)
  * - _italic_ (instead of Texy's default //italic//)
+ * - a /--perex delimited block
  *
  * WHAT YOU'LL LEARN:
  * - How to register inline syntaxes with addInlineSyntax()
+ * - How to serve a new /--type delimited block with config->delimitedBlockHandler
  * - How to disable conflicting default syntax
  * - How to parse content inside your custom elements
  * - How to apply modifiers to your elements
  *
- * The new syntaxes create nodes Texy already knows, a strong or emphasized phrase,
- * so they need no renderer and every output format (HTML, plain text) understands
- * them. Which HTML tag a phrase gets is up to $phraseTags.
+ * The new syntaxes create nodes Texy already knows, a strong or emphasized phrase
+ * and a division, so they need no renderer and every output format (HTML, plain text)
+ * understands them. Which HTML tag a phrase gets is up to $phraseTags.
  *
  * CUSTOM SYNTAX WE CREATE:
  * *bold text*        → <b>bold text</b>
  * _italic text_      → <i>italic text</i>
+ * /--perex
+ * Text
+ * \--                → <div class="perex"><p>Text</p></div>
  */
 
 use Texy\{Modifier, Range, Syntax};
-use Texy\Nodes\{PhraseNode, PhraseType};
+use Texy\Nodes\{BlockNode, DivNode, PhraseNode, PhraseType};
 use Texy\Parsing\ParseContext;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
@@ -100,9 +105,42 @@ $texy->addInlineSyntax(
 );
 
 
+// ============================================================
+// REGISTER BLOCK TYPE
+// ============================================================
+
+// Add new delimited block: /--perex ... \--
+// It needs no pattern of its own, the block module hands over the content already outdented
+$texy->config->delimitedBlockHandler = function (
+	ParseContext $context,
+	string $type,
+	string $content,
+	?string $param,
+	?Modifier $modifier,
+	Closure $next,
+): ?BlockNode {
+	if ($type !== 'perex') {
+		return $next(); // every other type stays as Texy makes it
+	}
+
+	// Keep the modifier written after /--perex and add our class
+	$modifier ??= new Modifier;
+	$modifier->classes['perex'] = true;
+
+	// Parse the content as blocks, so it may hold paragraphs, lists, etc.
+	return new DivNode($context->parseBlock($content), $modifier);
+};
+
+
 // Process the text
 $text = <<<'TEXY'
 	User syntax - this is *bold* and this _italic_
+
+	/--perex
+	Welcome to the world of your own syntax :-)
+
+	It may hold *more* paragraphs, as any block.
+	\--
 	TEXY;
 $html = $texy->toHtml($text);
 

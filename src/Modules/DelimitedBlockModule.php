@@ -34,6 +34,12 @@ final class DelimitedBlockModule extends Texy\Module
 	];
 
 
+	public function __construct(
+		private Texy\Config $config,
+	) {
+	}
+
+
 	public function register(Texy\Parsing\Engine $engine): void
 	{
 		foreach (self::Types as $name) {
@@ -77,6 +83,42 @@ final class DelimitedBlockModule extends Texy\Module
 
 		$param = empty($parts[1]) ? null : $parts[1];
 		$mod = Texy\Modifier::parse($matches[2], $offsets[2] ?? null);
+		$built = null;
+		$next = function () use ($context, $type, $param, $mod, $matches, $offsets, &$built): ?BlockNode {
+			return $built = $this->createNode($context, $type, $param, $mod, $matches, $offsets);
+		};
+
+		$handler = $this->config->delimitedBlockHandler;
+		if ($handler === null) {
+			return $next();
+		}
+
+		[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($matches[3], $offsets[3]));
+		$node = $handler($context, $type, $content, $param, $mod, $next);
+		if ($node !== null && $node !== $built) {
+			foreach ($node->getChildren() as $child) {
+				$map->applyTo($child, except: $built); // the handler read the outdented content
+			}
+			$node->range ??= new Range($offsets[0], strlen($matches[0]));
+		}
+		return $node;
+	}
+
+
+	/**
+	 * Creates the node of a built-in type, or the unknown node of any other type.
+	 * @param  array{string, string, ?string, string}  $matches
+	 * @param  array{int, int, ?int, int}  $offsets
+	 */
+	private function createNode(
+		ParseContext $context,
+		string $type,
+		?string $param,
+		?Texy\Modifier $mod,
+		array $matches,
+		array $offsets,
+	): ?BlockNode
+	{
 		$mContent = $matches[3];
 		[$content, $map] = OffsetMap::outdentLines(OffsetMap::linesOf($mContent, $offsets[3]));
 		$range = new Range($offsets[0], strlen($matches[0]));

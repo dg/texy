@@ -157,11 +157,11 @@ final class OffsetMap
 	/**
 	 * Recursively rewrites node positions from local to absolute coordinates: every
 	 * Range and OffsetMap the node holds. Length of multi-line spans grows by the
-	 * stripped prefixes they cover in the source.
+	 * stripped prefixes they cover in the source. The subtree of $except is left as it is.
 	 */
-	public function applyTo(Node $node): void
+	public function applyTo(Node $node, ?Node $except = null): void
 	{
-		if (!$this->map) {
+		if (!$this->map || $node === $except) {
 			return;
 		}
 
@@ -179,7 +179,7 @@ final class OffsetMap
 		}
 
 		foreach ($node->getChildren() as $child) {
-			$this->applyTo($child);
+			$this->applyTo($child, $except);
 		}
 	}
 

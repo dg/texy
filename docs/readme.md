@@ -14,7 +14,7 @@ extending Texy, plus how it converts its markup to HTML underneath.
   are rendered (`addRenderer()`), transforming the parsed document
   (`addPass()` + `$node->find()` / `traverse()`) and serving `{{directives}}` (`config->directiveHandler`).
 - **[custom-syntax.md](custom-syntax.md)** — adding brand-new markup constructs with
-  `addInlineSyntax()` / `addBlockSyntax()`.
+  `addInlineSyntax()` / `addBlockSyntax()`, and types of `/--` blocks (`config->delimitedBlockHandler`).
 
 ## Internals (how it works)
 

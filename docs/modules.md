@@ -11,7 +11,7 @@ A module extends `Texy\Module`, whose single method is `register(Parsing\Engine 
 - `register()` runs in the constructor of the facade and again before every parse in Texy, because patterns depend on the configuration (`Config::$emoticons`); a name keeps its position, and the state declared first holds.
 - A module gets in the constructor only what it needs: the configuration, a policy, another module. It holds no reference to the facade.
 - A module registers no passes. What it does over the whole document is a public method and the facade lists it among the passes, whose order is thus one explicit list in `Texy::createModules()`.
-- Configuration lives on `Config`, permanent registrations of the application too (`directiveHandler`, `addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
+- Configuration lives on `Config`, permanent registrations of the application too (`directiveHandler`, `delimitedBlockHandler`, `addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
 
 ## Anatomy of a typical module
 
@@ -61,7 +61,7 @@ All modules live in `src/Modules/`; syntax names are catalogued on `Texy\Syntax`
 | Module | Purpose |
 |---|---|
 | **ParagraphModule** | Not pattern-based: the block parser's *gap handler*. Splits inter-block text into `ParagraphNode`s, handles hard line breaks and the paragraph modifier (see [parsing.md](parsing.md#paragraphmodule-the-gap-handler)). |
-| **DelimitedBlockModule** | Delimited blocks `/-- type … \--` → a `VerbatimBlockNode` per type (`CodeBlockNode` for code, `PreformattedNode` for `/--pre` and a bare `/--`, `HtmlBlockNode`, `TextBlockNode`, `TexySourceNode`, `UnknownDelimitedNode` holding the whole source of a type it does not know), `DivNode`, `CommentNode`; nested Texy for `block/texy`. |
+| **DelimitedBlockModule** | Delimited blocks `/-- type … \--` → a `VerbatimBlockNode` per type (`CodeBlockNode` for code, `PreformattedNode` for `/--pre` and a bare `/--`, `HtmlBlockNode`, `TextBlockNode`, `TexySourceNode`, `UnknownDelimitedNode` holding the whole source of a type it does not know), `DivNode`, `CommentNode`; nested Texy for `block/texy`; every type that is switched on goes through `Config::delimitedBlockHandler`, whose `$next()` makes these nodes. |
 | **FencedCodeModule** | Fenced code blocks ```` ```language ```` → `CodeBlockNode` with verbatim content. |
 | **HorizontalRuleModule** | `---` / `***` → `HorizontalRuleNode`. |
 | **BlockQuoteModule** | `>` quotations → `BlockQuoteNode`, including nested content and citation link. |

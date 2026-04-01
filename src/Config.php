@@ -81,6 +81,14 @@ final class Config
 	public ?\Closure $directiveHandler = null;
 
 	/**
+	 * Handler of delimited blocks /--type: gets the type in lower case, the content without its
+	 * indentation, the parameter, the modifier and $next(), which returns what Texy makes of the block.
+	 * Returns the node of the block, or null to leave it as text.
+	 * @var ?\Closure(Parsing\ParseContext, string, string, ?string, ?Modifier, \Closure(): ?Nodes\BlockNode): ?Nodes\BlockNode
+	 */
+	public ?\Closure $delimitedBlockHandler = null;
+
+	/**
 	 * @var array<string, Nodes\ImageDefinitionNode>
 	 * @internal
 	 */

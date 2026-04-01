@@ -295,7 +295,7 @@ Displayed literally, both Texy and HTML markup escaped.
 | `block/div` | `<div>`, content parsed as Texy blocks; may nest |
 | `block/default` | plain `/--` without a type; `<pre>` with escaped content, unlike `/--pre` no HTML tags or entities are read in it |
 
-A block of an unknown type (`/--foo`, also a malformed modifier like `/--.[x]`) is shown as written: its whole source, the lines `/--foo` and `\--` included, goes out escaped in a `<pre>`, without Texy markup or typography, so a typo in the type stays visible. Code in a language is written `/--code php` or as a fenced code block.
+A block of an unknown type (`/--foo`, also a malformed modifier like `/--.[x]`) is shown as written: its whole source, the lines `/--foo` and `\--` included, goes out escaped in a `<pre>`, without Texy markup or typography, so a typo in the type stays visible. Code in a language is written `/--code php` or as a fenced code block; other types are served by the application's handler (`$texy->config->delimitedBlockHandler`, see [custom-syntax.md](custom-syntax.md#a-block-type-of---)).
 
 Each subtype (except `block/texy`) is individually switchable in `$allowedSyntax`; the whole feature via `blocks`.
 

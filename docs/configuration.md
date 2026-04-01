@@ -219,6 +219,15 @@ $texy->allowedSyntax[Syntax::ListAlpha] = false;     // a) and A)
 
 A switched-off marker is plain text. `I)`, `V)` or `X)` with roman numbering off reads as a letter, so `I) …` and `J) …` make an alphabetical list starting at 9.
 
+### Handlers
+
+```php
+$texy->config->directiveHandler = fn(Texy\Nodes\DirectiveNode $d) => …;   // serves {{name: value}}
+$texy->config->delimitedBlockHandler = fn($context, $type, $content, $param, $modifier, $next) => …;   // serves /--type
+```
+
+Both are `null` by default: a directive then renders as written and a `/--type` block of an unknown type as its source. See [custom-handlers.md](custom-handlers.md#directives) and [custom-syntax.md](custom-syntax.md).
+
 ## Configurator presets
 
 `Texy\Configurator` (`src/Configurator.php`) is a static class with prepared configurations.
