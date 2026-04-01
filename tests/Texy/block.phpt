@@ -29,8 +29,6 @@ test('block type variants', function () {
 	$texy->htmlOutput->imageBaseUrl = '../images/';
 	$texy->htmlOutput->lineWrap = 180;
 
-	$texy->config->addLinkDefinition('texy', 'https://texy.deegee.dev/');
-
 	Assert::matchFile(
 		__DIR__ . '/expected/block-types.html',
 		$texy->toHtml(file_get_contents(__DIR__ . '/sources/block-types.texy')),

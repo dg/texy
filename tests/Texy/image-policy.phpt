@@ -94,32 +94,25 @@ test('figure with a definition with rejected URL acts as undefined', function ()
 });
 
 
-test('definition with rejected URL does not overwrite a user-defined one', function () {
-	$texy = createTexy();
-	$texy->config->addImageDefinition('x', 'logo.png');
-	Assert::match(
-		'<p>a <img src="logo.png" alt=""> b</p>',
-		$texy->toHtml("[*x*]: javascript:alert(1)\n\na [*x*] b"),
-	);
-});
-
-
 test('image node with rejected URL renders as its alternative text', function () {
 	$texy = createTexy();
-	$texy->config->addImageDefinition('x', 'javascript:alert(1)', alt: 'Logo <b>');
+	$texy->addInlineSyntax('myimage', '~@@~', fn() => new Texy\Nodes\ImageNode('javascript:alert(1)', alt: 'Logo <b>'));
 	Assert::match(
 		'<p>a Logo &lt;b&gt; b</p>',
-		$texy->toHtml('a [*x*] b'),
+		$texy->toHtml('a @@ b'),
 	);
 });
 
 
 test('linked image node with rejected URL keeps the link', function () {
 	$texy = createTexy();
-	$texy->config->addImageDefinition('x', 'javascript:alert(1)', alt: 'Logo');
+	$texy->addInlineSyntax('myimage', '~@@~', fn() => new Texy\Nodes\LinkNode(
+		'http://x.cz',
+		new Texy\Nodes\ContentNode([new Texy\Nodes\ImageNode('javascript:alert(1)', alt: 'Logo')]),
+	));
 	Assert::match(
 		'<p>a <a href="http://x.cz">Logo</a> b</p>',
-		$texy->toHtml('a [*x*]:http://x.cz b'),
+		$texy->toHtml('a @@ b'),
 	);
 });
 
@@ -143,9 +136,9 @@ test('renderer returns an element for an image node with rejected URL', function
 			return $el;
 		},
 	);
-	$texy->config->addImageDefinition('x', 'javascript:alert(1)', alt: 'Logo');
+	$texy->addInlineSyntax('myimage', '~@@~', fn() => new Texy\Nodes\ImageNode('javascript:alert(1)', alt: 'Logo'));
 	Assert::match(
 		'<p>a Logo b</p>',
-		$texy->toHtml('a [*x*] b'),
+		$texy->toHtml('a @@ b'),
 	);
 });

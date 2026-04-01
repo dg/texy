@@ -53,36 +53,8 @@ test('case insensitive reference matching', function () {
 
 
 // =============================================================================
-// User-defined definitions via addDefinition()
+// Definitions across documents
 // =============================================================================
-
-test('user-defined link definition works', function () {
-	$texy = new Texy\Texy;
-	$texy->config->addLinkDefinition('texy', 'https://texy.deegee.dev/');
-	Assert::same(
-		"<p><a href=\"https://texy.deegee.dev/\">Visit</a></p>\n",
-		$texy->toHtml('"Visit":[texy]'),
-	);
-});
-
-
-test('user-defined definition persists across calls', function () {
-	$texy = new Texy\Texy;
-	$texy->config->addLinkDefinition('texy', 'https://texy.deegee.dev/');
-
-	// First call
-	Assert::same(
-		"<p><a href=\"https://texy.deegee.dev/\">Texy</a></p>\n",
-		$texy->toHtml('"Texy":[texy]'),
-	);
-
-	// Second call - definition should still work
-	Assert::same(
-		"<p><a href=\"https://texy.deegee.dev/\">Texy</a></p>\n",
-		$texy->toHtml('"Texy":[texy]'),
-	);
-});
-
 
 test('document-defined reference does NOT leak to the next call', function () {
 	$texy = new Texy\Texy;
@@ -94,18 +66,6 @@ test('document-defined reference does NOT leak to the next call', function () {
 	Assert::same(
 		"<p><a href=\"link\">Click</a></p>\n",
 		$texy->toHtml('"Click":[link]'),
-	);
-});
-
-
-test('user-defined definition is overwritten by document definition', function () {
-	$texy = new Texy\Texy;
-	$texy->config->addLinkDefinition('link', 'https://user-defined.com/');
-
-	// Document defines same reference - it overwrites user-defined one
-	Assert::same(
-		"<p><a href=\"https://document.com\">Click</a></p>\n",
-		$texy->toHtml("\"Click\":[link]\n\n[link]: https://document.com"),
 	);
 });
 
@@ -161,11 +121,14 @@ test('LinkNode keeps the written reference name after resolution', function () {
 test('a %s in the target is the link text', function () {
 	$texy = new Texy\Texy;
 	$texy->allowedSyntax[Texy\Syntax::LinkReference] = true;
-	$texy->config->addLinkDefinition('php', 'https://php.net/%s');
-	Assert::same('<a href="https://php.net/strlen">strlen</a>', $texy->toInlineHtml('"strlen":[php]'));
-	Assert::same('<a href="https://php.net/str+len"><strong>str len</strong></a>', $texy->toInlineHtml('**str len**:[php]'));
+	$definition = "\n\n[php]: https://php.net/%s";
+	Assert::same("<p><a href=\"https://php.net/strlen\">strlen</a></p>\n", $texy->toHtml('"strlen":[php]' . $definition));
+	Assert::same(
+		"<p><a href=\"https://php.net/str+len\"><strong>str len</strong></a></p>\n",
+		$texy->toHtml('**str len**:[php]' . $definition),
+	);
 	Assert::same('<a href="http://x.cz/?q=a+b">a b</a>', $texy->toInlineHtml('"a b":http://x.cz/?q=%s'));
-	Assert::same('<a href="https://php.net/%s">php</a>', $texy->toInlineHtml('[php]'));
+	Assert::same("<p><a href=\"https://php.net/%s\">php</a></p>\n", $texy->toHtml('[php]' . $definition));
 });
 
 

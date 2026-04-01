@@ -220,6 +220,17 @@ final class Helpers
 
 
 	/**
+	 * Replaces %s in the URL of the link by its text, URL-encoded, unless the link is a bare reference.
+	 */
+	public static function insertLinkText(string $url, Nodes\LinkNode $link): string
+	{
+		return $link->isBareRef || !str_contains($url, '%s')
+			? $url
+			: str_replace('%s', urlencode(trim($link->content->getPlainText())), $url);
+	}
+
+
+	/**
 	 * Prepends http:// to scheme-less www.* URLs.
 	 */
 	public static function normalizeWww(string $url): string

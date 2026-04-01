@@ -25,6 +25,8 @@ class LinkNode extends InlineNode implements HasModifier
 		public ?Range $range = null,
 		/** the target is an image, [*img*] or the image itself: a reference names an image definition, the URL is relative to images */
 		public bool $isImageLink = false,
+		/** the text of the link is its name, a bare reference [name] */
+		public bool $isBareRef = false,
 		/** Original reference name for links written as [ref]; survives resolution */
 		public ?string $ref = null,
 		/** name of the syntax the link is written in, e.g. Syntax::WikiLink */

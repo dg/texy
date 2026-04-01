@@ -76,7 +76,7 @@ class Texy
 	private function createModules(): void
 	{
 		$directive = new Modules\DirectiveModule($this->config);
-		$image = new Modules\ImageModule($this->config, $this->urlPolicy);
+		$image = new Modules\ImageModule($this->urlPolicy);
 		$link = new Modules\LinkReferenceModule($this->config, $image);
 		$heading = new Modules\HeadingModule($this->config);
 

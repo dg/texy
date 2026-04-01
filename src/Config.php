@@ -73,6 +73,15 @@ final class Config
 	];
 
 	/**
+	 * Resolver of links whose target is a name in brackets the document does not define,
+	 * "text":[name] or [name]; it is called once per link with the name as written, #fragment included.
+	 * It returns the URL, where %s stands for the text of the link, or null to keep the name as the address.
+	 * It may change the link, e.g. its content or modifier.
+	 * @var ?\Closure(string, Nodes\LinkNode): ?string
+	 */
+	public ?\Closure $linkResolver = null;
+
+	/**
 	 * Handler of every directive {{name ...}} except {{texy: ...}}. The directive is replaced
 	 * by the node the handler returns, so returning the directive keeps it; anything else, nothing
 	 * included, removes it. Without a handler directives stay and render as the author wrote them.
@@ -88,17 +97,13 @@ final class Config
 	 */
 	public ?\Closure $delimitedBlockHandler = null;
 
-	/**
-	 * @var array<string, Nodes\ImageDefinitionNode>
-	 * @internal
-	 */
-	public private(set) array $imageDefinitions = [];
 
-	/**
-	 * @var array<string, Nodes\LinkDefinitionNode>
-	 * @internal
-	 */
-	public private(set) array $linkDefinitions = [];
+	/** @internal */
+	public function resolveLink(string $name, Nodes\LinkNode $link): ?string
+	{
+		$url = $this->linkResolver?->__invoke($name, $link);
+		return $url === null ? null : Helpers::insertLinkText($url, $link);
+	}
 
 
 	/**
@@ -120,29 +125,5 @@ final class Config
 		if (!array_key_exists('quotes', $row) || count($row['quotes']) !== 4) {
 			throw new InvalidArgumentException("Config::\$locales['$this->locale']['quotes'] must be a list of four quotes.");
 		}
-	}
-
-
-	/**
-	 * Adds an image definition that lasts across documents; a document can override it by its own.
-	 */
-	public function addImageDefinition(
-		string $name,
-		string $url,
-		?int $width = null,
-		?int $height = null,
-		?string $alt = null,
-	): void
-	{
-		$this->imageDefinitions[Helpers::toLower($name)] = new Nodes\ImageDefinitionNode($name, $url, $alt, $width, $height);
-	}
-
-
-	/**
-	 * Adds a link definition that lasts across documents; a document can override it by its own.
-	 */
-	public function addLinkDefinition(string $name, string $url): void
-	{
-		$this->linkDefinitions[Helpers::toLower($name)] = new Nodes\LinkDefinitionNode($name, $url);
 	}
 }

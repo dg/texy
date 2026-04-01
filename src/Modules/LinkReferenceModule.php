@@ -49,8 +49,7 @@ final class LinkReferenceModule extends Texy\Module
 			$this->parseDefinition(...),
 		);
 
-		// [reference] - bare reference link (opt-in); the raw target is kept in
-		// LinkNode::$ref for consumer resolution passes (wiki links etc.)
+		// [reference] - bare reference link (opt-in), resolved like "text":[reference]
 		$engine->addInline(
 			Syntax::LinkReference,
 			'~
@@ -95,6 +94,7 @@ final class LinkReferenceModule extends Texy\Module
 		return new Nodes\LinkNode(
 			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef), $refRange)]),
 			range: new Range($offsets[0], strlen($matches[0])),
+			isBareRef: true,
 			ref: $mRef,
 			syntax: Syntax::LinkReference,
 			textRange: $refRange,
@@ -132,10 +132,9 @@ final class LinkReferenceModule extends Texy\Module
 	 */
 	public function resolveReferences(DocumentNode $doc): void
 	{
-		// Start with the definitions of the application
-		$this->definitions = $this->config->linkDefinitions;
+		$this->definitions = [];
 
-		// Pass 1: Collect document definitions (overwrites user-defined)
+		// Pass 1: Collect document definitions
 		foreach ($doc->find(LinkDefinitionNode::class) as $node) {
 			$this->definitions[Helpers::toLower($node->reference)] = $node;
 		}
@@ -148,21 +147,24 @@ final class LinkReferenceModule extends Texy\Module
 
 
 	/**
-	 * Resolves the URL of a link written as [ref] or [*img*]; a reference not found is used as the URL.
-	 * A %s in the URL stands for the link text, such as "strlen":[php] with php.net/%s.
+	 * Resolves the URL of a link written as [ref] or [*img*] by the definitions of the document, then by
+	 * the link resolver; a reference not found is used as the URL. A %s in the URL stands for the link text,
+	 * such as "strlen":[php] with php.net/%s.
 	 */
 	private function resolveLinkNodeUrl(Nodes\LinkNode $node): void
 	{
-		if ($node->url === null && $node->ref !== null) {
+		if ($node->url !== null) {
+			$node->url = Helpers::insertLinkText($node->url, $node);
+
+		} elseif ($node->ref !== null) {
 			if ($node->isImageLink) {
 				$node->url = $this->imageModule->getDefinition($node->ref)->url ?? $node->ref;
 				return;
 			}
-			$node->url = $this->resolveDefinition($node->ref)->url ?? $node->ref;
-		}
-
-		if ($node->url !== null && $node->syntax !== Syntax::LinkReference && str_contains($node->url, '%s')) {
-			$node->url = str_replace('%s', urlencode(trim($node->content->getPlainText())), $node->url);
+			$definition = $this->resolveDefinition($node->ref);
+			$node->url = $definition
+				? Helpers::insertLinkText($definition->url, $node)
+				: $this->config->resolveLink($node->ref, $node) ?? $node->ref;
 		}
 
 		$this->convertEmailUrl($node);

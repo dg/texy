@@ -39,7 +39,6 @@ final class ImageModule extends Texy\Module
 
 
 	public function __construct(
-		private Texy\Config $config,
 		private Texy\UrlPolicy $urlPolicy,
 	) {
 	}
@@ -289,10 +288,9 @@ final class ImageModule extends Texy\Module
 	 */
 	public function resolveReferences(DocumentNode $doc): void
 	{
-		// Start with the definitions of the application
-		$this->definitions = $this->config->imageDefinitions;
+		$this->definitions = [];
 
-		// Pass 1: Collect document definitions (overwrites user-defined), one with a rejected URL defines nothing
+		// Pass 1: Collect document definitions, one with a rejected URL defines nothing
 		foreach ($doc->find(ImageDefinitionNode::class, fn($node) => $node->url !== null) as $node) {
 			$this->definitions[Helpers::toLower($node->reference)] = $node;
 		}

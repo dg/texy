@@ -281,53 +281,8 @@ test('direct image with alt text works', function () {
 
 
 // =============================================================================
-// User-defined definitions via addDefinition()
+// Definitions across documents
 // =============================================================================
-
-test('user-defined image definition works', function () {
-	$texy = new Texy\Texy;
-	$texy->config->addImageDefinition('logo', 'logo.png', 100, 50, 'Company Logo');
-	// alt parameter is used as alt text for images
-	Assert::match(
-		'<figure><img src="logo.png" alt="Company Logo" width="100" height="50"></figure>
-',
-		$texy->toHtml('[* logo *]'),
-	);
-});
-
-
-test('user-defined image definition persists across toHtml() calls', function () {
-	$texy = new Texy\Texy;
-	$texy->config->addImageDefinition('logo', 'logo.png');
-
-	// First call
-	Assert::match(
-		'<figure><img src="logo.png" alt=""></figure>
-',
-		$texy->toHtml('[* logo *]'),
-	);
-
-	// Second call - definition should still work
-	Assert::match(
-		'<figure><img src="logo.png" alt=""></figure>
-',
-		$texy->toHtml('[* logo *]'),
-	);
-});
-
-
-test('user-defined image definition is overwritten by document definition', function () {
-	$texy = new Texy\Texy;
-	$texy->config->addImageDefinition('logo', 'user-logo.png', 100);
-
-	// Document defines same reference - it overwrites user-defined one
-	Assert::match(
-		'<figure><img src="document-logo.jpg" alt="" width="200" height="100"></figure>
-',
-		$texy->toHtml("[* logo *]\n\n[*logo*]: document-logo.jpg 200x100"),
-	);
-});
-
 
 test('document-defined image reference does NOT leak to the next call', function () {
 	$texy = new Texy\Texy;

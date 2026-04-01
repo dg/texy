@@ -10,7 +10,7 @@
  * - Transform special image names (like "user" -> "profile.jpg")
  *
  * WHAT YOU'LL LEARN:
- * - How to define images by name, as a CMS would
+ * - How to define an image by name in the document
  * - How to modify the HTML of images using an HTML handler
  * - How to set image folder paths
  * - How to add CSS classes for left/right floated images
@@ -21,6 +21,7 @@
  * [* image.gif *]::         - image linking to itself
  * [* image.gif <]           - left-floated image
  * [* image.gif >]           - right-floated image
+ * [*user*]: image.gif .(alt) - defines the image [* user *]
  */
 
 use Texy\Nodes\ImageNode;
@@ -41,11 +42,6 @@ $texy->htmlOutput->floatClasses = [
 	'left' => 'my-left-class',   // Class for [* ... <] (left-floated)
 	'right' => 'my-right-class', // Class for [* ... >] (right-floated)
 ];
-
-
-// The special keyword "user" stands for an actual image file with its alternative text,
-// both in [* user *] and in the link of [* user *]::
-$texy->config->addImageDefinition('user', 'image.gif', alt: 'Texy! logo');
 
 
 // Register our custom image handler
@@ -72,9 +68,11 @@ $text = <<<'TEXY'
 
 	[* image.gif 60 X ?  *] This is image with one maximal dimension defined.
 
-	This is by-cms-defined image [* user *]
+	This is image defined by name [* user *]
 
-	And this is by-cms-defined image with by-cms-defined link [* user *]::
+	And this is image defined by name with a link to itself [* user *]::
+
+	[*user*]: image.gif .(Texy! logo)
 	TEXY;
 $html = $texy->toHtml($text);
 

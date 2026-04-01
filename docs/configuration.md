@@ -167,12 +167,29 @@ $texy->allowedSyntax['phrase/link'] = true;   // allow ":url" links attached to 
 
 ### References
 
+A link whose target is a name in brackets, `"text":[name]` or the bare `[name]`, leads where the definition `[name]: url` of the document says. A name the document does not define goes to the link resolver of the application; it returns the URL, in which `%s` stands for the text of the link, or `null` to keep the name as the address:
+
 ```php
-$texy->config->addLinkDefinition('example', 'https://example.com');
-$texy->config->addImageDefinition('logo', 'logo.png', 100, 50, 'Logo');
+$texy->config->linkResolver = fn(string $name) => match ($name) {
+    'php' => 'https://php.net/%s',     // "strlen":[php]
+    'nette' => 'https://nette.org',
+    default => null,
+};
 ```
 
-User definitions persist across `toHtml()` calls; definitions in the document override them.
+The URL goes through `$texy->urlPolicy` like one written by the author. The resolver is called once per link with the name as written, `#fragment` and any prefix included, and with the `LinkNode`, which it may change. A wiki gives a bare `[page]`, recognized by `LinkNode::$isBareRef`, the title of the page as its text:
+
+```php
+$texy->config->linkResolver = function (string $name, Texy\Nodes\LinkNode $link) use ($wiki): ?string {
+    $page = $wiki->findPage($name);
+    if ($page && $link->isBareRef) {
+        $link->content = Texy\Nodes\ContentNode::fromText($page->title);
+    }
+    return $page?->url;
+};
+```
+
+A link to an image, `"text":[*img*]`, does not reach the resolver. Images have no definitions of the application: an image is defined in the document, `[*logo*]: logo.png 100x50 .(Logo)`, or its URL is set by a pass over `ImageNode` (see [custom-handlers.md](custom-handlers.md#transform-passes)).
 
 ### Typography
 

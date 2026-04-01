@@ -46,7 +46,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
 4. **Transform.** `transform($document)` runs the passes of `Stage::Transform` and then of `Stage::Finalize`, each stage in the order of registration, which the facade lists explicitly:
    - `DirectiveModule::processDirectives()` – consumes `{{texy: …}}` directives into `DocumentNode::$meta` (e.g. `$meta['nofollow']`) and dispatches other directives to the handler set by `$texy->config->directiveHandler`; running first, the handler may still change configuration the later passes depend on,
-   - `ImageModule` / `LinkReferenceModule` `resolveReferences()` – resolves `[ref]` and `[*ref*]` references against collected definitions,
+   - `ImageModule` / `LinkReferenceModule` `resolveReferences()` – resolves `[ref]` and `[*ref*]` references against the definitions of the document, a link name it does not define by the resolver set by `$texy->config->linkResolver`,
    - `HeadingModule::processHeadings()` – level balancing of `HeadingBalancing::Dynamic` and `{toc: …}` hoisting,
    - and the common passes of `DocumentPasses`: `HtmlPairingPass` and `HtmlSanitizePass` (pairing, and the policy of tags, URLs and modifiers, see [rendering.md](rendering.md#html-passthrough-transform-passes)), `HeadingPass` (shift by `headingTop`, IDs).
 

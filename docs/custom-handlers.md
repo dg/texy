@@ -134,6 +134,20 @@ $texy->addPass(function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
 });
 ```
 
+### Example: images named by the application
+
+The target of a link written as a name is resolved by `$texy->config->linkResolver` (see [configuration.md](configuration.md#references)); images have no such resolver, a pass sets their URL:
+
+```php
+$texy->addPass(function (Texy\Nodes\DocumentNode $doc) use ($gallery) {
+    foreach ($doc->find(Texy\Nodes\ImageNode::class) as $image) {
+        if ($image->url !== null && ($photo = $gallery->findPhoto($image->url))) {
+            $image->url = $photo->url;
+        }
+    }
+});
+```
+
 ## Directives
 
 `{{name: value}}` in the document is a directive. Set the handler with `config->directiveHandler`; it is called for every directive except `{{texy: ...}}` and receives the `DirectiveNode` with its `$name`, `$value` and comma-separated `$args`. The directive is replaced by the node the handler returns, so returning the directive keeps it; anything else, nothing included, removes it. Without a handler directives stay in the document and render as the text the author wrote. Pick a directive by its name:

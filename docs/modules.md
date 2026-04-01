@@ -11,7 +11,7 @@ A module extends `Texy\Module`, whose single method is `register(Parsing\Engine 
 - `register()` runs in the constructor of the facade and again before every parse in Texy, because patterns depend on the configuration (`Config::$emoticons`); a name keeps its position, and the state declared first holds.
 - A module gets in the constructor only what it needs: the configuration, a policy, another module. It holds no reference to the facade.
 - A module registers no passes. What it does over the whole document is a public method and the facade lists it among the passes, whose order is thus one explicit list in `Texy::createModules()`.
-- Configuration lives on `Config`, permanent registrations of the application too (`directiveHandler`, `delimitedBlockHandler`, `addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
+- Configuration lives on `Config`, permanent registrations of the application too (`directiveHandler`, `delimitedBlockHandler`, `linkResolver`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
 
 ## Anatomy of a typical module
 
@@ -76,5 +76,5 @@ Typography and hyphenation are not modules: `Typography\Typographer` and `CzechH
 Modules communicate through the AST, not through each other:
 
 - **Nodes are the interface.** A clickable image is a `LinkNode` wrapping an `ImageNode`; a figure holds its image node; `PhraseModule` produces `LinkNode`s directly for its link syntaxes. There are no shared mutable value objects.
-- **References resolve in the transform phase.** Definitions collected during parsing (`ImageDefinitionNode`, `LinkDefinitionNode`) stay in the tree; the modules' transform passes walk the document with `$document->find()` and fill in the referencing nodes. Definitions of the application (`addLinkDefinition()`, `addImageDefinition()`) persist across `toHtml()` calls.
+- **References resolve in the transform phase.** Definitions collected during parsing (`ImageDefinitionNode`, `LinkDefinitionNode`) stay in the tree; the modules' transform passes walk the document with `$document->find()` and fill in the referencing nodes. A link name the document does not define goes to the resolver of the application (`Config::resolveLink()`); images have no definitions of the application.
 - Relations are one-directional (`PhraseModule` knows link nodes exist; link modules know nothing of phrases), keeping modules replaceable.
