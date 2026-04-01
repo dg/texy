@@ -1,7 +1,7 @@
 User syntax - this is *bold* and this _italic_
 
-.h1
-This is main title
-
-.perex
+/--perex
 Welcome to the world of your own syntax :-)
+
+It may hold *more* paragraphs, as any block.
+\--

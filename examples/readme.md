@@ -51,7 +51,7 @@ php "1-2-3 start/demo.php"
 | [emoticons](emoticons/) | Enable and customize smileys |
 | [syntax highlighting](syntax%20highlighting/) | Add code highlighting with FSHL library |
 | [Youtube video](Youtube%20video/) | Embed videos using image syntax |
-| [user syntax](user%20syntax/) | Create your own markup syntax |
+| [user syntax](user%20syntax/) | Create your own inline syntax and `/--` block type that produce nodes Texy already knows |
 
 ---
 

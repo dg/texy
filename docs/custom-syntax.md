@@ -29,6 +29,20 @@ $texy->addInlineSyntax('custom/mention', '~
 
 `Texy\Patterns` fragments (`Modifier`, `LinkUrl`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
 
+## A block type of /--
+
+A block written as `/--gallery … \--` needs no pattern of its own: register the type on the configuration. The handler gets the content with its shared indentation stripped, the parameter written after the type and the modifier, and returns a node, or `null` to leave the block as text. Whatever it parses from the content with `$context` is mapped back to the source, nesting and modifiers work as in any `/--` block:
+
+```php
+$texy->config->addBlockType('gallery', function (ParseContext $context, string $content, ?string $param, ?Modifier $modifier) {
+    $modifier ??= new Modifier;
+    $modifier->classes['gallery'] = true;
+    return new Nodes\DivNode($context->parseBlock($content), $modifier);
+});
+```
+
+A registered type replaces a built-in one of the same name, and like a built-in one it is switched off by `$texy->allowedSyntax['block/gallery'] = false`.
+
 ## The syntax handler
 
 ```php

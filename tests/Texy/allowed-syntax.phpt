@@ -48,6 +48,15 @@ test('a removed key falls back to the declared state', function () {
 });
 
 
+test('a key of a custom block type is declared by the configuration', function () {
+	$texy = new Texy;
+	$texy->config->addBlockType('gallery', fn() => null);
+	$texy->allowedSyntax['block/gallery'] = false;
+	$texy->parse('a');
+	Assert::false($texy->allowedSyntax['block/gallery']);
+});
+
+
 test('a name stays declared when its pattern is gone', function () {
 	$texy = new Texy;
 	$texy->allowedSyntax[Syntax::Emoticon] = true;

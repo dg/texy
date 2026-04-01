@@ -75,6 +75,12 @@ final class TexyConfig extends Config
 	public private(set) ?\Closure $directiveFallback = null;
 
 	/**
+	 * @var array<string, \Closure(Parsing\ParseContext, string, ?string, ?Modifier): ?Nodes\BlockNode>
+	 * @internal
+	 */
+	public private(set) array $blockTypes = [];
+
+	/**
 	 * @var array<string, Nodes\ImageDefinitionNode>
 	 * @internal
 	 */
@@ -127,6 +133,19 @@ final class TexyConfig extends Config
 	public function setDirectiveFallback(?callable $handler): void
 	{
 		$this->directiveFallback = $handler === null ? null : $handler(...);
+	}
+
+
+	/**
+	 * Registers the block /--$type, or replaces a built-in one. The parser gets the content
+	 * with its shared indentation stripped, the parameter written after the type and the
+	 * modifier; what it parses from the content with $context is mapped to the source.
+	 * Returning null leaves the block as text, as does switching off the syntax 'block/$type'.
+	 * @param  callable(Parsing\ParseContext, string, ?string, ?Modifier): ?Nodes\BlockNode  $parser
+	 */
+	public function addBlockType(string $type, callable $parser): void
+	{
+		$this->blockTypes[Helpers::toLower($type)] = $parser(...);
 	}
 
 

@@ -21,6 +21,12 @@ use function strlen;
  */
 final class BlockModule extends Texy\Module
 {
+	public function __construct(
+		private Texy\TexyConfig $config,
+	) {
+	}
+
+
 	public function register(Texy\Parsing\Registry $registry): void
 	{
 		foreach ([
@@ -34,6 +40,10 @@ final class BlockModule extends Texy\Module
 			Syntax::BlockDiv,
 		] as $name) {
 			$registry->declare($name);
+		}
+
+		foreach ($this->config->blockTypes as $type => $_) {
+			$registry->declare('block/' . $type);
 		}
 
 		$registry->addBlock(
@@ -126,6 +136,17 @@ final class BlockModule extends Texy\Module
 		$allowedAs = isset($context->allowedSyntaxes[$blocktype]) ? $blocktype : Syntax::BlockCode;
 		if (empty($context->allowedSyntaxes[$allowedAs])) {
 			return null;
+		}
+
+		if ($parser = $this->config->blockTypes[Helpers::toLower($parts[0])] ?? null) {
+			$node = $parser($context, $content, $param, $mod);
+			if ($node !== null) {
+				foreach ($node->getChildren() as $child) {
+					$map->applyTo($child); // the parser read the outdented content
+				}
+				$node->range ??= $range;
+			}
+			return $node;
 		}
 
 		if ($blocktype === Syntax::BlockCode) {
