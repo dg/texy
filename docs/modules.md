@@ -11,7 +11,7 @@ A module extends `Texy\Module`, whose single method is `register(Parsing\Registr
 - `register()` runs in the constructor of the facade and again before every parse in Texy, because patterns depend on the configuration (`TexyConfig::$listBullets`); a name keeps its position, and the state declared first holds.
 - A module gets in the constructor only what it needs: the configuration, a policy, another module. It holds no reference to the facade.
 - A module registers no passes. What it does over the whole document is a public method and the facade lists it among the passes, whose order is thus one explicit list in `Texy::createModules()`.
-- Configuration lives on `TexyConfig`, permanent registrations of the application too (`addDirective()`, `addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
+- Configuration lives on `TexyConfig`, permanent registrations of the application too (`addDirective()`, `addBlockType()`, `addImageDefinition()`, `addLinkDefinition()`). A definition read from a document stays local to its parse; per-parse *results* belong in the AST (see `HeadingNode::getTitle()`).
 
 ## Anatomy of a typical module
 
