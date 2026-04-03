@@ -20,8 +20,8 @@ use function is_array;
  */
 class Configurator
 {
-	/** @var array<string, list<string>> */
-	public static array $safeTags = [
+	/** tag => list of allowed attributes */
+	public const SafeTags = [
 		'a' => ['href', 'title'],
 		'abbr' => ['title'],
 		'b' => [],
@@ -56,7 +56,7 @@ class Configurator
 		$texy->htmlPolicy->allowedStyles = $texy::None; // style modifiers are disabled
 		// only some "safe" HTML tags and attributes are allowed; the '*' list names
 		// attributes acceptable on any element and is the only source for modifiers
-		$texy->htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];
+		$texy->htmlPolicy->allowedTags = self::SafeTags + ['*' => ['title', 'lang', 'dir']];
 		$texy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
 		$texy->urlPolicy->imagePattern = '~https?:~A';
 		$texy->allowed[Syntax::Image] = false; // disable images

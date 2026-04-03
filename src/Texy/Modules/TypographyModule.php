@@ -17,7 +17,7 @@ use Texy\{Patterns, Syntax};
 final class TypographyModule extends Texy\Module
 {
 	/** @var array<string, array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}}> */
-	public static array $locales = [
+	public array $locales = [
 		'cs' => [
 			'singleQuotes' => ["\u{201A}", "\u{2018}"],
 			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
@@ -46,8 +46,11 @@ final class TypographyModule extends Texy\Module
 
 	public string $locale = 'cs';
 
-	/** @var array<string, string> */
-	private static array $patterns = [
+	/**
+	 * search => replacement; :ldq:/:rdq:/:lsq:/:rsq: are placeholders for locale quotes
+	 * @var array<string, string>
+	 */
+	private array $replacements = [
 		'~(?<! [.\x{2026}] ) \.{3,4} (?! [.\x{2026}] )~mx'  => "\u{2026}",                // ellipsis  ...
 		'~(?<= [\d ] | ^ ) - (?= [\d ] | $)~x' /* .         */ => "\u{2013}",                // en dash 123-123
 		'~(?<= [^!*+,/:;<=>@\\\_|-] ) -- (?= [^!*+,/:;<=>@\\\_|-] )~x' => "\u{2013}",   // en dash alphanum--alphanum
@@ -94,7 +97,7 @@ final class TypographyModule extends Texy\Module
 	];
 
 	/** @var array<string, string> */
-	private array $pattern = [];
+	private array $localizedReplacements = [];
 
 	/** @var ?array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}} */
 	private ?array $compiledQuotes = null;
@@ -120,16 +123,16 @@ final class TypographyModule extends Texy\Module
 	private function getReplacements(): array
 	{
 		// compared by value, so both changing $locale and mutating $locales invalidate the cache
-		$quotes = self::$locales[$this->locale] ?? self::$locales['en'];
+		$quotes = $this->locales[$this->locale] ?? $this->locales['en'];
 		if ($quotes !== $this->compiledQuotes) {
 			$this->compiledQuotes = $quotes;
 			$dq = $quotes['doubleQuotes'];
 			$sq = $quotes['singleQuotes'];
-			foreach (self::$patterns as $k => $v) {
-				$this->pattern[$k] = strtr($v, [':ldq:' => $dq[0], ':rdq:' => $dq[1], ':lsq:' => $sq[0], ':rsq:' => $sq[1]]);
+			foreach ($this->replacements as $k => $v) {
+				$this->localizedReplacements[$k] = strtr($v, [':ldq:' => $dq[0], ':rdq:' => $dq[1], ':lsq:' => $sq[0], ':rsq:' => $sq[1]]);
 			}
 		}
 
-		return $this->pattern;
+		return $this->localizedReplacements;
 	}
 }
