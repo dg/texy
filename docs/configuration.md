@@ -183,7 +183,14 @@ User definitions persist across `process()` calls; definitions in the document o
 $texy->typographyModule->locale = 'cs';
 ```
 
-The locale determines quote characters (`TypographyModule::$locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are cs, de, en, fr and pl; unknown locales fall back to `en`.
+The locale determines quote characters (`$texy->typographyModule->locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are cs, de, en, fr and pl; unknown locales fall back to `en`. Adding a locale is a matter of extending the array:
+
+```php
+$texy->typographyModule->locales['nl'] = [
+    'singleQuotes' => ["\u{2018}", "\u{2019}"],   // inner quotes
+    'doubleQuotes' => ["\u{201C}", "\u{201D}"],   // outer quotes
+];
+```
 
 ### HyphenationModule
 
@@ -229,7 +236,7 @@ Exactly what it does:
 
 - `$htmlPolicy->allowedClasses = Texy::None` – no classes or IDs,
 - `$htmlPolicy->allowedStyles = Texy::None` – no inline styles,
-- `$htmlPolicy->allowedTags = Configurator::$safeTags` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
+- `$htmlPolicy->allowedTags = Configurator::SafeTags` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
 - URL scheme filters: links `~https?:|ftp:|mailto:~A`, images `~https?:~A`,
 - `$allowed['image'] = false` – no images (note: the `figure` syntax is *not* disabled by safeMode; combine with `disableImages()` if needed),
 - `$allowed['link/definition'] = false` – no reference definitions,

@@ -5,7 +5,6 @@
  */
 
 use Tester\Assert;
-use Texy\Modules\TypographyModule;
 use Texy\{Syntax, Texy};
 
 require __DIR__ . '/../bootstrap.php';
@@ -24,7 +23,7 @@ test('mutating the quote table of the active locale', function () {
 	$texy = new Texy;
 
 	Assert::contains("\u{201E}q\u{201C}", $texy->process('"q"'));
-	TypographyModule::$locales['cs']['doubleQuotes'] = ['«', '»'];
+	$texy->typographyModule->locales['cs']['doubleQuotes'] = ['«', '»'];
 	Assert::contains('«q»', $texy->process('"q"'));
 });
 
