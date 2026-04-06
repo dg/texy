@@ -78,7 +78,6 @@ $texy->urlPolicy->imagePattern = '~https?:~A';
 ```php
 $texy->config->mergeLines = true;  // join consecutive lines into one paragraph
 $texy->tabWidth = 8;               // tab → spaces conversion width
-$texy->removeSoftHyphens = true;   // strip U+00AD from input (deprecated)
 ```
 
 ### Results

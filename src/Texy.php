@@ -49,9 +49,6 @@ class Texy
 	/** TAB width (for converting tabs to spaces) */
 	public int $tabWidth = 8;
 
-	/** @deprecated */
-	public bool $removeSoftHyphens = true;
-
 	/** URL scheme security policy for links and images */
 	public readonly UrlPolicy $urlPolicy;
 
@@ -232,9 +229,7 @@ class Texy
 	 */
 	public function preprocess(string $text): string
 	{
-		if ($this->removeSoftHyphens) {
-			$text = str_replace("\u{AD}", '', $text);
-		}
+		$text = str_replace("\u{AD}", '', $text);
 
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
