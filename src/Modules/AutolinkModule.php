@@ -28,7 +28,7 @@ final class AutolinkModule extends Texy\Module
 				(?<= ^ | [\s([<:>] )               # must be preceded by these chars, > ends a tag
 				(?: https?:// | www\. | ftp:// )   # protocol or www
 				[0-9.' . Patterns::Letter . '-]      # first char
-				[/\d' . Patterns::Letter . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
+				[/\d' . Patterns::Letter . '+.\~%&?@=_:;#$!,*()-]{1,1000}  # URL body
 				[/\d' . Patterns::Letter . '+\~?@=_#$*]  # last char
 			~x',
 			$this->parseUrl(...),

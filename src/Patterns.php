@@ -73,8 +73,8 @@ class Patterns
 		[' . self::Letter . ']                 # first char
 		[0-9.+_' . self::Letter . '-]{0,63}    # local part
 		@
-		[0-9.+_' . self::Letter . '\x{ad}-]{1,252} # domain
+		[0-9.+_' . self::Letter . '-]{1,252}   # domain
 		\.
-		[' . self::Letter . '\x{ad}]{2,19}     # TLD
+		[' . self::Letter . ']{2,19}           # TLD
 	)';
 }
