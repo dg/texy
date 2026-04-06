@@ -26,7 +26,3 @@ overrides:
 	- # renaming the parameters $URL would break calls naming them
 		paths: [src/Helpers.php]
 		naming: {variable: keep}
-
-	- # the package keeps its own deprecated API working, so it uses it
-		paths: [src/Texy.php]
-		upgrading: {declarations: {deprecatedMember: keep}}

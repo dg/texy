@@ -22,7 +22,7 @@ final class AutolinkModule extends Texy\Module
 	public function register(Texy\Parsing\Engine $engine): void
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
-		$char = '[/\d' . Patterns::Letter . '+.\~%&?@=_:;#$!,*\x{ad}-]';
+		$char = '[/\d' . Patterns::Letter . '+.\~%&?@=_:;#$!,*-]';
 		$paren = '(?: \( ' . $char . '{0,1000}+ \) | \( ) ' . $char . '{0,1000}'; // takes ) only to close its own (
 		$engine->addInline(
 			Syntax::AutolinkUrl,
