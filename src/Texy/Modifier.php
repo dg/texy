@@ -23,13 +23,19 @@ use function strlen;
  */
 final class Modifier
 {
-	/** list of properties which are regarded as HTML element attributes */
+	/**
+	 * Names in {...} treated as HTML attributes; anything else is a CSS style. Names that are
+	 * also CSS properties (width, height, color, border, translate...) are omitted on purpose,
+	 * so that the far more common style meaning wins.
+	 */
 	public const ElAttrs = [
 		'abbr' => 1, 'accesskey' => 1, 'alt' => 1, 'cite' => 1, 'colspan' => 1, 'contenteditable' => 1, 'crossorigin' => 1,
-		'datetime' => 1, 'decoding' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1, 'hidden' => 1,
-		'href' => 1, 'hreflang' => 1, 'id' => 1, 'itemid' => 1, 'itemprop' => 1, 'itemref' => 1, 'itemscope' => 1, 'itemtype' => 1,
-		'lang' => 1, 'name' => 1, 'ping' => 1, 'referrerpolicy' => 1, 'rel' => 1, 'reversed' => 1, 'rowspan' => 1, 'scope' => 1,
-		'slot' => 1, 'src' => 1, 'srcset' => 1, 'start' => 1, 'target' => 1, 'title' => 1, 'translate' => 1, 'type' => 1, 'value' => 1,
+		'datetime' => 1, 'decoding' => 1, 'dir' => 1, 'download' => 1, 'draggable' => 1, 'for' => 1, 'headers' => 1,
+		'hidden' => 1, 'href' => 1, 'hreflang' => 1, 'id' => 1, 'inert' => 1, 'inputmode' => 1, 'itemid' => 1, 'itemprop' => 1,
+		'itemref' => 1, 'itemscope' => 1, 'itemtype' => 1, 'lang' => 1, 'loading' => 1, 'name' => 1, 'ping' => 1, 'popover' => 1,
+		'referrerpolicy' => 1, 'rel' => 1, 'reversed' => 1, 'role' => 1, 'rowspan' => 1, 'scope' => 1, 'slot' => 1,
+		'spellcheck' => 1, 'src' => 1, 'srcset' => 1, 'start' => 1, 'tabindex' => 1, 'target' => 1, 'title' => 1,
+		'type' => 1, 'value' => 1,
 	];
 
 	public ?string $id = null;
