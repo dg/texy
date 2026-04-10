@@ -34,7 +34,7 @@ test('a locale missing from the table is refused', function () {
 		"Config::\$locale 'xx' is not a key of Config::\$locales.",
 	);
 	Assert::exception(
-		fn() => $texy->processTypo('text'),
+		fn() => $texy->applyTypography('text'),
 		InvalidArgumentException::class,
 		"Config::\$locale 'xx' is not a key of Config::\$locales.",
 	);

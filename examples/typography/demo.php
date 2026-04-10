@@ -8,10 +8,10 @@
  * and hyphenation of long words.
  *
  * WHAT YOU'LL LEARN:
- * - How to use processTypo() instead of toHtml()
+ * - How to use applyTypography() instead of toHtml()
  * - Texy's typographic improvements (quotes, dashes, spaces)
  *
- * WHAT processTypo() DOES:
+ * WHAT applyTypography() DOES:
  * - Replaces straight quotes with typographic quotes: "text" → „text"
  * - Replaces double hyphens with en-dash: -- → –
  * - Replaces triple dots with ellipsis: ... → …
@@ -40,7 +40,7 @@ $texy = new Texy\Texy;
 // $texy->config->locale = 'fr';  // French quotes: «text»
 
 
-// Use processTypo() instead of toHtml()
+// Use applyTypography() instead of toHtml()
 // This applies only typography fixes, not full Texy markup
 $text = <<<'TEXY'
 	"Hello"
@@ -51,7 +51,7 @@ $text = <<<'TEXY'
 
 	Nedělitelná mezera ve spojení slov v lese.
 	TEXY;
-$html = $texy->processTypo($text);
+$html = $texy->applyTypography($text);
 
 
 // Display the result

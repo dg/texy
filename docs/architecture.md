@@ -56,7 +56,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
 5. **Render.** a fresh `Output\Html\Renderer` (configured by `$texy->htmlOutput`) produces the final HTML string (see [rendering.md](rendering.md)). Any renderer can render the same document; `parse()` and `transform()` can equally be called alone and the AST rendered later or elsewhere – that is what `Texy::renderHtml()` does.
 
-`toInlineHtml($text)` is the single-line (inline-only) variant, `parseInline()` its parsing; `processTypo()` applies only typography/hyphenation to plain text without parsing.
+`toInlineHtml($text)` is the single-line (inline-only) variant, `parseInline()` its parsing; `applyTypography()` applies only typography/hyphenation to plain text without parsing.
 
 ## Two states of the tree
 

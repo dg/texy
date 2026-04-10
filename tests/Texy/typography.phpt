@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /**
- * Test: processTypo()
+ * Test: applyTypography()
  */
 
 use Tester\Assert;
@@ -13,5 +13,5 @@ $texy = new Texy\Texy;
 
 Assert::match(
 	'„Hello“ © …',
-	$texy->processTypo('"Hello" (c) ...'),
+	$texy->applyTypography('"Hello" (c) ...'),
 );
