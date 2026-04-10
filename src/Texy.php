@@ -252,7 +252,7 @@ class Texy
 	/**
 	 * Makes only typographic corrections.
 	 */
-	public function processTypo(string $text): string
+	public function applyTypography(string $text): string
 	{
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
