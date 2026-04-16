@@ -27,11 +27,26 @@ final class Config
 	 * @var array<string, array{quotes: list<string>}>
 	 */
 	public array $locales = [
+		'bg' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
 		'cs' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
 		'de' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
+		// languages using guillemets nest the inner level in the quotes given as single
+		'el' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"]],
 		'en' => ['quotes' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"]],
+		'es' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"]],
 		'fr' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{2039}", "\u{203A}"]],
+		'hu' => ['quotes' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"]],
+		'it' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"]],
+		// Japanese corner brackets: 「…」 primary, 『…』 nested
+		'ja' => ['quotes' => ["\u{300C}", "\u{300D}", "\u{300E}", "\u{300F}"]],
 		'pl' => ['quotes' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"]],
+		// Brazilian usage, which is what the pt documentation follows
+		'pt' => ['quotes' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"]],
+		'ro' => ['quotes' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"]],
+		'ru' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"]],
+		'sl' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
+		'tr' => ['quotes' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"]],
+		'uk' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"]],
 	];
 
 	/** break long words with soft hyphens? */
