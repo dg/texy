@@ -197,11 +197,19 @@ A link to an image, `"text":[*img*]`, does not reach the resolver. Images have n
 $texy->config->locale = 'cs';
 ```
 
-The locale determines quote characters (`$texy->config->locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are bg, cs, de, el, en, es, fr, hu, it, ja, pl, pt, ro, ru, sl, tr and uk; a locale that is not a key of `$locales` throws `InvalidArgumentException` at the start of processing. Adding a locale is a matter of extending the array; a row holds the quotes:
+The locale determines quote characters (`$texy->config->locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are bg, cs, de, el, en, es, fr, hu, it, ja, pl, pt, ro, ru, sk, sl, tr and uk; a locale that is not a key of `$locales` throws `InvalidArgumentException` at the start of processing. Adding a locale is a matter of extending the array; a row holds the quotes:
 
 ```php
 // opening and closing double quotes, then the single ones used inside them
 $texy->config->locales['nl'] = ['quotes' => ['“', '”', '‘', '’']];
+```
+
+Some languages do not let a one-letter preposition or conjunction end a line; the locale binds it to
+the next word by a non-breaking space. Built in are cs (`k s v z o u i` and capital `A`), pl and sk, a
+row without `oneLetterWords` gets no such space. The words are letters in the row of the locale:
+
+```php
+$texy->config->locales['cs']['oneLetterWords'] .= 'a';   // bind the conjunction a too
 ```
 
 ### Hyphenation
@@ -209,6 +217,9 @@ $texy->config->locales['nl'] = ['quotes' => ['“', '”', '‘', '’']];
 ```php
 $texy->config->hyphenationWordLimit = 20;   // minimal length of a word to hyphenate
 ```
+
+Long words are broken by the syllables of Czech, which serve Slovak too; text in another locale is
+left whole.
 
 ### Emoticons
 

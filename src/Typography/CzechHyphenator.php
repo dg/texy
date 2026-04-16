@@ -12,12 +12,16 @@ use function count;
 
 
 /**
- * Breaks long words with soft hyphens for better line wrapping. Its patterns are
- * written over the image of Passes\TextRunPass.
+ * Breaks long words with soft hyphens for better line wrapping, by the syllables of Czech,
+ * which serve Slovak too; text in another language is left whole. Its patterns are written
+ * over the image of Passes\TextRunPass.
  * @internal
  */
 final class CzechHyphenator
 {
+	/** locales whose words it can break */
+	private const Locales = ['cs' => true, 'sk' => true];
+
 	private const
 		Dont = 0, // don't hyphenate
 		Here = 1, // hyphenate here
@@ -74,6 +78,10 @@ final class CzechHyphenator
 
 	public function hyphenate(string $text): string
 	{
+		if (!isset(self::Locales[$this->config->locale])) {
+			return $text;
+		}
+
 		// \x15 (protected text) and \x16 (replaced content) break words,
 		// \x17 (markup boundary) is transparent - see the TextRunPass image alphabet
 		return Regexp::replace(

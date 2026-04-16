@@ -23,12 +23,13 @@ final class Config
 	public string $locale = 'cs';
 
 	/**
-	 * locale => quotes, opening and closing double, then single ones
-	 * @var array<string, array{quotes: list<string>}>
+	 * locale => quotes (opening and closing double, then single ones) and optionally
+	 * one-letter words that may not end a line, bound to the next word
+	 * @var array<string, array{quotes: list<string>, oneLetterWords?: string}>
 	 */
 	public array $locales = [
 		'bg' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
-		'cs' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
+		'cs' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"], 'oneLetterWords' => 'ksvzouiKSVZOUIA'],
 		'de' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
 		// languages using guillemets nest the inner level in the quotes given as single
 		'el' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"]],
@@ -39,11 +40,12 @@ final class Config
 		'it' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"]],
 		// Japanese corner brackets: 「…」 primary, 『…』 nested
 		'ja' => ['quotes' => ["\u{300C}", "\u{300D}", "\u{300E}", "\u{300F}"]],
-		'pl' => ['quotes' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"]],
+		'pl' => ['quotes' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"], 'oneLetterWords' => 'wzioauWZIOAU'],
 		// Brazilian usage, which is what the pt documentation follows
 		'pt' => ['quotes' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"]],
 		'ro' => ['quotes' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"]],
 		'ru' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"]],
+		'sk' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"], 'oneLetterWords' => 'ksvzouaiKSVZOUAI'],
 		'sl' => ['quotes' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"]],
 		'tr' => ['quotes' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"]],
 		'uk' => ['quotes' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"]],
