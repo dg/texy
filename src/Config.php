@@ -41,9 +41,17 @@ class Config
 		'pt' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"],
 		'ro' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"],
 		'ru' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"],
+		'sk' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"],
 		'sl' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"],
 		'tr' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"],
 		'uk' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"],
+	];
+
+	/** @var array<string, string>  locale => one-letter words that may not end a line, bound to the next word */
+	public array $oneLetterWords = [
+		'cs' => 'ksvzouiKSVZOUIA',
+		'pl' => 'wzioauWZIOAU',
+		'sk' => 'ksvzouaiKSVZOUAI',
 	];
 
 	/** break long words with soft hyphens? */

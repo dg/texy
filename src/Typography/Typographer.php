@@ -18,7 +18,8 @@ use Texy\{Config, Patterns, Regexp};
 final class Typographer
 {
 	/**
-	 * search => replacement; :ldq:/:rdq:/:lsq:/:rsq: are placeholders for locale quotes
+	 * search => replacement; :ldq:/:rdq:/:lsq:/:rsq: are placeholders for locale quotes,
+	 * :words: for the one-letter words of the locale, a rule without them is left out
 	 * @var array<string, string>
 	 */
 	private array $replacements = [
@@ -54,10 +55,10 @@ final class Typographer
 		'~(?<= ^|\ |\.|,|-|\+|\x16|\(|\d\x{A0}) (\x17* \d++ \.? \x17*) \s++ (?= \x17* [%'
 		. Patterns::Letter
 		. '\x{b0}-\x{be}\x{2020}-\x{214f}])~mx' => "\$1\u{A0}",
-		// space between preposition and word
+		// space after a one-letter word that may not end a line
 		'~(?<= ^|[^0-9'
 		. Patterns::Letter
-		. ']) (\x17* [ksvzouiKSVZOUIA] \x17*) \s++ (?= \x17* [0-9'
+		. ']) (\x17* [:words:] \x17*) \s++ (?= \x17* [0-9'
 		. Patterns::Letter
 		. '])~msx' => "\$1\u{A0}",
 
@@ -70,8 +71,8 @@ final class Typographer
 	/** @var array<string, string> */
 	private array $localizedReplacements = [];
 
-	/** @var ?list<string> */
-	private ?array $compiledQuotes = null;
+	/** @var ?array{string, list<string>} */
+	private ?array $compiledFor = null;
 
 
 	public function __construct(
@@ -94,11 +95,19 @@ final class Typographer
 	private function getReplacements(): array
 	{
 		// compared by value, so both changing the locale and mutating the table invalidate the cache
+		$words = $this->config->oneLetterWords[$this->config->locale] ?? '';
 		$quotes = $this->config->locales[$this->config->locale];
-		if ($quotes !== $this->compiledQuotes) {
-			$this->compiledQuotes = $quotes;
+		if ($this->compiledFor !== [$words, $quotes]) {
+			$this->compiledFor = [$words, $quotes];
 			$placeholders = array_combine([':ldq:', ':rdq:', ':lsq:', ':rsq:'], $quotes);
+			$this->localizedReplacements = [];
 			foreach ($this->replacements as $k => $v) {
+				if (str_contains($k, ':words:')) {
+					if ($words === '') {
+						continue;
+					}
+					$k = str_replace(':words:', preg_quote($words, '~'), $k);
+				}
 				$this->localizedReplacements[$k] = strtr($v, $placeholders);
 			}
 		}
