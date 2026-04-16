@@ -182,7 +182,7 @@ User definitions persist across `toHtml()` calls; definitions in the document ov
 $texy->config->locale = 'cs';
 ```
 
-The locale determines quote characters (`$texy->config->locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are cs, de, en, fr and pl; unknown locales fall back to `en`. Adding a locale is a matter of extending the array:
+The locale determines quote characters (`$texy->config->locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are bg, cs, de, el, en, es, fr, hu, it, ja, pl, pt, ro, ru, sl, tr and uk; a locale that is not a key of `$locales` throws `InvalidArgumentException` at the start of processing. Adding a locale is a matter of extending the array:
 
 ```php
 // opening and closing double quotes, then the single ones used inside them

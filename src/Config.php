@@ -24,11 +24,26 @@ class Config
 
 	/** @var array<string, list<string>>  locale => four quotes: opening and closing double, then single ones */
 	public array $locales = [
+		'bg' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"],
 		'cs' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"],
 		'de' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"],
+		// languages using guillemets nest the inner level in the quotes given as single
+		'el' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"],
 		'en' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"],
+		'es' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"],
 		'fr' => ["\u{00AB}", "\u{00BB}", "\u{2039}", "\u{203A}"],
+		'hu' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"],
+		'it' => ["\u{00AB}", "\u{00BB}", "\u{201C}", "\u{201D}"],
+		// Japanese corner brackets: 「…」 primary, 『…』 nested
+		'ja' => ["\u{300C}", "\u{300D}", "\u{300E}", "\u{300F}"],
 		'pl' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"],
+		// Brazilian usage, which is what the pt documentation follows
+		'pt' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"],
+		'ro' => ["\u{201E}", "\u{201D}", "\u{201A}", "\u{2019}"],
+		'ru' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"],
+		'sl' => ["\u{201E}", "\u{201C}", "\u{201A}", "\u{2018}"],
+		'tr' => ["\u{201C}", "\u{201D}", "\u{2018}", "\u{2019}"],
+		'uk' => ["\u{00AB}", "\u{00BB}", "\u{201E}", "\u{201C}"],
 	];
 
 	/** break long words with soft hyphens? */
