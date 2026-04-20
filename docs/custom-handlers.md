@@ -15,7 +15,7 @@ Register a closure on an output generator; the node class is determined from the
 use Texy\Nodes;
 use Texy\Output\Html;
 
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
     function (Nodes\ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
         // your logic
     },
@@ -44,7 +44,7 @@ Handlers must respect the render-phase purity rule: **do not mutate the node or 
 use Texy\Nodes\ImageNode;
 use Texy\Output\Html;
 
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
     function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
         if (!str_starts_with($node->url ?? '', 'youtube:')) {
             return null;   // not ours - delegate to the default renderer
@@ -65,7 +65,7 @@ Usage: `[* youtube:dQw4w9WgXcQ 640x360 *]`
 ### Example: post-processing the default result
 
 ```php
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
     function (Texy\Nodes\HeadingNode $node, Html\Renderer $gen, ?Closure $previous) {
         $el = $previous($node, $gen);       // default <h#> element
         $el->attrs['class'][] = 'anchored';
@@ -80,12 +80,12 @@ To emit ready-made HTML, return `new Html\Raw($html)` – it bypasses text escap
 
 ## Transform passes
 
-For document-level changes, register a pass with `$texy->addHandler()`; `transform()` calls it with the `DocumentNode` after the built-in passes and before the typography, and the AST may be freely changed there. A pass that only finishes recognizing the source, without consulting definitions or changing the meaning, may be registered with `Texy\Stage::Syntax` instead; it then runs in `parse()` and must keep ranges exact (see [architecture.md](architecture.md#two-states-of-the-tree)). A `Stage::Finalize` pass runs after the typography.
+For document-level changes, register a pass with `$texy->addPass()`; `transform()` calls it with the `DocumentNode` after the built-in passes and before the typography, and the AST may be freely changed there. A pass that only finishes recognizing the source, without consulting definitions or changing the meaning, may be registered with `Texy\Stage::Syntax` instead; it then runs in `parse()` and must keep ranges exact (see [architecture.md](architecture.md#two-states-of-the-tree)). A `Stage::Finalize` pass runs after the typography.
 
 Most passes only visit nodes of one kind. `Texy\NodeHelpers::find()` collects them in traversal order, so the pass is a plain `foreach`:
 
 ```php
-$texy->addHandler(function (Texy\Nodes\DocumentNode $doc) {
+$texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
     foreach (Texy\NodeHelpers::find($doc, Texy\Nodes\LinkNode::class) as $node) {
         if ($node->url !== null) {
             $node->url = addTrackingParams($node->url);  // transform phase may mutate
@@ -99,7 +99,7 @@ The filter is either a node class, which narrows the returned type to it, or a p
 To restructure the tree (replace or remove nodes, or skip whole subtrees), walk it with `Texy\NodeTraverser`:
 
 ```php
-$texy->addHandler(function (Texy\Nodes\DocumentNode $doc) {
+$texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
     (new Texy\NodeTraverser)->traverse($doc, fn(Texy\Node $node) => $node instanceof Texy\Nodes\HtmlCommentNode
         ? Texy\NodeTraverser::RemoveNode
         : null);
@@ -115,7 +115,7 @@ Passes run in `transform()`, in registration order, and return values are ignore
 ```php
 $stats = [];
 
-$texy->addHandler(function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
+$texy->addPass(function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
     $stats['images'] = count(Texy\NodeHelpers::find($doc, Texy\Nodes\ImageNode::class));
     $stats['headings'] = count(Texy\NodeHelpers::find($doc, Texy\Nodes\HeadingNode::class));
 });

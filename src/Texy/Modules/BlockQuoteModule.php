@@ -27,15 +27,15 @@ final class BlockQuoteModule extends Texy\Module
 
 	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parse(...),
+		$this->texy->addBlockSyntax(
+			Syntax::Blockquote,
 			'~^
 				(?: ' . Texy\Patterns::ModifierHAlign . '\n)? # modifier (1)
 				>                                      # blockquote char
 				( [ \t]++ | : )                        # space/tab or colon (2)
 				( \S.*+ )                              # content (3)
 			$~mUx',
-			Syntax::Blockquote,
+			$this->parse(...),
 		);
 	}
 

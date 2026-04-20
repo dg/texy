@@ -52,7 +52,7 @@ composer phpstan
 
 - **Four phases: preprocess → parse → transform → render.** `parse()` returns the
   *syntax tree* (`Texy\Nodes\*`), whose ranges are the notation; `transform()` runs
-  the passes added via `addHandler()` and turns it into the document in place, ranges
+  the passes added via `addPass()` and turns it into the document in place, ranges
   then meaning origin; the render phase (`Texy\Output\*`) must not mutate it -
   **rendering is a pure function of the AST** (enforced by `renderer-purity.phpt`).
   A semantic pass never changes a range (`range-invariants.phpt`). See

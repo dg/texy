@@ -22,7 +22,7 @@ final class HtmlModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler($this->processPassthrough(...));
+		$texy->addPass($this->processPassthrough(...));
 	}
 
 
@@ -44,8 +44,8 @@ final class HtmlModule extends Texy\Module
 
 	public function beforeParse(): void
 	{
-		$this->texy->registerLinePattern(
-			$this->parseTag(...),
+		$this->texy->addLineSyntax(
+			Syntax::HtmlTag,
 			'~
 				< (/?)                          # tag begin
 				([a-z][a-z0-9_:-]{0,50})        # tag name
@@ -61,23 +61,23 @@ final class HtmlModule extends Texy\Module
 				(/?)                             # self-closing slash
 				>
 			~isx',
-			Syntax::HtmlTag,
+			$this->parseTag(...),
 		);
 
-		$this->texy->registerLinePattern(
-			$this->parseComment(...),
+		$this->texy->addLineSyntax(
+			Syntax::HtmlComment,
 			'~
 				<!--
 				( .*? )
 				-->
 			~isx',
-			Syntax::HtmlComment,
+			$this->parseComment(...),
 		);
 
-		$this->texy->registerLinePattern(
-			$this->parseEntity(...),
-			'~' . Texy\Helpers::EntityPattern . '~',
+		$this->texy->addLineSyntax(
 			Syntax::HtmlEntity,
+			'~' . Texy\Helpers::EntityPattern . '~',
+			$this->parseEntity(...),
 		);
 	}
 

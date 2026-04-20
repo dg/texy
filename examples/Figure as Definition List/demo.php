@@ -30,7 +30,7 @@ $texy = new Texy;
 
 // Register our custom handler for figures
 // The first parameter type (FigureNode) determines which node class the handler processes
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (FigureNode $node, Html\Renderer $gen) use ($texy): Html\Element {
 		$el = new Html\Element('dl');
 

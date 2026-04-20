@@ -4,9 +4,9 @@ Modules are the basic organizational unit of the parse and transform phases. Eac
 
 ## Responsibilities of a module
 
-1. **Registering syntaxes.** Line and block patterns are registered in `beforeParse()` (called on every `parse()`, so patterns may depend on runtime config such as `ListModule::$bullets`) via `Texy::registerLinePattern()` / `registerBlockPattern()`.
+1. **Registering syntaxes.** Line and block patterns are registered in `beforeParse()` (called on every `parse()`, so patterns may depend on runtime config such as `ListModule::$bullets`) via `Texy::addLineSyntax()` / `addBlockSyntax()`.
 2. **Building AST nodes.** Syntax handlers extract data from regex groups, parse nested content through the `ParseContext`, and return `Texy\Nodes\*` objects.
-3. **Registering transform passes.** Work that needs the whole document – reference resolution, heading balancing, HTML pairing/sanitization – is registered in the constructor with `addHandler()`; it runs in `transform()`. A pass that only finishes recognizing the notation is registered with `Stage::Syntax` and runs in `parse()` (`LinkReferenceModule` marks `[ref]` targets there).
+3. **Registering transform passes.** Work that needs the whole document – reference resolution, heading balancing, HTML pairing/sanitization – is registered in the constructor with `addPass()`; it runs in `transform()`. A pass that only finishes recognizing the notation is registered with `Stage::Syntax` and runs in `parse()` (`LinkReferenceModule` marks `[ref]` targets there).
 4. **Semantic configuration and state.** Public properties that change the *document's meaning* stay on the module (`HeadingModule::$top`, `EmoticonModule::$icons`, `TypographyModule::$locale`); properties that only change the HTML output's look live on `$texy->htmlOutput` (modules keep deprecated `__get`/`__set` bridges for their old locations). Module state such as collected reference definitions is private to the module; per-parse *results* belong in the AST, not on the module (see `HeadingNode::getTitle()`).
 
 The set of modules is created in `Texy::loadModules()`; a `Texy` subclass may override it.
@@ -22,15 +22,15 @@ final class FooModule extends Texy\Module
         private Texy\Texy $texy,
     ) {
         $texy->allowed['foo/advanced'] = false;              // default off
-        $texy->addHandler($this->resolve(...)); // transform pass
+        $texy->addPass($this->resolve(...)); // transform pass
     }
 
     public function beforeParse(): void
     {
-        $this->texy->registerLinePattern(
-            $this->parseFoo(...),   // syntax handler
-            '~...~U',               // pattern
+        $this->texy->addLineSyntax(
             'foo',                  // syntax name
+            '~...~U',               // pattern
+            $this->parseFoo(...),   // parser
         );
     }
 

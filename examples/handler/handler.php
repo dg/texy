@@ -5,7 +5,7 @@
  *
  * This file is a REFERENCE showing how to customize HTML output in Texy 4.0.
  * In the new AST architecture, parsing produces Node objects, and HTML
- * generation is handled separately via $texy->htmlOutput->registerHandler().
+ * generation is handled separately via $texy->htmlOutput->addRenderer().
  *
  * WHAT YOU'LL LEARN:
  * - How to register HTML handlers for specific Node types
@@ -35,7 +35,7 @@ $texy = new Texy;
 // HTML GENERATION HANDLERS
 // ============================================================
 //
-// Register handlers using: $texy->htmlOutput->registerHandler($handler)
+// Register handlers using: $texy->htmlOutput->addRenderer($handler)
 // The handler's first parameter type determines which Node class it handles.
 //
 // Handler signature:
@@ -59,42 +59,42 @@ $texy = new Texy;
 // ============================================================
 
 // EmoticonNode - handles :-)  :-(  etc.
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\EmoticonNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // ImageNode - handles [* image.jpg *]
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\ImageNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // LinkNode - handles "text":url and [text](url)
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\LinkNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // UrlNode - handles auto-detected URLs like https://example.com
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\UrlNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // EmailNode - handles auto-detected emails like john@example.com
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\EmailNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // PhraseNode - handles **bold**, //italic//, etc.
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\PhraseNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // TextNode - plain text
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\TextNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // RawTextNode - ''notexy'' (unprocessed text)
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\RawTextNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
@@ -104,103 +104,108 @@ $texy->htmlOutput->registerHandler(
 // ============================================================
 
 // ParagraphNode - paragraphs
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\ParagraphNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // HeadingNode - headings (=== or ### style)
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\HeadingNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // FigureNode - images with captions [* img *] *** caption
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\FigureNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // CodeBlockNode - /--code and ```code blocks
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\CodeBlockNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // BlockQuoteNode - blockquotes
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\BlockQuoteNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // ListNode - ordered/unordered lists
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\ListNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // ListItemNode - list items
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\ListItemNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // DefinitionListNode - definition lists
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\DefinitionListNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // TableNode - tables
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\TableNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // TableRowNode - table rows
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\TableRowNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // TableCellNode - table cells
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\TableCellNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // HorizontalRuleNode - horizontal lines (---)
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\HorizontalRuleNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // HtmlTagNode - HTML tags in the input
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\HtmlTagNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // HtmlCommentNode - HTML comments <!-- -->
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\HtmlCommentNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // DirectiveNode - {{command: args}} syntax
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\DirectiveNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 // SectionNode - /--div blocks
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	fn(Nodes\SectionNode $node, Html\Renderer $gen): Html\Element|string|null => null,
 );
 
 
 // ============================================================
-// EVENT HANDLERS
+// TRANSFORM PASSES
 // ============================================================
-// These are NOT HTML generation handlers - they run in the transform phase and work on the AST.
+// These are NOT renderers - they run in the transform phase and work on the AST.
 
-// Called by transform() after the built-in handlers - can modify the AST
-$texy->addHandler(function (DocumentNode $doc): void {
+// Called by transform() after the built-in passes - can modify the AST
+$texy->addPass(function (DocumentNode $doc): void {
 	// $doc - the root DocumentNode containing the entire AST
 	// Use NodeHelpers or NodeTraverser to walk and modify the tree
 });
+
+// To change the input text before parsing, just do it yourself:
+//     $html = $texy->process(myPreprocess($text));
+// and to work on the AST with full control over ordering:
+//     $doc = $texy->parse($text); /* ... */ $texy->transform($doc); $html = $texy->createHtmlRenderer()->render($doc);
 
 
 // ============================================================
 // EXAMPLE: Custom YouTube embed
 // ============================================================
 
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (Nodes\ImageNode $node, Html\Renderer $gen): Html\Element|string|null {
 		if ($node->url && str_starts_with($node->url, 'youtube:')) {
 			return new Html\Element('iframe', [
@@ -220,7 +225,7 @@ $texy->htmlOutput->registerHandler(
 // ============================================================
 
 // A bare reference like [123] becomes a LinkNode whose $ref keeps the written name.
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (Nodes\LinkNode $node, Html\Renderer $gen): Html\Element|string|null {
 		// Handle numeric references as comment mentions
 		if ($node->ref !== null && ctype_digit($node->ref)) {

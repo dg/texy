@@ -57,31 +57,31 @@ final class HeadingModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler($this->processHeadings(...));
+		$texy->addPass($this->processHeadings(...));
 	}
 
 
 	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parseUnderline(...),
+		$this->texy->addBlockSyntax(
+			Syntax::HeadingUnderlined,
 			'~^
 				( \S .{0,1000} )                 # heading text (1)
 				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				\n
 				( \#{3,}+ | \*{3,}+ | ={3,}+ | -{3,}+ )  # underline characters (3)
 			$~mUx',
-			Syntax::HeadingUnderlined,
+			$this->parseUnderline(...),
 		);
 
-		$this->texy->registerBlockPattern(
-			$this->parseSurround(...),
+		$this->texy->addBlockSyntax(
+			Syntax::HeadingSurrounded,
 			'~^
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
 				(.+)                             # heading text (2)
 				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 			$~mUx',
-			Syntax::HeadingSurrounded,
+			$this->parseSurround(...),
 		);
 	}
 

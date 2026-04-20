@@ -43,7 +43,7 @@ $texy->htmlOutput->imageRightClass = 'my-right-class'; // Class for [*> ... *] (
 
 // Register our custom image handler
 // The first parameter type (ImageNode) determines which node class the handler processes
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|string|null {
 		// Check if the image URL is our special keyword "user"
 		if ($node->url === 'user') {

@@ -132,26 +132,28 @@ class Texy
 	}
 
 
-	public function addModule(Module $module): static
+	public function addModule(Module $module): void
 	{
 		$this->modules[] = $module;
-		return $this;
 	}
 
 
-	/** @return Module[] */
+	/**
+	 * @return Module[]
+	 * @internal
+	 */
 	public function getModules(): array
 	{
 		return $this->modules;
 	}
 
 
-	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode */
-	final public function registerLinePattern(
-		\Closure $handler,
+	/** @param  callable  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode */
+	final public function addLineSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		callable $parser,
 	): void
 	{
 		if ($this->inModulePrepare) {
@@ -166,16 +168,16 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->engine->registerLinePattern($handler, $pattern, $name);
+		$this->engine->addLineSyntax($name, $pattern, $parser(...));
 	}
 
 
-	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode */
-	final public function registerBlockPattern(
-		\Closure $handler,
+	/** @param  callable  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode */
+	final public function addBlockSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		callable $parser,
 	): void
 	{
 		if ($this->inModulePrepare) {
@@ -190,7 +192,7 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->engine->registerBlockPattern($handler, $pattern, $name);
+		$this->engine->addBlockSyntax($name, $pattern, $parser(...));
 	}
 
 
@@ -357,15 +359,16 @@ class Texy
 	 * parse(), do the work, and then transform().
 	 * @param  callable(Nodes\DocumentNode): void  $pass
 	 */
-	final public function addHandler(callable $pass, Stage $stage = Stage::Transform): void
+	final public function addPass(callable $pass, Stage $stage = Stage::Transform): void
 	{
 		$this->engine->addPass($pass(...), $stage);
 	}
 
 
 	/**
-	 * Creates parse context (for advanced usage).
-	 * Note: Modules must be initialized via parse() first for patterns to be available.
+	 * Creates parse context. Modules must be initialized via parse() first
+	 * for patterns to be available.
+	 * @internal
 	 */
 	public function createParseContext(): ParseContext
 	{

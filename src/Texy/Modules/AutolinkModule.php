@@ -28,11 +28,8 @@ final class AutolinkModule extends Texy\Module
 	public function beforeParse(): void
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
-		$this->texy->registerLinePattern(
-			fn(ParseContext $context, array $matches, array $offsets) => new UrlNode(
-				$matches[0],
-				new Range($offsets[0], strlen($matches[0])),
-			),
+		$this->texy->addLineSyntax(
+			Syntax::AutolinkUrl,
 			'~
 				(?<= ^ | [\s([<:] )                # must be preceded by these chars
 				(?: https?:// | www\. | ftp:// )   # protocol or www
@@ -40,20 +37,37 @@ final class AutolinkModule extends Texy\Module
 				[/\d' . Patterns::Letter . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
 				[/\d' . Patterns::Letter . '+\~?@=_#$*]  # last char
 			~x',
-			Syntax::AutolinkUrl,
+			$this->parseUrl(...),
 		);
 
 		// direct email
-		$this->texy->registerLinePattern(
-			fn(ParseContext $context, array $matches, array $offsets) => new EmailNode(
-				$matches[0],
-				new Range($offsets[0], strlen($matches[0])),
-			),
+		$this->texy->addLineSyntax(
+			Syntax::AutolinkEmail,
 			'~
 				(?<= ^ | [\s([<] )                  # must be preceded by these chars
 				' . Patterns::Email . '
 			~x',
-			Syntax::AutolinkEmail,
+			$this->parseEmail(...),
 		);
+	}
+
+
+	/**
+	 * @param  array{string}  $matches
+	 * @param  array{int}  $offsets
+	 */
+	public function parseUrl(ParseContext $context, array $matches, array $offsets): UrlNode
+	{
+		return new UrlNode($matches[0], new Range($offsets[0], strlen($matches[0])));
+	}
+
+
+	/**
+	 * @param  array{string}  $matches
+	 * @param  array{int}  $offsets
+	 */
+	public function parseEmail(ParseContext $context, array $matches, array $offsets): EmailNode
+	{
+		return new EmailNode($matches[0], new Range($offsets[0], strlen($matches[0])));
 	}
 }
