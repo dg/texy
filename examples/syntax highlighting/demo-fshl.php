@@ -39,7 +39,7 @@ $texy = new Texy;
 
 // Register our code block handler
 // The first parameter type (CodeBlockNode) determines which node class the handler processes
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (CodeBlockNode $node, Html\Renderer $gen, ?Closure $previous) use ($texy): Html\Element|string|null {
 		// Map of supported languages to FSHL lexer classes
 		static $lexers = [

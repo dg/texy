@@ -36,8 +36,8 @@ final class BlockModule extends Texy\Module
 
 	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parse(...),
+		$this->texy->addBlockSyntax(
+			Syntax::Blocks,
 			'~^
 				/--++ \ *+                    # opening tag /--
 				(.*)                          # content type (1)
@@ -52,12 +52,12 @@ final class BlockModule extends Texy\Module
 					\z                       # or end of input
 				)
 			~mUix',
-			Syntax::Blocks,
+			$this->parse(...),
 		);
 
 		// ```language
-		$this->texy->registerBlockPattern(
-			$this->parseFenced(...),
+		$this->texy->addBlockSyntax(
+			Syntax::CodeFenced,
 			'~^
 				(`{3,}) \ *+                        # opening fence (1)
 				([^\n`]*)                           # info string (2)
@@ -68,7 +68,7 @@ final class BlockModule extends Texy\Module
 					\z                              # or end of input
 				)
 			~mx',
-			Syntax::CodeFenced,
+			$this->parseFenced(...),
 		);
 	}
 

@@ -10,8 +10,8 @@
  * - .h1 and .perex block syntax
  *
  * WHAT YOU'LL LEARN:
- * - How to register inline (line) patterns with registerLinePattern()
- * - How to register block patterns with registerBlockPattern()
+ * - How to register inline (line) syntaxes with addLineSyntax()
+ * - How to register block syntaxes with addBlockSyntax()
  * - How to disable conflicting default syntax
  * - How to parse content inside your custom elements
  * - How to apply modifiers to your elements
@@ -28,7 +28,6 @@
 use Texy\{Modifier, Range};
 use Texy\Nodes\{ParagraphNode, PhraseNode};
 use Texy\Output\Html;
-use Texy\Parsing\ParseContext;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -52,8 +51,15 @@ $texy->allowed[Texy\Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks
-$texy->registerLinePattern(
-	function (ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
+$texy->addLineSyntax(
+	'myInlineSyntax1', // Unique name for this syntax
+	'~
+		(?<! \* ) \* (?! [ *] )
+		(.+)
+		' . Texy\Patterns::Modifier . '?
+		(?<! [ *] ) \* (?! \* )
+	~U', // regular expression
+	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
 		// Parse the content recursively (allows nesting like *bold _and italic_ text*)
@@ -67,18 +73,18 @@ $texy->registerLinePattern(
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~
-		(?<! \* ) \* (?! [ *] )
-		(.+)
-		' . Texy\Patterns::Modifier . '?
-		(?<! [ *] ) \* (?! \* )
-	~U', // regular expression
-	'myInlineSyntax1', // Unique name for this syntax
 );
 
 // Add new syntax: _italic_
-$texy->registerLinePattern(
-	function (ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
+$texy->addLineSyntax(
+	'myInlineSyntax2',
+	'~
+		(?<! _ ) _ (?! [ _] )
+		(.+)
+		' . Texy\Patterns::Modifier . '?
+		(?<! [ _] ) _ (?! _ )
+	~U',
+	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
 		$content = $context->parseInline(trim($mContent), $offsets[1] ?? $offsets[0]);
@@ -91,13 +97,6 @@ $texy->registerLinePattern(
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~
-		(?<! _ ) _ (?! [ _] )
-		(.+)
-		' . Texy\Patterns::Modifier . '?
-		(?<! [ _] ) _ (?! _ )
-	~U',
-	'myInlineSyntax2',
 );
 
 
@@ -107,8 +106,13 @@ $texy->registerLinePattern(
 
 // Add new syntax: .tagname followed by content on next line
 // Examples: .h1, .h2, .perex, etc.
-$texy->registerBlockPattern(
-	function (ParseContext $context, array $matches, array $offsets, string $name) use ($texy): ParagraphNode {
+$texy->addBlockSyntax( // Match .tagname\ncontent
+	'myBlockSyntax1',
+	'~^
+		\. ([a-z0-9]+) \n
+		(.+)
+	$~m',
+	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): ParagraphNode {
 		[, $mTag, $mText] = $matches;
 
 		// Parse the content with inline parser
@@ -120,11 +124,6 @@ $texy->registerBlockPattern(
 
 		return new ParagraphNode($content, $modifier);
 	},
-	'~^
-		\. ([a-z0-9]+) \n
-		(.+)
-	$~m', // Match .tagname\ncontent
-	'myBlockSyntax1',
 );
 
 
@@ -133,7 +132,7 @@ $texy->registerBlockPattern(
 // ============================================================
 
 // Handler for our custom phrase types (myInlineSyntax1 and myInlineSyntax2)
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (PhraseNode $node, Html\Renderer $gen) use ($texy): ?Html\Element {
 		// Only handle our custom types
 		if ($node->type !== 'myInlineSyntax1' && $node->type !== 'myInlineSyntax2') {
@@ -158,7 +157,7 @@ $texy->htmlOutput->registerHandler(
 );
 
 // Handler for our custom block syntax
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (ParagraphNode $node, Html\Renderer $gen) use ($texy): ?Html\Element {
 		// Only handle paragraphs with our data-tag attribute
 		$tag = $node->modifier?->attrs['data-tag'] ?? null;

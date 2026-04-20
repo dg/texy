@@ -35,7 +35,7 @@ $texy = new Texy;
 
 // Register our custom link handler
 // The first parameter type (LinkNode) determines which node class the handler processes
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (LinkNode $node, Html\Renderer $gen): Html\Element {
 		$url = $node->url ?? '';
 

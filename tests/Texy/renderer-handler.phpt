@@ -16,7 +16,7 @@ test('registerHandler replaces default handler', function () {
 	$ast = $texy->parse('hello');
 
 	// Register custom handler for paragraphs
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		fn(Nodes\ParagraphNode $node, Renderer $g) => new Raw('<div>custom</div>'),
 	);
 
@@ -30,7 +30,7 @@ test('handler receives node data', function () {
 	$ast = $texy->parse('[* image.jpg *]');
 
 	// Custom handler that accesses node properties
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		fn(Nodes\FigureNode $node, Renderer $g) => new Raw(
 			'<figure><img src="/img/' . htmlspecialchars($node->image->url ?? '') . '" alt="custom"></figure>',
 		),
@@ -46,7 +46,7 @@ test('handler can access Texy configuration', function () {
 	$ast = $texy->parse("Title\n=====");
 
 	// Custom handler that modifies result of default handler
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (Nodes\HeadingNode $node, Renderer $g, ?Closure $previous) {
 			$element = $previous($node, $g);
 			$element->attrs['class'] = 'custom';

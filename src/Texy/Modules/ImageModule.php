@@ -45,23 +45,23 @@ final class ImageModule extends Texy\Module
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed[Syntax::ImageDefinition] = true;
-		$texy->addHandler($this->resolveReferences(...));
+		$texy->addPass($this->resolveReferences(...));
 	}
 
 
 	public function beforeParse(): void
 	{
 		// [*image*]:LINK
-		$this->texy->registerLinePattern(
-			$this->parseImage(...),
+		$this->texy->addLineSyntax(
+			Syntax::Image,
 			'~' . self::ImagePattern . self::LinkPattern . '
 			~Ux',
-			Syntax::Image,
+			$this->parseImage(...),
 		);
 
 		// [*ref*]: url .(title)[class]{style}
-		$this->texy->registerBlockPattern(
-			$this->parseDefinition(...),
+		$this->texy->addBlockSyntax(
+			Syntax::ImageDefinition,
 			'~^
 				\[\*                              # opening [*
 				( [^\n]{1,100} )                  # reference (1)
@@ -72,12 +72,12 @@ final class ImageModule extends Texy\Module
 				' . Patterns::Modifier . '?       # modifier (3)
 				\s*
 			$~mUx',
-			Syntax::ImageDefinition,
+			$this->parseDefinition(...),
 		);
 
 		// [*image*]:link *** caption
-		$this->texy->registerBlockPattern(
-			$this->parseFigure(...),
+		$this->texy->addBlockSyntax(
+			Syntax::Figure,
 			'~^
 				(?>' . self::ImagePattern . ')' . self::LinkPattern . '
 				(?:
@@ -86,7 +86,7 @@ final class ImageModule extends Texy\Module
 				)?
 				' . Patterns::ModifierHAlign . '?     # modifier (6)
 			$~mUx',
-			Syntax::Figure,
+			$this->parseFigure(...),
 		);
 	}
 

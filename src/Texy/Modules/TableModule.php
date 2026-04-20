@@ -30,14 +30,14 @@ final class TableModule extends Texy\Module
 
 	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parseTable(...),
+		$this->texy->addBlockSyntax(
+			Syntax::Table,
 			'~^
 				(?:' . Patterns::ModifierHVAlign . '\n)? # modifier (1)
 				\|                                   # table start
 				.*                                   # content
 			$~mUx',
-			Syntax::Table,
+			$this->parseTable(...),
 		);
 	}
 

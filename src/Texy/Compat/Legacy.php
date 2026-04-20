@@ -96,6 +96,9 @@ final class Legacy
 
 	/** v3 methods removed without emulation; the value navigates to the successor */
 	public const RemovedMethods = [
+		'addHandler' => 'the event system was replaced; use $texy->addPass() for AST transforms and $texy->htmlOutput->addRenderer() for output, see docs/custom-handlers.md',
+		'registerLinePattern' => 'use $texy->addLineSyntax() (note: the name comes first), see docs/custom-syntax.md',
+		'registerBlockPattern' => 'use $texy->addBlockSyntax() (note: the name comes first), see docs/custom-syntax.md',
 		'registerPostLine' => 'the string post-processing pipeline was removed, typography runs as an AST pass',
 		'protect' => 'return a Texy\Output\Html\Element or Raw from a renderer instead',
 		'unprotect' => 'return a Texy\Output\Html\Element or Raw from a renderer instead',
@@ -103,6 +106,8 @@ final class Legacy
 		'stringToHtml' => 'use process()',
 		'stringToText' => 'use toText()',
 		'getDOM' => 'use parse(), which returns the document AST',
+		'invokeHandlers' => 'the event system was removed',
+		'invokeAroundHandlers' => 'the event system was removed',
 		'getLinePatterns' => 'internal API removed without replacement',
 		'getBlockPatterns' => 'internal API removed without replacement',
 		'getAllowedProps' => 'internal API removed without replacement',

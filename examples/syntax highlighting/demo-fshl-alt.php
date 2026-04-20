@@ -8,7 +8,7 @@
  * will recognize.
  *
  * WHAT YOU'LL LEARN:
- * - How to register new block syntax using registerBlockPattern()
+ * - How to register new block syntax using addBlockSyntax()
  * - Recognize <?php ... ?> blocks automatically
  * - Recognize <script> ... </script> blocks automatically
  * - Combine pattern-based and handler-based approaches
@@ -31,7 +31,6 @@
 use Texy\{Helpers, Range};
 use Texy\Nodes\CodeBlockNode;
 use Texy\Output\Html;
-use Texy\Parsing\ParseContext;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
@@ -50,7 +49,7 @@ $texy = new Texy;
 // ============================================================
 
 // Custom handler for CodeBlockNode that applies FSHL syntax highlighting
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (CodeBlockNode $node, Html\Renderer $gen) use ($texy): ?Html\Element {
 		static $lexers = [
 			'html' => FSHL\Lexer\Html::class,
@@ -86,8 +85,12 @@ $texy->htmlOutput->registerHandler(
 
 // Register NEW syntax: recognize blocks starting with <?php
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
-$texy->registerBlockPattern(
-	function (ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
+$texy->addBlockSyntax( // Must be multiline (m) and single-line mode (s)
+	'phpBlockSyntax',
+	'~^
+		<\?php \n .+? \n \?>
+	$~ms',
+	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
 		[$content] = $matches;
 		$lang = $name === 'phpBlockSyntax' ? 'php' : 'javascript';
 
@@ -99,15 +102,17 @@ $texy->registerBlockPattern(
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~^
-		<\?php \n .+? \n \?>
-	$~ms', // Must be multiline (m) and single-line mode (s)
-	'phpBlockSyntax',
 );
 
 // Register NEW syntax: recognize <script> ... </script> blocks
-$texy->registerBlockPattern(
-	function (ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
+$texy->addBlockSyntax( // block patterns must be multiline and line-anchored
+	'scriptBlockSyntax',
+	'~^
+		<script (?: type=.?text/javascript.?)? > \n
+		.+? \n
+		</script>
+	$~ms',
+	function (Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
 		[$content] = $matches;
 
 		return new CodeBlockNode(
@@ -118,25 +123,21 @@ $texy->registerBlockPattern(
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	},
-	'~^
-		<script (?: type=.?text/javascript.?)? > \n
-		.+? \n
-		</script>
-	$~ms', // block patterns must be multiline and line-anchored
-	'scriptBlockSyntax',
 );
 
 
 // Process the text
 $text = file_get_contents(__DIR__ . '/sample2.texy');
-$html = $texy->process($text);
+$document = $texy->parse($text);
+$texy->transform($document);
+$html = $texy->createHtmlRenderer()->render($document);
 
 
 // Display the result with stylesheets
 header('Content-type: text/html; charset=utf-8');
 echo '<link rel="stylesheet" href="style.css">';
 echo '<link rel="stylesheet" href="fshl.css">';
-echo '<title>' . $texy->headingModule->title . '</title>';
+echo '<title>' . Texy\Nodes\HeadingNode::collectFrom($document)[0]?->getTitle() . '</title>';
 echo $html;
 
 

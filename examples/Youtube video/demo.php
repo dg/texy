@@ -36,7 +36,7 @@ $texy = new Texy;
 // Register our custom image handler
 // This works for both inline images AND images in figures,
 // because FigureModule delegates to the generator for ImageNode processing.
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
 		// Check if the URL has our custom "youtube:" scheme
 		$url = $node->url ?? '';

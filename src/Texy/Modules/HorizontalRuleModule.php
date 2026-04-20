@@ -27,14 +27,14 @@ final class HorizontalRuleModule extends Texy\Module
 
 	public function beforeParse(): void
 	{
-		$this->texy->registerBlockPattern(
-			$this->parse(...),
+		$this->texy->addBlockSyntax(
+			Syntax::HorizontalRule,
 			'~^
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
 				[ \t]*                       # optional spaces
 				' . Texy\Patterns::Modifier . '? # modifier (2)
 			$~mUx',
-			Syntax::HorizontalRule,
+			$this->parse(...),
 		);
 	}
 

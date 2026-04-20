@@ -93,12 +93,12 @@ Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **prep
 
 **Syntax** – a named syntactic construct, e.g. `phrase/strong` or `image`. Names are catalogued as constants on `Texy\Syntax` and used as keys in `Texy::$allowed`. Simple syntaxes have one-word names; related groups use a slash hierarchy (`phrase/*`, `block/*`).
 
-**Pattern** – the regular expression that recognizes the syntax, registered via `Texy::registerLinePattern()` / `registerBlockPattern()` together with the syntax handler and name. Registration defaults `$allowed[$name]` to `true` unless a module set it otherwise (e.g. `emoticon`, `phrase/ins` default to `false`).
+**Pattern** – the regular expression that recognizes the syntax, registered via `Texy::addLineSyntax()` / `addBlockSyntax()` together with the syntax name and its parser. Registration defaults `$allowed[$name]` to `true` unless a module set it otherwise (e.g. `emoticon`, `phrase/ins` default to `false`).
 
 **Syntax handler** – the closure the parser calls on a match: `function(ParseContext $context, array $matches, array $offsets, string $name): ?Node`. It returns an AST node, or `null` to refuse the match (the parser then gives other patterns a chance). Handlers parse nested content recursively through the `ParseContext`.
 
-**Transform pass** – a callable registered with `Texy::addHandler()`, receiving the `DocumentNode` in `transform()`. This is where the AST may be freely mutated, typically using `NodeHelpers` or, for structural changes, `NodeTraverser`. All passes run, in registration order within their stage, and return values are ignored. A pass registered with `Stage::Syntax` runs in `parse()` instead and may only finish recognizing the source.
+**Transform pass** – a callable registered with `Texy::addPass()`, receiving the `DocumentNode` in `transform()`. This is where the AST may be freely mutated, typically using `NodeHelpers` or, for structural changes, `NodeTraverser`. All passes run, in registration order within their stage, and return values are ignored. A pass registered with `Stage::Syntax` runs in `parse()` instead and may only finish recognizing the source.
 
-**Node renderer** – a callable registered on an output generator with `NodeRenderer::registerHandler()` that renders one node class, optionally delegating to the previous renderer in the chain. This is the render-phase extension point (see [custom-handlers.md](custom-handlers.md)).
+**Node renderer** – a callable registered on an output generator with `NodeRenderer::addRenderer()` that renders one node class, optionally delegating to the previous renderer in the chain. This is the render-phase extension point (see [custom-handlers.md](custom-handlers.md)).
 
 Passes registered by modules always run before any the consumer adds to the same stage, so a consumer cannot get in front of them. Where the order matters, call `parse()`, work on the AST, and then `transform()`.

@@ -11,10 +11,10 @@ extending Texy, plus how it converts its markup to HTML underneath.
   generator and per-module properties with defaults, the `Configurator` presets,
   and security (safe mode).
 - **[custom-handlers.md](custom-handlers.md)** — changing how existing constructs
-  are rendered (`registerHandler()`) and transforming the parsed document
-  (`addHandler()` + `NodeHelpers` / `NodeTraverser`).
+  are rendered (`addRenderer()`) and transforming the parsed document
+  (`addPass()` + `NodeHelpers` / `NodeTraverser`).
 - **[custom-syntax.md](custom-syntax.md)** — adding brand-new markup constructs with
-  `registerLinePattern()` / `registerBlockPattern()`.
+  `addLineSyntax()` / `addBlockSyntax()`.
 
 ## Internals (how it works)
 

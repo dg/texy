@@ -120,19 +120,19 @@ class Config
 		Syntax::QuickLink => 'a',
 	];
 
-	/** @var list<\Closure>  user node handlers (see registerHandler) */
-	private array $userHandlers = [];
+	/** @var list<\Closure>  user node renderers (see addRenderer) */
+	private array $userRenderers = [];
 
 
 	/**
 	 * Registers how a node class is rendered; the class is taken from the type of
 	 * the first parameter. Return null to pass the node to the previous renderer.
 	 */
-	public function registerHandler(callable $renderer): void
+	public function addRenderer(callable $renderer): void
 	{
 		$renderer = $renderer(...);
 		NodeRenderer::renderedClass($renderer); // fail here, not at render time
-		$this->userHandlers[] = $renderer;
+		$this->userRenderers[] = $renderer;
 	}
 
 
@@ -140,8 +140,8 @@ class Config
 	 * @internal
 	 * @return list<\Closure>
 	 */
-	public function getHandlers(): array
+	public function getRenderers(): array
 	{
-		return $this->userHandlers;
+		return $this->userRenderers;
 	}
 }

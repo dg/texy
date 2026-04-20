@@ -17,7 +17,7 @@ test('handler receives $previous parameter', function () {
 
 	$previousCalled = false;
 
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$previousCalled): Html\Element|string {
 			$previousCalled = $previous !== null;
 			// Call previous handler
@@ -37,7 +37,7 @@ test('handler can delegate to previous handler by returning null', function () {
 	$texy = new Texy;
 	$ast = $texy->parse('hello');
 
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		fn(Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous): ?Html\Element => null,
 	);
 
@@ -51,7 +51,7 @@ test('handler chain with conditional delegation', function () {
 
 	$customCount = 0;
 
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$customCount): Html\Element|string|null {
 			// Only handle paragraphs containing "hello"
 			$text = Helpers::extractText($node);
@@ -81,7 +81,7 @@ test('multiple handlers form a chain', function () {
 	$calls = [];
 
 	// First handler (registered first, called last in chain)
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$calls): Html\Element|string {
 			$calls[] = 'first';
 			// Delegate to default handler and modify result
@@ -92,7 +92,7 @@ test('multiple handlers form a chain', function () {
 	);
 
 	// Second handler (registered second, called first, can delegate to first)
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous) use (&$calls): Html\Element|string {
 			$calls[] = 'second';
 			// Delegate to first handler
