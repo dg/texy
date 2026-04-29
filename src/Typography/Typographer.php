@@ -84,6 +84,7 @@ final class Typographer
 	public function correct(string $text, bool $preserveSpaces = false): string
 	{
 		if (!$preserveSpaces) {
+			$text = strtr($text, "\t", ' ');
 			$text = Regexp::replace($text, '~\ {2,}~', ' ');
 		}
 

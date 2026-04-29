@@ -21,10 +21,10 @@ final class ImageModule extends Texy\Module
 {
 	/** the [* url .(title) alignment ] part, shared by the image and figure syntaxes */
 	private const ImagePattern = '
-			\[\* \ *+                         # opening bracket with asterisk
+			\[\* [ \t]*+                      # opening bracket with asterisk
 			([^\n]{1,1000})                   # URLs (1)
 			' . Patterns::Modifier . '?       # modifier (2)
-			\ *+
+			[ \t]*+
 			( \* | (?<! < ) > | < )           # alignment (3)
 			]';
 
@@ -77,7 +77,7 @@ final class ImageModule extends Texy\Module
 			'~^
 				(?>' . self::ImagePattern . ')' . self::LinkPattern . '
 				(?:
-					\ ++ \*\*\* \ ++              # separator
+					[ \t]++ \*\*\* [ \t]++        # separator
 					(.{0,2000})                   # caption (5)
 				)?
 				' . Patterns::ModifierHAlign . '?     # modifier (6)

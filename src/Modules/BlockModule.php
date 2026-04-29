@@ -49,7 +49,7 @@ final class BlockModule extends Texy\Module
 		$registry->addBlock(
 			Syntax::Blocks,
 			'~^
-				/--++ \ *+                    # opening tag /--
+				/--++ [ \t]*+                 # opening tag /--
 				(.*)                          # content type (1)
 				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				$
@@ -69,12 +69,12 @@ final class BlockModule extends Texy\Module
 		$registry->addBlock(
 			Syntax::CodeFenced,
 			'~^
-				(`{3,}) \ *+                        # opening fence (1)
+				(`{3,}) [ \t]*+                     # opening fence (1)
 				([^\n`]*)                           # info string (2)
 				$
-				((?: \n (?! \1 `*+ \ *+ $ ) .*+ )*) # content (3): lines that are not a valid closing fence
+				((?: \n (?! \1 `*+ [ \t]*+ $ ) .*+ )*) # content (3): lines that are not a valid closing fence
 				(?:
-					\n \1 `*+ \ *+ $ |              # closing fence (same length or longer)
+					\n \1 `*+ [ \t]*+ $ |           # closing fence (same length or longer)
 					\z                              # or end of input
 				)
 			~mx',

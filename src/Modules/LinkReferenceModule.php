@@ -40,7 +40,7 @@ final class LinkReferenceModule extends Texy\Module
 			'~^
 				\[
 				( [^\[\]#?*\n]{1,100} )           # reference (1)
-				] : \ ++
+				] : [ \t]++
 				( \S{1,1000} )                    # URL (2)
 				( [ \t] .{1,1000} )?              # optional label (3)
 				' . Patterns::Modifier . '?       # modifier (4)

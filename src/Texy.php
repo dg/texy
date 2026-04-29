@@ -9,7 +9,6 @@ namespace Texy;
 
 use JetBrains\PhpStorm\Language;
 use Texy\Parsing\{Engine, ParseContext};
-use function strlen;
 
 
 /**
@@ -45,9 +44,6 @@ class Texy
 
 	/** HTML security policy: allowed tags, classes and inline styles */
 	public readonly HtmlPolicy $htmlPolicy;
-
-	/** TAB width (for converting tabs to spaces) */
-	public int $tabWidth = 8;
 
 	/** URL scheme security policy for links and images */
 	public readonly UrlPolicy $urlPolicy;
@@ -190,14 +186,13 @@ class Texy
 
 	/**
 	 * Parses text to the syntax tree: every node records where it is written, and
-	 * nothing of its meaning is applied yet (see transform()). The text is preprocessed
-	 * first (idempotent), so node ranges always refer to the preprocessed form
-	 * obtainable via preprocess().
+	 * nothing of its meaning is applied yet (see transform()). The text is normalized
+	 * first (idempotent), so node ranges are byte offsets in normalize($text).
 	 */
 	public function parse(string $text): Nodes\DocumentNode
 	{
 		$this->registerModules();
-		return $this->engine->parse($this->preprocess($text), $this->allowedSyntax);
+		return $this->engine->parse(self::normalize($text), $this->allowedSyntax);
 	}
 
 
@@ -207,7 +202,7 @@ class Texy
 	public function parseInline(string $text): Nodes\DocumentNode
 	{
 		$this->registerModules();
-		return $this->engine->parse($this->preprocess($text), $this->allowedSyntax, singleLine: true);
+		return $this->engine->parse(self::normalize($text), $this->allowedSyntax, singleLine: true);
 	}
 
 
@@ -225,27 +220,37 @@ class Texy
 
 
 	/**
-	 * Preprocesses text (normalizes line endings, replaces tabs, removes soft hyphens).
+	 * Normalizes text to the canonical form that parsing operates on: removes the leading
+	 * byte order mark, converts line endings to \n, strips control characters
+	 * and soft hyphens, right-trims lines and drops blank lines at both ends, keeping the newline
+	 * that ends the last line, so a file stays a file. Idempotent,
+	 * so it is safe to apply before storing text and again before parsing.
+	 * @throws InvalidInputException when the input is not valid UTF-8
 	 */
-	public function preprocess(string $text): string
+	public static function normalize(string $text): string
 	{
-		$text = str_replace("\u{AD}", '', $text);
-
-		// standardize line endings and spaces
-		$text = Helpers::normalize($text);
-
-		// replace tabs with spaces
-		if ($this->tabWidth) {
-			while (str_contains($text, "\t")) {
-				$text = Regexp::replace(
-					$text,
-					'~^([^\t\n]*+)\t~mU',
-					fn($m) => $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1] ?? '') % $this->tabWidth),
-				);
-			}
+		if (!preg_match('##u', $text)) {
+			throw new InvalidInputException('Input is not valid UTF-8 text.');
 		}
 
-		return $text;
+		// standardize line endings to unix-like
+		$text = str_replace("\r\n", "\n", $text);
+		$text = strtr($text, "\r", "\n");
+
+		// remove control characters; leave \t + \n
+		$text = Regexp::replace($text, '~[\x00-\x08\x0B-\x1F]+~');
+
+		// remove soft hyphens, which get in by copy-pasting hyphenated text
+		$text = str_replace("\u{AD}", '', $text);
+
+		// right trim line ends
+		$text = Regexp::replace($text, "~[\t ]+$~m");
+
+		// drop blank lines at both ends and byte order marks at the start;
+		// a mark hidden behind blank lines would surface after the trim otherwise
+		$text = Regexp::replace($text, '~^[\n\x{FEFF}]+~u');
+		$trimmed = rtrim($text, "\n");
+		return $trimmed !== $text && $trimmed !== '' ? $trimmed . "\n" : $trimmed; // the last line keeps its newline
 	}
 
 
@@ -254,8 +259,7 @@ class Texy
 	 */
 	public function applyTypography(string $text): string
 	{
-		// standardize line endings and spaces
-		$text = Helpers::normalize($text);
+		$text = self::normalize($text);
 
 		$this->config->validate();
 		$text = new Typography\Typographer($this->config)->correct($text, preserveSpaces: true);

@@ -58,6 +58,8 @@ test('images and figures can be kept, their definitions stay disabled', function
 
 
 test('a tab or newline does not hide a forbidden scheme', function () {
+	Assert::match('<p>a</p>', createTexy()->toHtml("\"a\":[java\tscript:alert(1)]"));
+	Assert::match('<p>a</p>', createTexy()->toHtml("[a|java\tscript:alert(1)]"));
 	Assert::notContains('<a', createTexy()->toHtml('<a href="jav&Tab;ascript:alert(1)">x</a>'));
 	Assert::notContains('<a', createTexy()->toHtml('<a href="jav&#10;ascript:alert(1)">x</a>'));
 });

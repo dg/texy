@@ -19,7 +19,7 @@ class Patterns
 	// modifier .(title)[class]{style}
 	public const Modifier = <<<'X'
 		(?x:
-			\ *+ (?<= \ | ^ )
+			[ \t]*+ (?<= [ \t] | ^ )
 			\.
 			((?:
 				\( (?: \\\) | [^)\n] )++ \) | # title
@@ -32,7 +32,7 @@ class Patterns
 	// modifier .(title)[class]{style}<>
 	public const ModifierHAlign = <<<'X'
 		(?x:
-			\ *+ (?<= \ | ^ )
+			[ \t]*+ (?<= [ \t] | ^ )
 			\.
 			((?:
 				\( (?: \\\) | [^)\n] )++ \) | # title
@@ -46,7 +46,7 @@ class Patterns
 	// modifier .(title)[class]{style}<>^
 	public const ModifierHVAlign = <<<'X'
 		(?x:
-			\ *+ (?<= \ | ^ )
+			[ \t]*+ (?<= [ \t] | ^ )
 			\.
 			((?:
 				\( (?: \\\) | [^)\n] )++ \) | # title
