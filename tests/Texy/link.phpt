@@ -99,6 +99,24 @@ test('url shortening www prefix', function () {
 });
 
 
+test('soft hyphens in the source are stripped from text and link targets', function () {
+	$texy = new Texy\Texy;
+	Assert::match(
+		"<p>slovo <a href=\"https://example.com/path\">text</a></p>\n",
+		$texy->toHtml("slo\u{AD}vo \"text\":https://exam\u{AD}ple.com/pa\u{AD}th"),
+	);
+});
+
+
+test('&shy; written in text survives as a soft hyphen', function () {
+	$texy = new Texy\Texy;
+	Assert::match(
+		"<p>slo\u{AD}vo</p>\n",
+		$texy->toHtml('slo&shy;vo'),
+	);
+});
+
+
 test('entities in link targets are decoded once', function () {
 	$texy = new Texy\Texy;
 	Assert::same('<p><a href="http://a.cz/?a=1&amp;b=2">x</a></p>', trim($texy->toHtml('"x":http://a.cz/?a=1&amp;b=2')));
@@ -126,4 +144,13 @@ test('autolinks right after an HTML tag, an e-mail inside a link is obfuscated t
 	Assert::same('<p><b><a href="http://x.cz">http://x.cz</a></b></p>', trim($texy->toHtml('<b>http://x.cz</b>')));
 	Assert::same('<p><b><a href="mailto:c&#64;x.cz">c&#64;<!-- -->x.cz</a></b></p>', trim($texy->toHtml('<b>c@x.cz</b>')));
 	Assert::same('<p><a href="mailto:a&#64;x.cz">a&#64;<!-- -->x.cz</a></p>', trim($texy->toHtml('<a href="mailto:a@x.cz">a@x.cz</a>')));
+});
+
+
+test('soft hyphens are stripped from email autolinks', function () {
+	$texy = new Texy\Texy;
+	Assert::match(
+		"<p><a href=\"mailto:info&#64;example.com\">info&#64;<!-- -->example.com</a></p>\n",
+		$texy->toHtml("in\u{AD}fo@exam\u{AD}ple.com"),
+	);
 });

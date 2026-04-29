@@ -44,7 +44,7 @@ test('code phrase content is protected from typography', function () {
 
 test('HTML code and preformatted text keep their text verbatim', function () {
 	Assert::same("<p>a <code>\"q\" -- b</code> „c“</p>\n", convert('a <code>"q" -- b</code> "c"'));
-	Assert::same("<pre>\na b  \"c\"\n</pre>\n", convert("<pre>\na b  \"c\"\n</pre>"));
+	Assert::same("<pre>\na\tb  \"c\"\n</pre>\n", convert("<pre>\na\tb  \"c\"\n</pre>"));
 });
 
 

@@ -5,10 +5,10 @@ Texy converts text written in its own markup language to HTML. Unlike simple con
 Processing runs in four phases:
 
 ```
-preprocess → parse (modules) → transform (passes) → render (Output\*)
+normalize → parse (modules) → transform (passes) → render (Output\*)
 ```
 
-1. **Preprocess** – input normalization: line endings, control-character stripping, tab expansion, soft-hyphen removal.
+1. **Normalize** – input normalization: BOM removal, line endings, control-character stripping.
 2. **Parse** – recognition of syntaxes using regular expressions; modules build the tree of `Texy\Nodes\*` objects. The result is the *syntax tree*, see [Two states of the tree](#two-states-of-the-tree).
 3. **Transform** – AST-to-AST passes: reference resolution, heading balancing, HTML passthrough pairing and sanitization, typography. The transform phase **may mutate the tree**; after it, the document is semantically complete.
 4. **Render** – an output generator converts the AST to a string. The render phase **must not mutate the tree or configuration**.
@@ -36,9 +36,9 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
 ## Processing flow
 
-`Texy::toHtml($text)` is `preprocess()`, `parse()`, `transform()` and `renderHtml()` in a row. In detail:
+`Texy::toHtml($text)` is `parse()`, `transform()` and `renderHtml()` in a row; `parse()` itself begins with normalization. In detail:
 
-1. **Preprocess** (`Texy::preprocess()`): removes soft hyphens, normalizes line endings and strips control characters (`Helpers::normalize()` – this is why control bytes can never reach patterns from input), expands tabs per `$tabWidth`.
+1. **Normalize** (static `Texy::normalize()`, applied by `parse()` idempotently): removes the leading BOM, normalizes line endings, strips control characters (this is why control bytes can never reach patterns from input), removes soft hyphens typed literally (copy-paste noise; an intended one is written `&shy;`, which the `html/entity` syntax decodes later), right-trims lines and drops blank edge lines, keeping the newline that ends the last line, so a stored file round-trips byte for byte. Tabs are preserved; the syntax treats a tab as plain whitespace (indentation is compared literally or per character, never in visual columns).
 
 2. **Registration.** Modules register their patterns in the constructor of `Texy` and again before every parse, as some patterns depend on the configuration (`TexyConfig::$listBullets`); a name keeps its position and its state. `$allowedSyntax` is checked then: a key nobody declared throws.
 
@@ -80,13 +80,37 @@ Whether the pass runs is controlled by `$texy->config->typography` and `$texy->c
 
 ## Source positions
 
-Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **preprocessed** source). What it means depends on the [state of the tree](#two-states-of-the-tree):
+Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **normalized** source). What it means depends on the [state of the tree](#two-states-of-the-tree):
 
 - **In the syntax tree a range is the notation.** Every node made by the parser covers all it was written with, the lines a handler consumed included; a child lies inside its parent and siblings do not overlap (enforced over all test sources by `tests/Texy/range-invariants.phpt`). `null` has only a node without a source of its own (containers, the padding cell of a short table row) and a modifier assembled from non-contiguous parts (a cell inheriting the column modifier). Only a handler or a `Stage::Syntax` pass may set or extend a range.
 - **In the document a range is the origin.** A Transform pass never moves or recomputes a range, even when it changes the node's text or structure; a node it creates carries the range of the notation it comes from (an `HtmlElementNode` the one of its opening tag) or none. What the built-in passes change: `DirectiveModule` consumes `{{texy: …}}` into `DocumentNode::$meta` and replaces handled directives, the HTML passes pair tags into `HtmlElementNode` and turns rejected tags into `RawTextNode`, `ImageModule` and `LinkReferenceModule` fill `$url` of references, `HeadingModule` and `HeadingPass` set `$level`, `$id` and `$titleOverride`, the typography rewrites `TextNode::$text` and modifier titles.
 - **The range is the source, never the text.** `TextNode::$text` is display text from the parse on (`&amp;` is `TextNode('&')` with the range of the entity), only code-like nodes keep literal source. The notation is read through the range.
 - **A node records the parts of its notation a tool would otherwise take apart again:** a part gets its own `Range` when it can be rewritten on its own, a variant is stored as written. `LinkNode::$syntax` (the name of the syntax, e.g. `Syntax::WikiLink`), `$textRange`, `$urlRange`; `ImageNode::$urlRange`; `HeadingNode::$marker`, `$textRange`; `ListItemNode::$bullet`, `$bulletRange`; `CodeBlockNode::$codeMap`, an `OffsetMap` from `$code` to the source. `OffsetMap::applyTo()` maps every `Range` and `OffsetMap` property of a node, so parts stay right inside lists, quotes, cells and `/--div`. A node of a custom syntax records no parts; a tool replaces it whole.
 - Heading IDs are generated in the transform phase **before** typography, so they are stable regardless of `$config->typography`. The displayed title (`HeadingNode::getTitle()`) is derived from the heading's content instead of copied, so it *is* typographed.
+
+### Working with positions
+
+There is no source map. Offsets refer to `Texy::normalize($text)` – the same normalization `parse()` applies internally (it is idempotent) – so a tool that reports positions or rewrites the source normalizes once and keeps working with that string:
+
+```php
+$src = Texy::normalize(file_get_contents($file));
+$doc = $texy->parse($src);
+// Range offsets are exact byte positions in $src
+$edited = substr_replace($src, $replacement, $range->offset, $range->length);
+file_put_contents($file, $edited);
+```
+
+Normalization is plain text hygiene – LF line endings, no control bytes or BOM, right-trimmed lines – so the recommended practice is to **store Texy files already normalized**. The file on disk is then byte-identical to the string the offsets refer to, and positions can be used against it directly.
+
+**Windows / CRLF files.** Never map offsets onto the raw CRLF bytes of a file. Work on the normalized (LF) string in memory and convert line endings only when serializing:
+
+```php
+$src = Texy::normalize(file_get_contents($file));            // CRLF → LF, offsets valid in $src
+// ... analyze or edit $src using Range offsets ...
+file_put_contents($file, str_replace("\n", "\r\n", $src));   // keep CRLF on disk if required
+```
+
+Normalized text contains no `\r`, so the conversion is a lossless bijection: re-normalizing on the next load restores the byte-identical string and every position stays stable across the round trip. Line and column coordinates are the same in both forms; only byte offsets differ, by one per preceding line.
 
 ## Terminology
 
