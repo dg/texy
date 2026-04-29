@@ -49,7 +49,7 @@ final class DelimitedBlockModule extends Texy\Module
 		$engine->addBlock(
 			Syntax::Delimited,
 			'~^
-				/--++ \ *+                    # opening tag /--
+				/--++ [ \t]*+                # opening tag /--
 				(.*)                         # content type (1)
 				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				$
