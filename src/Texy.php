@@ -255,14 +255,16 @@ class Texy
 
 
 	/**
-	 * Makes only typographic corrections.
+	 * Makes only typographic corrections, honouring the configuration.
 	 */
 	public function applyTypography(string $text): string
 	{
 		$text = self::normalize($text);
 
 		$this->config->validate();
-		$text = new Typography\Typographer($this->config)->correct($text, preserveSpaces: true);
+		if ($this->config->typography) {
+			$text = new Typography\Typographer($this->config)->correct($text, preserveSpaces: true);
+		}
 
 		if ($this->config->hyphenation) {
 			$text = new Typography\CzechHyphenator($this->config)->hyphenate($text);
