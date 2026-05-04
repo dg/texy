@@ -203,6 +203,16 @@ class Texy
 	{
 		$document = $this->parse($text, $singleLine);
 		$this->transform($document);
+		return $this->renderHtml($document);
+	}
+
+
+	/**
+	 * Renders a transformed document to HTML. Separate from parse() and transform()
+	 * so a consumer can read or change the AST in between.
+	 */
+	public function renderHtml(Nodes\DocumentNode $document): string
+	{
 		return $this->createHtmlRenderer()->render($document);
 	}
 
@@ -259,11 +269,20 @@ class Texy
 
 
 	/**
-	 * Runs typography/hyphenation over the AST and marks the document so
-	 * generators skip their string post-processing.
+	 * Runs typography/hyphenation over the AST, honouring the allowed[] configuration,
+	 * and marks the document so generators skip their string post-processing.
+	 *
+	 * transform() does this itself as its last step. It is public for the other case: a
+	 * document built by a different parser, which is still an ordinary Texy AST and
+	 * still wants the typography. Calling it on an already typographed document does
+	 * nothing.
 	 */
-	private function applyAstTypography(Nodes\DocumentNode $document): void
+	public function applyAstTypography(Nodes\DocumentNode $document): void
 	{
+		if (!empty($document->meta['typographed'])) {
+			return;
+		}
+
 		$transformers = [];
 		if (!empty($this->allowed[Syntax::Typography])) {
 			$transformers[] = fn(string $s): string => $this->typographyModule->postLine($s);
@@ -344,6 +363,15 @@ class Texy
 	{
 		$document = $this->parse($text);
 		$this->transform($document);
+		return $this->renderText($document);
+	}
+
+
+	/**
+	 * Renders a transformed document to plain text.
+	 */
+	public function renderText(Nodes\DocumentNode $document): string
+	{
 		return (new Output\Text\Renderer)->render($document);
 	}
 

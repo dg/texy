@@ -154,3 +154,12 @@ test('nothing inside a rejected tag becomes active', function () {
 		}
 	}
 });
+
+
+test('a tag without its written form is rebuilt from its attributes', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlPolicy->allowedTags = Texy\Texy::None;
+	$tag = new Nodes\HtmlTagNode('key', ['a' => 'b', 'c' => true]);
+	$doc = new Nodes\DocumentNode(new Nodes\ContentNode([new Nodes\ParagraphNode(new Nodes\ContentNode([$tag]))]));
+	Assert::same('&lt;key a="b" c&gt;', $texy->renderHtml($doc));
+});
