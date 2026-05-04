@@ -198,7 +198,7 @@ $texy->addPass(function (DocumentNode $doc): void {
 // To change the input text before parsing, just do it yourself:
 //     $html = $texy->process(myPreprocess($text));
 // and to work on the AST with full control over ordering:
-//     $doc = $texy->parse($text); /* ... */ $texy->transform($doc); $html = $texy->createHtmlRenderer()->render($doc);
+//     $doc = $texy->parse($text); /* ... */ $texy->transform($doc); $html = $texy->renderHtml($doc);
 
 
 // ============================================================
@@ -223,8 +223,8 @@ $texy->htmlOutput->addRenderer(
 // ============================================================
 // EXAMPLE: Custom reference handler (comment mentions)
 // ============================================================
-
 // A bare reference like [123] becomes a LinkNode whose $ref keeps the written name.
+
 $texy->htmlOutput->addRenderer(
 	function (Nodes\LinkNode $node, Html\Renderer $gen): Html\Element|string|null {
 		// Handle numeric references as comment mentions

@@ -59,6 +59,7 @@ $texy->removeSoftHyphens = true;   // strip U+00AD from input (deprecated)
 $html = $texy->process($text);     // parse + transform + render HTML
 $ast = $texy->parse($text);        // the syntax tree, a Nodes\DocumentNode
 $texy->transform($ast);            // turns it into the document, in place
+$html = $texy->renderHtml($ast);   // render a document transformed earlier
 $plain = $texy->toText($text);     // plain-text rendition
 Texy\Nodes\HeadingNode::collectFrom($ast);          // headings in document order
 Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->getTitle(); // document title (for <title>)

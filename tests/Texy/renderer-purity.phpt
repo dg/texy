@@ -128,12 +128,12 @@ test('directive of one document does not affect rendering of another AST', funct
 test('rendering does not depend on the syntaxes allowed after parsing', function () {
 	$texy = new Texy\Texy;
 	$doc = $texy->parse("/--html\n<b>raw</b> &amp;\n\\--\n\n/--pre\n<i>x</i>\n\\--\n\n/--texysource\n**bold**\n\\--");
-	$html = $texy->createHtmlRenderer()->render($doc);
+	$html = $texy->renderHtml($doc);
 
 	$texy->allowed[Texy\Syntax::HtmlTag] = false;
 	$texy->allowed[Texy\Syntax::HtmlEntity] = false;
 	$texy->allowed[Texy\Syntax::Strong] = false;
-	Assert::same($html, $texy->createHtmlRenderer()->render($doc));
+	Assert::same($html, $texy->renderHtml($doc));
 });
 
 

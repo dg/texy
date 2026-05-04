@@ -17,7 +17,7 @@ test('a hand-assembled renderer renders a parsed document', function () {
 	$texy->transform($doc);
 
 	$renderer = new Html\Renderer($texy->htmlOutput, $texy->htmlPolicy, $texy->urlPolicy);
-	Assert::same($texy->createHtmlRenderer()->render($doc), $renderer->render($doc));
+	Assert::same($texy->renderHtml($doc), $renderer->render($doc));
 });
 
 
