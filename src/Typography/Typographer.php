@@ -51,7 +51,7 @@ final class Typographer
 		'~(?<= .{50}) \s++ (?= \x17* \S{1,6} \x17* $)~sx' => "\u{A0}",      // space before last short word
 
 		// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-		'~(?<= ^|\ |\.|,|-|\+|\x16|\(|\d\x{A0}) (\x17* \d++ \.? \x17*) \s++ (?= \x17* [%'
+		'~(?<= ^|\ |\.|,|-|\x{2013}|\+|\x16|\(|\d\x{A0}) (\x17* \d++ \.? \x17*) \s++ (?= \x17* [%'
 		. Patterns::Letter
 		. '\x{b0}-\x{be}\x{2020}-\x{214f}])~mx' => "\$1\u{A0}",
 		// space between preposition and word

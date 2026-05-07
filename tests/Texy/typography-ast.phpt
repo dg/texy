@@ -26,6 +26,11 @@ test('basic typography', function () {
 });
 
 
+test('a unit after a range is bound to the number', function () {
+	Assert::same("<p>stála 1500–2000\u{A0}Kč a vážila 10–12\u{A0}kg</p>\n", convert('stála 1500-2000 Kč a vážila 10-12 kg'));
+});
+
+
 test('quotes pair across phrase boundaries', function () {
 	Assert::same(
 		"<p>řekl „ahoj <strong>světe</strong>!“ a šel</p>\n",
