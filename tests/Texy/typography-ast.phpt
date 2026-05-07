@@ -26,6 +26,11 @@ test('basic typography', function () {
 });
 
 
+test('a unit after a range is bound to the number', function () {
+	Assert::same("<p>stála 1500–2000\u{A0}Kč a vážila 10–12\u{A0}kg</p>\n", convert('stála 1500-2000 Kč a vážila 10-12 kg'));
+});
+
+
 test('the space after a one-letter word is fixed by the words of the locale', function () {
 	Assert::same("<p>Byl jsem v\u{A0}Praze a I\u{A0}tam</p>\n", convert('Byl jsem v Praze a I tam'));
 
