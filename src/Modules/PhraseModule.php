@@ -135,10 +135,8 @@ final class PhraseModule extends Texy\Module
 				(?<! \' )                        # not preceded by quote
 				\'\'
 				(?! [\s\'] )                     # not followed by space or quote
-				( (?: [^\r\n\']++ | \' )+ )      # content (1)
-				(?<! [\s\'] )                    # not preceded by space or quote
-				\'\'
-				(?! \' )                         # not followed by quote
+				# content (1), then quotes not preceded by space or quote and not followed by quote
+				' . self::buildContentPattern('(?: [^\r\n\']++ | \' )', '(?<! [\s\'] ) \'\' (?! \' )') . '
 			~Ux',
 			fn($context, $matches, $offsets) => new RawTextNode($matches[1], new Range($offsets[0], strlen($matches[0]))),
 		);
@@ -148,10 +146,8 @@ final class PhraseModule extends Texy\Module
 			Syntax::CodeSpan,
 			'~
 				`
-				( \S (?: [^\r\n `]++ | [ `] )* )       # content (1)
-				' . Patterns::Modifier . '?            # modifier (2)
-				(?<! \s )                              # not preceded by space
-				`
+				# content (1), then modifier (2) and a backtick not preceded by space
+				' . self::buildContentPattern('(?: [^\r\n `]++ | [ `] )', Patterns::Modifier . '? (?<! \s ) `', first: '\S') . '
 				(?: : (' . Patterns::LinkUrl . ') )??  # optional link (3)
 			~Ux',
 			$this->parsePhrase(...),
@@ -238,18 +234,33 @@ final class PhraseModule extends Texy\Module
 			default => '\r\n ',
 		};
 		$lone = (empty($spec['noSpaces']) ? ' ' : '') . (empty($spec['noDelimiter']) ? $closeChar : '');
+		$step = '(?: [^' . $whitespace . $closeChar . ']++ | [' . $lone . '] )';
+		$end = Patterns::Modifier . '?  # modifier (2)
+				(?<! [\s' . $closeChar . $guard . '] ) ' . preg_quote($close, '~') . ' (?! ' . $afterClose . ' )  # closing delimiter';
 
 		return '~
 				(?<! ' . $beforeOpen . ' ) ' . preg_quote($open, '~') . ' (?! [\s' . $char . $guardAfter . '] )  # opening delimiter
-				( (?: [^' . $whitespace . $closeChar . ']++ | [' . $lone . '] )+ )  # content (1)
-				' . Patterns::Modifier . '?  # modifier (2)
-				(?<! [\s' . $closeChar . $guard . '] ) ' . preg_quote($close, '~') . ' (?! ' . $afterClose . ' )  # closing delimiter'
+				' . self::buildContentPattern($step, $end)
 			. (empty($spec['link'])
 				? ''
 				: '
 				(?: :(' . Patterns::LinkUrl . ') )??  # optional link (3)')
 			. '
 			~Ux';
+	}
+
+
+	/**
+	 * Builds the content (1), which runs by $step to the first place where $end matches, and $end
+	 * behind it. The loop is possessive, so a long content takes no stack, and where it finds no
+	 * end, no delimiter it passed over would find one either: (*SKIP) resumes the search behind them.
+	 */
+	private static function buildContentPattern(string $step, string $end, ?string $first = null): string
+	{
+		return '( ' . ($first ?? $step) . ' (?: (?! (?n: ' . $end . '
+				) ) ' . $step . ' )*+ )  # content (1)
+				(*SKIP)
+				' . $end;
 	}
 
 

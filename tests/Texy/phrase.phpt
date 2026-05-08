@@ -186,6 +186,13 @@ test('phrases can be extended through the table', function () {
 });
 
 
+test('a long text of delimiters that never close is parsed', function () {
+	foreach (['**a ', '//a ', '*a.', '`a ', "''a "] as $fragment) {
+		Assert::noError(fn() => process(str_repeat($fragment, 10_000)));
+	}
+});
+
+
 test('a long link of a phrase is parsed', function () {
 	foreach (['a.', '(a)', '//a//:'] as $fragment) {
 		Assert::noError(fn() => process('"a":http://a.cz/' . str_repeat($fragment, 10_000)));
