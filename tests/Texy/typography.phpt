@@ -23,3 +23,10 @@ Assert::match(
 	'"Hello" (c) ...',
 	$texy->applyTypography('"Hello" (c) ...'),
 );
+
+
+// an opening quote without its closing one stays as it is, however long the text after it
+$texy = new Texy\Texy;
+Assert::same('„a "b“ c', $texy->applyTypography('"a "b" c'));
+Assert::same(20_000, substr_count($texy->applyTypography(str_repeat('"a ', 20_000)), '"'));
+Assert::same(20_000, substr_count($texy->applyTypography(str_repeat("'a ", 20_000)), "'"));

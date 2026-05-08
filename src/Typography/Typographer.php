@@ -62,10 +62,11 @@ final class Typographer
 		. Patterns::Letter
 		. '])~msx' => "\$1\u{A0}",
 
+		// a closing quote does not depend on the opening one, so once an opening one has none, no later one has (*COMMIT)
 		// double ""
-		'~(?<! "|\w) " (?! \ | " ) ( (?: [^"]++ | ")+ ) (?<! \ | " ) " (?! ["' . Patterns::Letter . '])~Ux' => ':ldq:$1:rdq:',
+		'~(?<! "|\w) " (?! \ | " ) (*COMMIT) ( .+? ) (?<! \ | " ) " (?! ["' . Patterns::Letter . '])~sx' => ':ldq:$1:rdq:',
 		// single ''
-		'~(?<! \'|\w) \' (?! \ | \' ) ( (?: [^\']++ | \')+ ) (?<! \ |\') \' (?! [\'' . Patterns::Letter . '])~Ux' => ':lsq:$1:rsq:',
+		'~(?<! \'|\w) \' (?! \ | \' ) (*COMMIT) ( .+? ) (?<! \ |\') \' (?! [\'' . Patterns::Letter . '])~sx' => ':lsq:$1:rsq:',
 	];
 
 	/** @var array<string, string> */
