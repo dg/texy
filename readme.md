@@ -53,6 +53,7 @@ directory holds the reference for using and extending Texy:
 - **[Custom handlers](docs/custom-handlers.md)** – changing the behavior of
   existing constructs via renderer handlers and AST passes
 - **[Custom syntax](docs/custom-syntax.md)** – adding brand-new markup constructs
+- **[Upgrading](docs/upgrading-from-3.md)** – migration guide from Texy 3
 
 The **[examples/](examples/)** directory contains ready-to-run demos.
 
