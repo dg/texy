@@ -15,6 +15,9 @@ extending Texy, plus how it converts its markup to HTML underneath.
   (`addPass()` + `$node->find()` / `traverse()`) and serving `{{directives}}` (`config->directiveHandler`).
 - **[custom-syntax.md](custom-syntax.md)** — adding brand-new markup constructs with
   `addInlineSyntax()` / `addBlockSyntax()`, and types of `/--` blocks (`config->delimitedBlockHandler`).
+- **[upgrading-from-3.md](upgrading-from-3.md)** — migration guide from Texy 3: where
+  the old properties, methods and extension points live now.
+- **[upgrading.md](upgrading.md)** — every change visible to users, per released version.
 
 ## Internals (how it works)
 

@@ -4,7 +4,7 @@ Texy!   [![Buy me a coffee](https://files.nette.org/images/coffee1s.png)](https:
 [![Downloads this Month](https://img.shields.io/packagist/dm/texy/texy.svg)](https://packagist.org/packages/texy/texy)
 [![Tests](https://github.com/dg/texy/workflows/Tests/badge.svg?branch=master)](https://github.com/dg/texy/actions)
 [![Coverage Status](https://coveralls.io/repos/github/dg/texy/badge.svg?branch=master)](https://coveralls.io/github/dg/texy?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/dg/texy/v/stable)](https://github.com/dg/texy/releases)
+[![Latest Stable Version](https://poser.pugx.org/texy/texy/v/stable)](https://github.com/dg/texy/releases)
 [![License](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://github.com/dg/texy/blob/master/license.md)
 
 Texy is a text-to-HTML engine for lightweight markup languages, written in PHP.
@@ -72,6 +72,7 @@ directory holds the reference for using and extending Texy:
 - **[Custom handlers](docs/custom-handlers.md)** – changing the behavior of
   existing constructs via renderer handlers and AST passes
 - **[Custom syntax](docs/custom-syntax.md)** – adding brand-new markup constructs
+- **[Upgrading](docs/upgrading-from-3.md)** – migration guide from Texy 3
 
 The **[examples/](examples/)** directory contains ready-to-run demos.
 
