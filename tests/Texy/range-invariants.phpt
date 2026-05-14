@@ -106,7 +106,7 @@ test('test sources', function () {
 
 
 test('the code map of a code block points every line of the code at its source', function () {
-	$src = "- item\n\n  /--code php\n    \$a = 1;\n      \$b = 2;\n  \\--\n\n> ```\n> x\n>   y\n> ```\n\n/--html\n<b>z</b>\n\\--";
+	$src = "- item\n\n  /--php\n    \$a = 1;\n      \$b = 2;\n  \\--\n\n> ```\n> x\n>   y\n> ```\n\n/--html\n<b>z</b>\n\\--";
 	$blocks = Texy\NodeHelpers::find((new Texy\Texy)->parse($src), Nodes\CodeBlockNode::class);
 	Assert::count(3, $blocks);
 
