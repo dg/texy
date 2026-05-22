@@ -276,3 +276,17 @@ test('passes run in their stage, in registration order', function () {
 	$engine->transform($document);
 	Assert::same(['syntax', 'transform 1', 'transform 2', 'finalize'], $log);
 });
+
+
+test('blocks nest to ParseContext::MaxDepth, what lies deeper is the text between them', function () {
+	$engine = createEngine();
+	$engine->addBlock('quote', '~^>(.*)$~', fn(ParseContext $context, array $matches) => new Texy\Nodes\BlockQuoteNode(
+		$context->parseBlock($matches[1]),
+	));
+
+	$document = $engine->parse(str_repeat('>', ParseContext::MaxDepth + 50) . 'a', ['quote' => true]);
+	$quotes = $document->find(Texy\Nodes\BlockQuoteNode::class);
+
+	Assert::count(ParseContext::MaxDepth, $quotes);
+	Assert::same(str_repeat('>', 50) . 'a', end($quotes)->getPlainText());
+});

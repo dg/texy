@@ -8,7 +8,7 @@ Texy has two parsers producing AST nodes:
 Neither is used directly; parsing goes through a **`ParseContext`** (`src/Parsing/ParseContext.php`), which holds one instance of each and exposes:
 
 - `parseInline(string $text, int $baseOffset = 0): ContentNode`
-- `parseBlock(string $text, int $baseOffset = 0): ContentNode` – clones the block parser, so nested block parsing is isolated from the outer parser's position state,
+- `parseBlock(string $text, int $baseOffset = 0): ContentNode` – clones the block parser, so nested block parsing is isolated from the outer parser's position state. Every level reads its whole content again, so blocks nest to `ParseContext::MaxDepth` levels only; deeper content is handed to the gap handler as text,
 - `getBlockParser()` – access to the running block parser's navigation API (`next()`, `moveBackward()`).
 
 This makes parsing recursive: any syntax handler can call `$context->parseInline()` / `parseBlock()` on extracted inner text and attach the resulting children to its node. Nesting of syntaxes happens **only** through this explicit recursion – the parsers never re-scan a handler's output.
