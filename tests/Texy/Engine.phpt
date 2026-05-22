@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\Nodes\{ContentNode, DivNode, DocumentNode, ParagraphNode, TextNode};
+use Texy\Nodes\{ContentNode, DocumentNode, ParagraphNode, TextNode};
 use Texy\Parsing\{Engine, ParseContext};
 use Texy\Stage;
 
@@ -152,7 +152,7 @@ test('an inline deferral takes the inline content at every level of nesting', fu
 	$engine->addBlockSyntax(
 		'outer',
 		'~^outer$~',
-		fn(ParseContext $context) => new DivNode($context->parseBlock('inner')),
+		fn(ParseContext $context) => $context->parseBlock('inner'),
 	);
 	$engine->addBlockSyntax(
 		'inner',
@@ -248,10 +248,10 @@ test('an unknown name in the map of enabled syntaxes is refused with the closest
 test('a parse context knows the enabled syntaxes, at every level of nesting', function () {
 	$engine = createEngine();
 	$seen = [];
-	$engine->addBlock('outer', '~^outer$~', fn(ParseContext $context) => new DivNode($context->parseBlock('inner')));
+	$engine->addBlock('outer', '~^outer$~', fn(ParseContext $context) => $context->parseBlock('inner'));
 	$engine->addBlock('inner', '~^inner$~', function (ParseContext $context) use (&$seen) {
 		$seen = $context->allowedSyntaxes;
-		return new DivNode;
+		return new ContentNode;
 	});
 
 	$engine->parse('outer', ['outer' => true, 'inner' => true, 'other' => false]);
