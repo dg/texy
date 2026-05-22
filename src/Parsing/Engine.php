@@ -41,13 +41,13 @@ class Engine implements Registry
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing, of the language and of the application.
-	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>}
+	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}>}
 	 */
 	private array $inlinePatterns = ['language' => [], 'application' => []];
 
 	/**
 	 * Registered regexps and associated handlers for block parsing, of the language and of the application.
-	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>}
+	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\BlockNode|Nodes\ContentNode|null), pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\BlockNode|Nodes\ContentNode|null), pattern: string}>}
 	 */
 	private array $blockPatterns = ['language' => [], 'application' => []];
 
@@ -59,7 +59,7 @@ class Engine implements Registry
 
 	/**
 	 * Gap handler for content between block patterns.
-	 * @var ?\Closure(ParseContext, string, int): array<Nodes\BlockNode>
+	 * @var ?\Closure(ParseContext, string, int): list<Nodes\BlockNode>
 	 */
 	private ?\Closure $gapHandler = null;
 

@@ -51,7 +51,8 @@ function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, s
 
 - `$matches[0]` is the whole match, `$matches[1]`… the capturing groups; `$offsets` holds the byte offset of each group in the source (for `Range` tracking).
 - Return an **AST node** – an `InlineNode` for line patterns, a `BlockNode` for block patterns – or **`null` to refuse** the match (the text is left alone and other patterns get their chance).
-- For nested content, parse recursively: `$context->parseInline($innerText, $offset)` / `$context->parseBlock(...)` return a `ContentNode` you attach to your node.
+- Return a **`ContentNode` to emit a sequence** – its children are spliced into the surrounding node list in place of a single node. An **empty `ContentNode`** consumes the match without emitting anything, which is how a construct that only collects data (such as a link reference definition of Markdown) disappears from the document.
+- For nested content, parse recursively: `$context->parseInline($innerText, $offset)` / `$context->parseBlock(...)` return a `ContentNode` you attach to your node. (Attach it to your node's content – returning it directly would splice its children as a sequence, see above.)
 
 Returning an existing node type (`PhraseNode`, `LinkNode`, `HtmlElementNode`…) gives you rendering for free in every output format. A brand-new `Node` subclass needs a [renderer handler](custom-handlers.md#renderer-handlers) on the generator you care about; the other formats fall back to rendering its children, so the document stays renderable everywhere. Implement `getChildren()` so they can find them; typography reads the content found there as text around markup, and treats a node without content like an image. Text that must stay verbatim belongs in a subclass of `InlineCodeNode` or `RawTextNode`.
 
@@ -125,6 +126,19 @@ $texy->addInlineSyntax(
     },
 );
 ```
+
+Refusal is also the **priority mechanism**. Collisions are resolved by position (leftmost, then longest, then your syntaxes before the built-in ones, then registration order; a block syntax compares no length) – there is no global priority table. When your construct should lose to another syntax in a specific context (say, its content contains an unbalanced backtick that a code span will claim), inspect the match and return `null`; the position is handed back and the other patterns get their turn.
+
+### Refusal of a block syntax
+
+The block parser finds the matches of every block pattern once, before it calls any handler. When a handler refuses its match, the matches of **other** patterns inside the refused range stay and get their turn, but its **own** pattern is not searched again there: a match it would have found inside, overlapping the refused one, is lost. A block pattern that can find another match of its own inside a match therefore carries its refusal conditions in the regular expression, not in the handler.
+
+### Context-sensitive patterns
+
+A handler sees only its own match, never the surrounding text. Two tools cover the cases where context matters:
+
+- **A neighbouring character as a value** – capture it through the lookbehind: `(?:(?<=(.))|(?<!.))` puts the character before the match into group 1 (unset at the start of text). Use this when the rule *classifies* the neighbour (letter? punctuation?) rather than merely forbidding it, which a plain lookbehind guard would do.
+- **The preceding block** – in a block handler, `$context->getBlockParser()->getNodes()` returns the blocks parsed so far; the last one is the block directly before your match (the gap handler has already run, so a preceding paragraph is already there). A rule like "this construct may not interrupt a paragraph" becomes a structural check on the last node instead of a lookbehind that guesses at blank lines. The nodes are live: a handler may even graft its consumed text onto the preceding block when the construct turns out to be a plain continuation of it.
 
 ### Multi-line structure with next()/moveBackward() (block)
 

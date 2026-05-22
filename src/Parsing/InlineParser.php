@@ -14,11 +14,13 @@ use function strlen;
 
 /**
  * Parses inline structures (links, images, formatting, etc.).
+ * A handler returns an InlineNode, a ContentNode (sequence to splice; empty
+ * consumes silently), or null to refuse the match.
  */
 class InlineParser
 {
 	public function __construct(
-		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}> */
+		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}> */
 		private array $patterns,
 	) {
 	}
@@ -38,8 +40,8 @@ class InlineParser
 
 	/**
 	 * First match of one pattern at or after the offset, in the shape the loop works with.
-	 * @param  array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}  $info
-	 * @return ?array{name: string, offset: int, length: int, match: array<?string>, offsets: array<?int>, handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode}
+	 * @param  array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}  $info
+	 * @return ?array{name: string, offset: int, length: int, match: array<?string>, offsets: array<?int>, handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null)}
 	 */
 	private function match(string $text, array $info, string $name, int $offset): ?array
 	{
@@ -135,7 +137,12 @@ class InlineParser
 				);
 			}
 
-			$res[] = $node;
+			if ($node instanceof Nodes\ContentNode) {
+				array_push($res, ...$node->children); // a returned sequence is spliced in
+			} else {
+				$res[] = $node;
+			}
+
 			$pos = $best['offset'] + $best['length'];
 		}
 

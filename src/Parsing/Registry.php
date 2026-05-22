@@ -20,7 +20,7 @@ use Texy\Nodes;
 interface Registry
 {
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
+	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): Nodes\InlineNode|Nodes\ContentNode|null
 	 * @throws \LogicException  when the name belongs to a block syntax
 	 */
 	function addInline(
@@ -31,7 +31,7 @@ interface Registry
 	): void;
 
 	/**
-	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
+	 * @param  callable  $handler  fn(ParseContext, array $matches, array $offsets, string $name): Nodes\BlockNode|Nodes\ContentNode|null
 	 * @throws \LogicException  when the name belongs to an inline syntax
 	 */
 	function addBlock(
@@ -44,6 +44,6 @@ interface Registry
 	/** Declares a syntax name, also one without a pattern of its own. */
 	function declare(string $name, bool $enabled = true): void;
 
-	/** @param  callable(ParseContext, string, int): array<Nodes\BlockNode>  $handler */
+	/** @param  callable(ParseContext, string, int): list<Nodes\BlockNode>  $handler */
 	function setGapHandler(callable $handler): void;
 }
