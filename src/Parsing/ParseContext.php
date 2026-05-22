@@ -16,6 +16,10 @@ use Texy\Nodes\ContentNode;
  */
 class ParseContext
 {
+	/** how deep blocks nest; every level reads its whole content again, so the cost grows with the square of the depth */
+	public const MaxDepth = 100;
+
+
 	public function __construct(
 		private InlineParser $inlineParser,
 		private BlockParser $blockParser,
@@ -23,6 +27,7 @@ class ParseContext
 		public readonly array $allowedSyntaxes = [],
 		/** @var ?\Closure(string, int): ContentNode  takes the inline content instead of the parser, in a language parsing it later */
 		private ?\Closure $inlineDeferral = null,
+		private int $depth = 0,
 	) {
 	}
 
@@ -40,12 +45,21 @@ class ParseContext
 
 	/**
 	 * Parse text as block content.
-	 * Creates a cloned parser for isolated recursive parsing.
+	 * Creates a cloned parser for isolated recursive parsing. Below MaxDepth no block syntax
+	 * is read any more and the content is the text between them.
 	 */
 	public function parseBlock(string $text, int $baseOffset = 0): ContentNode
 	{
-		$clonedParser = clone $this->blockParser;
-		$newContext = new self($this->inlineParser, $clonedParser, $this->allowedSyntaxes, $this->inlineDeferral);
+		$clonedParser = $this->depth < self::MaxDepth
+			? clone $this->blockParser
+			: $this->blockParser->withoutPatterns();
+		$newContext = new self(
+			$this->inlineParser,
+			$clonedParser,
+			$this->allowedSyntaxes,
+			$this->inlineDeferral,
+			$this->depth + 1,
+		);
 		return $clonedParser->parse($newContext, $text, $baseOffset);
 	}
 
