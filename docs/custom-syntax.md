@@ -137,12 +137,14 @@ Refusal is also the **priority mechanism**. Collisions are resolved by position 
 
 The block parser finds the matches of every block pattern once, before it calls any handler. When a handler refuses its match, the matches of **other** patterns inside the refused range stay and get their turn, but its **own** pattern is not searched again there: a match it would have found inside, overlapping the refused one, is lost. A block pattern that can find another match of its own inside a match therefore carries its refusal conditions in the regular expression, not in the handler.
 
+The refused text itself stays with the text around it, so it becomes part of the paragraph it stands in rather than splitting it.
+
 ### Context-sensitive patterns
 
 A handler sees only its own match, never the surrounding text. Two tools cover the cases where context matters:
 
 - **A neighbouring character as a value** – capture it through the lookbehind: `(?:(?<=(.))|(?<!.))` puts the character before the match into group 1 (unset at the start of text). Use this when the rule *classifies* the neighbour (letter? punctuation?) rather than merely forbidding it, which a plain lookbehind guard would do.
-- **The preceding block** – in a block handler, `$context->getBlockParser()->getNodes()` returns the blocks parsed so far; the last one is the block directly before your match (the gap handler has already run, so a preceding paragraph is already there). A rule like "this construct may not interrupt a paragraph" becomes a structural check on the last node instead of a lookbehind that guesses at blank lines. The nodes are live: a handler may even graft its consumed text onto the preceding block when the construct turns out to be a plain continuation of it.
+- **The preceding block** – in a block handler, `$context->getBlockParser()->getNodes()` returns the blocks parsed so far; the last one is the block directly before your match (the call hands the text in front of the match to the gap handler first, so a preceding paragraph is already there; a refusal after it leaves that paragraph ending at your match). A rule like "this construct may not interrupt a paragraph" becomes a structural check on the last node instead of a lookbehind that guesses at blank lines. The nodes are live: a handler may even graft its consumed text onto the preceding block when the construct turns out to be a plain continuation of it.
 
 ### Multi-line structure with next()/moveBackward() (block)
 

@@ -50,11 +50,13 @@ Blocks never nest or overlap at parser level – every line belongs to at most o
 2. Walks the sorted matches; text between them goes to the **gap handler** – `ParagraphModule::parseText()` (the language sets it through `Engine::setGapHandler()`, parsing blocks without one throws).
 3. Calls the syntax handler of each match. The handler may consume additional lines through the parser API. As in the inline parser, the handler returns a `BlockNode`, a `ContentNode` (a **sequence** of blocks spliced into the result; an empty one consumes the match silently), or `null` to reject – the position then stays for the gap handler.
 
+The text in front of a match goes to the gap handler only once the handler accepts the match. A rejected match therefore stays in the gap together with the text around it, and a paragraph runs across it: `text\n1. item\nmore` with a single-item list is one paragraph. The gap is handed over earlier only when the handler asks for `getNodes()`; if it then rejects, the paragraph before the match ends there.
+
 Handlers of multi-line structures use the navigation API on `$context->getBlockParser()`:
 
 - **`next(string $pattern, ?array &$matches, ?array &$offsets = null): bool`** – matches the *next line* against the pattern (`Am` modifiers added automatically); on success fills `$matches`, advances past the line and returns `true`. Typical use: consuming successive list items or table rows in a loop.
 - **`moveBackward(int $linesCount = 1): void`** – moves back over line endings; used when the registered pattern matched in the middle of a structure and the handler wants to re-read from its beginning with `next()`.
-- **`getNodes(): array`** – the blocks produced so far at this nesting level, gap-handler output included; the last one is the block immediately preceding the current match. The gap handler runs *before* the match handler, so a paragraph sitting right before the construct is already there. This makes context-sensitive rules ("this construct may not interrupt a paragraph") a structural check instead of a fragile lookbehind, and since the nodes are live objects, a handler may deliberately graft consumed text onto the preceding block (lazy paragraph continuation).
+- **`getNodes(): array`** – the blocks produced so far at this nesting level, gap-handler output included; the last one is the block immediately preceding the current match. The call hands the text in front of the match to the gap handler first, so a paragraph sitting right before the construct is already there. This makes context-sensitive rules ("this construct may not interrupt a paragraph") a structural check instead of a fragile lookbehind, and since the nodes are live objects, a handler may deliberately graft consumed text onto the preceding block (lazy paragraph continuation).
 
 ## What else belongs to parsing
 

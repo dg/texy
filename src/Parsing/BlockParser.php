@@ -24,6 +24,11 @@ final class BlockParser
 	private string $text;
 	private int $offset;
 	private int $baseOffset;
+	private ParseContext $context;
+
+	/** text from $gapStart to $gapEnd (the current match) is not yet handed to the gap handler */
+	private int $gapStart = 0;
+	private int $gapEnd = 0;
 
 	/** @var list<BlockNode>  nodes produced so far by the running parse */
 	private array $nodes = [];
@@ -41,8 +46,9 @@ final class BlockParser
 	public function parse(ParseContext $context, string $text, int $baseOffset = 0): Nodes\ContentNode
 	{
 		$this->text = $text = rtrim($text, "\n");
-		$this->offset = 0;
+		$this->offset = $this->gapStart = 0;
 		$this->baseOffset = $baseOffset;
+		$this->context = $context;
 		$this->nodes = [];
 		$matches = $this->match($text, $baseOffset);
 		$matches[] = [strlen($text), null, null, 0, null]; // terminal sentinel
@@ -57,12 +63,7 @@ final class BlockParser
 				}
 			} while (true);
 
-			// between-matches content → delegate to gap handler
-			if ($mOffset > $this->offset) {
-				$s = substr($text, $this->offset, $mOffset - $this->offset);
-				$this->nodes = [...$this->nodes, ...($this->gapHandler)($context, $s, $baseOffset + $this->offset)];
-			}
-
+			$this->gapEnd = $mOffset;
 			if ($mName === null) {
 				break; // finito
 			}
@@ -74,10 +75,13 @@ final class BlockParser
 			$handler = $this->patterns[$mName]['handler'];
 			$node = $handler($context, $mMatches, $mOffsets, $mName);
 
-			if ($node === null || $this->offset <= $mOffset) { // handler rejects text
+			if ($node === null || $this->offset <= $mOffset) { // handler rejects text, it stays in the gap
 				$this->offset = $mOffset;
 				continue;
 			}
+
+			$this->flushGap();
+			$this->gapStart = $this->offset;
 
 			if ($node instanceof Nodes\ContentNode) {
 				foreach ($node->children as $child) { // a returned sequence is spliced in
@@ -91,6 +95,7 @@ final class BlockParser
 			}
 		} while (true);
 
+		$this->flushGap();
 		return new Nodes\ContentNode($this->nodes);
 	}
 
@@ -103,7 +108,22 @@ final class BlockParser
 	 */
 	public function getNodes(): array
 	{
+		$this->flushGap();
 		return $this->nodes;
+	}
+
+
+	/**
+	 * Hands the text in front of the current match to the gap handler.
+	 */
+	private function flushGap(): void
+	{
+		$start = $this->gapStart;
+		$this->gapStart = $this->gapEnd;
+		if ($this->gapEnd > $start) {
+			$s = substr($this->text, $start, $this->gapEnd - $start);
+			$this->nodes = [...$this->nodes, ...($this->gapHandler)($this->context, $s, $this->baseOffset + $start)];
+		}
 	}
 
 

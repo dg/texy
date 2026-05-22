@@ -278,6 +278,44 @@ test('all handlers return null - text goes to gapHandler', function () {
 });
 
 
+test('refused match stays in one gap with the text around it', function () {
+	$gaps = [];
+	$blockParser = new BlockParser([
+		'rule' => [
+			'pattern' => '~^---$~m',
+			'handler' => createBlockHandler('rule'),
+		],
+		'rejecting' => [
+			'pattern' => '~^\#[ ](.+)~m',
+			'handler' => createNullHandler(),
+		],
+	], function (ParseContext $context, string $text, int $offset) use (&$gaps) {
+		$gaps[] = [$offset, $text];
+		return [];
+	});
+	$blockParser->parse(new ParseContext(createInlineParser(), $blockParser), "---\nbefore\n# One\n# Two\nafter\n---\nend", 10);
+
+	Assert::same([[14, "before\n# One\n# Two\nafter\n"], [43, 'end']], $gaps);
+});
+
+
+test('refusal after getNodes() leaves the gap split', function () {
+	$nodes = parseWithBlockParser([
+		'rejecting' => [
+			'pattern' => '~^\#[ ](.+)~m',
+			'handler' => function (ParseContext $context) {
+				$context->getBlockParser()->getNodes();
+				return null;
+			},
+		],
+	], "before\n# Title\nafter\n");
+
+	Assert::count(2, $nodes);
+	Assert::same("before\n", $nodes[0]->content);
+	Assert::same("# Title\nafter", $nodes[1]->content);
+});
+
+
 // =============================================================================
 // E. Method next() (iterative matching)
 // =============================================================================
@@ -513,7 +551,7 @@ test('getNodes() shows previous blocks including gap output', function () {
 		],
 	], "paragraph\n---\n");
 
-	// the gap handler ran before this handler, so its node is already visible
+	// the text in front of the match goes to the gap handler first, so its node is visible
 	Assert::count(1, $seen);
 	Assert::type(GapNode::class, $seen[0]);
 	Assert::same("paragraph\n", $seen[0]->content);
