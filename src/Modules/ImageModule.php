@@ -116,11 +116,15 @@ final class ImageModule extends Texy\Module
 	 * @param  array{string, string, string, ?string}  $matches
 	 * @param  array{int, int, int, ?int}  $offsets
 	 */
-	public function parseDefinition(ParseContext $context, array $matches, array $offsets): ImageDefinitionNode
+	public function parseDefinition(ParseContext $context, array $matches, array $offsets): ImageDefinitionNode|ContentNode
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
 		$modifier = Modifier::parse($mMod, $offsets[3] ?? null);
+
+		if ($parsed['url'] === null) {
+			return new ContentNode;
+		}
 
 		return new ImageDefinitionNode(
 			trim($mRef),
@@ -290,8 +294,8 @@ final class ImageModule extends Texy\Module
 	{
 		$this->definitions = [];
 
-		// Pass 1: Collect document definitions, one with a rejected URL defines nothing
-		foreach ($doc->find(ImageDefinitionNode::class, fn($node) => $node->url !== null) as $node) {
+		// Pass 1: Collect document definitions
+		foreach ($doc->find(ImageDefinitionNode::class) as $node) {
 			$this->definitions[Helpers::toLower($node->reference)] = $node;
 		}
 

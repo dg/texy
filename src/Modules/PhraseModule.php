@@ -285,7 +285,7 @@ final class PhraseModule extends Texy\Module
 
 		$range = new Range($offsets[0], strlen($matches[0]));
 		$textRange = self::trimRange($mContent, $offsets[1]);
-		$isLink = $mLink !== null && ($isSpan || !empty($context->allowedSyntaxes[Syntax::PhraseLink]));
+		$isLink = $mLink !== null && !empty($context->allowedSyntaxes[Syntax::PhraseLink]);
 		$mod = Modifier::parse($mMod, $offsets[2] ?? null);
 
 		if ($isLink && $isSpan) { // a span with a link is the link itself
@@ -356,12 +356,17 @@ final class PhraseModule extends Texy\Module
 	 * @param  array{string, string, ?string, ?string}  $matches
 	 * @param  array{int, int, ?int, ?int}  $offsets
 	 */
-	private function parseLink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
+	private function parseLink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode|ContentNode
 	{
+		$content = $context->parseInline(trim($matches[1]), $offsets[1]);
+		if (empty($context->allowedSyntaxes[Syntax::PhraseLink])) {
+			return $content;
+		}
+
 		$group = $name === Syntax::WikiLink ? 2 : 3; // [text|link .modifier] has the link before the modifier
 		return new LinkNode(
 			Texy\Helpers::decodeEntities(trim((string) $matches[$group])),
-			$context->parseInline(trim($matches[1]), $offsets[1]),
+			$content,
 			null,
 			new Range($offsets[0], strlen($matches[0])),
 			syntax: $name,

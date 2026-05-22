@@ -264,7 +264,7 @@ class Texy
 
 
 	/**
-	 * @param  \Closure  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode
+	 * @param  \Closure  $parser  fn(ParseContext, array $matches, array $offsets, string $name): Nodes\InlineNode|Nodes\ContentNode|null
 	 */
 	final public function addInlineSyntax(
 		string $name,
@@ -279,7 +279,7 @@ class Texy
 
 
 	/**
-	 * @param  \Closure  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode
+	 * @param  \Closure  $parser  fn(ParseContext, array $matches, array $offsets, string $name): Nodes\BlockNode|Nodes\ContentNode|null
 	 */
 	final public function addBlockSyntax(
 		string $name,
