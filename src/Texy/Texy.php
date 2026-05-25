@@ -70,6 +70,8 @@ class Texy
 
 	public Output\Html\Config $htmlOutput;
 
+	public Modules\DirectiveModule $directiveModule;
+
 	/** @var Module[] */
 	private array $modules = [];
 
@@ -109,7 +111,7 @@ class Texy
 	protected function loadModules(): void
 	{
 		// line parsing
-		$this->addModule(new Modules\DirectiveModule($this));
+		$this->addModule($this->directiveModule = new Modules\DirectiveModule($this));
 		$this->addModule(new Modules\HtmlModule($this));
 		$this->addModule($this->imageModule = new Modules\ImageModule($this));
 		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));

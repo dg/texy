@@ -51,7 +51,7 @@ All modules live in `src/Texy/Modules/`; syntax names are catalogued on `Texy\Sy
 
 | Module | Purpose |
 |---|---|
-| **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` in the transform phase. |
+| **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` and dispatches other directives to `DirectiveModule::addDirective()` handlers in the first transform pass. |
 | **HtmlModule** | HTML tags and comments written in the input → `HtmlTagNode` / `HtmlCommentNode`; registers the pairing + sanitization transform passes ([rendering.md](rendering.md#html-passthrough-transform-passes)). |
 | **ImageModule** | Images `[* url *]` → `ImageNode` (wrapped in `LinkNode` when clickable); the block form with caption → `FigureNode`; collects `[*ref*]:` definitions and resolves references in the transform phase. |
 | **PhraseModule** | All inline formatting → `PhraseNode` (type = syntax name); acronyms → `AnnotationNode`, `''notexy''` → `RawTextNode`; the alternative link syntaxes (wikilink, markdown, quicklink) → `LinkNode`. |

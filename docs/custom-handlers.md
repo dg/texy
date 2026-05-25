@@ -121,6 +121,32 @@ $texy->addPass(function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
 });
 ```
 
+## Directives
+
+`{{name: value}}` in the document is a directive. Register a handler for one with `directiveModule->addDirective()`; it receives the value, the comma-separated arguments and the node, and returns a replacement node, or `null` to drop the directive:
+
+```php
+$texy->directiveModule->addDirective('include', fn(?string $value) => new Texy\Nodes\HtmlCommentNode("include $value"));
+```
+
+A directive nobody handles is left in the document and renders as the text the author wrote. To learn about those, register a fallback; it takes the same arguments as a named handler, so the name is read from the node:
+
+```php
+$texy->directiveModule->setFallback(function (?string $value, array $args, Texy\Nodes\DirectiveNode $node) {
+    echo 'Unknown directive ', $node->parseContent()['name'];
+    return null;   // drops it, like any other handler
+});
+```
+
+Handlers run in the **first** pass, before the built-in ones. That is what makes them the right place for a directive that configures how the rest of the document is processed – a plain `addPass()` would come too late, because module passes always run first:
+
+```php
+$texy->directiveModule->addDirective('title', function (?string $value) use ($texy) {
+    $texy->headingModule->top = 2;   // HeadingPass has not run yet
+    return null;
+});
+```
+
 ## Which extension point to choose
 
-Apply the configuration placement test from [architecture.md](architecture.md): if the change affects the *document's meaning for every output format* (dropping links, rewriting URLs, restructuring), do it in a transform pass – every output format then gets it for free. If it only affects the *look of one output format* (tags, attributes, wrappers), use a renderer handler.
+Apply the configuration placement test from [architecture.md](architecture.md): if the change affects the *document's meaning for every output format* (dropping links, rewriting URLs, restructuring), do it in a transform pass – every output format then gets it for free. If it only affects the *look of one output format* (tags, attributes, wrappers), use a renderer handler. A `{{directive}}` written by the author is served by `directiveModule->addDirective()`.
