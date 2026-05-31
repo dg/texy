@@ -112,9 +112,7 @@ final class ParagraphModule extends Texy\Module
 
 		if ($el->getName()) {
 			// apply modifier
-			if ($mod) {
-				$mod->decorate($texy, $el);
-			}
+			$mod?->decorate($texy, $el);
 
 			// add <br>
 			if (str_contains($content, "\r")) {

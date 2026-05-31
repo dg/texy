@@ -24,7 +24,7 @@ final class HandlerInvocation
 	/** @param mixed[] $args */
 	public function __construct(
 		/** @var list<\Closure(mixed...): mixed> */
-		private array $handlers,
+		private readonly array $handlers,
 		private readonly Parser $parser,
 		array $args,
 	) {

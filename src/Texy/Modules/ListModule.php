@@ -116,7 +116,7 @@ final class ListModule extends Texy\Module
 		$mod = new Modifier($mMod);
 		$mod->decorate($this->texy, $el);
 
-		$parser->moveBackward(1);
+		$parser->moveBackward();
 
 		while ($elItem = $this->patternItem($parser, $bullet, false, 'li')) {
 			$el->add($elItem);
