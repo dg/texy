@@ -80,14 +80,16 @@ $texy->htmlOutput->addRenderer(
 
 // Process the text
 $text = file_get_contents(__DIR__ . '/sample.texy');
-$html = $texy->process($text);
+$document = $texy->parse($text);
+$texy->transform($document);
+$html = $texy->renderHtml($document);
 
 
 // Display the result with stylesheets
 header('Content-type: text/html; charset=utf-8');
 echo '<link rel="stylesheet" href="style.css">';
 echo '<link rel="stylesheet" href="fshl.css">';
-echo '<title>' . $texy->headingModule->title . '</title>';
+echo '<title>' . Texy\Nodes\HeadingNode::collectFrom($document)[0]?->getTitle() . '</title>';
 echo $html;
 
 

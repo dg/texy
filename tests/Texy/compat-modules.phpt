@@ -111,6 +111,10 @@ test('removed properties warn and writes are ignored', function () {
 	}, E_USER_WARNING, 'Property $texy->urlSchemeFilters has been removed; use $texy->urlPolicy.');
 
 	Assert::error(function () use ($texy) {
+		$texy->removeSoftHyphens = true;
+	}, E_USER_WARNING, 'Property $texy->removeSoftHyphens has been removed; soft hyphens are always stripped from the input.');
+
+	Assert::error(function () use ($texy) {
 		Assert::null($texy->headingModule->title);
 	}, E_USER_WARNING, 'Property $texy->headingModule->title has been removed; use HeadingNode::collectFrom($document)[0]?->getTitle().');
 

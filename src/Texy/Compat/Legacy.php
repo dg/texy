@@ -28,6 +28,7 @@ final class Legacy
 		'nontextParagraph' => ['htmlOutput', 'nontextParagraph'],
 		'urlSchemeFilters' => 'use $texy->urlPolicy',
 		'summary' => null,
+		'removeSoftHyphens' => 'soft hyphens are always stripped from the input',
 	];
 
 	/** module properties of Texy that were only renamed; the module itself still exists */

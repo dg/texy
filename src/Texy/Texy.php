@@ -31,15 +31,6 @@ class Texy
 		All = true,
 		None = false;
 
-	#[\Deprecated('use Texy::Version')]
-	public const VERSION = self::Version;
-
-	#[\Deprecated('use Texy::All')]
-	public const ALL = self::All;
-
-	#[\Deprecated('use Texy::None')]
-	public const NONE = self::None;
-
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
@@ -51,9 +42,6 @@ class Texy
 
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
-
-	/** @deprecated */
-	public bool $removeSoftHyphens = true;
 
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\ImageModule $imageModule;
@@ -309,9 +297,7 @@ class Texy
 	 */
 	public function preprocess(string $text): string
 	{
-		if ($this->removeSoftHyphens) {
-			$text = str_replace("\u{AD}", '', $text);
-		}
+		$text = str_replace("\u{AD}", '', $text);
 
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
