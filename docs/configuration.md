@@ -50,7 +50,6 @@ $texy->urlPolicy->imagePattern = '~https?:~A';
 ```php
 $texy->mergeLines = true;          // join consecutive lines into one paragraph
 $texy->tabWidth = 8;               // tab → spaces conversion width
-$texy->removeSoftHyphens = true;   // strip U+00AD from input (deprecated)
 ```
 
 ### Results
@@ -160,8 +159,6 @@ foreach ($headings as $heading) {
 ```
 
 `HeadingNode::$id` is the effective anchor: an explicit `.[#id]` written by the author, or the generated one. A generated ID is written by the engine, so it survives safe mode; an author's `.[#id]` goes through the `allowedClasses` policy like any other modifier.
-
-`HeadingModule::$title` and `$TOC` were removed: they held only the last parse's results, while the AST carries them for as long as you hold the document.
 
 ### PhraseModule
 

@@ -28,5 +28,5 @@ overrides:
 		naming: {variable: keep}
 
 	- # the package keeps its own deprecated API working, so it uses it
-		paths: [src/Texy/Modifier.php, src/Texy/Modules/TableModule.php, src/Texy/Texy.php]
+		paths: [src/Texy/Modifier.php, src/Texy/Modules/TableModule.php]
 		upgrading: {declarations: {deprecatedMember: keep}}

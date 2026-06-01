@@ -38,7 +38,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
 `Texy::process($text)` is `preprocess()`, `parse()`, `transform()` and `renderHtml()` in a row. In detail:
 
-1. **Preprocess** (`Texy::preprocess()`): removes soft hyphens (if `$removeSoftHyphens`), normalizes line endings and strips control characters (`Helpers::normalize()` – this is why control bytes can never reach patterns from input), expands tabs per `$tabWidth`.
+1. **Preprocess** (`Texy::preprocess()`): removes soft hyphens, normalizes line endings and strips control characters (`Helpers::normalize()` – this is why control bytes can never reach patterns from input), expands tabs per `$tabWidth`.
 
 2. **Module initialization.** Each module's `beforeParse()` runs: modules register their line/block patterns here (on every parse – some patterns depend on runtime config such as `ListModule::$bullets`).
 
