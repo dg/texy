@@ -53,6 +53,8 @@ php "1-2-3 start/demo.php"
 | [Youtube video](Youtube%20video/) | Embed videos using image syntax |
 | [user syntax](user%20syntax/) | Create your own inline syntax and `/--` block type that produce nodes Texy already knows |
 
+A whole other language on the same engine is the package [texy/markdown](https://github.com/dg/texy-markdown): it parses CommonMark and GitHub Flavored Markdown into the Texy AST.
+
 ---
 
 ## Quick Reference
@@ -78,7 +80,7 @@ $html = $texy->toHtml($userInput);
 $texy = new Texy\Texy;
 $texy->addPass(function (Texy\Nodes\DocumentNode $document): void {
     foreach ($document->find(Texy\Nodes\LinkNode::class) as $link) {
-        // change the link, every output format (HTML, text) gets it
+        // change the link, every output format (HTML, text, Markdown) gets it
     }
 });
 ```
