@@ -19,10 +19,10 @@ test('process() rejects invalid UTF-8', function () {
 });
 
 
-test('processTypo() rejects invalid UTF-8', function () {
+test('applyTypography() rejects invalid UTF-8', function () {
 	$texy = new Texy\Texy;
 	Assert::exception(
-		fn() => $texy->processTypo("\xE2\x28\xA1"),
+		fn() => $texy->applyTypography("\xE2\x28\xA1"),
 		Texy\InvalidArgumentException::class,
 		'Input is not valid UTF-8 text.',
 	);

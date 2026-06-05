@@ -116,7 +116,8 @@ final class Legacy
 
 
 	/**
-	 * Serves v3 method calls: removed methods throw with a pointer to the successor.
+	 * Serves v3 method calls: pure renames are emulated with a deprecation
+	 * notice, removed methods throw with a pointer to the successor.
 	 * @param  array<mixed>  $args
 	 */
 	public static function call(Texy $texy, string $name, array $args): mixed
@@ -125,7 +126,18 @@ final class Legacy
 			throw new \LogicException("Method Texy::$name() has been removed; $hint.");
 		}
 
-		throw new \LogicException(sprintf('Call to undefined method %s::%s().', Texy::class, $name));
+		switch ($name) {
+			case 'processTypo':
+				trigger_error('Method Texy::processTypo() is deprecated, use applyTypography() instead.', E_USER_DEPRECATED);
+				return $texy->applyTypography(...$args);
+
+			case 'processLine':
+				trigger_error('Method Texy::processLine() is deprecated, use process($text, singleLine: true) instead.', E_USER_DEPRECATED);
+				return $texy->process($args[0], singleLine: true);
+
+			default:
+				throw new \LogicException(sprintf('Call to undefined method %s::%s().', Texy::class, $name));
+		}
 	}
 
 

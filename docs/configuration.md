@@ -60,6 +60,7 @@ $ast = $texy->parse($text);        // the syntax tree, a Nodes\DocumentNode
 $texy->transform($ast);            // turns it into the document, in place
 $html = $texy->renderHtml($ast);   // render a document transformed earlier
 $plain = $texy->toText($text);     // plain-text rendition
+$fixed = $texy->applyTypography($text); // typography/hyphenation only, no parsing
 Texy\Nodes\HeadingNode::collectFrom($ast);          // headings in document order
 Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->getTitle(); // document title (for <title>)
 ```
