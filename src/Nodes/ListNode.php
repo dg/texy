@@ -25,6 +25,7 @@ class ListNode extends BlockNode implements HasModifier
 		public ?int $start = null,
 		public ?Texy\Modifier $modifier = null,
 		public ?Range $range = null,
+		public ItemParagraphs $paragraphs = ItemParagraphs::FirstUnwrapped,
 	) {
 		(function (ListItemNode ...$items) {})(...$items);
 	}

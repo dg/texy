@@ -17,8 +17,8 @@
  * - How to apply modifiers to your elements
  *
  * The new syntaxes create nodes Texy already knows, a strong or emphasized phrase
- * and a division, so they need no renderer and every output format (HTML, plain text)
- * understands them. Which HTML tag a phrase gets is up to $phraseTags.
+ * and a division, so they need no renderer and every output format (HTML, plain text,
+ * Markdown) understands them. Which HTML tag a phrase gets is up to $phraseTags.
  *
  * CUSTOM SYNTAX WE CREATE:
  * *bold text*        → <b>bold text</b>

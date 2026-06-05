@@ -48,6 +48,19 @@ enum PhraseType: string
 }
 
 
+/**
+ * Which paragraphs of a list item are wrapped in <p>.
+ */
+enum ItemParagraphs
+{
+	case Wrapped;
+	case Unwrapped;
+
+	/** every one but the first paragraph, which opens the item */
+	case FirstUnwrapped;
+}
+
+
 enum ListType: string
 {
 	case Unordered = 'ul';

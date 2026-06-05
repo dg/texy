@@ -16,7 +16,7 @@
  * - How to handle custom URL schemes
  *
  * Where a link points is the meaning of the document, not its look, so it is changed
- * in a pass rather than in a renderer: every output (HTML, plain text) then
+ * in a pass rather than in a renderer: every output (HTML, plain text, Markdown) then
  * gets the new URL, and the renderer of links stays the default one.
  *
  * TEXY LINK SYNTAX:

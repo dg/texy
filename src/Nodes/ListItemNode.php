@@ -24,6 +24,8 @@ class ListItemNode extends BlockNode implements HasModifier
 		/** the bullet as written, e.g. '-' or '1)'; null for a term */
 		public ?string $bullet = null,
 		public ?Range $bulletRange = null,
+		/** is the task of the item done? null for an item that is no task */
+		public ?bool $checked = null,
 	) {
 	}
 

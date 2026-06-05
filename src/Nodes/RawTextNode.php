@@ -11,7 +11,7 @@ use Texy\Range;
 
 
 /**
- * Raw text.
+ * Literal text, escaped on output and untouched by typography.
  * ''no texy''
  */
 class RawTextNode extends InlineNode
