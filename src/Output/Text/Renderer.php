@@ -37,7 +37,11 @@ class Renderer extends NodeRenderer
 
 			// List nodes
 			Nodes\ListNode::class => fn(Nodes\ListNode $n, self $g) => $g->renderLines($n->items),
-			Nodes\ListItemNode::class => fn(Nodes\ListItemNode $n, self $g) => $g->renderBlocks($n->content->children, "\n"),
+			Nodes\ListItemNode::class => fn(Nodes\ListItemNode $n, self $g) => match ($n->checked) {
+				true => '[x] ',
+				false => '[ ] ',
+				null => '',
+			} . $g->renderBlocks($n->content->children, "\n"),
 			Nodes\DefinitionListNode::class => fn(Nodes\DefinitionListNode $n, self $g) => $g->renderLines($n->items),
 
 			// Table nodes
@@ -57,6 +61,7 @@ class Renderer extends NodeRenderer
 			Nodes\AnnotationNode::class => fn(Nodes\AnnotationNode $n) => $n->text,
 			Nodes\EmoticonNode::class => fn(Nodes\EmoticonNode $n) => $n->resolved ?? $n->emoticon,
 			Nodes\LineBreakNode::class => fn() => "\n",
+			Nodes\SoftBreakNode::class => fn() => "\n",
 
 			// Autolink nodes
 			Nodes\UrlNode::class => fn(Nodes\UrlNode $n) => $n->url,

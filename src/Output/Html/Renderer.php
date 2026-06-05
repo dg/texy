@@ -9,7 +9,7 @@ namespace Texy\Output\Html;
 
 use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, UrlPolicy};
 use Texy\Output\NodeRenderer;
-use function is_array, is_string;
+use function count, is_array, is_string;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
 
 
@@ -83,6 +83,7 @@ final class Renderer extends NodeRenderer
 			),
 			Nodes\EmoticonNode::class => fn(Nodes\EmoticonNode $n, self $g) => $g->renderEmoticon($n),
 			Nodes\LineBreakNode::class => fn(Nodes\LineBreakNode $n, self $g) => $g->plainBreaks ? "\n" : new Raw('<br>'),
+			Nodes\SoftBreakNode::class => fn() => "\n",
 
 			// Autolink nodes
 			Nodes\UrlNode::class => fn(Nodes\UrlNode $n, self $g) => $g->renderUrl($n),
@@ -391,9 +392,20 @@ final class Renderer extends NodeRenderer
 			return $this->renderDefinitionItem($node);
 		}
 
+		$paragraphs = $list->paragraphs ?? Nodes\ItemParagraphs::FirstUnwrapped;
 		$el = new Element('li');
 		$this->decorateElement($node->modifier, $el);
-		$el->children = $this->renderItemContent($node->content->children);
+		$el->children = $this->renderItemContent($node->content->children, $paragraphs);
+		if ($node->checked !== null) {
+			$first = $el->children[0] ?? null;
+			$holder = $first instanceof Element && $first->name === 'p' ? $first : $el;
+			array_unshift(
+				$holder->children,
+				new Element('input', ['type' => 'checkbox', 'disabled' => true, 'checked' => $node->checked]),
+				' ',
+			);
+		}
+
 		return $el;
 	}
 
@@ -438,13 +450,33 @@ final class Renderer extends NodeRenderer
 
 
 	/**
+	 * @param  array<Node>  $content
+	 * @return list<Element|Raw|string>
+	 */
+	private function renderItemContent(
+		array $content,
+		Nodes\ItemParagraphs $paragraphs = Nodes\ItemParagraphs::FirstUnwrapped,
+	): array
+	{
+		return match ($paragraphs) {
+			Nodes\ItemParagraphs::Wrapped => $this->renderNodes($content),
+			Nodes\ItemParagraphs::Unwrapped => array_merge(...array_map(
+				fn(Node $block) => $this->renderNodes($block instanceof Nodes\ParagraphNode ? $block->content->children : [$block]),
+				$content,
+			)),
+			Nodes\ItemParagraphs::FirstUnwrapped => $this->renderItemFirstUnwrapped($content),
+		};
+	}
+
+
+	/**
 	 * The item is a block container itself, so a wrapper on the block that opens it
 	 * adds nothing: <li>text<ul>…</ul></li> needs no <p> around the text. A second
 	 * paragraph does get one, because there the wrapper is what separates them.
 	 * @param  array<Node>  $content
 	 * @return list<Element|Raw|string>
 	 */
-	private function renderItemContent(array $content): array
+	private function renderItemFirstUnwrapped(array $content): array
 	{
 		$first = $content[0] ?? null;
 		$rest = array_slice($content, 1);
@@ -727,11 +759,17 @@ final class Renderer extends NodeRenderer
 	 */
 	private function renderHtmlElement(Nodes\HtmlElementNode $node): Element
 	{
-		$open = new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range, source: $node->source);
+		$open = $this->renderHtmlTag(new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range, source: $node->source));
 		$close = $node->closingTag ?? new Nodes\HtmlTagNode($node->name, closing: true);
+		$content = $node->content->children;
 		return $this->wrapChildren([
-			$this->renderHtmlTag($open),
-			...$this->renderNodes($node->content->children),
+			$open,
+			...($open instanceof Raw
+				&& Schema::isRawText($node->name)
+				&& count($content) === 1
+				&& $content[0] instanceof Nodes\RawTextNode
+				? [new Raw(str_ireplace('</' . $node->name, '<\/' . $node->name, $content[0]->text))] // the content must not end the element
+				: $this->renderNodes($content)),
 			$this->renderHtmlTag($close),
 		]);
 	}
