@@ -58,6 +58,22 @@ test('long words get soft hyphens', function () {
 });
 
 
+test('a link displaying its own address is protected like an autolink', function () {
+	$url = 'https://example.com/nejneobhospodarovavatelnejsimi';
+	$link = fn(string $text, string $url) => new Texy\Nodes\LinkNode($url, Texy\Nodes\ContentNode::fromText($text));
+	$texy = new Texy\Texy;
+	$doc = new Texy\Nodes\DocumentNode(new Texy\Nodes\ContentNode([new Texy\Nodes\ParagraphNode(new Texy\Nodes\ContentNode([
+		$link($url, $url),
+		$link('jana@nejneobhospodarovavatelnejsimi.cz', 'mailto:jana@nejneobhospodarovavatelnejsimi.cz'),
+		$link('www.nejneobhospodarovavatelnejsimi.cz', 'http://www.nejneobhospodarovavatelnejsimi.cz'),
+	]))]));
+	$texy->transform($doc);
+	Assert::notContains("\u{AD}", $texy->renderHtml($doc));
+
+	Assert::contains("\u{AD}", convert('"nejneobhospodarovavatelnejsimi":https://example.com'));
+});
+
+
 test('typography can be disabled', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
