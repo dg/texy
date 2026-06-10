@@ -172,6 +172,9 @@ final class TextRunPass
 				$this->collect($node->content->children, $pieces);
 				$pieces[] = [self::Markup, null];
 
+			} elseif ($node instanceof Nodes\LinkNode && self::displaysItsAddress($node)) {
+				$pieces[] = [self::textualRun($node->content->getPlainText()), null]; // protected like UrlNode
+
 			} elseif ($node instanceof Nodes\LinkNode) {
 				$pieces[] = [self::Markup, null];
 				$this->collect($node->content->children, $pieces);
@@ -358,5 +361,17 @@ final class TextRunPass
 	private static function textualRun(string $visible): string
 	{
 		return str_repeat(self::Textual, min(max(mb_strlen($visible), 1), 8));
+	}
+
+
+	/**
+	 * Is the text of the link its own address, as an autolink of Markdown writes it?
+	 */
+	private static function displaysItsAddress(Nodes\LinkNode $node): bool
+	{
+		$children = $node->content->children;
+		return count($children) === 1
+			&& $children[0] instanceof Nodes\TextNode
+			&& in_array($node->url, [$children[0]->text, 'mailto:' . $children[0]->text, 'http://' . $children[0]->text], true);
 	}
 }
