@@ -182,7 +182,7 @@ User definitions persist across `process()` calls; definitions in the document o
 $texy->typographyModule->locale = 'cs';
 ```
 
-The locale determines quote characters (`$texy->typographyModule->locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are cs, de, en, fr and pl; unknown locales fall back to `en`. Adding a locale is a matter of extending the array:
+The locale determines quote characters (`$texy->typographyModule->locales`), e.g. cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Built in are bg, cs, de, el, en, es, fr, hu, it, ja, pl, pt, ro, ru, sl, tr and uk; unknown locales fall back to `en`. Adding a locale is a matter of extending the array:
 
 ```php
 $texy->typographyModule->locales['nl'] = [
