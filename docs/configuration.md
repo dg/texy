@@ -86,6 +86,9 @@ $html = $texy->toHtml($text);     // parse + transform + render HTML
 $ast = $texy->parse($text);        // the syntax tree, a Nodes\DocumentNode
 $texy->transform($ast);            // turns it into the document, in place
 $html = $texy->renderHtml($ast);   // render a document transformed earlier
+$rewriter = new Texy\Rewriter(Texy\Texy::normalize($text)); // write into the source by ranges of the syntax tree
+$rewriter->replace($range, $new); $rewriter->getResult();
+Texy\SourcePosition::fromOffset($source, $offset);          // line and column, for messages
 $plain = $texy->toText($text);     // plain-text rendition
 $fixed = $texy->applyTypography($text); // typography/hyphenation only, no parsing
 $ast->getHeadings();          // headings in document order
