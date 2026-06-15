@@ -48,4 +48,6 @@ test('what the text causes is a Texy\Exception, what the program does a LogicExc
 	} finally {
 		ini_set('pcre.backtrack_limit', (string) $limit);
 	}
+
+	Assert::type(LogicException::class, new Texy\RewriteException);
 });

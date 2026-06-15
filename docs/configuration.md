@@ -85,6 +85,9 @@ $html = $texy->toHtml($text);     // parse + transform + render HTML
 $ast = $texy->parse($text);        // the syntax tree, a Nodes\DocumentNode
 $texy->transform($ast);            // turns it into the document, in place
 $html = $texy->renderHtml($ast);   // render a document transformed earlier
+$rewriter = new Texy\Rewriter(Texy\Texy::normalize($text)); // write into the source by ranges of the syntax tree
+$rewriter->replace($range, $new); $rewriter->getResult();
+Texy\SourcePosition::fromOffset($source, $offset);          // line and column, for messages
 $plain = $texy->toText($text);     // plain-text rendition
 $fixed = $texy->applyTypography($text); // typography/hyphenation only, no parsing
 $ast->getHeadings();          // headings in document order
@@ -273,7 +276,7 @@ Texy's protections against common attacks are activated by safe mode – enable 
 
 **URL validation** applies to all links and images via `$urlPolicy` (see above). Only absolute URLs with a scheme are checked; relative URLs always pass.
 
-**Errors.** Whatever the text itself causes throws a `Texy\Exception`: invalid UTF-8 is an `InvalidInputException`, a document exhausting a PCRE limit a `RegexpException`. Code processing foreign text catches `Texy\Exception`; an error in the use of the library, such as an invalid configuration or a pattern of a syntax that does not compile, is a `\LogicException`.
+**Errors.** Whatever the text itself causes throws a `Texy\Exception`: invalid UTF-8 is an `InvalidInputException`, a document exhausting a PCRE limit a `RegexpException`. Code processing foreign text catches `Texy\Exception`; an error in the use of the library, such as an invalid configuration, a pattern of a syntax that does not compile or a replacement that does not fit the source of `Rewriter`, is a `\LogicException`.
 
 Recommended practice for user content:
 

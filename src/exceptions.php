@@ -33,6 +33,14 @@ class RegexpException extends Exception
 
 
 /**
+ * A replacement does not fit the source: it overlaps another one or finds other text than expected.
+ */
+class RewriteException extends \LogicException
+{
+}
+
+
+/**
  * The argument does not match the expected value.
  */
 class InvalidArgumentException extends \InvalidArgumentException
