@@ -111,8 +111,12 @@ test('removed properties warn and writes are ignored', function () {
 	}, E_USER_WARNING, 'Property $texy->urlSchemeFilters has been removed; use $texy->urlPolicy.');
 
 	Assert::error(function () use ($texy) {
+		$texy->tabWidth = 4;
+	}, E_USER_WARNING, 'Property $texy->tabWidth has been removed; tabs are preserved as plain whitespace since Texy 4.');
+
+	Assert::error(function () use ($texy) {
 		$texy->removeSoftHyphens = true;
-	}, E_USER_WARNING, 'Property $texy->removeSoftHyphens has been removed; soft hyphens are always stripped from the input.');
+	}, E_USER_WARNING, 'Property $texy->removeSoftHyphens has been removed; soft hyphens are preserved in text and stripped from URL targets automatically.');
 
 	Assert::error(function () use ($texy) {
 		Assert::null($texy->headingModule->title);

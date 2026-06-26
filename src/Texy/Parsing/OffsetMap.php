@@ -72,9 +72,9 @@ final class OffsetMap
 
 
 	/**
-	 * Outdents lines and builds the matching offset map. The transformation mirrors
-	 * Helpers::outdent(): blank edge lines are dropped, then the minimal indentation
-	 * (of the first line, or across all lines) is stripped from each line.
+	 * Outdents lines and builds the matching offset map (Helpers::outdent() delegates
+	 * here): blank edge lines are dropped, then the whitespace prefix shared by all
+	 * lines (or taken from the first line) is stripped from each line.
 	 * @param  list<array{content: string, offset: int}>  $lines
 	 * @return array{string, self}  [outdented text joined by "\n", offset map]
 	 */
@@ -88,26 +88,41 @@ final class OffsetMap
 		}
 
 		if ($firstLine) {
-			$indent = $lines ? strspn($lines[0]['content'], ' ') : 0;
+			$prefix = $lines ? substr($lines[0]['content'], 0, strspn($lines[0]['content'], " \t")) : '';
 		} else {
-			$indent = PHP_INT_MAX;
+			$prefix = null;
 			foreach ($lines as $line) {
-				// only lines with a non-whitespace character right after the leading
-				// spaces participate, mirroring the `^\ *\S` rule of Helpers::outdent()
-				$spaces = strspn($line['content'], ' ');
-				$ch = $line['content'][$spaces] ?? '';
-				if ($ch !== '' && strspn($ch, " \t\r\n\v\f\0") === 0) {
-					$indent = min($indent, $spaces);
+				// only lines with a non-whitespace character after the indentation participate
+				$ws = strspn($line['content'], " \t");
+				if (isset($line['content'][$ws])) {
+					$indent = substr($line['content'], 0, $ws);
+					$prefix = $prefix === null ? $indent : substr($prefix, 0, self::commonPrefixLength($prefix, $indent));
 				}
 			}
+			$prefix ??= '';
 		}
 
 		foreach ($lines as &$line) {
-			$strip = min(strspn($line['content'], ' '), $indent);
+			$strip = self::commonPrefixLength($line['content'], $prefix);
 			$line = ['content' => substr($line['content'], $strip), 'offset' => $line['offset'] + $strip];
 		}
 
 		return [implode("\n", array_column($lines, 'content')), self::fromLines($lines)];
+	}
+
+
+	/**
+	 * Length of the leading run shared by both strings.
+	 */
+	private static function commonPrefixLength(string $a, string $b): int
+	{
+		$i = 0;
+		$max = min(strlen($a), strlen($b));
+		while ($i < $max && $a[$i] === $b[$i]) {
+			$i++;
+		}
+
+		return $i;
 	}
 
 

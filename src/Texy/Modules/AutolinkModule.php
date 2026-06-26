@@ -58,7 +58,7 @@ final class AutolinkModule extends Texy\Module
 	 */
 	public function parseUrl(ParseContext $context, array $matches, array $offsets): UrlNode
 	{
-		return new UrlNode($matches[0], new Range($offsets[0], strlen($matches[0])));
+		return new UrlNode(Texy\Helpers::removeSoftHyphens($matches[0]), new Range($offsets[0], strlen($matches[0])));
 	}
 
 
@@ -68,6 +68,6 @@ final class AutolinkModule extends Texy\Module
 	 */
 	public function parseEmail(ParseContext $context, array $matches, array $offsets): EmailNode
 	{
-		return new EmailNode($matches[0], new Range($offsets[0], strlen($matches[0])));
+		return new EmailNode(Texy\Helpers::removeSoftHyphens($matches[0]), new Range($offsets[0], strlen($matches[0])));
 	}
 }

@@ -22,7 +22,7 @@ The core is non-trivial — a two-parser pipeline building an AST, transform
 passes, and content-model well-forming — so it is split by seam:
 
 - **[architecture.md](architecture.md)** — the four phases
-  (preprocess → parse → transform → render), the purity and semantic-completeness
+  (normalize → parse → transform → render), the purity and semantic-completeness
   invariants, the typography pass, and the terminology.
 - **[parsing.md](parsing.md)** — `InlineParser` vs `BlockParser`, collision
   resolution, recursion through `ParseContext`, and the paragraph gap handler.

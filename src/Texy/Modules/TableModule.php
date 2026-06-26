@@ -301,7 +301,7 @@ final class TableModule extends Texy\Module
 				( [\#=] ){2,}  (?! [|\#=+] )  # opening chars (1)
 				(.+)                          # caption (2)
 				\1*                           # matching closing chars
-				\|? \ *                       # optional closing pipe and spaces
+				\|? [ \t]*                    # optional closing pipe and spaces
 			$~Umx',
 			$matches,
 			$offsets,

@@ -50,7 +50,7 @@ composer phpstan
 
 ## Working in this repo
 
-- **Four phases: preprocess → parse → transform → render.** `parse()` returns the
+- **Four phases: normalize → parse → transform → render.** `parse()` returns the
   *syntax tree* (`Texy\Nodes\*`), whose ranges are the notation; `transform()` runs
   the passes added via `addPass()` and turns it into the document in place, ranges
   then meaning origin; the render phase (`Texy\Output\*`) must not mutate it -
