@@ -11,7 +11,6 @@ require __DIR__ . '/../bootstrap.php';
 
 test('figure with caption', function () {
 	$texy = new Texy\Texy;
-	$texy->tabWidth = 0;
 	$texy->htmlOutput->lineWrap = 180;
 	$texy->htmlOutput->imageRoot = '../images/';
 	$texy->htmlOutput->imageLeftClass = 'left';
@@ -25,7 +24,6 @@ test('figure with caption', function () {
 
 test('figure with HTML5 figure tag', function () {
 	$texy = new Texy\Texy;
-	$texy->tabWidth = 0;
 	$texy->htmlOutput->lineWrap = 180;
 	$texy->htmlOutput->imageRoot = '../images/';
 	$texy->htmlOutput->imageLeftClass = 'left';

@@ -11,7 +11,6 @@ require __DIR__ . '/../bootstrap.php';
 
 test('complete syntax showcase', function () {
 	$texy = new Texy\Texy;
-	$texy->tabWidth = 0;
 	$texy->htmlOutput->imageRoot = '../images/';
 	$texy->htmlOutput->imageLeftClass = 'left';
 	$texy->allowed[Texy\Syntax::Inserted] = true;

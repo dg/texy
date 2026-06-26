@@ -97,3 +97,21 @@ test('url shortening www prefix', function () {
 		$texy->process('www.example.com/page'),
 	);
 });
+
+
+test('soft hyphens are stripped from link targets but kept in text', function () {
+	$texy = new Texy\Texy;
+	Assert::match(
+		"<p>slo\u{AD}vo <a href=\"https://example.com/path\">text</a></p>\n",
+		$texy->process("slo\u{AD}vo \"text\":https://exam\u{AD}ple.com/pa\u{AD}th"),
+	);
+});
+
+
+test('soft hyphens are stripped from email autolinks', function () {
+	$texy = new Texy\Texy;
+	Assert::match(
+		"<p><a href=\"mailto:info&#64;example.com\">info&#64;<!-- -->example.com</a></p>\n",
+		$texy->process("in\u{AD}fo@exam\u{AD}ple.com"),
+	);
+});

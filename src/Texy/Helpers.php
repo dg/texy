@@ -8,7 +8,7 @@
 namespace Texy;
 
 use Nette\Utils\Strings;
-use function function_exists, strlen;
+use function function_exists;
 use const ENT_HTML5, ENT_QUOTES, ICONV_IMPL;
 
 
@@ -107,33 +107,6 @@ final class Helpers
 
 
 	/**
-	 * Removes special controls characters and normalizes line endings and spaces.
-	 * @throws InvalidArgumentException when the input is not valid UTF-8
-	 */
-	public static function normalize(string $s): string
-	{
-		if (!preg_match('##u', $s)) {
-			throw new InvalidArgumentException('Input is not valid UTF-8 text.');
-		}
-
-		// standardize line endings to unix-like
-		$s = str_replace("\r\n", "\n", $s); // DOS
-		$s = strtr($s, "\r", "\n"); // Mac
-
-		// remove special chars; leave \t + \n
-		$s = Regexp::replace($s, '~[\x00-\x08\x0B-\x1F]+~');
-
-		// right trim
-		$s = Regexp::replace($s, "~[\t ]+$~m");
-
-		// trailing spaces
-		$s = trim($s, "\n");
-
-		return $s;
-	}
-
-
-	/**
 	 * Converts UTF-8 to ASCII.
 	 */
 	public static function toAscii(string $s): string
@@ -173,26 +146,22 @@ final class Helpers
 
 
 	/**
-	 * Outdents text block.
+	 * Outdents text block: strips the whitespace prefix shared by all lines
+	 * (or taken from the first line).
 	 */
 	public static function outdent(string $s, bool $firstLine = false): string
 	{
-		$s = trim($s, "\n");
-		if ($firstLine) {
-			$min = strspn($s, ' ');
-		} else {
-			$min = strlen($s);
-			/** @var array{string} $m */
-			foreach (Regexp::matchAll($s, '~^\ *\S~m') as $m) {
-				$min = min($min, strlen($m[0]) - 1);
-			}
-		}
+		return Parsing\OffsetMap::outdentLines(Parsing\OffsetMap::linesOf(trim($s, "\n"), 0), $firstLine)[0];
+	}
 
-		if ($min) {
-			$s = Regexp::replace($s, "~^\\ {1,$min}~mx");
-		}
 
-		return $s;
+	/**
+	 * Removes soft hyphens. URL targets parsed from source text are cleaned with this:
+	 * soft hyphens get into them by copy-pasting hyphenated text and would break the address.
+	 */
+	public static function removeSoftHyphens(string $s): string
+	{
+		return str_replace("\u{AD}", '', $s);
 	}
 
 

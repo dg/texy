@@ -19,7 +19,7 @@ class Patterns
 	// modifier .(title)[class]{style}
 	public const Modifier = <<<'X'
 		(?x:
-			\ *+ (?<= \ | ^ )
+			[ \t]*+ (?<= [ \t] | ^ )
 			\.
 			((?:
 				\( (?: \\\) | [^)\n] )++ \) | # title
@@ -32,7 +32,7 @@ class Patterns
 	// modifier .(title)[class]{style}<>
 	public const ModifierHAlign = <<<'X'
 		(?x:
-			\ *+ (?<= \ | ^ )
+			[ \t]*+ (?<= [ \t] | ^ )
 			\.
 			((?:
 				\( (?: \\\) | [^)\n] )++ \) | # title
@@ -46,7 +46,7 @@ class Patterns
 	// modifier .(title)[class]{style}<>^
 	public const ModifierHVAlign = <<<'X'
 		(?x:
-			\ *+ (?<= \ | ^ )
+			[ \t]*+ (?<= [ \t] | ^ )
 			\.
 			((?:
 				\( (?: \\\) | [^)\n] )++ \) | # title
@@ -71,7 +71,7 @@ class Patterns
 
 	public const Email = '(?x:
 		[' . self::Letter . ']                 # first char
-		[0-9.+_' . self::Letter . '-]{0,63}    # local part
+		[0-9.+_' . self::Letter . '\x{ad}-]{0,63}  # local part
 		@
 		[0-9.+_' . self::Letter . '\x{ad}-]{1,252} # domain
 		\.

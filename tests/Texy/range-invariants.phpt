@@ -90,7 +90,7 @@ function isSynthesized(Node $node): bool
 function checkSource(string $src): array
 {
 	$texy = new Texy\Texy;
-	$src = $texy->preprocess($src);
+	$src = Texy\Texy::normalize($src);
 	return check($texy->parse($src), new Range(0, strlen($src)));
 }
 
@@ -142,7 +142,7 @@ test('transform() keeps the range of every node, and a node it creates points at
 	foreach (glob(__DIR__ . '/sources/*.texy') as $file) {
 		$texy = new Texy\Texy;
 		$texy->headingModule->generateID = true;
-		$src = $texy->preprocess(file_get_contents($file));
+		$src = Texy\Texy::normalize(file_get_contents($file));
 		$doc = $texy->parse($src);
 		$before = collectRanges($doc);
 		$texy->transform($doc);

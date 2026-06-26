@@ -49,7 +49,6 @@ $texy->urlPolicy->imagePattern = '~https?:~A';
 
 ```php
 $texy->mergeLines = true;          // join consecutive lines into one paragraph
-$texy->tabWidth = 8;               // tab → spaces conversion width
 ```
 
 ### Results

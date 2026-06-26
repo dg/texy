@@ -175,6 +175,7 @@ final class TypographyModule extends Texy\Module
 	public function postLine(string $text, bool $preserveSpaces = false): string
 	{
 		if (!$preserveSpaces) {
+			$text = strtr($text, "\t", ' ');
 			$text = Texy\Regexp::replace($text, '~\ {2,}~', ' ');
 		}
 
