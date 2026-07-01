@@ -15,3 +15,11 @@ Assert::match(
 	'„Hello“ © …',
 	$texy->applyTypography('"Hello" (c) ...'),
 );
+
+// disabled typography is honoured
+$texy = new Texy\Texy;
+$texy->allowed[Texy\Syntax::Typography] = false;
+Assert::match(
+	'"Hello" (c) ...',
+	$texy->applyTypography('"Hello" (c) ...'),
+);
