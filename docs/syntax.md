@@ -18,7 +18,7 @@ After the blank line, a brand new paragraph starts.
 Disable merging so that every line becomes its own paragraph:
 
 ```php
-$texy->mergeLines = false;
+$texy->paragraphModule->mergeLines = false;
 ```
 
 A **forced line break** without a new paragraph: start the next line with a single space (poems, addresses). The break renders as `<br>`.
@@ -441,7 +441,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `typography` | ✅ on | typographic corrections (quotes, dashes, nbsp, symbols) applied by the AST typography pass | TypographyModule |
 | `longwords` | ✅ on | insertion of soft hyphens into long words, same pass | HyphenationModule |
 
-Paragraphs themselves have no syntax ID – text between recognized blocks is always handled by **ParagraphModule** (configurable via `$texy->mergeLines`).
+Paragraphs themselves have no syntax ID – text between recognized blocks is always handled by **ParagraphModule** (configurable via `$texy->paragraphModule->mergeLines`).
 
 Enable or disable any syntax by its ID:
 

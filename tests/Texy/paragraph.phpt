@@ -89,7 +89,7 @@ test('line break in a paragraph without <p>', function () {
 	Assert::same('<span></span> <span></span>', $texy->process("<span></span>\n  <span></span>"));
 	Assert::same('<!-- a --> <!-- b -->', $texy->process("<!-- a -->\n  <!-- b -->"));
 
-	$texy->mergeLines = false;
+	$texy->paragraphModule->mergeLines = false;
 	Assert::same('text <div>a</div>', $texy->process("text\n<div>a</div>"));
 });
 
