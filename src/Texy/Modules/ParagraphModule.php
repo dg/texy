@@ -20,10 +20,8 @@ use function count, strlen;
  */
 final class ParagraphModule extends Texy\Module
 {
-	public function __construct(
-		private Texy\Texy $texy,
-	) {
-	}
+	/** joining consecutive lines into one paragraph; false = every newline is a line break */
+	public bool $mergeLines = true;
 
 
 	/**
@@ -176,7 +174,7 @@ final class ParagraphModule extends Texy\Module
 			$offset = $line['offset'];
 			if ($i > 0) {
 				$strip = strspn($content, " \t");
-				if (!$this->texy->mergeLines) {
+				if (!$this->mergeLines) {
 					$joined .= "\r";
 				} elseif ($strip > 0 && isset($content[$strip])) {
 					// whitespace-indented continuation line: hard break, indentation stripped

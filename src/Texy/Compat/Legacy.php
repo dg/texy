@@ -26,6 +26,7 @@ final class Legacy
 		'alignClasses' => ['htmlOutput', 'alignClasses'],
 		'obfuscateEmail' => ['htmlOutput', 'obfuscateEmail'],
 		'nontextParagraph' => ['htmlOutput', 'nontextParagraph'],
+		'mergeLines' => ['paragraphModule', 'mergeLines'],
 		'urlSchemeFilters' => 'use $texy->urlPolicy',
 		'summary' => null,
 		'tabWidth' => 'tabs are preserved as plain whitespace since Texy 4',

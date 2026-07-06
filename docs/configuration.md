@@ -48,7 +48,7 @@ $texy->urlPolicy->imagePattern = '~https?:~A';
 ### Other properties
 
 ```php
-$texy->mergeLines = true;          // join consecutive lines into one paragraph
+$texy->paragraphModule->mergeLines = true;  // join consecutive lines into one paragraph
 ```
 
 ### Results

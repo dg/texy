@@ -62,7 +62,7 @@ Handlers of multi-line structures use the navigation API on `$context->getBlockP
 `ParagraphModule` is not pattern-based: it receives the text between block matches, splits it on blank lines, and parses each paragraph's inline content. Details that matter:
 
 - A paragraph-level modifier (`.[class]` on its own line-end) is extracted before inline parsing.
-- **Hard line breaks:** with `$texy->mergeLines` (default), a newline followed by indentation becomes a break, other newlines merge into spaces; without it every newline is a break. The break is carried through inline parsing as an internal `\r` marker inside text and expanded afterwards into `LineBreakNode`s – which is why `\r` can never occur in input text (normalization removed it) and why `stripControlChars` deliberately preserves `\x0D`.
+- **Hard line breaks:** with `$texy->paragraphModule->mergeLines` (default), a newline followed by indentation becomes a break, other newlines merge into spaces; without it every newline is a break. The break is carried through inline parsing as an internal `\r` marker inside text and expanded afterwards into `LineBreakNode`s – which is why `\r` can never occur in input text (normalization removed it) and why `stripControlChars` deliberately preserves `\x0D`.
 - Text starting with a block-level HTML tag is parsed without soft-line-break processing and flagged `ParagraphNode::$blockHtml` – the renderer then emits no `<p>` wrapper.
 - Whether a `<p>`, a non-text wrapper (`$htmlOutput->nontextParagraph`, default `div`), or no wrapper is emitted is a **render-phase** decision based on analyzing the paragraph's children (text vs. replaced elements vs. markup) – see `Renderer::renderParagraph()`.
 
