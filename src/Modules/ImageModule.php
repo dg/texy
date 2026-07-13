@@ -152,10 +152,6 @@ final class ImageModule extends Texy\Module
 			return null;
 		}
 
-		// the float is written in the brackets of the image, but it is the figure that floats
-		$float = $imageNode->float;
-		$imageNode->float = null;
-
 		$image = $mLink
 			? $this->wrapInLink(
 				$imageNode,
@@ -176,7 +172,7 @@ final class ImageModule extends Texy\Module
 		return new FigureNode(
 			$image,
 			$caption,
-			$float,
+			$imageNode->float,
 			Modifier::parse($mMod, $offsets[6] ?? null),
 			new Range($offsets[0], strlen($matches[0])),
 		);

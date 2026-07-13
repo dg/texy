@@ -94,6 +94,15 @@ test('figure with a definition with rejected URL acts as undefined', function ()
 });
 
 
+test('definition with rejected URL is not printed back', function () {
+	$texy = createTexy();
+	Assert::same(
+		"text\n",
+		$texy->renderTexy($texy->parse("[*x*]: javascript:alert(1)\n\ntext")),
+	);
+});
+
+
 test('definition with rejected URL does not overwrite a user-defined one', function () {
 	$texy = createTexy();
 	$texy->config->addImageDefinition('x', 'logo.png');

@@ -207,6 +207,18 @@ class Texy
 
 
 	/**
+	 * Would a block syntax take the text, or a part of it, where a paragraph is meant? Only its
+	 * pattern decides, since whether its handler refuses the text can depend on the neighbours:
+	 * "1. a" is a list only when another item follows.
+	 */
+	public function readsAsBlock(string $text): bool
+	{
+		$this->registerModules();
+		return $this->engine->matchesBlockSyntax(self::normalize($text), $this->allowedSyntax);
+	}
+
+
+	/**
 	 * Turns the syntax tree into the document: resolves references, balances
 	 * headings, sanitizes HTML, applies typography and the consumer's passes.
 	 * Changes the tree in place and returns it; a second call for one document throws.
@@ -291,6 +303,16 @@ class Texy
 	public function renderText(Nodes\DocumentNode $document): string
 	{
 		return (new Output\Text\Renderer)->render($document);
+	}
+
+
+	/**
+	 * Prints a syntax tree back as Texy source, see Output\Texy\Renderer. Addresses stay as they
+	 * are written, or are filtered by the given policy when the source is to be published further.
+	 */
+	public function renderTexy(Nodes\DocumentNode $document, ?UrlPolicy $urlPolicy = null): string
+	{
+		return new Output\Texy\Renderer($this, $urlPolicy)->render($document);
 	}
 
 

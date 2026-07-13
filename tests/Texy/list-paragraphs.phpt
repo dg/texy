@@ -73,9 +73,16 @@ test('a task survives the safe mode, it is no tag of the document', function () 
 });
 
 
-test('a task in plain text', function () {
+test('a task in plain text and in Texy', function () {
 	Assert::same("[x] a\nb\n", (new TextRenderer)->render(createList(ItemParagraphs::Wrapped, checked: true)));
 	Assert::same("[ ] a\nb\n", (new TextRenderer)->render(createList(ItemParagraphs::Wrapped, checked: false)));
+
+	$single = fn(?bool $checked) => new DocumentNode(new ContentNode([
+		new ListNode([new ListItemNode(new ContentNode([paragraph('a')]), checked: $checked)]),
+	]));
+	Assert::same("- [x] a\n", (new Texy)->renderTexy($single(true)));
+	Assert::same("- [ ] a\n", (new Texy)->renderTexy($single(false)));
+	Assert::same("- a\n", (new Texy)->renderTexy($single(null)));
 });
 
 
@@ -86,4 +93,6 @@ test('a soft break in the outputs', function () {
 
 	Assert::same("<p>a b</p>\n", (new Texy)->createHtmlRenderer()->render($soft('b')));
 	Assert::same("a\nb\n", (new TextRenderer)->render($soft('b')));
+	Assert::same("a\nb\n", (new Texy)->renderTexy($soft('b')));
+	Assert::same("a - b\n", (new Texy)->renderTexy($soft('- b')));
 });
