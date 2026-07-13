@@ -34,7 +34,7 @@ php "1-2-3 start/demo.php"
 | [images](images/) | Control image paths, add handlers for special URLs |
 | [links](links/) | Transform links, handle custom URL schemes |
 | [headings](headings/) | Configure heading levels, generate TOC |
-| [Figure as Definition List](Figure%20as%20Definition%20List/) | Change figure HTML from `<div>` to `<dl>` |
+| [Figure as Definition List](figure%20as%20definition%20list/) | Change figure HTML from `<div>` to `<dl>` |
 
 ### Security
 
