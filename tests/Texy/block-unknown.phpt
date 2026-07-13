@@ -40,6 +40,12 @@ test('text output is the source', function () use ($block) {
 });
 
 
+test('printed back as Texy it is the same source', function () use ($block) {
+	$texy = new Texy;
+	Assert::same($block . "\n", $texy->renderTexy($texy->parse($block)));
+});
+
+
 test('a block that is not closed reaches the end of the text', function () {
 	$src = "/--foo\na\nb";
 	$node = (new Texy)->parse($src)->findFirst(UnknownDelimitedNode::class);

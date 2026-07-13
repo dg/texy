@@ -20,7 +20,7 @@ class FigureNode extends BlockNode implements HasModifier
 		/** Image node, or LinkNode wrapping the image when figure has a link */
 		public ImageNode|LinkNode $image,
 		public ?ContentNode $caption = null,
-		/** @var 'left'|'right'|null  written in the brackets of the image, but the figure floats */
+		/** @var 'left'|'right'|null  written in the brackets of the image, which keeps it too, but the figure floats */
 		public ?string $float = null,
 		public ?Modifier $modifier = null,
 		public ?Range $range = null,

@@ -211,6 +211,28 @@ class Texy
 
 
 	/**
+	 * Prints a syntax tree back as Texy source, see Output\Texy\Renderer. Addresses stay as they
+	 * are written, or are filtered by the given policy when the source is to be published further.
+	 */
+	public function renderTexy(Nodes\DocumentNode $document, ?UrlPolicy $urlPolicy = null): string
+	{
+		return new Output\Texy\Renderer($this, $urlPolicy)->render($document);
+	}
+
+
+	/**
+	 * Would a block syntax take the text, or a part of it, where a paragraph is meant? Only its
+	 * pattern decides, since whether its handler refuses the text can depend on the neighbours:
+	 * "1. a" is a list only when another item follows.
+	 */
+	public function readsAsBlock(string $text): bool
+	{
+		$this->registerModules();
+		return $this->engine->matchesBlockSyntax(self::normalize($text), $this->allowedSyntax);
+	}
+
+
+	/**
 	 * Normalizes text to the form parsing operates on: removes the byte order mark, converts line
 	 * endings to \n, strips control characters and soft hyphens, right-trims lines and drops blank
 	 * lines at both ends, keeping the newline that ends the last line. Idempotent.

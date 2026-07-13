@@ -62,14 +62,14 @@ test('rendering does not mutate link modifier (nofollow class)', function () {
 });
 
 
-test('the float of a figure is the figure\'s, rendering does not mutate it', function () {
+test('the float of a figure is kept by its image as written, rendering does not mutate either', function () {
 	$texy = new Texy\Texy;
 	$doc = $texy->parse('[* figure.png >] *** Caption');
 
 	$figure = $doc->content->children[0];
 	Assert::type(Texy\Nodes\FigureNode::class, $figure);
 	Assert::type(Texy\Nodes\ImageNode::class, $figure->image);
-	Assert::same(['right', null], [$figure->float, $figure->image->float]);
+	Assert::same(['right', 'right'], [$figure->float, $figure->image->float]);
 	$before = serialize($figure);
 
 	$texy->createHtmlRenderer()->render($doc);

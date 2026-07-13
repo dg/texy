@@ -94,6 +94,15 @@ test('figure with a definition with rejected URL acts as undefined', function ()
 });
 
 
+test('definition with rejected URL is not printed back', function () {
+	$texy = createTexy();
+	Assert::same(
+		"text\n",
+		$texy->renderTexy($texy->parse("[*x*]: javascript:alert(1)\n\ntext")),
+	);
+});
+
+
 test('image node with rejected URL renders as its alternative text', function () {
 	$texy = createTexy();
 	$texy->addInlineSyntax('myimage', '~@@~', fn() => new Texy\Nodes\ImageNode('javascript:alert(1)', alt: 'Logo <b>'));
