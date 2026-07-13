@@ -11,6 +11,9 @@ require __DIR__ . '/../bootstrap.php';
 
 const EngineDirectories = ['Parsing', 'Nodes', 'Passes', 'Typography', 'Output'];
 
+/** the printer of Texy source needs the parser of Texy to read its output back */
+const LayerExceptions = ['Output/Texy/Renderer.php'];
+
 
 function isForbidden(string $class): bool
 {
@@ -154,7 +157,7 @@ test('the engine reads nothing of the language', function () {
 			FilesystemIterator::SKIP_DOTS,
 		)) as $file) {
 			$relative = strtr(substr($file->getPathname(), strlen($root)), '\\', '/');
-			if ($file->getExtension() === 'php') {
+			if ($file->getExtension() === 'php' && !in_array($relative, LayerExceptions, true)) {
 				$files++;
 				Assert::same([], findForbiddenReferences(file_get_contents($file->getPathname())), $relative);
 			}

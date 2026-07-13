@@ -27,6 +27,7 @@ test('an unknown key fails in every entry point', function () {
 
 	Assert::exception(fn() => $texy->parse('a'), InvalidArgumentException::class, $message);
 	Assert::exception(fn() => $texy->parseInline('a'), InvalidArgumentException::class, $message);
+	Assert::exception(fn() => $texy->readsAsBlock('a'), InvalidArgumentException::class, $message);
 });
 
 

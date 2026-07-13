@@ -128,6 +128,8 @@ test('quoted acronym', function () {
 		'<p><abbr title="t"><strong>x</strong> y</abbr></p>',
 		process('"**x** y"((t))'),
 	);
+	$texy = new Texy\Texy;
+	Assert::same("\"**x** y\"((t))\n", $texy->renderTexy($texy->parse('"**x** y"((t))')));
 });
 
 

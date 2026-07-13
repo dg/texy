@@ -338,8 +338,13 @@ final class Renderer extends NodeRenderer
 	{
 		$el = new Element($this->config->figureTag);
 
-		// Build image via generator - this allows custom ImageNode handlers to work
-		$el->children = $this->renderNodes([$node->image]);
+		// Build image via generator - this allows custom ImageNode handlers to work;
+		// the figure floats, not the image in it
+		$image = clone $node->image;
+		foreach ($image->find(Nodes\ImageNode::class) as $imageNode) {
+			$imageNode->float = null;
+		}
+		$el->children = $this->renderNodes([$image]);
 
 		// Caption
 		if ($node->caption !== null) {
