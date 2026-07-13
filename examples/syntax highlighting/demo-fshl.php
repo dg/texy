@@ -13,11 +13,11 @@
  * - How to change only the content of the element the default renderer builds
  *
  * TEXY CODE BLOCK SYNTAX:
- * /--php
+ * ```php
  * echo "Hello World";
- * \--
+ * ```
  *
- * The language (php, html, javascript, sql) is specified after /--
+ * The language (php, html, javascript, sql) is specified after ```
  *
  * REQUIREMENTS:
  * Install FSHL: composer require kukulich/fshl

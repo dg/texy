@@ -1,0 +1,46 @@
+Code blocks of Texy 3
+=====================
+
+A block named after its language:
+
+/--php
+$texy = new Texy\Texy;
+echo $texy->toHtml($text);
+\--
+
+The language written as a parameter of /--code, with a modifier:
+
+/--code js .[example]
+	if (ok) {
+		alert('Hello');
+	}
+\--
+
+- install the package
+
+  /--bash
+  composer require texy/texy
+  \--
+
+- and you are done
+
+> A quote can hold code as well:
+>
+> /--neon
+> texy:
+>     headingLevel: 2
+> \--
+
+These stay as they are:
+
+```php
+echo 'already a fence';
+```
+
+/--html
+<b>a built-in type</b>
+\--
+
+/--foo bar
+a type that is not a language name
+\--

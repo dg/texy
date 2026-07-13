@@ -53,6 +53,12 @@ php "1-2-3 start/demo.php"
 | [Youtube video](Youtube%20video/) | Embed videos using image syntax |
 | [user syntax](user%20syntax/) | Create your own inline syntax and `/--` delimited block type that produce nodes Texy already knows |
 
+### Upgrading from Texy 3
+
+| Example | Description |
+|---------|-------------|
+| [code blocks to fences](code%20blocks%20to%20fences/) | Convert `/--php` code blocks of existing texts to fences, keeping their HTML |
+
 A whole other language on the same engine is the package [texy/markdown](https://github.com/dg/texy-markdown): it parses CommonMark and GitHub Flavored Markdown into the Texy AST.
 
 ---
@@ -147,11 +153,11 @@ Subtitle
 ```
 
 ### Code Blocks
-```
-/--php
+````
+```php
 echo "Hello";
-\--
 ```
+````
 
 ---
 
