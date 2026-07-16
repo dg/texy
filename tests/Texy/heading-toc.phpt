@@ -249,6 +249,20 @@ test('generateID = true', function () {
 });
 
 
+test('a soft hyphen does not split the generated ID', function () {
+	$texy = new Texy\Texy;
+	$texy->config->headingIds = true;
+	Assert::contains('id="toc-slozeni"', $texy->toHtml("Slo&shy;žení\n====="));
+});
+
+
+test('a zero width space does not split the generated ID', function () {
+	$texy = new Texy\Texy;
+	$texy->config->headingIds = true;
+	Assert::contains('id="toc-ab"', $texy->toHtml("a\u{200B}b\n====="));
+});
+
+
 test('custom idPrefix', function () {
 	$texy = new Texy\Texy;
 	$texy->config->headingIds = true;
