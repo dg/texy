@@ -7,9 +7,8 @@
 
 namespace Texy;
 
-use Nette\Utils\Strings;
-use function function_exists;
-use const ENT_HTML5, ENT_QUOTES, ICONV_IMPL;
+use function defined, extension_loaded;
+use const ENT_HTML5, ENT_QUOTES;
 
 
 /**
@@ -32,9 +31,7 @@ final class Helpers
 	 */
 	public static function toLower(string $s): string
 	{
-		return function_exists('mb_strtolower')
-			? mb_strtolower($s, 'UTF-8')
-			: $s;
+		return mb_strtolower($s, 'UTF-8');
 	}
 
 
@@ -107,27 +104,56 @@ final class Helpers
 
 
 	/**
-	 * Converts UTF-8 to ASCII.
+	 * Converts UTF-8 to ASCII, ie removes diacritics etc. Requires the intl extension.
 	 */
 	public static function toAscii(string $s): string
 	{
-		if (class_exists(Strings::class)) {
-			return Strings::toAscii($s);
-		}
-		$s = strtr($s, '`\'"^~', '-----');
-		if (ICONV_IMPL === 'glibc') {
-			$s = (string) @iconv('UTF-8', 'WINDOWS-1250//TRANSLIT', $s); // @ untranslatable characters trigger a notice
-			$s = strtr(
-				$s,
-				"\xa5\xa3\xbc\x8c\xa7\x8a\xaa\x8d\x8f\x8e\xaf\xb9\xb3\xbe\x9c\x9a\xba\x9d\x9f\x9e\xbf\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2"
-				. "\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf8\xf9\xfa\xfb\xfc\xfd\xfe",
-				'ALLSSSSTZZZallssstzzzRAAAALCCCEEEEIIDDNNOOOOxRUUUUYTsraaaalccceeeeiiddnnooooruuuuyt',
-			);
-		} else {
-			$s = (string) @iconv('UTF-8', 'ASCII//TRANSLIT', $s); // @ untranslatable characters trigger a notice
+		if (!extension_loaded('intl')) {
+			throw new \LogicException(__METHOD__ . '() requires INTL extension that is not loaded.');
 		}
 
-		$s = str_replace(['`', "'", '"', '^', '~'], '', $s);
+		$iconv = defined('ICONV_IMPL') ? trim(ICONV_IMPL, '"\'') : null;
+
+		// remove control characters
+		$s = Regexp::replace($s, '#[^\x09\x0A\x0D\x20-\x7E\xA0-\x{2FF}\x{370}-\x{10FFFF}]#');
+
+		// transliteration (by Transliterator and iconv) is not optimal, replace some characters directly
+		$s = strtr($s, [
+			"\u{201E}" => '"', "\u{201C}" => '"', "\u{201D}" => '"', "\u{201A}" => "'", "\u{2018}" => "'", "\u{2019}" => "'",
+			"\u{B0}" => '^', "\u{42F}" => 'Ya', "\u{44F}" => 'ya', "\u{42E}" => 'Yu', "\u{44E}" => 'yu', "\u{c4}" => 'Ae', "\u{d6}" => 'Oe',
+			"\u{dc}" => 'Ue', "\u{1e9e}" => 'Ss', "\u{e4}" => 'ae', "\u{f6}" => 'oe', "\u{fc}" => 'ue', "\u{df}" => 'ss',
+		]); // „ “ ” ‚ ‘ ’ ° Я я Ю ю Ä Ö Ü ẞ ä ö ü ß
+		if ($iconv !== 'libiconv') {
+			$s = strtr($s, [
+				"\u{AE}" => '(R)', "\u{A9}" => '(c)', "\u{2026}" => '...', "\u{AB}" => '<<', "\u{BB}" => '>>', "\u{A3}" => 'lb',
+				"\u{A5}" => 'yen', "\u{B2}" => '^2', "\u{B3}" => '^3', "\u{B5}" => 'u', "\u{B9}" => '^1', "\u{BA}" => 'o', "\u{BF}" => '?',
+				"\u{2CA}" => "'", "\u{2CD}" => '_', "\u{2DD}" => '"', "\u{1FEF}" => '', "\u{20AC}" => 'EUR', "\u{2122}" => 'TM',
+				"\u{212E}" => 'e', "\u{2190}" => '<-', "\u{2191}" => '^', "\u{2192}" => '->', "\u{2193}" => 'V', "\u{2194}" => '<->',
+			]); // ® © … « » £ ¥ ² ³ µ ¹ º ¿ ˊ ˍ ˝ ` € ™ ℮ ← ↑ → ↓ ↔
+		}
+
+		$s = \Transliterator::create('Any-Latin; Latin-ASCII')?->transliterate($s)
+			?? throw new Exception('Transliterator::transliterate() failed.');
+
+		// use iconv because the transliterator leaves some characters out of ASCII, eg → ʾ
+		if ($iconv === 'glibc') {
+			$s = strtr($s, '?', "\x01"); // temporarily hide ? to distinguish them from the garbage that iconv creates
+			$s = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+			if ($s === false) {
+				throw new Exception('iconv() failed.');
+			}
+
+			$s = str_replace(['?', "\x01"], ['', '?'], $s); // remove garbage and restore ? characters
+
+		} elseif ($iconv === 'libiconv') {
+			$s = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+			if ($s === false) {
+				throw new Exception('iconv() failed.');
+			}
+		} else { // null or 'unknown'
+			$s = Regexp::replace($s, '#[^\x00-\x7F]++#'); // remove non-ascii chars
+		}
+
 		return $s;
 	}
 

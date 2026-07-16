@@ -24,7 +24,7 @@ Install Texy via Composer:
 
     composer require texy/texy
 
-Texy requires PHP 8.4 or higher.
+Texy requires PHP 8.4 or higher with the mbstring extension; generated IDs of headings need the intl extension too.
 
 
 Usage
