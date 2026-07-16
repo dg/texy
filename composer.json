@@ -11,7 +11,11 @@
 		}
 	],
 	"require": {
-		"php": "8.4 - 8.6"
+		"php": "8.4 - 8.6",
+		"ext-mbstring": "*"
+	},
+	"suggest": {
+		"ext-intl": "to generate the IDs of headings (Config::$headingIds)"
 	},
 	"require-dev": {
 		"nette/tester": "^2.5",

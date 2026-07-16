@@ -102,7 +102,7 @@ final class CzechHyphenator
 		[$mWord] = $matches;
 		// [0] => lllloooonnnnggggwwwoorrdddd
 
-		if (iconv_strlen($mWord, 'UTF-8') > self::SafeLimit) {
+		if (mb_strlen($mWord) > self::SafeLimit) {
 			return $mWord;
 		}
 
