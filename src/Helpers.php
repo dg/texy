@@ -133,11 +133,11 @@ final class Helpers
 
 
 	/**
-	 * Converts to web safe characters [a-z0-9-] text.
+	 * Converts to web safe characters [a-z0-9-] text. Invisible format characters are ignored.
 	 */
 	public static function webalize(string $s, string $charlist = ''): string
 	{
-		$s = self::toAscii($s);
+		$s = self::toAscii(Regexp::replace($s, '~\p{Cf}+~u'));
 		$s = strtolower($s);
 		$s = Regexp::replace($s, '~[^a-z0-9' . Regexp::quote($charlist) . ']+~', '-');
 		$s = trim($s, '-');
