@@ -61,4 +61,4 @@ Handlers of multi-line structures use the navigation API on `$context->getBlockP
 
 - `\r` – hard line break marker inside `ParagraphModule` (see above).
 - `\x13` – temporary mask for escaped pipes in `TableModule` while splitting a row on `|`; restored in each cell.
-- Bytes `\x14`–`\x1F` are reserved by the deprecated protection-mark bridge for legacy custom render handlers ([rendering.md](rendering.md#deprecated-protection-marks)) and are used as the marker alphabet of the typography pass ([architecture.md](architecture.md#typography-over-the-ast)). Input normalization strips all control bytes, so none of them can arrive from outside.
+- Bytes `\x15`–`\x17` are the marker alphabet of the typography pass ([architecture.md](architecture.md#typography-over-the-ast)). Input normalization strips all control bytes, so none of them can arrive from outside.

@@ -61,8 +61,7 @@ composer phpstan
 - **Typography and hyphenation are an AST pass** (`TextRunPass`); its regexes
   treat bytes `\x15`-`\x17` as a marker alphabet and must never create or
   destroy them.
-- **Raw HTML in renderers:** return `Output\Html\Element` or `Output\Html\Raw`;
-  `Generator::protect()` marks are a deprecated bridge for legacy custom handlers.
+- **Raw HTML in renderers:** return `Output\Html\Element` or `Output\Html\Raw`.
   Well-forming (pairing, content model, indentation) happens in `WellFormer`,
   fed by a walk of the rendered tree. See `docs/rendering.md`.
 - **Security: always run `Configurator::safeMode($texy)` for untrusted input** - it
