@@ -50,3 +50,15 @@ test('allowed XSS for URLs #34', function () {
 	Assert::contains('&lt;a href=', $result); // escaped as text
 	Assert::contains('click', $result);
 });
+
+
+test('rejected inline match must not duplicate preceding text', function () {
+	// span syntax "..." without modifier/link is rejected by the handler;
+	// the parser must not emit the preceding text twice
+	$texy = new Texy;
+	Assert::same("<p>řekl „ahoj“ a šel</p>\n", $texy->process('řekl "ahoj" a šel'));
+	Assert::same(
+		"<p>A „quote <strong>b</strong>“ c</p>\n",
+		$texy->process('A "quote **b**" c'),
+	);
+});

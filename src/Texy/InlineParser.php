@@ -96,14 +96,6 @@ class InlineParser
 				continue; // Skip overlapping match
 			}
 
-			// Add text before this match
-			if ($m['offset'] > $pos) {
-				$res[] = new TextNode(
-					substr($text, $pos, $m['offset'] - $pos),
-					new Range($baseOffset + $pos, $m['offset'] - $pos),
-				);
-			}
-
 			// Adjust offsets to absolute positions
 			$absoluteOffsets = [];
 			foreach ($m['offsets'] as $key => $offset) {
@@ -114,6 +106,14 @@ class InlineParser
 			$node = ($m['handler'])($context, $m['match'], $absoluteOffsets, $m['name']);
 			if ($node === null) {
 				continue; // Handler rejected - try other patterns at this position
+			}
+
+			// Add text before this match (only now - a rejected match must not emit it)
+			if ($m['offset'] > $pos) {
+				$res[] = new TextNode(
+					substr($text, $pos, $m['offset'] - $pos),
+					new Range($baseOffset + $pos, $m['offset'] - $pos),
+				);
 			}
 
 			$res[] = $node;
