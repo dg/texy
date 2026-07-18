@@ -94,7 +94,7 @@ final class Legacy
 		'registerPostLine' => 'the string post-processing pipeline was removed, typography runs as an AST pass',
 		'checkURL' => 'use $texy->urlPolicy->isLinkAllowed() or isImageAllowed()',
 		'stringToHtml' => 'use process()',
-		'stringToText' => 'the string pipeline was removed',
+		'stringToText' => 'use toText()',
 		'getDOM' => 'use parse(), which returns the document AST',
 		'getLinePatterns' => 'internal API removed without replacement',
 		'getBlockPatterns' => 'internal API removed without replacement',

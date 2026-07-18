@@ -103,6 +103,13 @@ test('render is repeatable on typographed AST (purity)', function () {
 });
 
 
+test('every output format inherits typography from the AST', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('Rekl "ahoj" a sel...');
+	Assert::same("Rekl „ahoj“ a sel…\n", (new Texy\Output\Text\Renderer)->render($doc));
+});
+
+
 test('entities are decoded before typography', function () {
 	// &#160; must act as nbsp, not as a 6-character word for hyphenation
 	Assert::notContains(

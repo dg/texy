@@ -66,6 +66,14 @@ test('escaped tag text participates in typography', function () {
 });
 
 
+test('other output formats no longer emit rejected tags as active HTML', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::safeMode($texy);
+	$doc = $texy->parse('<u>klik</u> text');
+	Assert::same("<u>klik</u> text\n", (new Texy\Output\Text\Renderer)->render($doc));
+});
+
+
 test('dangerous URL scheme is neutralized in transform phase', function () {
 	$texy = new Texy\Texy;
 	Texy\Configurator::safeMode($texy);

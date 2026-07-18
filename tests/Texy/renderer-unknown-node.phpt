@@ -52,3 +52,11 @@ test('the format with a renderer uses it', function () {
 
 	Assert::contains('<div class="alert">Watch out</div>', $texy->process('!!! Watch out'));
 });
+
+
+test('the other formats keep the content instead of failing', function () {
+	$texy = texyWithAlert();
+	$document = $texy->parse("Intro.\n\n!!! Watch out\n\nOutro.");
+
+	Assert::contains('Watch out', (new Output\Text\Renderer)->render($document));
+});
