@@ -168,6 +168,17 @@ final class Helpers
 
 
 	/**
+	 * Prepends http:// to scheme-less www.* URLs.
+	 */
+	public static function normalizeWww(string $url): string
+	{
+		return strncasecmp($url, 'www.', 4) === 0
+			? 'http://' . $url
+			: $url;
+	}
+
+
+	/**
 	 * Returns shortened URL for display (e.g., in autolinks).
 	 */
 	public static function shortenUrl(string $url): string

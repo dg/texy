@@ -29,19 +29,14 @@ class Texy
 		ALL = true,
 		NONE = false;
 
-	// url filters
-	public const
-		FILTER_ANCHOR = 'anchor',
-		FILTER_IMAGE = 'image';
-
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
 	/** TAB width (for converting tabs to spaces) */
 	public int $tabWidth = 8;
 
-	/** @var array<string, string>  regexps to check URL schemes */
-	public array $urlSchemeFilters; // disable URL scheme filter
+	/** URL scheme security policy for links and images */
+	public readonly UrlPolicy $urlPolicy;
 
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
@@ -85,6 +80,7 @@ class Texy
 	public function __construct()
 	{
 		$this->engine = new Engine;
+		$this->urlPolicy = new UrlPolicy;
 		$this->htmlPolicy = new HtmlPolicy($this);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->loadModules();
@@ -326,19 +322,6 @@ class Texy
 		foreach ($this->handlers[$event] as $handler) {
 			$handler(...$args);
 		}
-	}
-
-
-	/**
-	 * Filters bad URLs.
-	 * @param  string  $type  Texy::FILTER_ANCHOR | Texy::FILTER_IMAGE
-	 */
-	final public function checkURL(string $URL, string $type): bool
-	{
-		// absolute URL with scheme? check scheme!
-		return empty($this->urlSchemeFilters[$type])
-			|| !Regexp::match($URL, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // http: | mailto:
-			|| Regexp::match($URL, $this->urlSchemeFilters[$type]);
 	}
 
 

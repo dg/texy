@@ -67,7 +67,7 @@ final class HtmlPolicy
 			}
 			// Validate href URL scheme (security: filter javascript: etc.)
 			if (isset($attrs['href']) && is_string($attrs['href'])) {
-				if (!$this->texy->checkURL($attrs['href'], Texy::FILTER_ANCHOR)) {
+				if (!$this->texy->urlPolicy->isLinkAllowed($attrs['href'])) {
 					return 'drop'; // XSS protection - drop dangerous URLs entirely
 				}
 			}
@@ -79,7 +79,7 @@ final class HtmlPolicy
 				return false;
 			}
 			// Validate src URL scheme
-			if (is_string($attrs['src']) && !$this->texy->checkURL($attrs['src'], Texy::FILTER_IMAGE)) {
+			if (is_string($attrs['src']) && !$this->texy->urlPolicy->isImageAllowed($attrs['src'])) {
 				return 'drop'; // XSS protection - drop dangerous URLs entirely
 			}
 		}

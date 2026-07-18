@@ -180,7 +180,7 @@ final class ImageModule extends Texy\Module
 		}
 
 		// Check URL
-		if (!$this->texy->checkURL($url, $this->texy::FILTER_IMAGE)) {
+		if (!$this->texy->urlPolicy->isImageAllowed($url)) {
 			$url = null;
 		}
 
