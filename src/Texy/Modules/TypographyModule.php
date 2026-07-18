@@ -72,16 +72,16 @@ final class TypographyModule extends Texy\Module
 		'~\(EUR\)~' /*.                           */ => "\u{20AC}",                // Euro (EUR)
 		'~(\d) \ (?= \d{3})~x' /*.                   */ => "\$1\u{A0}",               // (phone) number 1 123 123 123...
 
-		// CONTENT_MARKUP mark: \x17-\x1F, CONTENT_REPLACED mark: \x16, CONTENT_TEXTUAL mark: \x17
-		'~(?<= [^\s\x17] ) \s++ ([\x17-\x1F]++)(?= \s)~x'  => '$1',                      // remove intermarkup space phase 1
-		'~(?<= \s) ([\x17-\x1F]++) \s++~x' /*.        */ => '$1',                      // remove intermarkup space phase 2
+		// TextRunPass image alphabet: \x17 markup boundary (transparent), \x16 replaced content
+		'~(?<= [^\s\x17] ) \s++ (\x17++)(?= \s)~x'  => '$1',                      // remove intermarkup space phase 1
+		'~(?<= \s) (\x17++) \s++~x' /*.        */ => '$1',                      // remove intermarkup space phase 2
 
-		'~(?<= .{50}) \s++ (?= [\x17-\x1F]* \S{1,6} [\x17-\x1F]* $)~sx' => "\u{A0}",      // space before last short word
+		'~(?<= .{50}) \s++ (?= \x17* \S{1,6} \x17* $)~sx' => "\u{A0}",      // space before last short word
 
 		// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-		'~(?<= ^|\ |\.|,|-|\+|\x16|\(|\d\x{A0}) ([\x17-\x1F]* \d++ \.? [\x17-\x1F]*) \s++ (?= [\x17-\x1F]* [%' . Patterns::CHAR . '\x{b0}-\x{be}\x{2020}-\x{214f}])~mx' => "\$1\u{A0}",
+		'~(?<= ^|\ |\.|,|-|\+|\x16|\(|\d\x{A0}) (\x17* \d++ \.? \x17*) \s++ (?= \x17* [%' . Patterns::CHAR . '\x{b0}-\x{be}\x{2020}-\x{214f}])~mx' => "\$1\u{A0}",
 		// space between preposition and word
-		'~(?<= ^|[^0-9' . Patterns::CHAR . ']) ([\x17-\x1F]* [ksvzouiKSVZOUIA] [\x17-\x1F]*) \s++ (?= [\x17-\x1F]* [0-9' . Patterns::CHAR . '])~msx' => "\$1\u{A0}",
+		'~(?<= ^|[^0-9' . Patterns::CHAR . ']) (\x17* [ksvzouiKSVZOUIA] \x17*) \s++ (?= \x17* [0-9' . Patterns::CHAR . '])~msx' => "\$1\u{A0}",
 
 		// double ""
 		'~(?<! "|\w) " (?! \ | " ) ( (?: [^"]++ | ")+ ) (?<! \ | " ) " (?! ["' . Patterns::CHAR . '])~Ux' => ':ldq:$1:rdq:',

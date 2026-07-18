@@ -10,8 +10,7 @@ namespace Texy\Output\Html;
 
 /**
  * Piece of ready-made HTML in the rendered tree: it bypasses text escaping
- * and is tokenized by the well-forming engine as-is. The typed successor of
- * protection marks.
+ * and is tokenized by the well-forming engine as-is.
  */
 final class Raw
 {

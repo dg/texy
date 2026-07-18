@@ -72,7 +72,7 @@ $texy->htmlOutput->registerHandler(
 
 ### Raw HTML strings
 
-To emit ready-made HTML, return `new Html\Raw($html)` – it bypasses text escaping and is tokenized by the well-forming engine as-is. (`$gen->protect($html, $gen::ContentBlock)` is the deprecated way to achieve the same and is kept only for backward compatibility.)
+To emit ready-made HTML, return `new Html\Raw($html)` – it bypasses text escaping and is tokenized by the well-forming engine as-is.
 
 ## Transform passes
 

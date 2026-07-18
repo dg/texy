@@ -35,7 +35,7 @@ Renderers return an **`Element` | `Raw` | `string`** tree:
 
 - **`Element`** – a tag with `$attrs` and `$children`. `name === null` means a transparent wrapper (renders only children). Void-ness is derived from `Element::$emptyElements`.
 - **`string`** – plain display text; escaped later by the well-forming engine.
-- **`Raw`** – a piece of ready-made HTML that bypasses text escaping and is tokenized as-is (generated `<br>`, obfuscated e-mail, escaped code content). The typed successor of protection marks.
+- **`Raw`** – a piece of ready-made HTML that bypasses text escaping and is tokenized as-is (generated `<br>`, obfuscated e-mail, escaped code content).
 
 `Element::formatAttrs()` escapes attribute values and *freezes* their whitespace (`\x01`–`\x04`), so line wrapping can break between attributes but never inside a value; `WellFormer::finish()` unfreezes at the very end.
 
@@ -66,7 +66,3 @@ The content model lives in **`Schema`**, the declarative per-element vocabulary:
 `Markdown\Generator` renders GFM from the same AST and depends only on an optional `UrlPolicy` – no `Texy` instance. Known lossy spots fall back to HTML (`<abbr>` for annotations, `<dl>` for definition lists, tables with cell spans). Because sanitization already happened in the transform phase, safe mode applies to Markdown output too.
 
 `Text\Generator` (behind `Texy::toText()`) renders a plain-text rendition: markup dropped, visible text and block structure kept, typography artifacts (non-breaking spaces, soft hyphens) normalized back.
-
-## Deprecated: protection marks
-
-`Generator::protect(string $html, string $contentType): string` exists only as a **backward-compatibility bridge for custom render handlers** that return a raw HTML string instead of an `Element`/`Raw`. It stores the string and returns a control-byte placeholder (`\x14`–`\x1F`) that the `Writer` decodes back into a raw island during the tree walk. New code should return `Element` or `Raw` objects; the mark mechanism (and the `Content*` constants) will eventually be removed.

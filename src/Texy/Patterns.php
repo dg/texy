@@ -16,10 +16,6 @@ class Patterns
 	// Unicode character classes
 	public const CHAR = 'A-Za-z\x{C0}-\x{2FF}\x{370}-\x{1EFF}';
 
-	// internal marker bytes: the TextRun image alphabet (\x15 textual, \x16 replaced,
-	// \x17 markup) and the deprecated protection marks; never present in parsed input
-	public const MARK = '\x14-\x1F';
-
 	// modifier .(title)[class]{style}
 	public const MODIFIER = <<<'X'
 		(?x:
