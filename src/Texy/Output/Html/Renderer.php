@@ -764,7 +764,7 @@ final class Renderer
 	{
 		// Check URL scheme (security - filter dangerous schemes like javascript:)
 		$rawUrl = $node->url ?? '';
-		if (!$this->texy->checkURL($rawUrl, Texy::FILTER_ANCHOR)) {
+		if (!$this->texy->urlPolicy->isLinkAllowed($rawUrl)) {
 			// URL fails scheme filter, return just the content without link
 			return $this->serialize($this->renderNodes($node->content->children));
 		}

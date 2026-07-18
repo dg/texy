@@ -14,7 +14,7 @@ use JetBrains\PhpStorm\Language;
  * Minimal parser engine - handles pattern registration and parsing.
  *
  * This class is designed to be configured once and reused for multiple parse operations.
- * It contains NO security logic (checkURL, allowedClasses, etc.) and NO lifecycle management.
+ * It contains NO security logic (UrlPolicy, allowedClasses, etc.) and NO lifecycle management.
  * Those responsibilities belong to the Texy class which contains this engine.
  *
  * Usage:

@@ -10,6 +10,7 @@ namespace Texy\Output\Markdown;
 use Texy\Helpers as TexyHelpers;
 use Texy\Node;
 use Texy\Nodes;
+use Texy\UrlPolicy;
 use Texy\Syntax;
 use Texy\Texy;
 use function array_map, count, explode, implode, is_string, max, mb_strlen, preg_match, rtrim, str_repeat, strlen, strncasecmp, trim;
@@ -64,7 +65,7 @@ class Renderer
 
 
 	public function __construct(
-		private Texy $texy,
+		private ?UrlPolicy $urlPolicy = null,
 	) {
 		$this->handlers = [
 			// Core nodes
@@ -97,7 +98,7 @@ class Renderer
 			Nodes\PhraseNode::class => fn(Nodes\PhraseNode $n, self $g) => $g->renderPhrase($n),
 			Nodes\RawTextNode::class => fn(Nodes\RawTextNode $n) => Helpers::escapeText($n->text),
 			Nodes\AnnotationNode::class => fn(Nodes\AnnotationNode $n) => '<abbr title="' . htmlspecialchars($n->annotation, ENT_QUOTES, 'UTF-8') . '">' . $n->text . '</abbr>',
-			Nodes\EmoticonNode::class => fn(Nodes\EmoticonNode $n, self $g) => $g->texy->emoticonModule->icons[$n->emoticon] ?? $n->emoticon,
+			Nodes\EmoticonNode::class => fn(Nodes\EmoticonNode $n) => $n->resolved ?? $n->emoticon,
 			Nodes\LineBreakNode::class => fn() => "  \n",
 
 			// Autolink nodes
@@ -306,11 +307,10 @@ class Renderer
 	/********************* list node generators ****************d*g**/
 
 
-	private function renderList(Nodes\ListNode $node, int $indent = 0): string
+	private function renderList(Nodes\ListNode $node): string
 	{
 		$result = [];
 		$counter = $node->start ?? 1;
-		$indentStr = str_repeat(' ', $indent);
 
 		foreach ($node->items as $item) {
 			$marker = $node->type->isOrdered()
@@ -318,7 +318,7 @@ class Renderer
 				: $this->unorderedListMarker . ' ';
 
 			$content = $this->renderListItemContent($item, strlen($marker));
-			$result[] = $indentStr . $marker . $content;
+			$result[] = $marker . $content;
 			$counter++;
 		}
 
@@ -466,14 +466,11 @@ class Renderer
 		$title = $node->modifier?->title;
 
 		// Check URL scheme (security)
-		if (!$this->texy->checkURL($url, Texy::FILTER_ANCHOR)) {
+		if ($this->urlPolicy !== null && !$this->urlPolicy->isLinkAllowed($url)) {
 			return $text; // Just return text without link
 		}
 
-		// Normalize www. URLs
-		if (strncasecmp($url, 'www.', 4) === 0) {
-			$url = 'http://' . $url;
-		}
+		$url = TexyHelpers::normalizeWww($url);
 
 		if ($this->linkStyle === 'reference') {
 			$ref = $this->addLinkReference($url, $title);
@@ -544,7 +541,7 @@ class Renderer
 		// www. URLs need full link syntax
 		if (strncasecmp($url, 'www.', 4) === 0) {
 			$displayUrl = $this->shortenUrls ? TexyHelpers::shortenUrl($url) : $url;
-			return '[' . $displayUrl . '](http://' . $url . ')';
+			return '[' . $displayUrl . '](' . TexyHelpers::normalizeWww($url) . ')';
 		}
 
 		return $url;

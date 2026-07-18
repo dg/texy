@@ -25,6 +25,7 @@ final class Legacy
 		'alignClasses' => ['htmlOutput', 'alignClasses'],
 		'obfuscateEmail' => ['htmlOutput', 'obfuscateEmail'],
 		'nontextParagraph' => ['htmlOutput', 'nontextParagraph'],
+		'urlSchemeFilters' => null,
 		'summary' => null,
 	];
 

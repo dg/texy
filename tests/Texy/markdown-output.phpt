@@ -14,7 +14,7 @@ function toMarkdown(string $text): string
 {
 	$texy = new Texy\Texy;
 	$ast = $texy->parse($text);
-	$generator = new Markdown\Renderer($texy);
+	$generator = new Markdown\Renderer;
 	return $generator->render($ast);
 }
 
@@ -51,7 +51,7 @@ test('heading setext style', function () {
 	$texy->headingModule->top = 1;
 	$texy->headingModule->levels = ['#' => 0, '*' => 0];  // * = level 1
 	$ast = $texy->parse("Heading 1\n*********");
-	$generator = new Markdown\Renderer($texy);
+	$generator = new Markdown\Renderer;
 	$generator->headingStyle = 'setext';
 	Assert::same(
 		"Heading 1\n=========\n",
@@ -89,7 +89,7 @@ test('strikethrough (GFM)', function () {
 	$texy = new Texy\Texy;
 	$texy->allowed[Texy\Syntax::Deleted] = true;
 	$ast = $texy->parse('--deleted--');
-	$generator = new Markdown\Renderer($texy);
+	$generator = new Markdown\Renderer;
 	Assert::same(
 		"~~deleted~~\n",
 		$generator->render($ast),
@@ -109,7 +109,7 @@ test('inline link', function () {
 test('reference link', function () {
 	$texy = new Texy\Texy;
 	$ast = $texy->parse('"link":https://example.com');
-	$generator = new Markdown\Renderer($texy);
+	$generator = new Markdown\Renderer;
 	$generator->linkStyle = 'reference';
 	Assert::same(
 		"[link][1]\n\n\n[1]: https://example.com\n",
@@ -165,7 +165,7 @@ test('fenced code block', function () {
 test('indented code block', function () {
 	$texy = new Texy\Texy;
 	$ast = $texy->parse("/--code\n\$x = 1;\n\\--");
-	$generator = new Markdown\Renderer($texy);
+	$generator = new Markdown\Renderer;
 	$generator->codeBlockStyle = 'indented';
 	Assert::same(
 		"    \$x = 1;\n",
@@ -249,9 +249,33 @@ test('emoticons', function () {
 	$texy = new Texy\Texy;
 	$texy->allowed[Texy\Syntax::Emoticon] = true;
 	$ast = $texy->parse(':-)');
-	$generator = new Markdown\Renderer($texy);
+	$generator = new Markdown\Renderer;
 	Assert::same(
 		"🙂\n",
+		$generator->render($ast),
+	);
+});
+
+
+// URL scheme filtering (security)
+test('UrlPolicy filters dangerous schemes', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::safeMode($texy);
+	$ast = $texy->parse('"click":javascript:evil and "ok":https://example.com');
+	$generator = new Markdown\Renderer($texy->urlPolicy);
+	Assert::same(
+		"click and [ok](https://example.com)\n",
+		$generator->render($ast),
+	);
+});
+
+
+test('without UrlPolicy no scheme filtering happens', function () {
+	$texy = new Texy\Texy;
+	$ast = $texy->parse('"click":javascript:evil');
+	$generator = new Markdown\Renderer;
+	Assert::same(
+		"[click](javascript:evil)\n",
 		$generator->render($ast),
 	);
 });
