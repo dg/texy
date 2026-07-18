@@ -16,12 +16,8 @@ class Patterns
 	// Unicode character classes
 	public const CHAR = 'A-Za-z\x{C0}-\x{2FF}\x{370}-\x{1EFF}';
 
-	// marking meta-characters
-	// any mark:              \x14-\x1F
-	// CONTENT_MARKUP mark:   \x17-\x1F
-	// CONTENT_REPLACED mark: \x16-\x1F
-	// CONTENT_TEXTUAL mark:  \x15-\x1F
-	// CONTENT_BLOCK mark:    \x14-\x1F
+	// internal marker bytes: the TextRun image alphabet (\x15 textual, \x16 replaced,
+	// \x17 markup) and the deprecated protection marks; never present in parsed input
 	public const MARK = '\x14-\x1F';
 
 	// modifier .(title)[class]{style}
@@ -66,34 +62,14 @@ class Patterns
 		)
 		X;
 
-	// images   [* urls .(title)[class]{style} >]   '\[\* *+([^\n'.MARK.']{1,1000})'.MODIFIER.'? *+(\*|(?<!<)>|<)\]'
-	public const IMAGE = <<<'X'
-		(?x:
-			\[\* \ *+
-			( [^\n\x14-\x1F]{1,1000} )       # URL
-			(?:
-				\ *+ (?<= \ | ^ )
-				\.
-				((?:
-					\( [^)\n]++ \) |         # title
-					\[ [^]\n]++ ] |          # class
-					\{ [^}\n]++ }            # style
-				){1,3}?)
-			)?
-			\ *+
-			( \* | (?<!<) > | < )            # alignment
-			]
-		)
-		X;
-
 	// links, url - doesn't end by :).,!?
 	public const LINK_URL = <<<'X'
 		(?x:
 			\[ [^]\n]++ ]                    # link text in brackets
 			|
 			(?= [\w/+.\~%&?@=_#$] )          # URL must start with these chars
-			[^\s\x14-\x1F]{0,1000}?          # URL body
-			[^:);,.!?\s\x14-\x1F]            # URL must not end with these chars
+			\S{0,1000}?                      # URL body
+			[^:);,.!?\s]                     # URL must not end with these chars
 		)
 		X;
 

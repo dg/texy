@@ -38,7 +38,7 @@ final class FigureModule extends Texy\Module
 			'~^
 				(?>
 					\[\*\ *+                      # opening bracket with asterisk
-					([^\n' . Patterns::MARK . ']{1,1000}) # URLs (1)
+					([^\n]{1,1000})               # URLs (1)
 					' . Patterns::MODIFIER . '?   # modifier (2)
 					\ *+
 					( \* | (?<! < ) > | < )       # alignment (3)

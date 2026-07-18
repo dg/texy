@@ -11,7 +11,6 @@ use Texy;
 use Texy\Nodes\HtmlCommentNode;
 use Texy\Nodes\HtmlTagNode;
 use Texy\ParseContext;
-use Texy\Patterns;
 use Texy\Range;
 use Texy\Regexp;
 use Texy\Syntax;
@@ -55,10 +54,10 @@ final class HtmlModule extends Texy\Module
 				([a-z][a-z0-9_:-]{0,50})        # tag name
 				(
 					(?:
-						\s++ [a-z0-9_:-]++ |   # attribute name
-						= \s*+ " [^"' . Patterns::MARK . ']*+ " |     # attribute value in double quotes
-						= \s*+ \' [^\'' . Patterns::MARK . ']*+ \' |  # attribute value in single quotes
-						= [^\s>' . Patterns::MARK . ']++              # attribute value without quotes
+						\s++ [a-z0-9_:-]++ |          # attribute name
+						= \s*+ " [^"]*+ " |           # attribute value in double quotes
+						= \s*+ \' [^\']*+ \' |        # attribute value in single quotes
+						= [^\s>]++                    # attribute value without quotes
 					)*
 				)
 				\s*+
@@ -72,7 +71,7 @@ final class HtmlModule extends Texy\Module
 			$this->parseComment(...),
 			'~
 				<!--
-				( [^' . Patterns::MARK . ']*? )
+				( .*? )
 				-->
 			~isx',
 			Syntax::HtmlComment,
