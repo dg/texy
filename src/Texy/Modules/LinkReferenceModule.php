@@ -67,7 +67,7 @@ final class LinkReferenceModule extends Texy\Module
 			'~
 				(?<! [.\#\[] )        # exclude modifier .[class], PHP attribute \#[Attr] and nested [
 				\[
-				( [^\[\]*|\n' . Patterns::MARK . ']++ )  # reference name (1); * would be an image, | a labeled form
+				( [^\[\]*|\n]++ )     # reference name (1); * would be an image, | a labeled form
 				]
 			~Ux',
 			Syntax::LinkReference,

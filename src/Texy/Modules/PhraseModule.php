@@ -124,7 +124,7 @@ final class PhraseModule extends Texy\Module
 		$texy->registerLinePattern(
 			$this->parsePhrase(...),
 			'~
-				(?<! [^\s.,;:<>()"\'' . Patterns::MARK . '-] )  # must be preceded by these chars
+				(?<! [^\s.,;:<>()"\'-] )         # must be preceded by these chars
 				\*
 				(?! [\s*] )                      # not followed by space or *
 				( (?: [^ *]++ | [ *] )+ )        # content (1)
@@ -316,7 +316,7 @@ final class PhraseModule extends Texy\Module
 				(?<! \' )                         # not preceded by quote
 				\'\'
 				(?! [\s\'] )                      # not followed by space or quote
-				( (?: [^' . Patterns::MARK . '\r\n\']++ | \' )+ )  # content (1)
+				( (?: [^\r\n\']++ | \' )+ )       # content (1)
 				(?<! [\s\'] )                     # not preceded by space or quote
 				\'\'
 				(?! \' )                          # not followed by quote
@@ -329,7 +329,7 @@ final class PhraseModule extends Texy\Module
 			$this->parseCode(...),
 			'~
 				`
-				( \S (?: [^' . Patterns::MARK . '\r\n `]++ | [ `] )* )  # content (1)
+				( \S (?: [^\r\n `]++ | [ `] )* )        # content (1)
 				' . Patterns::MODIFIER . '?             # modifier (2)
 				(?<! \s )                               # not preceded by space
 				`
@@ -359,7 +359,7 @@ final class PhraseModule extends Texy\Module
 				(?! [\s*] )                      # not followed by space or *
 				( [^|\r\n\]]++ )                 # text (1)
 				\|
-				( (?: [^' . Patterns::MARK . '|\r\n \]]++ | [ ] )+ )  # link (2)
+				( (?: [^|\r\n \]]++ | [ ] )+ )   # link (2)
 				' . Patterns::MODIFIER . '?      # modifier (3)
 				(?<! \s )                        # not preceded by space
 				]
@@ -380,7 +380,7 @@ final class PhraseModule extends Texy\Module
 				(?<! \s )                       # not preceded by space
 				]
 				\(
-				( (?: [^' . Patterns::MARK . '\r )]++ | [ ] )+ )  # link (3)
+				( (?: [^\r )]++ | [ ] )+ )      # link (3)
 				\)
 			~Ux',
 			Syntax::MarkdownLink,
