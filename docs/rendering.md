@@ -14,9 +14,11 @@ Output/
 │   ├── Writer              walks the rendered tree into the well-forming engine
 │   ├── WellFormer          call-driven well-forming + indentation + line wrapping
 │   └── Formatter           formatting config facade + legacy format(string) API
-└── Markdown/
-    ├── Generator           GFM output; needs no Texy instance
-    └── Helpers
+├── Markdown/
+│   ├── Generator           GFM output; needs no Texy instance
+│   └── Helpers
+└── Text/
+    └── Generator           plain-text rendition (Texy::toText())
 ```
 
 ## NodeRenderer – dispatch and extensibility
@@ -59,9 +61,11 @@ Elements built from Texy syntax are correct by construction; invalid structure c
 
 The content model lives in **`Schema`**, the declarative per-element vocabulary: explicit child lists for tables/lists, transparent elements (`a`, `ins`, `del`, `figure`…), text-only (`script`, `style`, `textarea`), phrasing-only contexts (`p`, headings, inline elements), flow content elsewhere. Deep prohibitions block `<a>`-in-`<a>`, `<button>`, `<form>` nesting at any depth. `Schema::inlineElements()` doubles as the phrasing catalogue (value `1` = replaced element), used by paragraph analysis and the typography pass alike.
 
-## Markdown Generator
+## Markdown and Text Generators
 
-`Markdown\Generator` renders GFM from the same AST and depends only on an optional `UrlPolicy` – no `Texy` instance. Known lossy spots fall back to HTML (`<abbr>` for annotations, `<dl>` for definition lists). Because sanitization already happened in the transform phase, safe mode applies to Markdown output too.
+`Markdown\Generator` renders GFM from the same AST and depends only on an optional `UrlPolicy` – no `Texy` instance. Known lossy spots fall back to HTML (`<abbr>` for annotations, `<dl>` for definition lists, tables with cell spans). Because sanitization already happened in the transform phase, safe mode applies to Markdown output too.
+
+`Text\Generator` (behind `Texy::toText()`) renders a plain-text rendition: markup dropped, visible text and block structure kept, typography artifacts (non-breaking spaces, soft hyphens) normalized back.
 
 ## Deprecated: protection marks
 

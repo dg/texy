@@ -305,11 +305,12 @@ class Texy
 
 
 	/**
-	 * Converts DOM structure to pure text.
+	 * Converts Texy text to a plain-text rendition.
 	 */
-	public function toText(): never
+	public function toText(string $text): string
 	{
-		throw new \LogicException('Not implemented yet.');
+		$node = $this->parse($this->preprocess($text));
+		return (new Output\Text\Renderer)->render($node);
 	}
 
 
