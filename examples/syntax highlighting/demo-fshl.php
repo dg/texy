@@ -65,15 +65,13 @@ $texy->htmlOutput->registerHandler(
 		$fshl = new FSHL\Highlighter(new FSHL\Output\Html, FSHL\Highlighter::OPTION_TAB_INDENT);
 		$content = $fshl->highlight($content, new $langClass);
 
-		// Tell Texy not to process the highlighted HTML further
-		$content = $gen->protect($content, $gen::ContentBlock);
-
 		// Build the HTML structure: <pre class="php"><code>...</code></pre>
 		$elPre = new Html\Element('pre');
 		$gen->decorateElement($node->modifier, $elPre);
 		$elPre->attrs['class'] = strtolower($lang);
 
-		$elPre->create('code', $content);
+		// Raw tells Texy not to process the highlighted HTML further
+		$elPre->create('code')->add(new Html\Raw($content));
 
 		return $elPre;
 	},

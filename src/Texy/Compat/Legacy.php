@@ -92,6 +92,8 @@ final class Legacy
 	/** v3 methods removed without emulation; the value navigates to the successor */
 	public const RemovedMethods = [
 		'registerPostLine' => 'the string post-processing pipeline was removed, typography runs as an AST pass',
+		'protect' => 'return a Texy\Output\Html\Element or Raw from a renderer instead',
+		'unprotect' => 'return a Texy\Output\Html\Element or Raw from a renderer instead',
 		'checkURL' => 'use $texy->urlPolicy->isLinkAllowed() or isImageAllowed()',
 		'stringToHtml' => 'use process()',
 		'stringToText' => 'use toText()',

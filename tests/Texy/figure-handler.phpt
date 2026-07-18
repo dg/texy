@@ -17,7 +17,7 @@ test('custom ImageNode handler is called for images in figures', function () {
 
 	// Register custom handler that transforms youtube: URLs to iframes
 	$texy->htmlOutput->registerHandler(
-		function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|string|null {
+		function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
 			if (!str_starts_with($node->url ?? '', 'youtube:')) {
 				return $previous ? $previous($node, $gen) : null;
 			}
@@ -26,9 +26,8 @@ test('custom ImageNode handler is called for images in figures', function () {
 			$width = $node->width ?: 640;
 			$height = $node->height ?: 360;
 
-			return $gen->protect(
+			return new Html\Raw(
 				'<iframe src="https://youtube.com/embed/' . htmlspecialchars($videoId) . '" width="' . $width . '" height="' . $height . '"></iframe>',
-				$gen::ContentBlock,
 			);
 		},
 	);
@@ -47,15 +46,14 @@ test('custom ImageNode handler is called for inline images', function () {
 	$texy = new Texy\Texy;
 
 	$texy->htmlOutput->registerHandler(
-		function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|string|null {
+		function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
 			if (!str_starts_with($node->url ?? '', 'youtube:')) {
 				return $previous ? $previous($node, $gen) : null;
 			}
 
 			$videoId = substr($node->url, 8);
-			return $gen->protect(
+			return new Html\Raw(
 				'<iframe src="https://youtube.com/embed/' . htmlspecialchars($videoId) . '"></iframe>',
-				$gen::ContentReplaced,
 			);
 		},
 	);

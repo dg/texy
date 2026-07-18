@@ -207,17 +207,14 @@ $texy->addHandler('afterParse', function (DocumentNode $doc): void {
 // ============================================================
 
 $texy->htmlOutput->registerHandler(
-	function (Nodes\ImageNode $node, Html\Renderer $gen) use ($texy): Html\Element|string|null {
+	function (Nodes\ImageNode $node, Html\Renderer $gen): Html\Element|string|null {
 		if ($node->url && str_starts_with($node->url, 'youtube:')) {
-			$videoId = substr($node->url, 8);
-			$width = $node->width ?: 640;
-			$height = $node->height ?: 360;
-
-			$code = '<iframe width="' . $width . '" height="' . $height . '"'
-				. ' src="https://www.youtube.com/embed/' . htmlspecialchars($videoId) . '"'
-				. ' frameborder="0" allowfullscreen></iframe>';
-
-			return $gen->protect($code, $gen::ContentBlock);
+			return new Html\Element('iframe', [
+				'width' => $node->width ?: 640,
+				'height' => $node->height ?: 360,
+				'src' => 'https://www.youtube.com/embed/' . substr($node->url, 8),
+				'allowfullscreen' => true,
+			]);
 		}
 		return null;
 	},

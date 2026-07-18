@@ -37,7 +37,7 @@ $texy = new Texy;
 // This works for both inline images AND images in figures,
 // because FigureModule delegates to the generator for ImageNode processing.
 $texy->htmlOutput->registerHandler(
-	function (ImageNode $node, Html\Renderer $gen, ?Closure $previous) use ($texy): Html\Element|string|null {
+	function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
 		// Check if the URL has our custom "youtube:" scheme
 		$url = $node->url ?? '';
 		if (!str_starts_with($url, 'youtube:')) {
@@ -60,7 +60,7 @@ $texy->htmlOutput->registerHandler(
 			. '</iframe>';
 
 		// Tell Texy this is ready-to-use HTML (don't process it further)
-		return $gen->protect($code, $gen::ContentBlock);
+		return new Html\Raw($code);
 	},
 );
 
