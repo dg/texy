@@ -40,6 +40,26 @@ final class EmoticonModule extends Texy\Module
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed[Syntax::Emoticon] = false;
+		$texy->addHandler('afterParse', $this->resolveEmoticons(...));
+	}
+
+
+	/**
+	 * Writes resolved emoji into EmoticonNode so the AST is semantically complete
+	 * and generators need not reach into this module.
+	 */
+	public function resolveEmoticons(Texy\Nodes\DocumentNode $doc): void
+	{
+		if (empty($this->texy->allowed[Syntax::Emoticon])) { // disabled → no EmoticonNodes in AST
+			return;
+		}
+
+		(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node): ?int {
+			if ($node instanceof EmoticonNode) {
+				$node->resolved = $this->icons[$node->emoticon] ?? $node->emoticon;
+			}
+			return null;
+		});
 	}
 
 
