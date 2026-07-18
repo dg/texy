@@ -33,19 +33,14 @@ class Texy
 		ALL = true,
 		NONE = false;
 
-	// url filters
-	public const
-		FILTER_ANCHOR = 'anchor',
-		FILTER_IMAGE = 'image';
-
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
 	/** TAB width (for converting tabs to spaces) */
 	public int $tabWidth = 8;
 
-	/** @var array<string, string>  regexps to check URL schemes */
-	public array $urlSchemeFilters; // disable URL scheme filter
+	/** URL scheme security policy for links and images */
+	public readonly UrlPolicy $urlPolicy;
 
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
@@ -105,7 +100,8 @@ class Texy
 
 	public function __construct()
 	{
-		$this->htmlPolicy = new HtmlPolicy($this);
+		$this->urlPolicy = new UrlPolicy;
+		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->loadModules();
 	}
@@ -123,7 +119,7 @@ class Texy
 		$this->addModule($this->imageModule = new Modules\ImageModule($this));
 		$this->addModule($this->phraseModule = new Modules\PhraseModule($this));
 		$this->addModule($this->linkModule = new Modules\LinkReferenceModule($this));
-		$this->addModule(new Modules\AutolinkModule($this));
+		$this->addModule($this->autolinkModule = new Modules\AutolinkModule($this));
 		$this->addModule($this->emoticonModule = new Modules\EmoticonModule($this));
 
 		// block parsing
@@ -226,7 +222,6 @@ class Texy
 	 */
 	public function process(string $text, bool $singleLine = false): string
 	{
-		$this->htmlPolicy->resetCache();
 		unset($this->_linePatterns, $this->_blockPatterns);
 		$node = $this->parse($text, $singleLine);
 		$renderer = new Output\Html\Renderer($this->htmlOutput, $this);
@@ -353,18 +348,9 @@ class Texy
 
 
 	/**
-	 * Filters bad URLs.
-	 * @param  string  $type  Texy::FILTER_ANCHOR | Texy::FILTER_IMAGE
+	 * Creates parse context (for advanced usage).
+	 * Note: Modules must be initialized via parse() first for patterns to be available.
 	 */
-	final public function checkURL(string $URL, string $type): bool
-	{
-		// absolute URL with scheme? check scheme!
-		return empty($this->urlSchemeFilters[$type])
-			|| !Regexp::match($URL, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // http: | mailto:
-			|| Regexp::match($URL, $this->urlSchemeFilters[$type]);
-	}
-
-
 	public function createParseContext(): ParseContext
 	{
 		return new ParseContext(

@@ -22,6 +22,13 @@ use function is_array, is_string;
  */
 final class ElementDecorator
 {
+	/** @var array<string, int>|bool  lookup set snapshot of $policy->allowedClasses */
+	private bool|array $classes;
+
+	/** @var array<string, int>|bool  lookup set snapshot of $policy->allowedStyles */
+	private bool|array $styles;
+
+
 	public function __construct(
 		private Texy $texy,
 		private Config $config,
@@ -87,7 +94,9 @@ final class ElementDecorator
 	private function decorateClasses(Modifier $modifier, array &$attrs): void
 	{
 		if ($modifier->classes || $modifier->id !== null) {
-			[$allowedClasses] = $this->texy->htmlPolicy->getAllowedProps();
+			$allowedClasses = $this->classes ??= is_array($this->texy->htmlPolicy->allowedClasses)
+				? array_flip($this->texy->htmlPolicy->allowedClasses)
+				: $this->texy->htmlPolicy->allowedClasses;
 			settype($attrs['class'], 'array');
 			if ($allowedClasses === Texy::ALL) {
 				foreach ($modifier->classes as $value => $foo) {
@@ -114,7 +123,9 @@ final class ElementDecorator
 	private function decorateStyles(Modifier $modifier, array &$attrs): void
 	{
 		if ($modifier->styles) {
-			[, $allowedStyles] = $this->texy->htmlPolicy->getAllowedProps();
+			$allowedStyles = $this->styles ??= is_array($this->texy->htmlPolicy->allowedStyles)
+				? array_flip($this->texy->htmlPolicy->allowedStyles)
+				: $this->texy->htmlPolicy->allowedStyles;
 			settype($attrs['style'], 'array');
 			if ($allowedStyles === Texy::ALL) {
 				foreach ($modifier->styles as $prop => $value) {
