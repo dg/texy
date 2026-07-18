@@ -58,6 +58,7 @@ $texy->removeSoftHyphens = true;   // strip U+00AD from input
 ```php
 $html = $texy->process($text);     // parse + render HTML
 $ast = $texy->parse($text);        // the Nodes\DocumentNode tree
+$plain = $texy->toText($text);     // plain-text rendition
 Texy\Nodes\HeadingNode::collectFrom($ast);          // headings in document order
 Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->tocTitle; // document title (for <title>)
 ```

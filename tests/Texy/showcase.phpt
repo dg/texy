@@ -26,8 +26,8 @@ test('complete syntax showcase', function () {
 		$texy->process(file_get_contents(__DIR__ . '/sources/showcase.texy')),
 	);
 
-	/*Assert::matchFile(
+	Assert::matchFile(
 		__DIR__ . '/expected/showcase.txt',
-		$texy->toText(),
-	);*/
+		$texy->toText(file_get_contents(__DIR__ . '/sources/showcase.texy')),
+	);
 });
