@@ -9,7 +9,7 @@ namespace Texy\Output\Html;
 
 use Texy;
 use Texy\Regexp;
-use function array_intersect, array_keys, array_unshift, htmlspecialchars, max, reset, rtrim, str_repeat, strtr, wordwrap;
+use function array_intersect, array_keys, array_unshift, count, htmlspecialchars, ltrim, max, reset, rtrim, str_repeat, strlen, substr, wordwrap;
 use const ENT_NOQUOTES;
 
 
@@ -18,19 +18,45 @@ use const ENT_NOQUOTES;
  * engine, now fed by startTag()/endTag()/text()/raw() calls from the
  * renderer's tree walk (or by the raw() string frontend).
  * Fixes pairing, content model and nesting, produces indented, wrapped HTML.
+ *
+ * The output buffer is a list of segments; whitespace fix-ups that the string
+ * machine encoded with control bytes (\x07 greedy space eater, \x08 back-tab,
+ * \r collapsible newline, frozen preserve-space text) are explicit operations
+ * here. Segment boundaries reproduce the byte-level quirks of the original:
+ * a Barrier marks a spot the final right-trim could not cross, and back-tab
+ * eating passes through EatSpaces barriers (the machine removed \x07 bytes
+ * before processing \x08) but stops at Close barriers and preserved text.
  */
 final class WellFormer
 {
-	private string $out = '';
+	// segment types
+	private const
+		Normal = 0,
+		Pre = 1,          // preserved text (pre, code, comments): exempt from trims and wrapping
+		BarrierEat = 2,   // former \x07 site: blocks trims, transparent to back-tab eating
+		BarrierClose = 3; // former \x08 site: blocks trims and back-tab eating
+
+	/** @var list<array{int, string}>  output buffer: [segment type, text] */
+	private array $segs = [];
 
 	private string $textBuffer = '';
 
 	/**
-	 * Offset where the current "fragment" (text emitted since the last tag)
-	 * begins; the legacy engine trimmed per regex fragment, so operations
-	 * like the <br> rtrim must not reach past this boundary.
+	 * Where the current "fragment" (text emitted since the last tag) begins;
+	 * the legacy engine trimmed per regex fragment, so operations like the
+	 * <br> rtrim must not reach past this boundary.
+	 * @var array{int, int}  [segment count, offset in last segment]
 	 */
-	private int $fragmentStart = 0;
+	private array $fragmentStart = [0, 0];
+
+	/** eat spaces immediately following the last emitted tag (former \x07) */
+	private bool $eatSpaces = false;
+
+	/** @var ?array{int, int}  position right after the last soft newline (former \r) */
+	private ?array $softMark = null;
+
+	/** the soft newline at $softMark has already absorbed a second one */
+	private bool $softCollapsed = false;
 
 	/** indent space counter */
 	private int $space;
@@ -38,7 +64,7 @@ final class WellFormer
 	/** @var array<string, int> */
 	private array $tagUsed = [];
 
-	/** @var array<int, array{tag: string, open: ?string, close: ?string, dtdContent: array<string, int>, indent: int}> */
+	/** @var array<int, array{tag: string, open: ?string, close: ?string, closeIndent: ?int, dtdContent: array<string, int>, indent: int}> */
 	private array $tagStack = [];
 
 	/** @var array<string, int>  content DTD used, when context is not defined */
@@ -84,7 +110,7 @@ final class WellFormer
 			$gap = substr($html, $offset, $m[0][1] - $offset);
 			if ($gap !== '') { // unmatched garbage bypassed the parser untouched
 				$this->flushText();
-				$this->out .= $gap;
+				$this->append($gap);
 				$this->endFragment();
 			}
 
@@ -128,7 +154,9 @@ final class WellFormer
 	public function comment(string $inner): void
 	{
 		$this->flushText();
-		$this->out .= '<' . Texy\Helpers::freezeSpaces($inner) . '>';
+		$this->append('<');
+		$this->appendPre($inner);
+		$this->append('>');
 		$this->endFragment();
 	}
 
@@ -158,9 +186,9 @@ final class WellFormer
 		}
 
 		if (array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->config->preserveSpaces)) {
-			$this->out .= Texy\Helpers::freezeSpaces($s); // inside pre & textarea preserve spaces
+			$this->appendPre($s); // inside pre & textarea preserve spaces verbatim
 		} else {
-			$this->out .= Regexp::replace($s, '~[ \n]+~', ' '); // otherwise shrink multiple spaces
+			$this->append(Regexp::replace($s, '~[ \n]+~', ' ')); // otherwise shrink multiple spaces
 		}
 	}
 
@@ -205,16 +233,19 @@ final class WellFormer
 
 			if ($indent && $tag === 'br') {
 				// trim only the current fragment, not previously emitted markup
-				$this->out = substr($this->out, 0, $this->fragmentStart)
-					. rtrim(substr($this->out, $this->fragmentStart))
-					. '<' . $tag . $attr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
+				$this->stripTail(" \t\n\r\0\x0B", $this->fragmentStart);
+				$this->append('<' . $tag . $attr . ">\n" . str_repeat("\t", max(0, $this->space - 1)));
+				$this->eatBarrier();
 
 			} elseif ($indent && !isset(Schema::inlineElements()[$tag])) {
-				$space = "\r" . str_repeat("\t", $this->space);
-				$this->out .= $space . '<' . $tag . $attr . '>' . $space;
+				$tabs = str_repeat("\t", $this->space);
+				$this->softNewline();
+				$this->append($tabs . '<' . $tag . $attr . '>');
+				$this->softNewline();
+				$this->append($tabs);
 
 			} else {
-				$this->out .= '<' . $tag . $attr . '>';
+				$this->append('<' . $tag . $attr . '>');
 			}
 
 			$this->endFragment();
@@ -223,10 +254,12 @@ final class WellFormer
 
 		$open = null;
 		$close = null;
+		$closeIndent = null;
 		$indent = 0;
 
 		if ($allowed) {
 			$open = '<' . $tag . $attr . '>';
+			$close = '</' . $tag . '>';
 
 			// Determine what children this tag can contain
 			$dtdContent = Schema::isKnown($tag)
@@ -235,12 +268,12 @@ final class WellFormer
 
 			// Format output with indentation for block elements
 			if ($this->config->indent && !isset(Schema::inlineElements()[$tag])) {
-				$close = "\x08" . '</' . $tag . '>' . "\n" . str_repeat("\t", $this->space);
-				$this->out .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
+				$closeIndent = $this->space;
+				$this->append("\n" . str_repeat("\t", $this->space++) . $open);
+				$this->eatBarrier();
 				$indent = 1;
 			} else {
-				$close = '</' . $tag . '>';
-				$this->out .= $open;
+				$this->append($open);
 			}
 		}
 
@@ -249,6 +282,7 @@ final class WellFormer
 			'tag' => $tag,
 			'open' => $open,
 			'close' => $close,
+			'closeIndent' => $closeIndent,
 			'dtdContent' => $dtdContent,
 			'indent' => $indent,
 		]);
@@ -281,7 +315,7 @@ final class WellFormer
 		$back = true;
 		foreach ($this->tagStack as $i => $item) {
 			$itemTag = $item['tag'];
-			$this->out .= $item['close'];
+			$this->emitClose($item);
 			$this->space -= $item['indent'];
 			$this->tagUsed[$itemTag]--;
 			$back = $back && isset(Schema::inlineElements()[$itemTag]);
@@ -306,7 +340,9 @@ final class WellFormer
 
 		// autoopen tags
 		foreach ($tmp as $item) {
-			$this->out .= $item['open'];
+			if ($item['open'] !== null) {
+				$this->append($item['open']);
+			}
 			$this->space += $item['indent'];
 			$this->tagUsed[$item['tag']]++;
 			array_unshift($this->tagStack, $item);
@@ -314,48 +350,213 @@ final class WellFormer
 	}
 
 
+	/**
+	 * Emits the closing tag of a stack frame; block closes eat the preceding
+	 * indentation tab (former \x08 back-tab) and re-indent for the parent.
+	 * @param  array{tag: string, open: ?string, close: ?string, closeIndent: ?int, dtdContent: array<string, int>, indent: int}  $item
+	 */
+	private function emitClose(array $item): void
+	{
+		if ($item['close'] === null) {
+			return;
+		}
+
+		if ($item['closeIndent'] !== null) {
+			$this->backtabEat();
+			$this->segs[] = [self::BarrierClose, ''];
+			$this->append($item['close'] . "\n" . str_repeat("\t", $item['closeIndent']));
+		} else {
+			$this->append($item['close']);
+		}
+	}
+
+
+	/********************* output buffer operations ****************d*g**/
+
+
+	/**
+	 * Appends markup/text to the buffer, consuming leading spaces while the
+	 * eat-spaces mode (set right after an indented open tag or <br>) is on.
+	 */
+	private function append(string $s): void
+	{
+		if ($s === '') {
+			return;
+		}
+
+		if ($this->eatSpaces) {
+			$s = ltrim($s, ' ');
+			if ($s === '') {
+				return; // fully eaten, keep eating
+			}
+			$this->eatSpaces = false;
+		}
+
+		$last = count($this->segs) - 1;
+		if ($last >= 0 && $this->segs[$last][0] === self::Normal) {
+			$this->segs[$last][1] .= $s;
+		} else {
+			$this->segs[] = [self::Normal, $s];
+		}
+	}
+
+
+	/**
+	 * Marks a former \x07 site: blocks the final right-trim across it and
+	 * turns on eating of the spaces that follow.
+	 */
+	private function eatBarrier(): void
+	{
+		$this->segs[] = [self::BarrierEat, ''];
+		$this->eatSpaces = true;
+	}
+
+
+	/**
+	 * Appends preserved text: exempt from space eating, trims and wrapping.
+	 */
+	private function appendPre(string $s): void
+	{
+		if ($s === '') {
+			return;
+		}
+
+		$this->eatSpaces = false; // preserved content is not eaten
+		$this->segs[] = [self::Pre, $s];
+	}
+
+
+	/**
+	 * Soft newline around empty block voids (former \r): trailing tabs and
+	 * spaces before it are trimmed, and two adjacent soft newlines collapse
+	 * into a single "\n" (pairwise, like the \r\r -> \n replacement did).
+	 */
+	private function softNewline(): void
+	{
+		$this->stripTail(" \t");
+
+		if ($this->softMark === $this->endPos() && !$this->softCollapsed) {
+			$this->softCollapsed = true;
+			return;
+		}
+
+		$this->append("\n");
+		$this->softMark = $this->endPos();
+		$this->softCollapsed = false;
+	}
+
+
+	/**
+	 * Back-tab (former \x08): removes spaces and at most one tab immediately
+	 * before a block closing tag. Passes through eat-barriers (the machine
+	 * removed \x07 bytes first), stops at close-barriers and preserved text.
+	 */
+	private function backtabEat(): void
+	{
+		for ($i = count($this->segs) - 1; $i >= 0; $i--) {
+			$type = $this->segs[$i][0];
+			if ($type === self::BarrierEat || ($type === self::Normal && $this->segs[$i][1] === '')) {
+				continue; // transparent
+			}
+			if ($type === self::Normal) {
+				$this->segs[$i][1] = Regexp::replace($this->segs[$i][1], '~\t?\ *\z~', '', limit: 1);
+			}
+			return; // eaten chars must be contiguous - one segment only
+		}
+	}
+
+
+	/**
+	 * Strips trailing characters from the buffer, walking segments backward;
+	 * stops at any barrier or preserved segment, and at $limit (fragment start).
+	 * @param  ?array{int, int}  $limit
+	 */
+	private function stripTail(string $chars, ?array $limit = null): void
+	{
+		for ($i = count($this->segs) - 1; $i >= 0; $i--) {
+			if ($this->segs[$i][0] !== self::Normal) {
+				return;
+			}
+
+			$s = $this->segs[$i][1];
+			if ($limit !== null && $limit[0] - 1 === $i) { // fragment starts inside this segment
+				$this->segs[$i][1] = substr($s, 0, $limit[1]) . rtrim(substr($s, $limit[1]), $chars);
+				return;
+			}
+			if ($limit !== null && $limit[0] - 1 > $i) {
+				return; // before the fragment entirely
+			}
+
+			$s = rtrim($s, $chars);
+			$this->segs[$i][1] = $s;
+			if ($s !== '') {
+				return;
+			}
+		}
+	}
+
+
+	/** @return array{int, int} */
+	private function endPos(): array
+	{
+		$last = count($this->segs) - 1;
+		return [$last + 1, $last >= 0 ? strlen($this->segs[$last][1]) : 0];
+	}
+
+
 	private function endFragment(): void
 	{
-		$this->fragmentStart = strlen($this->out);
+		$this->fragmentStart = $this->endPos();
 	}
 
 
 	/**
 	 * Flushes open tags and finalizes the output (trim, indentation cleanup,
-	 * line wrapping, unfreezing spaces).
+	 * line wrapping).
 	 */
 	public function finish(): string
 	{
 		$this->flushText();
-		$s = $this->out;
-		$this->out = '';
 
 		// empty out stack
 		foreach ($this->tagStack as $item) {
-			$s .= $item['close'];
+			$this->emitClose($item);
 		}
 
 		$this->tagStack = [];
 		$this->tagUsed = [];
 
-		// right trim
-		$s = Regexp::replace($s, '~[\t ]+(\n|\r|$)~', '$1');
+		// right trim inside normal segments; barriers and preserved text
+		// interrupt the [\t ]+ runs exactly like the control bytes did
+		$wrap = $this->config->lineWrap > 0;
+		$s = '';
+		$lastIndex = count($this->segs) - 1;
+		foreach ($this->segs as $i => [$type, $text]) {
+			if ($type === self::Pre) {
+				// wordwrap must not break inside preserved text - encode its
+				// whitespace as non-breakable for the duration of the wrap
+				$s .= $wrap ? Texy\Helpers::freezeSpaces($text) : $text;
+			} elseif ($type === self::Normal) {
+				$text = Regexp::replace($text, '~[\t ]+(?=\n)~', '');
+				if ($i === $lastIndex) {
+					$text = Regexp::replace($text, '~[\t ]+\z~', '');
+				}
+				$s .= $text;
+			}
+		}
 
-		// join double \r to single \n
-		$s = str_replace("\r\r", "\n", $s);
-		$s = strtr($s, "\r", "\n");
-
-		// greedy chars
-		$s = Regexp::replace($s, '~\x07\ *~', '');
-		// back-tabs
-		$s = Regexp::replace($s, '~\t?\ *\x08~', '');
+		$this->segs = [];
+		$this->fragmentStart = [0, 0];
+		$this->eatSpaces = false;
+		$this->softMark = null;
+		$this->softCollapsed = false;
 
 		// line wrap
-		if ($this->config->lineWrap > 0) {
+		if ($wrap) {
 			$s = Regexp::replace($s, '~^(\t*)(.*)$~m', $this->wrap(...));
 		}
 
-		// unfreeze spaces
+		// unfreeze attribute values (and wrap-protected preserved text)
 		return Texy\Helpers::unfreezeSpaces($s);
 	}
 
@@ -396,7 +597,7 @@ final class WellFormer
 			}
 
 			// close it
-			$this->out .= $item['close'];
+			$this->emitClose($item);
 			$this->space -= $item['indent'];
 			$this->tagUsed[$itemTag]--;
 			unset($this->tagStack[$i]);
