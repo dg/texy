@@ -351,6 +351,15 @@ class Renderer extends NodeRenderer
 
 	private function renderTable(Nodes\TableNode $node): string
 	{
+		// GFM tables cannot express cell spans - fall back to an HTML table
+		foreach ($node->rows as $row) {
+			foreach ($row->cells as $cell) {
+				if ($cell->colspan > 1 || $cell->rowspan > 1) {
+					return $this->renderHtmlTable($node);
+				}
+			}
+		}
+
 		$rows = [];
 		$headerDone = false;
 		$columnAligns = [];
@@ -390,6 +399,31 @@ class Renderer extends NodeRenderer
 		}
 
 		return implode("\n", $rows) . "\n";
+	}
+
+
+	/**
+	 * HTML fallback for tables with colspan/rowspan. Markdown inside a block
+	 * HTML island is not processed, so cells carry plain text content.
+	 */
+	private function renderHtmlTable(Nodes\TableNode $node): string
+	{
+		$s = "<table>\n";
+		foreach ($node->rows as $row) {
+			$s .= '<tr>';
+			foreach ($row->cells as $cell) {
+				$tag = $cell->header ? 'th' : 'td';
+				$s .= '<' . $tag
+					. ($cell->colspan > 1 ? ' colspan="' . $cell->colspan . '"' : '')
+					. ($cell->rowspan > 1 ? ' rowspan="' . $cell->rowspan . '"' : '')
+					. '>'
+					. htmlspecialchars(trim(TexyHelpers::extractText($cell->content)), ENT_QUOTES, 'UTF-8')
+					. '</' . $tag . '>';
+			}
+			$s .= "</tr>\n";
+		}
+
+		return $s . "</table>\n";
 	}
 
 

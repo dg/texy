@@ -191,6 +191,26 @@ test('table', function () {
 });
 
 
+test('table with colspan falls back to HTML', function () {
+	$input = "| Name || Age\n| Jesus | Christ | 33";
+	$expected = "<table>\n"
+		. "<tr><td colspan=\"2\">Name</td><td>Age</td></tr>\n"
+		. "<tr><td>Jesus</td><td>Christ</td><td>33</td></tr>\n"
+		. "</table>\n";
+	Assert::same($expected, toMarkdown($input));
+});
+
+
+test('table with rowspan falls back to HTML', function () {
+	$input = "| Bill | 50\n|^ | 52";
+	$expected = "<table>\n"
+		. "<tr><td rowspan=\"2\">Bill</td><td>50</td></tr>\n"
+		. "<tr><td>52</td></tr>\n"
+		. "</table>\n";
+	Assert::same($expected, toMarkdown($input));
+});
+
+
 // Horizontal rule
 test('horizontal rule', function () {
 	Assert::same(
