@@ -188,7 +188,12 @@ class Texy
 		$this->htmlPolicy->resetCache();
 		$text = $this->preprocess($text);
 		$node = $this->parse($text, $singleLine);
-		$html = (new Output\Html\Renderer($this->htmlOutput, $this))->render($node);
+		$renderer = new Output\Html\Renderer(
+			$this->htmlOutput,
+			$this,
+			noFollow: $this->htmlOutput->linkNoFollow || !empty($node->meta['nofollow']),
+		);
+		$html = $renderer->render($node);
 		return $html;
 	}
 

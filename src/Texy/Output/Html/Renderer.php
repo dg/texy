@@ -35,6 +35,10 @@ final class Renderer
 
 	private ElementDecorator $decorator;
 
+	private ImageDimensions $imageDimensions;
+
+	private bool $noFollow;
+
 	/** @var array<string, string>  Protection markup table */
 	private array $marks = [];
 
@@ -42,7 +46,10 @@ final class Renderer
 	public function __construct(
 		public readonly Config $config,
 		private Texy $texy,
+		?bool $noFollow = null,
 	) {
+		$this->noFollow = $noFollow ?? $config->linkNoFollow;
+		$this->imageDimensions = new ImageDimensions($config);
 		$this->decorator = new ElementDecorator($texy, $config);
 
 		$this->handlers = [
@@ -154,7 +161,6 @@ final class Renderer
 	 */
 	public function registerHandler(\Closure $handler): void
 	{
-		/** @var class-string<Node> $nodeClass */
 		$nodeClass = (string) (new \ReflectionFunction($handler))->getParameters()[0]->getType();
 		$previous = $this->handlers[$nodeClass] ?? null;
 		$this->handlers[$nodeClass] = static function (Node $node, self $gen) use ($handler, $previous): Element|string {
@@ -267,6 +273,21 @@ final class Renderer
 	}
 
 
+	/**
+	 * Checks whether rendered children produce no visible output (only empty strings/whitespace).
+	 * @param array<Element|string> $children
+	 */
+	private function renderedToNothing(array $children): bool
+	{
+		foreach ($children as $child) {
+			if (!is_string($child) || trim($child) !== '') {
+				return false;
+			}
+		}
+		return true;
+	}
+
+
 	/********************* protection mechanism ****************d*g**/
 
 
@@ -317,6 +338,11 @@ final class Renderer
 		// Block HTML content - skip <p> wrapper entirely
 		if ($node->blockHtml) {
 			return $this->wrapChildren($children);
+		}
+
+		// Whole content rendered to nothing (consumed directives, comments) → no paragraph at all
+		if ($node->modifier === null && $this->renderedToNothing($children)) {
+			return $this->wrapChildren([]);
 		}
 
 		$info = $this->analyzeContent($node->content->children);
@@ -460,14 +486,23 @@ final class Renderer
 
 		// Get the actual ImageNode (might be wrapped in LinkNode)
 		$image = $node->image;
-		$imageNode = $image instanceof Nodes\LinkNode && isset($image->content->children[0]) && $image->content->children[0] instanceof Nodes\ImageNode
-			? $image->content->children[0]
-			: $image;
+		$inner = $image instanceof Nodes\LinkNode ? ($image->content->children[0] ?? null) : $image;
 
-		// Extract alignment from ImageNode - we'll apply it to the figure wrapper instead
-		$hAlign = $imageNode instanceof Nodes\ImageNode ? $imageNode->modifier?->hAlign : null;
-		if ($imageNode instanceof Nodes\ImageNode && $imageNode->modifier) {
-			$imageNode->modifier->hAlign = null; // Clear so generator won't add it to <img>
+		// Extract alignment from ImageNode - we'll apply it to the figure wrapper instead;
+		// clear it on a copy so generator won't add it to <img> (the node must stay untouched)
+		$hAlign = null;
+		if ($inner instanceof Nodes\ImageNode && $inner->modifier?->hAlign !== null) {
+			$hAlign = $inner->modifier->hAlign;
+			$cleared = clone $inner;
+			$cleared->modifier = clone $inner->modifier;
+			$cleared->modifier->hAlign = null;
+			if ($image instanceof Nodes\LinkNode) {
+				$image = clone $image;
+				$image->content = clone $image->content;
+				$image->content->children[0] = $cleared;
+			} else {
+				$image = $cleared;
+			}
 		}
 
 		// Build image via generator - this allows custom ImageNode handlers to work
@@ -659,15 +694,16 @@ final class Renderer
 	private function renderImage(Nodes\ImageNode $node): Element
 	{
 		// Detect dimensions from file system
-		$this->detectImageDimensions($node);
+		[$width, $height] = $this->imageDimensions->detect($node);
 
 		$el = new Element('img');
 		$mod = $node->modifier;
 
-		// Extract and clear title/hAlign before decorate
+		// Extract title/hAlign and clear them on a copy before decorate (the node must stay untouched)
 		$alt = $mod?->title;
 		$hAlign = $mod?->hAlign;
-		if ($mod) {
+		if ($mod !== null) {
+			$mod = clone $mod;
 			$mod->title = null;
 			$mod->hAlign = null;
 		}
@@ -717,40 +753,10 @@ final class Renderer
 		}
 
 		// dimensions
-		$el->attrs['width'] = $node->width;
-		$el->attrs['height'] = $node->height;
+		$el->attrs['width'] = $width;
+		$el->attrs['height'] = $height;
 
 		return $el;
-	}
-
-
-	/**
-	 * Detects image dimensions from file system.
-	 */
-	private function detectImageDimensions(Nodes\ImageNode $node): void
-	{
-		if ($node->url === null || !Helpers::isRelative($node->url) || str_contains($node->url, '..')) {
-			return;
-		}
-
-		$fileRoot = $this->config->imageFileRoot;
-		if ($fileRoot === null) {
-			return;
-		}
-
-		$file = rtrim($fileRoot, '/\\') . '/' . $node->url;
-		if (!@is_file($file) || !($size = @getimagesize($file))) { // intentionally @
-			return;
-		}
-
-		if ($node->width === null && $node->height === null) {
-			$node->width = $size[0];
-			$node->height = $size[1];
-		} elseif ($node->width !== null && $node->height === null) {
-			$node->height = (int) round($size[1] / $size[0] * $node->width);
-		} elseif ($node->height !== null && $node->width === null) {
-			$node->width = (int) round($size[0] / $size[1] * $node->height);
-		}
 	}
 
 
@@ -765,16 +771,18 @@ final class Renderer
 
 		$el = new Element('a');
 
-		// Handle nofollow class
+		// Handle nofollow class (work on a copy, the node must stay untouched)
+		$mod = $node->modifier;
 		$nofollow = false;
-		if ($node->modifier && isset($node->modifier->classes['nofollow'])) {
+		if ($mod !== null && isset($mod->classes['nofollow'])) {
 			$nofollow = true;
-			unset($node->modifier->classes['nofollow']);
+			$mod = clone $mod;
+			unset($mod->classes['nofollow']);
 		}
 
 		// Apply modifier (title, class, id, style, etc.) before href
 		$el->attrs['href'] = null; // trick - reserve position at front
-		$this->decorateElement($node->modifier, $el);
+		$this->decorateElement($mod, $el);
 
 		// Normalize www. to http://
 		if (strncasecmp($rawUrl, 'www.', 4) === 0) {
@@ -787,7 +795,7 @@ final class Renderer
 		$el->attrs['href'] = Helpers::prependRoot($rawUrl, $root);
 
 		// rel="nofollow"
-		if ($nofollow || ($this->config->linkNoFollow && str_contains($el->attrs['href'], '//'))) {
+		if ($nofollow || ($this->noFollow && str_contains($el->attrs['href'], '//'))) {
 			$el->attrs['rel'] = 'nofollow';
 		}
 
@@ -848,7 +856,7 @@ final class Renderer
 			: $node->url;
 
 		$el = new Element('a', ['href' => $url]);
-		if ($this->config->linkNoFollow && str_contains($url, '//')) {
+		if ($this->noFollow && str_contains($url, '//')) {
 			$el->attrs['rel'] = 'nofollow';
 		}
 
@@ -890,7 +898,7 @@ final class Renderer
 
 		// Add rel="nofollow" for external links when linkNoFollow is enabled
 		if ($tagName === 'a' && !$node->closing && isset($attrs['href']) && is_string($attrs['href'])) {
-			if ($this->config->linkNoFollow && str_contains($attrs['href'], '//')) {
+			if ($this->noFollow && str_contains($attrs['href'], '//')) {
 				$existingRel = isset($attrs['rel']) && is_string($attrs['rel']) ? $attrs['rel'] : '';
 				$relParts = $existingRel ? explode(' ', $existingRel) : [];
 				if (!in_array('nofollow', $relParts, true)) {
@@ -944,14 +952,9 @@ final class Renderer
 	{
 		$parsed = $node->parseContent();
 
-		// Handle special directives
+		// {{texy: ...}} directives are normally consumed by DirectiveModule::processDirectives()
+		// in the transform phase; swallow any that reach the renderer (hand-built AST)
 		if ($parsed['name'] === 'texy' && $parsed['args']) {
-			switch ($parsed['args'][0]) {
-				case 'nofollow':
-					$this->config->linkNoFollow = true;
-					break;
-			}
-			// texy directive with args returns empty
 			return '';
 		}
 

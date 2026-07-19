@@ -230,7 +230,7 @@ class Renderer
 	private function renderParagraph(Nodes\ParagraphNode $node): string
 	{
 		$content = $this->renderNodes($node->content->children);
-		return $content . "\n";
+		return $content === '' ? '' : $content . "\n";
 	}
 
 
