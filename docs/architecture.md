@@ -32,7 +32,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
 **The AST** – node classes in `src/Texy/Nodes/`, all extending `Texy\Node`. Two abstract families: `BlockNode` (paragraphs, headings, lists, tables…) and `InlineNode` (text, phrases, links, images…). Child lists live in `ContentNode` containers. `Texy\NodeTraverser` provides visitor-style traversal with enter/leave callbacks and node replacement/removal.
 
-**[Output generators](rendering.md)** – `Output\Html\Config` and `Output\Markdown\Generator`, both extending `Output\NodeRenderer` (a per-node-class dispatch with chainable custom handlers). The Markdown generator needs no `Texy` instance at all – the test of the AST's semantic completeness.
+**[Output generators](rendering.md)** – `Output\Html\Renderer` and `Output\Markdown\Renderer`, both extending `Output\NodeRenderer` (a per-node-class dispatch with chainable custom handlers). The HTML renderer is created per render by the `Output\Html\Config` configuration facade; the Markdown renderer needs no `Texy` instance at all – the test of the AST's semantic completeness.
 
 ## Processing flow
 

@@ -359,7 +359,7 @@ Not a syntax on its own but usable with almost every construct above:
 .(title)[class #id]{style: value; attr: value}<>^
 ```
 
-See [modifiers.md](modifiers.md) for the full description and the configuration reference (user manual) for the `$allowedClasses` / `$allowedStyles` restrictions.
+See [modifiers.md](modifiers.md) for the full description and the configuration reference (user manual) for the `$htmlPolicy->allowedClasses` / `$htmlPolicy->allowedStyles` restrictions.
 
 ---
 
