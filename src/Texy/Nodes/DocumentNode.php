@@ -15,6 +15,10 @@ use Texy\Range;
  */
 class DocumentNode extends BlockNode
 {
+	/** @var array<string, mixed>  document-level options collected from {{texy: ...}} directives */
+	public array $meta = [];
+
+
 	public function __construct(
 		public ContentNode $content = new ContentNode,
 		public ?Range $range = null,
