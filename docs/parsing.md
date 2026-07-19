@@ -33,7 +33,7 @@ Because matching happens once on the raw input, a handler's output is never re-i
 
 ### TextNode holds display text
 
-`TextNode::$content` is **decoded display text**: HTML entities from the input are decoded at parse time (`Helpers::decodeEntities()`, which also strips control characters that entities could smuggle in). Renderers escape text on output. The exceptions holding literal source text are code-like content (`phrase/code`, `phrase/notexy` → `RawTextNode`, code blocks), where the author's characters are shown verbatim.
+`TextNode::$text` is **decoded display text**: HTML entities from the input are decoded at parse time (`Helpers::decodeEntities()`, which also strips control characters that entities could smuggle in). Renderers escape text on output. The exceptions holding literal source text are code-like content (`phrase/code`, `phrase/notexy` → `RawTextNode`, code blocks), where the author's characters are shown verbatim.
 
 ## BlockParser
 

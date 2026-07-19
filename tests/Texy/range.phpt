@@ -148,3 +148,37 @@ test('positions inside div block with indented content', function () {
 
 	Assert::same('**tučný**', extractBySource($doc, $src, Texy\Nodes\PhraseNode::class));
 });
+
+
+test('paragraph line merging and modifier keep exact inline ranges', function () {
+	$texy = new Texy\Texy;
+	$text = "prvni radek\n   pokracovani **tucne** dal\ndalsi text .[trida]";
+	$doc = $texy->parse($text);
+	$para = $doc->content->children[0];
+
+	Assert::same('trida', $para->modifier->classes ? array_key_first($para->modifier->classes) : null);
+
+	$check = function (Texy\Node $n) use ($text, &$check): void {
+		foreach ($n->getChildren() as $child) {
+			$check($child);
+		}
+		if ($n instanceof Texy\Nodes\PhraseNode && $n->range !== null) {
+			Assert::same('**tucne**', substr($text, $n->range->offset, $n->range->length));
+		}
+	};
+	$check($para);
+
+	// text node after the hard break must point at its source position
+	$found = false;
+	$walk = function (Texy\Node $n) use (&$walk, &$found, $text): void {
+		foreach ($n->getChildren() as $child) {
+			$walk($child);
+		}
+		if ($n instanceof Texy\Nodes\TextNode && str_starts_with($n->text, 'pokracovani')) {
+			$found = true;
+			Assert::same('pokracovani ', substr($text, $n->range->offset, 12));
+		}
+	};
+	$walk($para);
+	Assert::true($found);
+});
