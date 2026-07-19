@@ -24,8 +24,14 @@ use function strlen;
 final class HeadingModule extends Texy\Module
 {
 	public const
-		DYNAMIC = 1, // auto-leveling
-		FIXED = 2; // fixed-leveling
+		Dynamic = 1, // auto-leveling
+		Fixed = 2; // fixed-leveling
+
+	#[\Deprecated('use HeadingModule::Dynamic')]
+	public const DYNAMIC = self::Dynamic;
+
+	#[\Deprecated('use HeadingModule::Fixed')]
+	public const FIXED = self::Fixed;
 
 	/** level of top heading, 1..6 */
 	public int $top = 1;
@@ -34,7 +40,7 @@ final class HeadingModule extends Texy\Module
 	public bool $moreMeansHigher = true;
 
 	/** balancing mode */
-	public int $balancing = self::DYNAMIC;
+	public int $balancing = self::Dynamic;
 
 	/** @var array<string, int>  when $balancing = HeadingModule::FIXED */
 	public array $levels = [
@@ -64,7 +70,7 @@ final class HeadingModule extends Texy\Module
 			$this->parseUnderline(...),
 			'~^
 				( \S .{0,1000} )                 # heading text (1)
-				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
+				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				\n
 				( \#{3,}+ | \*{3,}+ | ={3,}+ | -{3,}+ )  # underline characters (3)
 			$~mUx',
@@ -76,7 +82,7 @@ final class HeadingModule extends Texy\Module
 			'~^
 				( \#{2,}+ | ={2,}+ )             # opening characters (1)
 				(.+)                             # heading text (2)
-				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
+				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 			$~mUx',
 			Syntax::HeadingSurrounded,
 		);
@@ -88,7 +94,7 @@ final class HeadingModule extends Texy\Module
 	{
 		(new Texy\Passes\HeadingPass(
 			$this->top,
-			$this->balancing === self::DYNAMIC,
+			$this->balancing === self::Dynamic,
 			$this->generateID,
 			$this->idPrefix,
 		))->process($document);

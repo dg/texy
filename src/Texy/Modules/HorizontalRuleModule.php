@@ -33,7 +33,7 @@ final class HorizontalRuleModule extends Texy\Module
 			'~^
 				( \*{3,}+ | -{3,}+ )         # three or more * or - (1)
 				[ \t]*                       # optional spaces
-				' . Texy\Patterns::MODIFIER . '? # modifier (2)
+				' . Texy\Patterns::Modifier . '? # modifier (2)
 			$~mUx',
 			Syntax::HorizontalRule,
 		);

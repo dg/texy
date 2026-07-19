@@ -60,7 +60,7 @@ $html = $texy->process($text);     // parse + render HTML
 $ast = $texy->parse($text);        // the Nodes\DocumentNode tree
 $plain = $texy->toText($text);     // plain-text rendition
 Texy\Nodes\HeadingNode::collectFrom($ast);          // headings in document order
-Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->tocTitle; // document title (for <title>)
+Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->getTitle(); // document title (for <title>)
 ```
 
 ## The HTML generator ($texy->htmlOutput)
@@ -139,11 +139,11 @@ $texy->headingModule->top = 1;                // level of the top heading (1..6)
 $texy->headingModule->generateID = false;     // autogenerate id attributes
 $texy->headingModule->idPrefix = 'toc-';      // prefix for generated IDs
 $texy->headingModule->moreMeansHigher = true; // surrounded: more #'s = higher heading
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::DYNAMIC; // or ::FIXED
-$texy->headingModule->levels = ['#' => 0, '*' => 1, '=' => 2, '-' => 3]; // used with FIXED
+$texy->headingModule->balancing = Texy\Modules\HeadingModule::Dynamic; // or ::Fixed
+$texy->headingModule->levels = ['#' => 0, '*' => 1, '=' => 2, '-' => 3]; // used with Fixed
 ```
 
-With `DYNAMIC` balancing the most important heading found becomes `$top`; with `FIXED` each underline character maps to a fixed level via `$levels` (level = `$levels[$char] + $top`).
+With `Dynamic` balancing the most important heading found becomes `$top`; with `Fixed` each underline character maps to a fixed level via `$levels` (level = `$levels[$char] + $top`).
 
 The results are facts about the document, so they are read from the AST, not from the module:
 

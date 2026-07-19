@@ -24,9 +24,9 @@ Parts may appear in any order and any may be omitted: `.[highlight]`, `.(Note)`,
 
 Not every construct accepts every part. Three pattern building blocks in `src/Texy/Patterns.php` define what a given syntax accepts:
 
-- `Patterns::MODIFIER` – title, classes/ID, styles (typical for inline phrases),
-- `Patterns::MODIFIER_H` – additionally horizontal alignment (paragraphs, headings, lists, blocks),
-- `Patterns::MODIFIER_HV` – additionally vertical alignment (tables and cells).
+- `Patterns::Modifier` – title, classes/ID, styles (typical for inline phrases),
+- `Patterns::ModifierHAlign` – additionally horizontal alignment (paragraphs, headings, lists, blocks),
+- `Patterns::ModifierHVAlign` – additionally vertical alignment (tables and cells).
 
 ## The Modifier class
 

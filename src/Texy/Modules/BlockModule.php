@@ -47,7 +47,7 @@ final class BlockModule extends Texy\Module
 			'~^
 				/--++ \ *+                    # opening tag /--
 				(.*)                          # content type (1)
-				' . Texy\Patterns::MODIFIER_H . '? # modifier (2)
+				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				$
 				((?:                         # content (3)
 					\n (?0) |                # recursive nested blocks
@@ -90,7 +90,7 @@ final class BlockModule extends Texy\Module
 
 		// a Texy modifier may trail the info string: ```php .{file: Foo.php}
 		$mod = null;
-		if ($m = Texy\Regexp::match($mInfo, '~' . Texy\Patterns::MODIFIER . '$~x', captureOffset: true)) {
+		if ($m = Texy\Regexp::match($mInfo, '~' . Texy\Patterns::Modifier . '$~x', captureOffset: true)) {
 			$mod = Texy\Modifier::parse($m[1][0], $offsets[2] + $m[1][1]);
 			$mInfo = substr($mInfo, 0, $m[0][1]);
 		}
