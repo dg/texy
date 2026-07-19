@@ -118,7 +118,7 @@ class Regexp
 
 	public static function quote(string $s): string
 	{
-		return preg_quote($s, '~');
+		return addcslashes($s, "\x00..\x20-.\\+*?[^]$(){}=!<>|:-#");
 	}
 
 

@@ -115,14 +115,20 @@ $texy->addHandler('block', 'blockHandler');
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
 $texy->registerBlockPattern(
 	'codeBlockHandler',
-	'~^<\?php\n.+?\n\?>$~ms',  // Must be multiline (m) and single-line mode (s)
+	'~^
+		<\?php \n .+? \n \?>
+	$~ms', // Must be multiline (m) and single-line mode (s)
 	'phpBlockSyntax',
 );
 
 // Register NEW syntax: recognize <script> ... </script> blocks
 $texy->registerBlockPattern(
 	'codeBlockHandler',
-	'~^<script(?: type=.?text/javascript.?)?>\n.+?\n</script>$~ms',
+	'~^
+		<script (?: type=.?text/javascript.?)? > \n
+		.+? \n
+		</script>
+	$~ms', // block patterns must be multiline and line-anchored
 	'scriptBlockSyntax',
 );
 
