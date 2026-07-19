@@ -65,7 +65,7 @@ test('rendering does not mutate link modifier (nofollow class)', function () {
 
 test('rendering does not mutate image node inside figure', function () {
 	$texy = new Texy\Texy;
-	$doc = $texy->parse("[* figure.png >] *** Caption");
+	$doc = $texy->parse('[* figure.png >] *** Caption');
 
 	$figure = $doc->content->children[0];
 	Assert::type(Texy\Nodes\FigureNode::class, $figure);

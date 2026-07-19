@@ -317,8 +317,11 @@ final class Renderer extends NodeRenderer
 	{
 		$children = $this->renderNodes($node->content->children);
 
-		// Block HTML content - skip <p> wrapper entirely
-		if ($node->blockHtml) {
+		// Block HTML content - skip <p> wrapper entirely. The parse-time flag is
+		// stale when the sanitize pass turned the block tags into text, so its
+		// own predicate is re-checked over the transformed content: paragraphs
+		// degraded to visible text get a normal <p> again.
+		if ($node->blockHtml && $this->containsBlockPassthrough($node->content->children)) {
 			return $this->wrapChildren($children);
 		}
 
@@ -959,6 +962,34 @@ final class Renderer extends NodeRenderer
 
 
 	/********************* utility methods ****************d*g**/
+
+
+	/**
+	 * Does the content still contain block-level passthrough markup?
+	 * The same predicate ParagraphModule uses when setting the blockHtml flag,
+	 * re-evaluated after transforms (sanitization may have turned tags to text).
+	 * @param  array<Node>  $content
+	 */
+	private function containsBlockPassthrough(array $content): bool
+	{
+		foreach ($content as $node) {
+			if ($node instanceof Nodes\HtmlTagNode) {
+				if (!$node->closing && !isset(Schema::inlineElements()[strtolower($node->name)])) {
+					return true;
+				}
+			} elseif ($node instanceof Nodes\HtmlElementNode) {
+				// block element, or a transparent inline wrapper (<a>, <ins>, ...) holding one
+				if (
+					!isset(Schema::inlineElements()[strtolower($node->name)])
+					|| $this->containsBlockPassthrough($node->content->children)
+				) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 
 
 	/**

@@ -26,16 +26,23 @@ final class HtmlModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('afterParse', $this->pairTags(...));
+		$texy->addHandler('afterParse', $this->processPassthrough(...));
 	}
 
 
 	/**
-	 * Pairs passthrough tags into HtmlElementNode trees (transform phase).
+	 * Pairs passthrough tags into HtmlElementNode trees and evaluates the
+	 * tag whitelist over them (transform phase): rejected tags become text.
 	 */
-	public function pairTags(Texy\Nodes\DocumentNode $doc): void
+	public function processPassthrough(Texy\Nodes\DocumentNode $doc): void
 	{
+		if (empty($this->texy->allowed[Syntax::HtmlTag])) {
+			return;
+		}
+
 		(new Texy\Passes\HtmlPairingPass)->process($doc);
+		(new Texy\Passes\HtmlSanitizePass($this->texy->htmlPolicy))
+			->process($doc);
 	}
 
 

@@ -89,12 +89,26 @@ final class HtmlPolicy
 
 
 	/**
-	 * Escape tag as text (when rejected by the whitelist or validation).
-	 * Only escapes < and > so quotes remain for typography processing.
+	 * Is the tag (opening or closing) acceptable? Mirrors the render-time
+	 * decision so it can also be evaluated in the transform phase.
+	 * @param  array<string, string|bool|null>  $attrs
 	 */
-	public function escapeHtmlTag(Nodes\HtmlTagNode $node): string
+	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
 	{
-		// Reconstruct the original tag text
+		if (!$this->isTagAllowed($tagName)) {
+			return false;
+		}
+
+		$validation = $this->validateTag($tagName, $attrs, $closing);
+		return $validation !== false && $validation !== 'drop';
+	}
+
+
+	/**
+	 * Reconstructs the original tag source text.
+	 */
+	public function reconstructTag(Nodes\HtmlTagNode $node): string
+	{
 		$tag = '<';
 		if ($node->closing) {
 			$tag .= '/';
@@ -109,10 +123,18 @@ final class HtmlPolicy
 		if ($node->selfClosing) {
 			$tag .= ' /';
 		}
-		$tag .= '>';
 
-		// Only escape angle brackets, leave quotes for typography
-		return str_replace(['<', '>'], ['&lt;', '&gt;'], $tag);
+		return $tag . '>';
+	}
+
+
+	/**
+	 * Escape tag as text (when validation fails).
+	 * Only escapes < and > so quotes remain for typography processing.
+	 */
+	public function escapeHtmlTag(Nodes\HtmlTagNode $node): string
+	{
+		return str_replace(['<', '>'], ['&lt;', '&gt;'], $this->reconstructTag($node));
 	}
 
 
