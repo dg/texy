@@ -72,7 +72,7 @@ test('{toc:} applies without generateID', function () {
 
 test('Fixed balancing - underline character maps to a fixed level', function () {
 	$texy = new Texy\Texy;
-	$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
+	$texy->headingModule->balancing = Texy\Modules\HeadingModule::Fixed;
 	$document = $texy->parse("A\n###\n\nB\n***\n\nC\n===\n\nD\n---");
 
 	// level = $levels[$char] + $top
@@ -82,7 +82,7 @@ test('Fixed balancing - underline character maps to a fixed level', function () 
 
 test('Fixed balancing - respects $top', function () {
 	$texy = new Texy\Texy;
-	$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
+	$texy->headingModule->balancing = Texy\Modules\HeadingModule::Fixed;
 	$texy->headingModule->top = 3;
 	$document = $texy->parse("A\n###\n\nB\n***");
 

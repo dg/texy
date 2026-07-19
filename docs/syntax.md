@@ -161,7 +161,7 @@ Second-level heading
 ********************
 ```
 
-**Surrounded** – the text is prefixed (and optionally suffixed) by 2–7 `#` or `=` characters; by default more characters mean a *higher* heading (`$moreMeansHigher`, applies to `DYNAMIC` balancing):
+**Surrounded** – the text is prefixed (and optionally suffixed) by 2–7 `#` or `=` characters; by default more characters mean a *higher* heading (`$moreMeansHigher`, applies to `Dynamic` balancing):
 
 ```texy
 ==== Top-level heading
@@ -169,7 +169,7 @@ Second-level heading
 === Lower level
 ```
 
-Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->headingModule->balancing` (`DYNAMIC` auto-levels relative to `$top`; `FIXED` maps characters via `$levels`). Optional automatic `id` attributes: `$generateID`, `$idPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the heading's `$tocTitle` and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `Texy\Nodes\HeadingNode::collectFrom($document)` returns them in document order, each carrying `$level`, `$tocTitle` and `$modifier?->id`; the document title is `collectFrom($document)[0]?->tocTitle`.
+Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->headingModule->balancing` (`Dynamic` auto-levels relative to `$top`; `Fixed` maps characters via `$levels`). Optional automatic `id` attributes: `$generateID`, `$idPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the heading's `$tocTitle` and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `Texy\Nodes\HeadingNode::collectFrom($document)` returns them in document order, each carrying `$level`, `$tocTitle` and `$modifier?->id`; the document title is `collectFrom($document)[0]?->tocTitle`.
 
 ## Lists
 

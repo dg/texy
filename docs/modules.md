@@ -69,7 +69,7 @@ All modules live in `src/Texy/Modules/`; syntax names are catalogued on `Texy\Sy
 | **HorizontalRuleModule** | `---` / `***` → `HorizontalRuleNode`. |
 | **BlockQuoteModule** | `>` quotations → `BlockQuoteNode`, including nested content and citation link. |
 | **TableModule** | Tables → `TableNode` / `TableRowNode` / `TableCellNode` with head detection, colspan/rowspan. |
-| **HeadingModule** | Underlined and surrounded headings → `HeadingNode`; registers `Passes\HeadingPass`, which balances levels (`DYNAMIC`/`FIXED`), fills `HeadingNode::$tocTitle` and generates IDs. |
+| **HeadingModule** | Underlined and surrounded headings → `HeadingNode`; registers `Passes\HeadingPass`, which balances levels (`Dynamic`/`Fixed`), fills `HeadingNode::$tocTitle` and generates IDs. |
 | **ListModule** | Bulleted, numbered and definition lists → `ListNode` / `DefinitionListNode` with `ListItemNode`s. |
 
 ### Text-transformation modules

@@ -38,7 +38,7 @@ $text = file_get_contents(__DIR__ . '/sample.texy');
 // ============================================================
 
 $texy->headingModule->top = 2;   // Start with <h2> (useful when <h1> is the page title)
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::DYNAMIC;
+$texy->headingModule->balancing = Texy\Modules\HeadingModule::Dynamic;
 
 // Generate IDs for headings (creates id="toc-heading-text")
 // This allows linking to specific sections: page.html#toc-heading-text
@@ -66,7 +66,7 @@ echo '<hr>';
 // ============================================================
 
 $texy->headingModule->top = 1;   // Start with <h1>
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
+$texy->headingModule->balancing = Texy\Modules\HeadingModule::Fixed;
 
 $html = $texy->process($text);
 
@@ -83,7 +83,7 @@ echo '<hr>';
 // ============================================================
 
 $texy->headingModule->top = 1;
-$texy->headingModule->balancing = Texy\Modules\HeadingModule::FIXED;
+$texy->headingModule->balancing = Texy\Modules\HeadingModule::Fixed;
 
 // Define your own mapping:
 // '=' underline produces level 0 + top (1) = h1
