@@ -53,6 +53,8 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
    Then `Texy` runs the **typography pass** (below) and marks the document `$meta['typographed']`.
 
+   The order above is a contract, not an accident: `HtmlModule` must run before typography (rejected tags become visible text), `ImageModule` must resolve before `LinkDefinitionModule` (image references used as link targets), and `HeadingPass` generates IDs before consumer handlers read the headings. Consumer `afterParse` handlers are registered after module construction, so they always run **after** all built-in passes.
+
 5. **Render.** a fresh `Output\Html\Renderer` (configured by `$texy->htmlOutput`) produces the final HTML string (see [rendering.md](rendering.md)). Any renderer can render the same document; `parse()` can equally be called alone and the AST rendered later or elsewhere.
 
 `processLine()` / `parseLine()` are the single-line (inline-only) variants; `processTypo()` applies only typography/hyphenation to plain text without parsing.
@@ -67,6 +69,14 @@ Typography (locale-aware quotes, dashes, non-breaking spaces) and long-word hyph
 - `Modifier::$title` values are typographed as isolated strings (quotes must not pair across a title and the body text).
 
 Whether the pass runs is controlled by `$allowed['typography']` and `$allowed['longwords']`.
+
+## Source positions
+
+Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **preprocessed** source). The contract for analyzers:
+
+- **The range is the only source of truth for a node's source span.** Never derive spans from content length: `TextNode::$content` holds decoded display text (entities resolved), so `strlen($content)` generally differs from `$range->length`.
+- Ranges are exact after parsing and **best-effort after transforms** – a pass that merges or rewrites nodes is not required to keep them precise. Synthesized values (e.g. a modifier assembled from non-contiguous fragments) have a `null` range by design.
+- Heading IDs and `HeadingNode::$tocTitle` are generated in the transform phase **before** typography, so they are stable regardless of `$allowed['typography']`.
 
 ## Terminology
 
