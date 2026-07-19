@@ -128,7 +128,7 @@ final class PhraseModule extends Texy\Module
 				"
 				(?! \s )                         # not followed by space
 				( (?: [^\r\n "]++ | [ ] )+ )     # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
+				' . Patterns::Modifier . '?      # modifier (2)
 				(?<! \s )                        # not preceded by space
 				"
 				(?! " )                          # not followed by "
@@ -143,8 +143,8 @@ final class PhraseModule extends Texy\Module
 		$texy->registerLinePattern(
 			$this->parseAcronym(...),
 			'~
-				(?<! [' . Patterns::CHAR . '] )  # not preceded by char
-				( [' . Patterns::CHAR . ']{2,} ) # at least 2 chars (1)
+				(?<! [' . Patterns::Letter . '] )  # not preceded by char
+				( [' . Patterns::Letter . ']{2,} ) # at least 2 chars (1)
 				()                               # modifier placeholder (2)
 				\(\(
 				( (?: [^\n )]++ | [ )] )+ )      # explanation (3)
@@ -174,10 +174,10 @@ final class PhraseModule extends Texy\Module
 			'~
 				`
 				( \S (?: [^\r\n `]++ | [ `] )* )        # content (1)
-				' . Patterns::MODIFIER . '?             # modifier (2)
+				' . Patterns::Modifier . '?             # modifier (2)
 				(?<! \s )                               # not preceded by space
 				`
-				(?: : (' . Patterns::LINK_URL . ') )??  # optional link (3)
+				(?: : (' . Patterns::LinkUrl . ') )??  # optional link (3)
 			~Ux',
 			Syntax::Code,
 		);
@@ -186,10 +186,10 @@ final class PhraseModule extends Texy\Module
 		$texy->registerLinePattern(
 			$this->parseLink(...),
 			'~
-				( [' . Patterns::CHAR . '0-9@#$%&.,_-]++ )  # allowed chars (1)
+				( [' . Patterns::Letter . '0-9@#$%&.,_-]++ )  # allowed chars (1)
 				()                                    # modifier placeholder (2)
 				: (?= \[ )                            # followed by :[
-				(' . Patterns::LINK_URL . ')          # link (3)
+				(' . Patterns::LinkUrl . ')          # link (3)
 			~Ux',
 			Syntax::QuickLink,
 		);
@@ -204,7 +204,7 @@ final class PhraseModule extends Texy\Module
 				( [^|\r\n\]]++ )                 # text (1)
 				\|
 				( (?: [^|\r\n \]]++ | [ ] )+ )   # link (2)
-				' . Patterns::MODIFIER . '?      # modifier (3)
+				' . Patterns::Modifier . '?      # modifier (3)
 				(?<! \s )                        # not preceded by space
 				]
 				(?! ] )                          # not followed by ]
@@ -220,7 +220,7 @@ final class PhraseModule extends Texy\Module
 				\[
 				(?! [\s*] )                     # not followed by space or *
 				( (?: [^|\r\n \]]++ | [ ] )+ )  # text (1)
-				' . Patterns::MODIFIER . '?     # modifier (2)
+				' . Patterns::Modifier . '?     # modifier (2)
 				(?<! \s )                       # not preceded by space
 				]
 				\(
@@ -263,12 +263,12 @@ final class PhraseModule extends Texy\Module
 		return '~
 				(?<! ' . $beforeOpen . ' ) ' . $spec['open'] . ' (?! ' . $afterOpen . ' )  # opening delimiter
 				( (?: [^' . $content . ']++ | [' . $contentPair . '] )+ )  # content (1)
-				' . Patterns::MODIFIER . '?  # modifier (2)
+				' . Patterns::Modifier . '?  # modifier (2)
 				(?<! ' . $beforeClose . ' ) ' . ($spec['close'] ?? $spec['open']) . ' (?! ' . $afterClose . ' )  # closing delimiter'
 			. (empty($spec['link'])
 				? ''
 				: '
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)')
+				(?: :(' . Patterns::LinkUrl . ') )??  # optional link (3)')
 			. '
 			~U' . (empty($spec['multiline']) ? '' : 's') . 'x';
 	}

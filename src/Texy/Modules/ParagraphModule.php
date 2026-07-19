@@ -142,7 +142,7 @@ final class ParagraphModule extends Texy\Module
 		// Extract modifier from paragraph; MODIFIER_H cannot span lines, so the
 		// removal only shortens the end of a single line
 		$modifier = null;
-		if ($mx = Regexp::match($text, '~' . Patterns::MODIFIER_H . '(?= \n | \z)~sUmx', captureOffset: true)) {
+		if ($mx = Regexp::match($text, '~' . Patterns::ModifierHAlign . '(?= \n | \z)~sUmx', captureOffset: true)) {
 			/** @var array{array{string, int}, array{string, int}} $mx */
 			[$mMod] = $mx[1];
 			$cutOffset = $baseOffset + $mx[0][1]; // full match incl. leading spaces and dot

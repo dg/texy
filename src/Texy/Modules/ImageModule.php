@@ -54,12 +54,12 @@ final class ImageModule extends Texy\Module
 			'~
 				\[\* \ *+                         # opening bracket with asterisk
 				([^\n]{1,1000})                   # URLs (1)
-				' . Patterns::MODIFIER . '?       # modifier (2)
+				' . Patterns::Modifier . '?       # modifier (2)
 				\ *+
 				( \* | (?<! < ) > | < )           # alignment (3)
 				]
 				(?:
-					:(' . Patterns::LINK_URL . ' | : ) # link or just colon (4)
+					:(' . Patterns::LinkUrl . ' | : ) # link or just colon (4)
 				)??
 			~Ux',
 			Syntax::Image,
@@ -75,7 +75,7 @@ final class ImageModule extends Texy\Module
 				: [ \t]+
 				(.{1,1000})                       # URL (2)
 				[ \t]*
-				' . Patterns::MODIFIER . '?       # modifier (3)
+				' . Patterns::Modifier . '?       # modifier (3)
 				\s*
 			$~mUx',
 			Syntax::ImageDefinition,

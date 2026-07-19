@@ -40,7 +40,7 @@ final class TableModule extends Texy\Module
 		$this->texy->registerBlockPattern(
 			$this->parseTable(...),
 			'~^
-				(?:' . Patterns::MODIFIER_HV . '\n)? # modifier (1)
+				(?:' . Patterns::ModifierHVAlign . '\n)? # modifier (1)
 				\|                                   # table start
 				.*                                   # content
 			$~mUx',
@@ -84,7 +84,7 @@ final class TableModule extends Texy\Module
 				continue;
 			}
 
-			if ($context->getBlockParser()->next('~^ ( \| ) (.*) (?: | \| [ \t]* ' . Patterns::MODIFIER_HV . '?)$~Ux', $lineMatches, $lineOffsets)) {
+			if ($context->getBlockParser()->next('~^ ( \| ) (.*) (?: | \| [ \t]* ' . Patterns::ModifierHVAlign . '?)$~Ux', $lineMatches, $lineOffsets)) {
 				// smarter head detection: if first row is followed by separator line, it's a head row
 				if (count($rows) === 0 && !$isHead && $context->getBlockParser()->next('~^ \| [=-] [+|=-]{2,} $~Umx', $foo)) {
 					$isHead = true;
@@ -139,9 +139,9 @@ final class TableModule extends Texy\Module
 					$cellMatches = Regexp::match($cell, '~
 						( \*?? )                          # head mark (1)
 						[ \t]*
-						' . Patterns::MODIFIER_HV . '??   # modifier (2)
+						' . Patterns::ModifierHVAlign . '??   # modifier (2)
 						(.*)                              # content (3)
-						' . Patterns::MODIFIER_HV . '?    # modifier (4)
+						' . Patterns::ModifierHVAlign . '?    # modifier (4)
 						[ \t]*
 					$~AUx', captureOffset: true);
 
