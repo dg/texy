@@ -23,4 +23,10 @@ class HorizontalRuleNode extends BlockNode
 		public ?Range $range = null,
 	) {
 	}
+
+
+	public function getModifier(): ?Texy\Modifier
+	{
+		return $this->modifier;
+	}
 }

@@ -31,4 +31,10 @@ class TableCellNode extends BlockNode
 	{
 		yield $this->content;
 	}
+
+
+	public function getModifier(): ?Texy\Modifier
+	{
+		return $this->modifier;
+	}
 }

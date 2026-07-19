@@ -27,4 +27,10 @@ class ImageNode extends InlineNode
 		public ?string $ref = null,
 	) {
 	}
+
+
+	public function getModifier(): ?Modifier
+	{
+		return $this->modifier;
+	}
 }

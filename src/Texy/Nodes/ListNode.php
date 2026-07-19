@@ -36,4 +36,10 @@ class ListNode extends BlockNode
 		$gen = $this->yieldList($this->items);
 		return $gen;
 	}
+
+
+	public function getModifier(): ?Texy\Modifier
+	{
+		return $this->modifier;
+	}
 }
