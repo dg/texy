@@ -124,6 +124,28 @@ final class ElementDecorator
 	}
 
 
+	/**
+	 * Applies a horizontal float: side-specific class, alignClasses fallback,
+	 * or an inline float style.
+	 */
+	public function applyFloat(Element $el, string $hAlign, ?string $leftClass, ?string $rightClass): void
+	{
+		$class = match ($hAlign) {
+			'left' => $leftClass,
+			'right' => $rightClass,
+			default => null,
+		};
+		$class ??= $this->config->alignClasses[$hAlign] ?? null;
+		if ($class) {
+			$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
+			$el->attrs['class'][] = $class;
+		} else {
+			$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
+			$el->attrs['style']['float'] = $hAlign;
+		}
+	}
+
+
 	/** @param  array<string, mixed>  $attrs */
 	private function decorateAligns(Modifier $modifier, array &$attrs): void
 	{
