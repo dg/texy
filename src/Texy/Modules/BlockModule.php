@@ -35,6 +35,7 @@ final class BlockModule extends Texy\Module
 		$texy->allowed[Syntax::BlockTexySource] = true;
 		$texy->allowed[Syntax::BlockComment] = true;
 		$texy->allowed[Syntax::BlockDiv] = true;
+		$texy->allowed[Syntax::CodeFenced] = true;
 	}
 
 
@@ -57,6 +58,44 @@ final class BlockModule extends Texy\Module
 				)
 			~mUix',
 			Syntax::Blocks,
+		);
+
+		// ```language
+		$this->texy->registerBlockPattern(
+			$this->parseFenced(...),
+			'~^
+				(`{3,}) \ *+                        # opening fence (1)
+				([^\n`]*)                           # info string (2)
+				$
+				((?: \n (?! \1 `*+ \ *+ $ ) .*+ )*) # content (3): lines that are not a valid closing fence
+				(?:
+					\n \1 `*+ \ *+ $ |              # closing fence (same length or longer)
+					\z                              # or end of input
+				)
+			~mx',
+			Syntax::CodeFenced,
+		);
+	}
+
+
+	/**
+	 * Parses ```language fenced code blocks; content is verbatim.
+	 * @param  array{string, string, string, string}  $matches
+	 * @param  array{int, int, int, int}  $offsets
+	 */
+	public function parseFenced(ParseContext $context, array $matches, array $offsets): CodeBlockNode
+	{
+		[, , $mInfo, $mContent] = $matches;
+
+		// first word of the info string is the language (GFM)
+		$language = Texy\Regexp::split(trim($mInfo), '~\s+~', limit: 2)[0];
+
+		return new CodeBlockNode(
+			'code',
+			substr($mContent, 1), // drop the separator "\n"; intentional blank lines stay
+			$language === '' ? null : $language,
+			null,
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 
