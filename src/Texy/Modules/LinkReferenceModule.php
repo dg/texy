@@ -206,14 +206,15 @@ final class LinkReferenceModule extends Texy\Module
 
 
 	/**
-	 * Convert email-like URLs to mailto: scheme.
+	 * Convert e-mail URLs to mailto: scheme. Requires a full e-mail address
+	 * (Patterns::Email) so that wiki-style targets containing @ are left alone.
 	 */
 	private function convertEmailUrl(Nodes\LinkNode $node): void
 	{
 		if ($node->url !== null
 			&& !str_contains($node->url, '/')
 			&& !preg_match('~^[a-z][a-z0-9+.-]*:~i', $node->url)
-			&& preg_match('~.@.~', $node->url)) { // valid email needs chars before and after @
+			&& Texy\Regexp::match($node->url, '~' . Patterns::Email . '(\?\S*)?$~A')) { // optional ?subject=... query
 			$node->url = 'mailto:' . $node->url;
 		}
 	}
