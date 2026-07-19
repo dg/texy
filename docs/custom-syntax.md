@@ -17,6 +17,16 @@ $texy->registerBlockPattern(\Closure $handler, string $pattern, string $name);
 
 Register before calling `process()`. Built-in modules register their patterns during `process()`, so your pattern keeps its priority position across calls.
 
+Your pattern behaves exactly as written: Texy adds only the `u` (UTF-8) flag, so what you verify in a regex tester works after registration. Flags of your own – including extended mode `x`, which lets you lay the pattern out over several lines with `#` comments – belong after the closing delimiter, as usual:
+
+```php
+$texy->registerLinePattern($handler, '~
+	@ ([a-z0-9_]{2,30})   # user name
+~x', 'custom/mention');
+```
+
+`Texy\Patterns` fragments (`MODIFIER`, `IMAGE`, `LINK_URL`, `EMAIL`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
+
 ## The syntax handler
 
 ```php
