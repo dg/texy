@@ -77,9 +77,14 @@ final class Helpers
 
 	/**
 	 * Removes special controls characters and normalizes line endings and spaces.
+	 * @throws InvalidArgumentException when the input is not valid UTF-8
 	 */
 	public static function normalize(string $s): string
 	{
+		if (!preg_match('##u', $s)) {
+			throw new InvalidArgumentException('Input is not valid UTF-8 text.');
+		}
+
 		// standardize line endings to unix-like
 		$s = str_replace("\r\n", "\n", $s); // DOS
 		$s = strtr($s, "\r", "\n"); // Mac
