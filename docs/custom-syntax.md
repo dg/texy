@@ -25,7 +25,7 @@ $texy->registerLinePattern($handler, '~
 ~x', 'custom/mention');
 ```
 
-`Texy\Patterns` fragments (`MODIFIER`, `IMAGE`, `LINK_URL`, `EMAIL`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
+`Texy\Patterns` fragments (`Modifier`, `LinkUrl`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
 
 ## The syntax handler
 
@@ -143,6 +143,6 @@ NOTE: It may span several lines.
 - **Return `null` on refusal** – the parser leaves the text alone and other syntaxes get their chance.
 - **Prefer existing node types** – they render in HTML and Markdown alike; add a custom `Node` subclass only when no existing node fits, and register renderer handlers for it.
 - **Use prefixed names** (`custom/username`, `myapp/alert`) – both to avoid future collisions and to let users disable your syntax via `$texy->allowed`.
-- **Support modifiers** – add `Texy\Patterns::MODIFIER . '?'` to your pattern and pass `Texy\Modifier::parse($matches[n])` into your node so users can style your construct like any other.
+- **Support modifiers** – add `Texy\Patterns::Modifier . '?'` to your pattern and pass `Texy\Modifier::parse($matches[n])` into your node so users can style your construct like any other.
 - **Fill in `Range`** where practical – editor tooling and passes rely on source positions.
 - **Test combinations** – what happens when your markup appears inside a link? Inside a code block?

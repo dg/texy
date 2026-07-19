@@ -14,10 +14,10 @@ namespace Texy;
 class Patterns
 {
 	// Unicode character classes
-	public const CHAR = 'A-Za-z\x{C0}-\x{2FF}\x{370}-\x{1EFF}';
+	public const Letter = 'A-Za-z\x{C0}-\x{2FF}\x{370}-\x{1EFF}';
 
 	// modifier .(title)[class]{style}
-	public const MODIFIER = <<<'X'
+	public const Modifier = <<<'X'
 		(?x:
 			\ *+ (?<= \ | ^ )
 			\.
@@ -30,7 +30,7 @@ class Patterns
 		X;
 
 	// modifier .(title)[class]{style}<>
-	public const MODIFIER_H = <<<'X'
+	public const ModifierHAlign = <<<'X'
 		(?x:
 			\ *+ (?<= \ | ^ )
 			\.
@@ -44,7 +44,7 @@ class Patterns
 		X;
 
 	// modifier .(title)[class]{style}<>^
-	public const MODIFIER_HV = <<<'X'
+	public const ModifierHVAlign = <<<'X'
 		(?x:
 			\ *+ (?<= \ | ^ )
 			\.
@@ -59,7 +59,7 @@ class Patterns
 		X;
 
 	// links, url - doesn't end by :).,!?
-	public const LINK_URL = <<<'X'
+	public const LinkUrl = <<<'X'
 		(?x:
 			\[ [^]\n]++ ]                    # link text in brackets
 			|
@@ -70,11 +70,11 @@ class Patterns
 		X;
 
 	public const Email = '(?x:
-		[' . self::CHAR . ']                 # first char
-		[0-9.+_' . self::CHAR . '-]{0,63}    # local part
+		[' . self::Letter . ']                 # first char
+		[0-9.+_' . self::Letter . '-]{0,63}    # local part
 		@
-		[0-9.+_' . self::CHAR . '\x{ad}-]{1,252} # domain
+		[0-9.+_' . self::Letter . '\x{ad}-]{1,252} # domain
 		\.
-		[' . self::CHAR . '\x{ad}]{2,19}     # TLD
+		[' . self::Letter . '\x{ad}]{2,19}     # TLD
 	)';
 }

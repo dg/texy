@@ -220,7 +220,7 @@ Rows start with `|`, cells are separated by `|`:
 - **Colspan:** end the cell with `||` (empty following cell merges left).
 - **Rowspan:** a cell containing `^` merges with the cell above.
 - **Literal pipe:** write `\|` to put a `|` character inside a cell; pipes inside `[…]` (wikilinks) need no escaping.
-- **Modifiers:** before the table (whole table, uses `MODIFIER_HV` – vertical alignment allowed), at the end of a row (row), at the start of the first cell of a column (whole column), inside a cell (cell).
+- **Modifiers:** before the table (whole table, uses `ModifierHVAlign` – vertical alignment allowed), at the end of a row (row), at the start of the first cell of a column (whole column), inside a cell (cell).
 
 ```texy
 .[data-table]

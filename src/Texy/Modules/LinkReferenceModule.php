@@ -54,7 +54,7 @@ final class LinkReferenceModule extends Texy\Module
 				] : \ ++
 				( \S{1,1000} )                    # URL (2)
 				( [ \t] .{1,1000} )?              # optional label (3)
-				' . Patterns::MODIFIER . '?       # modifier (4)
+				' . Patterns::Modifier . '?       # modifier (4)
 				\s*
 			$~mUx',
 			Syntax::LinkDefinition,

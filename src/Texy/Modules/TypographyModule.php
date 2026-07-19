@@ -79,14 +79,14 @@ final class TypographyModule extends Texy\Module
 		'~(?<= .{50}) \s++ (?= \x17* \S{1,6} \x17* $)~sx' => "\u{A0}",      // space before last short word
 
 		// nbsp space between number (optionally followed by dot) and word, symbol, punctation, currency symbol
-		'~(?<= ^|\ |\.|,|-|\+|\x16|\(|\d\x{A0}) (\x17* \d++ \.? \x17*) \s++ (?= \x17* [%' . Patterns::CHAR . '\x{b0}-\x{be}\x{2020}-\x{214f}])~mx' => "\$1\u{A0}",
+		'~(?<= ^|\ |\.|,|-|\+|\x16|\(|\d\x{A0}) (\x17* \d++ \.? \x17*) \s++ (?= \x17* [%' . Patterns::Letter . '\x{b0}-\x{be}\x{2020}-\x{214f}])~mx' => "\$1\u{A0}",
 		// space between preposition and word
-		'~(?<= ^|[^0-9' . Patterns::CHAR . ']) (\x17* [ksvzouiKSVZOUIA] \x17*) \s++ (?= \x17* [0-9' . Patterns::CHAR . '])~msx' => "\$1\u{A0}",
+		'~(?<= ^|[^0-9' . Patterns::Letter . ']) (\x17* [ksvzouiKSVZOUIA] \x17*) \s++ (?= \x17* [0-9' . Patterns::Letter . '])~msx' => "\$1\u{A0}",
 
 		// double ""
-		'~(?<! "|\w) " (?! \ | " ) ( (?: [^"]++ | ")+ ) (?<! \ | " ) " (?! ["' . Patterns::CHAR . '])~Ux' => ':ldq:$1:rdq:',
+		'~(?<! "|\w) " (?! \ | " ) ( (?: [^"]++ | ")+ ) (?<! \ | " ) " (?! ["' . Patterns::Letter . '])~Ux' => ':ldq:$1:rdq:',
 		// single ''
-		'~(?<! \'|\w) \' (?! \ | \' ) ( (?: [^\']++ | \')+ ) (?<! \ |\') \' (?! [\'' . Patterns::CHAR . '])~Ux' => ':lsq:$1:rsq:',
+		'~(?<! \'|\w) \' (?! \ | \' ) ( (?: [^\']++ | \')+ ) (?<! \ |\') \' (?! [\'' . Patterns::Letter . '])~Ux' => ':lsq:$1:rsq:',
 	];
 
 	/** @var array<string, string> */
