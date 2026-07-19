@@ -9,6 +9,21 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
+test('writing into an array property works through the proxy', function () {
+	$texy = new Texy\Texy;
+
+	Assert::error(function () use ($texy) {
+		$texy->horizLineModule->classes['-'] = 'my-hr';
+	}, E_USER_DEPRECATED, '%a%horizontalRuleClasses%a%');
+	Assert::same('my-hr', $texy->htmlOutput->horizontalRuleClasses['-']);
+
+	Assert::error(function () use ($texy) {
+		$texy->htmlOutputModule->preserveSpaces[] = 'output';
+	}, E_USER_DEPRECATED, '%a%preserveSpaces%a%');
+	Assert::contains('output', $texy->htmlOutput->preserveSpaces);
+});
+
+
 test('options of living modules are forwarded too', function () {
 	$texy = new Texy\Texy;
 

@@ -32,11 +32,18 @@ final class HtmlModule extends Texy\Module
 
 
 	/**
-	 * Pairs passthrough tags into HtmlElementNode trees (transform phase).
+	 * Pairs passthrough tags into HtmlElementNode trees and evaluates the
+	 * tag whitelist over them (transform phase): rejected tags become text.
 	 */
 	public function processPassthrough(Texy\Nodes\DocumentNode $doc): void
 	{
+		if (empty($this->texy->allowed[Syntax::HtmlTag])) {
+			return;
+		}
+
 		(new Texy\Passes\HtmlPairingPass)->process($doc);
+		(new Texy\Passes\HtmlSanitizePass($this->texy->htmlPolicy))
+			->process($doc);
 	}
 
 
