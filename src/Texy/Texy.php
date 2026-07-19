@@ -229,7 +229,8 @@ class Texy
 		$this->htmlPolicy->resetCache();
 		unset($this->_linePatterns, $this->_blockPatterns);
 		$node = $this->parse($text, $singleLine);
-		$html = (new Output\Html\Renderer($this->htmlOutput, $this))->render($node);
+		$renderer = new Output\Html\Renderer($this->htmlOutput, $this);
+		$html = $renderer->render($node);
 		return $html;
 	}
 

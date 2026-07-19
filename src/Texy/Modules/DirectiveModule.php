@@ -23,6 +23,29 @@ final class DirectiveModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
+		$texy->addHandler('afterParse', $this->processDirectives(...));
+	}
+
+
+	/**
+	 * Consumes {{texy: ...}} directives: stores document-level options into
+	 * DocumentNode::$meta and removes the directive nodes from the AST, so all
+	 * output generators see the same document.
+	 */
+	public function processDirectives(Texy\Nodes\DocumentNode $doc): void
+	{
+		(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) use ($doc): ?int {
+			if ($node instanceof DirectiveNode) {
+				$parsed = $node->parseContent();
+				if ($parsed['name'] === 'texy' && $parsed['args']) {
+					foreach ($parsed['args'] as $arg) {
+						$doc->meta[$arg] = true;
+					}
+					return Texy\NodeTraverser::RemoveNode;
+				}
+			}
+			return null;
+		});
 	}
 
 
