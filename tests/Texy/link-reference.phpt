@@ -137,13 +137,7 @@ test('unresolved bare reference keeps name as URL and in ref', function () {
 	$texy = new Texy\Texy;
 	$texy->allowed[Texy\Syntax::LinkReference] = true;
 	$doc = $texy->parse('viz [wiki#kotva] stranka');
-	$link = null;
-	(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $n) use (&$link): ?int {
-		if ($n instanceof Texy\Nodes\LinkNode) {
-			$link = $n;
-		}
-		return null;
-	});
+	$link = Texy\NodeHelpers::findFirst($doc, Texy\Nodes\LinkNode::class);
 
 	Assert::same('wiki#kotva', $link->ref);
 	Assert::same('wiki#kotva', $link->url);
@@ -154,13 +148,7 @@ test('unresolved bare reference keeps name as URL and in ref', function () {
 test('LinkNode keeps the written reference name after resolution', function () {
 	$texy = new Texy\Texy;
 	$doc = $texy->parse("\"Click\":[link] a \"jinde\":https://example.org\n\n[link]: https://example.com");
-	$links = [];
-	(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $n) use (&$links): ?int {
-		if ($n instanceof Texy\Nodes\LinkNode) {
-			$links[] = $n;
-		}
-		return null;
-	});
+	$links = Texy\NodeHelpers::find($doc, Texy\Nodes\LinkNode::class);
 
 	Assert::same('link', $links[0]->ref);
 	Assert::same('https://example.com', $links[0]->url);
@@ -180,4 +168,33 @@ test('bare reference does not swallow neighboring syntaxes', function () {
 	Assert::same("<p>atribut #[Requires] zustava</p>\n", $texy->process('atribut #[Requires] zustava'));
 	// labeled form is handled by its own syntax, not swallowed by bare reference
 	Assert::same("<p><a href=\"odkaz\">text</a></p>\n", $texy->process('[text |odkaz]'));
+});
+
+
+test('mailto conversion requires a full e-mail address', function () {
+	$texy = new Texy\Texy;
+	$texy->allowed[Texy\Syntax::LinkReference] = true;
+
+	// proper e-mail gets mailto:
+	Assert::same(
+		"<p><a href=\"mailto:dave&#64;example.com\">pis</a></p>\n",
+		$texy->process('"pis":dave@example.com'),
+	);
+	// wiki-style target with @ is left alone
+	$doc = $texy->parse('viz [nette:@home] stranka');
+	$link = Texy\NodeHelpers::findFirst($doc, Texy\Nodes\LinkNode::class);
+	Assert::same('nette:@home', $link->url);
+
+	$doc = $texy->parse('viz [foo@bar] stranka');
+	$link = Texy\NodeHelpers::findFirst($doc, Texy\Nodes\LinkNode::class);
+	Assert::same('foo@bar', $link->url); // no TLD - not an e-mail
+});
+
+
+test('mailto conversion keeps query parameters', function () {
+	$texy = new Texy\Texy;
+	Assert::same(
+		"<p><a href=\"mailto:dave&#64;example.com?subject=ahoj\">pis</a></p>\n",
+		$texy->process('"pis":dave@example.com?subject=ahoj'),
+	);
 });
