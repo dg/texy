@@ -137,31 +137,74 @@ final class ParagraphModule extends Texy\Module
 
 	private function parseParagraph(ParseContext $context, string $text, int $baseOffset = 0): ParagraphNode
 	{
-		// Extract modifier from paragraph
+		$lines = Texy\OffsetMap::linesOf($text, $baseOffset);
+
+		// Extract modifier from paragraph; MODIFIER_H cannot span lines, so the
+		// removal only shortens the end of a single line
 		$modifier = null;
 		if ($mx = Regexp::match($text, '~' . Patterns::MODIFIER_H . '(?= \n | \z)~sUmx', captureOffset: true)) {
 			/** @var array{array{string, int}, array{string, int}} $mx */
 			[$mMod] = $mx[1];
-			$text = trim(substr_replace($text, '', $mx[0][1], strlen($mx[0][0])));
-			if ($text !== '') {
-				$modifier = Modifier::parse($mMod);
+			$modOffset = $baseOffset + $mx[0][1];
+			foreach ($lines as $i => $line) {
+				$local = $modOffset - $line['offset'];
+				if ($local >= 0 && $local <= strlen($line['content'])) {
+					$lines[$i]['content'] = rtrim(substr($line['content'], 0, $local));
+				}
 			}
+			$modifier = Modifier::parse($mMod, $modOffset);
 		}
 
-		// Process line breaks - note: this changes text length, positions become approximate
-		if ($this->texy->mergeLines) {
-			$text = Regexp::replace($text, '~\n\ +(?=\S)~', "\r");
-			$text = Regexp::replace($text, '~\n~', ' ');
-		} else {
-			$text = Regexp::replace($text, '~\n~', "\r");
+		// the former trim(): drop blank edge lines and edge whitespace
+		while ($lines && trim($lines[0]['content']) === '') {
+			array_shift($lines);
+		}
+		while ($lines && trim($lines[count($lines) - 1]['content']) === '') {
+			array_pop($lines);
+		}
+		if (!$lines) {
+			return new ParagraphNode(new ContentNode);
+		}
+		$trimmed = ltrim($lines[0]['content'], " \t");
+		$lines[0]['offset'] += strlen($lines[0]['content']) - strlen($trimmed);
+		$lines[0]['content'] = $trimmed;
+		$last = count($lines) - 1;
+		$lines[$last]['content'] = rtrim($lines[$last]['content'], " \t");
+
+		// Join lines with single-character separators: ' ' for merged lines,
+		// "\r" for hard breaks. The separators have the same length as the "\n"
+		// they replace, so the per-line offset map stays valid.
+		$joined = '';
+		$mapLines = [];
+		foreach ($lines as $i => $line) {
+			$content = $line['content'];
+			$offset = $line['offset'];
+			if ($i > 0) {
+				$strip = strspn($content, ' ');
+				if (!$this->texy->mergeLines) {
+					$joined .= "\r";
+				} elseif ($strip > 0 && ($content[$strip] ?? "\t") !== "\t") {
+					// space-indented continuation line (the former `\n\ +(?=\S)` rule):
+					// hard break, indentation stripped
+					$joined .= "\r";
+					$content = substr($content, $strip);
+					$offset += $strip;
+				} else {
+					$joined .= ' ';
+				}
+			}
+			$mapLines[] = ['content' => $content, 'offset' => $offset];
+			$joined .= $content;
 		}
 
-		$content = $context->parseInline($text, $baseOffset);
+		// hard breaks are expanded while ranges are still local (the split
+		// arithmetic must not skip the stripped continuation indentation),
+		// then the line map translates everything to source coordinates
+		$content = $context->parseInline($joined);
+		$node = new ContentNode($this->expandLineBreaks($content->children));
+		Texy\OffsetMap::fromLines($mapLines)->applyTo($node);
 
-		return new ParagraphNode(
-			new ContentNode($this->expandLineBreaks($content->children)),
-			$modifier,
-		);
+		return new ParagraphNode($node, $modifier);
 	}
 
 
@@ -175,13 +218,17 @@ final class ParagraphModule extends Texy\Module
 		$result = [];
 		foreach ($nodes as $node) {
 			if ($node instanceof TextNode && str_contains($node->text, "\r")) {
+				// sub-ranges are computed from decoded content lengths, so they are
+				// exact unless the text contained entities (ranges are best-effort)
+				$offset = $node->range?->offset;
 				foreach (explode("\r", $node->text) as $i => $part) {
 					if ($i > 0) {
-						$result[] = new LineBreakNode;
+						$result[] = new LineBreakNode($offset === null ? null : new Texy\Range($offset - 1, 1));
 					}
 					if ($part !== '') {
-						$result[] = new TextNode($part, $node->range); // content of an already decoded TextNode
+						$result[] = new TextNode($part, $offset === null ? $node->range : new Texy\Range($offset, strlen($part)));
 					}
+					$offset = $offset === null ? null : $offset + strlen($part) + 1;
 				}
 			} elseif ($node instanceof Nodes\PhraseNode) {
 				$node->content->children = $this->expandLineBreaks($node->content->children);
