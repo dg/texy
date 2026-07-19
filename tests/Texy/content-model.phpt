@@ -369,7 +369,8 @@ test('well-forming: misnested inline', function () {
 
 
 test('well-forming: orphan end tags', function () {
-	// orphan end tags are ignored, remaining text gets a paragraph
+	// orphan end tags are ignored, remaining text is output
+	// stray closers are dropped; the remaining visible text gets a normal <p>
 	Assert::same('<p>T</p>', processHtml('</div>T</p>'));
 });
 
