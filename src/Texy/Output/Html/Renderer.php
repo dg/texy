@@ -602,21 +602,7 @@ final class Renderer extends NodeRenderer
 
 		// hAlign ? float class or style
 		if ($hAlign) {
-			$class = match ($hAlign) {
-				'left' => $this->config->imageLeftClass,
-				'right' => $this->config->imageRightClass,
-				default => null,
-			};
-			if ($class) {
-				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-				$el->attrs['class'][] = $class;
-			} elseif (!empty($this->config->alignClasses[$hAlign])) {
-				$el->attrs['class'] = (array) ($el->attrs['class'] ?? []);
-				$el->attrs['class'][] = $this->config->alignClasses[$hAlign];
-			} else {
-				$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-				$el->attrs['style']['float'] = $hAlign;
-			}
+			$this->decorator->applyFloat($el, $hAlign, $this->config->imageLeftClass, $this->config->imageRightClass);
 		}
 
 		// dimensions
