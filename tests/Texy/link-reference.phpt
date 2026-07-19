@@ -181,3 +181,44 @@ test('bare reference does not swallow neighboring syntaxes', function () {
 	// labeled form is handled by its own syntax, not swallowed by bare reference
 	Assert::same("<p><a href=\"odkaz\">text</a></p>\n", $texy->process('[text |odkaz]'));
 });
+
+
+test('mailto conversion requires a full e-mail address', function () {
+	$texy = new Texy\Texy;
+	$texy->allowed[Texy\Syntax::LinkReference] = true;
+
+	// proper e-mail gets mailto:
+	Assert::same(
+		"<p><a href=\"mailto:dave&#64;example.com\">pis</a></p>\n",
+		$texy->process('"pis":dave@example.com'),
+	);
+	// wiki-style target with @ is left alone
+	$doc = $texy->parse('viz [nette:@home] stranka');
+	$link = null;
+	(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $n) use (&$link): ?int {
+		if ($n instanceof Texy\Nodes\LinkNode) {
+			$link = $n;
+		}
+		return null;
+	});
+	Assert::same('nette:@home', $link->url);
+
+	$doc = $texy->parse('viz [foo@bar] stranka');
+	$link = null;
+	(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $n) use (&$link): ?int {
+		if ($n instanceof Texy\Nodes\LinkNode) {
+			$link = $n;
+		}
+		return null;
+	});
+	Assert::same('foo@bar', $link->url); // no TLD - not an e-mail
+});
+
+
+test('mailto conversion keeps query parameters', function () {
+	$texy = new Texy\Texy;
+	Assert::same(
+		"<p><a href=\"mailto:dave&#64;example.com?subject=ahoj\">pis</a></p>\n",
+		$texy->process('"pis":dave@example.com?subject=ahoj'),
+	);
+});
