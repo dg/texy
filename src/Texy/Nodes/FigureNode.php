@@ -34,4 +34,10 @@ class FigureNode extends BlockNode
 			yield $this->caption;
 		}
 	}
+
+
+	public function getModifier(): ?Modifier
+	{
+		return $this->modifier;
+	}
 }

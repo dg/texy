@@ -34,4 +34,10 @@ class TableNode extends BlockNode
 		$gen = $this->yieldList($this->rows);
 		return $gen;
 	}
+
+
+	public function getModifier(): ?Texy\Modifier
+	{
+		return $this->modifier;
+	}
 }

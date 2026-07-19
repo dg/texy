@@ -25,6 +25,12 @@ abstract class Node
 	}
 
 
+	public function getModifier(): ?Modifier
+	{
+		return null;
+	}
+
+
 	/**
 	 * @template T of self
 	 * @param  array<?T>  $list

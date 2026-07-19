@@ -26,4 +26,10 @@ class ImageDefinitionNode extends BlockNode
 		public ?Range $range = null,
 	) {
 	}
+
+
+	public function getModifier(): ?Modifier
+	{
+		return $this->modifier;
+	}
 }

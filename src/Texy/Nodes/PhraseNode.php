@@ -30,4 +30,10 @@ class PhraseNode extends InlineNode
 	{
 		yield $this->content;
 	}
+
+
+	public function getModifier(): ?Modifier
+	{
+		return $this->modifier;
+	}
 }
