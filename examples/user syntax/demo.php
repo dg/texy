@@ -49,15 +49,25 @@ $texy->allowed['phrase/em-alt2'] = false;    // Disables *text*
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks
 $texy->registerLinePattern(
-	'userInlineHandler',                      // Handler function to call
-	'~(?<!\*)\*(?!\ |\*)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |\*)\*(?!\*)()~U',
-	'myInlineSyntax1',                        // Unique name for this syntax
+	'userInlineHandler',  // Handler function to call
+	'~
+		(?<! \* ) \* (?! [ *] )
+		(.+)
+		' . Texy\Patterns::MODIFIER . '?
+		(?<! [ *] ) \* (?! \* )
+	()~U', // regular expression
+	'myInlineSyntax1', // Unique name for this syntax
 );
 
 // Add new syntax: _italic_
 $texy->registerLinePattern(
 	'userInlineHandler',                      // Same handler, different name
-	'~(?<!_)_(?!\ |_)(.+)' . Texy\Patterns::MODIFIER . '?(?<!\ |_)_(?!_)()~U',
+	'~
+		(?<! _ ) _ (?! [ _] )
+		(.+)
+		' . Texy\Patterns::MODIFIER . '?
+		(?<! [ _] ) _ (?! _ )
+	()~U',
 	'myInlineSyntax2',
 );
 
@@ -70,7 +80,10 @@ $texy->registerLinePattern(
 // Examples: .h1, .h2, .perex, etc.
 $texy->registerBlockPattern(
 	'userBlockHandler',
-	'~^\.([a-z0-9]+)\n(.+)$~m',  // Match .tagname\ncontent
+	'~^
+		\. ([a-z0-9]+) \n
+		(.+)
+	$~m', // Match .tagname\ncontent
 	'myBlockSyntax1',
 );
 
