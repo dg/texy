@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\BlockParser;
+use Texy\Parsing\BlockParser;
 use Texy\HtmlElement;
 use Texy\Modifier;
 use Texy\Patterns;

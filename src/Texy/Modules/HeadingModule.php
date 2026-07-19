@@ -176,7 +176,7 @@ final class HeadingModule extends Texy\Module
 	 * -------------------------------
 	 * @param  array<?string>  $matches
 	 */
-	public function patternUnderline(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function patternUnderline(Texy\Parsing\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string, ?string, string} $matches */
 		[, $mContent, $mMod, $mLine] = $matches;
@@ -197,7 +197,7 @@ final class HeadingModule extends Texy\Module
 	 * ### Heading .(title)[class]{style}>
 	 * @param  array<?string>  $matches
 	 */
-	public function patternSurround(Texy\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
+	public function patternSurround(Texy\Parsing\BlockParser $parser, array $matches): Texy\HtmlElement|string|null
 	{
 		/** @var array{string, string, string, ?string} $matches */
 		[, $mLine, $mContent, $mMod] = $matches;

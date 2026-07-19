@@ -337,7 +337,7 @@ class myHandler
 	/**
 	 * Called after a list is created (<ul> or <ol>)
 	 */
-	public function afterList(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
+	public function afterList(\Texy\Parsing\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
@@ -346,7 +346,7 @@ class myHandler
 	 * Called after a definition list is created (<dl>)
 	 */
 	public function afterDefinitionList(
-		Texy\BlockParser $parser,
+		\Texy\Parsing\BlockParser $parser,
 		Texy\HtmlElement $element,
 		Texy\Modifier $modifier,
 	): void
@@ -357,7 +357,7 @@ class myHandler
 	/**
 	 * Called after a table is created (<table>)
 	 */
-	public function afterTable(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
+	public function afterTable(\Texy\Parsing\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 
@@ -365,7 +365,7 @@ class myHandler
 	/**
 	 * Called after a blockquote is created (<blockquote>)
 	 */
-	public function afterBlockquote(Texy\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
+	public function afterBlockquote(\Texy\Parsing\BlockParser $parser, Texy\HtmlElement $element, Texy\Modifier $modifier): void
 	{
 	}
 

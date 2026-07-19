@@ -59,7 +59,7 @@ final class BlockModule extends Texy\Module
 	/**
 	 * Single block pre-processing.
 	 */
-	private function beforeBlockParse(Texy\BlockParser $parser, string &$text): void
+	private function beforeBlockParse(Texy\Parsing\BlockParser $parser, string &$text): void
 	{
 		// autoclose exclusive blocks
 		$text = Texy\Regexp::replace(
@@ -86,7 +86,7 @@ final class BlockModule extends Texy\Module
 	 * \----
 	 * @param  array<?string>  $matches
 	 */
-	public function pattern(Texy\BlockParser $parser, array $matches): HtmlElement|string|null
+	public function pattern(Texy\Parsing\BlockParser $parser, array $matches): HtmlElement|string|null
 	{
 		/** @var array{string, string, ?string, string} $matches */
 		[, $mParam, $mMod, $mContent] = $matches;
@@ -117,7 +117,7 @@ final class BlockModule extends Texy\Module
 	{
 		$texy = $this->texy;
 		$parser = $invocation->getParser();
-		assert($parser instanceof Texy\BlockParser);
+		assert($parser instanceof Texy\Parsing\BlockParser);
 
 		if ($blocktype === 'block/texy') {
 			return $this->blockTexy($s, $texy, $parser);
@@ -145,7 +145,7 @@ final class BlockModule extends Texy\Module
 	}
 
 
-	private function blockTexy(string $s, Texy\Texy $texy, Texy\BlockParser $parser): HtmlElement
+	private function blockTexy(string $s, Texy\Texy $texy, Texy\Parsing\BlockParser $parser): HtmlElement
 	{
 		$el = new HtmlElement;
 		$el->parseBlock($texy, $s, $parser->isIndented());
@@ -302,7 +302,7 @@ final class BlockModule extends Texy\Module
 		string $s,
 		Texy\Texy $texy,
 		Texy\Modifier $mod,
-		Texy\BlockParser $parser,
+		Texy\Parsing\BlockParser $parser,
 	): string|HtmlElement
 	{
 		$s = Helpers::outdent($s, firstLine: true);

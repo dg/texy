@@ -82,7 +82,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
  *
  * This is called when our custom patterns match in the text.
  */
-function codeBlockHandler(Texy\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+function codeBlockHandler(\Texy\Parsing\BlockParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
 {
 	[$content] = $matches;
 

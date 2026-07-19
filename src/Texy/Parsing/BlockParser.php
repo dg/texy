@@ -5,9 +5,13 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy;
+namespace Texy\Parsing;
 
 use JetBrains\PhpStorm\Language;
+use Texy\HtmlElement;
+use Texy\Parser;
+use Texy\Regexp;
+use Texy\Texy;
 use function is_array, is_string, strlen;
 
 
