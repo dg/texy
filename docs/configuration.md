@@ -26,7 +26,7 @@ $texy->allowed['typography'] = false;    // disable the typography pass
 
 The array is consulted once at the start of `process()`; changing it during processing has no effect.
 
-### $allowedClasses, $allowedStyles
+### $htmlPolicy->allowedClasses, $htmlPolicy->allowedStyles
 
 Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `Texy::All`.
 
