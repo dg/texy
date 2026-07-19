@@ -9,12 +9,6 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-// temporarily disabled tests - the code cannot meet these expectations yet
-function skip(string $description, \Closure $fn): void
-{
-}
-
-
 test('nested div blocks', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->linkRoot = 'xxx/';
@@ -28,7 +22,7 @@ test('nested div blocks', function () {
 });
 
 
-skip('block type variants', function () {
+test('block type variants', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->linkRoot = 'xxx/';
 	$texy->htmlOutput->imageRoot = '../images/';
