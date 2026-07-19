@@ -24,8 +24,14 @@ use function max, min, rtrim, strlen, trim;
 final class HeadingModule extends Texy\Module
 {
 	public const
-		DYNAMIC = 1, // auto-leveling
-		FIXED = 2; // fixed-leveling
+		Dynamic = 1, // auto-leveling
+		Fixed = 2; // fixed-leveling
+
+	#[\Deprecated('use HeadingModule::Dynamic')]
+	public const DYNAMIC = self::Dynamic;
+
+	#[\Deprecated('use HeadingModule::Fixed')]
+	public const FIXED = self::Fixed;
 
 	/**
 	 * textual content of first heading
@@ -46,7 +52,7 @@ final class HeadingModule extends Texy\Module
 	public bool $moreMeansHigher = true;
 
 	/** balancing mode */
-	public int $balancing = self::DYNAMIC;
+	public int $balancing = self::Dynamic;
 
 	/** @var array<string, int>  when $balancing = HeadingModule::FIXED */
 	public array $levels = [
@@ -105,7 +111,7 @@ final class HeadingModule extends Texy\Module
 	{
 		(new Texy\Passes\HeadingPass(
 			$this->top,
-			$this->balancing === self::DYNAMIC,
+			$this->balancing === self::Dynamic,
 			$this->generateID,
 			$this->idPrefix,
 		))->process($document);
