@@ -42,6 +42,7 @@ class Texy
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
 
+	/** @deprecated */
 	public bool $removeSoftHyphens = true;
 
 	// Modules with runtime state (kept as-is)
@@ -168,7 +169,6 @@ class Texy
 	public function process(string $text, bool $singleLine = false): string
 	{
 		$this->htmlPolicy->resetCache();
-		$text = $this->preprocess($text);
 		$node = $this->parse($text, $singleLine);
 		$renderer = new Output\Html\Renderer(
 			$this->htmlOutput,
@@ -182,10 +182,13 @@ class Texy
 
 
 	/**
-	 * Parses text to AST.
+	 * Parses text to AST. The text is preprocessed first (idempotent), so node
+	 * ranges always refer to the preprocessed form obtainable via preprocess().
 	 */
 	public function parse(string $text, bool $singleLine = false): Nodes\DocumentNode
 	{
+		$text = $this->preprocess($text);
+
 		// Let modules do per-parse initialization (pattern registration, state reset, text preprocessing)
 		foreach ($this->modules as $module) {
 			$module->beforeParse($text);
@@ -267,25 +270,6 @@ class Texy
 
 
 	/**
-	 * Parses single line to AST.
-	 */
-	public function parseLine(string $text): Nodes\ParagraphNode
-	{
-		$text = $this->preprocess($text);
-
-		// Initialize modules (pattern registration, state reset)
-		foreach ($this->modules as $module) {
-			$module->beforeParse($text);
-		}
-
-		// Create context using engine
-		$context = $this->engine->createParseContext($this->allowed);
-		$inlineNodes = $context->parseInline($text);
-		return new Nodes\ParagraphNode($inlineNodes);
-	}
-
-
-	/**
 	 * Makes only typographic corrections.
 	 */
 	public function processTypo(string $text): string
@@ -309,7 +293,7 @@ class Texy
 	 */
 	public function toText(string $text): string
 	{
-		$node = $this->parse($this->preprocess($text));
+		$node = $this->parse($text);
 		return (new Output\Text\Renderer)->render($node);
 	}
 
