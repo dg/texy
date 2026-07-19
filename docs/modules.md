@@ -79,7 +79,7 @@ All modules live in `src/Texy/Modules/`; syntax names are catalogued on `Texy\Sy
 | **TypographyModule** | Locale-aware quotes, dashes, ellipsis, non-breaking spaces… Its `postLine()` regexes are run by `TextRunPass` over the AST text image ([architecture.md](architecture.md#typography-over-the-ast)). |
 | **HyphenationModule** | Inserts soft hyphens into words longer than `$wordLimit`; second transformer of the same pass. |
 
-Output formatting is not a module: its configuration lives on `$texy->htmlOutput->formatter` (`Output\Html\Formatter`).
+Output formatting is not a module: its configuration lives on `$texy->htmlOutput` (`Output\Html\Config`).
 
 ## Interactions between modules
 
