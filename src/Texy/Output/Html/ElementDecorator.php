@@ -7,6 +7,7 @@
 
 namespace Texy\Output\Html;
 
+use Texy\HtmlPolicy;
 use Texy\Modifier;
 use Texy\Texy;
 use function array_flip, is_array, settype;
@@ -14,13 +15,14 @@ use function array_flip, is_array, settype;
 
 /**
  * Applies Modifier (classes, styles, attributes, alignment) to an Element,
- * filtered by the Policy whitelists.
+ * filtered by the HtmlPolicy whitelists.
  */
 final class ElementDecorator
 {
 	public function __construct(
-		private Texy $texy,
+		private HtmlPolicy $policy,
 		private Config $config,
+		private Renderer $renderer,
 	) {
 	}
 
@@ -46,12 +48,14 @@ final class ElementDecorator
 		$attrs = &$el->attrs;
 		$name = $el->name ?? '';
 
+		$allowedTags = $this->policy->allowedTags;
+
 		if (!$modifier->attrs) {
-		} elseif ($this->texy->htmlPolicy->allowedTags === Texy::ALL) {
+		} elseif ($allowedTags === Texy::ALL) {
 			$attrs = $modifier->attrs;
 
-		} elseif (is_array($this->texy->htmlPolicy->allowedTags)) {
-			$tmp = $this->texy->htmlPolicy->allowedTags[$name] ?? [];
+		} elseif (is_array($allowedTags)) {
+			$tmp = $allowedTags[$name] ?? [];
 
 			if ($tmp === Texy::ALL) {
 				$attrs = $modifier->attrs;
@@ -67,7 +71,7 @@ final class ElementDecorator
 		}
 
 		if ($modifier->title !== null) {
-			$attrs['title'] = $this->texy->typographyModule->postLine($modifier->title);
+			$attrs['title'] = $this->renderer->postLineText($modifier->title);
 		}
 	}
 
@@ -76,7 +80,7 @@ final class ElementDecorator
 	private function decorateClasses(Modifier $modifier, array &$attrs): void
 	{
 		if ($modifier->classes || $modifier->id !== null) {
-			[$allowedClasses] = $this->texy->htmlPolicy->getAllowedProps();
+			[$allowedClasses] = $this->policy->getAllowedProps();
 			settype($attrs['class'], 'array');
 			if ($allowedClasses === Texy::ALL) {
 				foreach ($modifier->classes as $value => $foo) {
@@ -103,7 +107,7 @@ final class ElementDecorator
 	private function decorateStyles(Modifier $modifier, array &$attrs): void
 	{
 		if ($modifier->styles) {
-			[, $allowedStyles] = $this->texy->htmlPolicy->getAllowedProps();
+			[, $allowedStyles] = $this->policy->getAllowedProps();
 			settype($attrs['style'], 'array');
 			if ($allowedStyles === Texy::ALL) {
 				foreach ($modifier->styles as $prop => $value) {
