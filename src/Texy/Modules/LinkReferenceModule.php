@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Compat;
 use Texy\Helpers;
 use Texy\Node;
 use Texy\Nodes;
@@ -287,5 +288,29 @@ final class LinkReferenceModule extends Texy\Module
 		}
 
 		return null;
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->linkRoot etc. instead
+	 */
+	public function &__get(string $name): mixed
+	{
+		return Compat\Legacy::ref($this->texy, Compat\Legacy::OfModule['linkModule'], '$texy->linkModule', $name, 'read');
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->linkRoot etc. instead
+	 */
+	public function __set(string $name, mixed $value): void
+	{
+		Compat\Legacy::set($this->texy, Compat\Legacy::OfModule['linkModule'], '$texy->linkModule', $name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return Compat\Legacy::isSet($this->texy, Compat\Legacy::OfModule['linkModule'], $name);
 	}
 }

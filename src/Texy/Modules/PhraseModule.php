@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Compat;
 use Texy\Modifier;
 use Texy\Nodes\ContentNode;
 use Texy\Nodes\LinkNode;
@@ -538,5 +539,29 @@ final class PhraseModule extends Texy\Module
 			null,  // wikilinks don't support modifiers
 			new Range($offsets[0], strlen($matches[0])),
 		);
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->phraseTags etc. instead
+	 */
+	public function &__get(string $name): mixed
+	{
+		return Compat\Legacy::ref($this->texy, Compat\Legacy::OfModule['phraseModule'], '$texy->phraseModule', $name, 'read');
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->phraseTags etc. instead
+	 */
+	public function __set(string $name, mixed $value): void
+	{
+		Compat\Legacy::set($this->texy, Compat\Legacy::OfModule['phraseModule'], '$texy->phraseModule', $name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return Compat\Legacy::isSet($this->texy, Compat\Legacy::OfModule['phraseModule'], $name);
 	}
 }

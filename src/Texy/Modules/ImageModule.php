@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Compat;
 use Texy\Helpers;
 use Texy\Modifier;
 use Texy\Node;
@@ -288,5 +289,29 @@ final class ImageModule extends Texy\Module
 	public function getDefinition(string $name): ?ImageDefinitionNode
 	{
 		return $this->definitions[Helpers::toLower($name)] ?? null;
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->imageRoot etc. instead
+	 */
+	public function &__get(string $name): mixed
+	{
+		return Compat\Legacy::ref($this->texy, Compat\Legacy::OfModule['imageModule'], '$texy->imageModule', $name, 'read');
+	}
+
+
+	/**
+	 * @deprecated use $texy->htmlOutput->imageRoot etc. instead
+	 */
+	public function __set(string $name, mixed $value): void
+	{
+		Compat\Legacy::set($this->texy, Compat\Legacy::OfModule['imageModule'], '$texy->imageModule', $name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return Compat\Legacy::isSet($this->texy, Compat\Legacy::OfModule['imageModule'], $name);
 	}
 }
