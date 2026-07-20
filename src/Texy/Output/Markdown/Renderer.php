@@ -10,17 +10,18 @@ namespace Texy\Output\Markdown;
 use Texy\Helpers as TexyHelpers;
 use Texy\Node;
 use Texy\Nodes;
-use Texy\UrlPolicy;
+use Texy\Output\NodeRenderer;
 use Texy\Syntax;
-use Texy\Texy;
+use Texy\UrlPolicy;
 use function array_map, count, explode, implode, is_string, max, mb_strlen, preg_match, rtrim, str_repeat, strlen, strncasecmp, trim;
 use const ENT_QUOTES;
 
 
 /**
  * Generates Markdown (GFM) output from AST.
+ * @extends NodeRenderer<string>
  */
-class Renderer
+class Renderer extends NodeRenderer
 {
 	/** Heading style: 'atx' (###) or 'setext' (===) */
 	public string $headingStyle = 'atx';
@@ -54,9 +55,6 @@ class Renderer
 
 	/** Shorten URLs in autolinks */
 	public bool $shortenUrls = false;
-
-	/** @var array<class-string<Node>, \Closure(Node, self): string> */
-	private array $handlers = [];
 
 	/** @var array<int|string, array{url: string, title: ?string}> collected link references */
 	private array $linkReferences = [];
@@ -121,30 +119,6 @@ class Renderer
 
 
 	/**
-	 * Register a handler for a node class.
-	 * Return null to delegate to previous handler.
-	 * @param \Closure(Node, self, ?\Closure): ?string $handler
-	 */
-	public function registerHandler(\Closure $handler): void
-	{
-		/** @var class-string<Node> $nodeClass */
-		$nodeClass = (string) (new \ReflectionFunction($handler))->getParameters()[0]->getType();
-		$previous = $this->handlers[$nodeClass] ?? null;
-		$this->handlers[$nodeClass] = static function (Node $node, self $gen) use ($handler, $previous): string {
-			/** @var \Closure(Node, self, \Closure|null): ?string $handler */
-			$result = $handler($node, $gen, $previous);
-			if ($result !== null) {
-				return $result;
-			}
-			if ($previous === null) {
-				throw new \LogicException('No handler for node class ' . $node::class);
-			}
-			return $previous($node, $gen);
-		};
-	}
-
-
-	/**
 	 * Generate Markdown from AST.
 	 */
 	public function render(Nodes\DocumentNode $document): string
@@ -164,19 +138,6 @@ class Renderer
 		}
 
 		return rtrim($content) . "\n";
-	}
-
-
-	/**
-	 * Generate Markdown from a node.
-	 */
-	public function renderNode(Node $node): string
-	{
-		$handler = $this->handlers[$node::class] ?? null;
-		if ($handler === null) {
-			throw new \LogicException('No handler for node class ' . $node::class);
-		}
-		return $handler($node, $this);
 	}
 
 
