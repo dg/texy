@@ -25,11 +25,10 @@ class TableRowNode extends BlockNode
 	}
 
 
+	/** @return \Generator<TableCellNode> */
 	public function &getChildren(): \Generator
 	{
-		foreach ($this->cells as &$cell) {
-			yield $cell;
-		}
-		$this->cells = array_values(array_filter($this->cells));
+		$gen = $this->yieldList($this->cells);
+		return $gen;
 	}
 }

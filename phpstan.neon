@@ -20,9 +20,12 @@ parameters:
 			paths:
 				- src/Texy/Node.php
 
-		# array_filter in getChildren() removes nulls added during traversal (NodeTraverser may set to null)
+		# Node::yieldList() yields list items by reference: callers may write null
+		# through the reference and the finally block filters them out, which PHPStan
+		# cannot model (it sees the by-ref parameter as widening the property type).
 		-
-			identifier: arrayFilter.same
+			identifier: assign.propertyType
+			message: '#does not accept array<.*\|null>#'
 			paths:
 				- src/Texy/Nodes/
 
@@ -66,3 +69,12 @@ parameters:
 			paths:
 				- src/Texy/Output/Html/Config.php
 				- src/Texy/Output/Html/Renderer.php
+
+		# The traversal writes null through a reference yielded by getChildren().
+		# Nodes that yield a non-nullable typed property (e.g. `yield $this->content`)
+		# throw TypeError there; PHPStan cannot model writes through references.
+		-
+			identifier: catch.neverThrown
+			message: '#^Dead catch - TypeError is never thrown in the try block\.$#'
+			count: 1
+			path: src/Texy/NodeTraverser.php

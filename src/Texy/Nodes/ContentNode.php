@@ -22,11 +22,10 @@ class ContentNode extends Texy\Node
 	}
 
 
+	/** @return \Generator<InlineNode|BlockNode> */
 	public function &getChildren(): \Generator
 	{
-		foreach ($this->children as &$item) {
-			yield $item;
-		}
-		$this->children = array_values(array_filter($this->children));
+		$gen = $this->yieldList($this->children);
+		return $gen;
 	}
 }

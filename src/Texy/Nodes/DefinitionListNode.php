@@ -26,11 +26,10 @@ class DefinitionListNode extends BlockNode
 	}
 
 
+	/** @return \Generator<ListItemNode> */
 	public function &getChildren(): \Generator
 	{
-		foreach ($this->items as &$item) {
-			yield $item;
-		}
-		$this->items = array_values(array_filter($this->items));
+		$gen = $this->yieldList($this->items);
+		return $gen;
 	}
 }

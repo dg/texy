@@ -7,6 +7,8 @@
 
 namespace Texy;
 
+use function sprintf;
+
 
 /**
  * Traverses and transforms AST nodes using visitor pattern.
@@ -55,13 +57,24 @@ final class NodeTraverser
 				return $node;
 
 			} elseif ($res === self::RemoveNode) {
-				return new Nodes\TextNode(''); // TODO: return null
+				return null;
 			}
 		}
 
 		if ($children) {
 			foreach ($node->getChildren() as &$subnode) {
-				$subnode = $this->traverseNode($subnode);
+				$res = $this->traverseNode($subnode);
+				if ($res !== $subnode) {
+					try {
+						$subnode = $res;
+					} catch (\TypeError $e) {
+						throw new \LogicException(sprintf(
+							'Cannot %s child node of %s during traversal, its slot does not allow that.',
+							$res === null ? 'remove' : 'replace',
+							$node::class,
+						), 0, $e);
+					}
+				}
 				if ($this->stop) {
 					break;
 				}
