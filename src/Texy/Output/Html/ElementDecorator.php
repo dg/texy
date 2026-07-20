@@ -7,6 +7,8 @@
 
 namespace Texy\Output\Html;
 
+use Texy\HtmlPolicy;
+use Texy\UrlPolicy;
 use Texy\Modifier;
 use Texy\Texy;
 use function is_array, is_string;
@@ -30,8 +32,10 @@ final class ElementDecorator
 
 
 	public function __construct(
-		private Texy $texy,
+		private HtmlPolicy $policy,
+		private UrlPolicy $urlPolicy,
 		private Config $config,
+		private Renderer $renderer,
 	) {
 	}
 
@@ -57,17 +61,17 @@ final class ElementDecorator
 		$attrs = &$el->attrs;
 
 		if ($modifier->attrs) {
-			$attrs = $this->filterUrls($this->texy->htmlPolicy->filterAttrs($el->name ?? '', $modifier->attrs));
+			$attrs = $this->filterUrls($this->policy->filterAttrs($el->name ?? '', $modifier->attrs));
 		}
 
 		if ($modifier->title !== null) {
-			$attrs['title'] = $this->texy->typographyModule->postLine($modifier->title);
+			$attrs['title'] = $this->renderer->postLineText($modifier->title);
 		}
 	}
 
 
 	/**
-	 * A URL attribute survives only if checkURL() accepts it. This runs regardless of
+	 * A URL attribute survives only if UrlPolicy accepts it. This runs regardless of
 	 * the whitelist - "javascript:" must not get through even on a permissive policy.
 	 * @param  array<string, mixed>  $attrs
 	 * @return array<string, mixed>
@@ -80,7 +84,9 @@ final class ElementDecorator
 				continue;
 			}
 
-			$allowed = $this->texy->checkURL($value, $kind === Schema::UrlImage ? Texy::FILTER_IMAGE : Texy::FILTER_ANCHOR);
+			$allowed = $kind === Schema::UrlImage
+				? $this->urlPolicy->isImageAllowed($value)
+				: $this->urlPolicy->isLinkAllowed($value);
 			if (!$allowed) {
 				unset($attrs[$name]);
 			}
@@ -94,9 +100,9 @@ final class ElementDecorator
 	private function decorateClasses(Modifier $modifier, array &$attrs): void
 	{
 		if ($modifier->classes || $modifier->id !== null) {
-			$allowedClasses = $this->classes ??= is_array($this->texy->htmlPolicy->allowedClasses)
-				? array_flip($this->texy->htmlPolicy->allowedClasses)
-				: $this->texy->htmlPolicy->allowedClasses;
+			$allowedClasses = $this->classes ??= is_array($this->policy->allowedClasses)
+				? array_flip($this->policy->allowedClasses)
+				: $this->policy->allowedClasses;
 			settype($attrs['class'], 'array');
 			if ($allowedClasses === Texy::ALL) {
 				foreach ($modifier->classes as $value => $foo) {
@@ -123,9 +129,9 @@ final class ElementDecorator
 	private function decorateStyles(Modifier $modifier, array &$attrs): void
 	{
 		if ($modifier->styles) {
-			$allowedStyles = $this->styles ??= is_array($this->texy->htmlPolicy->allowedStyles)
-				? array_flip($this->texy->htmlPolicy->allowedStyles)
-				: $this->texy->htmlPolicy->allowedStyles;
+			$allowedStyles = $this->styles ??= is_array($this->policy->allowedStyles)
+				? array_flip($this->policy->allowedStyles)
+				: $this->policy->allowedStyles;
 			settype($attrs['style'], 'array');
 			if ($allowedStyles === Texy::ALL) {
 				foreach ($modifier->styles as $prop => $value) {
