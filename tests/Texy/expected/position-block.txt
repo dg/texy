@@ -2,7 +2,7 @@ DocumentNode
   ContentNode
     BlockQuoteNode [0,33]
       ContentNode
-        ParagraphNode
+        ParagraphNode [2,31]
           ContentNode
             TextNode [2,31] "Quote line one Quote line two"
     HorizontalRuleNode [35,3]

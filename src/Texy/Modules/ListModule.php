@@ -138,7 +138,7 @@ final class ListModule extends Texy\Module
 			$items,
 			$listType,
 			$start,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[1]),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
@@ -187,11 +187,12 @@ final class ListModule extends Texy\Module
 			if ($context->getBlockParser()->next($patternTerm, $termMatches, $termOffsets)) {
 				/** @var array{string, string, ?string} $termMatches */
 				[, $mContent, $mTermMod] = $termMatches;
-				$termMod = Modifier::parse($mTermMod);
-				// group 1 always participates in a successful match, but next() cannot type that
+				$termMod = Modifier::parse($mTermMod, $termOffsets[2] ?? null);
+				// groups 0 and 1 always participate in a successful match, but next() cannot type that
+				$termOffset = $termOffsets[0] ?? throw new \LogicException('Match without group 0.');
 				$contentOffset = $termOffsets[1] ?? throw new \LogicException('Match without group 1.');
 				$termContent = $context->parseInline($mContent, $contentOffset);
-				$items[] = new ListItemNode($termContent, true, $termMod);
+				$items[] = new ListItemNode($termContent, true, $termMod, new Range($termOffset, strlen($termMatches[0])));
 				continue;
 			}
 
@@ -200,7 +201,7 @@ final class ListModule extends Texy\Module
 
 		return new DefinitionListNode(
 			$items,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[1]),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
@@ -229,6 +230,10 @@ final class ListModule extends Texy\Module
 
 		/** @var array{string, string, ?string, ?string} $matches */
 		[, $mIndent, $mContent, $mMod] = $matches;
+		// group 0 always participates in a successful match, but next() cannot type that
+		$itemOffset = $offsets[0] ?? throw new \LogicException('Match without group 0.');
+		$modOffset = $offsets[3] ?? null;
+		$itemEnd = $itemOffset + strlen($matches[0]);
 
 		// Assemble content and map local line starts to absolute source offsets
 		$map = [];
@@ -258,6 +263,7 @@ final class ListModule extends Texy\Module
 			}
 
 			$content .= "\n" . $mBlank . $mContent;
+			$itemEnd = ($offsets[0] ?? throw new \LogicException('Match without group 0.')) + strlen($matches[0]);
 		}
 
 		// Parse content as blocks
@@ -272,7 +278,8 @@ final class ListModule extends Texy\Module
 		return new ListItemNode(
 			$parsed,
 			false,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $modOffset),
+			new Range($itemOffset, $itemEnd - $itemOffset),
 		);
 	}
 }

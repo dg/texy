@@ -109,7 +109,7 @@ final class BlockModule extends Texy\Module
 	{
 		[, $mParam, $mMod, $mContent] = $matches;
 
-		$mod = Texy\Modifier::parse($mMod);
+		$mod = Texy\Modifier::parse($mMod, $offsets[2] ?? null);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
 		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];

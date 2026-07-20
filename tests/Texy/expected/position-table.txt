@@ -1,24 +1,24 @@
 DocumentNode
   ContentNode
     TableNode [0,17]
-      TableRowNode
-        TableCellNode
+      TableRowNode [0,17]
+        TableCellNode [1,7]
           ContentNode
             TextNode [2,5] "Col A"
-        TableCellNode
+        TableCellNode [9,7]
           ContentNode
             TextNode [10,5] "Col B"
-      TableRowNode
-        TableCellNode
+      TableRowNode [18,17]
+        TableCellNode [19,7]
           ContentNode
             TextNode [20,5] "val 1"
-        TableCellNode
+        TableCellNode [27,7]
           ContentNode
             TextNode [28,5] "val 2"
-      TableRowNode
-        TableCellNode
+      TableRowNode [36,17]
+        TableCellNode [37,7]
           ContentNode
             TextNode [38,5] "val 3"
-        TableCellNode
+        TableCellNode [45,7]
           ContentNode
             TextNode [46,5] "val 4"

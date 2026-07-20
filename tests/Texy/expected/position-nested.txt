@@ -2,7 +2,7 @@ DocumentNode
   ContentNode
     BlockQuoteNode [0,48]
       ContentNode
-        ParagraphNode
+        ParagraphNode [2,46]
           ContentNode
             TextNode [2,11] "Quote with "
             PhraseNode [13,8] phrase/strong
@@ -14,35 +14,35 @@ DocumentNode
                 TextNode [35,6] "italic"
             TextNode [43,5] " here"
     DefinitionListNode [50,29]
-      ListItemNode
+      ListItemNode [50,9]
         ContentNode
           TextNode [50,8] "Def Term"
-      ListItemNode
+      ListItemNode [60,19]
         ContentNode
-          ParagraphNode
+          ParagraphNode [64,15]
             ContentNode
               TextNode [64,15] "description one"
-      ListItemNode
+      ListItemNode [80,19]
         ContentNode
-          ParagraphNode
+          ParagraphNode [84,15]
             ContentNode
               TextNode [84,15] "description two"
     TableNode [101,25]
-      TableRowNode
-        TableCellNode
+      TableRowNode [101,25]
+        TableCellNode [102,10]
           ContentNode
             PhraseNode [103,8] phrase/strong
               ContentNode
                 TextNode [105,4] "bold"
-        TableCellNode
+        TableCellNode [113,12]
           ContentNode
             PhraseNode [114,10] phrase/em
               ContentNode
                 TextNode [116,6] "italic"
-      TableRowNode
-        TableCellNode
+      TableRowNode [127,25]
+        TableCellNode [128,10]
           ContentNode
             TextNode [129,4] "cell"
-        TableCellNode
+        TableCellNode [139,12]
           ContentNode
             TextNode [140,4] "cell"

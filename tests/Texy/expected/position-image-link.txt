@@ -1,6 +1,6 @@
 DocumentNode
   ContentNode
-    ParagraphNode
+    ParagraphNode [0,31]
       ContentNode
         LinkNode [0,31] url=https://example.com
           ContentNode

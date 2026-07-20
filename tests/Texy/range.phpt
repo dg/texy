@@ -182,3 +182,15 @@ test('paragraph line merging and modifier keep exact inline ranges', function ()
 	$walk($para);
 	Assert::true($found);
 });
+
+
+test('modifier positions', function () {
+	$texy = new Texy\Texy;
+	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-modifier.texy'));
+	$doc = $texy->parse($text);
+
+	Assert::matchFile(
+		__DIR__ . '/expected/position-modifier.txt',
+		AstDumper::dump($doc),
+	);
+});

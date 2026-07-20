@@ -91,7 +91,7 @@ final class ParagraphModule extends Texy\Module
 	private function parseBlockHtml(ParseContext $context, string $text, int $baseOffset = 0): ParagraphNode
 	{
 		$content = $context->parseInline($text, $baseOffset);
-		$node = new ParagraphNode($content);
+		$node = new ParagraphNode($content, range: new Texy\Range($baseOffset, strlen($text)));
 		$node->blockHtml = true;
 		return $node;
 	}
@@ -145,14 +145,14 @@ final class ParagraphModule extends Texy\Module
 		if ($mx = Regexp::match($text, '~' . Patterns::MODIFIER_H . '(?= \n | \z)~sUmx', captureOffset: true)) {
 			/** @var array{array{string, int}, array{string, int}} $mx */
 			[$mMod] = $mx[1];
-			$modOffset = $baseOffset + $mx[0][1];
+			$cutOffset = $baseOffset + $mx[0][1]; // full match incl. leading spaces and dot
 			foreach ($lines as $i => $line) {
-				$local = $modOffset - $line['offset'];
+				$local = $cutOffset - $line['offset'];
 				if ($local >= 0 && $local <= strlen($line['content'])) {
 					$lines[$i]['content'] = rtrim(substr($line['content'], 0, $local));
 				}
 			}
-			$modifier = Modifier::parse($mMod, $modOffset);
+			$modifier = Modifier::parse($mMod, $baseOffset + $mx[1][1]);
 		}
 
 		// the former trim(): drop blank edge lines and edge whitespace
@@ -163,7 +163,7 @@ final class ParagraphModule extends Texy\Module
 			array_pop($lines);
 		}
 		if (!$lines) {
-			return new ParagraphNode(new ContentNode);
+			return new ParagraphNode(new ContentNode, range: new Texy\Range($baseOffset, strlen($text)));
 		}
 		$trimmed = ltrim($lines[0]['content'], " \t");
 		$lines[0]['offset'] += strlen($lines[0]['content']) - strlen($trimmed);
@@ -204,7 +204,7 @@ final class ParagraphModule extends Texy\Module
 		$node = new ContentNode($this->expandLineBreaks($content->children));
 		Texy\OffsetMap::fromLines($mapLines)->applyTo($node);
 
-		return new ParagraphNode($node, $modifier);
+		return new ParagraphNode($node, $modifier, new Texy\Range($baseOffset, strlen($text)));
 	}
 
 

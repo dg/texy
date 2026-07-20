@@ -92,7 +92,7 @@ final class ImageModule extends Texy\Module
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
-		$modifier = Modifier::parse($mMod);
+		$modifier = Modifier::parse($mMod, $offsets[3] ?? null);
 
 		return new ImageDefinitionNode(
 			trim($mRef),

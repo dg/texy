@@ -1,13 +1,13 @@
 DocumentNode
   ContentNode
-    ParagraphNode
+    ParagraphNode [0,20]
       ContentNode
         TextNode [0,6] "Plain "
         PhraseNode [6,8] phrase/strong
           ContentNode
             TextNode [8,4] "bold"
         TextNode [14,6] " text."
-    ParagraphNode
+    ParagraphNode [22,39]
       ContentNode
         TextNode [22,6] "Start "
         PhraseNode [28,10] phrase/em
@@ -18,14 +18,14 @@ DocumentNode
           ContentNode
             TextNode [48,6] "strong"
         TextNode [56,5] " end."
-    ParagraphNode
+    ParagraphNode [63,25]
       ContentNode
         TextNode [63,6] "Code: "
         PhraseNode [69,13] phrase/code
           ContentNode
             TextNode [70,11] "inline code"
         TextNode [82,6] " here."
-    ParagraphNode
+    ParagraphNode [90,32]
       ContentNode
         TextNode [90,9] "Combined "
         PhraseNode [99,17] phrase/strong+em

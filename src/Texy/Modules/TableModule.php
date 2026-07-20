@@ -157,7 +157,7 @@ final class TableModule extends Texy\Module
 
 						// column modifier inheritance
 						if ($mModCol) {
-							$colModifier[$col] = Modifier::parse($mModCol);
+							$colModifier[$col] = Modifier::parse($mModCol, $cellMatches[2][1] >= 0 ? $cellAbsoluteOffset + $cellMatches[2][1] : null);
 						}
 						$cellMod = isset($colModifier[$col]) ? clone $colModifier[$col] : new Modifier;
 						$cellMod->setProperties($mCellMod);
@@ -166,7 +166,7 @@ final class TableModule extends Texy\Module
 						$contentAbsoluteOffset = $cellAbsoluteOffset + $mCellContentOffset;
 
 						// Create cell node - text will be parsed later
-						$lastCell = new TableCellNode(new ContentNode, 1, 1, $cellIsHeader, $cellMod);
+						$lastCell = new TableCellNode(new ContentNode, 1, 1, $cellIsHeader, $cellMod, new Range($cellAbsoluteOffset, strlen($originalCell)));
 						$cells[] = $lastCell;
 						$cellTexts[$lastCell] = [['content' => $mCellContent, 'offset' => $contentAbsoluteOffset]];
 						$prevRow[$col] = ['node' => $lastCell, 'text' => $mCellContent];
@@ -189,8 +189,11 @@ final class TableModule extends Texy\Module
 				$colCounter = $col;
 
 				if ($cells) {
-					$rowMod = Modifier::parse($mRowMod);
-					$rows[] = new TableRowNode($cells, $isHead, $rowMod);
+					$rowMod = Modifier::parse($mRowMod, $lineOffsets[3] ?? null);
+					// group 0 always participates in a successful match, but next() cannot type that
+					$rowOffset = $lineOffsets[0] ?? throw new \LogicException('Match without group 0.');
+					$rowText = $lineMatches[0] ?? throw new \LogicException('Match without group 0.');
+					$rows[] = new TableRowNode($cells, $isHead, $rowMod, new Range($rowOffset, strlen($rowText)));
 				} else {
 					// redundant row - decrement rowspan
 					foreach ($prevRow as $item) {
@@ -253,7 +256,7 @@ final class TableModule extends Texy\Module
 
 		return new TableNode(
 			$rows,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[1]),
 			new Range($startOffset, strlen($matches[0])),
 		);
 	}
