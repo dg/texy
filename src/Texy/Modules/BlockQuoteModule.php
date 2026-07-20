@@ -9,7 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Nodes\BlockQuoteNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Range;
 use Texy\Syntax;
 use function max, strlen;
@@ -80,7 +80,7 @@ final class BlockQuoteModule extends Texy\Module
 		}
 
 		// Fix positions in parsed content using offset map
-		Texy\OffsetMap::fromLines($lines, strlen($content) - strlen(ltrim($content)))
+		Texy\Parsing\OffsetMap::fromLines($lines, strlen($content) - strlen(ltrim($content)))
 			->applyTo($parsed);
 
 		return new BlockQuoteNode(

@@ -9,10 +9,10 @@
  */
 
 use Tester\Assert;
-use Texy\BlockParser;
-use Texy\InlineParser;
+use Texy\Parsing\BlockParser;
+use Texy\Parsing\InlineParser;
 use Texy\Nodes\BlockNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Range;
 
 require __DIR__ . '/../bootstrap.php';

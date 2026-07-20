@@ -35,7 +35,7 @@ final class FooModule extends Texy\Module
     }
 
     /** @param array<?string> $matches  @param array<?int> $offsets */
-    public function parseFoo(Texy\ParseContext $context, array $matches, array $offsets): ?Texy\Nodes\InlineNode
+    public function parseFoo(\Texy\Parsing\ParseContext $context, array $matches, array $offsets): ?Texy\Nodes\InlineNode
     {
         // extract data, optionally $context->parseInline(...) for nested content,
         // return a node or null to refuse the match

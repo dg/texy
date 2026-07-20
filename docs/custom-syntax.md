@@ -30,7 +30,7 @@ $texy->registerLinePattern($handler, '~
 ## The syntax handler
 
 ```php
-function (Texy\ParseContext $context, array $matches, array $offsets, string $name): ?Texy\Node
+function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name): ?Texy\Node
 ```
 
 - `$matches[0]` is the whole match, `$matches[1]`… the capturing groups; `$offsets` holds the byte offset of each group in the source (for `Range` tracking).
@@ -49,7 +49,7 @@ Collision resolution ([parsing.md](parsing.md#inlineparser)): at the same positi
 use Texy\Nodes;
 
 $texy->registerLinePattern(
-    function (Texy\ParseContext $context, array $matches, array $offsets): Nodes\LinkNode {
+    function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\LinkNode {
         $username = $matches[1];
         return new Nodes\LinkNode(
             url: '/user/' . urlencode($username),
@@ -70,7 +70,7 @@ Check out the profile of @@johndoe.
 
 ```php
 $texy->registerBlockPattern(
-    function (Texy\ParseContext $context, array $matches, array $offsets): Nodes\SectionNode {
+    function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\SectionNode {
         [, $type, $content] = $matches;
         $mod = new Texy\Modifier;
         $mod->classes['alert'] = $mod->classes['alert-' . $type] = true;
@@ -100,7 +100,7 @@ $abbreviations = [
 ];
 
 $texy->registerLinePattern(
-    function (Texy\ParseContext $context, array $matches, array $offsets) use ($abbreviations): ?Nodes\AnnotationNode {
+    function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets) use ($abbreviations): ?Nodes\AnnotationNode {
         if (!isset($abbreviations[$matches[1]])) {
             return null;   // unknown abbreviation - leave the text alone
         }
@@ -117,7 +117,7 @@ For structures whose full extent the registered pattern cannot capture, use the 
 
 ```php
 $texy->registerBlockPattern(
-    function (Texy\ParseContext $context, array $matches, array $offsets): Nodes\BlockQuoteNode {
+    function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\BlockQuoteNode {
         $parser = $context->getBlockParser();
         $parser->moveBackward();   // pattern matched the first line; re-read from it
 

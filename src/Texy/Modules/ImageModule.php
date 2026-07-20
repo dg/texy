@@ -19,7 +19,7 @@ use Texy\Nodes\ImageDefinitionNode;
 use Texy\Nodes\ImageNode;
 use Texy\Nodes\LinkNode;
 use Texy\NodeTraverser;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Patterns;
 use Texy\Range;
 use Texy\Regexp;

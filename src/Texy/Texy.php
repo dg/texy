@@ -8,6 +8,8 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
+use Texy\Parsing\Engine;
+use Texy\Parsing\ParseContext;
 use Texy\Passes\TextRunPass;
 use function strlen;
 

@@ -15,7 +15,7 @@ use Texy\Nodes\LinkNode;
 use Texy\Nodes\PhraseNode;
 use Texy\Nodes\RawTextNode;
 use Texy\Nodes\TextNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Patterns;
 use Texy\Range;
 use Texy\Syntax;

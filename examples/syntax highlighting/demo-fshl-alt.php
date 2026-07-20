@@ -88,7 +88,7 @@ $texy->htmlOutput->registerHandler(
 // Register NEW syntax: recognize <?php ... ?​> blocks
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
 $texy->registerBlockPattern(
-	function (Texy\ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
+	function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
 		[$content] = $matches;
 		$lang = $name === 'phpBlockSyntax' ? 'php' : 'javascript';
 
@@ -108,7 +108,7 @@ $texy->registerBlockPattern(
 
 // Register NEW syntax: recognize <script> ... </script> blocks
 $texy->registerBlockPattern(
-	function (Texy\ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
+	function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name): CodeBlockNode {
 		[$content] = $matches;
 
 		return new CodeBlockNode(

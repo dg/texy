@@ -11,7 +11,7 @@ use Texy;
 use Texy\Modifier;
 use Texy\Nodes\HeadingNode;
 use Texy\Nodes\HeadingType;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Range;
 use Texy\Syntax;
 use function max, min, rtrim, strlen, trim;

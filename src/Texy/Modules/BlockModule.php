@@ -13,7 +13,7 @@ use Texy\Nodes\BlockNode;
 use Texy\Nodes\CodeBlockNode;
 use Texy\Nodes\CommentNode;
 use Texy\Nodes\SectionNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Range;
 use Texy\Syntax;
 use function strlen, trim;
@@ -135,8 +135,8 @@ final class BlockModule extends Texy\Module
 			return new CodeBlockNode('text', trim($mContent, "\n"), null, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockDiv) {
-			[$content, $map] = Texy\OffsetMap::outdentLines(
-				Texy\OffsetMap::linesOf($mContent, $offsets[3]),
+			[$content, $map] = Texy\Parsing\OffsetMap::outdentLines(
+				Texy\Parsing\OffsetMap::linesOf($mContent, $offsets[3]),
 				firstLine: true,
 			);
 			if ($content === '') {

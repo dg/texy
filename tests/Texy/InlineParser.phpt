@@ -5,11 +5,11 @@
  */
 
 use Tester\Assert;
-use Texy\InlineParser;
+use Texy\Parsing\InlineParser;
 use Texy\Nodes\ContentNode;
 use Texy\Nodes\PhraseNode;
 use Texy\Nodes\TextNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Range;
 use Texy\Texy;
 

@@ -15,7 +15,7 @@ use Texy\Nodes;
 use Texy\Nodes\DocumentNode;
 use Texy\Nodes\LinkDefinitionNode;
 use Texy\NodeTraverser;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Patterns;
 use Texy\Range;
 use Texy\Syntax;

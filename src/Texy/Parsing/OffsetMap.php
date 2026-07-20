@@ -5,8 +5,10 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy;
+namespace Texy\Parsing;
 
+use Texy\Node;
+use Texy\Range;
 use function array_column, array_pop, array_shift, count, explode, implode, min, strlen, strspn, substr;
 use const PHP_INT_MAX;
 

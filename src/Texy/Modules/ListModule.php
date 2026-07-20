@@ -13,7 +13,7 @@ use Texy\Nodes\DefinitionListNode;
 use Texy\Nodes\ListItemNode;
 use Texy\Nodes\ListNode;
 use Texy\Nodes\ListType;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Patterns;
 use Texy\Range;
 use Texy\Regexp;
@@ -272,7 +272,7 @@ final class ListModule extends Texy\Module
 		// Fix positions in parsed content using offset mapping
 		if ($map) {
 			$skipped = strlen($content) - strlen(ltrim($content));
-			(new Texy\OffsetMap($map, $skipped))->applyTo($parsed);
+			(new Texy\Parsing\OffsetMap($map, $skipped))->applyTo($parsed);
 		}
 
 		return new ListItemNode(

@@ -15,7 +15,7 @@ use Texy\Nodes\LineBreakNode;
 use Texy\Nodes\ParagraphNode;
 use Texy\Nodes\TextNode;
 use Texy\Output\Html;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
 
@@ -137,7 +137,7 @@ final class ParagraphModule extends Texy\Module
 
 	private function parseParagraph(ParseContext $context, string $text, int $baseOffset = 0): ParagraphNode
 	{
-		$lines = Texy\OffsetMap::linesOf($text, $baseOffset);
+		$lines = Texy\Parsing\OffsetMap::linesOf($text, $baseOffset);
 
 		// Extract modifier from paragraph; MODIFIER_H cannot span lines, so the
 		// removal only shortens the end of a single line
@@ -202,7 +202,7 @@ final class ParagraphModule extends Texy\Module
 		// then the line map translates everything to source coordinates
 		$content = $context->parseInline($joined);
 		$node = new ContentNode($this->expandLineBreaks($content->children));
-		Texy\OffsetMap::fromLines($mapLines)->applyTo($node);
+		Texy\Parsing\OffsetMap::fromLines($mapLines)->applyTo($node);
 
 		return new ParagraphNode($node, $modifier, new Texy\Range($baseOffset, strlen($text)));
 	}

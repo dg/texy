@@ -10,7 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\HtmlCommentNode;
 use Texy\Nodes\HtmlTagNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Range;
 use Texy\Regexp;
 use Texy\Syntax;

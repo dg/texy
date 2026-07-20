@@ -5,10 +5,12 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy;
+namespace Texy\Parsing;
 
 use JetBrains\PhpStorm\Language;
+use Texy\Nodes;
 use Texy\Nodes\BlockNode;
+use Texy\Regexp;
 use function is_array, is_string, max, strlen, substr, usort;
 
 

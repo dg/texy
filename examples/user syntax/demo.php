@@ -54,7 +54,7 @@ $texy->allowed[Texy\Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 // Add new syntax: *bold*
 // The pattern captures the text between asterisks
 $texy->registerLinePattern(
-	function (Texy\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
+	function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
 		// Parse the content recursively (allows nesting like *bold _and italic_ text*)
@@ -79,7 +79,7 @@ $texy->registerLinePattern(
 
 // Add new syntax: _italic_
 $texy->registerLinePattern(
-	function (Texy\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
+	function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): PhraseNode {
 		[, $mContent, $mMod] = $matches;
 
 		$content = $context->parseInline(trim($mContent), $offsets[1] ?? $offsets[0]);
@@ -109,7 +109,7 @@ $texy->registerLinePattern(
 // Add new syntax: .tagname followed by content on next line
 // Examples: .h1, .h2, .perex, etc.
 $texy->registerBlockPattern(
-	function (Texy\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): ParagraphNode {
+	function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, string $name) use ($texy): ParagraphNode {
 		[, $mTag, $mText] = $matches;
 
 		// Parse the content with inline parser

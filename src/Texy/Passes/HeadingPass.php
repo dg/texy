@@ -98,6 +98,8 @@ final class HeadingPass
 			$node->level = min(6, max(1, $level));
 		}
 	}
+
+
 	/**
 	 * Returns the title for the table of contents; the {toc: ...} style is
 	 * transport syntax, so it is removed from the modifier.

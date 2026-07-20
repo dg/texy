@@ -5,7 +5,7 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy;
+namespace Texy\Parsing;
 
 use Texy\Nodes\ContentNode;
 

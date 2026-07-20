@@ -10,7 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\EmailNode;
 use Texy\Nodes\UrlNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Patterns;
 use Texy\Range;
 use Texy\Syntax;

@@ -10,7 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Compat;
 use Texy\Nodes\EmoticonNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Range;
 use Texy\Syntax;
 use function strlen;

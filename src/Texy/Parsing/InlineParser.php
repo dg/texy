@@ -5,9 +5,13 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy;
+namespace Texy\Parsing;
 
+use Texy\Helpers;
+use Texy\Nodes;
 use Texy\Nodes\TextNode;
+use Texy\Range;
+use Texy\Regexp;
 use function strlen;
 
 

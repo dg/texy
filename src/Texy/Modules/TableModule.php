@@ -13,7 +13,7 @@ use Texy\Nodes\ContentNode;
 use Texy\Nodes\TableCellNode;
 use Texy\Nodes\TableNode;
 use Texy\Nodes\TableRowNode;
-use Texy\ParseContext;
+use Texy\Parsing\ParseContext;
 use Texy\Patterns;
 use Texy\Range;
 use Texy\Regexp;
@@ -228,7 +228,7 @@ final class TableModule extends Texy\Module
 
 					if (count($lines) > 1) {
 						// multiline - parse as block (disable nested tables)
-						[$outdented, $map] = Texy\OffsetMap::outdentLines($lines);
+						[$outdented, $map] = Texy\Parsing\OffsetMap::outdentLines($lines);
 						$this->disableTables = true;
 						try {
 							$parsed = $context->parseBlock($outdented);
