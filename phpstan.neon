@@ -53,12 +53,6 @@ parameters:
 			count: 1
 			path: src/Texy/Texy.php
 
-		-
-			message: '#^Empty array passed to foreach\.$#'
-			identifier: foreach.emptyArray
-			count: 1
-			path: src/Texy/Output/Html/WellFormer.php
-
 		# Output handlers are intentionally polymorphic: the type of the first
 		# parameter decides which node class the handler serves (read via reflection),
 		# so any concrete Closure signature would be contravariantly narrower and

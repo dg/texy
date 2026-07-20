@@ -70,7 +70,7 @@ final class HyphenationModule extends Texy\Module
 		$this->before_h = array_flip($this->before_h);
 		$this->doubleVowels = array_flip($this->doubleVowels);
 
-		$texy->registerPostLine($this->postLine(...), Syntax::Hyphenation);
+		$texy->allowed[Syntax::Hyphenation] ??= true;
 	}
 
 

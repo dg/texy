@@ -9,12 +9,6 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
-// temporarily disabled tests - the code cannot meet these expectations yet
-function skip(string $description, Closure $fn): void
-{
-}
-
-
 function createTexy()
 {
 	$texy = new Texy\Texy;
@@ -24,7 +18,7 @@ function createTexy()
 }
 
 
-skip('HTML tags', function () {
+test('HTML tags', function () {
 	$texy = createTexy();
 	Assert::matchFile(
 		__DIR__ . '/expected/html.html',
@@ -33,7 +27,7 @@ skip('HTML tags', function () {
 });
 
 
-skip('HTML tags in safe mode', function () {
+test('HTML tags in safe mode', function () {
 	$texy = createTexy();
 	Texy\Configurator::safeMode($texy);
 	Assert::matchFile(
@@ -54,7 +48,7 @@ test('HTML tags disabled', function () {
 });
 
 
-skip('html-tags2', function () {
+test('html-tags2', function () {
 	Assert::matchFile(
 		__DIR__ . '/expected/html-tags2.html',
 		createTexy()->process(file_get_contents(__DIR__ . '/sources/html-tags2.texy')),
@@ -70,7 +64,7 @@ test('html-tags3', function () {
 });
 
 
-skip('html-tags4', function () {
+test('html-tags4', function () {
 	Assert::matchFile(
 		__DIR__ . '/expected/html-tags4.html',
 		createTexy()->process(file_get_contents(__DIR__ . '/sources/html-tags4.texy')),

@@ -13,7 +13,8 @@ use function is_array, is_string;
 
 /**
  * Security policy for HTML in the document: which tags, classes and inline
- * styles may appear, plus validation of passthrough HTML tags.
+ * styles may appear, plus validation and reconstruction of passthrough
+ * HTML tags.
  */
 final class HtmlPolicy
 {
@@ -113,11 +114,6 @@ final class HtmlPolicy
 
 
 	/**
-	 * Escape tag as text (when rejected by the whitelist or validation).
-	 * Only escapes < and > so quotes remain for typography processing.
-
-
-	/**
 	 * Is the tag (opening or closing) acceptable? Mirrors the render-time
 	 * decision so it can also be evaluated in the transform phase.
 	 * @param  array<string, string|bool|null>  $attrs
@@ -154,15 +150,5 @@ final class HtmlPolicy
 		}
 
 		return $tag . '>';
-	}
-
-
-	/**
-	 * Escape tag as text (when validation fails).
-	 * Only escapes < and > so quotes remain for typography processing.
-	 */
-	public function escapeHtmlTag(Nodes\HtmlTagNode $node): string
-	{
-		return str_replace(['<', '>'], ['&lt;', '&gt;'], $this->reconstructTag($node));
 	}
 }

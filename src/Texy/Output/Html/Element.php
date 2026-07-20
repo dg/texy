@@ -26,7 +26,7 @@ class Element
 	/** @var array<string, string|int|bool|array<string|int|bool>|null>  element's attributes */
 	public array $attrs = [];
 
-	/** @var list<Element|string> */
+	/** @var list<Element|Raw|string> */
 	public array $children = [];
 
 	private bool $isVoid;
@@ -67,7 +67,7 @@ class Element
 	/**
 	 * Adds new element's child.
 	 */
-	public function add(self|string $child): static
+	public function add(self|Raw|string $child): static
 	{
 		$this->children[] = $child;
 		return $this;

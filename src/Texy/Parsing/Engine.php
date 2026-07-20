@@ -42,12 +42,6 @@ class Engine
 	private array $blockPatterns = [];
 
 	/**
-	 * Post-line processing handlers.
-	 * @var array<string, \Closure(string): string>
-	 */
-	private array $postHandlers = [];
-
-	/**
 	 * Gap handler for content between block patterns.
 	 * @var \Closure(ParseContext, string, int): array<Nodes\BlockNode>
 	 */
@@ -96,17 +90,6 @@ class Engine
 			'handler' => $handler,
 			'pattern' => $pattern . 'm', // force multiline
 		];
-	}
-
-
-	/**
-	 * Register a post-line processing handler.
-	 *
-	 * @param  \Closure(string): string  $handler
-	 */
-	public function registerPostLine(\Closure $handler, string $name): void
-	{
-		$this->postHandlers[$name] = $handler;
 	}
 
 

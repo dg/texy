@@ -7,6 +7,7 @@
 
 namespace Texy\Parsing;
 
+use Texy\Helpers;
 use Texy\Nodes;
 use Texy\Nodes\TextNode;
 use Texy\Range;
@@ -93,7 +94,7 @@ class InlineParser
 			if ($text === '') {
 				return new Nodes\ContentNode;
 			}
-			return new Nodes\ContentNode([new TextNode($text, new Range($baseOffset, strlen($text)))]);
+			return new Nodes\ContentNode([new TextNode(Helpers::decodeEntities($text), new Range($baseOffset, strlen($text)))]);
 		}
 
 		// One candidate per pattern, refreshed as the position moves. Searching every
@@ -142,7 +143,7 @@ class InlineParser
 			// Add text before this match (only now - a rejected match must not emit it)
 			if ($best['offset'] > $pos) {
 				$res[] = new TextNode(
-					substr($text, $pos, $best['offset'] - $pos),
+					Helpers::decodeEntities(substr($text, $pos, $best['offset'] - $pos)),
 					new Range($baseOffset + $pos, $best['offset'] - $pos),
 				);
 			}
@@ -154,7 +155,7 @@ class InlineParser
 		// Add remaining text
 		if ($pos < strlen($text)) {
 			$res[] = new TextNode(
-				substr($text, $pos),
+				Helpers::decodeEntities(substr($text, $pos)),
 				new Range($baseOffset + $pos, strlen($text) - $pos),
 			);
 		}
