@@ -13,10 +13,10 @@
  * - How to create a custom whitelist of allowed tags
  *
  * SECURITY LEVELS (from most to least permissive):
- * 1. Texy::ALL - allows ALL HTML tags (dangerous for user input!)
+ * 1. Texy::All - allows ALL HTML tags (dangerous for user input!)
  * 2. Default - allows most valid HTML5 tags
  * 3. safeMode() - allows only safe tags (recommended for comments/forums)
- * 4. Texy::NONE - allows NO HTML tags at all
+ * 4. Texy::None - allows NO HTML tags at all
  * 5. Custom whitelist - you specify exactly which tags are allowed
  */
 
@@ -63,12 +63,12 @@ doIt($texy);
 
 
 // ============================================================
-// Texy::ALL
+// Texy::All
 // Allows ALL HTML tags, including custom elements.
 // WARNING: Only use this if you trust the input completely!
 // ============================================================
-echo '<h2>Texy::ALL - enables all tags</h2>';
-$texy->htmlPolicy->allowedTags = $texy::ALL;
+echo '<h2>Texy::All - enables all tags</h2>';
+$texy->htmlPolicy->allowedTags = $texy::All;
 doIt($texy);
 
 
@@ -92,12 +92,12 @@ doIt($texy);
 
 
 // ============================================================
-// Texy::NONE
+// Texy::None
 // Completely disables all HTML tags.
 // Tags in input will be escaped and shown as text.
 // ============================================================
-echo '<h2>Texy::NONE - disables all tags</h2>';
-$texy->htmlPolicy->allowedTags = $texy::NONE;
+echo '<h2>Texy::None - disables all tags</h2>';
+$texy->htmlPolicy->allowedTags = $texy::None;
 doIt($texy);
 
 
