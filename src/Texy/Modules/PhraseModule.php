@@ -416,14 +416,14 @@ final class PhraseModule extends Texy\Module
 		if ($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) {
 			if ($mLink !== null) {
 				$content = $context->parseInline(trim($mContent), $contentOffset);
-				return new LinkNode($mLink, $content, Modifier::parse($mMod), $range);
+				return new LinkNode($mLink, $content, Modifier::parse($mMod, $offsets[2] ?? null), $range);
 
 			} elseif ($mMod === null) {
 				return null;
 			}
 		}
 
-		$mod = Modifier::parse($mMod);
+		$mod = Modifier::parse($mMod, $offsets[2] ?? null);
 		$content = $context->parseInline(trim($mContent), $contentOffset);
 
 		// Other phrases with link
@@ -451,7 +451,7 @@ final class PhraseModule extends Texy\Module
 		return new PhraseNode(
 			new ContentNode($content),
 			$phrase,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[2] ?? null),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
@@ -486,7 +486,7 @@ final class PhraseModule extends Texy\Module
 		[, $mContent, $mMod, $mTitle] = $matches;
 		$contentOffset = $offsets[1];
 
-		$mod = Modifier::parse($mMod) ?? new Modifier;
+		$mod = Modifier::parse($mMod, $offsets[2] ?? null) ?? new Modifier;
 		$mod->title = trim(Texy\Helpers::unescapeHtml($mTitle));
 		$content = [new TextNode(Texy\Helpers::decodeEntities(trim($mContent)), new Range($contentOffset, strlen(trim($mContent))))];
 

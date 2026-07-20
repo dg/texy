@@ -137,7 +137,7 @@ final class HeadingModule extends Texy\Module
 			$context->parseInline(trim($mContent), $contentOffset),
 			$level,
 			HeadingType::Underlined,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[2] ?? null),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
@@ -165,7 +165,7 @@ final class HeadingModule extends Texy\Module
 			$context->parseInline(trim($mContent), $contentOffset),
 			$level,
 			HeadingType::Surrounded,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[3] ?? null),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}

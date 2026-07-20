@@ -22,6 +22,11 @@ final class AstDumper
 			$line .= ' ' . $pos;
 		}
 
+		$modifier = get_object_vars($node)['modifier'] ?? null;
+		if ($modifier instanceof Texy\Modifier && $modifier->range) {
+			$line .= " mod[{$modifier->range->offset},{$modifier->range->length}]";
+		}
+
 		// Add type-specific extra info
 		$extra = self::getExtraInfo($node);
 		if ($extra !== '') {

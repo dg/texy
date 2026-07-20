@@ -145,13 +145,24 @@ final class OffsetMap
 		}
 
 		if ($node->range !== null) {
-			$offset = $this->toAbsolute($node->range->offset);
-			$end = $this->toAbsolute($node->range->offset + $node->range->length);
-			$node->range = new Range($offset, $end - $offset);
+			$node->range = $this->rangeToAbsolute($node->range);
+		}
+
+		$modifier = $node->getModifier();
+		if ($modifier?->range !== null) {
+			$modifier->range = $this->rangeToAbsolute($modifier->range);
 		}
 
 		foreach ($node->getChildren() as $child) {
 			$this->applyTo($child);
 		}
+	}
+
+
+	private function rangeToAbsolute(Range $range): Range
+	{
+		$offset = $this->toAbsolute($range->offset);
+		$end = $this->toAbsolute($range->offset + $range->length);
+		return new Range($offset, $end - $offset);
 	}
 }

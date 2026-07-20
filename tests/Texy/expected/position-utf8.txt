@@ -3,24 +3,24 @@ DocumentNode
     HeadingNode [0,16] level=1
       ContentNode
         TextNode [0,9] "日本語"
-    ParagraphNode
+    ParagraphNode [18,28]
       ContentNode
         TextNode [18,10] "Text with "
         PhraseNode [28,10] phrase/strong
           ContentNode
             TextNode [30,6] "太字"
         TextNode [38,8] " inside."
-    ParagraphNode
+    ParagraphNode [48,5]
       ContentNode
         TextNode [48,5] "List:"
     ListNode [54,14] unordered
-      ListItemNode
+      ListItemNode [54,14]
         ContentNode
-          ParagraphNode
+          ParagraphNode [56,12]
             ContentNode
               TextNode [56,12] "アイテム"
-      ListItemNode
+      ListItemNode [69,8]
         ContentNode
-          ParagraphNode
+          ParagraphNode [71,6]
             ContentNode
               TextNode [71,6] "項目"

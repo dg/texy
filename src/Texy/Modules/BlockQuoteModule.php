@@ -85,7 +85,7 @@ final class BlockQuoteModule extends Texy\Module
 
 		return new BlockQuoteNode(
 			$parsed,
-			Texy\Modifier::parse($mMod),
+			Texy\Modifier::parse($mMod, $offsets[1] ?? null),
 			new Range($startOffset, $totalLength),
 		);
 	}

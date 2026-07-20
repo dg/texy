@@ -1,34 +1,34 @@
 DocumentNode
   ContentNode
     ListNode [0,7] unordered
-      ListItemNode
+      ListItemNode [0,7]
         ContentNode
-          ParagraphNode
+          ParagraphNode [2,5]
             ContentNode
               TextNode [2,5] "first"
-      ListItemNode
+      ListItemNode [8,8]
         ContentNode
-          ParagraphNode
+          ParagraphNode [10,6]
             ContentNode
               TextNode [10,6] "second"
-      ListItemNode
+      ListItemNode [17,7]
         ContentNode
-          ParagraphNode
+          ParagraphNode [19,5]
             ContentNode
               TextNode [19,5] "third"
     ListNode [26,6] ordered
-      ListItemNode
+      ListItemNode [26,6]
         ContentNode
-          ParagraphNode
+          ParagraphNode [29,3]
             ContentNode
               TextNode [29,3] "one"
-      ListItemNode
+      ListItemNode [33,6]
         ContentNode
-          ParagraphNode
+          ParagraphNode [36,3]
             ContentNode
               TextNode [36,3] "two"
-      ListItemNode
+      ListItemNode [40,8]
         ContentNode
-          ParagraphNode
+          ParagraphNode [43,5]
             ContentNode
               TextNode [43,5] "three"

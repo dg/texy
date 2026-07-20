@@ -49,7 +49,7 @@ final class HorizontalRuleModule extends Texy\Module
 	{
 		return new HorizontalRuleNode(
 			$matches[1][0],
-			Texy\Modifier::parse($matches[2]),
+			Texy\Modifier::parse($matches[2], $offsets[2]),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}

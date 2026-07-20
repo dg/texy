@@ -122,7 +122,7 @@ final class FigureModule extends Texy\Module
 		return new FigureNode(
 			$image,
 			$caption,
-			Modifier::parse($mMod),
+			Modifier::parse($mMod, $offsets[6] ?? null),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
