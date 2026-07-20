@@ -351,7 +351,7 @@ Applied automatically to all running text (never inside code or other protected 
 
 *(`longwords` – HyphenationModule; post-processing)*
 
-Inserts invisible soft hyphens (`&shy;`) into words longer than `$texy->longWordsModule->wordLimit` (default 20) so browsers can break them. Uses Czech-oriented syllable heuristics. Enabled by default; disable with `$texy->allowed['longwords'] = false`.
+Inserts invisible soft hyphens (`&shy;`) into words longer than `$texy->hyphenationModule->wordLimit` (default 20) so browsers can break them. Uses Czech-oriented syllable heuristics. Enabled by default; disable with `$texy->allowed['longwords'] = false`.
 
 ## Modifiers
 

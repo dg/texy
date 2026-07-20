@@ -97,6 +97,8 @@ final class HeadingPass
 			$node->level = min(6, max(1, $level));
 		}
 	}
+
+
 	/**
 	 * Moves the {toc: ...} label out of the modifier; it is transport syntax and must
 	 * never reach the output.

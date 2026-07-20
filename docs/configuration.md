@@ -184,7 +184,7 @@ The locale determines quote characters (`TypographyModule::$locales`): cs/de „
 ### HyphenationModule
 
 ```php
-$texy->longWordsModule->wordLimit = 20;   // minimal length of a word to hyphenate
+$texy->hyphenationModule->wordLimit = 20;   // minimal length of a word to hyphenate
 ```
 
 ### EmoticonModule
