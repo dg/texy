@@ -30,14 +30,14 @@ class Element
 	/** @var list<Element|string> */
 	public array $children = [];
 
-	private bool $isEmpty;
+	private bool $isVoid;
 
 
 	/** @param  array<string, mixed>|string|null  $attrs  element's attributes (or textual content) */
 	public function __construct(?string $name = null, array|string|null $attrs = null)
 	{
 		$this->name = $name;
-		$this->isEmpty = isset(Schema::voidElements()[$name ?? '']);
+		$this->isVoid = isset(Schema::voidElements()[$name ?? '']);
 		if (is_array($attrs)) {
 			$this->attrs = $attrs;
 		} elseif ($attrs !== null) {
@@ -49,9 +49,9 @@ class Element
 	/**
 	 * Is element empty?
 	 */
-	public function isEmpty(): bool
+	public function isVoid(): bool
 	{
-		return $this->isEmpty;
+		return $this->isVoid;
 	}
 
 
@@ -168,7 +168,7 @@ class Element
 	 */
 	public function endTag(): string
 	{
-		if ($this->name && !$this->isEmpty) {
+		if ($this->name && !$this->isVoid) {
 			return '</' . $this->name . '>';
 		}
 
