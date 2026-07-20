@@ -306,7 +306,7 @@ final class Schema
 	{
 		static $cache;
 		if ($cache === null) {
-			$cache = array_fill_keys(array_keys(self::Elements), Texy::ALL);
+			$cache = array_fill_keys(array_keys(self::Elements), Texy::All);
 			unset($cache['html'], $cache['head'], $cache['body'], $cache['style']);
 		}
 

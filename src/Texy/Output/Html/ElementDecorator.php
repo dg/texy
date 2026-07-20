@@ -51,13 +51,13 @@ final class ElementDecorator
 		$allowedTags = $this->policy->allowedTags;
 
 		if (!$modifier->attrs) {
-		} elseif ($allowedTags === Texy::ALL) {
+		} elseif ($allowedTags === Texy::All) {
 			$attrs = $modifier->attrs;
 
 		} elseif (is_array($allowedTags)) {
 			$tmp = $allowedTags[$name] ?? [];
 
-			if ($tmp === Texy::ALL) {
+			if ($tmp === Texy::All) {
 				$attrs = $modifier->attrs;
 
 			} elseif (is_array($tmp)) {
@@ -82,7 +82,7 @@ final class ElementDecorator
 		if ($modifier->classes || $modifier->id !== null) {
 			[$allowedClasses] = $this->policy->getAllowedProps();
 			settype($attrs['class'], 'array');
-			if ($allowedClasses === Texy::ALL) {
+			if ($allowedClasses === Texy::All) {
 				foreach ($modifier->classes as $value => $foo) {
 					$attrs['class'][] = $value;
 				}
@@ -109,7 +109,7 @@ final class ElementDecorator
 		if ($modifier->styles) {
 			[, $allowedStyles] = $this->policy->getAllowedProps();
 			settype($attrs['style'], 'array');
-			if ($allowedStyles === Texy::ALL) {
+			if ($allowedStyles === Texy::All) {
 				foreach ($modifier->styles as $prop => $value) {
 					$attrs['style'][$prop] = $value;
 				}

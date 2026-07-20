@@ -28,10 +28,10 @@ The array is consulted once at the start of `process()`; changing it during proc
 
 ### $allowedClasses, $allowedStyles
 
-Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `Texy::ALL`.
+Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `Texy::All`.
 
 ```php
-$texy->htmlPolicy->allowedClasses = Texy\Texy::NONE;          // no classes/IDs
+$texy->htmlPolicy->allowedClasses = Texy\Texy::None;          // no classes/IDs
 $texy->htmlPolicy->allowedClasses = ['highlight', '#main'];   // whitelist; IDs prefixed with #
 $texy->htmlPolicy->allowedStyles = ['color'];
 ```
@@ -72,12 +72,12 @@ Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->tocTitle; // document title (for 
 Controls which HTML tags may pass through from the input. Default: an array whitelist of the common HTML tags (inline, void, block), each with all attributes.
 
 ```php
-$texy->htmlPolicy->allowedTags = Texy\Texy::ALL;    // any tag whatsoever
-$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;   // no HTML tags at all
+$texy->htmlPolicy->allowedTags = Texy\Texy::All;    // any tag whatsoever
+$texy->htmlPolicy->allowedTags = Texy\Texy::None;   // no HTML tags at all
 $texy->htmlPolicy->allowedTags = [
     'strong' => [],                     // <strong> without attributes
     'a' => ['href', 'title'],           // <a> with these attributes only
-    'img' => Texy\Texy::ALL,            // <img> with any attributes
+    'img' => Texy\Texy::All,            // <img> with any attributes
 ];
 ```
 
@@ -211,8 +211,8 @@ Texy\Configurator::safeMode($texy);
 
 Exactly what it does:
 
-- `$allowedClasses = Texy::NONE` – no classes or IDs,
-- `$allowedStyles = Texy::NONE` – no inline styles,
+- `$htmlPolicy->allowedClasses = Texy::None` – no classes or IDs,
+- `$htmlPolicy->allowedStyles = Texy::None` – no inline styles,
 - `$htmlPolicy->allowedTags = Configurator::$safeTags` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
 - URL scheme filters: links `~https?:|ftp:|mailto:~A`, images `~https?:~A`,
 - `$allowed['image'] = false` – no images (note: the `figure` syntax is *not* disabled by safeMode; combine with `disableImages()` if needed),

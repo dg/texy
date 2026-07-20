@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text): string
 {
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = Texy\Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy\Texy::All;
 	return $texy->process($text);
 }
 

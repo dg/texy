@@ -27,6 +27,54 @@ use function str_replace, strlen, trim;
  */
 final class PhraseModule extends Texy\Module
 {
+	/**
+	 * Paired phrases: a delimiter, some content, an optional modifier, the same
+	 * delimiter again. They all share one skeleton (see buildPhrasePattern()),
+	 * so a row only says what the delimiters are and which characters must not
+	 * touch them:
+	 *
+	 *   char        the delimiter character, as it appears inside a class
+	 *   guard       characters that must not precede either delimiter
+	 *   guardAfter  characters that must not follow either delimiter
+	 *   link        the phrase can carry a :link suffix
+	 *   multiline   the content may span lines
+	 *
+	 * The remaining keys are overrides for the places where a syntax deviates
+	 * from the skeleton; each one is commented, because the deviations are the
+	 * only interesting thing here.
+	 */
+	private const Phrases = [
+		Syntax::StrongEmphasis => ['open' => '\*\*\*', 'char' => '\*', 'guard' => '\\\\', 'link' => true, 'multiline' => true],
+		Syntax::Strong => ['open' => '\*\*', 'char' => '\*', 'guard' => '\\\\', 'link' => true, 'multiline' => true],
+		// : guards the // in http://
+		Syntax::Emphasis => ['open' => '//', 'char' => '/', 'guard' => ':', 'link' => true, 'multiline' => true],
+		Syntax::EmphasisSingleAsterisk => [
+			'open' => '\*', 'char' => '\*', 'guard' => '\\\\', 'link' => true, 'multiline' => true,
+			'content' => '\s\*', 'contentPair' => '\*', // a single * phrase holds no whitespace at all
+		],
+		Syntax::EmphasisSingleAsterisk2 => [
+			'open' => '\*', 'char' => '\*', 'guard' => '\\\\', 'link' => true, 'multiline' => true,
+			'beforeOpen' => '[^\s.,;:<>()"\'-]',    // must stand at a word boundary, ...
+			'afterClose' => '[^\s.,;:<>()"?!\'-]',  // ... hence the inverted classes
+		],
+		Syntax::Inserted => ['open' => '\+\+', 'char' => '\+'],
+		// < and > guard the arrows <-- and -->
+		Syntax::Deleted => ['open' => '--', 'char' => '\-', 'guard' => '<', 'guardAfter' => '>'],
+		Syntax::Superscript => ['open' => '\^\^', 'char' => '\^'],
+		Syntax::Subscript => ['open' => '__', 'char' => '_'],
+		Syntax::SpanQuotes => [
+			'open' => '"', 'char' => '"', 'link' => true,
+			'afterOpen' => '\s', 'beforeClose' => '\s', // the delimiter may touch itself: ""quoted""
+			'content' => '\r "', 'contentPair' => ' ',  // and the content may span lines
+		],
+		Syntax::SpanTilde => [
+			'open' => '\~', 'char' => '\~', 'link' => true,
+			'afterOpen' => '\s', 'beforeClose' => '\s',
+			'content' => '\r \~', 'contentPair' => ' ',
+		],
+		Syntax::Quote => ['open' => '>>', 'close' => '<<', 'char' => '>', 'closeChar' => '<', 'link' => true],
+	];
+
 	public bool $linksAllowed = true;
 
 
@@ -43,147 +91,10 @@ final class PhraseModule extends Texy\Module
 	public function beforeParse(string &$text): void
 	{
 		$texy = $this->texy;
-		/*
-		// UNIVERSAL
-		$texy->registerLinePattern(
-			array($this, 'patternPhrase'),
-			'~((?>([*+/^_"\~`-])+?))(?!\s)(.*(?!\2).)'.Texy\Patterns::MODIFIER.'?(?<!\s)\1(?!\2)(?::('.Texy\Patterns::LINK_URL.'))??~Us',
-			'phrase/strong'
-		);
-		*/
 
-		// ***strong+emphasis***
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! [*\\\] )                     # not preceded by * or \
-				\*\*\*
-				(?! [\s*] )                       # not followed by space or *
-				( (?: [^ *]++ | [ *] )+ )         # content (1)
-				' . Patterns::MODIFIER . '?       # modifier (2)
-				(?<! [\s*\\\] )                   # not preceded by space, * or \
-				\*\*\*
-				(?! \* )                          # not followed by *
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			Syntax::StrongEmphasis,
-		);
-
-		// **strong**
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! [*\\\] )                     # not preceded by * or \
-				\*\*
-				(?! [\s*] )                       # not followed by space or *
-				( (?: [^ *]++ | [ *] )+ )         # content (1)
-				' . Patterns::MODIFIER . '?       # modifier (2)
-				(?<! [\s*\\\] )                   # not preceded by space, * or \
-				\*\*
-				(?! \* )                          # not followed by *
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			Syntax::Strong,
-		);
-
-		// //emphasis//
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! [/:] )                       # not preceded by / or :
-				//
-				(?! [\s/] )                       # not followed by space or /
-				( (?: [^ /]++ | [ /] )+ )         # content (1)
-				' . Patterns::MODIFIER . '?       # modifier (2)
-				(?<! [\s/:] )                     # not preceded by space, / or :
-				//
-				(?! / )                           # not followed by /
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			Syntax::Emphasis,
-		);
-
-		// *emphasisAlt*
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! [*\\\] )                    # not preceded by * or \
-				\*
-				(?! [\s*] )                      # not followed by space or *
-				( (?: [^\s*]++ | [*] )+ )        # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s*\\\] )                  # not preceded by space, * or \
-				\*
-				(?! \* )                         # not followed by *
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			Syntax::EmphasisSingleAsterisk,
-		);
-
-		// *emphasisAlt2*
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! [^\s.,;:<>()"\'-] )         # must be preceded by these chars
-				\*
-				(?! [\s*] )                      # not followed by space or *
-				( (?: [^ *]++ | [ *] )+ )        # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s*\\\] )                  # not preceded by space, * or \
-				\*
-				(?! [^\s.,;:<>()"?!\'-] )        # must be followed by these chars
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Usx',
-			Syntax::EmphasisSingleAsterisk2,
-		);
-
-		// ++inserted++
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! \+ )                        # not preceded by +
-				\+\+
-				(?! [\s+] )                      # not followed by space or +
-				( (?: [^\r\n +]++ | [ +] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s+] )                     # not preceded by space or +
-				\+\+
-				(?! \+ )                         # not followed by +
-			~Ux',
-			Syntax::Inserted,
-		);
-
-		// --deleted--
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! [<-] )                      # not preceded by < or -
-				--
-				(?! [\s>-] )                     # not followed by space, > or -
-				( (?: [^\r\n -]++ | [ -] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s<-] )                    # not preceded by space, < or -
-				--
-				(?! [>-] )                       # not followed by > or -
-			~Ux',
-			Syntax::Deleted,
-		);
-
-		// ^^superscript^^
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! \^ )                        # not preceded by ^
-				\^\^
-				(?! [\s^] )                      # not followed by space or ^
-				( (?: [^\r\n ^]++ | [ ^] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s^] )                     # not preceded by space or ^
-				\^\^
-				(?! \^ )                         # not followed by ^
-			~Ux',
-			Syntax::Superscript,
-		);
+		foreach (self::Phrases as $syntax => $spec) {
+			$texy->registerLinePattern($this->parsePhrase(...), self::buildPhrasePattern($spec), $syntax);
+		}
 
 		// m^2 alternative superscript
 		$texy->registerLinePattern(
@@ -197,22 +108,6 @@ final class PhraseModule extends Texy\Module
 			Syntax::SuperscriptShort,
 		);
 
-		// __subscript__
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! _ )                         # not preceded by _
-				__
-				(?! [\s_] )                      # not followed by space or _
-				( (?: [^\r\n _]++ | [ _] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s_] )                     # not preceded by space or _
-				__
-				(?! _ )                          # not followed by _
-			~Ux',
-			Syntax::Subscript,
-		);
-
 		// m_2 alternative subscript
 		$texy->registerLinePattern(
 			$this->parseSupSub(...),
@@ -223,57 +118,6 @@ final class PhraseModule extends Texy\Module
 				(?! [a-z0-9] )                   # not followed by letter or number
 			~Uix',
 			Syntax::SubscriptShort,
-		);
-
-		// "span"
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! " )                         # not preceded by "
-				"
-				(?! \s )                         # not followed by space
-				( (?: [^\r "]++ | [ ] )+ )       # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! \s )                        # not preceded by space
-				"
-				(?! " )                          # not followed by "
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Ux',
-			Syntax::SpanQuotes,
-		);
-
-		// ~alternative span~
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! \~ )
-				\~
-				(?! \s )                         # not followed by space
-				( (?: [^\r \~]++ | [ ] )+ )      # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! \s )                        # not preceded by space
-				\~
-				(?! \~ )
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Ux',
-			Syntax::SpanTilde,
-		);
-
-		// >>quote<<
-		$texy->registerLinePattern(
-			$this->parsePhrase(...),
-			'~
-				(?<! > )                         # not preceded by >
-				>>
-				(?! [\s>] )                      # not followed by space or >
-				( (?: [^\r\n <]++ | [ <] )+ )    # content (1)
-				' . Patterns::MODIFIER . '?      # modifier (2)
-				(?<! [\s<] )                     # not preceded by space or
-				<<
-				(?! < )                          # not followed by <
-				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)
-			~Ux',
-			Syntax::Quote,
 		);
 
 		// acronym/abbr "et al."((and others))
@@ -392,6 +236,52 @@ final class PhraseModule extends Texy\Module
 			'~\\\\\*~',
 			Syntax::EscapedAsterisk,
 		);
+	}
+
+
+	/**
+	 * Builds the pattern of a paired phrase from its delimiter spec:
+	 *
+	 *   (?<! guard ) open (?! space or char ) content modifier? (?<! space or guard ) close (?! char ) (:link)??
+	 *
+	 * @param  array<string, string|bool>  $spec
+	 */
+	private static function buildPhrasePattern(array $spec): string
+	{
+		$char = (string) $spec['char'];
+		$closeChar = (string) ($spec['closeChar'] ?? $char);
+		$guard = (string) ($spec['guard'] ?? '');
+		$guardAfter = (string) ($spec['guardAfter'] ?? '');
+
+		$beforeOpen = $spec['beforeOpen'] ?? self::charClass($char . $guard);
+		$afterOpen = $spec['afterOpen'] ?? self::charClass('\s' . $char . $guardAfter);
+		$beforeClose = $spec['beforeClose'] ?? self::charClass('\s' . $closeChar . $guard);
+		$afterClose = $spec['afterClose'] ?? self::charClass($closeChar . $guardAfter);
+		$content = $spec['content'] ?? (empty($spec['multiline']) ? '\r\n' : '') . ' ' . $closeChar;
+		$contentPair = $spec['contentPair'] ?? ' ' . $closeChar;
+
+		return '~
+				(?<! ' . $beforeOpen . ' ) ' . $spec['open'] . ' (?! ' . $afterOpen . ' )  # opening delimiter
+				( (?: [^' . $content . ']++ | [' . $contentPair . '] )+ )  # content (1)
+				' . Patterns::MODIFIER . '?  # modifier (2)
+				(?<! ' . $beforeClose . ' ) ' . ($spec['close'] ?? $spec['open']) . ' (?! ' . $afterClose . ' )  # closing delimiter'
+			. (empty($spec['link'])
+				? ''
+				: '
+				(?: :(' . Patterns::LINK_URL . ') )??  # optional link (3)')
+			. '
+			~U' . (empty($spec['multiline']) ? '' : 's') . 'x';
+	}
+
+
+	/**
+	 * Wraps characters in a class, unless a single (possibly escaped) one speaks for itself.
+	 */
+	private static function charClass(string $chars): string
+	{
+		return preg_match('#^(\\\.|[^\\\])$#D', $chars)
+			? $chars
+			: '[' . $chars . ']';
 	}
 
 

@@ -52,8 +52,8 @@ class Configurator
 	 */
 	public static function safeMode(Texy $texy): void
 	{
-		$texy->htmlPolicy->allowedClasses = $texy::NONE; // no class or ID are allowed
-		$texy->htmlPolicy->allowedStyles = $texy::NONE; // style modifiers are disabled
+		$texy->htmlPolicy->allowedClasses = $texy::None; // no class or ID are allowed
+		$texy->htmlPolicy->allowedStyles = $texy::None; // style modifiers are disabled
 		$texy->htmlPolicy->allowedTags = self::$safeTags; // only some "safe" HTML tags and attributes are allowed
 		$texy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
 		$texy->urlPolicy->imagePattern = '~https?:~A';

@@ -40,7 +40,7 @@ test('HTML tags in safe mode', function () {
 test('HTML tags disabled', function () {
 	$texy = createTexy();
 	Texy\Configurator::safeMode($texy);
-	$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;
+	$texy->htmlPolicy->allowedTags = Texy\Texy::None;
 	Assert::matchFile(
 		__DIR__ . '/expected/html-none.html',
 		$texy->process(file_get_contents(__DIR__ . '/sources/html.texy')),

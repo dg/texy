@@ -22,10 +22,10 @@ final class HtmlPolicy
 	public bool|array $allowedTags;
 
 	/** @var bool|array<int, string>  allowed classes and IDs */
-	public bool|array $allowedClasses = Texy::ALL;
+	public bool|array $allowedClasses = Texy::All;
 
 	/** @var bool|array<int, string>  allowed inline CSS styles */
-	public bool|array $allowedStyles = Texy::ALL;
+	public bool|array $allowedStyles = Texy::All;
 
 	/** @var array<string, int>|bool */
 	private bool|array $classes;

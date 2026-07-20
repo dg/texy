@@ -23,12 +23,21 @@ use function strlen;
 class Texy
 {
 	// Texy version
-	public const VERSION = '4.0.0-dev';
+	public const Version = '4.0.0-dev';
 
 	// configuration directives
 	public const
-		ALL = true,
-		NONE = false;
+		All = true,
+		None = false;
+
+	#[\Deprecated('use Texy::Version')]
+	public const VERSION = self::Version;
+
+	#[\Deprecated('use Texy::All')]
+	public const ALL = self::All;
+
+	#[\Deprecated('use Texy::None')]
+	public const NONE = self::None;
 
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
