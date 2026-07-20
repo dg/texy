@@ -21,7 +21,7 @@ test('registerHandler replaces default handler', function () {
 		fn(Nodes\ParagraphNode $node, Renderer $g) => $g->protect('<div>custom</div>', Renderer::ContentBlock),
 	);
 
-	Assert::match('<div>custom</div>', trim((new \Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($ast)));
+	Assert::match('<div>custom</div>', trim((new Renderer($texy->htmlOutput, $texy))->render($ast)));
 });
 
 
@@ -38,7 +38,7 @@ test('handler receives node data', function () {
 		),
 	);
 
-	Assert::contains('<figure><img src="/img/image.jpg" alt="custom"></figure>', (new \Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($ast));
+	Assert::contains('<figure><img src="/img/image.jpg" alt="custom"></figure>', (new Renderer($texy->htmlOutput, $texy))->render($ast));
 });
 
 
@@ -46,7 +46,6 @@ test('handler can access Texy configuration', function () {
 	$texy = new Texy;
 	$texy->headingModule->top = 3;
 	$ast = $texy->parse("Title\n=====");
-	$texy->headingModule->afterParse($ast);
 
 	// Custom handler that modifies result of default handler
 	$texy->htmlOutput->registerHandler(
@@ -58,5 +57,5 @@ test('handler can access Texy configuration', function () {
 	);
 
 	// The node.level is already adjusted by headingModule.top
-	Assert::contains('class="custom">Title</h', (new \Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($ast));
+	Assert::contains('class="custom">Title</h', (new Renderer($texy->htmlOutput, $texy))->render($ast));
 });

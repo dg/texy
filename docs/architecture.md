@@ -49,7 +49,7 @@ When `Texy::process()` receives input text, the following happens (`src/Texy/Tex
 
 3. **Parsing.** A root `HtmlElement` representing the document is created. For a full document, `parseBlock()` creates a `BlockParser` that walks the text and identifies block constructs; text between blocks is handled by `ParagraphModule`, which internally uses `InlineParser` for the inline content. For `processLine()`, only `parseLine()`/`InlineParser` is used. Parsing incrementally builds the DOM tree.
 
-4. **afterParse.** After parsing completes, `afterParse` notification handlers are invoked with the root element. They can perform final tree adjustments, e.g. `HeadingModule` assigns final heading levels, generates IDs and builds the TOC here.
+4. **afterParse.** After parsing completes, `afterParse` notification handlers are invoked with the root element. They can perform final tree adjustments, e.g. `HeadingModule` runs `Passes\HeadingPass` here, which assigns final heading levels, fills `HeadingNode::$tocTitle` and generates IDs. The pass writes its results into the tree, so a consumer holding the document can read the outline without a live `Texy` instance (`HeadingNode::collectFrom()`).
 
 5. **Serialization and post-processing.** `HtmlElement::toHtml()` converts the tree to a string. During this conversion each element is recursively rendered with HTML tags immediately masked by protection marks (see [parsing.md](parsing.md#protection-marks)). The resulting internal string is passed through `Texy::stringToHtml()`, which:
    - applies **post-line handlers** registered via `registerPostLine()` – typographic corrections (`typography`) and long-word hyphenation (`longwords`) – to the textual segments between block marks,

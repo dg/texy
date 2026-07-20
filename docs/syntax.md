@@ -169,7 +169,7 @@ Second-level heading
 === Lower level
 ```
 
-Final `<h1>`–`<h6>` levels are computed in `afterParse` according to `$texy->headingModule->balancing` (`DYNAMIC` auto-levels relative to `$top`; `FIXED` maps characters via `$levels`). Optional automatic `id` attributes: `$generateID`, `$idPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the text used for the generated ID and the TOC entry. The first heading is exposed as `$texy->headingModule->title` and all of them in `$texy->headingModule->TOC`.
+Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->headingModule->balancing` (`DYNAMIC` auto-levels relative to `$top`; `FIXED` maps characters via `$levels`). Optional automatic `id` attributes: `$generateID`, `$idPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the heading's `$tocTitle` and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `Texy\Nodes\HeadingNode::collectFrom($document)` returns them in document order, each carrying `$level`, `$tocTitle` and `$modifier?->id`; the document title is `collectFrom($document)[0]?->tocTitle`.
 
 ## Lists
 
