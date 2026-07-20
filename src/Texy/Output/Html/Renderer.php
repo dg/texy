@@ -12,9 +12,9 @@ use Texy\Modifier;
 use Texy\Node;
 use Texy\Nodes;
 use Texy\Output\NodeRenderer;
+use Texy\Regexp;
 use Texy\Syntax;
 use Texy\Texy;
-use function base_convert, count, explode, htmlspecialchars, implode, in_array, is_string, ltrim, str_contains, str_replace, strncasecmp, strtr;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
 
 
@@ -116,43 +116,8 @@ final class Renderer extends NodeRenderer
 	public function render(Nodes\DocumentNode $document): string
 	{
 		$this->marks = [];
-		$s = $this->renderNode($document);
-		assert(is_string($s));
-
-		// decode HTML entities to UTF-8
-		$s = Helpers::unescapeHtml($s);
-
-		// line-postprocessing (typography, long words); skipped when typography
-		// already ran over the AST
-		$blocks = explode(self::ContentBlock, $s);
-		foreach ($this->titleTypography ? $this->texy->postHandlers : [] as $name => $handler) {
-			if (empty($this->texy->allowed[$name])) {
-				continue;
-			}
-
-			foreach ($blocks as $n => $s) {
-				if ($n % 2 === 0 && $s !== '') {
-					$blocks[$n] = $handler($s);
-				}
-			}
-		}
-
-		$s = implode(self::ContentBlock, $blocks);
-
-		// encode < > &
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-
-		// replace protected marks
-		$s = $this->unprotect($s);
-
-		// wellform and reformat HTML
-		$s = (new WellFormer($this->config))->format($s);
-
-		// unfreeze spaces
-		$s = Helpers::unfreezeSpaces($s);
-		$s = ltrim($s, "\n");
-
-		return $s;
+		$result = $this->renderNode($document);
+		return $this->finalize($result, legacyPostLine: $this->titleTypography);
 	}
 
 
@@ -270,6 +235,119 @@ final class Renderer extends NodeRenderer
 	}
 
 
+	/**
+	 * Entity dance: decode entities to UTF-8, re-encode < > & and expand
+	 * protection marks.
+	 */
+	public function flatten(string $s): string
+	{
+		$s = Helpers::unescapeHtml($s);
+		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
+		return $this->unprotect($s);
+	}
+	/**
+	 * Turns the rendered document into the final HTML string. The default
+	 * path walks the Element tree straight into the well-forming engine;
+	 * the legacy path (string post-line typography) serializes to a string
+	 * with protection marks and runs the entity dance document-wide.
+	 */
+	private function finalize(Element|string $root, bool $legacyPostLine = false): string
+	{
+		if ($legacyPostLine) {
+			$s = $root instanceof Element ? $this->serialize([$root]) : $root;
+			$s = Helpers::unescapeHtml($s); // decode HTML entities to UTF-8
+			$s = $this->applyPostHandlers($s); // line-postprocessing (typography, long words)
+			$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8'); // encode < > &
+			$s = $this->unprotect($s); // replace protected marks
+			$wellFormer = new WellFormer($this->config);
+			$wellFormer->raw($s);
+			$s = $wellFormer->finish(); // wellform and reformat
+			$s = Helpers::unfreezeSpaces($s);
+			return ltrim($s, "\n");
+		}
+
+		$wellFormer = new WellFormer($this->config);
+		$this->walk([$root], $wellFormer);
+		return ltrim($wellFormer->finish(), "\n");
+	}
+	/**
+	 * Well-forms a standalone fragment (texysource); no post-line handlers.
+	 * @param array<Element|string> $content
+	 */
+	private function finalizeFragment(array $content): string
+	{
+		$wellFormer = new WellFormer($this->config);
+		$first = true;
+		foreach ($content as $child) {
+			if (!$first) {
+				$wellFormer->text("\n");
+			}
+			$first = false;
+			$this->walk([$child], $wellFormer);
+		}
+
+		return trim($wellFormer->finish());
+	}
+	/**
+	 * Feeds rendered content (Elements and strings with protection marks)
+	 * to the well-forming engine as tags, text and raw HTML islands.
+	 * @param array<Element|string> $content
+	 */
+	private function walk(array $content, WellFormer $wellFormer): void
+	{
+		foreach ($content as $child) {
+			if (!$child instanceof Element) {
+				$this->walkString($child, $wellFormer);
+
+			} elseif ($child->name === null || $child->name === '') {
+				$this->walk($child->children, $wellFormer); // transparent wrapper
+
+			} else {
+				$wellFormer->startTag($child->name, Element::formatAttrs($child->attrs), $child->isEmpty());
+				if (!$child->isEmpty()) {
+					$this->walk($child->children, $wellFormer);
+					$wellFormer->endTag($child->name);
+				}
+			}
+		}
+	}
+	/**
+	 * Splits a rendered string into protection-mark islands (raw HTML) and
+	 * text. Text is entity-decoded here and re-escaped by the engine - the
+	 * same net "entity dance" the string pipeline performed document-wide.
+	 */
+	private function walkString(string $s, WellFormer $wellFormer): void
+	{
+		foreach (Regexp::split($s, '~([\x14-\x17][\x18-\x1F]++[\x14-\x17])~') as $part) {
+			if ($part === '') {
+			} elseif (isset($this->marks[$part])) {
+				$wellFormer->raw($this->marks[$part]);
+			} else {
+				$wellFormer->text(Helpers::unescapeHtml($part));
+			}
+		}
+	}
+	/**
+	 * Apply post-line handlers to segments outside ContentBlock-protected blocks.
+	 */
+	private function applyPostHandlers(string $s): string
+	{
+		$blocks = explode(self::ContentBlock, $s);
+		foreach ($this->texy->postHandlers as $name => $handler) {
+			if (empty($this->texy->allowed[$name])) {
+				continue;
+			}
+
+			foreach ($blocks as $n => $block) {
+				if ($n % 2 === 0 && $block !== '') {
+					$blocks[$n] = $handler($block);
+				}
+			}
+		}
+
+		return implode(self::ContentBlock, $blocks);
+	}
+
 	/********************* protection mechanism ****************d*g**/
 
 
@@ -374,13 +452,7 @@ final class Renderer extends NodeRenderer
 		if ($node->type === 'texysource') {
 			$context = $this->texy->createParseContext();
 			$parsed = $context->parseBlock($node->code);
-			$content = $this->serialize($this->renderNodes($parsed->children), "\n");
-			$html = Helpers::unescapeHtml($content);
-			$html = htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8');
-			$html = $this->unprotect($html);
-			$html = (new WellFormer($this->config))->format($html);
-			$html = Helpers::unfreezeSpaces($html);
-			$html = trim($html);
+			$html = $this->finalizeFragment($this->renderNodes($parsed->children));
 			// Now escape the final HTML to show as source code
 			$escaped = htmlspecialchars($html, ENT_NOQUOTES, 'UTF-8');
 			$escaped = $this->protect($escaped, self::ContentTextual);
