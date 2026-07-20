@@ -341,16 +341,6 @@ class Texy
 	}
 
 
-	/**
-	 * Get the underlying parsing engine.
-	 * @internal
-	 */
-	public function getEngine(): Engine
-	{
-		return $this->engine;
-	}
-
-
 	final public function __clone()
 	{
 		throw new \LogicException('Clone is not supported.');
