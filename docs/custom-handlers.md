@@ -1,301 +1,115 @@
 # Changing the Behavior of Existing Constructs
 
-This chapter covers modifying how **existing** constructs are processed – images, links, code blocks, formatting. To add a **brand-new** markup construct, see [custom-syntax.md](custom-syntax.md).
+This chapter covers modifying how **existing** constructs are processed. To add a **brand-new** markup construct, see [custom-syntax.md](custom-syntax.md).
 
-Typical use cases: make the image syntax `[* youtube:dQw4w9WgXcQ *]` render an embedded player, run code blocks through a syntax highlighter, validate link targets. The tool for this is the **element handler** – a function Texy invokes when processing a given kind of item. All signatures below were verified against the `invokeAroundHandlers()` / `invokeHandlers()` call sites in `src/`.
+There are two extension points, matching the two phases where behavior can change:
 
-## Element handlers
+- **Renderer handlers** – change how a node is *rendered* (the typical case: custom image rendering, extra attributes, wrapping elements).
+- **Transform passes** – change the *parsed document* itself before rendering (restructure content, remove nodes, collect data).
 
-Register with `Texy::addHandler($elementName, $callback)`:
+## Renderer handlers
+
+Register a closure on an output generator; the node class is determined from the type of the closure's first parameter:
 
 ```php
-$texy->addHandler('image', function(
-    Texy\HandlerInvocation $invocation,
-    Texy\Image $image,
-    ?Texy\Link $link,
-) {
-    // your logic
-});
+use Texy\Nodes;
+use Texy\Output\Html;
+
+$texy->htmlOutput->registerHandler(
+    function (Nodes\ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
+        // your logic
+    },
+);
 ```
 
-The callback always receives a `Texy\HandlerInvocation` first, followed by element-specific parameters. When Texy processes the element, it builds a `HandlerInvocation` wrapping all handlers registered for that name. **Your handler runs first** (execution order is from the last registered to the first – the module's default handler, registered in its constructor, runs last) and can:
+Handlers for one node class form a chain, executed **from the last registered to the first**; the generator's default renderer sits at the end. Your handler can:
 
-- **delegate** – `return $invocation->proceed();`
-- **modify input** – call `proceed()` with modified parameters; they replace the parameters for the rest of the chain (do not pass the invocation itself, it is prepended automatically),
-- **modify output** – post-process the value returned by `proceed()`,
-- **replace processing entirely** – return its own result without calling `proceed()`,
-- **refuse** – return `null` (the construct is left unprocessed).
+- **replace rendering entirely** – return its own result,
+- **delegate** – call `$previous($node, $gen)` (the previous handler, or the default renderer) and optionally post-process its result,
+- **decline** – return `null`, which delegates to the previous handler automatically.
 
-Valid return values are `Texy\HtmlElement`, `string`, or `null`; anything else throws `UnexpectedValueException`. Calling `proceed()` when no handler remains in the chain throws `Texy\Exception` (the module's default handler never calls `proceed()`, so this happens only if you invoke an element that has no default handler). Useful accessors on the invocation: `getTexy()`, `getParser()`.
+Valid return values are `Html\Element`, `Html\Raw`, a plain string (display text – it will be HTML-escaped), or `null` to delegate. For the Markdown generator the same mechanism applies with string results.
 
-```php
-$texy->addHandler('image', function($invocation, Texy\Image $image, ?Texy\Link $link) {
-    $image->modifier->title = 'Modified title';        // 1. adjust input
-    $element = $invocation->proceed($image, $link);    // 2. run the chain
-    $element->attrs['loading'] = 'lazy';               // 3. adjust output
-    return $element;
-});
-```
+The same handler works for a construct wherever it appears – e.g. an `ImageNode` handler fires for inline images and for the image inside a figure alike, because the figure renderer delegates through `renderNode()`.
 
-## Element reference
+Handlers must respect the render-phase purity rule: **do not mutate the node or the modifier** – if you need a modified variant, clone it.
 
-### image
-
-Images `[* url *]`. `$link` is set when the image is clickable (`[* img *]:url`).
+### Example: YouTube embed
 
 ```php
-function(HandlerInvocation $i, Texy\Image $image, ?Texy\Link $link): HtmlElement|string|null
-```
+use Texy\Nodes\ImageNode;
+use Texy\Output\Html;
 
-### figure
-
-Image with caption `[* img *] *** caption`.
-
-```php
-function(HandlerInvocation $i, Texy\Image $image, ?Texy\Link $link, string $content, Texy\Modifier $mod): HtmlElement|string|null
-```
-
-### linkReference
-
-Reference links `[ref]`. `$content` is the already-parsed HTML content of the link.
-
-```php
-function(HandlerInvocation $i, Texy\Link $link, string $content): HtmlElement|string|null
-```
-
-### linkURL / linkEmail
-
-Autodetected URLs and e-mail addresses.
-
-```php
-function(HandlerInvocation $i, Texy\Link $link): HtmlElement|string|null
-```
-
-### newReference
-
-Fired when `[ref]` uses an undefined reference name. The handler may create a link dynamically or return `null` to reject.
-
-```php
-function(HandlerInvocation $i, string $name): HtmlElement|string|null
-```
-
-### phrase
-
-All inline formatting. `$phrase` is the syntax name (`phrase/strong`, `phrase/em`, ...); `$content` the inner text; `$link` is set when the phrase carries a `:url` link.
-
-```php
-function(HandlerInvocation $i, string $phrase, string $content, Texy\Modifier $mod, ?Texy\Link $link): HtmlElement|string|null
-```
-
-### block
-
-Fenced blocks `/--type … \--`. `$blocktype` is prefixed, e.g. `block/code`; `$param` is the text after the type (e.g. language name).
-
-```php
-function(HandlerInvocation $i, string $blocktype, string $content, ?string $param, Texy\Modifier $mod): HtmlElement|string|null
-```
-
-### paragraph
-
-Every paragraph produced from plain text between blocks.
-
-```php
-function(HandlerInvocation $i, string $content, ?Texy\Modifier $mod): HtmlElement|string|null
-```
-
-### heading
-
-`$level` is the raw parsed level (before balancing); `$isSurrounded` distinguishes `### x` from underlined headings.
-
-```php
-function(HandlerInvocation $i, int $level, string $content, Texy\Modifier $mod, bool $isSurrounded): HtmlElement|string|null
-```
-
-### horizline
-
-`$type` is the character sequence used (`---…` or `***…`).
-
-```php
-function(HandlerInvocation $i, string $type, Texy\Modifier $mod): HtmlElement|string|null
-```
-
-### htmlTag
-
-HTML tags in the input. `$el` carries the tag name and attributes; `$isStart` says whether it is an opening tag; `$forceEmpty` marks self-closing tags.
-
-```php
-function(HandlerInvocation $i, Texy\HtmlElement $el, bool $isStart, ?bool $forceEmpty): HtmlElement|string|null
-```
-
-### htmlComment
-
-`$content` is the text between `<!--` and `-->`.
-
-```php
-function(HandlerInvocation $i, string $content): HtmlElement|string|null
-```
-
-### script
-
-Macros `{{command: args}}`. `$args` is the argument list split by `DirectiveModule::$separator`; `$raw` the unparsed argument string. Texy has no default rendering for scripts – without a user handler the construct produces nothing, so this is the primary extension point for template-like macros.
-
-```php
-function(HandlerInvocation $i, string $command, array $args, ?string $raw): HtmlElement|string|null
-```
-
-### emoticon
-
-`$emoticon` is the recognized emoticon (e.g. `:-)`), `$raw` the original text including repeated characters (`:-)))`). Emoticons are off by default (`$texy->allowed['emoticon'] = true`).
-
-```php
-function(HandlerInvocation $i, string $emoticon, string $raw): HtmlElement|string|null
-```
-
-## Notification events
-
-Registered with the same `addHandler()`, but invoked via `invokeHandlers()`: all handlers always run in registration order, return values are ignored, and the chain cannot be interrupted. Use them for side effects – collecting statistics, logging, modifying the built DOM tree.
-
-| Event | Signature | When |
-|---|---|---|
-| `afterParse` | `function(Texy\HtmlElement $dom, bool $isSingleLine): void` | after parsing, before serialization; `$dom` is the document root |
-| `beforeBlockParse` | `function(Texy\BlockParser $parser, string &$text): void` | before each block-level parse (including nested ones) |
-| `afterList` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<ul>`/`<ol>` is built |
-| `afterDefinitionList` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<dl>` is built |
-| `afterTable` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<table>` is built |
-| `afterBlockquote` | `function(Texy\BlockParser $parser, Texy\HtmlElement $el, Texy\Modifier $mod): void` | after a `<blockquote>` is built |
-| `postProcess` | `function(Texy\Texy $texy, string &$s): void` | on the final HTML string (this is where `HtmlOutputModule` well-forms the output) |
-
-Preprocessing before parsing is no longer a notification event: it is the `Module::beforeParse(string &$text)` method, invoked on every registered module. Override it in a custom module instead of registering a `beforeParse` handler.
-
-## Practical examples
-
-### YouTube embed
-
-```php
-$texy->addHandler('image', function($invocation, Texy\Image $image, ?Texy\Link $link) {
-    if (str_starts_with($image->URL, 'youtube:')) {
-        $id = substr($image->URL, 8);
-        $iframe = sprintf(
-            '<iframe width="%d" height="%d" src="https://youtube.com/embed/%s" frameborder="0" allowfullscreen></iframe>',
-            $image->width ?: 560,
-            $image->height ?: 315,
-            htmlspecialchars($id),
-        );
-        $texy = $invocation->getTexy();
-        return $texy->protect($iframe, $texy::CONTENT_BLOCK);  // raw HTML must be protected!
-    }
-    return $invocation->proceed();
-});
+$texy->htmlOutput->registerHandler(
+    function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
+        if (!str_starts_with($node->url ?? '', 'youtube:')) {
+            return null;   // not ours - delegate to the default renderer
+        }
+        $el = new Html\Element('iframe', [
+            'src' => 'https://youtube.com/embed/' . substr($node->url, 8),
+            'width' => $node->width ?: 640,
+            'height' => $node->height ?: 360,
+            'allowfullscreen' => true,
+        ]);
+        return $el;
+    },
+);
 ```
 
 Usage: `[* youtube:dQw4w9WgXcQ 640x360 *]`
 
-### Lightbox gallery wrapper
+### Example: post-processing the default result
 
 ```php
-$texy->addHandler('image', function($invocation, Texy\Image $image, ?Texy\Link $link) {
-    $element = $invocation->proceed();
-    if (isset($image->modifier->classes['gallery'])) {   // classes are array keys
-        $wrapper = new Texy\HtmlElement('div');
-        $wrapper->attrs['class'][] = 'lightbox-item';
-        $wrapper->attrs['data-src'] = $image->URL;
-        $wrapper->add($element);
-        return $wrapper;
-    }
-    return $element;
-});
+$texy->htmlOutput->registerHandler(
+    function (Texy\Nodes\HeadingNode $node, Html\Renderer $gen, ?Closure $previous) {
+        $el = $previous($node, $gen);       // default <h#> element
+        $el->attrs['class'][] = 'anchored';
+        return $el;
+    },
+);
 ```
 
-Usage: `[* image.jpg .[gallery] *]`
+### Raw HTML strings
 
-### Link domain whitelist
+To emit ready-made HTML, return `new Html\Raw($html)` – it bypasses text escaping and is tokenized by the well-forming engine as-is. (`$gen->protect($html, $gen::ContentBlock)` is the deprecated way to achieve the same and is kept only for backward compatibility.)
 
-```php
-$allowedDomains = ['example.com', 'trusted.org'];
+## Transform passes
 
-$texy->addHandler('linkURL', function($invocation, Texy\Link $link) use ($allowedDomains) {
-    $host = parse_url($link->URL, PHP_URL_HOST);
-    if ($host && !in_array($host, $allowedDomains, true)) {
-        return null;   // refuse – the URL stays as plain text
-    }
-    return $invocation->proceed();
-});
-```
-
-### Syntax highlighting
+For document-level changes, register an `afterParse` handler; it receives the `DocumentNode` after parsing and the built-in transform passes may be freely combined with yours. Use `Texy\NodeTraverser` to walk and modify the tree:
 
 ```php
-$texy->addHandler('block', function($invocation, string $blocktype, string $content, ?string $param, Texy\Modifier $mod) {
-    if ($blocktype !== 'block/code') {
-        return $invocation->proceed();
-    }
-
-    $highlighted = (new MyHighlighter)->highlight($content, $param);
-    $texy = $invocation->getTexy();
-
-    $el = new Texy\HtmlElement('pre');
-    $mod->decorate($texy, $el);
-    $el->attrs['class'][] = 'language-' . $param;
-    $el->create('code')->add($texy->protect($highlighted, $texy::CONTENT_MARKUP));
-    return $el;
-});
-```
-
-### Lazy loading via afterParse
-
-```php
-$texy->addHandler('afterParse', function(Texy\HtmlElement $dom, bool $isSingleLine) {
-    $walk = function(Texy\HtmlElement $el) use (&$walk) {
-        foreach ($el->getChildren() as $child) {
-            if ($child instanceof Texy\HtmlElement) {
-                if ($child->getName() === 'img') {
-                    $child->attrs['loading'] = 'lazy';
-                }
-                $walk($child);
-            }
+$texy->addHandler('afterParse', function (Texy\Nodes\DocumentNode $doc) {
+    (new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) {
+        if ($node instanceof Texy\Nodes\LinkNode && $node->url !== null) {
+            $node->url = addTrackingParams($node->url);  // transform phase may mutate
         }
-    };
-    $walk($dom);
+        return null;
+    });
 });
 ```
 
-### Collecting statistics
+The enter/leave callbacks may return a replacement `Node`, `NodeTraverser::RemoveNode` (only for nodes held in list containers such as `ContentNode`), `DontTraverseChildren`, or `StopTraversal`.
+
+`addHandler()` is a plain notification mechanism: all handlers for an event run in registration order and return values are ignored. The only built-in event is `afterParse`.
+
+### Example: collecting statistics
 
 ```php
 $stats = ['images' => 0, 'headings' => 0];
 
-$texy->addHandler('image', function($invocation, $image, $link) use (&$stats) {
-    $stats['images']++;
-    return $invocation->proceed();
+$texy->addHandler('afterParse', function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
+    (new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) use (&$stats) {
+        match (true) {
+            $node instanceof Texy\Nodes\ImageNode => $stats['images']++,
+            $node instanceof Texy\Nodes\HeadingNode => $stats['headings']++,
+            default => null,
+        };
+        return null;
+    });
 });
-$texy->addHandler('heading', function($invocation, $level, $content, $mod, $isSurrounded) use (&$stats) {
-    $stats['headings']++;
-    return $invocation->proceed();
-});
 ```
 
-## Helper classes
+## Which extension point to choose
 
-### Texy\Image
-
-```php
-$image->URL;        // ?string – image path
-$image->linkedURL;  // ?string – link target when the image is clickable
-$image->width;      // ?int
-$image->height;     // ?int
-$image->asMax;      // bool – dimensions are maximums
-$image->modifier;   // Modifier
-$image->name;       // ?string – reference name
-```
-
-### Texy\Link
-
-```php
-$link->URL;        // ?string – target URL (after root/normalization)
-$link->raw;        // string – original URL text
-$link->modifier;   // Modifier
-$link->type;       // Link::COMMON | Link::BRACKET | Link::IMAGE
-$link->name;       // ?string – reference name
-```
-
-For `Texy\HtmlElement` see [html-element.md](html-element.md); for `Texy\Modifier` see [modifiers.md](modifiers.md).
+Apply the configuration placement test from [architecture.md](architecture.md): if the change affects the *document's meaning for every output format* (dropping links, rewriting URLs, restructuring), do it in a transform pass – the Markdown output then gets it for free. If it only affects the *look of one output format* (tags, attributes, wrappers), use a renderer handler.

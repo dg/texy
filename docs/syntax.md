@@ -21,9 +21,9 @@ Disable merging so that every line becomes its own paragraph:
 $texy->mergeLines = false;
 ```
 
-A **forced line break** without a new paragraph: start the next line with a single space (poems, addresses). Internally the break becomes a protected `<br>`.
+A **forced line break** without a new paragraph: start the next line with a single space (poems, addresses). The break renders as `<br>`.
 
-The paragraph wrapper is chosen by inspecting the [content-type marks](parsing.md#how-content-types-drive-behavior) of the parsed content: normal text gets `<p>`; a paragraph consisting only of replaced content (e.g. a single image) is wrapped in `$texy->nontextParagraph` (default `div`); content containing a block-level element gets no wrapper at all.
+The paragraph wrapper is chosen by analyzing the parsed content ([parsing.md](parsing.md#paragraphmodule-the-gap-handler)): normal text gets `<p>`; a paragraph consisting only of replaced content (e.g. a single image) is wrapped in `$texy->htmlOutput->nontextParagraph` (default `div`); content containing a block-level element gets no wrapper at all.
 
 Paragraphs accept [modifiers](modifiers.md) on a standalone line before the paragraph or at the end of its last line:
 
@@ -60,7 +60,7 @@ This paragraph is centered. .<>
 Rules:
 
 - No spaces are allowed immediately inside the delimiters: `** not bold **` does not match.
-- The generated tag for each phrase is configurable through `$texy->phraseModule->tags` (e.g. map `phrase/strong` to `b`).
+- The generated tag for each phrase is configurable through `$texy->htmlOutput->phraseTags` (e.g. map `phrase/strong` to `b`).
 - Any phrase accepts a [modifier](modifiers.md) just before the closing delimiter: `**strong and green .{color:green}**`.
 - Most phrases can become links by appending `:URL` (see below); this requires `$texy->phraseModule->linksAllowed = true` (default).
 
@@ -85,18 +85,18 @@ Alternative link syntaxes *(PhraseModule)*:
 word:[url-or-reference]               // single-word link   – phrase/quicklink
 ```
 
-**Reference links** *(`link/reference`, definitions `link/definition`, LinkReferenceModule)* keep long URLs out of the text:
+**Reference links** *(definitions `link/definition`, bare references `link/reference`, LinkReferenceModule)* keep long URLs out of the text:
 
 ```texy
 See the "documentation":[doc] and use [Nette].
 
-[doc]: https://texy.nette.org "Texy! documentation"
+[doc]: https://texy.nette.org
 [Nette]: https://nette.org
 ```
 
-References can also be added programmatically with `$texy->linkModule->addDefinition()`. An unresolved `[ref]` triggers the `newReference` element handler.
+References can also be added programmatically with `$texy->linkModule->addDefinition()`. The bare `[ref]` form is **opt-in** (`$texy->allowed[Syntax::LinkReference] = true`): it produces a link whose target is resolved against the definitions, and the written reference name stays available in `LinkNode::$ref`, so a consumer transform pass can resolve wiki-style targets itself.
 
-**Automatic links** *(`link/url`, `link/email`, AutolinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. Displayed URLs are shortened when `$texy->autolinkModule->shorten` is on; e-mails are obfuscated against bots when `$texy->obfuscateEmail` is on. A URL rejected by `$texy->urlPolicy` produces no link.
+**Automatic links** *(`link/url`, `link/email`, AutolinkModule)*: bare URLs starting with `http://`, `https://`, `www.`, `ftp://` and bare e-mail addresses become links automatically. Addresses starting with `www.` get the `http://` scheme prepended and e-mails get `mailto:`. Displayed URLs are shortened when `$texy->htmlOutput->shortenUrls` is on; e-mails are obfuscated against bots when `$texy->htmlOutput->obfuscateEmail` is on. A URL rejected by `$texy->urlPolicy` produces no link.
 
 A `.[nofollow]` class on a link converts to `rel="nofollow"`.
 
@@ -111,7 +111,7 @@ A `.[nofollow]` class on a link converts to `rel="nofollow"`.
 [* photo.jpg .(alt text description)[css-class] *]
 ```
 
-Dimensions – detected automatically for local files when `$texy->imageModule->fileRoot` is set, or specified manually:
+Dimensions – detected automatically for local files when `$texy->htmlOutput->imageFileRoot` is set, or specified manually:
 
 ```texy
 [* img.jpg 150x100 *]    // exact size
@@ -145,7 +145,7 @@ An image followed by ` *** ` and caption text on the same block:
 [* photo.jpg *] *** The caption. It may contain **formatting**.
 ```
 
-Renders `<div class="figure">` by default; set `$texy->figureModule->tagName = 'figure'` for semantic `<figure>`/`<figcaption>`. The caption is optional – an image alone on its own block line also becomes a figure (without a `<figcaption>`).
+Renders `<div class="figure">` by default; set `$texy->htmlOutput->figureTagName = 'figure'` for semantic `<figure>`/`<figcaption>`. The caption is optional – an image alone on its own block line also becomes a figure (without a `<figcaption>`).
 
 ## Headings
 
@@ -243,7 +243,7 @@ Lines starting with `>`; blank `>` lines separate paragraphs inside the quote; `
 > Back in the outer quotation.
 ```
 
-Continuation lines may also use `>:` instead of `> ` as the prefix. After the quote is built, the `afterBlockquote` event fires, letting handlers post-process the element.
+Continuation lines may also use `>:` instead of `> ` as the prefix.
 
 ## Horizontal rules
 
@@ -255,13 +255,13 @@ Three or more `-` or `*` on a separate line (a blank line must precede, otherwis
 ***
 ```
 
-Each character type may get its own CSS class via `$texy->horizLineModule->classes`.
+Each character type may get its own CSS class via `$texy->htmlOutput->horizontalRuleClasses`.
 
 ## Fenced blocks
 
 *(`blocks` + `block/*` subtypes – BlockModule)*
 
-A block starts with `/--type` and ends with `\--`. Blocks of type `div` may nest. The optional parameter after the type (e.g. language) is passed to handlers.
+A block starts with `/--type` and ends with `\--`. Blocks of type `div` may nest. The optional parameter after the type (e.g. language) is stored on the node.
 
 ```texy
 /--code php
@@ -283,7 +283,7 @@ Displayed literally, both Texy and HTML markup escaped.
 
 | Subtype | Output |
 |---|---|
-| `block/code` | `<pre><code>` with escaped content; the language parameter is available to a custom `block` handler (syntax highlighting) |
+| `block/code` | `<pre><code>` with escaped content; the language parameter is stored on `CodeBlockNode` for custom renderer handlers (syntax highlighting) |
 | `block/pre` | `<pre>`; content is escaped, but HTML tags written inside are recognized and validated |
 | `block/html` | content parsed as HTML (tags validated against `$allowedTags`), Texy markup off, no wrapper element |
 | `block/text` | content escaped literally, line breaks become `<br>` |
@@ -299,7 +299,7 @@ Each subtype (except `block/texy`) is individually switchable in `$allowed`; the
 
 *(`html/tag`, `html/comment` – HtmlModule)*
 
-HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->allowedTags` and the content model; disallowed tags/attributes are removed, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlModule->passComment` is on.
+HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->htmlOutput->allowedTags`; disallowed tags become visible text, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlOutput->passHtmlComments` is on.
 
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.
@@ -313,7 +313,7 @@ This is **Texy bold** and this is <strong>HTML bold</strong>.
 {{command: arg1, arg2}}
 ```
 
-Texy itself renders nothing for scripts – the construct exists solely for user handlers of the `script` element (see the custom-handlers guide (user manual)). The argument separator is `$texy->scriptModule->separator` (default `,`).
+`{{texy: …}}` directives are consumed into document options (`DocumentNode::$meta`); any other directive renders as its literal text unless a custom renderer handler for `DirectiveNode` processes it (see [custom-handlers.md](custom-handlers.md)).
 
 ## Emoticons
 
@@ -323,7 +323,7 @@ Texy itself renders nothing for scripts – the construct exists solely for user
 $texy->allowed['emoticon'] = true;
 ```
 
-Recognized emoticons and replacements come from `$texy->emoticonModule->icons` (default: `:-)` 🙂, `:-(` ☹, `;-)` 😉, `:-D` 😁, `8-O` 😮, `8-)` 😄, `:-?` 😕, `:-x` 😶, `:-P` 😛, `:-|` 😐). Replacements are rendered as text (wrapped in a `<span>` when `$texy->emoticonModule->class` is set); image-file emoticons are no longer supported. The pattern is registered in `beforeParse`.
+Recognized emoticons and replacements come from `$texy->emoticonModule->icons` (default: `:-)` 🙂, `:-(` ☹, `;-)` 😉, `:-D` 😁, `8-O` 😮, `8-)` 😄, `:-?` 😕, `:-x` 😶, `:-P` 😛, `:-|` 😐). Replacements are rendered as text (wrapped in a `<span>` when `$texy->htmlOutput->emoticonClass` is set); image-file emoticons are no longer supported.
 
 ## Typography
 
@@ -389,7 +389,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `phrase/wikilink` | ✅ on | `[text | url]` | PhraseModule |
 | `phrase/markdown` | ✅ on | `[text](url)` | PhraseModule |
 | `phrase/escaped-asterix` | ✅ on | `\*` (literal asterisk) | PhraseModule |
-| `link/reference` | ✅ on | `[ref]` | LinkReferenceModule |
+| `link/reference` | ❌ off | bare `[ref]` | LinkReferenceModule |
 | `link/url` | ✅ on | autodetected `https://…`, `www.…`, `ftp://…` | AutolinkModule |
 | `link/email` | ✅ on | autodetected e-mail address | AutolinkModule |
 | `emoticon` | ❌ off | `:-)`, `:-D`, `;-)` … | EmoticonModule |
@@ -420,12 +420,12 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 
 | Syntax ID | Default | What it does | Module |
 |---|---|---|---|
-| `link/definition` | ✅ on | `[name]: url` reference definitions, extracted in `beforeParse` (a label or modifier in the definition is deprecated) | LinkReferenceModule |
-| `image/definition` | ✅ on | `[*name*]: url .(alt)` image reference definitions, extracted in `beforeParse` | ImageModule |
-| `typography` | ✅ on | post-line typographic corrections (quotes, dashes, nbsp, symbols) | TypographyModule |
-| `longwords` | ✅ on | post-line insertion of `&shy;` soft hyphens into long words | HyphenationModule |
+| `link/definition` | ✅ on | `[name]: url` reference definitions, resolved in the transform phase (a label or modifier in the definition is deprecated) | LinkReferenceModule |
+| `image/definition` | ✅ on | `[*name*]: url .(alt)` image reference definitions, resolved in the transform phase | ImageModule |
+| `typography` | ✅ on | typographic corrections (quotes, dashes, nbsp, symbols) applied by the AST typography pass | TypographyModule |
+| `longwords` | ✅ on | insertion of soft hyphens into long words, same pass | HyphenationModule |
 
-Paragraphs themselves have no syntax ID – text between recognized blocks is always handled by **ParagraphModule** (configurable via `$texy->mergeLines` and the `paragraph` element handler).
+Paragraphs themselves have no syntax ID – text between recognized blocks is always handled by **ParagraphModule** (configurable via `$texy->mergeLines`).
 
 Enable or disable any syntax by its ID:
 

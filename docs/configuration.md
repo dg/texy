@@ -1,67 +1,39 @@
 # Configuration
 
-Texy is configured through **public properties** of the main `Texy\Texy` class and of its **modules**:
+Texy is configured through **public properties** in three places, following the semantic/presentation split ([architecture.md](architecture.md)):
 
 ```php
 $texy = new Texy\Texy;
-$texy->allowedTags = Texy\Texy::NONE;   // main class
-$texy->imageModule->root = '/images/';  // module
+$texy->allowed['emoticon'] = true;             // Texy: syntax + security
+$texy->typographyModule->locale = 'en';        // module: semantic configuration
+$texy->htmlOutput->imageRoot = '/images/';  // generator: presentation
+$texy->htmlOutput->lineWrap = 120;       // output formatting
 ```
 
-All defaults below are taken from the source code (`src/Texy/Texy.php`, `src/Texy/Modules/*.php`).
+Reading or writing the pre-4.0 property locations (e.g. `$texy->imageModule->root`) still works through deprecated `__get`/`__set` bridges that trigger `E_USER_DEPRECATED`.
 
 ## The Texy class
 
 ### $allowed
 
-`array<string, bool>` controlling which syntaxes are active. Entries are created automatically when patterns are registered (default `true` unless the module sets otherwise). The complete list of syntax IDs, defaults, and owning modules is in [syntax.md](syntax.md#syntax-overview).
+`array<string, bool>` controlling which syntaxes are active. Entries are created automatically when patterns are registered (default `true` unless the module sets otherwise – e.g. `emoticon`, `phrase/ins`, `phrase/del`, `phrase/sup`, `phrase/sub` default to `false`). Syntax IDs are catalogued as constants on `Texy\Syntax`; the complete list is in [syntax.md](syntax.md).
 
 ```php
 $texy->allowed['image'] = false;         // disable images
 $texy->allowed['phrase/ins'] = true;     // enable ++inserted++ text
-$texy->allowed['emoticon'] = true;       // enable emoticons
+$texy->allowed['typography'] = false;    // disable the typography pass
 ```
 
 The array is consulted once at the start of `process()`; changing it during processing has no effect.
 
-### $allowedTags
+### $allowedClasses, $allowedStyles
 
-Controls which HTML tags may appear in the output (and be written in the input). Default: an array whitelist built by `Texy::initAllowedTags()` – **the common HTML tags (inline, void, and block) each with all their attributes**.
-
-```php
-$texy->allowedTags = Texy\Texy::ALL;    // any tag whatsoever
-$texy->allowedTags = Texy\Texy::NONE;   // no HTML tags at all
-$texy->allowedTags = [
-    'strong' => [],                     // <strong> without attributes
-    'a' => ['href', 'title'],           // <a> with these attributes only
-    'img' => Texy\Texy::ALL,            // <img> with any attributes
-];
-```
-
-### $allowedClasses
-
-Controls CSS classes and IDs usable in [modifiers](modifiers.md). Default `Texy::ALL`.
+Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `Texy::ALL`.
 
 ```php
-$texy->htmlPolicy->allowedClasses = Texy\Texy::NONE;               // no classes/IDs
-$texy->htmlPolicy->allowedClasses = ['highlight', '#main'];        // whitelist; IDs prefixed with #
-```
-
-### $allowedStyles
-
-Controls inline CSS properties usable in modifiers. Default `Texy::ALL`.
-
-```php
-$texy->htmlPolicy->allowedStyles = Texy\Texy::NONE;
-$texy->htmlPolicy->allowedStyles = ['color', 'background-color'];
-```
-
-### $alignClasses
-
-Maps alignment modifiers to CSS classes instead of inline styles. Default: all seven keys (`left`, `right`, `center`, `justify`, `top`, `middle`, `bottom`) set to `null`, meaning inline `text-align`/`vertical-align` styles are used.
-
-```php
-$texy->alignClasses['left'] = 'text-left';   // .< now produces class="text-left"
+$texy->htmlPolicy->allowedClasses = Texy\Texy::NONE;          // no classes/IDs
+$texy->htmlPolicy->allowedClasses = ['highlight', '#main'];   // whitelist; IDs prefixed with #
+$texy->htmlPolicy->allowedStyles = ['color'];
 ```
 
 ### $urlPolicy
@@ -69,8 +41,8 @@ $texy->alignClasses['left'] = 'text-left';   // .< now produces class="text-left
 URL scheme security policy (`Texy\UrlPolicy`): a regex of allowed link schemes and one for image schemes. A null pattern means no restriction. Only absolute URLs with a scheme are checked; scheme-less (relative) URLs always pass.
 
 ```php
-$texy->urlPolicy->linkPattern = '#https?:|ftp:|mailto:#A';
-$texy->urlPolicy->imagePattern = '#https?:#A';
+$texy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
+$texy->urlPolicy->imagePattern = '~https?:~A';
 ```
 
 ### Other properties
@@ -78,33 +50,74 @@ $texy->urlPolicy->imagePattern = '#https?:#A';
 ```php
 $texy->mergeLines = true;          // join consecutive lines into one paragraph
 $texy->tabWidth = 8;               // tab → spaces conversion width
-$texy->obfuscateEmail = true;      // obfuscate e-mail addresses against bots
 $texy->removeSoftHyphens = true;   // strip U+00AD from input
-$texy->nontextParagraph = 'div';   // element for paragraphs without text (e.g. image-only); string or HtmlElement
 ```
 
-### Read-only results
-
-After `process()`:
+### Results
 
 ```php
-$texy->getDOM();               // the parsed HtmlElement tree
-$texy->toText();               // plain-text rendition
+$html = $texy->process($text);     // parse + render HTML
+$ast = $texy->parse($text);        // the Nodes\DocumentNode tree
+Texy\Nodes\HeadingNode::collectFrom($ast);          // headings in document order
+Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->tocTitle; // document title (for <title>)
 ```
 
-Headings are facts about the document, so they are read from the parsed tree:
+## The HTML generator ($texy->htmlOutput)
+
+`Output\Html\Config` holds everything that shapes only the HTML output:
+
+### $allowedTags
+
+Controls which HTML tags may pass through from the input. Default: an array whitelist of the common HTML tags (inline, void, block), each with all attributes.
 
 ```php
-$document = $texy->parse($text);
-$headings = Texy\Nodes\HeadingNode::collectFrom($document); // document order, texysource excluded
-$title = $headings[0]?->tocTitle;                           // document title (for <title>)
+$texy->htmlPolicy->allowedTags = Texy\Texy::ALL;    // any tag whatsoever
+$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;   // no HTML tags at all
+$texy->htmlPolicy->allowedTags = [
+    'strong' => [],                     // <strong> without attributes
+    'a' => ['href', 'title'],           // <a> with these attributes only
+    'img' => Texy\Texy::ALL,            // <img> with any attributes
+];
 ```
 
-`HeadingModule::$title` and `$TOC` still work but are deprecated: they hold only the last parse's results, while the tree carries them for as long as you hold the document.
+The whitelist applies both to tags written in the input (disallowed ones become visible text) and to attributes from modifiers.
 
-## Modules
+### Other generator properties
 
-Properties marked *(deprecated)* carry `@deprecated` in the code.
+```php
+$g = $texy->htmlOutput;
+$g->alignClasses['left'] = 'text-left'; // alignment modifiers → classes instead of inline styles
+$g->obfuscateEmail = true;              // obfuscate e-mail addresses against bots
+$g->nontextParagraph = 'div';           // wrapper for image-only paragraphs; string or Element
+$g->shortenUrls = true;                 // shorten displayed autolink URLs
+$g->emoticonClass = null;               // CSS class wrapping emoticons (<span>)
+$g->passHtmlComments = true;            // keep HTML comments in output
+$g->linkRoot = null;                    // prefix for relative link URLs
+$g->linkNoFollow = false;               // rel="nofollow" on absolute links
+$g->imageRoot = 'images/';              // URL prefix for images
+$g->imageFileRoot = null;               // filesystem path for size autodetection
+$g->imageLeftClass = null;              // class for left-floating images
+$g->imageRightClass = null;
+$g->figureTagName = 'div';              // 'figure' produces <figure>/<figcaption>
+$g->figureClass = 'figure';             // CSS class of the figure wrapper
+$g->figureLeftClass = null;             // classes for floated figures
+$g->figureRightClass = null;            //   (fall back to alignClasses or inline style)
+$g->horizontalRuleClasses = ['-' => null, '*' => null];  // CSS class per HR type
+$g->phraseTags['phrase/strong'] = 'b';  // change the tag a phrase syntax renders to
+```
+
+## Output formatting ($texy->htmlOutput)
+
+Formatting options live on the generator facade:
+
+```php
+$texy->htmlOutput->indent = true;      // indent output
+$texy->htmlOutput->baseIndent = 0;     // base indentation level
+$texy->htmlOutput->lineWrap = 80;      // maximum line width (0 = no wrapping)
+$texy->htmlOutput->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
+```
+
+## Modules (semantic configuration)
 
 ### HeadingModule
 
@@ -119,72 +132,33 @@ $texy->headingModule->levels = ['#' => 0, '*' => 1, '=' => 2, '-' => 3]; // used
 
 With `DYNAMIC` balancing the most important heading found becomes `$top`; with `FIXED` each underline character maps to a fixed level via `$levels` (level = `$levels[$char] + $top`).
 
+The results are facts about the document, so they are read from the AST, not from the module:
+
+```php
+$document = $texy->parse($text);
+$headings = Texy\Nodes\HeadingNode::collectFrom($document); // document order, texysource excluded
+$title = $headings[0]?->tocTitle;                           // document title
+foreach ($headings as $heading) {
+	echo $heading->level, $heading->tocTitle, $heading->modifier?->id;
+}
+```
+
+`HeadingModule::$title` and `$TOC` still work but are deprecated: they hold only the last parse's results, while the AST carries them for as long as you hold the document.
+
 ### PhraseModule
 
 ```php
 $texy->phraseModule->linksAllowed = true;   // allow ":url" links attached to phrases
-$texy->phraseModule->tags['phrase/strong'] = 'b';   // change generated tag
 ```
 
-Default `$tags` map: `phrase/strong` → `strong`, `phrase/em`, `phrase/em-alt`, `phrase/em-alt2` → `em`, `phrase/ins` → `ins`, `phrase/del` → `del`, `phrase/sup`, `phrase/sup-alt` → `sup`, `phrase/sub`, `phrase/sub-alt` → `sub`, `phrase/span`, `phrase/span-alt`, `phrase/quicklink` → `a`, `phrase/acronym`, `phrase/acronym-alt` → `abbr`, `phrase/code` → `code`, `phrase/quote` → `q`.
-
-### LinkReferenceModule
-
-```php
-$texy->linkModule->root = null;           // prefix for relative link URLs
-$texy->linkModule->forceNoFollow = false; // add rel="nofollow" to external links
-```
-
-References:
+### LinkReferenceModule / ImageModule references
 
 ```php
 $texy->linkModule->addDefinition('example', 'https://example.com');
-$texy->linkModule->getReference('example');   // ?Link
+$texy->imageModule->addDefinition('logo', 'logo.png', 100, 50, 'Logo');
 ```
 
-### AutolinkModule
-
-Autodetection of bare URLs and e-mail addresses (`link/url`, `link/email`), split out from the former `LinkModule`.
-
-```php
-$texy->autolinkModule->shorten = true;   // shorten displayed URLs
-```
-
-### ImageModule
-
-```php
-$texy->imageModule->root = 'images/';       // URL prefix for images
-$texy->imageModule->fileRoot = null;        // filesystem path for size autodetection
-$texy->imageModule->leftClass = null;       // class for left-floating images
-$texy->imageModule->rightClass = null;      // class for right-floating images
-```
-
-References work like in LinkReferenceModule via `addDefinition()` / `getReference()`.
-
-### FigureModule
-
-```php
-$texy->figureModule->tagName = 'div';      // 'figure' produces <figure>/<figcaption>
-$texy->figureModule->class = 'figure';     // CSS class of the wrapper
-$texy->figureModule->leftClass = null;     // class for left-floated figures
-$texy->figureModule->rightClass = null;
-```
-
-When `leftClass`/`rightClass` are `null`, alignment falls back to `$texy->alignClasses['left'|'right']` or an inline style.
-
-### ListModule
-
-```php
-$texy->listModule->bullets;   // definitions of bullet/numbering styles
-```
-
-Default keys: `*`, `-`, `+` (unordered), `1.`, `1)`, `I.`, `I)`, `a)`, `A)` (ordered; roman and alpha variants set `list-style-type`). Each value is `[first-item regexp, ordered?, list-style-type, (optional) next-item regexp]`.
-
-### HorizontalRuleModule
-
-```php
-$texy->horizLineModule->classes = ['-' => null, '*' => null];  // CSS class per rule type
-```
+User definitions persist across `process()` calls; definitions in the document override them.
 
 ### TypographyModule
 
@@ -192,7 +166,7 @@ $texy->horizLineModule->classes = ['-' => null, '*' => null];  // CSS class per 
 $texy->typographyModule->locale = 'cs';   // 'cs', 'en', 'fr', 'de', 'pl'
 ```
 
-The locale determines quote characters (see `TypographyModule::$locales`): cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Unknown locales fall back to `en`.
+The locale determines quote characters (`TypographyModule::$locales`): cs/de „…“ ‚…‘, en “…” ‘…’, fr «…» ‹…›, pl „…” ‚…’. Unknown locales fall back to `en`.
 
 ### HyphenationModule
 
@@ -205,36 +179,22 @@ $texy->longWordsModule->wordLimit = 20;   // minimal length of a word to hyphena
 Disabled by default (`$allowed['emoticon'] = false`).
 
 ```php
-$texy->emoticonModule->class = null;     // CSS class of the wrapping element
-$texy->emoticonModule->icons = [         // emoticon => replacement
+$texy->emoticonModule->icons = [          // emoticon => replacement character
     ':-)' => '🙂', ':-(' => '☹', ';-)' => '😉', ':-D' => '😁',
     '8-O' => '😮', '8-)' => '😄', ':-?' => '😕', ':-x' => '😶',
     ':-P' => '😛', ':-|' => '😐',
 ];
 ```
 
-Replacements are rendered as text (wrapped in a `<span>` when `$class` is set). Image-file emoticons are no longer supported – a replacement containing `.` triggers a deprecation notice.
+Replacements are rendered as text (wrapped in a `<span>` when `$htmlOutput->emoticonClass` is set). Image-file emoticons are no longer supported – a replacement containing `.` triggers a deprecation notice.
 
-### HtmlModule
-
-```php
-$texy->htmlModule->passComment = true;   // keep HTML comments in output
-```
-
-### HtmlOutputModule
+### ListModule
 
 ```php
-$texy->htmlOutput->indent = true;      // indent output
-$texy->htmlOutput->baseIndent = 0;     // base indentation level
-$texy->htmlOutput->lineWrap = 80;      // maximum line width
-$texy->htmlOutput->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
+$texy->listModule->bullets;   // definitions of bullet/numbering styles
 ```
 
-### DirectiveModule
-
-```php
-$texy->scriptModule->separator = ',';   // argument separator in {{command: a, b}}
-```
+Default keys: `*`, `-`, `+` (unordered), `1.`, `1)`, `I.`, `I)`, `a)`, `A)` (ordered; roman and alpha variants set `list-style-type`).
 
 ## Configurator presets
 
@@ -252,36 +212,36 @@ Exactly what it does:
 
 - `$allowedClasses = Texy::NONE` – no classes or IDs,
 - `$allowedStyles = Texy::NONE` – no inline styles,
-- `$allowedTags = Configurator::$safeTags` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
-- URL scheme filters: links `#https?:|ftp:|mailto:#A`, images `#https?:#A`,
+- `$htmlPolicy->allowedTags = Configurator::$safeTags` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
+- URL scheme filters: links `~https?:|ftp:|mailto:~A`, images `~https?:~A`,
 - `$allowed['image'] = false` – no images (note: the `figure` syntax is *not* disabled by safeMode; combine with `disableImages()` if needed),
 - `$allowed['link/definition'] = false` – no reference definitions,
 - `$allowed['html/comment'] = false` – no HTML comments,
-- `$texy->linkModule->forceNoFollow = true` – `rel="nofollow"` on external links.
+- `$htmlOutput->linkNoFollow = true` – `rel="nofollow"` on external links.
+
+Because sanitization runs in the transform phase, safe mode protects every output format, including Markdown.
 
 ### disableLinks()
 
-Disables `link/reference`, `link/email`, `link/url`, `link/definition`, sets `phraseModule->linksAllowed = false`, and removes `a` from `$allowedTags`.
+Disables `link/email`, `link/url`, `link/definition`, sets `phraseModule->linksAllowed = false`, and removes `a` from `allowedTags`.
 
 ### disableImages()
 
-Disables `image`, `figure`, `image/definition` and removes `img`, `object`, `embed`, `applet` from `$allowedTags`.
+Disables `image`, `figure`, `image/definition` and removes `img`, `object`, `embed`, `applet` from `allowedTags`.
 
 ## Security
 
 Texy's protections against common attacks are activated by safe mode – enable it whenever you process untrusted input.
 
-**XSS.** In safe mode Texy validates HTML (removing disallowed tags and attributes, including event handlers like `onclick`), filters URLs to safe schemes (blocking `javascript:`, `data:` URLs), and escapes text content properly:
+**XSS.** In safe mode Texy validates HTML (removing disallowed tags and attributes, including event handlers like `onclick`), filters URLs to safe schemes (blocking `javascript:` and `data:` URLs – dangerous `<a href>`/`<img src>` drop the whole tag), and escapes text content properly:
 
 ```texy
-<script>alert('XSS')</script>          → removed
-<img src=x onerror="alert('XSS')">    → removed
+<script>alert('XSS')</script>          → shown as text
+<img src=x onerror="alert('XSS')">    → shown as text
 "click":javascript:alert('XSS')       → link not created
 ```
 
 **URL validation** applies to all links and images via `$urlPolicy` (see above). Only absolute URLs with a scheme are checked; relative URLs always pass.
-
-**Tag filtering** via `$allowedTags` applies both to HTML written in the input and to the generated output; disallowed tags are dropped while their textual content is kept.
 
 Recommended practice for user content:
 
