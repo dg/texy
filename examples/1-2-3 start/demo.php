@@ -28,7 +28,7 @@ $texy = new Texy;
 // STEP 2: Configure Texy (all of this is optional)
 
 // Tell Texy where your images are located
-$texy->imageModule->root = 'images/';
+$texy->htmlOutput->imageRoot = 'images/';
 
 // Enable some text formatting that is disabled by default:
 // ++inserted text++ renders as <ins>

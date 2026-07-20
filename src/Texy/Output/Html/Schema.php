@@ -24,6 +24,10 @@ final class Schema
 		Text = '%TEXT',
 		Transparent = '%TRANS';
 
+	public const
+		UrlLink = 'link',
+		UrlImage = 'image';
+
 	/** element flags */
 	private const
 		Inline = 0b000001,       // phrasing element
@@ -171,10 +175,34 @@ final class Schema
 		'form' => ['form'],
 	];
 
+	/**
+	 * Attributes whose value is a URL, and which policy governs them. Whoever writes
+	 * such an attribute - hand-written tag or modifier - must pass UrlPolicy, or
+	 * "javascript:" gets in through the back door.
+	 */
+	private const UrlAttrs = [
+		'href' => self::UrlLink,
+		'cite' => self::UrlLink,
+		'ping' => self::UrlLink,
+		'itemid' => self::UrlLink,
+		'itemtype' => self::UrlLink,
+		'src' => self::UrlImage,
+		'srcset' => self::UrlImage,
+	];
+
 
 	public static function isKnown(string $tag): bool
 	{
 		return isset(self::Elements[$tag]);
+	}
+
+
+	/**
+	 * Returns UrlLink / UrlImage for an attribute carrying a URL, null otherwise.
+	 */
+	public static function urlAttribute(string $name): ?string
+	{
+		return self::UrlAttrs[$name] ?? null;
 	}
 
 
@@ -308,6 +336,7 @@ final class Schema
 		if ($cache === null) {
 			$cache = array_fill_keys(array_keys(self::Elements), Texy::ALL);
 			unset($cache['html'], $cache['head'], $cache['body'], $cache['style']);
+			$cache['*'] = Texy::ALL; // modifiers may set anything unless the policy says otherwise
 		}
 
 		return $cache;

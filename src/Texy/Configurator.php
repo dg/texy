@@ -52,15 +52,17 @@ class Configurator
 	 */
 	public static function safeMode(Texy $texy): void
 	{
-		$texy->allowedClasses = $texy::NONE; // no class or ID are allowed
-		$texy->allowedStyles = $texy::NONE; // style modifiers are disabled
-		$texy->allowedTags = self::$safeTags; // only some "safe" HTML tags and attributes are allowed
+		$texy->htmlPolicy->allowedClasses = $texy::NONE; // no class or ID are allowed
+		$texy->htmlPolicy->allowedStyles = $texy::NONE; // style modifiers are disabled
+		// only some "safe" HTML tags and attributes are allowed; the '*' list names
+		// attributes acceptable on any element and is the only source for modifiers
+		$texy->htmlPolicy->allowedTags = self::$safeTags + ['*' => ['title', 'lang', 'dir']];
 		$texy->urlSchemeFilters[$texy::FILTER_ANCHOR] = '~https?:|ftp:|mailto:~A';
 		$texy->urlSchemeFilters[$texy::FILTER_IMAGE] = '~https?:~A';
 		$texy->allowed[Syntax::Image] = false; // disable images
 		$texy->allowed[Syntax::LinkDefinition] = false; // disable [ref]: URL reference definitions
 		$texy->allowed[Syntax::HtmlComment] = false; // disable HTML comments
-		$texy->linkModule->forceNoFollow = true; // force rel="nofollow"
+		$texy->htmlOutput->linkNoFollow = true; // force rel="nofollow"
 	}
 
 
@@ -75,8 +77,8 @@ class Configurator
 		$texy->allowed[Syntax::LinkReference] = false;
 		$texy->phraseModule->linksAllowed = false;
 
-		if (is_array($texy->allowedTags)) {
-			unset($texy->allowedTags['a']);
+		if (is_array($texy->htmlPolicy->allowedTags)) {
+			unset($texy->htmlPolicy->allowedTags['a']);
 		} // TODO: else...
 	}
 
@@ -90,8 +92,8 @@ class Configurator
 		$texy->allowed[Syntax::Figure] = false;
 		$texy->allowed[Syntax::ImageDefinition] = false;
 
-		if (is_array($texy->allowedTags)) {
-			unset($texy->allowedTags['img'], $texy->allowedTags['object'], $texy->allowedTags['embed'], $texy->allowedTags['applet']);
+		if (is_array($texy->htmlPolicy->allowedTags)) {
+			unset($texy->htmlPolicy->allowedTags['img'], $texy->htmlPolicy->allowedTags['object'], $texy->htmlPolicy->allowedTags['embed'], $texy->htmlPolicy->allowedTags['applet']);
 		} // TODO: else...
 	}
 }

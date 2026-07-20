@@ -8,9 +8,6 @@ use Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
 
-// all cases are temporarily disabled - skip the file until the first one lights up
-Tester\Environment::skip('temporarily disabled');
-
 
 // temporarily disabled tests - the code cannot meet these expectations yet
 function skip(string $description, \Closure $fn): void
@@ -49,7 +46,7 @@ skip('HTML tags in safe mode', function () {
 skip('HTML tags disabled', function () {
 	$texy = createTexy();
 	Texy\Configurator::safeMode($texy);
-	$texy->htmlOutput->allowedTags = Texy\Texy::NONE;
+	$texy->htmlPolicy->allowedTags = Texy\Texy::NONE;
 	Assert::matchFile(
 		__DIR__ . '/expected/html-none.html',
 		$texy->process(file_get_contents(__DIR__ . '/sources/html.texy')),
@@ -81,7 +78,7 @@ skip('html-tags4', function () {
 });
 
 
-skip('html-tags5', function () {
+test('html-tags5', function () {
 	Assert::matchFile(
 		__DIR__ . '/expected/html-tags5.html',
 		createTexy()->process(file_get_contents(__DIR__ . '/sources/html-tags5.texy')),

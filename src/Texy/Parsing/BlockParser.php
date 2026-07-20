@@ -9,6 +9,7 @@ namespace Texy\Parsing;
 
 use JetBrains\PhpStorm\Language;
 use Texy\Nodes;
+use Texy\Nodes\BlockNode;
 use Texy\Regexp;
 use function is_array, is_string, strlen;
 
@@ -22,10 +23,12 @@ class BlockParser
 	private int $offset;
 
 
+	/**
+	 * @param array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?BlockNode, pattern: string}> $patterns
+	 * @param \Closure(ParseContext, string): array<BlockNode> $gapHandler
+	 */
 	public function __construct(
-		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}> */
 		private array $patterns,
-		/** @var \Closure(ParseContext, string): array<Nodes\BlockNode> gap handler receives (context, text) */
 		private \Closure $gapHandler,
 	) {
 	}

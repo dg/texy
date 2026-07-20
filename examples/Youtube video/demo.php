@@ -60,7 +60,7 @@ $texy->htmlOutput->registerHandler(
 			. '</iframe>';
 
 		// Tell Texy this is ready-to-use HTML (don't process it further)
-		return $texy->protect($code, $texy::CONTENT_BLOCK);
+		return $gen->protect($code, $gen::ContentBlock);
 	},
 );
 

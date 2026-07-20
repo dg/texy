@@ -1,0 +1,73 @@
+<?php declare(strict_types=1);
+
+/**
+ * Test: attributes of passthrough HTML tags are filtered by the allowedTags whitelist.
+ */
+
+use Tester\Assert;
+use Texy\Configurator;
+use Texy\Node;
+use Texy\Nodes;
+use Texy\NodeTraverser;
+use Texy\Texy;
+
+require __DIR__ . '/../bootstrap.php';
+
+
+test('safe mode strips event handlers and styles from hand-written tags', function () {
+	$cases = [
+		'<a href="https://example.com" onclick="alert(1)">klik</a>' => 'onclick',
+		'<b onmouseover="alert(1)">tuk</b>' => 'onmouseover',
+		'<b style="position:fixed;top:0">tuk</b>' => 'style',
+		'<abbr title="x" onload="alert(1)">zkr</abbr>' => 'onload',
+	];
+
+	foreach ($cases as $source => $forbidden) {
+		$texy = new Texy;
+		Configurator::safeMode($texy);
+		Assert::notContains($forbidden, $texy->process($source), $source);
+	}
+});
+
+
+test('the tag itself and its allowed attributes survive', function () {
+	$texy = new Texy;
+	Configurator::safeMode($texy);
+	$html = $texy->process('<a href="https://example.com" title="popis" onclick="alert(1)">klik</a>');
+
+	Assert::contains('<a href="https://example.com"', $html);
+	Assert::contains('title="popis"', $html);
+	Assert::notContains('onclick', $html);
+});
+
+
+test('a custom whitelist names both the tags and their attributes', function () {
+	$texy = new Texy;
+	$texy->htmlPolicy->allowedTags = ['a' => ['href'], 'b' => []];
+
+	$html = $texy->process('<a href="/x" title="t">odkaz</a> <b class="c">tuk</b>');
+
+	Assert::contains('href="/x"', $html);
+	Assert::notContains('title=', $html);   // 'a' allows href only
+	Assert::contains('<b>', $html);          // 'b' allows no attribute at all
+	Assert::notContains('class=', $html);
+});
+
+
+test('Texy::ALL on a tag lets every attribute through', function () {
+	$texy = new Texy;
+	$texy->htmlPolicy->allowedTags = ['b' => Texy::ALL];
+
+	Assert::contains('onmouseover', $texy->process('<b onmouseover="x">tuk</b>'));
+});
+
+
+test('filtering also applies to paired elements, not just lone tags', function () {
+	// the pairing pass turns these into HtmlElementNode, a different branch
+	$texy = new Texy;
+	Configurator::safeMode($texy);
+	$html = $texy->process("<b onmouseover=\"alert(1)\">first</b>\n\nsecond");
+
+	Assert::notContains('onmouseover', $html);
+	Assert::contains('<b>first</b>', $html);
+});

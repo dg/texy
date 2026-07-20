@@ -11,7 +11,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('paragraphs with modifiers', function () {
 	$texy = new Texy\Texy;
-	$texy->linkModule->root = 'xxx/';
+	$texy->htmlOutput->linkRoot = 'xxx/';
 	$texy->htmlOutput->lineWrap = 180;
 
 	Assert::matchFile(

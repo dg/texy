@@ -8,9 +8,6 @@ use Tester\Assert;
 
 require __DIR__ . '/../bootstrap.php';
 
-// all cases are temporarily disabled - skip the file until the first one lights up
-Tester\Environment::skip('temporarily disabled');
-
 
 // temporarily disabled tests - the code cannot meet these expectations yet
 function skip(string $description, \Closure $fn): void
@@ -18,7 +15,7 @@ function skip(string $description, \Closure $fn): void
 }
 
 
-skip('nested div blocks', function () {
+test('nested div blocks', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->linkRoot = 'xxx/';
 	$texy->htmlOutput->imageRoot = '../images/';
