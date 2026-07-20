@@ -53,7 +53,7 @@ All modules live in `src/Texy/Modules/`; syntax names are catalogued on `Texy\Sy
 |---|---|
 | **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` in the transform phase. |
 | **HtmlModule** | HTML tags and comments written in the input → `HtmlTagNode` / `HtmlCommentNode`; registers the pairing + sanitization transform passes ([rendering.md](rendering.md#html-passthrough-transform-passes)). |
-| **ImageModule** | Images `[* url *]` → `ImageNode` (wrapped in `LinkNode` when clickable); collects `[*ref*]:` definitions and resolves references in the transform phase. |
+| **ImageModule** | Images `[* url *]` → `ImageNode` (wrapped in `LinkNode` when clickable); the block form with caption → `FigureNode`; collects `[*ref*]:` definitions and resolves references in the transform phase. |
 | **PhraseModule** | All inline formatting → `PhraseNode` (type = syntax name); acronyms → `AnnotationNode`, `''notexy''` → `RawTextNode`; the alternative link syntaxes (wikilink, markdown, quicklink) → `LinkNode`. |
 | **LinkReferenceModule** | `[ref]: url` definitions → `LinkDefinitionNode`; resolves `[ref]` targets of `LinkNode`s in the transform phase; exposed as `$texy->linkModule`. |
 | **AutolinkModule** | Autodetected URLs and e-mails → `UrlNode` / `EmailNode`. |
@@ -65,7 +65,6 @@ All modules live in `src/Texy/Modules/`; syntax names are catalogued on `Texy\Sy
 |---|---|
 | **ParagraphModule** | Not pattern-based: the block parser's *gap handler*. Splits inter-block text into `ParagraphNode`s, handles hard line breaks and the paragraph modifier (see [parsing.md](parsing.md#paragraphmodule-the-gap-handler)). |
 | **BlockModule** | Fenced blocks `/-- type … \--` → `CodeBlockNode` (code/html/text/pre…), `SectionNode` (div), `CommentNode`; nested Texy for `block/texy`. |
-| **FigureModule** | Image with caption → `FigureNode` holding the image node and caption content. |
 | **HorizontalRuleModule** | `---` / `***` → `HorizontalRuleNode`. |
 | **BlockQuoteModule** | `>` quotations → `BlockQuoteNode`, including nested content and citation link. |
 | **TableModule** | Tables → `TableNode` / `TableRowNode` / `TableCellNode` with head detection, colspan/rowspan. |

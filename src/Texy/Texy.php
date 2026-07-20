@@ -113,7 +113,6 @@ class Texy
 		// block parsing
 		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
 		$this->addModule(new Modules\BlockModule($this));
-		$this->addModule(new Modules\FigureModule($this));
 		$this->addModule(new Modules\HorizontalRuleModule($this));
 		$this->addModule(new Modules\BlockQuoteModule($this));
 		$this->addModule(new Modules\TableModule($this));

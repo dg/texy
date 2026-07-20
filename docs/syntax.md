@@ -137,7 +137,7 @@ Our logo [* company-logo *] symbolizes our vision.
 
 ## Figures (image with caption)
 
-*(`figure` – FigureModule)*
+*(`figure` – ImageModule)*
 
 An image followed by ` *** ` and caption text on the same block:
 
@@ -283,7 +283,7 @@ Displayed literally, both Texy and HTML markup escaped.
 
 | Subtype | Output |
 |---|---|
-| `block/code` | `<pre><code>` with escaped content; the language parameter is stored on `CodeBlockNode` for custom renderer handlers (syntax highlighting) |
+| `block/code` | `<pre><code class="language-xxx">` with escaped content; the class mask is `$htmlOutput->codeLanguageClass`, and the language is stored on `CodeBlockNode` for custom renderer handlers (syntax highlighting) |
 | `block/pre` | `<pre>`; content is escaped, but HTML tags written inside are recognized and validated |
 | `block/html` | content parsed as HTML (tags validated against `$allowedTags`), Texy markup off, no wrapper element |
 | `block/text` | content escaped literally, line breaks become `<br>` |
@@ -291,7 +291,7 @@ Displayed literally, both Texy and HTML markup escaped.
 | `block/texysource` | content processed by Texy and the *resulting HTML source* displayed in a code block (parameter `line` switches to inline parsing) |
 | `block/comment` | content discarded entirely |
 | `block/div` | `<div>`, content parsed as Texy blocks; may nest |
-| `block/default` | plain `/--` without a type; escaped `<pre>`, the parameter (if any) becomes a CSS class |
+| `block/default` | plain `/--` without a type; escaped `<pre>`, the parameter (if any) becomes a language CSS class |
 
 Each subtype (except `block/texy`) is individually switchable in `$allowed`; the whole feature via `blocks`.
 
@@ -416,7 +416,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `block/fenced` | ✅ on | ```` ```language ```` | BlockModule |
 | `block/pre` | ✅ on | subtype `/--pre` | BlockModule |
 | `block/default` | ✅ on | plain `/--` block | BlockModule |
-| `figure` | ✅ on | `[* img.jpg *] *** caption` | FigureModule |
+| `figure` | ✅ on | `[* img.jpg *] *** caption` | ImageModule |
 | `horizline` | ✅ on | `---` or `***` on its own line | HorizontalRuleModule |
 | `blockquote` | ✅ on | `> quoted text` | BlockQuoteModule |
 | `table` | ✅ on | `| cell | cell |` | TableModule |
