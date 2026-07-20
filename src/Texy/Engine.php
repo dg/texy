@@ -101,17 +101,6 @@ class Engine
 
 
 	/**
-	 * Get all registered pattern names.
-	 *
-	 * @return list<string>
-	 */
-	public function getPatternNames(): array
-	{
-		return array_keys(array_merge($this->linePatterns, $this->blockPatterns));
-	}
-
-
-	/**
 	 * Parse text into AST.
 	 *
 	 * @param  array<string, bool>  $allowedSyntaxes  Map of syntax name => enabled

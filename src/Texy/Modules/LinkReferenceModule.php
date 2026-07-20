@@ -196,11 +196,6 @@ final class LinkReferenceModule extends Texy\Module
 			return;
 		}
 
-		// For other URLs, resolve and check for email
-		$resolved = $this->resolveUrl($node->url);
-		if ($resolved !== $node->url) {
-			$node->url = $resolved;
-		}
 		$this->convertEmailUrl($node);
 	}
 
@@ -217,40 +212,6 @@ final class LinkReferenceModule extends Texy\Module
 			&& Texy\Regexp::match($node->url, '~' . Patterns::Email . '(\?\S*)?$~A')) { // optional ?subject=... query
 			$node->url = 'mailto:' . $node->url;
 		}
-	}
-
-
-	/**
-	 * Resolve URL that might be [ref] or [*img*] format.
-	 */
-	private function resolveUrl(string $url): string
-	{
-		$len = strlen($url);
-
-		// [ref] or [*img*] format
-		if ($len > 2 && $url[0] === '[' && $url[$len - 1] === ']') {
-			// [*img*] → image URL
-			if ($url[1] === '*' && $url[$len - 2] === '*') {
-				$imgRef = trim(substr($url, 2, -2));
-				$imgDef = $this->texy->imageModule->getDefinition($imgRef);
-				if ($imgDef !== null && $imgDef->url !== null) {
-					return $imgDef->url;
-				}
-				// Image reference not found - return inner content as URL
-				return $imgRef;
-			} else {
-				// [ref] → link URL
-				$refName = substr($url, 1, -1);
-				$def = $this->resolveDefinition($refName);
-				if ($def !== null) {
-					return $def->url;
-				}
-				// Link reference not found - return inner content as URL
-				return $refName;
-			}
-		}
-
-		return $url;
 	}
 
 

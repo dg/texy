@@ -33,7 +33,7 @@ class Renderer extends NodeRenderer
 			Nodes\ParagraphNode::class => fn(Nodes\ParagraphNode $n, self $g) => $g->renderChildren($n->content),
 			Nodes\HeadingNode::class => fn(Nodes\HeadingNode $n, self $g) => $g->renderChildren($n->content),
 			Nodes\BlockQuoteNode::class => fn(Nodes\BlockQuoteNode $n, self $g) => $g->renderBlocks($n->content->children),
-			Nodes\CodeBlockNode::class => fn(Nodes\CodeBlockNode $n) => $n->type === 'comment' ? '' : trim($n->code, "\n"),
+			Nodes\CodeBlockNode::class => fn(Nodes\CodeBlockNode $n) => trim($n->code, "\n"),
 			Nodes\SectionNode::class => fn(Nodes\SectionNode $n, self $g) => $g->renderBlocks($n->content->children),
 			Nodes\HorizontalRuleNode::class => fn() => '',
 			Nodes\FigureNode::class => fn(Nodes\FigureNode $n, self $g) => $n->caption ? $g->renderChildren($n->caption) : '',
