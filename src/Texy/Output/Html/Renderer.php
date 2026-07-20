@@ -34,9 +34,9 @@ final class Renderer extends NodeRenderer
 
 	private ElementDecorator $decorator;
 
-	private ImageDimensions $imageDimensions;
-
 	private bool $noFollow;
+
+	private ImageDimensions $imageDimensions;
 
 	/** @var array<string, string>  Protection markup table */
 	private array $marks = [];
@@ -46,10 +46,11 @@ final class Renderer extends NodeRenderer
 		public readonly Config $config,
 		private Texy $texy,
 		?bool $noFollow = null,
+		private bool $titleTypography = true,
 	) {
 		$this->noFollow = $noFollow ?? $config->linkNoFollow;
 		$this->imageDimensions = new ImageDimensions($config);
-		$this->decorator = new ElementDecorator($texy, $config);
+		$this->decorator = new ElementDecorator($texy->htmlPolicy, $config, $this);
 
 		$this->handlers = [
 			// Core nodes
@@ -120,9 +121,10 @@ final class Renderer extends NodeRenderer
 		// decode HTML entities to UTF-8
 		$s = Helpers::unescapeHtml($s);
 
-		// line-postprocessing (typography, long words)
+		// line-postprocessing (typography, long words); skipped when typography
+		// already ran over the AST
 		$blocks = explode(self::ContentBlock, $s);
-		foreach ($this->texy->postHandlers as $name => $handler) {
+		foreach ($this->titleTypography ? $this->texy->postHandlers : [] as $name => $handler) {
 			if (empty($this->texy->allowed[$name])) {
 				continue;
 			}
@@ -251,6 +253,19 @@ final class Renderer extends NodeRenderer
 			}
 		}
 		return true;
+	}
+
+
+	/**
+	 * Applies typography to an isolated string (title, alt) unless the AST
+	 * was already typographed in the transform phase or typography is disabled.
+	 * @internal
+	 */
+	public function postLineText(string $s): string
+	{
+		return $this->titleTypography && !empty($this->texy->allowed[Syntax::Typography])
+			? $this->texy->typographyModule->postLine($s)
+			: $s;
 	}
 
 
@@ -694,9 +709,7 @@ final class Renderer extends NodeRenderer
 
 		// alt: from title or empty (if not set by custom attrs)
 		if (!$hasCustomAlt && !isset($el->attrs['alt'])) {
-			$el->attrs['alt'] = $alt !== null
-				? $this->texy->typographyModule->postLine($alt)
-				: '';
+			$el->attrs['alt'] = $alt !== null ? $this->postLineText($alt) : '';
 		}
 
 		// hAlign ? float class or style
