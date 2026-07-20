@@ -389,6 +389,10 @@ final class Renderer extends NodeRenderer
 	{
 		$el = new Element('h' . $node->level);
 		$this->decorateElement($node->modifier, $el);
+		if ($node->id !== null && $node->modifier?->id === null) {
+			$el->attrs['id'] = $node->id; // generated, so not subject to the modifier policy
+		}
+
 		$el->children = $this->renderNodes($node->content->children);
 		return $el;
 	}

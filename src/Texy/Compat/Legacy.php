@@ -83,6 +83,10 @@ final class Legacy
 			'root' => 'emoticons render as Unicode characters, image files are not used',
 			'fileRoot' => 'emoticons render as Unicode characters, image files are not used',
 		],
+		'headingModule' => [
+			'title' => 'use HeadingNode::collectFrom($document)[0]?->getTitle()',
+			'TOC' => 'use HeadingNode::collectFrom($document)',
+		],
 	];
 
 	/** v3 methods removed without emulation; the value navigates to the successor */

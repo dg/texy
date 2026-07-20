@@ -88,11 +88,19 @@ $texy->nontextParagraph = 'div';   // element for paragraphs without text (e.g. 
 After `process()`:
 
 ```php
-$texy->headingModule->title;   // first heading text (for <title>)
-$texy->headingModule->TOC;     // table of contents: [{el, level, type, title}]
 $texy->getDOM();               // the parsed HtmlElement tree
 $texy->toText();               // plain-text rendition
 ```
+
+Headings are facts about the document, so they are read from the parsed tree:
+
+```php
+$document = $texy->parse($text);
+$headings = Texy\Nodes\HeadingNode::collectFrom($document); // document order, texysource excluded
+$title = $headings[0]?->getTitle();                        // document title (for <title>)
+```
+
+`HeadingModule::$title` and `$TOC` still work but are deprecated: they hold only the last parse's results, while the tree carries them for as long as you hold the document.
 
 ## Modules
 
@@ -110,6 +118,19 @@ $texy->headingModule->levels = ['#' => 0, '*' => 1, '=' => 2, '-' => 3]; // used
 ```
 
 With `DYNAMIC` balancing the most important heading found becomes `$top`; with `FIXED` each underline character maps to a fixed level via `$levels` (level = `$levels[$char] + $top`).
+
+The results are facts about the document, so they are read from the AST, not from the module:
+
+```php
+$document = $texy->parse($text);
+$headings = Texy\Nodes\HeadingNode::collectFrom($document); // document order, texysource excluded
+$title = $headings[0]?->getTitle();                      // document title
+foreach ($headings as $heading) {
+	echo $heading->level, $heading->getTitle(), $heading->id;
+}
+```
+
+`HeadingModule::$title` and `$TOC` still work but are deprecated: they hold only the last parse's results, while the AST carries them for as long as you hold the document.
 
 ### PhraseModule
 

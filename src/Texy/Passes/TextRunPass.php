@@ -84,9 +84,19 @@ final class TextRunPass
 
 	private function transformTitle(Node $node): void
 	{
+		$transform = $this->titleTransformer;
+		if ($transform === null) {
+			return;
+		}
+
 		$modifier = $node instanceof HasModifier ? $node->getModifier() : null;
-		if ($this->titleTransformer !== null && $modifier?->title !== null) {
-			$modifier->title = ($this->titleTransformer)($modifier->title);
+		if ($modifier?->title !== null) {
+			$modifier->title = $transform($modifier->title);
+		}
+
+		// the {toc: ...} label is display text too
+		if ($node instanceof Nodes\HeadingNode && $node->titleOverride !== null) {
+			$node->titleOverride = $transform($node->titleOverride);
 		}
 	}
 
