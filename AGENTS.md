@@ -9,10 +9,9 @@ internally and the rationale behind key design decisions - lives in `docs/`.
 Consult it before non-trivial changes; it is the source of truth from which the
 public manual is distilled.
 
-The core is non-trivial - a two-parser pipeline, a protection-mark hierarchy,
-chain-of-responsibility handlers, and content-model well-forming. Read the relevant
-`docs/` seam before editing. Note the internals describe the current
-**4.0-dev** line (still the two-parser design); the eventual AST rewrite will change most of it.
+The core is non-trivial - a two-parser pipeline building an AST, transform
+passes, and content-model well-forming. Read the relevant `docs/` seam before
+editing. The internals describe the current **4.0-dev** line (the AST design).
 
 ## Project Overview
 
@@ -45,24 +44,31 @@ composer phpstan
 
 ## Working in this repo
 
-- **Two parsers, in order:** `BlockParser` handles block structures (blocks never
-  overlap), then `InlineParser` handles inline syntaxes (nesting via progressive
-  expansion). See `docs/parsing.md`.
-- **Protection marks are a hierarchy, not just a mask.** Content-type bytes
-  `\x14`-`\x1F` are ordered so `[\x17-\x1F]+` matches a whole MARKUP placeholder;
-  paragraph detection, autolinks, longwords, and typography all read them. New
-  patterns must exclude already-processed content (`[^\x14-\x1F]`), and raw HTML you
-  emit must be wrapped via `$texy->protect($html, Texy\Texy::CONTENT_BLOCK)`.
-- **Syntax collisions are resolved by registration order** (earlier pattern wins);
-  some registration is lazy in `beforeParse`.
-- **The handler chain runs last-registered-first**, with the module's default
-  implementation last; a handler calls `$invocation->proceed()` to delegate.
-- **Modules are wired one-directionally through value objects** (`Link`/`Image`);
-  `HtmlOutputModule` fixes nesting/auto-closing against a built-in content model, and
-  `Modifier::decorate` filters attributes/classes/styles against the `allowed*` whitelists.
+- **Four phases: preprocess → parse → transform → render.** Parsing builds an AST
+  (`Texy\Nodes\*`); the transform phase (`afterParse` passes) may mutate it; the
+  render phase (`Texy\Output\*`) must not - **rendering is a pure function of the
+  AST** (enforced by `renderer-purity.phpt`). See `docs/architecture.md`.
+- **Two parsers:** `BlockParser` handles block structures (blocks never overlap),
+  `InlineParser` handles inline syntaxes; nesting happens only through explicit
+  recursion via `ParseContext`, handler output is never re-scanned. Collisions:
+  at the same offset the longer match wins, then earlier registration.
+  See `docs/parsing.md`.
+- **Configuration placement rule:** what changes the document's meaning for every
+  format lives on `Texy`/modules; what only shapes HTML output lives on
+  `$texy->htmlOutput` (modules keep deprecated property bridges).
+- **`TextNode` holds decoded display text** (entities decoded at parse time);
+  renderers escape on output. Code-like nodes keep literal source.
+- **Typography and hyphenation are an AST pass** (`TextRunPass`); its regexes
+  treat bytes `\x15`-`\x17` as a marker alphabet and must never create or
+  destroy them.
+- **Raw HTML in renderers:** return `Output\Html\Element` or `Output\Html\Raw`;
+  `Generator::protect()` marks are a deprecated bridge for legacy custom handlers.
+  Well-forming (pairing, content model, indentation) happens in `WellFormer`,
+  fed by a walk of the rendered tree. See `docs/rendering.md`.
 - **Security: always run `Configurator::safeMode($texy)` for untrusted input** - it
   restricts HTML to a safe subset, disables classes/IDs/styles and images, filters
-  URL schemes, and adds `rel="nofollow"`.
+  URL schemes, and adds `rel="nofollow"`. Tag sanitization happens in the transform
+  phase (`HtmlSanitizePass`), so it protects every output format.
 - User- and extender-facing how-to (Texy syntax, configuration, custom handlers,
   custom syntax registration, the modifier catalog) is manual material and lives in
   the public web docs, not here.
