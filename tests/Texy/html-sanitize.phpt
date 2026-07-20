@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 
 test('rejected tags become text nodes in the AST', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = ['b' => Texy\Texy::ALL];
+	$texy->htmlPolicy->allowedTags = ['b' => Texy\Texy::All];
 	$doc = $texy->parse('a <u>x</u> <b>y</b>');
 	$children = $doc->content->children[0]->content->children;
 
@@ -31,7 +31,7 @@ test('rejected tags become text nodes in the AST', function () {
 
 test('nested rejected elements are sanitized recursively', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlPolicy->allowedTags = ['b' => Texy\Texy::ALL];
+	$texy->htmlPolicy->allowedTags = ['b' => Texy\Texy::All];
 	$doc = $texy->parse('<u><i>x</i></u> a <u><b>y</b></u>');
 	$children = $doc->content->children[0]->content->children;
 

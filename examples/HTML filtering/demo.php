@@ -68,7 +68,7 @@ doIt($texy);
 // WARNING: Only use this if you trust the input completely!
 // ============================================================
 echo '<h2>Texy::ALL - enables all tags</h2>';
-$texy->htmlPolicy->allowedTags = $texy::ALL;
+$texy->htmlPolicy->allowedTags = $texy::All;
 doIt($texy);
 
 
@@ -97,7 +97,7 @@ doIt($texy);
 // Tags in input will be escaped and shown as text.
 // ============================================================
 echo '<h2>Texy::NONE - disables all tags</h2>';
-$texy->htmlPolicy->allowedTags = $texy::NONE;
+$texy->htmlPolicy->allowedTags = $texy::None;
 doIt($texy);
 
 
