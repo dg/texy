@@ -79,20 +79,20 @@ class Texy
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>
 	 */
 	private array $linePatterns = [];
 
-	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}> */
+	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}> */
 	private array $_linePatterns;
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
-	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}> */
+	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}> */
 	private array $_blockPatterns;
 
 	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
@@ -152,7 +152,7 @@ class Texy
 	}
 
 
-	/** @param  \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode  $handler */
+	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode */
 	final public function registerLinePattern(
 		\Closure $handler,
 		#[Language('RegExp')]
@@ -171,7 +171,7 @@ class Texy
 	}
 
 
-	/** @param  \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode  $handler */
+	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode */
 	final public function registerBlockPattern(
 		\Closure $handler,
 		#[Language('RegExp')]
@@ -305,9 +305,9 @@ class Texy
 	/**
 	 * Converts DOM structure to pure text.
 	 */
-	public function toText(): string
+	public function toText(): never
 	{
-		throw new \LogicException('Not implemented');
+		throw new \LogicException('Not implemented yet.');
 	}
 
 
@@ -367,7 +367,7 @@ class Texy
 		);
 		return new BlockParser(
 			$this->_blockPatterns,
-			fn(ParseContext $context, string $text) => $this->paragraphModule->parseText($context, $text),
+			fn(ParseContext $context, string $text, int $offset) => $this->paragraphModule->parseText($context, $text, $offset),
 		);
 	}
 

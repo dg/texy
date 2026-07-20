@@ -19,6 +19,7 @@ use Texy\Nodes\LinkNode;
 use Texy\NodeTraverser;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Range;
 use Texy\Regexp;
 use Texy\Syntax;
 use function count, strlen;
@@ -83,11 +84,11 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Parses [*image*]: urls .(title)[class]{style}
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, string, ?string}  $matches
+	 * @param  array{int, int, int, ?int}  $offsets
 	 */
-	public function parseDefinition(ParseContext $context, array $matches): ImageDefinitionNode
+	public function parseDefinition(ParseContext $context, array $matches, array $offsets): ImageDefinitionNode
 	{
-		/** @var array{string, string, string, ?string} $matches */
 		[, $mRef, $mURLs, $mMod] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
 		$modifier = Modifier::parse($mMod);
@@ -98,35 +99,38 @@ final class ImageModule extends Texy\Module
 			$parsed['width'],
 			$parsed['height'],
 			$modifier,
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 
 
 	/**
 	 * Parses [* small.jpg 80x13 .(alternative text)[class]{style}>]:LINK
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, ?string, string, ?string}  $matches
+	 * @param  array{int, int, ?int, int, ?int}  $offsets
 	 */
-	public function parseImage(ParseContext $context, array $matches): ImageNode|LinkNode
+	public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode|LinkNode
 	{
-		/** @var array{string, string, ?string, string, ?string} $matches */
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
 		$modifier = Modifier::parse($mMod . $mAlign);
+		$range = new Range($offsets[0], strlen($matches[0]));
 
 		$imageNode = new ImageNode(
 			$parsed['url'],
 			$parsed['width'],
 			$parsed['height'],
 			$modifier,
+			$range,
 		);
 
 		return $mLink
-			? $this->wrapInLink($imageNode, $mLink)
+			? $this->wrapInLink($imageNode, $mLink, $range)
 			: $imageNode;
 	}
 
 
-	private function wrapInLink(ImageNode $imageNode, string $mLink): LinkNode
+	private function wrapInLink(ImageNode $imageNode, string $mLink, Range $range): LinkNode
 	{
 		if ($mLink === ':') {
 			// Link to the image itself
@@ -144,6 +148,7 @@ final class ImageModule extends Texy\Module
 		return new LinkNode(
 			url: $linkUrl,
 			content: new ContentNode([$imageNode]),
+			range: $range,
 			isImageLink: $isImageLink,
 		);
 	}

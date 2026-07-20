@@ -180,7 +180,7 @@ final class Schema
 
 	/**
 	 * Phrasing elements; replaced elements have value 1, others 0.
-	 * @return array<string, int>
+	 * @return array<string, 0|1>
 	 */
 	public static function inlineElements(): array
 	{

@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy\Modifier;
+use Texy\Range;
 
 
 /**
@@ -20,6 +21,7 @@ class PhraseNode extends InlineNode
 		public ContentNode $content,
 		public string $type,
 		public ?Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

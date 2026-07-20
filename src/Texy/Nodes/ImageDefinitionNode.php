@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy\Modifier;
+use Texy\Range;
 
 
 /**
@@ -22,6 +23,7 @@ class ImageDefinitionNode extends BlockNode
 		public ?int $width = null,
 		public ?int $height = null,
 		public ?Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 }

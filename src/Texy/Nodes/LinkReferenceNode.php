@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Link reference.
@@ -16,6 +18,7 @@ class LinkReferenceNode extends InlineNode
 {
 	public function __construct(
 		public string $identifier,
+		public ?Range $range = null,
 	) {
 	}
 }

@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -21,6 +22,7 @@ class TableCellNode extends BlockNode
 		public int $rowspan = 1,
 		public bool $header = false,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -22,6 +23,7 @@ class ParagraphNode extends BlockNode
 	public function __construct(
 		public ContentNode $content = new ContentNode,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -21,6 +22,7 @@ class TableNode extends BlockNode
 		/** @var TableRowNode[] */
 		public array $rows = [],
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 		(function (TableRowNode ...$rows) {})(...$rows);
 	}

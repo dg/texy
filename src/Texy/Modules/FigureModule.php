@@ -15,6 +15,7 @@ use Texy\Nodes\ImageNode;
 use Texy\Nodes\LinkNode;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Range;
 use Texy\Syntax;
 use function strlen;
 
@@ -59,11 +60,11 @@ final class FigureModule extends Texy\Module
 
 	/**
 	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, ?string, string, ?string, ?string, ?string}  $matches
+	 * @param  array{int, int, ?int, int, ?int, ?int, ?int}  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): ?FigureNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?FigureNode
 	{
-		/** @var array{string, string, ?string, string, ?string, ?string, ?string} $matches */
 		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
 
 		$texy = $this->texy;
@@ -76,12 +77,14 @@ final class FigureModule extends Texy\Module
 			return null;
 		}
 
-		// Create ImageNode
+		// Create ImageNode; its source span is "[* ... <alignment>]"
+		$imageEnd = $offsets[3] + strlen($mAlign) + 1; // 1 = "]"
 		$imageNode = new ImageNode(
 			$parsed['url'],
 			$parsed['width'],
 			$parsed['height'],
 			$modifier,
+			new Range($offsets[0], $imageEnd - $offsets[0]),
 		);
 
 		// If figure has link, wrap image in LinkNode
@@ -103,6 +106,7 @@ final class FigureModule extends Texy\Module
 			$image = new LinkNode(
 				url: $linkUrl,
 				content: new ContentNode([$imageNode]),
+				range: new Range($offsets[0], $offsets[4] + strlen($mLink) - $offsets[0]),
 				isImageLink: $isImageLink,
 			);
 		}
@@ -111,13 +115,15 @@ final class FigureModule extends Texy\Module
 		$caption = null;
 		$mContent = trim($mContent ?? '');
 		if ($mContent !== '') {
-			$caption = $context->parseInline($mContent);
+			$captionOffset = $offsets[5] ?? $offsets[0];
+			$caption = $context->parseInline($mContent, $captionOffset);
 		}
 
 		return new FigureNode(
 			$image,
 			$caption,
 			Modifier::parse($mMod),
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 }

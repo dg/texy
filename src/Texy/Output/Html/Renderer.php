@@ -522,8 +522,11 @@ final class Renderer
 		}
 
 		if ($style = $node->type->getStyleType()) {
-			$el->attrs['style'] = (array) ($el->attrs['style'] ?? []);
-			$el->attrs['style']['list-style-type'] = $style;
+			// modifier may already have set styles, so merge instead of overwriting
+			$styles = $el->attrs['style'] ?? [];
+			$styles = is_array($styles) ? $styles : [];
+			$styles['list-style-type'] = $style;
+			$el->attrs['style'] = $styles;
 		}
 
 		foreach ($node->items as $item) {
@@ -962,7 +965,7 @@ final class Renderer
 
 	/**
 	 * Analyze paragraph content to determine what types of nodes it contains.
-	 * @param  array<Nodes\BlockNode|Nodes\InlineNode>  $content
+	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $content
 	 * @return array{hasText: bool, hasReplaced: bool, hasMarkup: bool, hasOther: bool}
 	 */
 	public function analyzeContent(array $content): array
@@ -990,7 +993,7 @@ final class Renderer
 				match ($inlineType) {
 					1 => $hasReplaced = true,    // replaced element (img, br, input, ...)
 					0 => $hasMarkup = true,      // inline markup (span, a, strong, ...)
-					default => $hasMarkup = true,   // block element or unknown
+					null => $hasMarkup = true,   // block element
 				};
 
 			} elseif ($node instanceof Nodes\LinkNode) {
@@ -1012,7 +1015,7 @@ final class Renderer
 
 	/**
 	 * Wrap children in a null element (no tag wrapper).
-	 * @param array<Element|string> $children
+	 * @param list<Element|string> $children
 	 */
 	public function wrapChildren(array $children): Element
 	{
@@ -1024,7 +1027,7 @@ final class Renderer
 
 	/**
 	 * Create paragraph for non-text content (images only).
-	 * @param array<Element|string> $children
+	 * @param list<Element|string> $children
 	 */
 	public function createNontextParagraph(array $children, ?Modifier $modifier): Element
 	{

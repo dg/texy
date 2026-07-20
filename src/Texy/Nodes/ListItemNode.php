@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -19,6 +20,7 @@ class ListItemNode extends BlockNode
 		public ContentNode $content = new ContentNode,
 		public bool $term = false,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

@@ -18,7 +18,6 @@ use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
-use function str_contains, strlen;
 
 
 /**
@@ -36,21 +35,26 @@ final class ParagraphModule extends Texy\Module
 	 * Parse text into paragraphs (split by blank lines).
 	 * @return array<ParagraphNode>
 	 */
-	public function parseText(ParseContext $context, string $text): array
+	public function parseText(ParseContext $context, string $text, int $baseOffset = 0): array
 	{
 		$parts = Regexp::split($text, '~(\n{2,})~', captureOffset: true, skipEmpty: true);
 		$res = [];
-		foreach ($parts ?: [] as [$part]) {
+		foreach ($parts as [$part, $partOffset]) {
+			$partOffset += $baseOffset;
 			$trimmed = trim($part);
 			if ($trimmed === '') {
 				continue;
 			}
 
+			// Calculate offset after leading whitespace trim
+			$leadingTrim = strlen($part) - strlen(ltrim($part));
+			$contentOffset = $partOffset + $leadingTrim;
+
 			// Text starting with known block element - parse without soft line breaks
 			if ($this->startsWithBlockElement($trimmed)) {
-				$node = $this->parseBlockHtml($context, $trimmed);
+				$node = $this->parseBlockHtml($context, $trimmed, $contentOffset);
 			} else {
-				$node = $this->parseParagraph($context, $trimmed);
+				$node = $this->parseParagraph($context, $trimmed, $contentOffset);
 				// Check if parsed content contains block-level HTML tags
 				if ($this->containsBlockHtmlTag($node->content->children)) {
 					$node->blockHtml = true;
@@ -84,9 +88,9 @@ final class ParagraphModule extends Texy\Module
 	/**
 	 * Parse text that starts with block HTML element (no soft line break processing).
 	 */
-	private function parseBlockHtml(ParseContext $context, string $text): ParagraphNode
+	private function parseBlockHtml(ParseContext $context, string $text, int $baseOffset = 0): ParagraphNode
 	{
-		$content = $context->parseInline($text);
+		$content = $context->parseInline($text, $baseOffset);
 		$node = new ParagraphNode($content);
 		$node->blockHtml = true;
 		return $node;
@@ -131,7 +135,7 @@ final class ParagraphModule extends Texy\Module
 	}
 
 
-	private function parseParagraph(ParseContext $context, string $text): ParagraphNode
+	private function parseParagraph(ParseContext $context, string $text, int $baseOffset = 0): ParagraphNode
 	{
 		// Extract modifier from paragraph
 		$modifier = null;
@@ -144,7 +148,7 @@ final class ParagraphModule extends Texy\Module
 			}
 		}
 
-		// Process line breaks
+		// Process line breaks - note: this changes text length, positions become approximate
 		if ($this->texy->mergeLines) {
 			$text = Regexp::replace($text, '~\n\ +(?=\S)~', "\r");
 			$text = Regexp::replace($text, '~\n~', ' ');
@@ -152,7 +156,7 @@ final class ParagraphModule extends Texy\Module
 			$text = Regexp::replace($text, '~\n~', "\r");
 		}
 
-		$content = $context->parseInline($text);
+		$content = $context->parseInline($text, $baseOffset);
 
 		return new ParagraphNode(
 			new ContentNode($this->expandLineBreaks($content->children)),
@@ -163,8 +167,8 @@ final class ParagraphModule extends Texy\Module
 
 	/**
 	 * Expand \r markers in TextNode content into LineBreakNode.
-	 * @param  array<Nodes\BlockNode|Nodes\InlineNode>  $nodes
-	 * @return array<Nodes\BlockNode|Nodes\InlineNode>
+	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $nodes
+	 * @return array<Nodes\InlineNode|Nodes\BlockNode>
 	 */
 	private function expandLineBreaks(array $nodes): array
 	{
@@ -176,7 +180,7 @@ final class ParagraphModule extends Texy\Module
 						$result[] = new LineBreakNode;
 					}
 					if ($part !== '') {
-						$result[] = new TextNode($part);
+						$result[] = new TextNode($part, $node->range);
 					}
 				}
 			} elseif ($node instanceof Nodes\PhraseNode) {

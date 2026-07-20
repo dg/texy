@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -28,6 +29,7 @@ class CodeBlockNode extends BlockNode
 		public string $code,
 		public ?string $language = null,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 }

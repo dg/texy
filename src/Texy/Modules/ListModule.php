@@ -15,6 +15,7 @@ use Texy\Nodes\ListNode;
 use Texy\Nodes\ListType;
 use Texy\ParseContext;
 use Texy\Patterns;
+use Texy\Range;
 use Texy\Regexp;
 use Texy\Syntax;
 use function count, implode, ord, strlen;
@@ -88,11 +89,11 @@ final class ListModule extends Texy\Module
 
 	/**
 	 * Parses list.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, ?string, string}  $matches
+	 * @param  array{int, ?int, int}  $offsets
 	 */
-	public function parseList(ParseContext $context, array $matches): ?ListNode
+	public function parseList(ParseContext $context, array $matches, array $offsets): ?ListNode
 	{
-		/** @var array{string, ?string, string} $matches */
 		[, $mMod, $mBullet] = $matches;
 
 		$bullet = null;
@@ -138,17 +139,18 @@ final class ListModule extends Texy\Module
 			$listType,
 			$start,
 			Modifier::parse($mMod),
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 
 
 	/**
 	 * Parses definition list.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, ?string, string, ?string, string, string}  $matches
+	 * @param  array{int, ?int, int, ?int, int, int}  $offsets
 	 */
-	public function parseDefList(ParseContext $context, array $matches): ?DefinitionListNode
+	public function parseDefList(ParseContext $context, array $matches, array $offsets): ?DefinitionListNode
 	{
-		/** @var array{string, ?string, string, ?string, string, string} $matches */
 		[, $mMod, , , , $mBullet] = $matches;
 
 		$bullet = null;
@@ -181,11 +183,14 @@ final class ListModule extends Texy\Module
 			}
 
 			$termMatches = null;
-			if ($context->getBlockParser()->next($patternTerm, $termMatches)) {
+			$termOffsets = null;
+			if ($context->getBlockParser()->next($patternTerm, $termMatches, $termOffsets)) {
 				/** @var array{string, string, ?string} $termMatches */
 				[, $mContent, $mTermMod] = $termMatches;
 				$termMod = Modifier::parse($mTermMod);
-				$termContent = $context->parseInline($mContent);
+				// group 1 always participates in a successful match, but next() cannot type that
+				$contentOffset = $termOffsets[1] ?? throw new \LogicException('Match without group 1.');
+				$termContent = $context->parseInline($mContent, $contentOffset);
 				$items[] = new ListItemNode($termContent, true, $termMod);
 				continue;
 			}
@@ -196,6 +201,7 @@ final class ListModule extends Texy\Module
 		return new DefinitionListNode(
 			$items,
 			Modifier::parse($mMod),
+			new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 
@@ -216,22 +222,30 @@ final class ListModule extends Texy\Module
 		$~mAUx';
 
 		$matches = null;
-		if (!$context->getBlockParser()->next($patternItem, $matches)) {
+		$offsets = null;
+		if (!$context->getBlockParser()->next($patternItem, $matches, $offsets)) {
 			return null;
 		}
 
 		/** @var array{string, string, ?string, ?string} $matches */
 		[, $mIndent, $mContent, $mMod] = $matches;
 
+		// Assemble content and map local line starts to absolute source offsets
+		$map = [];
+		$content = ' ' . ($mContent ?? '');
+		if ($mContent !== null) {
+			// content matched, so group 2 participated and carries an offset
+			$map[1] = $offsets[2] ?? throw new \LogicException('Content without group 2.'); // 1 = the leading space
+		}
+
 		// next lines
 		$spaces = '';
-		$content = ' ' . ($mContent ?? '');
 		while ($context->getBlockParser()->next('~^
 			(\n*)
 			' . Regexp::quote($mIndent) . '
 			([ \t]{1,' . $spaces . '})
 			(.*)                                     # content (3)
-		$~Amx', $matches)) {
+		$~Amx', $matches, $offsets)) {
 			/** @var array{string, string, string, string} $matches */
 			[, $mBlank, $mSpaces, $mContent] = $matches;
 
@@ -239,11 +253,21 @@ final class ListModule extends Texy\Module
 				$spaces = strlen($mSpaces);
 			}
 
+			if ($mContent !== '' && $offsets[3] !== null) {
+				$map[strlen($content) + 1 + strlen($mBlank)] = $offsets[3]; // 1 = "\n"
+			}
+
 			$content .= "\n" . $mBlank . $mContent;
 		}
 
 		// Parse content as blocks
 		$parsed = $context->parseBlock(trim($content));
+
+		// Fix positions in parsed content using offset mapping
+		if ($map) {
+			$skipped = strlen($content) - strlen(ltrim($content));
+			(new Texy\OffsetMap($map, $skipped))->applyTo($parsed);
+		}
 
 		return new ListItemNode(
 			$parsed,

@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * URL.
@@ -16,6 +18,7 @@ class UrlNode extends InlineNode
 {
 	public function __construct(
 		public string $url,
+		public ?Range $range = null,
 	) {
 	}
 }

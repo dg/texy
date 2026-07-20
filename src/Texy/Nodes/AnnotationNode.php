@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Annotation.
@@ -17,6 +19,7 @@ class AnnotationNode extends InlineNode
 	public function __construct(
 		public string $text,
 		public string $annotation,
+		public ?Range $range = null,
 	) {
 	}
 }

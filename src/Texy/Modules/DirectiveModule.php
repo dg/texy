@@ -10,7 +10,9 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\DirectiveNode;
 use Texy\ParseContext;
+use Texy\Range;
 use Texy\Syntax;
+use function strlen, trim;
 
 
 /**
@@ -27,7 +29,7 @@ final class DirectiveModule extends Texy\Module
 	public function beforeParse(string &$text): void
 	{
 		$this->texy->registerLinePattern(
-			fn(ParseContext $context, array $matches) => trim((string) $matches[1]) === '' ? null : new DirectiveNode((string) $matches[1]),
+			$this->parse(...),
 			'~
 				\{\{
 				((?:
@@ -38,5 +40,18 @@ final class DirectiveModule extends Texy\Module
 			~Ux',
 			Syntax::Directive,
 		);
+	}
+
+
+	/**
+	 * Parses {{macro}}.
+	 * @param  array{string, string}  $matches
+	 * @param  array{int, int}  $offsets
+	 */
+	public function parse(ParseContext $context, array $matches, array $offsets): ?DirectiveNode
+	{
+		return trim($matches[1]) === ''
+			? null
+			: new DirectiveNode($matches[1], new Range($offsets[0], strlen($matches[0])));
 	}
 }

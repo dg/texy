@@ -7,6 +7,7 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
 use Texy\Regexp;
 
 
@@ -18,6 +19,7 @@ class DirectiveNode extends InlineNode
 {
 	public function __construct(
 		public string $text,
+		public ?Range $range = null,
 	) {
 	}
 

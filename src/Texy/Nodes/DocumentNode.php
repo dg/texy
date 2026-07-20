@@ -7,6 +7,8 @@
 
 namespace Texy\Nodes;
 
+use Texy\Range;
+
 
 /**
  * Root document node.
@@ -15,6 +17,7 @@ class DocumentNode extends BlockNode
 {
 	public function __construct(
 		public ContentNode $content = new ContentNode,
+		public ?Range $range = null,
 	) {
 	}
 

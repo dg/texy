@@ -13,6 +13,7 @@ use Texy\BlockParser;
 use Texy\InlineParser;
 use Texy\Nodes\BlockNode;
 use Texy\ParseContext;
+use Texy\Range;
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -56,7 +57,7 @@ class GapNode extends BlockNode
  */
 function createBlockHandler(string $type): Closure
 {
-	return fn(ParseContext $context, array $matches, string $name): TestBlockNode => new TestBlockNode($type, $matches[0]);
+	return fn(ParseContext $context, array $matches, array $offsets, string $name): TestBlockNode => new TestBlockNode($type, $matches[0]);
 }
 
 
@@ -65,7 +66,7 @@ function createBlockHandler(string $type): Closure
  */
 function createGapHandler(): Closure
 {
-	return fn(ParseContext $context, string $text) => $text !== '' ? [new GapNode($text)] : [];
+	return fn(ParseContext $context, string $text, int $offset) => $text !== '' ? [new GapNode($text)] : [];
 }
 
 
@@ -405,7 +406,7 @@ test('handler receives correct pattern name', function () {
 	parseWithBlockParser([
 		'my/custom-pattern' => [
 			'pattern' => '~^test~m',
-			'handler' => function (ParseContext $context, $matches, $name) use (&$receivedName) {
+			'handler' => function (ParseContext $context, $matches, $offsets, $name) use (&$receivedName) {
 				$receivedName = $name;
 				return new TestBlockNode('test');
 			},
@@ -413,4 +414,129 @@ test('handler receives correct pattern name', function () {
 	], "test\n");
 
 	Assert::same('my/custom-pattern', $receivedName);
+});
+
+
+test('handler receives offsets', function () {
+	$receivedOffsets = null;
+
+	parseWithBlockParser([
+		'test' => [
+			'pattern' => '~^(prefix)(.+)~m',
+			'handler' => function (ParseContext $context, $matches, $offsets) use (&$receivedOffsets) {
+				$receivedOffsets = $offsets;
+				return new TestBlockNode('test');
+			},
+		],
+	], "prefixcontent\n");
+
+	Assert::same(0, $receivedOffsets[0]); // whole match
+	Assert::same(0, $receivedOffsets[1]); // "prefix"
+	Assert::same(6, $receivedOffsets[2]); // "content"
+});
+
+
+// =============================================================================
+// H. Range tracking
+// =============================================================================
+
+
+/**
+ * Helper to create a block handler that sets Range on the node.
+ */
+function createBlockHandlerWithRange(string $type): Closure
+{
+	return function (ParseContext $context, array $matches, array $offsets) use ($type): TestBlockNode {
+		$node = new TestBlockNode($type, $matches[0]);
+		$node->range = new Range($offsets[0], strlen($matches[0]));
+		return $node;
+	};
+}
+
+
+test('block node position is correct', function () {
+	$nodes = parseWithBlockParser([
+		'heading' => [
+			'pattern' => '~^\#[ ](.+)~m',
+			'handler' => createBlockHandlerWithRange('heading'),
+		],
+	], "# Title\n");
+
+	Assert::same(0, $nodes[0]->range->offset);
+	Assert::same(7, $nodes[0]->range->length); // "# Title" = 7 bytes
+});
+
+
+test('sequential blocks have correct positions', function () {
+	$nodes = parseWithBlockParser([
+		'heading' => [
+			'pattern' => '~^\#[ ](.+)~m',
+			'handler' => createBlockHandlerWithRange('heading'),
+		],
+	], "# One\n# Two\n");
+
+	Assert::same(0, $nodes[0]->range->offset);
+	Assert::same(5, $nodes[0]->range->length); // "# One" = 5 bytes
+
+	Assert::same(6, $nodes[1]->range->offset); // after "# One\n"
+	Assert::same(5, $nodes[1]->range->length); // "# Two" = 5 bytes
+});
+
+
+test('block position after gap text', function () {
+	$nodes = parseWithBlockParser([
+		'heading' => [
+			'pattern' => '~^\#[ ](.+)~m',
+			'handler' => createBlockHandlerWithRange('heading'),
+		],
+	], "text\n# Title\n");
+
+	// First node is GapNode (no position)
+	Assert::type(GapNode::class, $nodes[0]);
+
+	// Second node is heading starting at offset 5 (after "text\n")
+	Assert::same(5, $nodes[1]->range->offset);
+	Assert::same(7, $nodes[1]->range->length);
+});
+
+
+test('multi-line block position with next()', function () {
+	$nodes = parseWithBlockParser([
+		'list' => [
+			'pattern' => '~^-[ ](.+)~m',
+			'handler' => function (ParseContext $context, array $matches, array $offsets) {
+				$startOffset = $offsets[0];
+				$totalLength = strlen($matches[0]);
+
+				while ($context->getBlockParser()->next('~^-[ ](.+)~', $m)) {
+					$totalLength += 1 + strlen($m[0]); // +1 for newline
+				}
+
+				$node = new TestBlockNode('list', 'items');
+				$node->range = new Range($startOffset, $totalLength);
+				return $node;
+			},
+		],
+	], "- one\n- two\n- three\n");
+
+	Assert::same(0, $nodes[0]->range->offset);
+	Assert::same(19, $nodes[0]->range->length); // "- one\n- two\n- three" = 19 bytes
+});
+
+
+test('UTF-8 positions are byte-based', function () {
+	$nodes = parseWithBlockParser([
+		'heading' => [
+			'pattern' => '~^\#[ ](.+)~m',
+			'handler' => createBlockHandlerWithRange('heading'),
+		],
+	], "# 日本語\n# Two\n");
+
+	// "# 日本語" = 2 + 9 bytes (each kanji is 3 bytes)
+	Assert::same(0, $nodes[0]->range->offset);
+	Assert::same(11, $nodes[0]->range->length);
+
+	// "# Two" starts after "# 日本語\n" = 12 bytes
+	Assert::same(12, $nodes[1]->range->offset);
+	Assert::same(5, $nodes[1]->range->length);
 });

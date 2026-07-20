@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -21,6 +22,7 @@ class DefinitionListNode extends BlockNode
 		/** @var ListItemNode[] */
 		public array $items = [],
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 		(function (ListItemNode ...$items) {})(...$items);
 	}

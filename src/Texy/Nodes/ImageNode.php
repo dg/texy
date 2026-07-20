@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy\Modifier;
+use Texy\Range;
 
 
 /**
@@ -21,6 +22,7 @@ class ImageNode extends InlineNode
 		public ?int $width = null,
 		public ?int $height = null,
 		public ?Modifier $modifier = null,
+		public ?Range $range = null,
 		/** Original reference name for images written as [*ref*]; survives resolution */
 		public ?string $ref = null,
 	) {

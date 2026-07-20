@@ -10,6 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\BlockQuoteNode;
 use Texy\ParseContext;
+use Texy\Range;
 use Texy\Syntax;
 use function max, strlen;
 
@@ -42,33 +43,50 @@ final class BlockQuoteModule extends Texy\Module
 
 	/**
 	 * Parses blockquote.
-	 * @param  array<?string>  $matches
+	 * @param  array{string, ?string, string, string}  $matches
+	 * @param  array{int, ?int, int, int}  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): ?BlockQuoteNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?BlockQuoteNode
 	{
-		/** @var array{string, ?string, string, string} $matches */
 		[, $mMod, $mPrefix, $mContent] = $matches;
 
-		// Collect lines
-		$lines = [$mContent];
+		$startOffset = $offsets[0];
+		$totalLength = strlen($matches[0]);
+
+		// Collect lines with their absolute offsets
+		$lines = [['content' => $mContent, 'offset' => $offsets[3]]];
 		$spaces = max(1, strlen($mPrefix));
 
-		while ($context->getBlockParser()->next("~^>(?: | ([ \\t]{1,$spaces} | :) (.*))$~mAx", $matches)) {
-			$lines[] = $matches[2] ?? '';
+		while ($context->getBlockParser()->next("~^>(?: | ([ \\t]{1,$spaces} | :) (.*))$~mAx", $nextMatches, $nextOffsets)) {
+			// group 0 always participates in a successful match, but next() cannot type that
+			$line = $nextMatches[0] ?? throw new \LogicException('Match without group 0.');
+			$lineOffset = $nextOffsets[0] ?? throw new \LogicException('Match without group 0.');
+
+			$totalLength += strlen($line) + 1; // +1 for \n
+
+			// Track where this line's content starts in absolute terms
+			$lineContentOffset = $nextOffsets[2] ?? $lineOffset + 2; // after "> "
+			$lines[] = ['content' => $nextMatches[2] ?? '', 'offset' => $lineContentOffset];
 		}
 
-		// Join content for parsing
-		$content = implode("\n", $lines);
+		// Join content for parsing, but track line boundaries
+		$content = implode("\n", array_column($lines, 'content'));
+		$trimmed = trim($content);
 
 		// Parse nested content
-		$parsed = $context->parseBlock(trim($content));
+		$parsed = $context->parseBlock($trimmed);
 		if (!$parsed->children) {
 			return null;
 		}
 
+		// Fix positions in parsed content using offset map
+		Texy\OffsetMap::fromLines($lines, strlen($content) - strlen(ltrim($content)))
+			->applyTo($parsed);
+
 		return new BlockQuoteNode(
 			$parsed,
 			Texy\Modifier::parse($mMod),
+			new Range($startOffset, $totalLength),
 		);
 	}
 }

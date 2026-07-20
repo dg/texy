@@ -8,6 +8,7 @@
 namespace Texy\Nodes;
 
 use Texy;
+use Texy\Range;
 
 
 /**
@@ -19,6 +20,7 @@ class HorizontalRuleNode extends BlockNode
 	public function __construct(
 		public string $type,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 }
