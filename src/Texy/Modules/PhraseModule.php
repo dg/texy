@@ -466,7 +466,7 @@ final class PhraseModule extends Texy\Module
 	{
 		[, $mContent] = $matches;
 		$mContent = str_replace('-', "\u{2212}", $mContent); // &minus;
-		$content = [new TextNode($mContent, new Range($offsets[1], strlen($matches[1])))];
+		$content = [new TextNode(Texy\Helpers::decodeEntities($mContent), new Range($offsets[1], strlen($matches[1])))];
 		return new PhraseNode(
 			new ContentNode($content),
 			$phrase,
@@ -488,7 +488,7 @@ final class PhraseModule extends Texy\Module
 
 		$mod = Modifier::parse($mMod) ?? new Modifier;
 		$mod->title = trim(Texy\Helpers::unescapeHtml($mTitle));
-		$content = [new TextNode(trim($mContent), new Range($contentOffset, strlen(trim($mContent))))];
+		$content = [new TextNode(Texy\Helpers::decodeEntities(trim($mContent)), new Range($contentOffset, strlen(trim($mContent))))];
 
 		return new PhraseNode(new ContentNode($content), $phrase, $mod, new Range($offsets[0], strlen($matches[0])));
 	}

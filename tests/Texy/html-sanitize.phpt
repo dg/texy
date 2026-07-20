@@ -55,17 +55,14 @@ test('rejected pair is escaped consistently in output', function () {
 });
 
 
-test('escaped tag text participates in typography like the string pipeline', function () {
-	$run = function (bool $ast): string {
-		$texy = new Texy\Texy;
-		Texy\Configurator::safeMode($texy);
-		$texy->astTypography = $ast;
-		$texy->htmlOutput->lineWrap = 0;
-		return $texy->process('text <font size="3">x</font> konec');
-	};
-
-	Assert::same($run(false), $run(true));
-	Assert::contains('&lt;font size=„3“&gt;', $run(true));
+test('escaped tag text participates in typography', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::safeMode($texy);
+	$texy->htmlOutput->lineWrap = 0;
+	Assert::contains(
+		'&lt;font size=„3“&gt;',
+		$texy->process('text <font size="3">x</font> konec'),
+	);
 });
 
 

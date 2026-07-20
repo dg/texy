@@ -12,10 +12,8 @@ use Texy\Node;
 use Texy\Nodes;
 use Texy\NodeTraverser;
 use Texy\Output;
-use Texy\Regexp;
 use Texy\Syntax;
-use function htmlspecialchars, str_contains, strlen, strpos, strtolower, substr;
-use const ENT_NOQUOTES;
+use function strlen;
 
 
 /**
@@ -129,7 +127,7 @@ final class TextRunPass
 			$this->transformTitle($node);
 
 			if ($node instanceof Nodes\TextNode) {
-				$pieces[] = [self::decode($node->text), $node];
+				$pieces[] = [$node->text, $node];
 
 			} elseif ($node instanceof Nodes\PhraseNode) {
 				if ($node->type === Syntax::Code) {
@@ -153,7 +151,7 @@ final class TextRunPass
 
 			} elseif ($node instanceof Nodes\AnnotationNode) {
 				$pieces[] = [self::Markup, null];
-				$pieces[] = [self::decode($node->text), $node];
+				$pieces[] = [$node->text, $node];
 				$pieces[] = [self::Markup, null];
 
 			} elseif ($node instanceof Nodes\HtmlTagNode) {
@@ -275,11 +273,7 @@ final class TextRunPass
 		// phase 2: apply
 		foreach ($writes as [$node, $text]) {
 			assert($node instanceof Nodes\TextNode || $node instanceof Nodes\RawTextNode || $node instanceof Nodes\AnnotationNode);
-			// TextNode/AnnotationNode render raw and go through the entity dance,
-			// so the decoded image must be re-encoded on the way back
-			$node->text = $node instanceof Nodes\RawTextNode
-				? $text
-				: htmlspecialchars($text, ENT_NOQUOTES, 'UTF-8');
+			$node->text = $text;
 		}
 	}
 
@@ -291,22 +285,5 @@ final class TextRunPass
 	private static function textualRun(string $visible): string
 	{
 		return str_repeat(self::Textual, min(max(mb_strlen($visible), 1), 8));
-	}
-
-
-	/**
-	 * The legacy string pipeline ran typography after HTML entities were
-	 * decoded; the image must match, otherwise entities count as characters.
-	 * Entities may smuggle in control characters - strip them (input
-	 * normalization does the same for raw input).
-	 */
-	private static function decode(string $s): string
-	{
-		if (!str_contains($s, '&')) {
-			return $s;
-		}
-
-		$s = Helpers::unescapeHtml($s);
-		return Regexp::replace($s, '~[\x00-\x08\x0B-\x1F]+~', '');
 	}
 }

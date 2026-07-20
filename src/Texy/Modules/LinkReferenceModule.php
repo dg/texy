@@ -86,7 +86,7 @@ final class LinkReferenceModule extends Texy\Module
 		$range = new Range($offsets[0], strlen($matches[0]));
 		return new Nodes\LinkNode(
 			url: '[' . $mRef . ']', // bracket form is resolved against definitions like "text":[ref]
-			content: new Nodes\ContentNode([new Nodes\TextNode($mRef, $range)]),
+			content: new Nodes\ContentNode([new Nodes\TextNode(Helpers::decodeEntities($mRef), $range)]),
 			range: $range,
 			ref: $mRef,
 		);

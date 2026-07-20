@@ -44,12 +44,6 @@ class Texy
 
 	public bool $removeSoftHyphens = true;
 
-	/**
-	 * Apply typography and hyphenation as an AST transform (default) instead
-	 * of the legacy HTML string post-processing (false).
-	 */
-	public bool $astTypography = true;
-
 	// Modules with runtime state (kept as-is)
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\ImageModule $imageModule;
@@ -65,9 +59,6 @@ class Texy
 	public readonly HtmlPolicy $htmlPolicy;
 
 	public Output\Html\Config $htmlOutput;
-
-	/** @var array<string, \Closure(string): string> @internal */
-	public array $postHandlers = [];
 
 	/** @var Module[] */
 	private array $modules = [];
@@ -171,18 +162,6 @@ class Texy
 	}
 
 
-	/** @param  \Closure(string): string  $handler */
-	final public function registerPostLine(\Closure $handler, string $name): void
-	{
-		if (!isset($this->allowed[$name])) {
-			$this->allowed[$name] = true;
-		}
-
-		$this->postHandlers[$name] = $handler;
-		$this->engine->registerPostLine($handler, $name);
-	}
-
-
 	/**
 	 * Converts Texy text to HTML.
 	 */
@@ -221,11 +200,7 @@ class Texy
 		$document = $this->engine->parse($text, $this->allowed, $singleLine);
 
 		$this->invokeHandlers('afterParse', [$document]);
-
-		if ($this->astTypography) {
-			$this->applyAstTypography($document);
-		}
-
+		$this->applyAstTypography($document);
 		return $document;
 	}
 

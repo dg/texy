@@ -8,12 +8,13 @@
 namespace Texy;
 
 use Texy\Output\Html\Schema;
-use function array_flip, is_array, is_string, str_replace, trim;
+use function array_flip, is_array, is_string, trim;
 
 
 /**
  * Security policy for HTML in the document: which tags, classes and inline
- * styles may appear, plus validation of passthrough HTML tags.
+ * styles may appear, plus validation and reconstruction of passthrough
+ * HTML tags.
  */
 final class HtmlPolicy
 {
@@ -125,16 +126,6 @@ final class HtmlPolicy
 		}
 
 		return $tag . '>';
-	}
-
-
-	/**
-	 * Escape tag as text (when validation fails).
-	 * Only escapes < and > so quotes remain for typography processing.
-	 */
-	public function escapeHtmlTag(Nodes\HtmlTagNode $node): string
-	{
-		return str_replace(['<', '>'], ['&lt;', '&gt;'], $this->reconstructTag($node));
 	}
 
 

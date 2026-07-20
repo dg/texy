@@ -41,6 +41,22 @@ final class Helpers
 
 
 	/**
+	 * Decodes HTML entities into display text; strips control characters
+	 * they may smuggle in (input normalization does the same for raw input).
+	 * \x0D survives - it is the internal hard line break marker.
+	 */
+	public static function decodeEntities(string $s): string
+	{
+		if (!str_contains($s, '&')) {
+			return $s;
+		}
+
+		$s = self::unescapeHtml($s);
+		return Regexp::replace($s, '~[\x00-\x08\x0B\x0C\x0E-\x1F]+~', '');
+	}
+
+
+	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
 	 * which are ignored by the well-forming engine
 	 */
