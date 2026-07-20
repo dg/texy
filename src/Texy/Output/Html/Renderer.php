@@ -92,6 +92,7 @@ final class Renderer extends NodeRenderer
 
 			// HTML passthrough nodes
 			Nodes\HtmlTagNode::class => fn(Nodes\HtmlTagNode $n, self $g) => $g->renderHtmlTag($n),
+			Nodes\HtmlElementNode::class => fn(Nodes\HtmlElementNode $n, self $g) => $g->renderHtmlElement($n),
 			Nodes\HtmlCommentNode::class => fn(Nodes\HtmlCommentNode $n, self $g) => $g->renderHtmlComment($n),
 
 			// Directive nodes
@@ -924,6 +925,21 @@ final class Renderer extends NodeRenderer
 	}
 
 
+	/**
+	 * Renders paired passthrough element as open tag + children + close tag,
+	 * delegating to renderHtmlTag() so sanitization and escaping behave
+	 * exactly like for unpaired tags.
+	 */
+	private function renderHtmlElement(Nodes\HtmlElementNode $node): string
+	{
+		$open = new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range);
+		$close = $node->closingTag ?? new Nodes\HtmlTagNode($node->name, closing: true);
+		return $this->renderHtmlTag($open)
+			. $this->serialize($this->renderNodes($node->content->children))
+			. $this->renderHtmlTag($close);
+	}
+
+
 	/********************* directive node renderers ****************d*g**/
 
 
@@ -977,6 +993,19 @@ final class Renderer extends NodeRenderer
 					0 => $hasMarkup = true,      // inline markup (span, a, strong, ...)
 					null => $hasMarkup = true,   // block element
 				};
+
+			} elseif ($node instanceof Nodes\HtmlElementNode) {
+				$inlineType = Schema::inlineElements()[strtolower($node->name)] ?? null;
+				match ($inlineType) {
+					1 => $hasReplaced = true,    // replaced element (script, object, ...)
+					default => $hasMarkup = true,
+				};
+				// flat pre-pairing analysis saw all descendants at top level - propagate everything
+				$inner = $this->analyzeContent($node->content->children);
+				$hasText = $hasText || $inner['hasText'];
+				$hasReplaced = $hasReplaced || $inner['hasReplaced'];
+				$hasMarkup = $hasMarkup || $inner['hasMarkup'];
+				$hasOther = $hasOther || $inner['hasOther'];
 
 			} elseif ($node instanceof Nodes\LinkNode) {
 				$inner = $this->analyzeContent($node->content->children);

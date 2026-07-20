@@ -164,6 +164,17 @@ final class TextRunPass
 					$pieces[] = [$inlineType ? self::Replaced : self::Markup, null];
 				}
 
+			} elseif ($node instanceof Nodes\HtmlElementNode) {
+				$inlineType = Output\Html\Schema::inlineElements()[strtolower($node->name)] ?? null;
+				$boundary = match ($inlineType) {
+					null => self::Break, // block-level element splits the segment
+					1 => [self::Replaced, null],
+					default => [self::Markup, null],
+				};
+				$pieces[] = $boundary;
+				$this->collect($node->content->children, $pieces);
+				$pieces[] = $boundary;
+
 			} elseif ($node instanceof Nodes\HtmlCommentNode) {
 				$pieces[] = [self::Markup, null];
 

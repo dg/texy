@@ -26,6 +26,16 @@ final class HtmlModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
+		$texy->addHandler('afterParse', $this->pairTags(...));
+	}
+
+
+	/**
+	 * Pairs passthrough tags into HtmlElementNode trees (transform phase).
+	 */
+	public function pairTags(Texy\Nodes\DocumentNode $doc): void
+	{
+		(new Texy\Passes\HtmlPairingPass)->process($doc);
 	}
 
 

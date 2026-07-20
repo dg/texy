@@ -105,6 +105,9 @@ class Renderer extends NodeRenderer
 
 			// HTML passthrough nodes
 			Nodes\HtmlTagNode::class => fn(Nodes\HtmlTagNode $n, self $g) => $g->renderHtmlTag($n),
+			Nodes\HtmlElementNode::class => fn(Nodes\HtmlElementNode $n, self $g) => $g->renderHtmlTag(new Nodes\HtmlTagNode($n->name, $n->attributes))
+				. $g->renderNodes($n->content->children)
+				. '</' . ($n->closingTag->name ?? $n->name) . '>',
 			Nodes\HtmlCommentNode::class => fn(Nodes\HtmlCommentNode $n) => '<!-- ' . trim($n->text) . ' -->',
 
 			// Directive nodes
