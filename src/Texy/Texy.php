@@ -63,7 +63,7 @@ class Texy
 	public Modules\HeadingModule $headingModule;
 	public Modules\ListModule $listModule;
 	public Modules\TypographyModule $typographyModule;
-	public Modules\HyphenationModule $longWordsModule;
+	public Modules\HyphenationModule $hyphenationModule;
 
 	/** HTML security policy: allowed tags, classes and inline styles */
 	public readonly HtmlPolicy $htmlPolicy;
@@ -121,7 +121,7 @@ class Texy
 
 		// post process
 		$this->addModule($this->typographyModule = new Modules\TypographyModule($this));
-		$this->addModule($this->longWordsModule = new Modules\HyphenationModule($this));
+		$this->addModule($this->hyphenationModule = new Modules\HyphenationModule($this));
 	}
 
 
@@ -227,7 +227,7 @@ class Texy
 			$transformers[] = fn(string $s): string => $this->typographyModule->postLine($s);
 		}
 		if (!empty($this->allowed[Syntax::Hyphenation])) {
-			$transformers[] = fn(string $s): string => $this->longWordsModule->postLine($s);
+			$transformers[] = fn(string $s): string => $this->hyphenationModule->postLine($s);
 		}
 
 		(new TextRunPass(
@@ -289,7 +289,7 @@ class Texy
 		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
 
 		if (!empty($this->allowed[Syntax::Hyphenation])) {
-			$text = $this->longWordsModule->postLine($text);
+			$text = $this->hyphenationModule->postLine($text);
 		}
 
 		return $text;
@@ -352,6 +352,12 @@ class Texy
 	 */
 	public function &__get(string $name): mixed
 	{
+		if (isset(Compat\Legacy::RenamedModules[$name])) {
+			$new = Compat\Legacy::RenamedModules[$name];
+			trigger_error("Property \$texy->$name is deprecated, use \$texy->$new instead.", E_USER_DEPRECATED);
+			return $this->$new;
+		}
+
 		if (isset(Compat\Legacy::OfModule[$name])) {
 			$proxy = $this->legacyProxies[$name] ??= new Compat\LegacyModuleProxy($this, $name);
 			return $proxy;
@@ -363,13 +369,21 @@ class Texy
 
 	public function __set(string $name, mixed $value): void
 	{
+		if (isset(Compat\Legacy::RenamedModules[$name])) {
+			$new = Compat\Legacy::RenamedModules[$name];
+			trigger_error("Property \$texy->$name is deprecated, use \$texy->$new instead.", E_USER_DEPRECATED);
+			$this->$new = $value;
+			return;
+		}
+
 		Compat\Legacy::set($this, Compat\Legacy::OfTexy, '$texy', $name, $value);
 	}
 
 
 	public function __isset(string $name): bool
 	{
-		return isset(Compat\Legacy::OfModule[$name])
+		return isset(Compat\Legacy::RenamedModules[$name])
+			|| isset(Compat\Legacy::OfModule[$name])
 			|| Compat\Legacy::isSet($this, Compat\Legacy::OfTexy, $name);
 	}
 }
