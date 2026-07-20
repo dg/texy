@@ -78,6 +78,9 @@ class Texy
 	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
 	private array $handlers = [];
 
+	/** @var array<string, Compat\LegacyModuleProxy>  v3 compatibility */
+	private array $legacyProxies = [];
+
 
 	public function __construct()
 	{
@@ -357,6 +360,33 @@ class Texy
 	final public function __clone()
 	{
 		throw new \LogicException('Clone is not supported.');
+	}
+
+
+	/**
+	 * @deprecated v3 compatibility: serves properties that moved elsewhere and modules that no longer exist
+	 */
+	public function &__get(string $name): mixed
+	{
+		if (isset(Compat\Legacy::OfModule[$name])) {
+			$proxy = $this->legacyProxies[$name] ??= new Compat\LegacyModuleProxy($this, $name);
+			return $proxy;
+		}
+
+		return Compat\Legacy::ref($this, Compat\Legacy::OfTexy, '$texy', $name, 'read');
+	}
+
+
+	public function __set(string $name, mixed $value): void
+	{
+		Compat\Legacy::set($this, Compat\Legacy::OfTexy, '$texy', $name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return isset(Compat\Legacy::OfModule[$name])
+			|| Compat\Legacy::isSet($this, Compat\Legacy::OfTexy, $name);
 	}
 }
 
