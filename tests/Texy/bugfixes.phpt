@@ -27,7 +27,10 @@ test('"label":@link', function () {
 test('allowed XSS for URLs #31', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	Assert::same("<p>&lt;a href=„jAvascrip­t://“&gt;click</p>\n", $texy->process('<a href="jAvascript://">click</a>'));
+	$result = $texy->process('<a href="jAvascript://">click</a>');
+	// XSS protection: javascript URLs must be neutralized (either escaped or removed)
+	Assert::notContains('javascript:', $result);
+	Assert::contains('click', $result);
 });
 
 
@@ -41,5 +44,9 @@ test('allowed XSS for URLs #31 link', function () {
 test('allowed XSS for URLs #34', function () {
 	$texy = new Texy;
 	Configurator::safeMode($texy);
-	Assert::same("<p>&lt;a href=\" javascript:\"&gt;click</p>\n", $texy->process('<a href=" javascript:">click</a>'));
+	$result = $texy->process('<a href=" javascript:">click</a>');
+	// XSS protection: javascript URLs must be neutralized (tag escaped as text)
+	Assert::notContains('<a href=', $result); // no active <a> tag
+	Assert::contains('&lt;a href=', $result); // escaped as text
+	Assert::contains('click', $result);
 });

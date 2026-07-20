@@ -42,7 +42,7 @@ final class Helpers
 
 	/**
 	 * Translate all white spaces (\t \n \r space) to meta-spaces \x01-\x04.
-	 * which are ignored by HtmlOutputModule routine
+	 * which are ignored by the well-forming engine
 	 */
 	public static function freezeSpaces(string $s): string
 	{
@@ -214,5 +214,25 @@ final class Helpers
 		}
 
 		return $res;
+	}
+
+
+	/**
+	 * Extracts plain text content from AST node(s).
+	 * @param  Node|iterable<Node>  $node
+	 */
+	public static function extractText(Node|iterable $node): string
+	{
+		if ($node instanceof Nodes\TextNode) {
+			return $node->text;
+		}
+
+		$text = '';
+		$children = $node instanceof Node ? $node->getChildren() : $node;
+		foreach ($children as $child) {
+			$text .= self::extractText($child);
+		}
+
+		return $text;
 	}
 }

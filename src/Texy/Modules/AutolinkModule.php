@@ -8,12 +8,12 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HandlerInvocation;
 use Texy\Helpers;
-use Texy\InlineParser;
-use Texy\Link;
+use Texy\Nodes\EmailNode;
+use Texy\Nodes\UrlNode;
+use Texy\Output\Html;
+use Texy\ParseContext;
 use Texy\Patterns;
-use Texy\Regexp;
 use function str_replace;
 
 
@@ -29,8 +29,8 @@ final class AutolinkModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('linkEmail', $this->solveUrlEmail(...));
-		$texy->addHandler('linkURL', $this->solveUrlEmail(...));
+		$texy->htmlOutput->registerHandler($this->solveUrl(...));
+		$texy->htmlOutput->registerHandler($this->solveEmail(...));
 	}
 
 
@@ -38,74 +38,61 @@ final class AutolinkModule extends Texy\Module
 	{
 		// direct url; characters not allowed in URL <>[\]^`{|}
 		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
+			fn(ParseContext $context, array $matches) => new UrlNode((string) $matches[0]),
 			'~
-				(?<= ^ | [\s([<:\x17] )            # must be preceded by these chars
+				(?<= ^ | [\s([<:] )                # must be preceded by these chars
 				(?: https?:// | www\. | ftp:// )   # protocol or www
 				[0-9.' . Patterns::CHAR . '-]      # first char
 				[/\d' . Patterns::CHAR . '+.\~%&?@=_:;#$!,*()\x{ad}-]{1,1000}  # URL body
 				[/\d' . Patterns::CHAR . '+\~?@=_#$*]  # last char
 			~x',
 			'link/url',
-			'~(?: https?:// | www\. | ftp://)~x',
 		);
 
 		// direct email
 		$this->texy->registerLinePattern(
-			$this->parseUrlEmail(...),
+			fn(ParseContext $context, array $matches) => new EmailNode((string) $matches[0]),
 			'~
-				(?<= ^ | [\s([<\x17] )             # must be preceded by these chars
+				(?<= ^ | [\s([<] )                  # must be preceded by these chars
 				' . Patterns::Email . '
 			~x',
 			'link/email',
-			'~' . Patterns::Email . '~',
 		);
 	}
 
 
 	/**
-	 * Parses http://davidgrudl.com david@grudl.com
-	 * @param  array<?string>  $matches
+	 * Generates HTML for UrlNode.
 	 */
-	public function parseUrlEmail(InlineParser $parser, array $matches, string $name): Texy\HtmlElement|string|null
+	public function solveUrl(UrlNode $node, Html\Renderer $generator): Html\Element
 	{
-		/** @var array{string} $matches */
-		[$mURL] = $matches;
-		// [0] => URL
+		$url = strncasecmp($node->url, 'www.', 4) === 0
+			? 'http://' . $node->url
+			: $node->url;
 
-		$link = new Link($mURL);
-		$this->texy->linkModule->checkLink($link);
+		$text = $this->shorten && preg_match('~^(https?://|ftp://|www\.|/)~i', $node->url)
+			? Helpers::shortenUrl($node->url)
+			: $node->url;
 
-		return $this->texy->invokeAroundHandlers(
-			$name === 'link/email' ? 'linkEmail' : 'linkURL',
-			$parser,
-			[$link],
-		);
-	}
-
-
-	/**
-	 * Handler for URL/email - creates textual content and link element.
-	 */
-	private function solveUrlEmail(HandlerInvocation $invocation, Link $link): Texy\HtmlElement|string|null
-	{
-		$content = $this->textualUrl($link);
-		$content = $this->texy->protect($content, Texy\Texy::CONTENT_TEXTUAL);
-		return $this->texy->linkModule->solve(null, $link, $content);
-	}
-
-
-	/**
-	 * Returns textual representation of URL.
-	 */
-	public function textualUrl(Link $link): string
-	{
-		if ($this->texy->obfuscateEmail && Regexp::match($link->raw, '~^' . Patterns::Email . '$~')) { // email
-			return str_replace('@', '&#64;<!-- -->', $link->raw);
-		} elseif ($this->shorten && Regexp::match($link->raw, '~^(https?://|ftp://|www\.|/)~i')) {
-			return Helpers::shortenUrl($link->raw);
+		$el = new Html\Element('a', ['href' => $url]);
+		if ($this->texy->linkModule->forceNoFollow && str_contains($url, '//')) {
+			$el->attrs['rel'] = 'nofollow';
 		}
 
-		return $link->raw;
+		// Protect URL text from typography/longwords processing
+		return $el->add($this->texy->protect($text, $this->texy::CONTENT_TEXTUAL));
+	}
+
+
+	/**
+	 * Generates HTML for EmailNode.
+	 */
+	public function solveEmail(EmailNode $node, Html\Renderer $generator): Html\Element
+	{
+		$el = new Html\Element('a', ['href' => 'mailto:' . $node->email]);
+		$email = $this->texy->obfuscateEmail
+			? $this->texy->protect(str_replace('@', '&#64;<!-- -->', $node->email), $this->texy::CONTENT_TEXTUAL)
+			: $node->email;
+		return $el->add($email);
 	}
 }

@@ -216,10 +216,10 @@ $texy->htmlModule->passComment = true;   // keep HTML comments in output
 ### HtmlOutputModule
 
 ```php
-$texy->htmlOutputModule->indent = true;      // indent output
-$texy->htmlOutputModule->baseIndent = 0;     // base indentation level
-$texy->htmlOutputModule->lineWrap = 80;      // maximum line width
-$texy->htmlOutputModule->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
+$texy->htmlOutput->indent = true;      // indent output
+$texy->htmlOutput->baseIndent = 0;     // base indentation level
+$texy->htmlOutput->lineWrap = 80;      // maximum line width
+$texy->htmlOutput->preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
 ```
 
 ### DirectiveModule

@@ -9,16 +9,13 @@ namespace Texy;
 
 
 /**
- * Base class for BlockParser and LineParser.
+ * Base class for AST nodes representing parsed document.
  */
-class Parser
+abstract class Node
 {
-	protected Texy $texy;
-	protected HtmlElement $element;
-
-
-	public function getTexy(): Texy
+	/** @return \Generator<int, self, mixed, void> */
+	public function &getChildren(): \Generator
 	{
-		return $this->texy;
+		false && yield;
 	}
 }

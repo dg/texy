@@ -23,7 +23,7 @@ test('emoticon with unicode', function () {
 test('emoticon with custom class', function () {
 	$texy = new Texy\Texy;
 	$texy->allowed['emoticon'] = true;
-	$texy->htmlOutputModule->lineWrap = 180;
+	$texy->htmlOutput->lineWrap = 180;
 	$texy->emoticonModule->class = 'smiley';
 
 	Assert::match(

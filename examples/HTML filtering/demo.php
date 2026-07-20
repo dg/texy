@@ -27,7 +27,7 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') {
 
 
 $texy = new Texy;
-$texy->htmlOutputModule->baseIndent = 1;
+$texy->htmlOutput->baseIndent = 1;
 
 
 /**

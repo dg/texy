@@ -5,31 +5,19 @@
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
-namespace Texy\Modules;
+namespace Texy\Output\Html;
 
 use Texy;
-use Texy\Output\Html\Schema;
 use Texy\Regexp;
-use function array_intersect, array_keys, array_unshift, is_string, max, reset, rtrim, str_repeat, str_replace, strtr, wordwrap;
+use function array_intersect, array_keys, array_unshift, max, reset, rtrim, str_repeat, str_replace, strtr, wordwrap;
 
 
 /**
- * Formats and validates HTML output (well-forming, indentation, line wrapping).
+ * Well-forming and formatting engine: fixes pairing, content model and
+ * nesting, produces indented, wrapped HTML.
  */
-final class HtmlOutputModule extends Texy\Module
+final class WellFormer
 {
-	/** indent HTML code? */
-	public bool $indent = true;
-
-	/** @var string[] */
-	public array $preserveSpaces = ['textarea', 'pre', 'script', 'code', 'samp', 'kbd'];
-
-	/** base indent level */
-	public int $baseIndent = 0;
-
-	/** wrap width, doesn't include indent space */
-	public int $lineWrap = 80;
-
 	/** indent space counter */
 	private int $space = 0;
 
@@ -43,19 +31,18 @@ final class HtmlOutputModule extends Texy\Module
 	private array $baseDTD = [];
 
 
-	public function __construct(Texy\Texy $texy)
-	{
-		$texy->addHandler('postProcess', $this->postProcess(...));
+	public function __construct(
+		private Config $config,
+	) {
 	}
 
 
 	/**
-	 * Converts <strong><em> ... </strong> ... </em>.
-	 * into <strong><em> ... </em></strong><em> ... </em>
+	 * Format HTML string with indentation and line wrapping.
 	 */
-	private function postProcess(string &$s): void
+	public function format(string $s): string
 	{
-		$this->space = $this->baseIndent;
+		$this->space = $this->config->baseIndent;
 		$this->tagStack = [];
 		$this->tagUsed = [];
 
@@ -89,13 +76,18 @@ final class HtmlOutputModule extends Texy\Module
 		$s = Regexp::replace($s, '~\t?\ *\x08~', '');
 
 		// line wrap
-		if ($this->lineWrap > 0) {
+		if ($this->config->lineWrap > 0) {
 			$s = Regexp::replace(
 				$s,
 				'~^(\t*)(.*)$~m',
 				$this->wrap(...),
 			);
 		}
+
+		// unfreeze spaces
+		$s = Texy\Helpers::unfreezeSpaces($s);
+
+		return $s;
 	}
 
 
@@ -122,7 +114,7 @@ final class HtmlOutputModule extends Texy\Module
 			$item = reset($this->tagStack);
 			if ($item && !isset($item['dtdContent'][Schema::Text])) {  // text not allowed?
 
-			} elseif (array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
+			} elseif (array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->config->preserveSpaces)) { // inside pre & textarea preserve spaces
 				$s = Texy\Helpers::freezeSpaces($mText);
 
 			} else {
@@ -136,14 +128,17 @@ final class HtmlOutputModule extends Texy\Module
 		}
 
 		// phase #3 - HTML tag
-		assert(is_string($mTag) && is_string($mAttr));
+		if ($mTag === null) {
+			return $s;
+		}
+
 		$mEmpty = $mEmpty || isset(Schema::voidElements()[$mTag]);
 		if ($mEmpty && $mEnd) { // bad tag; /end/
 			return $s;
 		} elseif ($mEnd) {
 			return $s . $this->processEndTag($mTag);
 		} else {
-			return $this->processStartTag($mTag, $mEmpty, $mAttr, $s);
+			return $this->processStartTag($mTag, $mEmpty, $mAttr ?? '', $s);
 		}
 	}
 
@@ -183,7 +178,7 @@ final class HtmlOutputModule extends Texy\Module
 				return $s;
 			}
 
-			$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->preserveSpaces);
+			$indent = $this->config->indent && !array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->config->preserveSpaces);
 
 			if ($indent && $tag === 'br') {
 				return rtrim($s) . '<' . $tag . $attr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";
@@ -210,7 +205,7 @@ final class HtmlOutputModule extends Texy\Module
 				: $dtdContent; // unknown tags keep inherited content model
 
 			// Format output with indentation for block elements
-			if ($this->indent && !isset(Schema::inlineElements()[$tag])) {
+			if ($this->config->indent && !isset(Schema::inlineElements()[$tag])) {
 				$close = "\x08" . '</' . $tag . '>' . "\n" . str_repeat("\t", $this->space);
 				$s .= "\n" . str_repeat("\t", $this->space++) . $open . "\x07";
 				$indent = 1;
@@ -328,6 +323,6 @@ final class HtmlOutputModule extends Texy\Module
 	{
 		/** @var array{string, string, string} $m */
 		[, $space, $s] = $m;
-		return $space . wordwrap($s, $this->lineWrap, "\n" . $space);
+		return $space . wordwrap($s, $this->config->lineWrap, "\n" . $space);
 	}
 }

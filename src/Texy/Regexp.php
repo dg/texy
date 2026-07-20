@@ -41,7 +41,7 @@ class Regexp
 	 * Searches the string for the part matching the regular expression and returns
 	 * an array with the found expression and individual subexpressions, or null.
 	 * Unmatched groups return null.
-	 * @return ($captureOffset is true ? array<int|string, array{?string, int}> : array<int|string, ?string>)|null
+	 * @return ($captureOffset is true ? array<array{?string, int}> : array<?string>)|null
 	 */
 	public static function match(
 		string $subject,
@@ -67,7 +67,7 @@ class Regexp
 	 * Searches the string for all occurrences matching the regular expression and
 	 * returns an array of arrays containing the found expression and each subexpression.
 	 * Unmatched groups return null.
-	 * @return ($captureOffset is true ? list<array<int|string, array{?string, int}>> : list<array<int|string, ?string>>)
+	 * @return ($captureOffset is true ? list<array<array{?string, int}>> : list<array<?string>>)
 	 */
 	public static function matchAll(
 		string $subject,

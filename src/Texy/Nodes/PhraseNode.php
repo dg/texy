@@ -1,0 +1,31 @@
+<?php declare(strict_types=1);
+
+/**
+ * This file is part of the Texy! (https://texy.nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
+ */
+
+namespace Texy\Nodes;
+
+use Texy\Modifier;
+
+
+/**
+ * Phrase (emphasis, strong, etc.).
+ * *italic*, **bold**, --strikethrough--, sup^2, ...
+ */
+class PhraseNode extends InlineNode
+{
+	public function __construct(
+		public ContentNode $content,
+		public string $type,
+		public ?Modifier $modifier = null,
+	) {
+	}
+
+
+	public function &getChildren(): \Generator
+	{
+		yield $this->content;
+	}
+}

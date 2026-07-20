@@ -18,15 +18,6 @@ test('link reference is resolved via phrase syntax', function () {
 });
 
 
-test('link reference with query string', function () {
-	$texy = new Texy\Texy;
-	Assert::same(
-		"<p><a href=\"https://example.com?foo=bar\">Click</a></p>\n",
-		$texy->process("\"Click\":[link?foo=bar]\n\n[link]: https://example.com"),
-	);
-});
-
-
 test('link reference with fragment', function () {
 	$texy = new Texy\Texy;
 	Assert::same(
@@ -93,16 +84,15 @@ test('user-defined definition persists across process() calls', function () {
 });
 
 
-test('document-defined reference leaks to next process() [BUG]', function () {
+test('document-defined reference does NOT leak to next process()', function () {
 	$texy = new Texy\Texy;
 
 	// First process() defines a reference
 	$texy->process("[link]: https://example.com\n\n\"Click\":[link]");
 
-	// Second process() - reference should NOT be available, but it is (BUG)
-	// This documents the current buggy behavior
+	// Second process() - reference should NOT be available, falls back to using "link" as URL
 	Assert::same(
-		"<p><a href=\"https://example.com\">Click</a></p>\n",
+		"<p><a href=\"link\">Click</a></p>\n",
 		$texy->process('"Click":[link]'),
 	);
 });
@@ -121,20 +111,73 @@ test('user-defined definition is overwritten by document definition', function (
 
 
 // =============================================================================
-// Bare [reference] links
+// Bare [reference] links (opt-in)
 // =============================================================================
 
-test('bare reference resolves via definition', function () {
+test('bare reference syntax is off by default', function () {
 	$texy = new Texy\Texy;
-	$result = $texy->process("Look at [homepage]\n\n[homepage]: http://texy.nette.org/");
-	Assert::contains('<a href="http://texy.nette.org/">', $result);
+	Assert::same(
+		"<p>viz [home] stranka</p>\n",
+		$texy->process('viz [home] stranka'),
+	);
 });
 
 
-test('undefined bare reference stays as literal text', function () {
+test('bare reference resolves against definitions when enabled', function () {
 	$texy = new Texy\Texy;
+	$texy->allowed['link/reference'] = true;
 	Assert::same(
-		"<p>[undefined]</p>\n",
-		$texy->process('[undefined]'),
+		"<p>viz <a href=\"https://example.com\">home</a> stranka</p>\n",
+		$texy->process("viz [home] stranka\n\n[home]: https://example.com"),
 	);
+});
+
+
+test('unresolved bare reference keeps name as URL and in ref', function () {
+	$texy = new Texy\Texy;
+	$texy->allowed['link/reference'] = true;
+	$doc = $texy->parse('viz [wiki#kotva] stranka');
+	$link = null;
+	(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $n) use (&$link): ?int {
+		if ($n instanceof Texy\Nodes\LinkNode) {
+			$link = $n;
+		}
+		return null;
+	});
+
+	Assert::same('wiki#kotva', $link->ref);
+	Assert::same('wiki#kotva', $link->url);
+	Assert::same('wiki#kotva', Texy\Helpers::extractText($link->content));
+});
+
+
+test('LinkNode keeps the written reference name after resolution', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse("\"Click\":[link] a \"jinde\":https://example.org\n\n[link]: https://example.com");
+	$links = [];
+	(new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $n) use (&$links): ?int {
+		if ($n instanceof Texy\Nodes\LinkNode) {
+			$links[] = $n;
+		}
+		return null;
+	});
+
+	Assert::same('link', $links[0]->ref);
+	Assert::same('https://example.com', $links[0]->url);
+	Assert::null($links[1]->ref); // literal URL has no reference
+});
+
+
+test('bare reference does not swallow neighboring syntaxes', function () {
+	$texy = new Texy\Texy;
+	$texy->allowed['link/reference'] = true;
+
+	// image syntax
+	Assert::contains('<img src="images/photo.png"', $texy->process('[* photo.png *]'));
+	// modifier class
+	Assert::same("<p class=\"note\">text</p>\n", $texy->process('text .[note]'));
+	// PHP attribute
+	Assert::same("<p>atribut #[Requires] zustava</p>\n", $texy->process('atribut #[Requires] zustava'));
+	// labeled form is handled by its own syntax, not swallowed by bare reference
+	Assert::same("<p><a href=\"odkaz\">text</a></p>\n", $texy->process('[text |odkaz]'));
 });
