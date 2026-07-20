@@ -68,8 +68,7 @@ parameters:
 			message: '#no signature specified for Closure\.$#'
 			paths:
 				- src/Texy/Output/Html/Config.php
-				- src/Texy/Output/Html/Renderer.php
-				- src/Texy/Output/Markdown/Renderer.php
+				- src/Texy/Output/NodeRenderer.php
 
 		# Pattern handlers are intentionally polymorphic: each declares the exact capture
 		# shape of its own regexp, so no single Closure signature fits them all -- a
@@ -86,7 +85,7 @@ parameters:
 		# $node::class, so a handler is never called with a foreign node type.
 		-
 			identifier: assign.propertyType
-			message: '#^Property Texy\\Output\\(Html|Markdown)\\Renderer\:\:\$handlers \(array<class\-string#'
+			message: '#^Property Texy\\Output\\NodeRenderer<[^>]+>\:\:\$handlers \(array<class\-string#'
 			paths:
 				- src/Texy/Output/Html/Renderer.php
 				- src/Texy/Output/Markdown/Renderer.php
