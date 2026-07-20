@@ -34,11 +34,11 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') {
 $texy = new Texy;
 
 // Configure image paths
-$texy->imageModule->root = 'imagesdir/';  // Base folder for images
+$texy->htmlOutput->imageRoot = 'imagesdir/';  // Base folder for images
 
 // CSS classes for aligned images
-$texy->imageModule->leftClass = 'my-left-class';   // Class for [*< ... *] (left-aligned)
-$texy->imageModule->rightClass = 'my-right-class'; // Class for [*> ... *] (right-aligned)
+$texy->htmlOutput->imageLeftClass = 'my-left-class';   // Class for [*< ... *] (left-aligned)
+$texy->htmlOutput->imageRightClass = 'my-right-class'; // Class for [*> ... *] (right-aligned)
 
 
 // Register our custom image handler

@@ -68,7 +68,7 @@ doIt($texy);
 // WARNING: Only use this if you trust the input completely!
 // ============================================================
 echo '<h2>Texy::ALL - enables all tags</h2>';
-$texy->allowedTags = $texy::ALL;
+$texy->htmlPolicy->allowedTags = $texy::ALL;
 doIt($texy);
 
 
@@ -97,7 +97,7 @@ doIt($texy);
 // Tags in input will be escaped and shown as text.
 // ============================================================
 echo '<h2>Texy::NONE - disables all tags</h2>';
-$texy->allowedTags = $texy::NONE;
+$texy->htmlPolicy->allowedTags = $texy::NONE;
 doIt($texy);
 
 
@@ -108,7 +108,7 @@ doIt($texy);
 // Empty array [] means no attributes are allowed.
 // ============================================================
 echo '<h2>Enable custom tags</h2>';
-$texy->allowedTags = [
+$texy->htmlPolicy->allowedTags = [
 	'my-extraTag' => ['attr1'],  // Allow <my-extraTag attr1="...">
 	'strong' => [],              // Allow <strong> with no attributes
 ];

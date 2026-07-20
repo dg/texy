@@ -9,17 +9,15 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Modifier;
-use Texy\Nodes;
 use Texy\Nodes\DefinitionListNode;
 use Texy\Nodes\ListItemNode;
 use Texy\Nodes\ListNode;
 use Texy\Nodes\ListType;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Regexp;
 use Texy\Syntax;
-use function count, implode, is_array, ord, strlen;
+use function count, implode, ord, strlen;
 
 
 /**
@@ -46,10 +44,6 @@ final class ListModule extends Texy\Module
 	) {
 		$texy->allowed[Syntax::List] = true;
 		$texy->allowed[Syntax::DefinitionList] = true;
-		$texy->htmlOutput->registerHandler($this->solveList(...));
-		$texy->htmlOutput->registerHandler($this->solveItem(...));
-		$texy->htmlOutput->registerHandler($this->solveDefList(...));
-		$texy->htmlOutput->registerHandler($this->solveDefItem(...));
 	}
 
 
@@ -229,7 +223,7 @@ final class ListModule extends Texy\Module
 		/** @var array{string, string, ?string, ?string} $matches */
 		[, $mIndent, $mContent, $mMod] = $matches;
 
-		// Collect content lines
+		// next lines
 		$spaces = '';
 		$content = ' ' . ($mContent ?? '');
 		while ($context->getBlockParser()->next('~^
@@ -256,84 +250,5 @@ final class ListModule extends Texy\Module
 			false,
 			Modifier::parse($mMod),
 		);
-	}
-
-
-	public function solveList(ListNode $node, Html\Renderer $generator): Html\Element
-	{
-		$el = new Html\Element($node->type->isOrdered() ? 'ol' : 'ul');
-		$node->modifier?->decorate($this->texy, $el);
-
-		if ($node->start !== null && $node->start > 1) {
-			$el->attrs['start'] = $node->start;
-		}
-
-		if ($style = $node->type->getStyleType()) {
-			$styles = is_array($el->attrs['style'] ?? null) ? $el->attrs['style'] : [];
-			$styles['list-style-type'] = $style;
-			$el->attrs['style'] = $styles;
-		}
-
-		foreach ($node->items as $item) {
-			$el->add($this->solveItem($item, $generator));
-		}
-
-		return $el;
-	}
-
-
-	public function solveItem(ListItemNode $node, Html\Renderer $generator): Html\Element
-	{
-		$el = new Html\Element('li');
-		$node->modifier?->decorate($this->texy, $el);
-
-		// If first child is a simple ParagraphNode (no modifier), unwrap it
-		$content = $node->content->children;
-		if (
-			count($content) === 1
-			&& $content[0] instanceof Nodes\ParagraphNode
-			&& $content[0]->modifier === null
-		) {
-			$el->children = $generator->renderNodes($content[0]->content->children);
-		} else {
-			$el->children = $generator->renderNodes($content);
-		}
-
-		return $el;
-	}
-
-
-	public function solveDefList(DefinitionListNode $node, Html\Renderer $generator): Html\Element
-	{
-		$el = new Html\Element('dl');
-		$node->modifier?->decorate($this->texy, $el);
-
-		foreach ($node->items as $item) {
-			$el->add($this->solveDefItem($item, $generator));
-		}
-
-		return $el;
-	}
-
-
-	public function solveDefItem(ListItemNode $node, Html\Renderer $generator): Html\Element
-	{
-		$el = new Html\Element($node->term ? 'dt' : 'dd');
-		$node->modifier?->decorate($this->texy, $el);
-
-		// If content is a single simple ParagraphNode (no modifier), unwrap it
-		$content = $node->content->children;
-		if (
-			!$node->term
-			&& count($content) === 1
-			&& $content[0] instanceof Nodes\ParagraphNode
-			&& $content[0]->modifier === null
-		) {
-			$el->children = $generator->renderNodes($content[0]->content->children);
-		} else {
-			$el->children = $generator->renderNodes($content);
-		}
-
-		return $el;
 	}
 }

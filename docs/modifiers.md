@@ -52,8 +52,8 @@ Note that `$classes` is an associative array with the class names as *keys* (`is
 
 1. **Attributes** (`$mod->attrs`) are copied only if allowed: with `$texy->allowedTags === Texy::ALL` all of them; with an array configuration only those listed for the element's tag (or all if the tag maps to `Texy::ALL`).
 2. **Title** is always applied if set; the text first passes through `TypographyModule::postLine()`, so quotes and dashes in titles are typographically corrected.
-3. **Classes and ID** are filtered by `$texy->allowedClasses`: with `ALL` everything is applied; with a whitelist, only listed classes, and the ID only when the whitelist contains `'#' . $id`.
-4. **Styles** are filtered analogously by `$texy->allowedStyles`.
+3. **Classes and ID** are filtered by `$texy->htmlPolicy->allowedClasses`: with `ALL` everything is applied; with a whitelist, only listed classes, and the ID only when the whitelist contains `'#' . $id`.
+4. **Styles** are filtered analogously by `$texy->htmlPolicy->allowedStyles`.
 5. **Alignment** is applied either as a CSS class (when `$texy->alignClasses` defines a class for the direction) or as an inline `text-align` / `vertical-align` style.
 
 The result: the element carries everything from the modifier that the current configuration permits – the basis of safe processing of untrusted input (see the configuration reference (user manual)).

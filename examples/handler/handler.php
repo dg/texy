@@ -222,7 +222,7 @@ $texy->htmlOutput->registerHandler(
 				. ' src="https://www.youtube.com/embed/' . htmlspecialchars($videoId) . '"'
 				. ' frameborder="0" allowfullscreen></iframe>';
 
-			return $texy->protect($code, Texy::CONTENT_BLOCK);
+			return $gen->protect($code, $gen::ContentBlock);
 		}
 		return null;
 	},
@@ -250,15 +250,15 @@ $texy->htmlOutput->registerHandler(
 
 // Process some sample text
 $text = <<<'TEXY'
-Title
-=====
+	Title
+	=====
 
-This is a **bold** text with //emphasis//.
+	This is a **bold** text with //emphasis//.
 
-[* youtube:dQw4w9WgXcQ 400x300 *]
+	[* youtube:dQw4w9WgXcQ 400x300 *]
 
-See comment [1] for details.
-TEXY;
+	See comment [1] for details.
+	TEXY;
 
 $html = $texy->process($text);
 

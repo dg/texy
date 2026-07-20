@@ -8,14 +8,11 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Helpers;
 use Texy\Nodes\EmailNode;
 use Texy\Nodes\UrlNode;
-use Texy\Output\Html;
 use Texy\ParseContext;
 use Texy\Patterns;
 use Texy\Syntax;
-use function str_replace;
 
 
 /**
@@ -23,15 +20,9 @@ use function str_replace;
  */
 final class AutolinkModule extends Texy\Module
 {
-	/** shorten URLs to more readable form? */
-	public bool $shorten = true;
-
-
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->htmlOutput->registerHandler($this->solveUrl(...));
-		$texy->htmlOutput->registerHandler($this->solveEmail(...));
 	}
 
 
@@ -59,41 +50,5 @@ final class AutolinkModule extends Texy\Module
 			~x',
 			Syntax::AutolinkEmail,
 		);
-	}
-
-
-	/**
-	 * Generates HTML for UrlNode.
-	 */
-	public function solveUrl(UrlNode $node, Html\Renderer $generator): Html\Element
-	{
-		$url = strncasecmp($node->url, 'www.', 4) === 0
-			? 'http://' . $node->url
-			: $node->url;
-
-		$text = $this->shorten && preg_match('~^(https?://|ftp://|www\.|/)~i', $node->url)
-			? Helpers::shortenUrl($node->url)
-			: $node->url;
-
-		$el = new Html\Element('a', ['href' => $url]);
-		if ($this->texy->linkModule->forceNoFollow && str_contains($url, '//')) {
-			$el->attrs['rel'] = 'nofollow';
-		}
-
-		// Protect URL text from typography/longwords processing
-		return $el->add($this->texy->protect($text, $this->texy::CONTENT_TEXTUAL));
-	}
-
-
-	/**
-	 * Generates HTML for EmailNode.
-	 */
-	public function solveEmail(EmailNode $node, Html\Renderer $generator): Html\Element
-	{
-		$el = new Html\Element('a', ['href' => 'mailto:' . $node->email]);
-		$email = $this->texy->obfuscateEmail
-			? $this->texy->protect(str_replace('@', '&#64;<!-- -->', $node->email), $this->texy::CONTENT_TEXTUAL)
-			: $node->email;
-		return $el->add($email);
 	}
 }

@@ -10,12 +10,6 @@ use Texy\Texy;
 require __DIR__ . '/../bootstrap.php';
 
 
-// temporarily disabled tests - the code cannot meet these expectations yet
-function skip(string $description, \Closure $fn): void
-{
-}
-
-
 // Helper function to process HTML through Texy (typography disabled for clean tests)
 function processHtml(string $html, ?array $allowedTags = null): string
 {
@@ -25,7 +19,7 @@ function processHtml(string $html, ?array $allowedTags = null): string
 	$texy->allowed['typography'] = false;
 
 	if ($allowedTags !== null) {
-		$texy->htmlOutput->allowedTags = $allowedTags;
+		$texy->htmlPolicy->allowedTags = $allowedTags;
 	}
 
 	return trim($texy->process($html));
@@ -279,9 +273,9 @@ test('text-only: textarea content as text', function () {
 // UNKNOWN/CUSTOM TAGS - INHERIT FROM PARENT
 // =============================================================================
 
-skip('unknown: inherits flow content', function () {
+test('unknown: inherits flow content', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::ALL;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -292,9 +286,9 @@ skip('unknown: inherits flow content', function () {
 });
 
 
-skip('unknown: inherits phrasing content', function () {
+test('unknown: inherits phrasing content', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::ALL;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -305,9 +299,9 @@ skip('unknown: inherits phrasing content', function () {
 });
 
 
-skip('unknown: inherits table restrictions', function () {
+test('unknown: inherits table restrictions', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::ALL;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -322,9 +316,9 @@ skip('unknown: inherits table restrictions', function () {
 // ALLOWED TAGS CONFIGURATION
 // =============================================================================
 
-skip('allowedTags: NONE disables all tags', function () {
+test('allowedTags: NONE disables all tags', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags = Texy::NONE;
+	$texy->htmlPolicy->allowedTags = Texy::NONE;
 	$texy->allowed['typography'] = false;
 	$html = trim($texy->process('<strong>Bold</strong>'));
 	Assert::notContains('<strong>', $html);
@@ -332,9 +326,9 @@ skip('allowedTags: NONE disables all tags', function () {
 });
 
 
-skip('allowedTags: selective', function () {
+test('allowedTags: selective', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags = ['strong' => Texy::ALL, 'em' => Texy::ALL];
+	$texy->htmlPolicy->allowedTags = ['strong' => Texy::ALL, 'em' => Texy::ALL];
 	$texy->htmlOutput->indent = false;
 
 	$html = trim($texy->process('<strong>A</strong> <b>B</b> <em>C</em>'));
@@ -344,9 +338,9 @@ skip('allowedTags: selective', function () {
 });
 
 
-skip('allowedTags: ALL enables everything', function () {
+test('allowedTags: ALL enables everything', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags = Texy::ALL;
+	$texy->htmlPolicy->allowedTags = Texy::ALL;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -422,10 +416,10 @@ test('not-allowed: custom element escaped', function () {
 });
 
 
-skip('allowed: head when added to allowedTags', function () {
+test('allowed: head when added to allowedTags', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags['head'] = Texy::ALL;
-	$texy->htmlOutput->allowedTags['title'] = Texy::ALL;
+	$texy->htmlPolicy->allowedTags['head'] = Texy::ALL;
+	$texy->htmlPolicy->allowedTags['title'] = Texy::ALL;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 
@@ -436,9 +430,9 @@ skip('allowed: head when added to allowedTags', function () {
 });
 
 
-skip('allowed: custom element when added', function () {
+test('allowed: custom element when added', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->allowedTags['x-w'] = Texy::ALL;
+	$texy->htmlPolicy->allowedTags['x-w'] = Texy::ALL;
 	$texy->htmlOutput->indent = false;
 	$texy->htmlOutput->lineWrap = 0;
 

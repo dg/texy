@@ -8,9 +8,8 @@
 namespace Texy;
 
 use JetBrains\PhpStorm\Language;
-use Texy\Output\Html;
-use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, ltrim, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
-use const ARRAY_FILTER_USE_BOTH, ENT_NOQUOTES;
+use function strlen;
+use const ARRAY_FILTER_USE_BOTH;
 
 
 /**
@@ -31,13 +30,6 @@ class Texy
 		ALL = true,
 		NONE = false;
 
-	// types of protection marks
-	public const
-		CONTENT_MARKUP = "\x17",
-		CONTENT_REPLACED = "\x16",
-		CONTENT_TEXTUAL = "\x15",
-		CONTENT_BLOCK = "\x14";
-
 	// url filters
 	public const
 		FILTER_ANCHOR = 'anchor',
@@ -46,20 +38,8 @@ class Texy
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
 
-	/** @var bool|array<string, bool|array<int, string>>  Allowed HTML tags */
-	public bool|array $allowedTags;
-
-	/** @var bool|array<int, string>  Allowed classes */
-	public bool|array $allowedClasses = self::ALL; // all classes and id are allowed
-
-	/** @var bool|array<int, string>  Allowed inline CSS style */
-	public bool|array $allowedStyles = self::ALL;  // all inline styles are allowed
-
 	/** TAB width (for converting tabs to spaces) */
 	public int $tabWidth = 8;
-
-	/** Do obfuscate e-mail addresses? */
-	public bool $obfuscateEmail = true;
 
 	/** @var array<string, string>  regexps to check URL schemes */
 	public array $urlSchemeFilters; // disable URL scheme filter
@@ -67,19 +47,7 @@ class Texy
 	/** Paragraph merging mode */
 	public bool $mergeLines = true;
 
-	/** @var array<string, ?string>  CSS classes for align modifiers */
-	public array $alignClasses = [
-		'left' => null,
-		'right' => null,
-		'center' => null,
-		'justify' => null,
-		'top' => null,
-		'middle' => null,
-		'bottom' => null,
-	];
-
 	public bool $removeSoftHyphens = true;
-	public string|Html\Element $nontextParagraph = 'div';
 	public Modules\DirectiveModule $scriptModule;
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\HtmlModule $htmlModule;
@@ -98,8 +66,13 @@ class Texy
 	public Modules\TypographyModule $typographyModule;
 	public Modules\HyphenationModule $longWordsModule;
 
-	/** HTML output configuration */
+	/** HTML security policy: allowed tags, classes and inline styles */
+	public readonly HtmlPolicy $htmlPolicy;
+
 	public Output\Html\Config $htmlOutput;
+
+	/** @var array<string, \Closure(string): string> @internal */
+	public array $postHandlers = [];
 
 	/** @var Module[] */
 	private array $modules;
@@ -122,34 +95,15 @@ class Texy
 	/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\BlockNode, pattern: string}> */
 	private array $_blockPatterns;
 
-	/** @var array<string, \Closure(string): string> */
-	private array $postHandlers = [];
-
-	/** @var array<string, string>  Texy protect markup table */
-	private array $marks = [];
-
-	/** @var array<string, int>|bool  for internal usage */
-	private bool|array $_classes;
-
-	/** @var array<string, int>|bool  for internal usage */
-	private bool|array $_styles;
-
 	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
 	private array $handlers = [];
 
 
 	public function __construct()
 	{
+		$this->htmlPolicy = new HtmlPolicy($this);
 		$this->htmlOutput = new Output\Html\Config;
 		$this->loadModules();
-		$this->initAllowedTags();
-	}
-
-
-	private function initAllowedTags(): void
-	{
-		// accept all valid HTML tags and attributes by default
-		$this->allowedTags = Html\Schema::defaultAllowedTags();
 	}
 
 
@@ -252,8 +206,8 @@ class Texy
 	 */
 	public function process(string $text, bool $singleLine = false): string
 	{
-		$this->marks = [];
-		unset($this->_classes, $this->_styles, $this->_linePatterns, $this->_blockPatterns);
+		$this->htmlPolicy->resetCache();
+		unset($this->_linePatterns, $this->_blockPatterns);
 		$text = $this->preprocess($text);
 		$node = $this->parse($text, $singleLine);
 		$html = (new Output\Html\Renderer($this->htmlOutput, $this))->render($node);
@@ -353,73 +307,7 @@ class Texy
 	 */
 	public function toText(): string
 	{
-		throw new \LogicException('Not implemented yet');
-	}
-
-
-	/**
-	 * Converts internal string representation to final HTML code.
-	 */
-	final public function stringToHtml(string $s): string
-	{
-		// decode HTML entities to UTF-8
-		$s = Helpers::unescapeHtml($s);
-
-		// line-postprocessing
-		$blocks = explode(self::CONTENT_BLOCK, $s);
-		foreach ($this->postHandlers as $name => $handler) {
-			if (empty($this->allowed[$name])) {
-				continue;
-			}
-
-			foreach ($blocks as $n => $s) {
-				if ($n % 2 === 0 && $s !== '') {
-					$blocks[$n] = $handler($s);
-				}
-			}
-		}
-
-		$s = implode(self::CONTENT_BLOCK, $blocks);
-
-		// encode < > &
-		$s = htmlspecialchars($s, ENT_NOQUOTES, 'UTF-8');
-
-		// replace protected marks
-		$s = $this->unprotect($s);
-
-		// wellform and reformat HTML
-		$s = (new Output\Html\WellFormer($this->htmlOutput))->format($s);
-
-		// unfreeze spaces
-		$s = Helpers::unfreezeSpaces($s);
-		$s = ltrim($s, "\n");
-
-		return $s;
-	}
-
-
-	/**
-	 * Converts internal string representation to final HTML code.
-	 */
-	final public function stringToText(string $s): string
-	{
-		$s = $this->stringToHtml($s);
-
-		// remove tags
-		$s = Regexp::replace($s, '~<(script|style)(.*)</\1>~Uis', '');
-		$s = strip_tags($s);
-		$s = Regexp::replace($s, '~\n\s*\n\s*\n[\n\s]*\n~', "\n\n");
-
-		// entities -> chars
-		$s = Helpers::unescapeHtml($s);
-
-		// convert nbsp to normal space and remove shy
-		$s = strtr($s, [
-			"\u{AD}" => '', // shy
-			"\u{A0}" => ' ', // nbsp
-		]);
-
-		return $s;
+		throw new \LogicException('Not implemented');
 	}
 
 
@@ -449,25 +337,6 @@ class Texy
 
 
 	/**
-	 * Generate unique mark - useful for freezing (folding) some substrings.
-	 */
-	final public function protect(string $child, string $contentType): string
-	{
-		if ($child === '') {
-			return '';
-		}
-
-		$key = $contentType
-			. strtr(base_convert((string) count($this->marks), 10, 8), '01234567', "\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F")
-			. $contentType;
-
-		$this->marks[$key] = $child;
-
-		return $key;
-	}
-
-
-	/**
 	 * Filters bad URLs.
 	 * @param  string  $type  Texy::FILTER_ANCHOR | Texy::FILTER_IMAGE
 	 */
@@ -477,12 +346,6 @@ class Texy
 		return empty($this->urlSchemeFilters[$type])
 			|| !Regexp::match($URL, '~\s*[a-z][a-z0-9+.-]{0,20}:~Ai') // http: | mailto:
 			|| Regexp::match($URL, $this->urlSchemeFilters[$type]);
-	}
-
-
-	final public function unprotect(string $html): string
-	{
-		return strtr($html, $this->marks);
 	}
 
 
@@ -517,22 +380,6 @@ class Texy
 			ARRAY_FILTER_USE_BOTH,
 		);
 		return new InlineParser($this->_linePatterns);
-	}
-
-
-	/**
-	 * @internal
-	 * @return array{array<string, int>|bool, array<string, int>|bool}
-	 */
-	final public function getAllowedProps(): array
-	{
-		$this->_classes ??= is_array($this->allowedClasses)
-			? array_flip($this->allowedClasses)
-			: $this->allowedClasses;
-		$this->_styles ??= is_array($this->allowedStyles)
-			? array_flip($this->allowedStyles)
-			: $this->allowedStyles;
-		return [$this->_classes, $this->_styles];
 	}
 
 
