@@ -30,9 +30,6 @@ final class LinkReferenceModule extends Texy\Module
 	/** @var array<string, Link> link references */
 	private array $references = [];
 
-	/** @var array<string, true> */
-	private static array $livelock;
-
 
 	public function __construct(
 		private Texy\Texy $texy,
@@ -56,8 +53,6 @@ final class LinkReferenceModule extends Texy\Module
 			'link/reference',
 		);
 
-		self::$livelock = [];
-
 		// [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
 		if (!empty($this->texy->allowed['link/definition'])) {
 			$text = Texy\Regexp::replace(
@@ -78,21 +73,18 @@ final class LinkReferenceModule extends Texy\Module
 
 
 	/**
-	 * Parses [la trine]: http://www.latrine.cz/ text odkazu .(title)[class]{style}
+	 * Parses [la trine]: http://www.latrine.cz/
 	 * @param  array<?string>  $matches
 	 */
 	private function parseDefinition(array $matches): string
 	{
 		/** @var array{string, string, string, ?string, ?string} $matches */
 		[, $mRef, $mLink, $mLabel, $mMod] = $matches;
-		// [1] => [ (reference) ]
-		// [2] => link
-		// [3] => ...
-		// [4] => .(title)[class]{style}
+		if ($mMod || $mLabel) {
+			trigger_error('Modifiers and label in link definitions are deprecated.', E_USER_DEPRECATED);
+		}
 
 		$link = new Link($mLink);
-		$link->label = trim($mLabel ?? '');
-		$link->modifier->setProperties($mMod);
 		$this->checkLink($link);
 		$link->name = Texy\Helpers::toLower($mRef);
 		$this->references[$link->name] = $link;
@@ -120,22 +112,8 @@ final class LinkReferenceModule extends Texy\Module
 
 		$link->type = $link::BRACKET;
 
-		if ($link->label != '') { // null or ''
-			// prevent circular references
-			assert($link->name !== null);
-			if (isset(self::$livelock[$link->name])) {
-				$content = $link->label;
-			} else {
-				self::$livelock[$link->name] = true;
-				$lineParser = $texy->createInlineParser();
-				$el = new Texy\HtmlElement(null, $lineParser->parse($link->label));
-				$content = $el->toString($texy);
-				unset(self::$livelock[$link->name]);
-			}
-		} else {
-			$content = $texy->autolinkModule->textualUrl($link);
-			$content = $texy->protect($content, $texy::CONTENT_TEXTUAL);
-		}
+		$content = $texy->autolinkModule->textualUrl($link);
+		$content = $texy->protect($content, $texy::CONTENT_TEXTUAL);
 
 		return $texy->invokeAroundHandlers('linkReference', $parser, [$link, $content]);
 	}
@@ -144,13 +122,9 @@ final class LinkReferenceModule extends Texy\Module
 	/**
 	 * Adds a user-defined link definition (persists across process() calls).
 	 */
-	public function addDefinition(string $name, string $url, ?string $label = null, ?string $title = null): void
+	public function addDefinition(string $name, string $url): void
 	{
 		$link = new Link($url);
-		$link->label = $label ?? '';
-		if ($title !== null) {
-			$link->modifier->title = $title;
-		}
 		$link->name = Texy\Helpers::toLower($name);
 		$this->references[$link->name] = $link;
 	}
@@ -203,7 +177,6 @@ final class LinkReferenceModule extends Texy\Module
 			$image = $texy->imageModule->getReference($dest);
 			if ($image) {
 				$link = new Link($image->linkedURL ?? $image->URL);
-				$link->modifier = $image->modifier;
 			}
 		}
 
