@@ -215,6 +215,7 @@ Rows start with `|`, cells are separated by `|`:
 | Eva  | Nova  | Brno
 ```
 
+- **Caption:** a line `|## Caption text` above the first row becomes `<caption>`. `=` works like `#`, the opening chars may be repeated after the text (`|## Caption ##|`), and the text may contain inline markup.
 - **Header row(s):** separate the head with a dashed line `|---…`.
 - **Row headers:** start the cell with `|*` to produce `<th>`.
 - **Colspan:** end the cell with `||` (empty following cell merges left).
@@ -224,6 +225,7 @@ Rows start with `|`, cells are separated by `|`:
 
 ```texy
 .[data-table]
+|## Price list
 | Name       | .> Price | In stock
 |------------|----------|---------
 | Product A  | $12      | yes

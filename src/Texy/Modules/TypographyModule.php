@@ -9,6 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Patterns;
+use Texy\Syntax;
 
 
 /**
@@ -90,21 +91,13 @@ final class TypographyModule extends Texy\Module
 	/** @var array<string, string> */
 	private array $pattern = [];
 
+	/** @var ?array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}} */
+	private ?array $compiledQuotes = null;
+
 
 	public function __construct(Texy\Texy $texy)
 	{
-		$texy->registerPostLine($this->postLine(...), 'typography');
-	}
-
-
-	public function beforeParse(string &$text): void
-	{
-		$locale = self::$locales[$this->locale] ?? self::$locales['en'];
-		$dq = $locale['doubleQuotes'];
-		$sq = $locale['singleQuotes'];
-		foreach (self::$patterns as $k => $v) {
-			$this->pattern[$k] = strtr($v, [':ldq:' => $dq[0], ':rdq:' => $dq[1], ':lsq:' => $sq[0], ':rsq:' => $sq[1]]);
-		}
+		$texy->registerPostLine($this->postLine(...), Syntax::Typography);
 	}
 
 
@@ -114,6 +107,24 @@ final class TypographyModule extends Texy\Module
 			$text = Texy\Regexp::replace($text, '~\ {2,}~', ' ');
 		}
 
-		return Texy\Regexp::replace($text, $this->pattern);
+		return Texy\Regexp::replace($text, $this->getReplacements());
+	}
+
+
+	/** @return array<string, string> */
+	private function getReplacements(): array
+	{
+		// compared by value, so both changing $locale and mutating $locales invalidate the cache
+		$quotes = self::$locales[$this->locale] ?? self::$locales['en'];
+		if ($quotes !== $this->compiledQuotes) {
+			$this->compiledQuotes = $quotes;
+			$dq = $quotes['doubleQuotes'];
+			$sq = $quotes['singleQuotes'];
+			foreach (self::$patterns as $k => $v) {
+				$this->pattern[$k] = strtr($v, [':ldq:' => $dq[0], ':rdq:' => $dq[1], ':lsq:' => $sq[0], ':rsq:' => $sq[1]]);
+			}
+		}
+
+		return $this->pattern;
 	}
 }

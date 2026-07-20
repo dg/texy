@@ -18,45 +18,42 @@
  * This becomes links to #comm-1 and #comm-2 on the page.
  */
 
+use Texy\Nodes\LinkNode;
+use Texy\Output\Html;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') {
 	die('Install packages using `composer install`');
 }
 
 
-/**
- * Handler for undefined references
- *
- * When Texy finds a reference like [1] that isn't defined elsewhere,
- * it calls this handler. We use it to create links to comment anchors.
- */
-function newReferenceHandler(Texy\HandlerInvocation $parser, $refName): Texy\HtmlElement|string|null
-{
-	// Map of comment IDs to author names
-	$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
-
-	// Only handle numeric references that exist in our list
-	if (!isset($names[$refName])) {
-		return null; // Let Texy handle it (will show as plain text)
-	}
-
-	$name = $names[$refName];
-
-	// Create a link to the comment anchor
-	$el = new Texy\HtmlElement('a');
-	$el->attrs['href'] = '#comm-' . $refName;  // Links to <div id="comm-1">
-	$el->attrs['class'][] = 'comment';
-	$el->attrs['rel'] = 'nofollow';            // Important for SEO/spam prevention
-	$el->setText("[$refName] $name:");
-
-	return $el;
-}
-
-
 $texy = new Texy;
 
+
 // Register our reference handler
-$texy->addHandler('newReference', newReferenceHandler(...));
+// A bare reference like [1] becomes a LinkNode whose $ref keeps the written name
+$texy->htmlOutput->registerHandler(
+	function (LinkNode $node, Html\Renderer $gen): Html\Element|string|null {
+		// Map of comment IDs to author names
+		$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];
+		$refName = $node->ref;
+
+		// Only handle numeric references that exist in our list
+		if ($refName === null || !isset($names[$refName])) {
+			return null; // not ours - let the default renderer handle it
+		}
+
+		$name = $names[$refName];
+
+		// Create a link to the comment anchor
+		$el = new Html\Element('a');
+		$el->attrs['href'] = '#comm-' . $refName;  // Links to <div id="comm-1">
+		$el->attrs['class'][] = 'comment';
+		$el->attrs['rel'] = 'nofollow';            // Important for SEO/spam prevention
+		$el->setText("[$refName] $name:");
+
+		return $el;
+	},
+);
 
 // IMPORTANT: Use safe mode for user-submitted content!
 // This prevents XSS attacks by:
@@ -65,10 +62,13 @@ $texy->addHandler('newReference', newReferenceHandler(...));
 // - Adding rel="nofollow" to links
 Texy\Configurator::safeMode($texy);
 
+// Bare [ref] references are opt-in
+$texy->allowed[Texy\Syntax::LinkReference] = true;
+
 // Alternative: If you want to disable specific features manually:
-// $texy->allowed['image'] = false;
-// $texy->allowed['figure'] = false;
-// $texy->allowed['linkURL'] = false;
+// $texy->allowed[Texy\Syntax::Image] = false;
+// $texy->allowed[Texy\Syntax::Figure] = false;
+// $texy->allowed[Texy\Syntax::AutolinkUrl] = false;
 
 
 // Process the comment text

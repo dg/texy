@@ -8,6 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
+use Texy\Syntax;
 use function count, ord;
 
 
@@ -69,7 +70,7 @@ final class HyphenationModule extends Texy\Module
 		$this->before_h = array_flip($this->before_h);
 		$this->doubleVowels = array_flip($this->doubleVowels);
 
-		$texy->registerPostLine($this->postLine(...), 'longwords');
+		$texy->registerPostLine($this->postLine(...), Syntax::Hyphenation);
 	}
 
 
