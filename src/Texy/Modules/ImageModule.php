@@ -14,6 +14,7 @@ use Texy\Modifier;
 use Texy\Node;
 use Texy\Nodes\ContentNode;
 use Texy\Nodes\DocumentNode;
+use Texy\Nodes\FigureNode;
 use Texy\Nodes\ImageDefinitionNode;
 use Texy\Nodes\ImageNode;
 use Texy\Nodes\LinkNode;
@@ -27,10 +28,25 @@ use function count, strlen;
 
 
 /**
- * Processes image syntax and detects image dimensions.
+ * Processes image and figure (image with caption) syntax.
  */
 final class ImageModule extends Texy\Module
 {
+	/** the [* url .(title) alignment ] part, shared by the image and figure syntaxes */
+	private const ImagePattern = '
+			\[\* \ *+                         # opening bracket with asterisk
+			([^\n]{1,1000})                   # URLs (1)
+			' . Patterns::Modifier . '?       # modifier (2)
+			\ *+
+			( \* | (?<! < ) > | < )           # alignment (3)
+			]';
+
+	/** the optional :LINK (or :: self link) suffix */
+	private const LinkPattern = '
+			(?:
+				:(' . Patterns::LinkUrl . ' | : ) # link or just colon (4)
+			)??';
+
 	/** @var array<string, ImageDefinitionNode> collected image definitions */
 	private array $definitions = [];
 
@@ -51,16 +67,7 @@ final class ImageModule extends Texy\Module
 		// [*image*]:LINK
 		$this->texy->registerLinePattern(
 			$this->parseImage(...),
-			'~
-				\[\* \ *+                         # opening bracket with asterisk
-				([^\n]{1,1000})                   # URLs (1)
-				' . Patterns::Modifier . '?       # modifier (2)
-				\ *+
-				( \* | (?<! < ) > | < )           # alignment (3)
-				]
-				(?:
-					:(' . Patterns::LinkUrl . ' | : ) # link or just colon (4)
-				)??
+			'~' . self::ImagePattern . self::LinkPattern . '
 			~Ux',
 			Syntax::Image,
 		);
@@ -79,6 +86,20 @@ final class ImageModule extends Texy\Module
 				\s*
 			$~mUx',
 			Syntax::ImageDefinition,
+		);
+
+		// [*image*]:link *** caption
+		$this->texy->registerBlockPattern(
+			$this->parseFigure(...),
+			'~^
+				(?>' . self::ImagePattern . ')' . self::LinkPattern . '
+				(?:
+					\ ++ \*\*\* \ ++              # separator
+					(.{0,2000})                   # caption (5)
+				)?
+				' . Patterns::ModifierHAlign . '?     # modifier (6)
+			$~mUx',
+			Syntax::Figure,
 		);
 	}
 
@@ -131,6 +152,56 @@ final class ImageModule extends Texy\Module
 	}
 
 
+	/**
+	 * Parses [*image*]:link *** caption .(title)[class]{style}>.
+	 * @param  array{string, string, ?string, string, ?string, ?string, ?string}  $matches
+	 * @param  array{int, int, ?int, int, ?int, ?int, ?int}  $offsets
+	 */
+	public function parseFigure(ParseContext $context, array $matches, array $offsets): ?FigureNode
+	{
+		[, $mURLs, $mImgMod, $mAlign, $mLink, $mContent, $mMod] = $matches;
+
+		$parsed = $this->parseImageContent($mURLs);
+		$modifier = Modifier::parse($mImgMod . $mAlign);
+
+		if ($parsed['url'] === null) {
+			return null;
+		}
+
+		// ImageNode source span is "[* ... <alignment>]"
+		$imageEnd = $offsets[3] + strlen($mAlign) + 1; // 1 = "]"
+		$imageNode = new ImageNode(
+			$parsed['url'],
+			$parsed['width'],
+			$parsed['height'],
+			$modifier,
+			new Range($offsets[0], $imageEnd - $offsets[0]),
+		);
+
+		$image = $mLink
+			? $this->wrapInLink(
+				$imageNode,
+				$mLink,
+				new Range($offsets[0], $offsets[4] + strlen($mLink) - $offsets[0]),
+			)
+			: $imageNode;
+
+		// Parse caption as inline content
+		$caption = null;
+		$mContent = trim($mContent ?? '');
+		if ($mContent !== '') {
+			$caption = $context->parseInline($mContent, $offsets[5] ?? $offsets[0]);
+		}
+
+		return new FigureNode(
+			$image,
+			$caption,
+			Modifier::parse($mMod, $offsets[6] ?? null),
+			new Range($offsets[0], strlen($matches[0])),
+		);
+	}
+
+
 	private function wrapInLink(ImageNode $imageNode, string $mLink, Range $range): LinkNode
 	{
 		if ($mLink === ':') {
@@ -157,7 +228,7 @@ final class ImageModule extends Texy\Module
 
 	/**
 	 * Parse image content: "image.jpg 100x200"
-	 * @return array{url: ?string, width: ?int, height: ?int, linkedUrl: ?string}
+	 * @return array{url: ?string, width: ?int, height: ?int}
 	 */
 	public function parseImageContent(string $content): array
 	{
@@ -188,7 +259,6 @@ final class ImageModule extends Texy\Module
 			'url' => $url,
 			'width' => $width,
 			'height' => $height,
-			'linkedUrl' => null,
 		];
 	}
 
