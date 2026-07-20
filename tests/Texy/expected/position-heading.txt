@@ -1,0 +1,11 @@
+DocumentNode
+  ContentNode
+    HeadingNode [0,19] level=1
+      ContentNode
+        TextNode [0,9] "Title One"
+    HeadingNode [21,16] level=1
+      ContentNode
+        TextNode [24,10] "Surrounded"
+    HeadingNode [39,15] level=2
+      ContentNode
+        TextNode [39,7] "Another"

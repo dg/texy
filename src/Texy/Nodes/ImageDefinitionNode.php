@@ -9,6 +9,7 @@ namespace Texy\Nodes;
 
 use Texy\HasModifier;
 use Texy\Modifier;
+use Texy\Range;
 
 
 /**
@@ -23,6 +24,7 @@ class ImageDefinitionNode extends BlockNode implements HasModifier
 		public ?int $width = null,
 		public ?int $height = null,
 		public ?Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

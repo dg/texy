@@ -15,8 +15,10 @@ use Texy;
  */
 class ContentNode extends Texy\Node
 {
+	/**
+	 * @param array<InlineNode|BlockNode> $children
+	 */
 	public function __construct(
-		/** @var array<InlineNode|BlockNode> */
 		public array $children = [],
 	) {
 	}

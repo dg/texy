@@ -9,6 +9,7 @@ namespace Texy\Nodes;
 
 use Texy;
 use Texy\HasModifier;
+use Texy\Range;
 
 
 /**
@@ -24,6 +25,7 @@ class ListNode extends BlockNode implements HasModifier
 		public ListType $type = ListType::Unordered,
 		public ?int $start = null,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 		(function (ListItemNode ...$items) {})(...$items);
 	}

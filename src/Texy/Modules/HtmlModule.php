@@ -12,8 +12,10 @@ use Texy\Nodes\HtmlCommentNode;
 use Texy\Nodes\HtmlTagNode;
 use Texy\Parsing\ParseContext;
 use Texy\Patterns;
+use Texy\Range;
 use Texy\Regexp;
 use Texy\Syntax;
+use function strlen;
 use const PREG_SET_ORDER;
 
 
@@ -51,7 +53,7 @@ final class HtmlModule extends Texy\Module
 		);
 
 		$this->texy->registerLinePattern(
-			fn(ParseContext $context, array $matches) => new HtmlCommentNode((string) $matches[1]),
+			$this->parseComment(...),
 			'~
 				<!--
 				( [^' . Patterns::MARK . ']*? )
@@ -63,12 +65,23 @@ final class HtmlModule extends Texy\Module
 
 
 	/**
-	 * Parses <tag attr="...">
-	 * @param  array<?string>  $matches
+	 * Parses <!-- comment -->
+	 * @param  array{string, string}  $matches
+	 * @param  array{int, int}  $offsets
 	 */
-	public function parseTag(ParseContext $context, array $matches): ?HtmlTagNode
+	public function parseComment(ParseContext $context, array $matches, array $offsets): HtmlCommentNode
 	{
-		/** @var array{string, string, string, string, string} $matches */
+		return new HtmlCommentNode($matches[1], new Range($offsets[0], strlen($matches[0])));
+	}
+
+
+	/**
+	 * Parses <tag attr="...">
+	 * @param  array{string, string, string, string, string}  $matches
+	 * @param  array{int, int, int, int, int}  $offsets
+	 */
+	public function parseTag(ParseContext $context, array $matches, array $offsets): ?HtmlTagNode
+	{
 		[, $mEnd, $mTag, $mAttr, $mEmpty] = $matches;
 
 		$isStart = $mEnd !== '/';
@@ -94,6 +107,7 @@ final class HtmlModule extends Texy\Module
 			$isStart ? $this->parseAttributes($mAttr) : [],
 			closing: !$isStart,
 			selfClosing: $isEmpty,
+			range: new Range($offsets[0], strlen($matches[0])),
 		);
 	}
 

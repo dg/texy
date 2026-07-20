@@ -9,6 +9,7 @@ namespace Texy\Nodes;
 
 use Texy;
 use Texy\HasModifier;
+use Texy\Range;
 
 
 /**
@@ -20,6 +21,7 @@ class HorizontalRuleNode extends BlockNode implements HasModifier
 	public function __construct(
 		public string $type,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 

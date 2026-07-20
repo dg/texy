@@ -9,6 +9,7 @@ namespace Texy\Parsing;
 
 use Texy\Nodes;
 use Texy\Nodes\TextNode;
+use Texy\Range;
 use Texy\Regexp;
 use function strlen;
 
@@ -19,13 +20,13 @@ use function strlen;
 class InlineParser
 {
 	public function __construct(
-		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}> */
+		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}> */
 		public array $patterns,
 	) {
 	}
 
 
-	/** @param \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode $handler */
+	/** @param \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode $handler */
 	public function addPattern(string $name, string $pattern, \Closure $handler): void
 	{
 		$this->patterns[$name] = [
@@ -49,8 +50,8 @@ class InlineParser
 
 	/**
 	 * First match of one pattern at or after the offset, in the shape the loop works with.
-	 * @param  array{handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode, pattern: string}  $info
-	 * @return ?array{name: string, offset: int, length: int, match: array<?string>, handler: \Closure(ParseContext, array<?string>, string): ?Nodes\InlineNode}
+	 * @param  array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}  $info
+	 * @return ?array{name: string, offset: int, length: int, match: array<?string>, offsets: array<?int>, handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode}
 	 */
 	private function match(string $text, array $info, string $name, int $offset): ?array
 	{
@@ -66,9 +67,10 @@ class InlineParser
 				continue;
 			}
 
-			$flatten = [];
+			$flatten = $offsets = [];
 			foreach ($m as $key => $value) {
 				$flatten[$key] = $value[0];
+				$offsets[$key] = $value[0] === null ? null : $value[1];
 			}
 
 			return [
@@ -76,6 +78,7 @@ class InlineParser
 				'offset' => $m[0][1],
 				'length' => strlen($m[0][0]),
 				'match' => $flatten,
+				'offsets' => $offsets,
 				'handler' => $info['handler'],
 			];
 		}
@@ -84,13 +87,13 @@ class InlineParser
 	}
 
 
-	public function parse(ParseContext $context, string $text): Nodes\ContentNode
+	public function parse(ParseContext $context, string $text, int $baseOffset = 0): Nodes\ContentNode
 	{
 		if ($text === '' || !$this->patterns) {
 			if ($text === '') {
 				return new Nodes\ContentNode;
 			}
-			return new Nodes\ContentNode([new TextNode($text)]);
+			return new Nodes\ContentNode([new TextNode($text, new Range($baseOffset, strlen($text)))]);
 		}
 
 		// One candidate per pattern, refreshed as the position moves. Searching every
@@ -102,7 +105,6 @@ class InlineParser
 		foreach ($this->patterns as $name => $info) {
 			$candidates[$name] = $this->match($text, $info, $name, 0);
 		}
-
 
 		$res = [];
 		$pos = 0;
@@ -123,8 +125,14 @@ class InlineParser
 				break;
 			}
 
-			// Call handler
-			$node = ($best['handler'])($context, $best['match'], $best['name']);
+			// Adjust offsets to absolute positions
+			$absoluteOffsets = [];
+			foreach ($best['offsets'] as $key => $offset) {
+				$absoluteOffsets[$key] = $offset !== null ? $baseOffset + $offset : null;
+			}
+
+			// Call handler with offsets
+			$node = ($best['handler'])($context, $best['match'], $absoluteOffsets, $best['name']);
 			if ($node === null) {
 				// Handler rejected - other patterns at this position still get their turn
 				$candidates[$best['name']] = $this->match($text, $this->patterns[$best['name']], $best['name'], $best['offset'] + 1);
@@ -133,7 +141,10 @@ class InlineParser
 
 			// Add text before this match (only now - a rejected match must not emit it)
 			if ($best['offset'] > $pos) {
-				$res[] = new TextNode(substr($text, $pos, $best['offset'] - $pos));
+				$res[] = new TextNode(
+					substr($text, $pos, $best['offset'] - $pos),
+					new Range($baseOffset + $pos, $best['offset'] - $pos),
+				);
 			}
 
 			$res[] = $node;
@@ -142,7 +153,10 @@ class InlineParser
 
 		// Add remaining text
 		if ($pos < strlen($text)) {
-			$res[] = new TextNode(substr($text, $pos));
+			$res[] = new TextNode(
+				substr($text, $pos),
+				new Range($baseOffset + $pos, strlen($text) - $pos),
+			);
 		}
 
 		return new Nodes\ContentNode($res);

@@ -9,6 +9,7 @@ namespace Texy\Nodes;
 
 use Texy;
 use Texy\HasModifier;
+use Texy\Range;
 
 
 /**
@@ -22,6 +23,7 @@ class TableNode extends BlockNode implements HasModifier
 		/** @var TableRowNode[] */
 		public array $rows = [],
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 		/** caption written as |## Text above the first row */
 		public ?ContentNode $caption = null,
 	) {

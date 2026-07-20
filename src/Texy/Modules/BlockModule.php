@@ -14,7 +14,9 @@ use Texy\Nodes\CodeBlockNode;
 use Texy\Nodes\CommentNode;
 use Texy\Nodes\SectionNode;
 use Texy\Parsing\ParseContext;
+use Texy\Range;
 use Texy\Syntax;
+use function strlen;
 use const ENT_NOQUOTES;
 
 
@@ -62,43 +64,49 @@ final class BlockModule extends Texy\Module
 
 	/**
 	 * Parses blocks /--foo
-	 * @param  array<?string>  $matches
+	 * @param  array{string, string, ?string, string}  $matches
+	 * @param  array{int, int, ?int, int}  $offsets
 	 */
-	public function parse(ParseContext $context, array $matches): ?BlockNode
+	public function parse(ParseContext $context, array $matches, array $offsets): ?BlockNode
 	{
-		/** @var array{string, string, ?string, string} $matches */
 		[, $mParam, $mMod, $mContent] = $matches;
 
-		$mod = Texy\Modifier::parse($mMod);
+		$mod = Texy\Modifier::parse($mMod, $offsets[2] ?? null);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
 		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . $parts[0];
 		$param = empty($parts[1]) ? null : $parts[1];
 
 		$content = Helpers::outdent($mContent);
+		$range = new Range($offsets[0], strlen($matches[0]));
 
 		if ($blocktype === Syntax::BlockCode) {
-			return new CodeBlockNode('code', $content, $param, $mod);
+			return new CodeBlockNode('code', $content, $param, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockDefault || $blocktype === Syntax::BlockPre) {
-			return new CodeBlockNode($blocktype === Syntax::BlockPre ? 'pre' : 'default', $content, $param, $mod);
+			return new CodeBlockNode($blocktype === Syntax::BlockPre ? 'pre' : 'default', $content, $param, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockComment) {
-			return new CommentNode($content);
+			return new CommentNode($content, $range);
 
 		} elseif ($blocktype === Syntax::BlockHtml) {
 			// html/text blocks don't use outdent - preserve original indentation
-			return new CodeBlockNode('html', trim($mContent, "\n"), null, $mod);
+			return new CodeBlockNode('html', trim($mContent, "\n"), null, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockText) {
 			// html/text blocks don't use outdent - preserve original indentation
-			return new CodeBlockNode('text', trim($mContent, "\n"), null, $mod);
+			return new CodeBlockNode('text', trim($mContent, "\n"), null, $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockDiv) {
-			$content = Helpers::outdent($mContent, firstLine: true);
+			[$content, $map] = Texy\Parsing\OffsetMap::outdentLines(
+				Texy\Parsing\OffsetMap::linesOf($mContent, $offsets[3]),
+				firstLine: true,
+			);
 			if ($content === '') {
 				return null;
 			}
-			return new SectionNode($context->parseBlock($content), 'div', $mod);
+			$parsed = $context->parseBlock($content);
+			$map->applyTo($parsed);
+			return new SectionNode($parsed, 'div', $mod, $range);
 
 		} elseif ($blocktype === Syntax::BlockTexySource) {
 			// Store raw texy content, will be parsed and displayed as HTML source in handler
@@ -106,7 +114,7 @@ final class BlockModule extends Texy\Module
 			if ($content === '') {
 				return null;
 			}
-			return new CodeBlockNode('texysource', $content, null, $mod);
+			return new CodeBlockNode('texysource', $content, null, $mod, $range);
 		}
 
 		return null;

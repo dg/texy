@@ -70,6 +70,15 @@ parameters:
 				- src/Texy/Output/Html/Config.php
 				- src/Texy/Output/Html/Renderer.php
 
+		# Pattern handlers are intentionally polymorphic: each declares the exact capture
+		# shape of its own regexp, so no single Closure signature fits them all -- a
+		# concrete one would be contravariantly narrower and reject every real handler.
+		-
+			identifier: missingType.callable
+			message: '#^Method Texy\\Texy\:\:register(Line|Block)Pattern\(\) has parameter \$handler with no signature specified for Closure\.$#'
+			count: 2
+			path: src/Texy/Texy.php
+
 		# The handler table is a correlated map class-string<X> => Closure(X, self),
 		# which PHPStan cannot express: each handler declares its own node class,
 		# contravariantly narrower than the Node in the property type. Dispatch is by

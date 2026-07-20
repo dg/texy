@@ -9,6 +9,7 @@ namespace Texy\Nodes;
 
 use Texy;
 use Texy\HasModifier;
+use Texy\Range;
 
 
 /**
@@ -29,6 +30,7 @@ class CodeBlockNode extends BlockNode implements HasModifier
 		public string $code,
 		public ?string $language = null,
 		public ?Texy\Modifier $modifier = null,
+		public ?Range $range = null,
 	) {
 	}
 
