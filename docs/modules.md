@@ -7,7 +7,7 @@ Modules are the basic organizational unit of Texy. Each module encapsulates the 
 1. **Registering syntaxes.** A module registers its line and block patterns in its `beforeParse()` method (called on every `process()`) via `Texy::registerLinePattern()` / `registerBlockPattern()`; post-line handlers are registered once in the constructor with `registerPostLine()`. This tells the parser: "when you find these patterns, call me."
 2. **Implementing element handlers.** The module registers default handlers (via `Texy::addHandler()`) for the elements its syntaxes produce. These handlers contain the logic that turns matched constructs into `HtmlElement` objects.
 3. **Providing configuration.** Public properties let users adjust the module's behavior without touching its code (e.g. `ImageModule::$root` for the image URL prefix).
-4. **Managing module-specific state.** E.g. `HeadingModule` collects headings into its `$TOC` array; `LinkReferenceModule` maintains the dictionary of link references. This state is private to the module.
+4. **Managing module-specific state.** E.g. `LinkReferenceModule` maintains the dictionary of link references. This state is private to the module; per-parse *results* belong in the tree, not on the module (see `HeadingNode::$tocTitle`).
 
 Modules are designed as independent units: each can work on its own and must not depend on the implementation details of other modules. Communication happens through shared value objects (`Texy\Link`, `Texy\Image`), not through direct method calls.
 
@@ -70,7 +70,7 @@ All modules live in `src/Texy/Modules/`. Registered syntax IDs and their default
 | **HorizontalRuleModule** | Horizontal rules `---` / `***` (`horizline`); type-specific CSS classes via `$classes`. |
 | **BlockQuoteModule** | Quotations introduced by `>` (`blockquote`), including nested quotes and link citation; fires `afterBlockquote`. |
 | **TableModule** | Tables (`table`) with head/body detection, row headers, colspan/rowspan (helper class `TableCellElement`); fires `afterTable`. One of the most complex modules. |
-| **HeadingModule** | Underlined (`heading/underlined`) and surrounded (`heading/surrounded`) headings; assigns levels in `afterParse` according to the balancing mode (`DYNAMIC`/`FIXED`), generates IDs, collects `$TOC` and `$title`; invokes the `heading` element. |
+| **HeadingModule** | Underlined (`heading/underlined`) and surrounded (`heading/surrounded`) headings; registers `Passes\HeadingPass`, which assigns levels according to the balancing mode (`DYNAMIC`/`FIXED`), fills `HeadingNode::$tocTitle` and generates IDs; invokes the `heading` element. |
 | **ListModule** | Bulleted, numbered (`list`) and definition (`list/definition`) lists; bullet styles configured via `$bullets`; registers its patterns in `beforeParse` (they depend on `$bullets`); fires `afterList` / `afterDefinitionList`. |
 
 ### Post-processing modules

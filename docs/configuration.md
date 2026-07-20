@@ -88,11 +88,19 @@ $texy->nontextParagraph = 'div';   // element for paragraphs without text (e.g. 
 After `process()`:
 
 ```php
-$texy->headingModule->title;   // first heading text (for <title>)
-$texy->headingModule->TOC;     // table of contents: [{el, level, type, title}]
 $texy->getDOM();               // the parsed HtmlElement tree
 $texy->toText();               // plain-text rendition
 ```
+
+Headings are facts about the document, so they are read from the parsed tree:
+
+```php
+$document = $texy->parse($text);
+$headings = Texy\Nodes\HeadingNode::collectFrom($document); // document order, texysource excluded
+$title = $headings[0]?->tocTitle;                           // document title (for <title>)
+```
+
+`HeadingModule::$title` and `$TOC` still work but are deprecated: they hold only the last parse's results, while the tree carries them for as long as you hold the document.
 
 ## Modules
 
