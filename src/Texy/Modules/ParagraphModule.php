@@ -180,7 +180,7 @@ final class ParagraphModule extends Texy\Module
 						$result[] = new LineBreakNode;
 					}
 					if ($part !== '') {
-						$result[] = new TextNode($part, $node->range);
+						$result[] = new TextNode($part, $node->range); // content of an already decoded TextNode
 					}
 				}
 			} elseif ($node instanceof Nodes\PhraseNode) {

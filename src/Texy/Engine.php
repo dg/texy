@@ -38,12 +38,6 @@ class Engine
 	private array $blockPatterns = [];
 
 	/**
-	 * Post-line processing handlers.
-	 * @var array<string, \Closure(string): string>
-	 */
-	private array $postHandlers = [];
-
-	/**
 	 * Gap handler for content between block patterns.
 	 * @var \Closure(ParseContext, string, int): array<Nodes\BlockNode>
 	 */
@@ -96,17 +90,6 @@ class Engine
 
 
 	/**
-	 * Register a post-line processing handler.
-	 *
-	 * @param  \Closure(string): string  $handler
-	 */
-	public function registerPostLine(\Closure $handler, string $name): void
-	{
-		$this->postHandlers[$name] = $handler;
-	}
-
-
-	/**
 	 * Set custom gap handler for content between block patterns.
 	 *
 	 * @param  \Closure(ParseContext, string, int): array<Nodes\BlockNode>  $handler
@@ -124,18 +107,7 @@ class Engine
 	 */
 	public function getPatternNames(): array
 	{
-		return array_keys(array_merge($this->linePatterns, $this->blockPatterns, $this->postHandlers));
-	}
-
-
-	/**
-	 * Get post-line handlers.
-	 *
-	 * @return array<string, \Closure(string): string>
-	 */
-	public function getPostHandlers(): array
-	{
-		return $this->postHandlers;
+		return array_keys(array_merge($this->linePatterns, $this->blockPatterns));
 	}
 
 

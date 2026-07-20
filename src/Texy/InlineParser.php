@@ -51,7 +51,7 @@ class InlineParser
 			if ($text === '') {
 				return new Nodes\ContentNode;
 			}
-			return new Nodes\ContentNode([new TextNode($text, new Range($baseOffset, strlen($text)))]);
+			return new Nodes\ContentNode([new TextNode(Helpers::decodeEntities($text), new Range($baseOffset, strlen($text)))]);
 		}
 
 		// Find all matches for all patterns
@@ -81,7 +81,7 @@ class InlineParser
 		}
 
 		if (!$allMatches) {
-			return new Nodes\ContentNode([new TextNode($text, new Range($baseOffset, strlen($text)))]);
+			return new Nodes\ContentNode([new TextNode(Helpers::decodeEntities($text), new Range($baseOffset, strlen($text)))]);
 		}
 
 		// Sort by offset, longer matches first for same offset
@@ -111,7 +111,7 @@ class InlineParser
 			// Add text before this match (only now - a rejected match must not emit it)
 			if ($m['offset'] > $pos) {
 				$res[] = new TextNode(
-					substr($text, $pos, $m['offset'] - $pos),
+					Helpers::decodeEntities(substr($text, $pos, $m['offset'] - $pos)),
 					new Range($baseOffset + $pos, $m['offset'] - $pos),
 				);
 			}
@@ -123,7 +123,7 @@ class InlineParser
 		// Add remaining text
 		if ($pos < strlen($text)) {
 			$res[] = new TextNode(
-				substr($text, $pos),
+				Helpers::decodeEntities(substr($text, $pos)),
 				new Range($baseOffset + $pos, strlen($text) - $pos),
 			);
 		}

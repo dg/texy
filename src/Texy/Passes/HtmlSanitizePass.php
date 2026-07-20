@@ -7,6 +7,7 @@
 
 namespace Texy\Passes;
 
+use Texy\Helpers;
 use Texy\HtmlPolicy;
 use Texy\Node;
 use Texy\Nodes;
@@ -59,7 +60,7 @@ final class HtmlSanitizePass
 		foreach ($children as $child) {
 			if ($child instanceof HtmlTagNode) {
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, $child->closing)) {
-					$out[] = new TextNode($this->policy->reconstructTag($child), $child->range);
+					$out[] = new TextNode(Helpers::decodeEntities($this->policy->reconstructTag($child)), $child->range);
 					continue;
 				}
 
@@ -67,11 +68,11 @@ final class HtmlSanitizePass
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, closing: false)) {
 					$open = new HtmlTagNode($child->name, $child->attributes, range: $child->range);
 					$close = $child->closingTag ?? new HtmlTagNode($child->name, closing: true);
-					$out[] = new TextNode($this->policy->reconstructTag($open), $child->range);
+					$out[] = new TextNode(Helpers::decodeEntities($this->policy->reconstructTag($open)), $child->range);
 					foreach ($this->sanitize($child->content->children) as $inner) {
 						$out[] = $inner;
 					}
-					$out[] = new TextNode($this->policy->reconstructTag($close), $close->range);
+					$out[] = new TextNode(Helpers::decodeEntities($this->policy->reconstructTag($close)), $close->range);
 					continue;
 				}
 			}

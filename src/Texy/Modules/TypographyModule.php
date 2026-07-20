@@ -95,7 +95,7 @@ final class TypographyModule extends Texy\Module
 
 	public function __construct(Texy\Texy $texy)
 	{
-		$texy->registerPostLine($this->postLine(...), Syntax::Typography);
+		$texy->allowed[Syntax::Typography] ??= true;
 	}
 
 
