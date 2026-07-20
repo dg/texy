@@ -45,10 +45,10 @@ class Texy
 	public bool $removeSoftHyphens = true;
 
 	/**
-	 * Experimental: apply typography and hyphenation as an AST transform
-	 * instead of HTML string post-processing. See docs/local/proposals/output-architecture.md.
+	 * Apply typography and hyphenation as an AST transform (default) instead
+	 * of the legacy HTML string post-processing (false).
 	 */
-	public bool $astTypography = false;
+	public bool $astTypography = true;
 
 	// Modules with runtime state (kept as-is)
 	public Modules\ParagraphModule $paragraphModule;
