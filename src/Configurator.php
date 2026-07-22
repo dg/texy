@@ -7,8 +7,6 @@
 
 namespace Texy;
 
-use function is_array;
-
 
 /**
  * Texy basic configurators.
@@ -90,10 +88,7 @@ class Configurator
 		$texy->allowedSyntax[Syntax::LinkDefinition] = false;
 		$texy->allowedSyntax[Syntax::LinkReference] = false;
 		$texy->config->phraseLinks = false;
-
-		if (is_array($texy->htmlPolicy->allowedTags)) {
-			unset($texy->htmlPolicy->allowedTags['a']);
-		} // TODO: else...
+		self::disallowTags($texy, 'a');
 	}
 
 
@@ -105,14 +100,21 @@ class Configurator
 		$texy->allowedSyntax[Syntax::Image] = false;
 		$texy->allowedSyntax[Syntax::Figure] = false;
 		$texy->allowedSyntax[Syntax::ImageDefinition] = false;
+		self::disallowTags($texy, 'img', 'object', 'embed', 'applet');
+	}
 
-		if (is_array($texy->htmlPolicy->allowedTags)) {
-			unset(
-				$texy->htmlPolicy->allowedTags['img'],
-				$texy->htmlPolicy->allowedTags['object'],
-				$texy->htmlPolicy->allowedTags['embed'],
-				$texy->htmlPolicy->allowedTags['applet'],
-			);
-		} // TODO: else...
+
+	private static function disallowTags(Texy $texy, string ...$names): void
+	{
+		$tags = $texy->htmlPolicy->allowedTags;
+		if ($tags === false) {
+			return;
+		}
+
+		$texy->htmlPolicy->allowedTags = array_filter(
+			$tags === true ? Output\Html\Schema::defaultAllowedTags() : $tags,
+			fn($value, $key) => !in_array($key, $names, true) && !in_array($value, $names, true),
+			ARRAY_FILTER_USE_BOTH,
+		);
 	}
 }

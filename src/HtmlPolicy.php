@@ -18,7 +18,7 @@ use function is_array, is_string;
  */
 final class HtmlPolicy
 {
-	/** @var bool|array<string, bool|array<int, string>>  allowed HTML tags and their attributes; true allows any tag, false none */
+	/** @var bool|array<array-key, bool|array<int, string>|string>  allowed tags and their attributes, a listed tag has none; true allows any tag, false none */
 	public bool|array $allowedTags;
 
 	/** @var bool|array<int, string>  allowed classes and IDs; true allows any, false none */
@@ -44,7 +44,9 @@ final class HtmlPolicy
 			return false;
 		}
 
-		return !is_array($this->allowedTags) || isset($this->allowedTags[$tagName]);
+		return !is_array($this->allowedTags)
+			|| isset($this->allowedTags[$tagName])
+			|| in_array($tagName, $this->allowedTags, true);
 	}
 
 

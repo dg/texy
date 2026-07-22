@@ -101,9 +101,9 @@ show('allowedTags = false - disables all tags', fn(Texy\Texy $texy) => $texy->ht
 // CUSTOM WHITELIST
 // Specify exactly which tags and attributes are allowed.
 // Format: 'tag-name' => ['allowed', 'attributes']
-// Empty array [] means no attributes are allowed.
+// A tag listed without a key, or with [], allows no attributes.
 // ============================================================
 show('Enable custom tags', fn(Texy\Texy $texy) => $texy->htmlPolicy->allowedTags = [
 	'my-extraTag' => ['attr1'],  // Allow <my-extraTag attr1="...">
-	'strong' => [],              // Allow <strong> with no attributes
+	'strong',                    // Allow <strong> with no attributes
 ]);
