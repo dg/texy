@@ -30,6 +30,26 @@ test('rejected tags become literal text nodes in the AST', function () {
 });
 
 
+test('a tag listed without a key is allowed without attributes', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlPolicy->allowedTags = ['b', 'a' => ['href']];
+	Assert::same(
+		'<p><b>x</b> &lt;i&gt;y&lt;/i&gt; <a href="http://x.cz">z</a></p>',
+		trim($texy->toHtml('<b class="c">x</b> <i>y</i> <a href="http://x.cz" title="t">z</a>')),
+	);
+
+	Texy\Configurator::disableLinks($texy);
+	Assert::same(['b'], $texy->htmlPolicy->allowedTags);
+});
+
+
+test('disabling links or images with all tags allowed keeps the others', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::disableImages($texy);
+	Assert::same('<p><b>x</b> &lt;img src="a.png"&gt;</p>', trim($texy->toHtml('<b>x</b> <img src="a.png">')));
+});
+
+
 test('nested rejected elements are sanitized recursively', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlPolicy->allowedTags = ['b' => true];
