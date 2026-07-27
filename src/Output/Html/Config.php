@@ -82,21 +82,20 @@ class Config
 	public ?string $linkBaseUrl = null;
 
 	// phrases
-	/** @var array<string, string> syntax → HTML tag mapping */
+	/**
+	 * Syntax → HTML tag mapping; Emphasis covers *text* as well, Superscript and Subscript their short forms,
+	 * Abbreviation its quoted form.
+	 * @var array<string, string>
+	 */
 	public array $phraseTags = [
 		Syntax::Strong => 'strong',
 		Syntax::Emphasis => 'em',
-		Syntax::EmphasisSingleAsterisk => 'em',
-		Syntax::EmphasisSingleAsterisk2 => 'em',
 		Syntax::Inserted => 'ins',
 		Syntax::Deleted => 'del',
 		Syntax::Superscript => 'sup',
-		Syntax::SuperscriptShort => 'sup',
 		Syntax::Subscript => 'sub',
-		Syntax::SubscriptShort => 'sub',
 		Syntax::SpanQuotes => 'span',
 		Syntax::SpanTilde => 'span',
-		Syntax::AbbreviationQuotes => 'abbr',
 		Syntax::Abbreviation => 'abbr',
 		Syntax::Code => 'code',
 		Syntax::Quote => 'q',

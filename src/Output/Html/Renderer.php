@@ -22,6 +22,15 @@ use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
  */
 final class Renderer extends NodeRenderer
 {
+	/** phrase syntaxes rendered with the tag of their base syntax, unless phraseTags names one for them */
+	private const PhraseVariants = [
+		Syntax::EmphasisSingleAsterisk => Syntax::Emphasis,
+		Syntax::EmphasisSingleAsterisk2 => Syntax::Emphasis,
+		Syntax::SuperscriptShort => Syntax::Superscript,
+		Syntax::SubscriptShort => Syntax::Subscript,
+		Syntax::AbbreviationQuotes => Syntax::Abbreviation,
+	];
+
 	/** elements whose content HTML reads as it is, without entities */
 	private const RawTextElements = ['script' => 1, 'style' => 1];
 
@@ -622,7 +631,8 @@ final class Renderer extends NodeRenderer
 
 	private function renderPhrase(Nodes\PhraseNode $node): Element
 	{
-		$tag = $this->config->phraseTags[$node->type] ?? 'span';
+		$tags = $this->config->phraseTags;
+		$tag = $tags[$node->type] ?? $tags[self::PhraseVariants[$node->type] ?? ''] ?? 'span';
 
 		if ($node->type === Syntax::StrongEmphasis) {
 			$el = new Element($this->config->phraseTags[Syntax::Strong] ?? 'strong');

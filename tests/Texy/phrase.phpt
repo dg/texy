@@ -119,6 +119,17 @@ test('acronym with explanation', function () {
 });
 
 
+test('a phrase variant uses the tag of its base syntax', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->phraseTags[Texy\Syntax::Emphasis] = 'i';
+	$texy->htmlOutput->phraseTags[Texy\Syntax::Abbreviation] = 'dfn';
+	Assert::same('<p><i>a</i> <i>b</i> <dfn title="t">NATO</dfn></p>', trim($texy->toHtml('*a* //b// NATO((t))')));
+
+	$texy->htmlOutput->phraseTags[Texy\Syntax::EmphasisSingleAsterisk] = 'em';
+	Assert::same('<p><em>a</em> <i>b</i></p>', trim($texy->toHtml('*a* //b//')));
+});
+
+
 test('quoted acronym', function () {
 	Assert::match(
 		'<p><abbr title="and others">et al.</abbr></p>',
