@@ -298,7 +298,7 @@ final class PhraseModule extends Texy\Module
 
 		// For phrase/span and phrase/span-alt, URL makes it a link
 		if ($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) {
-			if ($mLink !== null) {
+			if ($mLink !== null && $this->linksAllowed) {
 				return new LinkNode(
 					url: Texy\Helpers::removeSoftHyphens($mLink),
 					content: $context->parseInline(trim($mContent), $contentOffset),
@@ -309,7 +309,7 @@ final class PhraseModule extends Texy\Module
 					urlRange: $urlRange,
 				);
 
-			} elseif ($mMod === null) {
+			} elseif ($mLink === null && $mMod === null) {
 				return null;
 			}
 		}
@@ -390,12 +390,17 @@ final class PhraseModule extends Texy\Module
 	 * @param  array{string, string, ?string, string}  $matches
 	 * @param  array{int, int, ?int, int}  $offsets
 	 */
-	public function parseLink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
+	public function parseLink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode|ContentNode
 	{
 		[, $mContent, $mMod, $mLink] = $matches;
+		$content = $context->parseInline(trim($mContent), $offsets[1]);
+		if (!$this->linksAllowed) {
+			return $content;
+		}
+
 		return new LinkNode(
 			Texy\Helpers::removeSoftHyphens(trim($mLink)),
-			$context->parseInline(trim($mContent), $offsets[1]),
+			$content,
 			null,  // quicklink and markdown links don't support modifiers
 			new Range($offsets[0], strlen($matches[0])),
 			syntax: $name,
@@ -411,12 +416,17 @@ final class PhraseModule extends Texy\Module
 	 * @param  array{string, string, string, ?string}  $matches
 	 * @param  array{int, int, int, ?int}  $offsets
 	 */
-	public function parseWikilink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode
+	public function parseWikilink(ParseContext $context, array $matches, array $offsets, string $name): LinkNode|ContentNode
 	{
 		[, $mContent, $mLink] = $matches;
+		$content = $context->parseInline(trim($mContent), $offsets[1]);
+		if (!$this->linksAllowed) {
+			return $content;
+		}
+
 		return new LinkNode(
 			Texy\Helpers::removeSoftHyphens(trim($mLink)),
-			$context->parseInline(trim($mContent), $offsets[1]),
+			$content,
 			null,  // wikilinks don't support modifiers
 			new Range($offsets[0], strlen($matches[0])),
 			syntax: $name,

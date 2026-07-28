@@ -172,7 +172,7 @@ test('text after match goes to gapHandler', function () {
 	Assert::count(2, $nodes);
 	Assert::type(TestBlockNode::class, $nodes[0]);
 	Assert::type(GapNode::class, $nodes[1]);
-	Assert::same("paragraph\n", $nodes[1]->content);
+	Assert::same('paragraph', $nodes[1]->content); // trailing newlines are trimmed on entry
 });
 
 
@@ -202,7 +202,7 @@ test('only text without matches', function () {
 
 	Assert::count(1, $nodes);
 	Assert::type(GapNode::class, $nodes[0]);
-	Assert::same("just text\n", $nodes[0]->content);
+	Assert::same('just text', $nodes[0]->content);
 });
 
 
@@ -275,7 +275,7 @@ test('all handlers return null - text goes to gapHandler', function () {
 
 	Assert::count(1, $nodes);
 	Assert::type(GapNode::class, $nodes[0]);
-	Assert::same("# Title\n", $nodes[0]->content);
+	Assert::same('# Title', $nodes[0]->content);
 });
 
 
@@ -336,7 +336,7 @@ test('next() advances position correctly', function () {
 	Assert::count(2, $nodes);
 	Assert::same('block', $nodes[0]->type);
 	Assert::type(GapNode::class, $nodes[1]);
-	Assert::same("after\n", $nodes[1]->content);
+	Assert::same('after', $nodes[1]->content);
 });
 
 
@@ -394,7 +394,7 @@ test('no patterns registered', function () {
 
 	Assert::count(1, $nodes);
 	Assert::type(GapNode::class, $nodes[0]);
-	Assert::same("text\n", $nodes[0]->content);
+	Assert::same('text', $nodes[0]->content);
 });
 
 
@@ -537,4 +537,144 @@ test('UTF-8 positions are byte-based', function () {
 	// "# Two" starts after "# 日本語\n" = 12 bytes
 	Assert::same(12, $nodes[1]->range->offset);
 	Assert::same(5, $nodes[1]->range->length);
+});
+
+
+// =============================================================================
+// I. Node sequences (ContentNode return)
+// =============================================================================
+
+test('handler returns ContentNode - children are spliced into the result', function () {
+	$nodes = parseWithBlockParser([
+		'double' => [
+			'pattern' => '~^double~m',
+			'handler' => fn() => new Texy\Nodes\ContentNode([
+				new TestBlockNode('one'),
+				new TestBlockNode('two'),
+			]),
+		],
+	], "double\n");
+
+	Assert::count(2, $nodes);
+	Assert::same('one', $nodes[0]->type);
+	Assert::same('two', $nodes[1]->type);
+});
+
+
+test('empty ContentNode consumes the match without emitting anything', function () {
+	$nodes = parseWithBlockParser([
+		'collector' => [
+			'pattern' => '~^\[def][ ](.+)~m',
+			'handler' => fn() => new Texy\Nodes\ContentNode,
+		],
+	], "before\n[def] url\nafter\n");
+
+	// the definition line is consumed (not passed to the gap handler), yet adds no node
+	Assert::count(2, $nodes);
+	Assert::same("before\n", $nodes[0]->content);
+	Assert::same('after', $nodes[1]->content);
+});
+
+
+// =============================================================================
+// J. getNodes() (previously parsed blocks)
+// =============================================================================
+
+test('getNodes() shows previous blocks including gap output', function () {
+	$seen = null;
+
+	parseWithBlockParser([
+		'rule' => [
+			'pattern' => '~^---~m',
+			'handler' => function (ParseContext $context) use (&$seen) {
+				$seen = $context->getBlockParser()->getNodes();
+				return new TestBlockNode('rule');
+			},
+		],
+	], "paragraph\n---\n");
+
+	// the gap handler ran before this handler, so its node is already visible
+	Assert::count(1, $seen);
+	Assert::type(GapNode::class, $seen[0]);
+	Assert::same("paragraph\n", $seen[0]->content);
+});
+
+
+test('getNodes() is empty for the first block', function () {
+	$seen = null;
+
+	parseWithBlockParser([
+		'rule' => [
+			'pattern' => '~^---~m',
+			'handler' => function (ParseContext $context) use (&$seen) {
+				$seen = $context->getBlockParser()->getNodes();
+				return new TestBlockNode('rule');
+			},
+		],
+	], "---\ntext\n");
+
+	Assert::same([], $seen);
+});
+
+
+test('nested parseBlock() has its own node list', function () {
+	$outer = $innerResult = null;
+
+	parseWithBlockParser([
+		'wrapper' => [
+			'pattern' => '~^wrap:[ ](.+)~m',
+			'handler' => function (ParseContext $context, array $matches) use (&$outer, &$innerResult) {
+				$innerResult = $context->parseBlock($matches[1])->children;
+				$outer = $context->getBlockParser()->getNodes(); // nested parse must not touch this list
+				return new TestBlockNode('wrapper');
+			},
+		],
+	], "first\nwrap: inner text\n");
+
+	Assert::count(1, $innerResult);
+	Assert::same('inner text', $innerResult[0]->content);
+	Assert::count(1, $outer);          // still only the gap node of the outer level
+	Assert::type(GapNode::class, $outer[0]);
+});
+
+
+// =============================================================================
+// K. Trailing newlines
+// =============================================================================
+
+test('trailing newlines do not produce a phantom empty line for next()', function () {
+	$lines = [];
+
+	parseWithBlockParser([
+		'fence' => [
+			'pattern' => '~^```~m',
+			'handler' => function (ParseContext $context) use (&$lines) {
+				while ($context->getBlockParser()->next('~[^\n]*~', $m)) {
+					$lines[] = $m[0];
+				}
+				return new TestBlockNode('fence');
+			},
+		],
+	], "```\ncode\n");
+
+	Assert::same(['code'], $lines); // no phantom '' after the last line
+});
+
+
+test('empty line inside the text still reaches next()', function () {
+	$lines = [];
+
+	parseWithBlockParser([
+		'fence' => [
+			'pattern' => '~^```~m',
+			'handler' => function (ParseContext $context) use (&$lines) {
+				while ($context->getBlockParser()->next('~[^\n]*~', $m)) {
+					$lines[] = $m[0];
+				}
+				return new TestBlockNode('fence');
+			},
+		],
+	], "```\na\n\nb\n");
+
+	Assert::same(['a', '', 'b'], $lines);
 });

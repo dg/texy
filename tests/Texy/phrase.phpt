@@ -80,6 +80,10 @@ test('a phrase loses its link when links are disabled', function () {
 		'<p><code>foo</code> and <strong>bar</strong></p>',
 		$texy->process('`foo`:http://a.cz and **bar**:http://b.cz'),
 	);
+	Assert::match(
+		'<p><span>a</span>, <span class="x">b</span>, c, d and word</p>',
+		$texy->process('"a":http://a.cz, "b .[x]":http://b.cz, [c|http://c.cz], [d](http://d.cz) and word:[http://e.cz]'),
+	);
 });
 
 
