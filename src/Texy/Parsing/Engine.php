@@ -21,9 +21,10 @@ use Texy\{Nodes, Stage};
  * allowedClasses, etc.) and NO lifecycle management; those responsibilities
  * belong to the Texy class which contains this engine.
  *
- * Plain text between matches becomes TextNode holding the source text
- * verbatim; decoding (e.g. HTML entities) is a language concern expressed as
- * a registered syntax, never engine mechanics.
+ * Input contract: valid UTF-8, LF line endings, no \r (it is the internal
+ * hard-break marker). Plain text between matches becomes TextNode holding the
+ * source text verbatim; decoding (e.g. HTML entities) is a language concern
+ * expressed as a registered syntax, never engine mechanics.
  *
  * Usage:
  *   $engine = new Engine();
@@ -35,19 +36,19 @@ class Engine
 {
 	/**
 	 * Registered regexps and associated handlers for inline parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}>
 	 */
 	private array $linePatterns = [];
 
 	/**
 	 * Registered regexps and associated handlers for block parsing.
-	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode, pattern: string}>
+	 * @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\BlockNode|Nodes\ContentNode|null), pattern: string}>
 	 */
 	private array $blockPatterns = [];
 
 	/**
 	 * Gap handler for content between block patterns.
-	 * @var \Closure(ParseContext, string, int): array<Nodes\BlockNode>
+	 * @var \Closure(ParseContext, string, int): list<Nodes\BlockNode>
 	 */
 	private \Closure $gapHandler;
 
@@ -65,7 +66,7 @@ class Engine
 	/**
 	 * Register an inline pattern handler.
 	 *
-	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode  $parser
+	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null)  $parser
 	 */
 	public function addLineSyntax(
 		string $name,
@@ -84,7 +85,7 @@ class Engine
 	/**
 	 * Register a block pattern handler.
 	 *
-	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode  $parser
+	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\BlockNode|Nodes\ContentNode|null)  $parser
 	 */
 	public function addBlockSyntax(
 		string $name,
@@ -103,7 +104,7 @@ class Engine
 	/**
 	 * Set custom gap handler for content between block patterns.
 	 *
-	 * @param  \Closure(ParseContext, string, int): array<Nodes\BlockNode>  $handler
+	 * @param  \Closure(ParseContext, string, int): list<Nodes\BlockNode>  $handler
 	 */
 	public function setGapHandler(\Closure $handler): void
 	{
