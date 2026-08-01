@@ -119,7 +119,9 @@ final class BlockModule extends Texy\Module
 
 		$mod = Texy\Modifier::parse($mMod, $offsets[2] ?? null);
 		$parts = Texy\Regexp::split($mParam, '~\s+~', limit: 2);
-		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . $parts[0];
+		// the opening pattern matches case-insensitively, so /--PRE must mean the same
+		// as /--pre; only the type is lowercased, a language name keeps its spelling
+		$blocktype = empty($parts[0]) ? Syntax::BlockDefault : 'block/' . Helpers::toLower($parts[0]);
 		$param = empty($parts[1]) ? null : $parts[1];
 
 		$content = Helpers::outdent($mContent);
@@ -163,6 +165,10 @@ final class BlockModule extends Texy\Module
 			return new CodeBlockNode('texysource', $content, null, $mod, $range);
 		}
 
-		return null;
+		// /--php and friends: a code block in that language. Anything that does not look
+		// like a language name stays refused and degrades to visible text.
+		return Texy\Regexp::match($parts[0], '~^[a-z][a-z0-9_+#-]*$~i')
+			? new CodeBlockNode('code', $content, $parts[0], $mod, $range)
+			: null;
 	}
 }
