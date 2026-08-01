@@ -292,12 +292,14 @@ Displayed literally, both Texy and HTML markup escaped.
 | `block/texy` | content parsed as regular Texy – restores full processing, e.g. inside a `div` block; handled before the `$allowed` check, so it cannot be disabled |
 | `block/texysource` | content processed by Texy and the *resulting HTML source* displayed in a code block (parameter `line` switches to inline parsing) |
 | `block/comment` | content discarded entirely |
+
+An unknown type that looks like a language name is read as a code block in that language – `/--php` means the same as `/--code php`. Anything else (a malformed modifier, punctuation) degrades to visible text.
 | `block/div` | `<div>`, content parsed as Texy blocks; may nest |
 | `block/default` | plain `/--` without a type; escaped `<pre>`, the parameter (if any) becomes a language CSS class |
 
 Each subtype (except `block/texy`) is individually switchable in `$allowed`; the whole feature via `blocks`.
 
-**Markdown-style fenced code blocks** *(`block/fenced`)* are also supported: three or more backticks, optionally followed by a language (the first word of the info string), closed by a fence of at least the same length. Content is verbatim; a longer fence can embed shorter backtick runs.
+**Markdown-style fenced code blocks** *(`block/fenced`)* are also supported: three or more backticks, optionally followed by a language (the first word of the info string) and a Texy modifier (`` ```php .{file: config.php} ``), closed by a fence of at least the same length. Content is verbatim; a longer fence can embed shorter backtick runs.
 
 ````texy
 ```php

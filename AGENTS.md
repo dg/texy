@@ -45,9 +45,9 @@ composer phpstan
 ## Working in this repo
 
 - **Four phases: preprocess → parse → transform → render.** Parsing builds an AST
-  (`Texy\Nodes\*`); the transform phase (`afterParse` passes) may mutate it; the
-  render phase (`Texy\Output\*`) must not - **rendering is a pure function of the
-  AST** (enforced by `renderer-purity.phpt`). See `docs/architecture.md`.
+  (`Texy\Nodes\*`); the transform phase (passes added via `addPass()`) may mutate
+  it; the render phase (`Texy\Output\*`) must not - **rendering is a pure function
+  of the AST** (enforced by `renderer-purity.phpt`). See `docs/architecture.md`.
 - **Two parsers:** `BlockParser` handles block structures (blocks never overlap),
   `InlineParser` handles inline syntaxes; nesting happens only through explicit
   recursion via `ParseContext`, handler output is never re-scanned. Collisions:

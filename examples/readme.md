@@ -78,25 +78,27 @@ Texy\Configurator::safeMode($texy);
 $html = $texy->process($userInput);
 ```
 
-### Adding a Handler
+### Customizing Output
 
 ```php
 $texy = new Texy;
-$texy->addHandler('image', function($invocation, $image, $link) {
-    // Modify the image or link
-    return $invocation->proceed();
-});
+$texy->htmlOutput->addRenderer(
+    function (Texy\Nodes\ImageNode $node, Texy\Output\Html\Renderer $gen, ?Closure $previous) {
+        // modify the rendered image, or return null to delegate
+        return $previous($node, $gen);
+    },
+);
 ```
 
 ### Registering Custom Syntax
 
 ```php
 $texy = new Texy;
-$texy->addLineSyntax(          // regex pattern
-    'custom/username'      // syntax name
-,           // callback function
-    '#@@(\w+)#',
-    'myHandler');
+$texy->addLineSyntax(
+    'custom/username',     // syntax name
+    '#@@(\w+)#',           // regex pattern
+    $parser,               // fn(ParseContext, array $matches, array $offsets): ?Node
+);
 ```
 
 ---

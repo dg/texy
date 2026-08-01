@@ -57,7 +57,9 @@ $texy->tabWidth = 8;               // tab → spaces conversion width
 ```php
 $html = $texy->process($text);     // parse + render HTML
 $ast = $texy->parse($text);        // the Nodes\DocumentNode tree
+$html = $texy->renderHtml($ast);   // render a document parsed earlier
 $plain = $texy->toText($text);     // plain-text rendition
+$fixed = $texy->applyTypography($text); // typography/hyphenation only, no parsing
 Texy\Nodes\HeadingNode::collectFrom($ast);          // headings in document order
 Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->getTitle(); // document title (for <title>)
 ```
@@ -154,6 +156,8 @@ foreach ($headings as $heading) {
 	echo $heading->level, $heading->getTitle(), $heading->id;
 }
 ```
+
+`HeadingNode::$id` is the effective anchor: an explicit `.[#id]` written by the author, or the generated one. A generated ID is written by the engine, so it survives safe mode; an author's `.[#id]` goes through the `allowedClasses` policy like any other modifier.
 
 
 ### PhraseModule

@@ -30,7 +30,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
 
 **[Parsers](parsing.md)** – `BlockParser` for multi-line block constructs, `InlineParser` for inline syntaxes. Both produce `Nodes\ContentNode` containers; recursion goes through `ParseContext`.
 
-**The AST** – node classes in `src/Texy/Nodes/`, all extending `Texy\Node`. Two abstract families: `BlockNode` (paragraphs, headings, lists, tables…) and `InlineNode` (text, phrases, links, images…). Child lists live in `ContentNode` containers. `Texy\NodeTraverser` provides visitor-style traversal with enter/leave callbacks and node replacement/removal.
+**The AST** – node classes in `src/Texy/Nodes/`, all extending `Texy\Node`. Two abstract families: `BlockNode` (paragraphs, headings, lists, tables…) and `InlineNode` (text, phrases, links, images…). Child lists live in `ContentNode` containers. `Texy\NodeTraverser` provides visitor-style traversal with enter/leave callbacks and node replacement/removal; `Texy\NodeHelpers` wraps it in `find()`, `findFirst()` and `clone()` for the common read-only cases.
 
 **[Output generators](rendering.md)** – `Output\Html\Renderer` and `Output\Text\Renderer`, both extending `Output\NodeRenderer` (a per-node-class dispatch with chainable custom handlers). The HTML renderer is created per render by the `Output\Html\Config` configuration facade; the text renderer needs no `Texy` instance at all – the test of the AST's semantic completeness.
 
@@ -110,7 +110,7 @@ Normalized text contains no `\r`, so the conversion is a lossless bijection: re-
 
 **Syntax handler** – the closure the parser calls on a match: `function(ParseContext $context, array $matches, array $offsets, string $name): ?Node`. It returns an AST node, or `null` to refuse the match (the parser then gives other patterns a chance). Handlers parse nested content recursively through the `ParseContext`.
 
-**Transform pass** – a callable registered with `Texy::addPass()`, receiving the `DocumentNode` after parsing. This is where the AST may be freely mutated, typically using `NodeTraverser`. All passes run, in registration order, and return values are ignored.
+**Transform pass** – a callable registered with `Texy::addPass()`, receiving the `DocumentNode` after parsing. This is where the AST may be freely mutated, typically using `NodeHelpers` or, for structural changes, `NodeTraverser`. All passes run, in registration order, and return values are ignored.
 
 **Node renderer** – a callable registered on an output generator with `NodeRenderer::addRenderer()` that renders one node class, optionally delegating to the previous renderer in the chain. This is the render-phase extension point (see [custom-handlers.md](custom-handlers.md)).
 

@@ -28,7 +28,7 @@ Because matching happens once on the raw input, a handler's output is never re-i
 ### Collisions in practice
 
 - Different lengths of the same symbol (`***x***` vs `**x**` vs `*x*`) are resolved by the longer-match rule.
-- Same position, same length: earlier registration wins. Built-in modules register their patterns in `beforeParse()` during `process()`; the `Engine` keeps insertion order per name, so a custom pattern registered before the first `process()` call actually precedes all built-ins, and re-registration on later calls keeps the original position.
+- Same position, same length: earlier registration wins. Built-in modules register their patterns in `beforeParse()` during `process()`; the `Engine` keeps insertion order per name, so a custom pattern registered before the first `process()` call actually precedes all built-ins, and re-registration on later calls keeps the original position. A name registered via `addLineSyntax()`/`addBlockSyntax()` is owned by the consumer: module registration never overwrites it, so overriding a built-in syntax (registering under its `Syntax::*` name) works and survives repeated parsing.
 - Keep patterns specific (e.g. wikilink `[text|url]` requires the pipe, markdown link `[text](url)` requires `](`) so most collisions never arise.
 
 ### TextNode holds display text

@@ -2,7 +2,7 @@
 
 Everything under `src/Texy/Output/` turns a finished AST into a string. The layer is split between a **shared dispatch base** and **format-specific renderers**; the HTML side additionally owns well-forming and formatting, configured through a single options object.
 
-Security policies are exposed on the `Texy` object: `Texy\UrlPolicy` (URL scheme filtering) and `Output\Html\Policy` as `$texy->htmlPolicy` (tag/class/style whitelists and passthrough tag validation), because the sanitize pass they drive changes the AST and therefore protects **every** output format.
+Security policies are exposed on the `Texy` object: `Texy\UrlPolicy` (URL scheme filtering) and `Texy\HtmlPolicy` as `$texy->htmlPolicy` (tag/class/style whitelists and passthrough tag validation), because the sanitize pass they drive changes the AST and therefore protects **every** output format.
 
 ```
 Output/

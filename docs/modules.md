@@ -85,5 +85,5 @@ Output formatting is not a module: its configuration lives on `$texy->htmlOutput
 Modules communicate through the AST, not through each other:
 
 - **Nodes are the interface.** A clickable image is a `LinkNode` wrapping an `ImageNode`; a figure holds its image node; `PhraseModule` produces `LinkNode`s directly for its link syntaxes. There are no shared mutable value objects.
-- **References resolve in the transform phase.** Definitions collected during parsing (`ImageDefinitionNode`, `LinkDefinitionNode`) stay in the tree; the modules' `afterParse` passes walk the document with `NodeTraverser` and fill in the referencing nodes. User-supplied definitions (`addDefinition()`) persist across `process()` calls.
+- **References resolve in the transform phase.** Definitions collected during parsing (`ImageDefinitionNode`, `LinkDefinitionNode`) stay in the tree; the modules' `afterParse` passes walk the document with `NodeHelpers::find()` and fill in the referencing nodes. User-supplied definitions (`addDefinition()`) persist across `process()` calls.
 - Relations are one-directional (`PhraseModule` knows link nodes exist; link modules know nothing of phrases), keeping modules replaceable.

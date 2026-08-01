@@ -22,6 +22,10 @@ $texy->htmlOutput->addRenderer(
 );
 ```
 
+Registration validates the parameter: a nullable, union or untyped first parameter could never be dispatched to, so it is refused with an exception right away. Dispatch respects inheritance – a node subclass without its own renderer uses the renderer of its nearest ancestor, so `class MyImageNode extends ImageNode` renders like an image until you register a renderer for it.
+
+A node no renderer is found for at all **degrades to its content**: the wrapper disappears, the children render as usual. That is what keeps a document renderable in every format – you register a renderer for the format you care about, and `toText()` still works on the same tree instead of failing on a class it has never heard of.
+
 Handlers for one node class form a chain, executed **from the last registered to the first**; the generator's default renderer sits at the end. Your handler can:
 
 - **replace rendering entirely** – return its own result,
@@ -76,37 +80,44 @@ To emit ready-made HTML, return `new Html\Raw($html)` – it bypasses text escap
 
 ## Transform passes
 
-For document-level changes, register an `afterParse` handler; it receives the `DocumentNode` after parsing and the built-in transform passes may be freely combined with yours. Use `Texy\NodeTraverser` to walk and modify the tree:
+For document-level changes, register an `afterParse` handler; it receives the `DocumentNode` after parsing and the built-in transform passes may be freely combined with yours.
+
+Most passes only visit nodes of one kind. `Texy\NodeHelpers::find()` collects them in traversal order, so the pass is a plain `foreach`:
 
 ```php
 $texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
-    (new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) {
-        if ($node instanceof Texy\Nodes\LinkNode && $node->url !== null) {
+    foreach (Texy\NodeHelpers::find($doc, Texy\Nodes\LinkNode::class) as $node) {
+        if ($node->url !== null) {
             $node->url = addTrackingParams($node->url);  // transform phase may mutate
         }
-        return null;
-    });
+    }
 });
 ```
 
-The enter/leave callbacks may return a replacement `Node`, `NodeTraverser::RemoveNode` (only for nodes held in list containers such as `ContentNode`), `DontTraverseChildren`, or `StopTraversal`.
+The filter is either a node class, which narrows the returned type to it, or a predicate `callable(Node): bool`. `NodeHelpers::findFirst()` returns the first match or `null` and stops the walk there, and `NodeHelpers::clone()` makes a deep copy of a tree.
+
+To restructure the tree (replace or remove nodes, or skip whole subtrees), walk it with `Texy\NodeTraverser`:
+
+```php
+$texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
+    (new Texy\NodeTraverser)->traverse($doc, fn(Texy\Node $node) => $node instanceof Texy\Nodes\HtmlCommentNode
+        ? Texy\NodeTraverser::RemoveNode
+        : null);
+});
+```
+
+The enter/leave callbacks may return a replacement `Node`, `NodeTraverser::RemoveNode` (only for nodes held in list containers such as `ContentNode`), `DontTraverseChildren`, or `StopTraversal`. Unlike `find()`, which collects the nodes first, the traverser walks the tree as your callback changes it.
 
 All passes run in registration order and return values are ignored. Passes registered by modules always run before yours, so you cannot get in front of them; where that matters, call `parse()`, work on the AST, and then `renderHtml()`.
 
 ### Example: collecting statistics
 
 ```php
-$stats = ['images' => 0, 'headings' => 0];
+$stats = [];
 
 $texy->addPass(function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
-    (new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) use (&$stats) {
-        match (true) {
-            $node instanceof Texy\Nodes\ImageNode => $stats['images']++,
-            $node instanceof Texy\Nodes\HeadingNode => $stats['headings']++,
-            default => null,
-        };
-        return null;
-    });
+    $stats['images'] = count(Texy\NodeHelpers::find($doc, Texy\Nodes\ImageNode::class));
+    $stats['headings'] = count(Texy\NodeHelpers::find($doc, Texy\Nodes\HeadingNode::class));
 });
 ```
 

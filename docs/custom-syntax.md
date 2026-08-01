@@ -7,8 +7,8 @@ You define what the construct looks like (a regular expression) and write a synt
 ## Registering
 
 ```php
-$texy->addLineSyntax( string $name, string $pattern,\Closure $handler);
-$texy->addBlockSyntax( string $name, string $pattern,\Closure $handler);
+$texy->addLineSyntax(string $name, string $pattern, callable $parser);
+$texy->addBlockSyntax(string $name, string $pattern, callable $parser);
 ```
 
 - **Line patterns** recognize inline constructs; the pattern is searched anywhere in the text, so it must **not** be anchored with `^`.
@@ -17,12 +17,14 @@ $texy->addBlockSyntax( string $name, string $pattern,\Closure $handler);
 
 Register before calling `process()`. Built-in modules register their patterns during `process()`, so your pattern keeps its priority position across calls.
 
+Registering under a built-in name (a `Syntax::*` constant) **replaces** that syntax: a name you register is owned by you and modules never overwrite it, no matter how many times the instance parses. The override is permanent for the lifetime of the instance – there is no API to restore the built-in pattern, so if you need the original behavior back, create a fresh `Texy` instance. Disabling via `$texy->allowed[$name] = false` works for overridden syntaxes exactly as for built-in ones.
+
 Your pattern behaves exactly as written: Texy adds only the `u` (UTF-8) flag, so what you verify in a regex tester works after registration. Flags of your own – including extended mode `x`, which lets you lay the pattern out over several lines with `#` comments – belong after the closing delimiter, as usual:
 
 ```php
-$texy->addLineSyntax( 'custom/mention', '~
+$texy->addLineSyntax('custom/mention', '~
 	@ ([a-z0-9_]{2,30})   # user name
-~x',$handler);
+~x', $parser);
 ```
 
 `Texy\Patterns` fragments (`Modifier`, `LinkUrl`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
@@ -37,7 +39,7 @@ function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, s
 - Return an **AST node** – an `InlineNode` for line patterns, a `BlockNode` for block patterns – or **`null` to refuse** the match (the text is left alone and other patterns get their chance).
 - For nested content, parse recursively: `$context->parseInline($innerText, $offset)` / `$context->parseBlock(...)` return a `ContentNode` you attach to your node.
 
-Returning an existing node type (`PhraseNode`, `LinkNode`, `HtmlElementNode`…) gives you rendering for free in every output format. A brand-new `Node` subclass needs a [renderer handler](custom-handlers.md#renderer-handlers) registered for it on each generator you use.
+Returning an existing node type (`PhraseNode`, `LinkNode`, `HtmlElementNode`…) gives you rendering for free in every output format. A brand-new `Node` subclass needs a [renderer handler](custom-handlers.md#renderer-handlers) on the generator you care about; the other formats fall back to rendering its children, so the document stays renderable everywhere. Implement `getChildren()` so they can find them.
 
 Collision resolution ([parsing.md](parsing.md#inlineparser)): at the same position the longer match wins, then earlier registration. Keep patterns specific.
 
@@ -58,7 +60,8 @@ $texy->addLineSyntax(
             content: new Nodes\ContentNode([new Nodes\TextNode('@' . $username)]),
             range: new Texy\Range($offsets[0], strlen($matches[0])),
         );
-    },);
+    },
+);
 ```
 
 ```texy
@@ -80,7 +83,8 @@ $texy->addBlockSyntax(
             'div',
             $mod,
         );
-    },);
+    },
+);
 ```
 
 ```texy
@@ -105,7 +109,8 @@ $texy->addLineSyntax(
             return null;   // unknown abbreviation - leave the text alone
         }
         return new Nodes\AnnotationNode($matches[1], $abbreviations[$matches[1]]);
-    },);
+    },
+);
 ```
 
 ### Multi-line structure with next()/moveBackward() (block)
@@ -126,7 +131,8 @@ $texy->addBlockSyntax(
         }
 
         return new Nodes\BlockQuoteNode($context->parseBlock(trim($content)));
-    },);
+    },
+);
 ```
 
 ```texy
@@ -137,7 +143,7 @@ NOTE: It may span several lines.
 ## Best practices
 
 - **Return `null` on refusal** – the parser leaves the text alone and other syntaxes get their chance.
-- **Prefer existing node types** – they render in every output format alike; add a custom `Node` subclass only when no existing node fits, and register renderer handlers for it.
+- **Prefer existing node types** – they render in every output format alike; add a custom `Node` subclass only when no existing node fits. Subclassing a built-in node is the cheapest way to keep full rendering, since dispatch falls back to the ancestor's renderer.
 - **Use prefixed names** (`custom/username`, `myapp/alert`) – both to avoid future collisions and to let users disable your syntax via `$texy->allowed`.
 - **Support modifiers** – add `Texy\Patterns::Modifier . '?'` to your pattern and pass `Texy\Modifier::parse($matches[n])` into your node so users can style your construct like any other.
 - **Fill in `Range`** where practical – editor tooling and passes rely on source positions.
