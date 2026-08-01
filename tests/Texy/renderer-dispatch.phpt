@@ -26,17 +26,10 @@ function documentWith(Texy $texy, Nodes\InlineNode $node): Nodes\DocumentNode
 }
 
 
-/** Renders a document with the era renderer. */
-function renderDoc(Texy $texy, Nodes\DocumentNode $doc): string
-{
-	return (new Html\Renderer($texy->htmlOutput, $texy))->render($doc);
-}
-
-
 test('a subclass without its own handler renders like its parent', function () {
 	$texy = new Texy;
-	$plain = renderDoc($texy, documentWith($texy, new Nodes\ImageNode('foo.png')));
-	$custom = renderDoc($texy, documentWith($texy, new CustomImageNode('foo.png')));
+	$plain = $texy->renderHtml(documentWith($texy, new Nodes\ImageNode('foo.png')));
+	$custom = $texy->renderHtml(documentWith($texy, new CustomImageNode('foo.png')));
 
 	Assert::same($plain, $custom);
 });
@@ -52,9 +45,9 @@ test('a renderer for the subclass wins and can delegate to the parent one', func
 		},
 	);
 
-	Assert::contains('data-custom="yes"', renderDoc($texy, documentWith($texy, new CustomImageNode('foo.png'))));
+	Assert::contains('data-custom="yes"', $texy->renderHtml(documentWith($texy, new CustomImageNode('foo.png'))));
 	// the parent class stays untouched
-	Assert::notContains('data-custom', renderDoc($texy, documentWith($texy, new Nodes\ImageNode('foo.png'))));
+	Assert::notContains('data-custom', $texy->renderHtml(documentWith($texy, new Nodes\ImageNode('foo.png'))));
 });
 
 
@@ -110,7 +103,7 @@ test('a node no renderer knows degrades to its content', function () {
 		}
 	};
 
-	Assert::same("<p>inside</p>\n", renderDoc($texy, documentWith($texy, $node)));
+	Assert::same("<p>inside</p>\n", $texy->renderHtml(documentWith($texy, $node)));
 });
 
 
@@ -119,5 +112,5 @@ test('a childless unknown node renders to nothing rather than failing', function
 	$node = new class extends Nodes\InlineNode {
 	};
 
-	Assert::noError(fn() => renderDoc($texy, documentWith($texy, $node)));
+	Assert::noError(fn() => $texy->renderHtml(documentWith($texy, $node)));
 });

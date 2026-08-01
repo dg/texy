@@ -82,13 +82,13 @@ class Texy
 	 */
 	private Engine $engine;
 
+	/** @var list<\Closure(Nodes\DocumentNode): void>  transform passes, in registration order */
+	private array $passes = [];
+
 	/** @var array{line: array<string, true>, block: array<string, true>}  syntax names registered by the consumer */
 	private array $consumerSyntaxes = ['line' => [], 'block' => []];
 
 	private bool $inModulePrepare = false;
-
-	/** @var list<\Closure(Nodes\DocumentNode): void>  transform passes, in registration order */
-	private array $passes = [];
 
 	/** @var array<string, Compat\LegacyModuleProxy>  v3 compatibility */
 	private array $legacyProxies = [];
@@ -206,10 +206,18 @@ class Texy
 	 */
 	public function process(string $text, bool $singleLine = false): string
 	{
-		$node = $this->parse($text, $singleLine);
+		return $this->renderHtml($this->parse($text, $singleLine));
+	}
+
+
+	/**
+	 * Renders a parsed document to HTML. Separate from parse() so a consumer can read
+	 * or transform the AST in between.
+	 */
+	public function renderHtml(Nodes\DocumentNode $document): string
+	{
 		$renderer = new Output\Html\Renderer($this->htmlOutput, $this);
-		$html = $renderer->render($node);
-		return $html;
+		return $renderer->render($document);
 	}
 
 
@@ -244,11 +252,20 @@ class Texy
 
 
 	/**
-	 * Runs typography/hyphenation over the AST and marks the document so
-	 * generators skip their string post-processing.
+	 * Runs typography/hyphenation over the AST, honouring the allowed[] configuration,
+	 * and marks the document so generators skip their string post-processing.
+	 *
+	 * parse() does this itself as its last step. It is public for the other case: a
+	 * document built by a different parser, which is still an ordinary Texy AST and
+	 * still wants the typography. Calling it on an already typographed document does
+	 * nothing.
 	 */
-	private function applyAstTypography(Nodes\DocumentNode $document): void
+	public function applyAstTypography(Nodes\DocumentNode $document): void
 	{
+		if (!empty($document->meta['typographed'])) {
+			return;
+		}
+
 		$transformers = [];
 		if (!empty($this->allowed[Syntax::Typography])) {
 			$transformers[] = fn(string $s): string => $this->typographyModule->postLine($s);
@@ -327,8 +344,16 @@ class Texy
 	 */
 	public function toText(string $text): string
 	{
-		$node = $this->parse($this->preprocess($text));
-		return (new Output\Text\Renderer)->render($node);
+		return $this->renderText($this->parse($text));
+	}
+
+
+	/**
+	 * Renders a parsed document to plain text.
+	 */
+	public function renderText(Nodes\DocumentNode $document): string
+	{
+		return (new Output\Text\Renderer)->render($document);
 	}
 
 

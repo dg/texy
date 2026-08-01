@@ -84,11 +84,9 @@ test('rows stay removable and replaceable next to a caption', function () {
 	$texy = new Texy;
 	$doc = $texy->parse("|## Caption\n| a | b\n| c | d\n");
 
-	(new NodeTraverser)->traverse($doc, function (Node $node): ?int {
-		return $node instanceof Nodes\TableRowNode && Helpers::extractText($node) === 'cd'
+	(new NodeTraverser)->traverse($doc, fn(Node $node): ?int => $node instanceof Nodes\TableRowNode && Helpers::extractText($node) === 'cd'
 			? NodeTraverser::RemoveNode
-			: null;
-	});
+			: null);
 
 	$table = NodeHelpers::findFirst($doc, Nodes\TableNode::class);
 

@@ -8,9 +8,9 @@
 namespace Texy\Output\Html;
 
 use Texy\HtmlPolicy;
-use Texy\UrlPolicy;
 use Texy\Modifier;
 use Texy\Texy;
+use Texy\UrlPolicy;
 use function is_array, is_string;
 
 

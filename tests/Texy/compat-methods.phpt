@@ -13,6 +13,12 @@ test('removed methods throw with a pointer to the successor', function () {
 	$texy = new Texy\Texy;
 
 	Assert::exception(
+		fn() => $texy->addHandler('image', fn() => null),
+		LogicException::class,
+		'Method Texy::addHandler() has been removed; %a%addPass()%a%addRenderer()%a%',
+	);
+
+	Assert::exception(
 		fn() => $texy->registerLinePattern(fn() => null, '~x~', 'name'),
 		LogicException::class,
 		'Method Texy::registerLinePattern() has been removed; use $texy->addLineSyntax() %a%',

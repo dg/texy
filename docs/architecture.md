@@ -49,7 +49,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
    - `HtmlModule::processPassthrough()` – pairs passthrough HTML tags into element subtrees and evaluates the tag whitelist (see [rendering.md](rendering.md#html-passthrough-transform-passes)),
    - `ImageModule` / `LinkReferenceModule` `resolveReferences()` – resolves `[ref]` and `[*ref*]` references against collected definitions,
    - `EmoticonModule::resolveEmoticons()` – resolves emoticon syntax to characters (`EmoticonNode::$resolved`),
-   - `Passes\HeadingPass` – heading level balancing, `$tocTitle` extraction and ID generation.
+   - `Passes\HeadingPass` – heading level balancing, `{toc: …}` hoisting and ID generation.
 
    Then `Texy` runs the **typography pass** (below) and marks the document `$meta['typographed']`.
 
@@ -76,18 +76,18 @@ Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **prep
 
 - **The range is the only source of truth for a node's source span.** Never derive spans from content length: `TextNode::$content` holds decoded display text (entities resolved), so `strlen($content)` generally differs from `$range->length`.
 - Ranges are exact after parsing and **best-effort after transforms** – a pass that merges or rewrites nodes is not required to keep them precise. Synthesized values (e.g. a modifier assembled from non-contiguous fragments) have a `null` range by design.
-- Heading IDs and `HeadingNode::$tocTitle` are generated in the transform phase **before** typography, so they are stable regardless of `$allowed['typography']`.
+- Heading IDs are generated in the transform phase **before** typography, so they are stable regardless of `$allowed['typography']`. The displayed title (`HeadingNode::getTitle()`) is derived from the heading's content instead of copied, so it *is* typographed.
 
 ## Terminology
 
 **Syntax** – a named syntactic construct, e.g. `phrase/strong` or `image`. Names are catalogued as constants on `Texy\Syntax` and used as keys in `Texy::$allowed`. Simple syntaxes have one-word names; related groups use a slash hierarchy (`phrase/*`, `block/*`).
 
-**Pattern** – the regular expression that recognizes the syntax, registered via `Texy::addLineSyntax()` / `addBlockSyntax()` together with the syntax name and its parser. Registration defaults `$allowed[$name]` to `true` unless a module set it otherwise (e.g. `emoticon`, `phrase/ins` default to `false`).
+**Pattern** – the regular expression that recognizes the syntax, registered via `Texy::registerLinePattern()` / `registerBlockPattern()` together with the syntax handler and name. Registration defaults `$allowed[$name]` to `true` unless a module set it otherwise (e.g. `emoticon`, `phrase/ins` default to `false`).
 
 **Syntax handler** – the closure the parser calls on a match: `function(ParseContext $context, array $matches, array $offsets, string $name): ?Node`. It returns an AST node, or `null` to refuse the match (the parser then gives other patterns a chance). Handlers parse nested content recursively through the `ParseContext`.
 
-**Transform pass** – a function registered for the `afterParse` event (`Texy::addHandler('afterParse', …)`), receiving the `DocumentNode`. This is where the AST may be freely mutated, typically using `NodeTraverser`.
+**Transform pass** – a callable registered with `Texy::addPass()`, receiving the `DocumentNode` after parsing. This is where the AST may be freely mutated, typically using `NodeTraverser`. All passes run, in registration order, and return values are ignored.
 
-**Renderer handler** – a closure registered on an output generator (`NodeRenderer::registerHandler()`) that renders a node class, optionally delegating to the previous handler in the chain. This is the render-phase extension point (see [custom-handlers.md](custom-handlers.md)).
+**Node renderer** – a callable registered on an output generator with `NodeRenderer::addRenderer()` that renders one node class, optionally delegating to the previous renderer in the chain. This is the render-phase extension point (see [custom-handlers.md](custom-handlers.md)).
 
-The only built-in event is `afterParse`. `Texy::addHandler()` / `invokeHandlers()` is a plain notification mechanism: all handlers run in registration order, return values are ignored.
+Passes registered by modules always run before any the consumer adds, so a consumer cannot get in front of them. Where the order matters, call `parse()`, work on the AST, and then `renderHtml()`.

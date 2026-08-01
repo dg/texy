@@ -62,3 +62,9 @@ The content model lives in **`Schema`**, the declarative per-element vocabulary:
 ## The Text Renderer
 
 `Text\Renderer` (behind `Texy::toText()`) renders a plain-text rendition: markup dropped, visible text and block structure kept, typography artifacts (non-breaking spaces, soft hyphens) normalized back. It needs no `Texy` instance at all – the test of the AST's semantic completeness. Because sanitization and typography already happened in the transform phase, safe mode and typographic corrections apply to its output as well.
+
+## Rendering a document parsed elsewhere
+
+The AST is not tied to the Texy parser. A document another parser produced – [texy/markdown](https://github.com/dg/texy-markdown) builds one from CommonMark – renders through these same generators, and a node type they do not know degrades to its content (`NodeRenderer::renderUnknown()`) or gets a handler of its own through `addRenderer()`.
+
+One step is not the renderer's, though: typography is a transform over the AST, which `parse()` runs as its last step. A document built elsewhere gets it from `Texy::applyAstTypography($document)`, called before rendering.

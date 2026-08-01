@@ -91,7 +91,7 @@ $texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
 
 The enter/leave callbacks may return a replacement `Node`, `NodeTraverser::RemoveNode` (only for nodes held in list containers such as `ContentNode`), `DontTraverseChildren`, or `StopTraversal`.
 
-All passes run in registration order and return values are ignored. Passes registered by modules always run before yours, so you cannot get in front of them; where that matters, call `parse()`, work on the AST, and then `render()`.
+All passes run in registration order and return values are ignored. Passes registered by modules always run before yours, so you cannot get in front of them; where that matters, call `parse()`, work on the AST, and then `renderHtml()`.
 
 ### Example: collecting statistics
 
