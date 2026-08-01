@@ -44,7 +44,8 @@ $texy->allowed[Texy\Syntax::Subscript] = true;
 
 // STEP 3: Process your Texy text
 $text = file_get_contents(__DIR__ . '/syntax.texy');
-$html = $texy->process($text);  // That's it!
+$document = $texy->parse($text);
+$html = $texy->renderHtml($document);  // That's it!
 
 
 // Display the result
@@ -52,7 +53,7 @@ echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';
 
 // You can use the first heading from your document as the page title
-echo '<title>' . $texy->headingModule->title . '</title>';
+echo '<title>' . Texy\Nodes\HeadingNode::collectFrom($document)[0]?->getTitle() . '</title>';
 
 echo $html;
 

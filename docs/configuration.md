@@ -50,7 +50,6 @@ $texy->urlPolicy->imagePattern = '~https?:~A';
 ```php
 $texy->mergeLines = true;          // join consecutive lines into one paragraph
 $texy->tabWidth = 8;               // tab → spaces conversion width
-$texy->removeSoftHyphens = true;   // strip U+00AD from input (deprecated)
 ```
 
 ### Results
@@ -156,7 +155,6 @@ foreach ($headings as $heading) {
 }
 ```
 
-`HeadingModule::$title` and `$TOC` still work but are deprecated: they hold only the last parse's results, while the AST carries them for as long as you hold the document.
 
 ### PhraseModule
 

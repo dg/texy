@@ -44,13 +44,14 @@ $texy->headingModule->balancing = Texy\Modules\HeadingModule::Dynamic;
 // This allows linking to specific sections: page.html#toc-heading-text
 $texy->headingModule->generateID = true;
 
-$html = $texy->process($text);
+$document = $texy->parse($text);
+$html = $texy->renderHtml($document);
 
 echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="../style.css">';
 
 // You can use the first heading as the page title
-echo '<title>' . $texy->headingModule->title . '</title>';
+echo '<title>' . Texy\Nodes\HeadingNode::collectFrom($document)[0]?->getTitle() . '</title>';
 
 echo '<strong>Dynamic method:</strong>';
 echo '<pre>';
@@ -108,5 +109,5 @@ echo '<hr>';
 
 echo '<h2>Table of contents</h2>';
 echo '<pre>';
-//print_r($texy->headingModule->TOC);
+//print_r(Texy\Nodes\HeadingNode::collectFrom($document));
 echo '</pre>';
