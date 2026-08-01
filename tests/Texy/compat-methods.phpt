@@ -9,6 +9,22 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
+test('renamed methods keep working with a deprecation notice', function () {
+	$texy = new Texy\Texy;
+
+	$result = null;
+	Assert::error(function () use ($texy, &$result) {
+		$result = $texy->processTypo('"Hello" ...');
+	}, E_USER_DEPRECATED, 'Method Texy::processTypo() is deprecated, use applyTypography() instead.');
+	Assert::same($texy->applyTypography('"Hello" ...'), $result);
+
+	Assert::error(function () use ($texy, &$result) {
+		$result = $texy->processLine('**bold**');
+	}, E_USER_DEPRECATED, 'Method Texy::processLine() is deprecated, use process($text, singleLine: true) instead.');
+	Assert::same($texy->process('**bold**', singleLine: true), $result);
+});
+
+
 test('removed methods throw with a pointer to the successor', function () {
 	$texy = new Texy\Texy;
 

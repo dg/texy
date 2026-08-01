@@ -300,18 +300,9 @@ class Texy
 
 
 	/**
-	 * Converts single line in Texy! to HTML code.
-	 */
-	public function processLine(string $text): string
-	{
-		return $this->process($text, singleLine: true);
-	}
-
-
-	/**
 	 * Makes only typographic corrections.
 	 */
-	public function processTypo(string $text): string
+	public function applyTypography(string $text): string
 	{
 		// standardize line endings and spaces
 		$text = Helpers::normalize($text);
@@ -418,7 +409,7 @@ class Texy
 
 
 	/**
-	 * @deprecated v3 compatibility: navigates away from removed methods
+	 * @deprecated v3 compatibility: emulates renamed methods, navigates away from removed ones
 	 * @param  array<mixed>  $args
 	 */
 	public function __call(string $name, array $args): mixed
