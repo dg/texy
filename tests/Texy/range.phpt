@@ -15,7 +15,7 @@ require __DIR__ . '/../AstDumper.php';
 
 test('headings position', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-heading.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-heading.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -27,7 +27,7 @@ test('headings position', function () {
 
 test('inline formatting position', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-inline.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-inline.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -39,7 +39,7 @@ test('inline formatting position', function () {
 
 test('lists position', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-list.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-list.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -51,7 +51,7 @@ test('lists position', function () {
 
 test('blocks position', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-block.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-block.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -63,7 +63,7 @@ test('blocks position', function () {
 
 test('table position', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-table.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-table.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -75,7 +75,7 @@ test('table position', function () {
 
 test('images and links position', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-image-link.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-image-link.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -87,7 +87,7 @@ test('images and links position', function () {
 
 test('UTF-8 positions are byte-based', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-utf8.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-utf8.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -99,7 +99,7 @@ test('UTF-8 positions are byte-based', function () {
 
 test('nested structures position', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-nested.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-nested.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(
@@ -120,7 +120,7 @@ function extractBySource(Texy\Nodes\DocumentNode $doc, string $src, string $node
 
 test('positions inside list item with blank line between continuation lines', function () {
 	$texy = new Texy\Texy;
-	$src = $texy->preprocess("- první řádek\n\n  pokračování **tučné**");
+	$src = Texy\Texy::normalize("- první řádek\n\n  pokračování **tučné**");
 	$doc = $texy->parse($src);
 
 	Assert::same('**tučné**', extractBySource($doc, $src, Texy\Nodes\PhraseNode::class));
@@ -129,7 +129,7 @@ test('positions inside list item with blank line between continuation lines', fu
 
 test('positions inside multiline table cell (rowspan)', function () {
 	$texy = new Texy\Texy;
-	$src = $texy->preprocess("| první **tučný** | x\n| pokračování ^| y");
+	$src = Texy\Texy::normalize("| první **tučný** | x\n| pokračování ^| y");
 	$doc = $texy->parse($src);
 
 	Assert::same('**tučný**', extractBySource($doc, $src, Texy\Nodes\PhraseNode::class));
@@ -138,7 +138,7 @@ test('positions inside multiline table cell (rowspan)', function () {
 
 test('positions inside div block with indented content', function () {
 	$texy = new Texy\Texy;
-	$src = $texy->preprocess("/--div\n  odstavec **tučný**\n\\--");
+	$src = Texy\Texy::normalize("/--div\n  odstavec **tučný**\n\\--");
 	$doc = $texy->parse($src);
 
 	Assert::same('**tučný**', extractBySource($doc, $src, Texy\Nodes\PhraseNode::class));
@@ -181,7 +181,7 @@ test('paragraph line merging and modifier keep exact inline ranges', function ()
 
 test('modifier positions', function () {
 	$texy = new Texy\Texy;
-	$text = $texy->preprocess(file_get_contents(__DIR__ . '/sources/position-modifier.texy'));
+	$text = Texy\Texy::normalize(file_get_contents(__DIR__ . '/sources/position-modifier.texy'));
 	$doc = $texy->parse($text);
 
 	Assert::matchFile(

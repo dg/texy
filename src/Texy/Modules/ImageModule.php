@@ -35,10 +35,10 @@ final class ImageModule extends Texy\Module
 {
 	/** the [* url .(title) alignment ] part, shared by the image and figure syntaxes */
 	private const ImagePattern = '
-			\[\* \ *+                         # opening bracket with asterisk
+			\[\* [ \t]*+                      # opening bracket with asterisk
 			([^\n]{1,1000})                   # URLs (1)
 			' . Patterns::Modifier . '?       # modifier (2)
-			\ *+
+			[ \t]*+
 			( \* | (?<! < ) > | < )           # alignment (3)
 			]';
 
@@ -95,7 +95,7 @@ final class ImageModule extends Texy\Module
 			'~^
 				(?>' . self::ImagePattern . ')' . self::LinkPattern . '
 				(?:
-					\ ++ \*\*\* \ ++              # separator
+					[ \t]++ \*\*\* [ \t]++        # separator
 					(.{0,2000})                   # caption (5)
 				)?
 				' . Patterns::ModifierHAlign . '?     # modifier (6)
@@ -211,7 +211,7 @@ final class ImageModule extends Texy\Module
 			$isImageLink = true;
 		} else {
 			// Direct URL or reference like [ref] or [*img*]
-			$linkUrl = $mLink;
+			$linkUrl = Helpers::removeSoftHyphens($mLink);
 			// Image reference [*...*] → uses imageRoot
 			$len = strlen($mLink);
 			$isImageLink = $len > 4 && $mLink[0] === '[' && $mLink[1] === '*'
@@ -240,7 +240,7 @@ final class ImageModule extends Texy\Module
 			trigger_error("Image syntax with '|' or '||' inside brackets is deprecated. Use [* image *]:url for linked images.", E_USER_DEPRECATED);
 		}
 
-		$url = $main;
+		$url = Helpers::removeSoftHyphens($main);
 		$width = $height = null;
 
 		// Parse dimensions: "image.jpg 100x200" or "image.jpg 100X200" (asMax)

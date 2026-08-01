@@ -307,7 +307,7 @@ final class PhraseModule extends Texy\Module
 		if ($phrase === Syntax::SpanQuotes || $phrase === Syntax::SpanTilde) {
 			if ($mLink !== null) {
 				$content = $context->parseInline(trim($mContent), $contentOffset);
-				return new LinkNode($mLink, $content, Modifier::parse($mMod, $offsets[2] ?? null), $range);
+				return new LinkNode(Texy\Helpers::removeSoftHyphens($mLink), $content, Modifier::parse($mMod, $offsets[2] ?? null), $range);
 
 			} elseif ($mMod === null) {
 				return null;
@@ -321,7 +321,7 @@ final class PhraseModule extends Texy\Module
 		if ($mLink !== null) {
 			// Wrap phrase in link
 			$phraseNode = new PhraseNode($content, $phrase, $mod, $range);
-			return new LinkNode($mLink, new ContentNode([$phraseNode]), null, $range);
+			return new LinkNode(Texy\Helpers::removeSoftHyphens($mLink), new ContentNode([$phraseNode]), null, $range);
 		}
 
 		return new PhraseNode($content, $phrase, $mod, $range);
@@ -407,7 +407,7 @@ final class PhraseModule extends Texy\Module
 	{
 		[, $mContent, $mMod, $mLink] = $matches;
 		return new LinkNode(
-			trim($mLink),
+			Texy\Helpers::removeSoftHyphens(trim($mLink)),
 			$context->parseInline(trim($mContent), $offsets[1]),
 			null,  // quicklink and markdown links don't support modifiers
 			new Range($offsets[0], strlen($matches[0])),
@@ -425,7 +425,7 @@ final class PhraseModule extends Texy\Module
 	{
 		[, $mContent, $mLink] = $matches;
 		return new LinkNode(
-			trim($mLink),
+			Texy\Helpers::removeSoftHyphens(trim($mLink)),
 			$context->parseInline(trim($mContent), $offsets[1]),
 			null,  // wikilinks don't support modifiers
 			new Range($offsets[0], strlen($matches[0])),

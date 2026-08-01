@@ -11,7 +11,6 @@ use JetBrains\PhpStorm\Language;
 use Texy\Parsing\Engine;
 use Texy\Parsing\ParseContext;
 use Texy\Passes\TextRunPass;
-use function strlen;
 use const ENT_NOQUOTES;
 
 
@@ -35,9 +34,6 @@ class Texy
 
 	/** @var array<string, bool>  Texy! syntax configuration */
 	public array $allowed = [];
-
-	/** TAB width (for converting tabs to spaces) */
-	public int $tabWidth = 8;
 
 	/** URL scheme security policy for links and images */
 	public readonly UrlPolicy $urlPolicy;
@@ -211,12 +207,12 @@ class Texy
 
 
 	/**
-	 * Parses text to AST. The text is preprocessed first (idempotent), so node
-	 * ranges always refer to the preprocessed form obtainable via preprocess().
+	 * Parses text to AST. The text is normalized first (idempotent), so node
+	 * ranges are byte offsets in normalize($text).
 	 */
 	public function parse(string $text, bool $singleLine = false): Nodes\DocumentNode
 	{
-		$text = $this->preprocess($text);
+		$text = self::normalize($text);
 
 		// Let modules do per-parse initialization (pattern registration, state reset)
 		$this->inModulePrepare = true;
@@ -275,27 +271,32 @@ class Texy
 
 
 	/**
-	 * Preprocesses text (normalizes line endings, replaces tabs, removes soft hyphens).
+	 * Normalizes text to the canonical form that parsing operates on: removes the leading
+	 * byte order mark, converts line endings to \n, strips control characters,
+	 * right-trims lines and drops blank lines at both ends. Idempotent,
+	 * so it is safe to apply before storing text and again before parsing.
+	 * @throws InvalidArgumentException when the input is not valid UTF-8
 	 */
-	public function preprocess(string $text): string
+	public static function normalize(string $text): string
 	{
-		$text = str_replace("\u{AD}", '', $text);
-
-		// standardize line endings and spaces
-		$text = Helpers::normalize($text);
-
-		// replace tabs with spaces
-		if ($this->tabWidth) {
-			while (str_contains($text, "\t")) {
-				$text = Regexp::replace(
-					$text,
-					'~^([^\t\n]*+)\t~mU',
-					fn($m) => $m[1] . str_repeat(' ', $this->tabWidth - strlen($m[1]) % $this->tabWidth),
-				);
-			}
+		if (!preg_match('##u', $text)) {
+			throw new InvalidArgumentException('Input is not valid UTF-8 text.');
 		}
 
-		return $text;
+		// standardize line endings to unix-like
+		$text = str_replace("\r\n", "\n", $text);
+		$text = strtr($text, "\r", "\n");
+
+		// remove control characters; leave \t + \n
+		$text = Regexp::replace($text, '~[\x00-\x08\x0B-\x1F]+~', '');
+
+		// right trim line ends
+		$text = Regexp::replace($text, "~[\t ]+$~m", '');
+
+		// drop blank lines at both ends and byte order marks at the start;
+		// a mark hidden behind blank lines would surface after the trim otherwise
+		$text = Regexp::replace($text, '~^[\n\x{FEFF}]+~u', '');
+		return rtrim($text, "\n");
 	}
 
 
@@ -304,8 +305,7 @@ class Texy
 	 */
 	public function applyTypography(string $text): string
 	{
-		// standardize line endings and spaces
-		$text = Helpers::normalize($text);
+		$text = self::normalize($text);
 
 		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
 

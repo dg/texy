@@ -28,6 +28,7 @@ final class Legacy
 		'nontextParagraph' => ['htmlOutput', 'nontextParagraph'],
 		'urlSchemeFilters' => 'use $texy->urlPolicy',
 		'summary' => null,
+		'tabWidth' => 'tabs are preserved as plain whitespace since Texy 4',
 		'removeSoftHyphens' => 'soft hyphens are preserved in text and stripped from URL targets automatically',
 	];
 

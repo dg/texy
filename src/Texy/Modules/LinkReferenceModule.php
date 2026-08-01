@@ -50,7 +50,7 @@ final class LinkReferenceModule extends Texy\Module
 			'~^
 				\[
 				( [^\[\]#?*\n]{1,100} )           # reference (1)
-				] : \ ++
+				] : [ \t]++
 				( \S{1,1000} )                    # URL (2)
 				( [ \t] .{1,1000} )?              # optional label (3)
 				' . Patterns::Modifier . '?       # modifier (4)
@@ -105,7 +105,7 @@ final class LinkReferenceModule extends Texy\Module
 		}
 		return new LinkDefinitionNode(
 			$mRef,
-			$mLink,
+			Helpers::removeSoftHyphens($mLink),
 			new Range($offsets[0], strlen($matches[0])),
 		);
 	}

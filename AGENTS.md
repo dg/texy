@@ -44,7 +44,7 @@ composer phpstan
 
 ## Working in this repo
 
-- **Four phases: preprocess → parse → transform → render.** Parsing builds an AST
+- **Four phases: normalize → parse → transform → render.** Parsing builds an AST
   (`Texy\Nodes\*`); the transform phase (passes added via `addPass()`) may mutate
   it; the render phase (`Texy\Output\*`) must not - **rendering is a pure function
   of the AST** (enforced by `renderer-purity.phpt`). See `docs/architecture.md`.

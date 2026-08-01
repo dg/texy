@@ -182,11 +182,11 @@ final class ParagraphModule extends Texy\Module
 			$content = $line['content'];
 			$offset = $line['offset'];
 			if ($i > 0) {
-				$strip = strspn($content, ' ');
+				$strip = strspn($content, " \t");
 				if (!$this->texy->mergeLines) {
 					$joined .= "\r";
-				} elseif ($strip > 0 && ($content[$strip] ?? "\t") !== "\t") {
-					// space-indented continuation line (the former `\n\ +(?=\S)` rule):
+				} elseif ($strip > 0 && isset($content[$strip])) {
+					// whitespace-indented continuation line (the former `\n\ +(?=\S)` rule):
 					// hard break, indentation stripped
 					$joined .= "\r";
 					$content = substr($content, $strip);
