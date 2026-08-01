@@ -11,8 +11,8 @@ extending Texy, plus how it converts its markup to HTML underneath.
   generator and per-module properties with defaults, the `Configurator` presets,
   and security (safe mode).
 - **[custom-handlers.md](custom-handlers.md)** — changing how existing constructs
-  are rendered (renderer handlers) and transforming the parsed document
-  (`afterParse` + `NodeTraverser`).
+  are rendered (`addRenderer()`), transforming the parsed document
+  (`addPass()` + `NodeHelpers` / `NodeTraverser`) and serving `{{directives}}` (`directiveModule->addDirective()`).
 - **[custom-syntax.md](custom-syntax.md)** — adding brand-new markup constructs with
   `addLineSyntax()` / `addBlockSyntax()`.
 
@@ -22,7 +22,7 @@ The core is non-trivial — a two-parser pipeline building an AST, transform
 passes, and content-model well-forming — so it is split by seam:
 
 - **[architecture.md](architecture.md)** — the four phases
-  (preprocess → parse → transform → render), the purity and semantic-completeness
+  (normalize → parse → transform → render), the purity and semantic-completeness
   invariants, the typography pass, and the terminology.
 - **[parsing.md](parsing.md)** — `InlineParser` vs `BlockParser`, collision
   resolution, recursion through `ParseContext`, and the paragraph gap handler.

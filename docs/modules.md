@@ -7,7 +7,7 @@ Modules are the basic organizational unit of the parse and transform phases. Eac
 1. **Registering syntaxes.** Line and block patterns are registered in `beforeParse()` (called on every `process()`, so patterns may depend on runtime config such as `ListModule::$bullets`) via `Texy::addLineSyntax()` / `addBlockSyntax()`.
 2. **Building AST nodes.** Syntax handlers extract data from regex groups, parse nested content through the `ParseContext`, and return `Texy\Nodes\*` objects.
 3. **Registering transform passes.** Work that needs the whole document – reference resolution, heading balancing, HTML pairing/sanitization – is registered in the constructor as an `afterParse` handler.
-4. **Semantic configuration and state.** Public properties that change the *document's meaning* stay on the module (`HeadingModule::$top`, `EmoticonModule::$icons`, `TypographyModule::$locale`); properties that only change the HTML output's look live on `$texy->htmlOutput` (modules keep deprecated `__get`/`__set` bridges for their old locations). Module state such as collected reference definitions is private to the module; per-parse *results* belong in the AST, not on the module (see `HeadingNode::$tocTitle`).
+4. **Semantic configuration and state.** Public properties that change the *document's meaning* stay on the module (`HeadingModule::$top`, `EmoticonModule::$icons`, `TypographyModule::$locale`); properties that only change the HTML output's look live on `$texy->htmlOutput` (modules keep deprecated `__get`/`__set` bridges for their old locations). Module state such as collected reference definitions is private to the module; per-parse *results* belong in the AST, not on the module (see `HeadingNode::getTitle()`).
 
 The set of modules is created in `Texy::loadModules()`; a `Texy` subclass may override it.
 
@@ -22,7 +22,7 @@ final class FooModule extends Texy\Module
         private Texy\Texy $texy,
     ) {
         $texy->allowed['foo/advanced'] = false;              // default off
-        $texy->addHandler('afterParse', $this->resolve(...)); // transform pass
+        $texy->addPass($this->resolve(...)); // transform pass
     }
 
     public function beforeParse(string &$text): void
@@ -51,7 +51,7 @@ All modules live in `src/Texy/Modules/`; syntax names are catalogued on `Texy\Sy
 
 | Module | Purpose |
 |---|---|
-| **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` in the transform phase. |
+| **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` and dispatches other directives to `DirectiveModule::addDirective()` handlers in the first transform pass. |
 | **HtmlModule** | HTML tags and comments written in the input → `HtmlTagNode` / `HtmlCommentNode`; registers the pairing + sanitization transform passes ([rendering.md](rendering.md#html-passthrough-transform-passes)). |
 | **ImageModule** | Images `[* url *]` → `ImageNode` (wrapped in `LinkNode` when clickable); the block form with caption → `FigureNode`; collects `[*ref*]:` definitions and resolves references in the transform phase. |
 | **PhraseModule** | All inline formatting → `PhraseNode` (type = syntax name); acronyms → `AnnotationNode`, `''notexy''` → `RawTextNode`; the alternative link syntaxes (wikilink, markdown, quicklink) → `LinkNode`. |
@@ -64,11 +64,11 @@ All modules live in `src/Texy/Modules/`; syntax names are catalogued on `Texy\Sy
 | Module | Purpose |
 |---|---|
 | **ParagraphModule** | Not pattern-based: the block parser's *gap handler*. Splits inter-block text into `ParagraphNode`s, handles hard line breaks and the paragraph modifier (see [parsing.md](parsing.md#paragraphmodule-the-gap-handler)). |
-| **BlockModule** | Fenced blocks `/-- type … \--` → `CodeBlockNode` (code/html/text/pre…), `SectionNode` (div), `CommentNode`; nested Texy for `block/texy`. |
+| **BlockModule** | Fenced blocks `/-- type … \--` → `CodeBlockNode` (code/html/text/pre…), `SectionNode` (div), `CommentNode`; nested Texy for `block/texy`; an unknown type that looks like a language name becomes a code block in that language. |
 | **HorizontalRuleModule** | `---` / `***` → `HorizontalRuleNode`. |
 | **BlockQuoteModule** | `>` quotations → `BlockQuoteNode`, including nested content and citation link. |
-| **TableModule** | Tables → `TableNode` / `TableRowNode` / `TableCellNode` with head detection, colspan/rowspan. |
-| **HeadingModule** | Underlined and surrounded headings → `HeadingNode`; registers `Passes\HeadingPass`, which balances levels (`Dynamic`/`Fixed`), fills `HeadingNode::$tocTitle` and generates IDs. |
+| **TableModule** | Tables → `TableNode` / `TableRowNode` / `TableCellNode` with head detection, colspan/rowspan and an optional `\|##` caption. |
+| **HeadingModule** | Underlined and surrounded headings → `HeadingNode`; registers `Passes\HeadingPass`, which balances levels (`Dynamic`/`Fixed`), hoists `{toc: …}` labels and generates IDs. |
 | **ListModule** | Bulleted, numbered and definition lists → `ListNode` / `DefinitionListNode` with `ListItemNode`s. |
 
 ### Text-transformation modules
