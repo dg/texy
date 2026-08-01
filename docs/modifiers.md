@@ -16,7 +16,7 @@ It is written before or at the end of the construct it applies to, e.g. `**text 
 |---|---|
 | `(text)` | `title` attribute (or `alt` text for images). A literal `)` can be escaped as `\)`. HTML entities inside are decoded. |
 | `[word word #id]` | CSS classes separated by spaces; an ID prefixed with `#`. The last `#id` wins if repeated. |
-| `{prop: value; ...}` | CSS styles in standard `property:value` form separated by semicolons. Names from a known list of HTML attributes (`href`, `target`, `src`, `alt`, `rel`...) and any `data-*`/`aria-*` name are treated as **HTML attributes** instead – e.g. `{target: _blank}` sets the `target` attribute; everything else is a CSS style. |
+| `{prop: value; ...}` | CSS styles in standard `property:value` form separated by semicolons. Names listed in `Modifier::ElAttrs` (`href`, `target`, `src`, `alt`, `rel`, `role`, `loading`...) and any `data-*`/`aria-*` name are treated as **HTML attributes** instead – e.g. `{target: _blank}` sets the `target` attribute; everything else is a CSS style. Names that are also CSS properties (`width`, `height`, `color`, `border`, `translate`...) are deliberately absent from the list and always mean a style. |
 | `<` `>` `=` `<>` | horizontal alignment: left, right, justify, center |
 | `^` `-` `_` | vertical alignment: top, middle, bottom |
 
