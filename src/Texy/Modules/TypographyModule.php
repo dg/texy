@@ -19,19 +19,14 @@ final class TypographyModule extends Texy\Module
 {
 	/** @var array<string, array{singleQuotes: array{string, string}, doubleQuotes: array{string, string}}> */
 	public array $locales = [
-		'cs' => [
+		'bg' => [
 			'singleQuotes' => ["\u{201A}", "\u{2018}"],
 			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
 		],
 
-		'en' => [
-			'singleQuotes' => ["\u{2018}", "\u{2019}"],
-			'doubleQuotes' => ["\u{201C}", "\u{201D}"],
-		],
-
-		'fr' => [
-			'singleQuotes' => ["\u{2039}", "\u{203A}"],
-			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
+		'cs' => [
+			'singleQuotes' => ["\u{201A}", "\u{2018}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
 		],
 
 		'de' => [
@@ -39,9 +34,77 @@ final class TypographyModule extends Texy\Module
 			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
 		],
 
+		// languages using guillemets nest the inner level in the quotes given as singleQuotes
+		'el' => [
+			'singleQuotes' => ["\u{201C}", "\u{201D}"],
+			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
+		],
+
+		'en' => [
+			'singleQuotes' => ["\u{2018}", "\u{2019}"],
+			'doubleQuotes' => ["\u{201C}", "\u{201D}"],
+		],
+
+		'es' => [
+			'singleQuotes' => ["\u{201C}", "\u{201D}"],
+			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
+		],
+
+		'fr' => [
+			'singleQuotes' => ["\u{2039}", "\u{203A}"],
+			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
+		],
+
+		'hu' => [
+			'singleQuotes' => ["\u{201A}", "\u{2019}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201D}"],
+		],
+
+		'it' => [
+			'singleQuotes' => ["\u{201C}", "\u{201D}"],
+			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
+		],
+
+		// Japanese corner brackets: 「…」 primary, 『…』 nested
+		'ja' => [
+			'singleQuotes' => ["\u{300E}", "\u{300F}"],
+			'doubleQuotes' => ["\u{300C}", "\u{300D}"],
+		],
+
 		'pl' => [
 			'singleQuotes' => ["\u{201A}", "\u{2019}"],
 			'doubleQuotes' => ["\u{201E}", "\u{201D}"],
+		],
+
+		// Brazilian usage, which is what the pt documentation follows
+		'pt' => [
+			'singleQuotes' => ["\u{2018}", "\u{2019}"],
+			'doubleQuotes' => ["\u{201C}", "\u{201D}"],
+		],
+
+		'ro' => [
+			'singleQuotes' => ["\u{201A}", "\u{2019}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201D}"],
+		],
+
+		'ru' => [
+			'singleQuotes' => ["\u{201E}", "\u{201C}"],
+			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
+		],
+
+		'sl' => [
+			'singleQuotes' => ["\u{201A}", "\u{2018}"],
+			'doubleQuotes' => ["\u{201E}", "\u{201C}"],
+		],
+
+		'tr' => [
+			'singleQuotes' => ["\u{2018}", "\u{2019}"],
+			'doubleQuotes' => ["\u{201C}", "\u{201D}"],
+		],
+
+		'uk' => [
+			'singleQuotes' => ["\u{201E}", "\u{201C}"],
+			'doubleQuotes' => ["\u{00AB}", "\u{00BB}"],
 		],
 	];
 
