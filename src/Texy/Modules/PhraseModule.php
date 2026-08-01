@@ -94,36 +94,36 @@ final class PhraseModule extends Texy\Module
 		$texy = $this->texy;
 
 		foreach (self::Phrases as $syntax => $spec) {
-			$texy->registerLinePattern($this->parsePhrase(...), self::buildPhrasePattern($spec), $syntax);
+			$texy->addLineSyntax($syntax, self::buildPhrasePattern($spec), $this->parsePhrase(...));
 		}
 
 		// m^2 alternative superscript
-		$texy->registerLinePattern(
-			$this->parseSupSub(...),
+		$texy->addLineSyntax(
+			Syntax::SuperscriptShort,
 			'~
 				(?<= [a-z0-9] )                  # preceded by letter or number
 				\^
 				( [n0-9+-]{1,4}? )               # 1-4 digits, n, + or - (1)
 				(?! [a-z0-9] )                   # not followed by letter or number
 			~Uix',
-			Syntax::SuperscriptShort,
+			$this->parseSupSub(...),
 		);
 
 		// m_2 alternative subscript
-		$texy->registerLinePattern(
-			$this->parseSupSub(...),
+		$texy->addLineSyntax(
+			Syntax::SubscriptShort,
 			'~
 				(?<= [a-z] )                     # preceded by letter
 				_
 				( [n0-9]{1,3} )                  # 1-3 digits or n (1)
 				(?! [a-z0-9] )                   # not followed by letter or number
 			~Uix',
-			Syntax::SubscriptShort,
+			$this->parseSupSub(...),
 		);
 
 		// acronym/abbr "et al."((and others))
-		$texy->registerLinePattern(
-			$this->parseAcronym(...),
+		$texy->addLineSyntax(
+			Syntax::AbbreviationQuotes,
 			'~
 				(?<! " )                         # not preceded by "
 				"
@@ -137,12 +137,12 @@ final class PhraseModule extends Texy\Module
 				( .+ )                           # explanation (3)
 				\)\)
 			~Ux',
-			Syntax::AbbreviationQuotes,
+			$this->parseAcronym(...),
 		);
 
 		// acronym/abbr NATO((North Atlantic Treaty Organisation))
-		$texy->registerLinePattern(
-			$this->parseAcronym(...),
+		$texy->addLineSyntax(
+			Syntax::Abbreviation,
 			'~
 				(?<! [' . Patterns::Letter . '] )  # not preceded by char
 				( [' . Patterns::Letter . ']{2,} ) # at least 2 chars (1)
@@ -151,12 +151,12 @@ final class PhraseModule extends Texy\Module
 				( (?: [^\n )]++ | [ )] )+ )      # explanation (3)
 				\)\)
 			~Ux',
-			Syntax::Abbreviation,
+			$this->parseAcronym(...),
 		);
 
 		// ''notexy''
-		$texy->registerLinePattern(
-			$this->parseNoTexy(...),
+		$texy->addLineSyntax(
+			Syntax::Raw,
 			'~
 				(?<! \' )                         # not preceded by quote
 				\'\'
@@ -166,12 +166,12 @@ final class PhraseModule extends Texy\Module
 				\'\'
 				(?! \' )                          # not followed by quote
 			~Ux',
-			Syntax::Raw,
+			$this->parseNoTexy(...),
 		);
 
 		// `code`
-		$texy->registerLinePattern(
-			$this->parseCode(...),
+		$texy->addLineSyntax(
+			Syntax::Code,
 			'~
 				`
 				( \S (?: [^\r\n `]++ | [ `] )* )        # content (1)
@@ -180,24 +180,24 @@ final class PhraseModule extends Texy\Module
 				`
 				(?: : (' . Patterns::LinkUrl . ') )??  # optional link (3)
 			~Ux',
-			Syntax::Code,
+			$this->parseCode(...),
 		);
 
 		// ....:LINK
-		$texy->registerLinePattern(
-			$this->parseLink(...),
+		$texy->addLineSyntax(
+			Syntax::QuickLink,
 			'~
 				( [' . Patterns::Letter . '0-9@#$%&.,_-]++ )  # allowed chars (1)
 				()                                    # modifier placeholder (2)
 				: (?= \[ )                            # followed by :[
 				(' . Patterns::LinkUrl . ')          # link (3)
 			~Ux',
-			Syntax::QuickLink,
+			$this->parseLink(...),
 		);
 
 		// [text |link]
-		$texy->registerLinePattern(
-			$this->parseWikilink(...),
+		$texy->addLineSyntax(
+			Syntax::WikiLink,
 			'~
 				(?<! \[ )                        # not preceded by [
 				\[
@@ -210,12 +210,12 @@ final class PhraseModule extends Texy\Module
 				]
 				(?! ] )                          # not followed by ]
 			~Ux',
-			Syntax::WikiLink,
+			$this->parseWikilink(...),
 		);
 
 		// [text](link)
-		$texy->registerLinePattern(
-			$this->parseLink(...),
+		$texy->addLineSyntax(
+			Syntax::MarkdownLink,
 			'~
 				(?<! [[.] )                     # not preceded by [ or .
 				\[
@@ -228,14 +228,14 @@ final class PhraseModule extends Texy\Module
 				( (?: [^\r )]++ | [ ] )+ )      # link (3)
 				\)
 			~Ux',
-			Syntax::MarkdownLink,
+			$this->parseLink(...),
 		);
 
 		// \* escaped asterisk
-		$texy->registerLinePattern(
-			fn($context, $matches, $offsets) => new TextNode('*', new Range($offsets[0], 2)),
-			'~\\\\\*~',
+		$texy->addLineSyntax(
 			Syntax::EscapedAsterisk,
+			'~\\\\\*~',
+			fn($context, $matches, $offsets) => new TextNode('*', new Range($offsets[0], 2)),
 		);
 	}
 

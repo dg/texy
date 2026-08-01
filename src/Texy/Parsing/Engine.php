@@ -23,8 +23,8 @@ use Texy\Nodes;
  *
  * Usage:
  *   $engine = new Engine();
- *   $engine->registerLinePattern($handler, $pattern, 'syntax/name');
- *   $engine->registerBlockPattern($handler, $pattern, 'syntax/name');
+ *   $engine->addLineSyntax('syntax/name', $pattern, $parser);
+ *   $engine->addBlockSyntax('syntax/name', $pattern, $parser);
  *   $doc = $engine->parse($text, ['syntax/name' => true]);
  */
 class Engine
@@ -58,17 +58,17 @@ class Engine
 	/**
 	 * Register an inline pattern handler.
 	 *
-	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode  $handler
+	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\InlineNode  $parser
 	 */
-	public function registerLinePattern(
-		\Closure $handler,
+	public function addLineSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		\Closure $parser,
 	): void
 	{
 		$this->linePatterns[$name] = [
-			'handler' => $handler,
+			'handler' => $parser,
 			'pattern' => $pattern,
 		];
 	}
@@ -77,17 +77,17 @@ class Engine
 	/**
 	 * Register a block pattern handler.
 	 *
-	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode  $handler
+	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): ?Nodes\BlockNode  $parser
 	 */
-	public function registerBlockPattern(
-		\Closure $handler,
+	public function addBlockSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		\Closure $parser,
 	): void
 	{
 		$this->blockPatterns[$name] = [
-			'handler' => $handler,
+			'handler' => $parser,
 			'pattern' => $pattern . 'm', // force multiline
 		];
 	}

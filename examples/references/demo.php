@@ -31,7 +31,7 @@ $texy = new Texy;
 
 // Register our reference handler
 // A bare reference like [1] becomes a LinkNode whose $ref keeps the written name
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
 	function (LinkNode $node, Html\Renderer $gen): Html\Element|string|null {
 		// Map of comment IDs to author names
 		$names = ['Me', 'Punkrats', 'Servats', 'Bonifats'];

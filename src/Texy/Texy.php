@@ -87,8 +87,8 @@ class Texy
 
 	private bool $inModulePrepare = false;
 
-	/** @var array<string, list<\Closure(mixed...): mixed>> of events and registered handlers */
-	private array $handlers = [];
+	/** @var list<\Closure(Nodes\DocumentNode): void>  transform passes, in registration order */
+	private array $passes = [];
 
 	/** @var array<string, Compat\LegacyModuleProxy>  v3 compatibility */
 	private array $legacyProxies = [];
@@ -137,26 +137,28 @@ class Texy
 	}
 
 
-	public function addModule(Module $module): static
+	public function addModule(Module $module): void
 	{
 		$this->modules[] = $module;
-		return $this;
 	}
 
 
-	/** @return Module[] */
+	/**
+	 * @return Module[]
+	 * @internal
+	 */
 	public function getModules(): array
 	{
 		return $this->modules;
 	}
 
 
-	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode */
-	final public function registerLinePattern(
-		\Closure $handler,
+	/** @param  callable  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\InlineNode */
+	final public function addLineSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		callable $parser,
 	): void
 	{
 		if ($this->inModulePrepare) {
@@ -171,16 +173,16 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->engine->registerLinePattern($handler, $pattern, $name);
+		$this->engine->addLineSyntax($name, $pattern, $parser(...));
 	}
 
 
-	/** @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode */
-	final public function registerBlockPattern(
-		\Closure $handler,
+	/** @param  callable  $parser  fn(ParseContext, array $matches, array $offsets, string $name): ?Nodes\BlockNode */
+	final public function addBlockSyntax(
+		string $name,
 		#[Language('RegExp')]
 		string $pattern,
-		string $name,
+		callable $parser,
 	): void
 	{
 		if ($this->inModulePrepare) {
@@ -195,7 +197,7 @@ class Texy
 			$this->allowed[$name] = true;
 		}
 
-		$this->engine->registerBlockPattern($handler, $pattern, $name);
+		$this->engine->addBlockSyntax($name, $pattern, $parser(...));
 	}
 
 
@@ -232,7 +234,10 @@ class Texy
 		// Parse using the engine with current allowed settings
 		$document = $this->engine->parse($text, $this->allowed, $singleLine);
 
-		$this->invokeHandlers('afterParse', [$document]);
+		foreach ($this->passes as $pass) {
+			$pass($document);
+		}
+
 		$this->applyAstTypography($document);
 		return $document;
 	}
@@ -328,33 +333,24 @@ class Texy
 
 
 	/**
-	 * Add new event handler.
+	 * Registers a transform pass: fn(Nodes\DocumentNode): void, called after parsing
+	 * with the whole document. The AST may be freely modified there; return values are
+	 * ignored and all passes run, in registration order.
+	 *
+	 * Passes registered by modules always run first, so a consumer cannot get in front
+	 * of them. Where that matters, call parse(), do the work, and then renderHtml().
+	 * @param  callable(Nodes\DocumentNode): void  $pass
 	 */
-	final public function addHandler(string $event, callable $callback): void
+	final public function addPass(callable $pass): void
 	{
-		$this->handlers[$event][] = $callback(...);
+		$this->passes[] = $pass(...);
 	}
 
 
 	/**
-	 * Invoke registered after-handlers.
-	 * @param  mixed[]  $args
-	 */
-	final public function invokeHandlers(string $event, array $args): void
-	{
-		if (!isset($this->handlers[$event])) {
-			return;
-		}
-
-		foreach ($this->handlers[$event] as $handler) {
-			$handler(...$args);
-		}
-	}
-
-
-	/**
-	 * Creates parse context (for advanced usage).
-	 * Note: Modules must be initialized via parse() first for patterns to be available.
+	 * Creates parse context. Modules must be initialized via parse() first
+	 * for patterns to be available.
+	 * @internal
 	 */
 	public function createParseContext(): ParseContext
 	{

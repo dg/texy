@@ -93,8 +93,8 @@ final class Renderer extends NodeRenderer
 			Nodes\CommentNode::class => fn() => '',
 		];
 
-		foreach ($config->getHandlers() as $handler) {
-			$this->registerHandler($handler);
+		foreach ($config->getRenderers() as $renderer) {
+			$this->addRenderer($renderer);
 		}
 	}
 
@@ -761,7 +761,8 @@ final class Renderer extends NodeRenderer
 			return Helpers::decodeEntities($this->texy->htmlPolicy->reconstructTag($node));
 		}
 
-		// an accepted tag must not smuggle in attributes the whitelist does not allow
+		// defense in depth: HtmlSanitizePass has already done this, but a hand-built
+		// AST or a policy tightened after parsing must not slip attributes through
 		$attrs = $this->texy->htmlPolicy->filterAttrs($tagName, $attrs);
 
 		// Add rel="nofollow" for external links when linkNoFollow is enabled

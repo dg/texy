@@ -82,7 +82,7 @@ Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **prep
 
 **Syntax** – a named syntactic construct, e.g. `phrase/strong` or `image`. Names are catalogued as constants on `Texy\Syntax` and used as keys in `Texy::$allowed`. Simple syntaxes have one-word names; related groups use a slash hierarchy (`phrase/*`, `block/*`).
 
-**Pattern** – the regular expression that recognizes the syntax, registered via `Texy::registerLinePattern()` / `registerBlockPattern()` together with the syntax handler and name. Registration defaults `$allowed[$name]` to `true` unless a module set it otherwise (e.g. `emoticon`, `phrase/ins` default to `false`).
+**Pattern** – the regular expression that recognizes the syntax, registered via `Texy::addLineSyntax()` / `addBlockSyntax()` together with the syntax name and its parser. Registration defaults `$allowed[$name]` to `true` unless a module set it otherwise (e.g. `emoticon`, `phrase/ins` default to `false`).
 
 **Syntax handler** – the closure the parser calls on a match: `function(ParseContext $context, array $matches, array $offsets, string $name): ?Node`. It returns an AST node, or `null` to refuse the match (the parser then gives other patterns a chance). Handlers parse nested content recursively through the `ParseContext`.
 

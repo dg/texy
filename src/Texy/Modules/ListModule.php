@@ -58,19 +58,19 @@ final class ListModule extends Texy\Module
 			}
 		}
 
-		$this->texy->registerBlockPattern(
-			$this->parseList(...),
+		$this->texy->addBlockSyntax(
+			Syntax::List,
 			'~^
 				(?:' . Patterns::ModifierHAlign . '\n)? # modifier (1)
 				(' . implode('|', $RE) . ')         # list marker (2)
 				[ \t]*+
 				\S .*                               # content
 			$~mUx',
-			Syntax::List,
+			$this->parseList(...),
 		);
 
-		$this->texy->registerBlockPattern(
-			$this->parseDefList(...),
+		$this->texy->addBlockSyntax(
+			Syntax::DefinitionList,
 			'~^
 				(?:' . Patterns::ModifierHAlign . '\n)?   # modifier (1)
 				( \S .{0,2000} )                      # definition term (2)
@@ -82,7 +82,7 @@ final class ListModule extends Texy\Module
 				[ \t]*+
 				\S .*                                 # content
 			$~mUx',
-			Syntax::DefinitionList,
+			$this->parseDefList(...),
 		);
 	}
 

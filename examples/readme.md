@@ -92,11 +92,11 @@ $texy->addHandler('image', function($invocation, $image, $link) {
 
 ```php
 $texy = new Texy;
-$texy->registerLinePattern(
-    'myHandler',           // callback function
-    '#@@(\w+)#',          // regex pattern
+$texy->addLineSyntax(          // regex pattern
     'custom/username'      // syntax name
-);
+,           // callback function
+    '#@@(\w+)#',
+    'myHandler');
 ```
 
 ---

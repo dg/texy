@@ -42,7 +42,7 @@ final class EmoticonModule extends Texy\Module
 		private Texy\Texy $texy,
 	) {
 		$texy->allowed[Syntax::Emoticon] = false;
-		$texy->addHandler('afterParse', $this->resolveEmoticons(...));
+		$texy->addPass($this->resolveEmoticons(...));
 	}
 
 
@@ -76,13 +76,13 @@ final class EmoticonModule extends Texy\Module
 			$pattern[] = Texy\Regexp::quote($key) . '+'; // last char can be repeated
 		}
 
-		$this->texy->registerLinePattern(
-			$this->parse(...),
+		$this->texy->addLineSyntax(
+			Syntax::Emoticon,
 			'~
 				(?<= ^ | [\x00-\x20] )
 				(' . implode('|', $pattern) . ')
 			~x',
-			Syntax::Emoticon,
+			$this->parse(...),
 		);
 	}
 

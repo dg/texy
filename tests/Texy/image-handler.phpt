@@ -17,7 +17,7 @@ test('custom image handler', function () {
 	$texy->htmlOutput->lineWrap = 180;
 
 	// Use afterParse handler to modify ImageNodes in the AST
-	$texy->addHandler('afterParse', function (Texy\Nodes\DocumentNode $doc) {
+	$texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
 		$traverser = new Texy\NodeTraverser;
 		$traverser->traverse($doc, function (Texy\Node $node) {
 			// Handle LinkNode wrapping ImageNode (image with link)

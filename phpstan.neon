@@ -42,21 +42,15 @@ parameters:
 			path: src/Bridges/Latte/TexyNode.php
 
 		-
-			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
-			identifier: missingType.callable
-			count: 1
-			path: src/Texy/Texy.php
-
-		-
 			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Texy/Texy.php
 
-		# Output handlers are intentionally polymorphic: the type of the first
-		# parameter decides which node class the handler serves (read via reflection),
-		# so any concrete Closure signature would be contravariantly narrower and
-		# would reject every real handler.
+		# Node renderers are intentionally polymorphic: the type of the first parameter
+		# decides which node class the renderer serves (read via reflection), so any
+		# concrete signature would be contravariantly narrower and would reject every
+		# real renderer.
 		-
 			identifier: missingType.callable
 			message: '#no signature specified for (Closure|callable)\.$#'
@@ -69,7 +63,7 @@ parameters:
 		# concrete one would be contravariantly narrower and reject every real handler.
 		-
 			identifier: missingType.callable
-			message: '#^Method Texy\\Texy\:\:register(Line|Block)Pattern\(\) has parameter \$handler with no signature specified for Closure\.$#'
+			message: '#^Method Texy\\Texy\:\:add(Line|Block)Syntax\(\) has parameter \$parser with no signature specified for callable\.$#'
 			count: 2
 			path: src/Texy/Texy.php
 

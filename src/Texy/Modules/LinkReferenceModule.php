@@ -38,15 +38,15 @@ final class LinkReferenceModule extends Texy\Module
 	) {
 		$texy->allowed[Syntax::LinkDefinition] = true;
 		$texy->allowed[Syntax::LinkReference] = false;
-		$texy->addHandler('afterParse', $this->resolveReferences(...));
+		$texy->addPass($this->resolveReferences(...));
 	}
 
 
 	public function beforeParse(): void
 	{
 		// [ref]: url label .(title)[class]{style}
-		$this->texy->registerBlockPattern(
-			$this->parseDefinition(...),
+		$this->texy->addBlockSyntax(
+			Syntax::LinkDefinition,
 			'~^
 				\[
 				( [^\[\]#?*\n]{1,100} )           # reference (1)
@@ -56,20 +56,20 @@ final class LinkReferenceModule extends Texy\Module
 				' . Patterns::Modifier . '?       # modifier (4)
 				\s*
 			$~mUx',
-			Syntax::LinkDefinition,
+			$this->parseDefinition(...),
 		);
 
 		// [reference] - bare reference link (opt-in); the raw target is kept in
 		// LinkNode::$ref for consumer resolution passes (wiki links etc.)
-		$this->texy->registerLinePattern(
-			$this->parseReference(...),
+		$this->texy->addLineSyntax(
+			Syntax::LinkReference,
 			'~
 				(?<! [.\#\[] )        # exclude modifier .[class], PHP attribute \#[Attr] and nested [
 				\[
 				( [^\[\]*|\n]++ )     # reference name (1); * would be an image, | a labeled form
 				]
 			~Ux',
-			Syntax::LinkReference,
+			$this->parseReference(...),
 		);
 	}
 

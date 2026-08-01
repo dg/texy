@@ -37,7 +37,7 @@ abstract class NodeRenderer
 	 * to the node class it serves, which is the whole mechanism here, and any concrete
 	 * callable type would be contravariantly wider and reject every real renderer.
 	 */
-	public function registerHandler(callable $renderer): void
+	public function addRenderer(callable $renderer): void
 	{
 		$renderer = $renderer(...);
 		$nodeClass = self::renderedClass($renderer);

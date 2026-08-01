@@ -15,7 +15,7 @@ Register a closure on an output generator; the node class is determined from the
 use Texy\Nodes;
 use Texy\Output\Html;
 
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
     function (Nodes\ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
         // your logic
     },
@@ -40,7 +40,7 @@ Handlers must respect the render-phase purity rule: **do not mutate the node or 
 use Texy\Nodes\ImageNode;
 use Texy\Output\Html;
 
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
     function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
         if (!str_starts_with($node->url ?? '', 'youtube:')) {
             return null;   // not ours - delegate to the default renderer
@@ -61,7 +61,7 @@ Usage: `[* youtube:dQw4w9WgXcQ 640x360 *]`
 ### Example: post-processing the default result
 
 ```php
-$texy->htmlOutput->registerHandler(
+$texy->htmlOutput->addRenderer(
     function (Texy\Nodes\HeadingNode $node, Html\Renderer $gen, ?Closure $previous) {
         $el = $previous($node, $gen);       // default <h#> element
         $el->attrs['class'][] = 'anchored';
@@ -79,7 +79,7 @@ To emit ready-made HTML, return `new Html\Raw($html)` – it bypasses text escap
 For document-level changes, register an `afterParse` handler; it receives the `DocumentNode` after parsing and the built-in transform passes may be freely combined with yours. Use `Texy\NodeTraverser` to walk and modify the tree:
 
 ```php
-$texy->addHandler('afterParse', function (Texy\Nodes\DocumentNode $doc) {
+$texy->addPass(function (Texy\Nodes\DocumentNode $doc) {
     (new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) {
         if ($node instanceof Texy\Nodes\LinkNode && $node->url !== null) {
             $node->url = addTrackingParams($node->url);  // transform phase may mutate
@@ -91,14 +91,14 @@ $texy->addHandler('afterParse', function (Texy\Nodes\DocumentNode $doc) {
 
 The enter/leave callbacks may return a replacement `Node`, `NodeTraverser::RemoveNode` (only for nodes held in list containers such as `ContentNode`), `DontTraverseChildren`, or `StopTraversal`.
 
-`addHandler()` is a plain notification mechanism: all handlers for an event run in registration order and return values are ignored. The only built-in event is `afterParse`.
+All passes run in registration order and return values are ignored. Passes registered by modules always run before yours, so you cannot get in front of them; where that matters, call `parse()`, work on the AST, and then `render()`.
 
 ### Example: collecting statistics
 
 ```php
 $stats = ['images' => 0, 'headings' => 0];
 
-$texy->addHandler('afterParse', function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
+$texy->addPass(function (Texy\Nodes\DocumentNode $doc) use (&$stats) {
     (new Texy\NodeTraverser)->traverse($doc, function (Texy\Node $node) use (&$stats) {
         match (true) {
             $node instanceof Texy\Nodes\ImageNode => $stats['images']++,

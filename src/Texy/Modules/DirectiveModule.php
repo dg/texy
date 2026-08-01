@@ -23,7 +23,7 @@ final class DirectiveModule extends Texy\Module
 	public function __construct(
 		private Texy\Texy $texy,
 	) {
-		$texy->addHandler('afterParse', $this->processDirectives(...));
+		$texy->addPass($this->processDirectives(...));
 	}
 
 
@@ -51,8 +51,8 @@ final class DirectiveModule extends Texy\Module
 
 	public function beforeParse(): void
 	{
-		$this->texy->registerLinePattern(
-			$this->parse(...),
+		$this->texy->addLineSyntax(
+			Syntax::Directive,
 			'~
 				\{\{
 				((?:
@@ -61,7 +61,7 @@ final class DirectiveModule extends Texy\Module
 				)+)
 				}}
 			~Ux',
-			Syntax::Directive,
+			$this->parse(...),
 		);
 	}
 

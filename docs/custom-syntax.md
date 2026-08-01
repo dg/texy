@@ -7,8 +7,8 @@ You define what the construct looks like (a regular expression) and write a synt
 ## Registering
 
 ```php
-$texy->registerLinePattern(\Closure $handler, string $pattern, string $name);
-$texy->registerBlockPattern(\Closure $handler, string $pattern, string $name);
+$texy->addLineSyntax( string $name, string $pattern,\Closure $handler);
+$texy->addBlockSyntax( string $name, string $pattern,\Closure $handler);
 ```
 
 - **Line patterns** recognize inline constructs; the pattern is searched anywhere in the text, so it must **not** be anchored with `^`.
@@ -20,9 +20,9 @@ Register before calling `process()`. Built-in modules register their patterns du
 Your pattern behaves exactly as written: Texy adds only the `u` (UTF-8) flag, so what you verify in a regex tester works after registration. Flags of your own – including extended mode `x`, which lets you lay the pattern out over several lines with `#` comments – belong after the closing delimiter, as usual:
 
 ```php
-$texy->registerLinePattern($handler, '~
+$texy->addLineSyntax( 'custom/mention', '~
 	@ ([a-z0-9_]{2,30})   # user name
-~x', 'custom/mention');
+~x',$handler);
 ```
 
 `Texy\Patterns` fragments (`Modifier`, `LinkUrl`, `Email`…) are written in extended mode but carry it themselves, so you can embed them in a pattern of either kind. Likewise `Texy\Regexp::quote()` escapes whitespace, so quoted text matches literally in both modes.
@@ -48,7 +48,9 @@ Collision resolution ([parsing.md](parsing.md#inlineparser)): at the same positi
 ```php
 use Texy\Nodes;
 
-$texy->registerLinePattern(
+$texy->addLineSyntax(
+    'custom/username',
+    '~@@([a-z0-9_]+)~i',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\LinkNode {
         $username = $matches[1];
         return new Nodes\LinkNode(
@@ -56,10 +58,7 @@ $texy->registerLinePattern(
             content: new Nodes\ContentNode([new Nodes\TextNode('@' . $username)]),
             range: new Texy\Range($offsets[0], strlen($matches[0])),
         );
-    },
-    '~@@([a-z0-9_]+)~i',
-    'custom/username',
-);
+    },);
 ```
 
 ```texy
@@ -69,7 +68,9 @@ Check out the profile of @@johndoe.
 ### Alert boxes (block, with nested Texy content)
 
 ```php
-$texy->registerBlockPattern(
+$texy->addBlockSyntax(
+    'custom/alert',
+    '~^:::(warning|info|danger)\n(.+?)\n:::$~s',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\SectionNode {
         [, $type, $content] = $matches;
         $mod = new Texy\Modifier;
@@ -79,10 +80,7 @@ $texy->registerBlockPattern(
             'div',
             $mod,
         );
-    },
-    '~^:::(warning|info|danger)\n(.+?)\n:::$~s',
-    'custom/alert',
-);
+    },);
 ```
 
 ```texy
@@ -99,16 +97,15 @@ $abbreviations = [
     'CSS' => 'Cascading Style Sheets',
 ];
 
-$texy->registerLinePattern(
+$texy->addLineSyntax(
+    'custom/abbreviation',
+    '~\b([A-Z]{2,})\b~',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets) use ($abbreviations): ?Nodes\AnnotationNode {
         if (!isset($abbreviations[$matches[1]])) {
             return null;   // unknown abbreviation - leave the text alone
         }
         return new Nodes\AnnotationNode($matches[1], $abbreviations[$matches[1]]);
-    },
-    '~\b([A-Z]{2,})\b~',
-    'custom/abbreviation',
-);
+    },);
 ```
 
 ### Multi-line structure with next()/moveBackward() (block)
@@ -116,7 +113,9 @@ $texy->registerLinePattern(
 For structures whose full extent the registered pattern cannot capture, use the block parser's navigation API:
 
 ```php
-$texy->registerBlockPattern(
+$texy->addBlockSyntax(
+    'custom/note',
+    '~^NOTE:\s*(.+)$~',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\BlockQuoteNode {
         $parser = $context->getBlockParser();
         $parser->moveBackward();   // pattern matched the first line; re-read from it
@@ -127,10 +126,7 @@ $texy->registerBlockPattern(
         }
 
         return new Nodes\BlockQuoteNode($context->parseBlock(trim($content)));
-    },
-    '~^NOTE:\s*(.+)$~',
-    'custom/note',
-);
+    },);
 ```
 
 ```texy

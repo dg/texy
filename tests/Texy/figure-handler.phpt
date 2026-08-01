@@ -16,7 +16,7 @@ test('custom ImageNode handler is called for images in figures', function () {
 	$texy->htmlOutput->lineWrap = 500; // Prevent line wrapping in output
 
 	// Register custom handler that transforms youtube: URLs to iframes
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
 			if (!str_starts_with($node->url ?? '', 'youtube:')) {
 				return $previous ? $previous($node, $gen) : null;
@@ -45,7 +45,7 @@ test('custom ImageNode handler is called for images in figures', function () {
 test('custom ImageNode handler is called for inline images', function () {
 	$texy = new Texy\Texy;
 
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (ImageNode $node, Html\Renderer $gen, ?Closure $previous): Html\Element|Html\Raw|string|null {
 			if (!str_starts_with($node->url ?? '', 'youtube:')) {
 				return $previous ? $previous($node, $gen) : null;

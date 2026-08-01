@@ -4,7 +4,7 @@ Modules are the basic organizational unit of the parse and transform phases. Eac
 
 ## Responsibilities of a module
 
-1. **Registering syntaxes.** Line and block patterns are registered in `beforeParse()` (called on every `process()`, so patterns may depend on runtime config such as `ListModule::$bullets`) via `Texy::registerLinePattern()` / `registerBlockPattern()`.
+1. **Registering syntaxes.** Line and block patterns are registered in `beforeParse()` (called on every `process()`, so patterns may depend on runtime config such as `ListModule::$bullets`) via `Texy::addLineSyntax()` / `addBlockSyntax()`.
 2. **Building AST nodes.** Syntax handlers extract data from regex groups, parse nested content through the `ParseContext`, and return `Texy\Nodes\*` objects.
 3. **Registering transform passes.** Work that needs the whole document – reference resolution, heading balancing, HTML pairing/sanitization – is registered in the constructor as an `afterParse` handler.
 4. **Semantic configuration and state.** Public properties that change the *document's meaning* stay on the module (`HeadingModule::$top`, `EmoticonModule::$icons`, `TypographyModule::$locale`); properties that only change the HTML output's look live on `$texy->htmlOutput` (modules keep deprecated `__get`/`__set` bridges for their old locations). Module state such as collected reference definitions is private to the module; per-parse *results* belong in the AST, not on the module (see `HeadingNode::$tocTitle`).
@@ -27,10 +27,10 @@ final class FooModule extends Texy\Module
 
     public function beforeParse(string &$text): void
     {
-        $this->texy->registerLinePattern(
-            $this->parseFoo(...),   // syntax handler
-            '~...~U',               // pattern
+        $this->texy->addLineSyntax(
             'foo',                  // syntax name
+            '~...~U',               // pattern
+            $this->parseFoo(...),   // parser
         );
     }
 

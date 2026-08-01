@@ -44,7 +44,7 @@ test('a subclass without its own handler renders like its parent', function () {
 
 test('a renderer for the subclass wins and can delegate to the parent one', function () {
 	$texy = new Texy;
-	$texy->htmlOutput->registerHandler(
+	$texy->htmlOutput->addRenderer(
 		function (CustomImageNode $node, Html\Renderer $renderer, ?Closure $previous) {
 			$el = $previous($node, $renderer);
 			$el->attrs['data-custom'] = 'yes';
@@ -68,7 +68,7 @@ test('a renderer that could never be dispatched to is refused when registered', 
 
 	foreach ($cases as $label => $handler) {
 		Assert::exception(
-			fn() => (new Texy)->htmlOutput->registerHandler($handler),
+			fn() => (new Texy)->htmlOutput->addRenderer($handler),
 			LogicException::class,
 			"Renderer's first parameter must be typed as a non-nullable Texy\\Node subclass, %a%",
 			null,
@@ -78,7 +78,7 @@ test('a renderer that could never be dispatched to is refused when registered', 
 
 	// a renderer taking no parameter at all says so, instead of blaming a missing type
 	Assert::exception(
-		fn() => (new Texy)->htmlOutput->registerHandler(fn() => null),
+		fn() => (new Texy)->htmlOutput->addRenderer(fn() => null),
 		LogicException::class,
 		'%a% no parameter given.',
 	);
@@ -88,7 +88,7 @@ test('a renderer that could never be dispatched to is refused when registered', 
 test('a valid renderer is accepted', function () {
 	$texy = new Texy;
 	Assert::noError(function () use ($texy) {
-		$texy->htmlOutput->registerHandler(
+		$texy->htmlOutput->addRenderer(
 			fn(Nodes\ImageNode $n, Html\Renderer $g, ?Closure $p) => null,
 		);
 	});

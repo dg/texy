@@ -14,7 +14,7 @@ extending Texy, plus how it converts its markup to HTML underneath.
   are rendered (renderer handlers) and transforming the parsed document
   (`afterParse` + `NodeTraverser`).
 - **[custom-syntax.md](custom-syntax.md)** — adding brand-new markup constructs with
-  `registerLinePattern()` / `registerBlockPattern()`.
+  `addLineSyntax()` / `addBlockSyntax()`.
 
 ## Internals (how it works)
 
