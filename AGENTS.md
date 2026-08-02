@@ -29,7 +29,7 @@ with Latte.
 vendor/bin/tester tests -s        # or: composer tester
 vendor/bin/tester tests/Texy/blocks.phpt -s
 
-# Static analysis (PHPStan level 5, informative)
+# Static analysis (PHPStan level 8)
 composer phpstan
 ```
 
