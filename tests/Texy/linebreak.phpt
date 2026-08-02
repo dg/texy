@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function process(string $text, bool $mergeLines = true): string
 {
 	$texy = new Texy\Texy;
-	$texy->mergeLines = $mergeLines;
+	$texy->paragraphModule->mergeLines = $mergeLines;
 	return $texy->process($text);
 }
 

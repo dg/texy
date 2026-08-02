@@ -88,6 +88,11 @@ test('Texy properties that moved to htmlPolicy/htmlOutput', function () {
 		$texy->obfuscateEmail = false;
 	}, E_USER_DEPRECATED, '%a%$texy->htmlOutput->obfuscateEmail instead.');
 	Assert::false($texy->htmlOutput->obfuscateEmail);
+
+	Assert::error(function () use ($texy) {
+		$texy->mergeLines = false;
+	}, E_USER_DEPRECATED, 'Property $texy->mergeLines is deprecated, use $texy->paragraphModule->mergeLines instead.');
+	Assert::false($texy->paragraphModule->mergeLines);
 });
 
 

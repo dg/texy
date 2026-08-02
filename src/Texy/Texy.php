@@ -38,9 +38,6 @@ class Texy
 	/** URL scheme security policy for links and images */
 	public readonly UrlPolicy $urlPolicy;
 
-	/** Paragraph merging mode */
-	public bool $mergeLines = true;
-
 	public Modules\ParagraphModule $paragraphModule;
 	public Modules\ImageModule $imageModule;
 	public Modules\LinkReferenceModule $linkModule;
@@ -108,7 +105,7 @@ class Texy
 		$this->addModule($this->emoticonModule = new Modules\EmoticonModule($this));
 
 		// block parsing
-		$this->addModule($this->paragraphModule = new Modules\ParagraphModule($this));
+		$this->addModule($this->paragraphModule = new Modules\ParagraphModule);
 		$this->addModule(new Modules\BlockModule($this));
 		$this->addModule(new Modules\HorizontalRuleModule($this));
 		$this->addModule(new Modules\BlockQuoteModule($this));
