@@ -198,8 +198,23 @@ class Texy
 	 */
 	public function renderHtml(Nodes\DocumentNode $document): string
 	{
-		$renderer = new Output\Html\Renderer($this->htmlOutput, $this);
-		return $renderer->render($document);
+		return $this->createHtmlRenderer()->render($document);
+	}
+
+
+	/**
+	 * Creates an HTML renderer wired to the current configuration. The renderer
+	 * needs no live Texy instance and is reusable across documents.
+	 */
+	public function createHtmlRenderer(): Output\Html\Renderer
+	{
+		return new Output\Html\Renderer(
+			$this->htmlOutput,
+			$this->htmlPolicy,
+			$this->urlPolicy,
+			!empty($this->allowed[Syntax::Typography]) ? $this->typographyModule->postLine(...) : null,
+			fn(): ParseContext => $this->createParseContext(),
+		);
 	}
 
 

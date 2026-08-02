@@ -97,8 +97,8 @@ test('render is repeatable on typographed AST (purity)', function () {
 	$texy = new Texy\Texy;
 	$doc = $texy->parse('Rekl "ahoj **svete**" a vazi 5 kg');
 	Assert::same(
-		(new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($doc),
-		(new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($doc),
+		($texy->createHtmlRenderer())->render($doc),
+		($texy->createHtmlRenderer())->render($doc),
 	);
 });
 

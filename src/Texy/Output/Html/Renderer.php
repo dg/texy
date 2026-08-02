@@ -8,18 +8,22 @@
 namespace Texy\Output\Html;
 
 use Texy\Helpers;
+use Texy\HtmlPolicy;
 use Texy\Modifier;
 use Texy\Node;
 use Texy\Nodes;
 use Texy\Output\NodeRenderer;
+use Texy\Parsing\ParseContext;
 use Texy\Syntax;
-use Texy\Texy;
+use Texy\UrlPolicy;
 use function array_slice, count, in_array, is_array, is_string;
 
 
 /**
- * Renders the AST to the output HTML string. Created per render() call;
- * configuration is read from the Config object.
+ * Renders the AST to the output HTML string; needs no live Texy instance.
+ * Configuration is read from the Config object; per-document facts (nofollow,
+ * typographed) are derived from the document itself at render time, so the
+ * instance is a configuration snapshot reusable across documents.
  * @extends NodeRenderer<Element|string>
  */
 final class Renderer extends NodeRenderer
@@ -33,13 +37,20 @@ final class Renderer extends NodeRenderer
 	private ImageDimensions $imageDimensions;
 
 
+	/**
+	 * @param  ?\Closure(string): string  $postLine  typography for isolated strings (title, alt); null = disabled
+	 * @param  ?\Closure(): ParseContext  $parseContextFactory  needed to render block/html and block/texysource
+	 */
 	public function __construct(
 		public readonly Config $config,
-		private Texy $texy,
+		private HtmlPolicy $htmlPolicy,
+		private UrlPolicy $urlPolicy,
+		private ?\Closure $postLine = null,
+		private ?\Closure $parseContextFactory = null,
 	) {
 		$this->noFollow = $config->linkNoFollow;
 		$this->imageDimensions = new ImageDimensions($config);
-		$this->decorator = new ElementDecorator($texy->htmlPolicy, $texy->urlPolicy, $config, $this);
+		$this->decorator = new ElementDecorator($htmlPolicy, $urlPolicy, $config, $this);
 
 		$this->handlers = [
 			// Core nodes
@@ -101,7 +112,8 @@ final class Renderer extends NodeRenderer
 
 	/**
 	 * Render document AST to final HTML string. Per-document facts are read
-	 * from the document itself: the {{texy: nofollow}} directive.
+	 * from the document itself: the {{texy: nofollow}} directive and the
+	 * typographed mark left by the transform phase.
 	 */
 	public function render(Nodes\DocumentNode $document): string
 	{
@@ -132,9 +144,17 @@ final class Renderer extends NodeRenderer
 	 */
 	private function renderHtmlPassthrough(string $content): Element
 	{
-		$context = $this->texy->createParseContext();
+		$context = $this->createParseContext();
 		$htmlParser = $context->getInlineParser()->withPatterns([Syntax::HtmlTag, Syntax::HtmlComment]);
 		return $this->wrapChildren($this->renderNodes($htmlParser->parse($context, $content)->children));
+	}
+
+
+	private function createParseContext(): ParseContext
+	{
+		return $this->parseContextFactory === null
+			? throw new \LogicException('Rendering block/html and block/texysource requires a parse context; create the renderer via $texy->createHtmlRenderer().')
+			: ($this->parseContextFactory)();
 	}
 
 
@@ -161,8 +181,8 @@ final class Renderer extends NodeRenderer
 	 */
 	public function postLineText(string $s): string
 	{
-		return $this->titleTypography && !empty($this->texy->allowed[Syntax::Typography])
-			? $this->texy->typographyModule->postLine($s)
+		return $this->titleTypography && $this->postLine !== null
+			? ($this->postLine)($s)
 			: $s;
 	}
 
@@ -274,7 +294,7 @@ final class Renderer extends NodeRenderer
 	{
 		// block/texysource - parse as texy, then display resulting HTML as source code
 		if ($node->type === 'texysource') {
-			$context = $this->texy->createParseContext();
+			$context = $this->createParseContext();
 			$parsed = $context->parseBlock($node->code);
 			$html = $this->finalizeFragment($this->renderNodes($parsed->children));
 			// Now escape the final HTML to show as source code
@@ -635,7 +655,7 @@ final class Renderer extends NodeRenderer
 	{
 		// Check URL scheme (security - filter dangerous schemes like javascript:)
 		$rawUrl = $node->url ?? '';
-		if (!$this->texy->urlPolicy->isLinkAllowed($rawUrl)) {
+		if (!$this->urlPolicy->isLinkAllowed($rawUrl)) {
 			// URL fails scheme filter, return just the content without link
 			return $this->wrapChildren($this->renderNodes($node->content->children));
 		}
@@ -706,7 +726,8 @@ final class Renderer extends NodeRenderer
 
 	private function renderEmoticon(Nodes\EmoticonNode $node): Element|string
 	{
-		$emoji = $node->resolved ?? $this->texy->emoticonModule->icons[$node->emoticon] ?? $node->emoticon;
+		$emoji = $node->resolved ?? $node->emoticon; // resolved is filled by the transform pass
+
 		return $this->config->emoticonClass
 			? (new Element('span', ['class' => $this->config->emoticonClass]))->setText($emoji)
 			: $emoji;
@@ -750,20 +771,20 @@ final class Renderer extends NodeRenderer
 		$attrs = $node->attributes;
 
 		// Check if tag is allowed
-		if (!$this->texy->htmlPolicy->isTagAllowed($tagName)) {
-			return Helpers::decodeEntities($this->texy->htmlPolicy->reconstructTag($node)); // shown as text
+		if (!$this->htmlPolicy->isTagAllowed($tagName)) {
+			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node)); // shown as text
 		}
 
 		// Validate tag - reject if validation fails
-		$validation = $this->texy->htmlPolicy->validateTag($tagName, $attrs, $node->closing);
+		$validation = $this->htmlPolicy->validateTag($tagName, $attrs, $node->closing);
 		if ($validation === false || $validation === 'drop') {
 			// Invalid tag - shown as text in the output
-			return Helpers::decodeEntities($this->texy->htmlPolicy->reconstructTag($node));
+			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node));
 		}
 
 		// defense in depth: HtmlSanitizePass has already done this, but a hand-built
 		// AST or a policy tightened after parsing must not slip attributes through
-		$attrs = $this->texy->htmlPolicy->filterAttrs($tagName, $attrs);
+		$attrs = $this->htmlPolicy->filterAttrs($tagName, $attrs);
 
 		// Add rel="nofollow" for external links when linkNoFollow is enabled
 		if ($tagName === 'a' && !$node->closing && isset($attrs['href']) && is_string($attrs['href'])) {

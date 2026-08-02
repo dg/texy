@@ -25,8 +25,8 @@ test('repeated render of the same AST gives identical output', function () {
 			TEXY,
 	);
 
-	$html1 = (new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($doc);
-	$html2 = (new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($doc);
+	$html1 = ($texy->createHtmlRenderer())->render($doc);
+	$html2 = ($texy->createHtmlRenderer())->render($doc);
 	Assert::same($html1, $html2);
 });
 
@@ -41,7 +41,7 @@ test('rendering does not mutate image modifier', function () {
 	Assert::same('The title', $image->modifier->title);
 	Assert::same('left', $image->modifier->hAlign);
 
-	(new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($doc);
+	($texy->createHtmlRenderer())->render($doc);
 
 	Assert::same('The title', $image->modifier->title);
 	Assert::same('left', $image->modifier->hAlign);
@@ -57,7 +57,7 @@ test('rendering does not mutate link modifier (nofollow class)', function () {
 	Assert::type(Texy\Nodes\LinkNode::class, $link);
 	Assert::true(isset($link->modifier->classes['nofollow']));
 
-	(new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($doc);
+	($texy->createHtmlRenderer())->render($doc);
 
 	Assert::true(isset($link->modifier->classes['nofollow']));
 });
@@ -73,7 +73,7 @@ test('rendering does not mutate image node inside figure', function () {
 	Assert::type(Texy\Nodes\ImageNode::class, $image);
 	Assert::same('right', $image->modifier->hAlign);
 
-	(new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($doc);
+	($texy->createHtmlRenderer())->render($doc);
 
 	Assert::same('right', $image->modifier->hAlign);
 });
@@ -120,7 +120,7 @@ test('directive of one document does not affect rendering of another AST', funct
 	$docB = $texy->parse('"b":https://example.com');
 	Assert::match(
 		'<p><a href="https://example.com">b</a></p>',
-		(new Texy\Output\Html\Renderer($texy->htmlOutput, $texy))->render($docB),
+		($texy->createHtmlRenderer())->render($docB),
 	);
 });
 

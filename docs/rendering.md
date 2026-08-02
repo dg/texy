@@ -10,10 +10,9 @@ Output/
 ├── Html/
 │   ├── Config              all HTML output options ($texy->htmlOutput)
 │   ├── Element, Raw        the rendered tree the renderers build
-│   ├── Renderer            per-render node renderers, entry point of the render phase
-│   ├── ElementDecorator    Modifier → attributes/classes/styles, filtered by Policy
+│   ├── Renderer            node renderers, entry point of the render phase
+│   ├── ElementDecorator    Modifier → attributes/classes/styles, filtered by HtmlPolicy
 │   ├── ImageDimensions     file-system probe for image sizes (the only I/O)
-│   ├── Policy              HTML security policy ($texy->htmlPolicy)
 │   ├── Schema              declarative HTML vocabulary (content model, categories)
 │   └── WellFormer          call-driven well-forming + indentation + line wrapping
 └── Text/
@@ -28,7 +27,7 @@ Output/
 
 `Html\Config` (`$texy->htmlOutput`) is the **home of all presentation configuration** – properties that only change the HTML output's look: `$imageRoot`, `$linkRoot`, `$linkNoFollow`, `$obfuscateEmail`, `$shortenUrls`, `$nontextParagraph`, `$phraseTags`, `$alignClasses`, `$emoticonClass`, figure/HR classes, the formatting options (`$indent`, `$baseIndent`, `$lineWrap`, `$preserveSpaces`) and the registered custom handlers. It does nothing itself. (Modules keep deprecated `__get`/`__set` bridges for the old property locations.)
 
-`Html\Renderer` is created for every render – `Texy::process()` builds one over the config and the parsed document – and its `renderNode()` is a **pure function of the AST**: repeated calls give identical output and never mutate nodes or configuration. Renderers that need to strip parts of a node's modifier (e.g. moving an image's alignment onto the figure wrapper) clone the node/modifier first. Per-document state (`{{texy: nofollow}}` from `DocumentNode::$meta`, the `typographed` flag) is fixed at the Renderer's construction. The only file-system touch, image dimension detection (`$imageFileRoot`), is isolated in `ImageDimensions` with a per-render cache.
+`Html\Renderer` needs no live `Texy` instance: its constructor takes the `Config`, the two policies, an optional typography closure and an optional parse-context factory (needed only for `block/html` and `block/texysource`; without it those blocks fail loudly). `Texy::createHtmlRenderer()` is the composition point that wires all of this from the instance's configuration, and `renderHtml()` is just `createHtmlRenderer()->render($document)`. Rendering is a **pure function of the AST**: repeated calls give identical output and never mutate nodes or configuration; renderers that need to strip parts of a node's modifier (e.g. moving an image's alignment onto the figure wrapper) clone the node/modifier first. Per-document facts (`{{texy: nofollow}}` and the `typographed` flag in `DocumentNode::$meta`) are read from the document at `render()` time, so one renderer instance serves any number of documents – it is a snapshot of *configuration* (the class/style whitelists are captured on first use per instance), not of any document. The only file-system touch, image dimension detection (`$imageFileRoot`), is isolated in `ImageDimensions` with a per-instance cache.
 
 Renderers return an **`Element` | `Raw` | `string`** tree:
 
@@ -41,7 +40,7 @@ Renderers return an **`Element` | `Raw` | `string`** tree:
 Two helpers matter for security and structure:
 
 - **`ElementDecorator`** applies a `Modifier` to an `Element`: attributes filtered by `$htmlPolicy->allowedTags`, classes/ID by `$htmlPolicy->allowedClasses`, styles by `$htmlPolicy->allowedStyles`, alignment via `$alignClasses` or inline styles. All modifier-driven decoration funnels through here (`Renderer::decorateElement()`).
-- **`Policy`** implements the passthrough policy: the `$allowedTags` whitelist, per-tag validation (`<a>` needs `href`/`name`/`id` and a safe scheme, `<img>` needs a safe `src` – dangerous URLs are dropped entirely), and reconstruction of rejected tags as visible text. It is used both by the transform-phase `HtmlSanitizePass` (the authoritative decision) and by the renderer as defense in depth.
+- **`HtmlPolicy`** implements the passthrough policy: the `$allowedTags` whitelist, per-tag validation (`<a>` needs `href`/`name`/`id` and a safe scheme, `<img>` needs a safe `src` – dangerous URLs are dropped entirely), and reconstruction of rejected tags as visible text. It is used both by the transform-phase `HtmlSanitizePass` (the authoritative decision) and by the renderer as defense in depth.
 
 ## HTML passthrough transform passes
 
@@ -61,7 +60,9 @@ The content model lives in **`Schema`**, the declarative per-element vocabulary:
 
 ## The Text Renderer
 
-`Text\Renderer` (behind `Texy::toText()`) renders a plain-text rendition: markup dropped, visible text and block structure kept, typography artifacts (non-breaking spaces, soft hyphens) normalized back. It needs no `Texy` instance at all – the test of the AST's semantic completeness. Because sanitization and typography already happened in the transform phase, safe mode and typographic corrections apply to its output as well.
+`Text\Renderer` renders a plain-text rendition: markup dropped, visible text and block structure kept, typography artifacts (non-breaking spaces, soft hyphens) normalized back. It needs no `Texy` instance at all – the test of the AST's semantic completeness. Because sanitization and typography already happened in the transform phase, safe mode and typographic corrections apply to its output as well.
+
+The facade follows one grammar for both formats: `to*(string)` is the one-shot conversion, `render*(DocumentNode)` renders a parsed document – `renderHtml()`/`process()`, `renderText()`/`toText()`.
 
 ## Rendering a document parsed elsewhere
 

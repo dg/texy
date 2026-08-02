@@ -30,7 +30,7 @@ test('handler receives $previous parameter', function () {
 	);
 
 	// Default handler should render <p>hello</p>
-	Assert::match('<p>hello</p>', trim((new Html\Renderer($texy->htmlOutput, $texy))->render($ast)));
+	Assert::match('<p>hello</p>', trim(($texy->createHtmlRenderer())->render($ast)));
 	Assert::true($previousCalled);
 });
 
@@ -43,7 +43,7 @@ test('handler can delegate to previous handler by returning null', function () {
 		fn(Nodes\ParagraphNode $node, Html\Renderer $gen, ?Closure $previous): ?Html\Element => null,
 	);
 
-	Assert::match('<p>hello</p>', trim((new Html\Renderer($texy->htmlOutput, $texy))->render($ast)));
+	Assert::match('<p>hello</p>', trim(($texy->createHtmlRenderer())->render($ast)));
 });
 
 
@@ -70,7 +70,7 @@ test('handler chain with conditional delegation', function () {
 		},
 	);
 
-	$html = (new Html\Renderer($texy->htmlOutput, $texy))->render($ast);
+	$html = ($texy->createHtmlRenderer())->render($ast);
 	Assert::same(1, $customCount);
 	Assert::match('<div class="custom">hello</div>%A%<p>world</p>', trim($html));
 });
@@ -107,7 +107,7 @@ test('multiple handlers form a chain', function () {
 		},
 	);
 
-	$html = (new Html\Renderer($texy->htmlOutput, $texy))->render($ast);
+	$html = ($texy->createHtmlRenderer())->render($ast);
 
 	// Second handler called first, then delegates to first
 	Assert::same(['second', 'first'], $calls);
