@@ -301,13 +301,15 @@ class Texy
 
 
 	/**
-	 * Makes only typographic corrections.
+	 * Makes only typographic corrections, honouring the allowed[] configuration.
 	 */
 	public function applyTypography(string $text): string
 	{
 		$text = self::normalize($text);
 
-		$text = $this->typographyModule->postLine($text, preserveSpaces: true);
+		if (!empty($this->allowed[Syntax::Typography])) {
+			$text = $this->typographyModule->postLine($text, preserveSpaces: true);
+		}
 
 		if (!empty($this->allowed[Syntax::Hyphenation])) {
 			$text = $this->hyphenationModule->postLine($text);
