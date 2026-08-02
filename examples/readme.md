@@ -52,6 +52,7 @@ php "1-2-3 start/demo.php"
 | [syntax highlighting](syntax%20highlighting/) | Add code highlighting with FSHL library |
 | [Youtube video](Youtube%20video/) | Embed videos using image syntax |
 | [user syntax](user%20syntax/) | Create your own markup syntax |
+| [markdown parser](markdown%20parser/) | Build a whole different language (CommonMark) on the parsing engine |
 
 ### Reference
 
