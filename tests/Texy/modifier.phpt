@@ -9,6 +9,15 @@ use Tester\Assert;
 require __DIR__ . '/../bootstrap.php';
 
 
+test('a modifier built in code equals the parsed one', function () {
+	Assert::equal(
+		Texy\Modifier::parse('[gallery #top]'),
+		new Texy\Modifier(id: 'top', classes: ['gallery' => true]),
+	);
+	Assert::same(['a' => true, 'b' => true], new Texy\Modifier(classes: ['a', 'b'])->classes);
+});
+
+
 test('disabled classes and styles', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
