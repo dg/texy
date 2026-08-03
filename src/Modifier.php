@@ -38,20 +38,27 @@ final class Modifier
 		'type' => 1, 'value' => 1,
 	];
 
-	public ?string $id = null;
-
 	/** @var array<string, true> of classes (as keys) */
 	public array $classes = [];
 
-	/** @var array<string, string> of CSS styles */
-	public array $styles = [];
 
-	/** @var array<string, string|string[]> of HTML element attributes */
-	public array $attrs = [];
-	public ?string $hAlign = null;
-	public ?string $vAlign = null;
-	public ?string $title = null;
-	public ?Range $range = null;
+	/** @param  array<string, true>|list<string>  $classes  names as keys, or a list of names */
+	public function __construct(
+		public ?string $id = null,
+		array $classes = [],
+		/** @var array<string, string> of CSS styles */
+		public array $styles = [],
+		/** @var array<string, string|string[]> of HTML element attributes */
+		public array $attrs = [],
+		public ?string $hAlign = null,
+		public ?string $vAlign = null,
+		public ?string $title = null,
+		public ?Range $range = null,
+	) {
+		foreach ($classes as $key => $value) {
+			$this->classes[$value === true ? (string) $key : $value] = true;
+		}
+	}
 
 
 	/**
