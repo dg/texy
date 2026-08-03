@@ -19,11 +19,14 @@ This makes parsing recursive: any syntax handler can call `$context->parseInline
 
 1. **Candidates.** Each registered (and allowed) pattern contributes its first match; as the position advances, a stale candidate is re-searched from the current position. Searching each pattern only once up front would lose matches – a pattern returns non-overlapping matches, so a wrong early one (say, a `**` inside a code span pairing with the next `**`) would swallow the region where the right one sits.
 2. **Best candidate wins.** The **leftmost** candidate is processed; at the same offset the **longer match wins**, and equal-length ties fall back to **registration order**. This is the entire collision-resolution mechanism.
-3. **Handler call.** The syntax handler returns an `InlineNode` or `null`.
-   - `null` means the handler **refused** the match (e.g. an unknown abbreviation): the text is left alone and later matches – including overlapping ones from other patterns – still get their chance. Invariant: the plain text preceding a match is emitted as a `TextNode` only once a handler *accepts*; a rejected match must not consume or duplicate it.
+3. **Handler call.** The syntax handler returns an `InlineNode`, a `ContentNode`, or `null`.
+   - A `ContentNode` return is a **sequence**: its children are spliced into the result in place of a single node. An empty one consumes the match without emitting anything (useful for constructs that only collect data). Returning the result of `$context->parseInline()` directly therefore splices, not nests.
+   - `null` means the handler **refused** the match: the text is left alone and later matches – including overlapping ones from other patterns – still get their chance. Invariant: the plain text preceding a match is emitted as a `TextNode` only once a handler *accepts*; a rejected match must not consume or duplicate it. Refusal doubles as a **priority mechanism**: a syntax that recognizes it should not win in a given context steps aside for the patterns behind it, without any global priority table.
 4. **Text gaps** between accepted matches become `TextNode`s.
 
 Because matching happens once on the raw input, a handler's output is never re-interpreted – there is no masking, no placeholder mechanism, no re-entry. What the old string-based pipeline achieved with protection marks now follows from the AST structure itself.
+
+A handler sees only its own match, never the surrounding text. A pattern that needs a neighbouring character *as a value* (not merely as a guard) captures it through a lookbehind group: `(?:(?<=(.))|(?<!.))` puts the preceding character into group 1, or leaves it unset at the start of the text.
 
 ### Collisions in practice
 
@@ -39,14 +42,15 @@ Because matching happens once on the raw input, a handler's output is never re-i
 
 Blocks never nest or overlap at parser level – every line belongs to at most one block construct. `BlockParser::parse()`:
 
-1. Matches all registered block patterns against the whole text (multiline mode is forced), sorts matches by position, then by registration order.
+1. Trims trailing newlines of the input (they are not part of any line, so `next()` never yields a phantom empty last line), then matches all registered block patterns against the whole text (multiline mode is forced) and sorts matches by position, then by registration order.
 2. Walks the sorted matches; text between them goes to the **gap handler** – `ParagraphModule::parseText()` (wired in `Texy::parse()`).
-3. Calls the syntax handler of each match. The handler may consume additional lines through the parser API; returning `null` rejects the match and the position stays for the gap handler.
+3. Calls the syntax handler of each match. The handler may consume additional lines through the parser API. As in the inline parser, the handler returns a `BlockNode`, a `ContentNode` (a **sequence** of blocks spliced into the result; an empty one consumes the match silently), or `null` to reject – the position then stays for the gap handler.
 
 Handlers of multi-line structures use the navigation API on `$context->getBlockParser()`:
 
 - **`next(string $pattern, ?array &$matches, ?array &$offsets = null): bool`** – matches the *next line* against the pattern (`Am` modifiers added automatically); on success fills `$matches`, advances past the line and returns `true`. Typical use: consuming successive list items or table rows in a loop.
 - **`moveBackward(int $linesCount = 1): void`** – moves back over line endings; used when the registered pattern matched in the middle of a structure and the handler wants to re-read from its beginning with `next()`.
+- **`getNodes(): array`** – the blocks produced so far at this nesting level, gap-handler output included; the last one is the block immediately preceding the current match. The gap handler runs *before* the match handler, so a paragraph sitting right before the construct is already there. This makes context-sensitive rules ("this construct may not interrupt a paragraph") a structural check instead of a fragile lookbehind, and since the nodes are live objects, a handler may deliberately graft consumed text onto the preceding block (lazy paragraph continuation).
 
 ## ParagraphModule (the gap handler)
 

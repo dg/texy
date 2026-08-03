@@ -581,3 +581,46 @@ test('a delimiter inside a code span does not consume the pair behind it', funct
 	Assert::contains('<strong>ne</strong>', (new Texy)->process('kod `**` a pak **ne** konec'));
 	Assert::contains('<em>ne</em>', (new Texy)->process('kod `//` a pak //ne// konec'));
 });
+
+
+// =============================================================================
+// Node sequences (ContentNode return)
+// =============================================================================
+
+test('handler returns ContentNode - children are spliced into the result', function () {
+	$parser = new InlineParser([
+		'wrap' => [
+			'pattern' => '~\[(.+?)]~',
+			'handler' => fn(ParseContext $context, array $matches, array $offsets) => new ContentNode([
+				new TextNode('('),
+				new TextNode($matches[1]),
+				new TextNode(')'),
+			]),
+		],
+	]);
+
+	$nodes = $parser->parse(createContext(), 'a [x] b')->children;
+
+	Assert::count(5, $nodes);
+	Assert::same('a ', $nodes[0]->text);
+	Assert::same('(', $nodes[1]->text);
+	Assert::same('x', $nodes[2]->text);
+	Assert::same(')', $nodes[3]->text);
+	Assert::same(' b', $nodes[4]->text);
+});
+
+
+test('empty ContentNode consumes the match without emitting anything', function () {
+	$parser = new InlineParser([
+		'strip' => [
+			'pattern' => '~\{\{.+?}}~',
+			'handler' => fn() => new ContentNode,
+		],
+	]);
+
+	$nodes = $parser->parse(createContext(), 'a {{gone}} b')->children;
+
+	Assert::count(2, $nodes);
+	Assert::same('a ', $nodes[0]->text);
+	Assert::same(' b', $nodes[1]->text);
+});

@@ -33,7 +33,7 @@ final class ParagraphModule extends Texy\Module
 
 	/**
 	 * Parse text into paragraphs (split by blank lines).
-	 * @return array<ParagraphNode>
+	 * @return list<ParagraphNode>
 	 */
 	public function parseText(ParseContext $context, string $text, int $baseOffset = 0): array
 	{

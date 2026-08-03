@@ -8,6 +8,7 @@
 namespace Texy\Parsing;
 
 use JetBrains\PhpStorm\Language;
+use Texy\InvalidArgumentException;
 use Texy\Nodes;
 use Texy\Nodes\BlockNode;
 use Texy\Regexp;
@@ -16,6 +17,9 @@ use function is_array, is_string, strlen;
 
 /**
  * Parses block structures (paragraphs, headings, lists, tables, etc.).
+ * Trailing newlines are trimmed on entry - they are not part of any line.
+ * A handler returns a BlockNode, a ContentNode (sequence to splice; empty
+ * consumes silently), or null to refuse the match.
  */
 class BlockParser
 {
@@ -23,10 +27,13 @@ class BlockParser
 	private int $offset;
 	private int $baseOffset;
 
+	/** @var list<BlockNode>  nodes produced so far by the running parse */
+	private array $nodes = [];
+
 
 	/**
-	 * @param array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): ?BlockNode, pattern: string}> $patterns
-	 * @param \Closure(ParseContext, string, int): array<BlockNode> $gapHandler gap handler receives (context, text, offset)
+	 * @param array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (BlockNode|Nodes\ContentNode|null), pattern: string}> $patterns
+	 * @param \Closure(ParseContext, string, int): list<BlockNode> $gapHandler gap handler receives (context, text, offset)
 	 */
 	public function __construct(
 		private array $patterns,
@@ -37,13 +44,13 @@ class BlockParser
 
 	public function parse(ParseContext $context, string $text, int $baseOffset = 0): Nodes\ContentNode
 	{
-		$this->text = $text;
+		$this->text = $text = rtrim($text, "\n");
 		$this->offset = 0;
 		$this->baseOffset = $baseOffset;
+		$this->nodes = [];
 		$matches = $this->match($text, $baseOffset);
 		$matches[] = [strlen($text), null, null, 0, null]; // terminal sentinel
 		$cursor = 0;
-		$res = [];
 
 		do {
 			do {
@@ -57,7 +64,7 @@ class BlockParser
 			// between-matches content → delegate to gap handler
 			if ($mOffset > $this->offset) {
 				$s = substr($text, $this->offset, $mOffset - $this->offset);
-				$res = array_merge($res, ($this->gapHandler)($context, $s, $baseOffset + $this->offset));
+				$this->nodes = array_merge($this->nodes, ($this->gapHandler)($context, $s, $baseOffset + $this->offset));
 			}
 
 			if ($mName === null) {
@@ -76,10 +83,31 @@ class BlockParser
 				continue;
 			}
 
-			$res[] = $node;
+			if ($node instanceof Nodes\ContentNode) {
+				foreach ($node->children as $child) { // a returned sequence is spliced in
+					if (!$child instanceof BlockNode) {
+						throw new InvalidArgumentException("Handler of block syntax '$mName' returned a sequence containing " . $child::class . '; only block nodes are allowed.');
+					}
+					$this->nodes[] = $child;
+				}
+			} else {
+				$this->nodes[] = $node;
+			}
 		} while (true);
 
-		return new Nodes\ContentNode($res);
+		return new Nodes\ContentNode($this->nodes);
+	}
+
+
+	/**
+	 * Nodes produced so far, gap-handler output included; the last one directly
+	 * precedes the current match. For handler decisions; the nodes are live, so a
+	 * handler may graft consumed text onto the preceding block.
+	 * @return list<BlockNode>
+	 */
+	public function getNodes(): array
+	{
+		return $this->nodes;
 	}
 
 
