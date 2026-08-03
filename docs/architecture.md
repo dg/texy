@@ -74,7 +74,7 @@ Whether the pass runs is controlled by `$allowed['typography']` and `$allowed['l
 
 Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **normalized** source). The contract for analyzers:
 
-- **The range is the only source of truth for a node's source span.** Never derive spans from content length: `TextNode::$content` holds decoded display text (entities resolved), so `strlen($content)` generally differs from `$range->length`.
+- **The range is the only source of truth for a node's source span.** Never derive spans from content length: `TextNode::$content` holds display text, which for decoded content (an entity reference, a hard-break marker) differs in length from the source span.
 - Ranges are exact after parsing and **best-effort after transforms** – a pass that merges or rewrites nodes is not required to keep them precise. Synthesized values (e.g. a modifier assembled from non-contiguous fragments) have a `null` range by design.
 - Heading IDs are generated in the transform phase **before** typography, so they are stable regardless of `$allowed['typography']`. The displayed title (`HeadingNode::getTitle()`) is derived from the heading's content instead of copied, so it *is* typographed.
 

@@ -10,6 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Nodes\HtmlCommentNode;
 use Texy\Nodes\HtmlTagNode;
+use Texy\Nodes\TextNode;
 use Texy\Parsing\ParseContext;
 use Texy\Range;
 use Texy\Regexp;
@@ -19,7 +20,7 @@ use const PREG_SET_ORDER;
 
 
 /**
- * Processes HTML tags and comments in input text.
+ * Processes HTML tags, comments and entity references in input text.
  */
 final class HtmlModule extends Texy\Module
 {
@@ -77,6 +78,26 @@ final class HtmlModule extends Texy\Module
 			~isx',
 			$this->parseComment(...),
 		);
+
+		$this->texy->addLineSyntax(
+			Syntax::HtmlEntity,
+			'~' . Texy\Helpers::EntityPattern . '~',
+			$this->parseEntity(...),
+		);
+	}
+
+
+	/**
+	 * Parses &amp;, &#160;, &#xA0;
+	 * @param  array{string}  $matches
+	 * @param  array{int}  $offsets
+	 */
+	public function parseEntity(ParseContext $context, array $matches, array $offsets): ?TextNode
+	{
+		$decoded = Texy\Helpers::decodeEntity($matches[0]);
+		return $decoded === null
+			? null
+			: new TextNode($decoded, new Range($offsets[0], strlen($matches[0])));
 	}
 
 

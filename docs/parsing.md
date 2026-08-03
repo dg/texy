@@ -36,7 +36,9 @@ A handler sees only its own match, never the surrounding text. A pattern that ne
 
 ### TextNode holds display text
 
-`TextNode::$text` is **decoded display text**: HTML entities from the input are decoded at parse time (`Helpers::decodeEntities()`, which also strips control characters that entities could smuggle in). Renderers escape text on output. The exceptions holding literal source text are code-like content (`phrase/code`, `phrase/notexy` → `RawTextNode`, code blocks), where the author's characters are shown verbatim.
+`TextNode::$text` is **display text**: renderers escape it on output. Text gaps between matches hold the source verbatim – the parser applies no content policy. HTML entity decoding is a property of the *language*, not of the parser, so it is an ordinary registered syntax: Texy's `html/entity` (`HtmlModule`, disable via `$allowed['html/entity']`) turns each valid reference into its own `TextNode` with decoded content and an exact source range. The pattern and decoding logic are shared through `Helpers::EntityPattern` / `Helpers::decodeEntity()` so other languages (texy/markdown) reuse them. The exceptions holding literal source text are code-like content (`phrase/code`, `phrase/notexy` → `RawTextNode`, code blocks), where the author's characters are shown verbatim.
+
+Every decoder that can create control characters must sanitize its output with `Helpers::stripControlChars()` – input normalization strips raw control bytes, but a decoded entity is born *after* normalization and would otherwise collide with the internal marker alphabet.
 
 ## BlockParser
 
@@ -57,7 +59,7 @@ Handlers of multi-line structures use the navigation API on `$context->getBlockP
 `ParagraphModule` is not pattern-based: it receives the text between block matches, splits it on blank lines, and parses each paragraph's inline content. Details that matter:
 
 - A paragraph-level modifier (`.[class]` on its own line-end) is extracted before inline parsing.
-- **Hard line breaks:** with `$texy->paragraphModule->mergeLines` (default), a newline followed by indentation becomes a break, other newlines merge into spaces; without it every newline is a break. The break is carried through inline parsing as an internal `\r` marker inside text and expanded afterwards into `LineBreakNode`s – which is why `\r` can never occur in input text (normalization removed it) and why `decodeEntities` deliberately preserves `\x0D`.
+- **Hard line breaks:** with `$texy->paragraphModule->mergeLines` (default), a newline followed by indentation becomes a break, other newlines merge into spaces; without it every newline is a break. The break is carried through inline parsing as an internal `\r` marker inside text and expanded afterwards into `LineBreakNode`s – which is why `\r` can never occur in input text (normalization removed it) and why `stripControlChars` deliberately preserves `\x0D`.
 - Text starting with a block-level HTML tag is parsed without soft-line-break processing and flagged `ParagraphNode::$blockHtml` – the renderer then emits no `<p>` wrapper.
 - Whether a `<p>`, a non-text wrapper (`$htmlOutput->nontextParagraph`, default `div`), or no wrapper is emitted is a **render-phase** decision based on analyzing the paragraph's children (text vs. replaced elements vs. markup) – see `Renderer::renderParagraph()`.
 

@@ -22,8 +22,9 @@ use Texy\Nodes;
  * belong to the Texy class which contains this engine.
  *
  * Input contract: valid UTF-8, LF line endings, no \r (it is the internal
- * hard-break marker). Plain text between matches becomes TextNode with HTML
- * entities decoded (TextNode holds display text, not source).
+ * hard-break marker). Plain text between matches becomes TextNode holding the
+ * source text verbatim; decoding (e.g. HTML entities) is a language concern
+ * expressed as a registered syntax, never engine mechanics.
  *
  * Usage:
  *   $engine = new Engine();

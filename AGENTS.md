@@ -56,8 +56,9 @@ composer phpstan
 - **Configuration placement rule:** what changes the document's meaning for every
   format lives on `Texy`/modules; what only shapes HTML output lives on
   `$texy->htmlOutput` (modules keep deprecated property bridges).
-- **`TextNode` holds decoded display text** (entities decoded at parse time);
-  renderers escape on output. Code-like nodes keep literal source.
+- **`TextNode` holds display text**; renderers escape on output. Text gaps are
+  source verbatim; HTML entities are decoded by the `html/entity` syntax into
+  their own `TextNode`s. Code-like nodes keep literal source.
 - **Typography and hyphenation are an AST pass** (`TextRunPass`); its regexes
   treat bytes `\x15`-`\x17` as a marker alphabet and must never create or
   destroy them.

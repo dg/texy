@@ -218,8 +218,8 @@ final class ParagraphModule extends Texy\Module
 		$result = [];
 		foreach ($nodes as $node) {
 			if ($node instanceof TextNode && str_contains($node->text, "\r")) {
-				// sub-ranges are computed from decoded content lengths, so they are
-				// exact unless the text contained entities (ranges are best-effort)
+				// sub-ranges are computed from content lengths; gap text is verbatim
+				// source, so they are exact unless the \r was decoded from an entity
 				$offset = $node->range?->offset;
 				foreach (explode("\r", $node->text) as $i => $part) {
 					if ($i > 0) {

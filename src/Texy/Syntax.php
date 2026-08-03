@@ -174,6 +174,9 @@ final class Syntax
 	/** HTML comment (`<!-- comment -->`) */
 	public const HtmlComment = 'html/comment';
 
+	/** HTML entity reference (`&amp;`, `&#160;`) */
+	public const HtmlEntity = 'html/entity';
+
 	/** Directive (`{{command}}`) */
 	public const Directive = 'script';
 

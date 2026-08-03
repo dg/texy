@@ -145,7 +145,7 @@ final class Renderer extends NodeRenderer
 	private function renderHtmlPassthrough(string $content): Element
 	{
 		$context = $this->createParseContext();
-		$htmlParser = $context->getInlineParser()->withPatterns([Syntax::HtmlTag, Syntax::HtmlComment]);
+		$htmlParser = $context->getInlineParser()->withPatterns([Syntax::HtmlTag, Syntax::HtmlComment, Syntax::HtmlEntity]);
 		return $this->wrapChildren($this->renderNodes($htmlParser->parse($context, $content)->children));
 	}
 

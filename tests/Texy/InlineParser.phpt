@@ -624,3 +624,14 @@ test('empty ContentNode consumes the match without emitting anything', function 
 	Assert::same('a ', $nodes[0]->text);
 	Assert::same(' b', $nodes[1]->text);
 });
+
+
+// =============================================================================
+// Text gaps
+// =============================================================================
+
+test('text gaps hold the source verbatim, entity decoding is a syntax, not parser mechanics', function () {
+	$nodes = (new InlineParser([]))->parse(createContext(), 'a &amp; b &#65;')->children;
+
+	Assert::same('a &amp; b &#65;', $nodes[0]->text);
+});

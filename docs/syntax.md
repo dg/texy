@@ -309,9 +309,11 @@ echo 'Hello';
 
 ## Direct HTML
 
-*(`html/tag`, `html/comment` – HtmlModule)*
+*(`html/tag`, `html/comment`, `html/entity` – HtmlModule)*
 
 HTML tags and comments may be mixed directly into the text. Tags are validated against `$texy->htmlOutput->allowedTags`; disallowed tags become visible text, invalid nesting is fixed by the output well-forming. HTML comments are kept when `$texy->htmlOutput->passHtmlComments` is on.
+
+HTML entity references (`&amp;`, `&#65;`, `&#xA0;`) are decoded into their characters; an unknown reference stays literal text. With `$allowed['html/entity']` off, references are ordinary text and render escaped.
 
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.
@@ -378,6 +380,7 @@ Every syntax lists its ID (the key in `$texy->allowed`), its default state, and 
 | `script` | ✅ on | `{{command: args}}` | DirectiveModule |
 | `html/tag` | ✅ on | `<strong>`, `<div class=…>` | HtmlModule |
 | `html/comment` | ✅ on | `<!-- comment -->` | HtmlModule |
+| `html/entity` | ✅ on | `&amp;`, `&#160;` | HtmlModule |
 | `image` | ✅ on | `[* image.jpg *]` | ImageModule |
 | `phrase/strong+em` | ✅ on | `***text***` | PhraseModule |
 | `phrase/strong` | ✅ on | `**text**` | PhraseModule |

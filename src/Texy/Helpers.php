@@ -16,6 +16,10 @@ use const ENT_HTML5, ENT_QUOTES, ICONV_IMPL;
  */
 final class Helpers
 {
+	/** Matches one HTML entity reference; shared by languages that treat `&...;` as an entity. */
+	public const EntityPattern = '&(?:\#[0-9]{1,7}|\#[xX][0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{1,31});';
+
+
 	public function __construct()
 	{
 		throw new \LogicException('Cannot instantiate static class ' . self::class);
@@ -42,7 +46,6 @@ final class Helpers
 	/**
 	 * Decodes HTML entities into display text; strips control characters
 	 * they may smuggle in (input normalization does the same for raw input).
-	 * \x0D survives - it is the internal hard line break marker.
 	 */
 	public static function decodeEntities(string $s): string
 	{
@@ -50,7 +53,35 @@ final class Helpers
 			return $s;
 		}
 
-		$s = self::unescapeHtml($s);
+		return self::stripControlChars(self::unescapeHtml($s));
+	}
+
+
+	/**
+	 * Decodes a single reference matched by EntityPattern into display text,
+	 * null when it is not a known entity and should stay literal.
+	 */
+	public static function decodeEntity(string $ref): ?string
+	{
+		$s = self::unescapeHtml($ref);
+		if ($s === $ref) {
+			// html_entity_decode refuses NUL and other control references; per CommonMark
+			// only NUL maps to U+FFFD, the rest stay literal (a deliberate deviation:
+			// the reference implementation decodes them into raw control characters)
+			return preg_match('~^&\#(?:0+|[xX]0+);$~', $ref) ? "\u{FFFD}" : null;
+		}
+
+		return self::stripControlChars($s);
+	}
+
+
+	/**
+	 * Strips control characters that must never occur in AST text (they collide with
+	 * the internal marker bytes); every decoder that can create them must call this.
+	 * \x0D survives - it is the internal hard line break marker.
+	 */
+	public static function stripControlChars(string $s): string
+	{
 		return Regexp::replace($s, '~[\x00-\x08\x0B\x0C\x0E-\x1F]+~', '');
 	}
 
