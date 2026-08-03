@@ -122,9 +122,7 @@ test('canonical form of what records no variant', function () {
 
 
 test('the parentheses of an image hold its alternative text, the title of its modifier is an attribute', function () {
-	$modifier = new Modifier;
-	$modifier->title = 'Tip';
-	$image = new Nodes\ImageNode('a.png', alt: 'Alt', modifier: $modifier);
+	$image = new Nodes\ImageNode('a.png', alt: 'Alt', modifier: new Modifier(title: 'Tip'));
 	$source = (new Texy)->renderTexy(new Nodes\DocumentNode(new Nodes\ContentNode(
 		[new Nodes\ParagraphNode(new Nodes\ContentNode([$image]))],
 	)));

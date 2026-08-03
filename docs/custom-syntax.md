@@ -91,11 +91,9 @@ $texy->addBlockSyntax(
     '~^:::(warning|info|danger)\n(.+?)\n:::$~s',
     function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets): Nodes\DivNode {
         [, $type, $content] = $matches;
-        $mod = new Texy\Modifier;
-        $mod->classes['alert'] = $mod->classes['alert-' . $type] = true;
         return new Nodes\DivNode(
             $context->parseBlock(trim($content), $offsets[2]),  // recursive Texy parsing
-            $mod,
+            new Texy\Modifier(classes: ['alert' => true, 'alert-' . $type => true]),
         );
     },
 );
