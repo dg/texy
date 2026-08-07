@@ -84,3 +84,7 @@ Assert::match(
 	'<p>hello</p>',
 	$latte->renderToString('{="hello"|texy}'),
 );
+
+
+// Static content rendered at compile time goes stale with another version of Texy
+Assert::same(Texy\Texy::Version, new Texy\Bridges\Latte\TexyExtension($texy)->getCacheKey($latte));

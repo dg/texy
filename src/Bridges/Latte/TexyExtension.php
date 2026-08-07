@@ -56,6 +56,12 @@ class TexyExtension extends Latte\Extension
 	}
 
 
+	public function getCacheKey(Latte\Engine $engine): mixed
+	{
+		return Texy::Version; // {texy} with static content is rendered into the compiled template
+	}
+
+
 	public function texyFilter(FilterInfo $info, string $text, mixed ...$args): string
 	{
 		$info->contentType ??= ContentType::Html;
