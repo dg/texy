@@ -84,3 +84,16 @@ Assert::match(
 	'<p>hello</p>',
 	$latte->renderToString('{="hello"|texy}'),
 );
+
+
+// Static content rendered at compile time goes stale with another version of Texy or another configuration
+$extension = new Texy\Bridges\Latte\TexyExtension($texy);
+$key = $extension->getCacheKey($latte);
+Assert::same(Texy\Texy::Version, $key[0]);
+Assert::same($key, $extension->getCacheKey($latte));
+$texy->config->headingTop = 2;
+Assert::notSame($key, $key = $extension->getCacheKey($latte));
+Texy\Configurator::safeMode($texy);
+Assert::notSame($key, $extension->getCacheKey($latte));
+
+Assert::same(Texy\Texy::Version, new Texy\Bridges\Latte\TexyExtension(fn(string $s) => $s)->getCacheKey($latte));
