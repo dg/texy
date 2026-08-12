@@ -52,7 +52,7 @@ Assert::match(
 				} finally {
 					$ʟ_tmp = ob_get_clean();
 				}
-				echo ($this->global->texy)($ʟ_tmp, ...[]);
+				echo ($this->global->texy)(Texy\Helpers::outdent($ʟ_tmp), ...[]);
 		%A%
 		XX,
 	$latte->compile($template),

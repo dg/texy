@@ -12,10 +12,11 @@ use Latte\Compiler\{NodeHelpers, PrintContext, Tag, TemplateParser};
 use Latte\Compiler\Nodes\{AreaNode, StatementNode};
 use Latte\Compiler\Nodes\Php\Expression\ArrayNode;
 use Latte\Compiler\Nodes\Php\IdentifierNode;
+use Texy\Helpers;
 
 
 /**
- * {texy} ... {/texy}
+ * {texy} ... {/texy}, the content without the indentation its lines share in the template
  */
 class TexyNode extends StatementNode
 {
@@ -61,7 +62,7 @@ class TexyNode extends StatementNode
 		$text = NodeHelpers::toText($node->content);
 		if ($text !== null) {
 			try {
-				$text = $processor($text, ...$node->args->toValue());
+				$text = $processor(Helpers::outdent($text), ...$node->args->toValue());
 				return new Latte\Compiler\Nodes\TextNode($text);
 			} catch (\Throwable) {
 			}
@@ -82,7 +83,7 @@ class TexyNode extends StatementNode
 				} finally {
 					$ʟ_tmp = ob_get_clean();
 				}
-				echo ($this->global->texy)($ʟ_tmp, ...%node);
+				echo ($this->global->texy)(Texy\Helpers::outdent($ʟ_tmp), ...%node);
 
 
 				XX,
