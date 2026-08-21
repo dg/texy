@@ -3,3 +3,4 @@ composer.lock
 /tests/*/output
 /tests/coverage.dat
 /tests/test.log
+/examples/markdown parser/spec.json
