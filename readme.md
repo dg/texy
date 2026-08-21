@@ -14,7 +14,7 @@ images, links, nested lists, and tables – no knowledge of HTML required.
 Above all, Texy is an engine. It ships with its own rich, easy-to-read markup,
 but nothing about that syntax is set in stone: every rule can be switched on or
 off, redefined, or extended with your own. You can reshape Texy to speak a
-different dialect entirely – even Markdown.
+different dialect entirely – and one of them already exists, see Markdown below.
 
 And Texy is a typographer at heart. It swaps straight quotes for typographically
 correct ones, hyphens for dashes, the letter x for the dimension sign, and applies
@@ -38,6 +38,25 @@ safe subset of HTML:
 
     Texy\Configurator::safeMode($texy);
     $html = $texy->process($text);
+
+
+Markdown
+--------
+
+[texy/markdown](https://github.com/dg/texy-markdown) is a companion package that
+parses CommonMark and GitHub Flavored Markdown – the whole specification, all five
+extensions – into **this same AST**:
+
+    composer require texy/markdown
+
+    $markdown = Texy\Markdown\Markdown::gfm();
+    $html = $markdown->toHtml($text, $texy);
+
+Because the tree is the same one, a Markdown document goes out through the renderer
+above and gets everything Texy does to a Texy one: typography, HTML sanitization,
+well-forming, Latte integration. The package renders a Texy AST back to Markdown as
+well, so converting between the two languages is a matter of picking a parser and a
+renderer.
 
 
 Documentation and Examples

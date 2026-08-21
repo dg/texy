@@ -37,7 +37,7 @@ function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, s
 
 - `$matches[0]` is the whole match, `$matches[1]`… the capturing groups; `$offsets` holds the byte offset of each group in the source (for `Range` tracking).
 - Return an **AST node** – an `InlineNode` for line patterns, a `BlockNode` for block patterns – or **`null` to refuse** the match (the text is left alone and other patterns get their chance).
-- Return a **`ContentNode` to emit a sequence** – its children are spliced into the surrounding node list in place of a single node. An **empty `ContentNode`** consumes the match without emitting anything, which is how a construct that only collects data disappears from the document.
+- Return a **`ContentNode` to emit a sequence** – its children are spliced into the surrounding node list in place of a single node. An **empty `ContentNode`** consumes the match without emitting anything, which is how a construct that only collects data (such as a link reference definition in the Markdown parser example) disappears from the document.
 - For nested content, parse recursively: `$context->parseInline($innerText, $offset)` / `$context->parseBlock(...)` return a `ContentNode` you attach to your node. (Attach it to your node's content – returning it directly would splice its children as a sequence, see above.)
 
 Returning an existing node type (`PhraseNode`, `LinkNode`, `HtmlElementNode`…) gives you rendering for free in every output format. A brand-new `Node` subclass needs a [renderer handler](custom-handlers.md#renderer-handlers) on the generator you care about; the other formats fall back to rendering its children, so the document stays renderable everywhere. Implement `getChildren()` so they can find them.
