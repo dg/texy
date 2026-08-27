@@ -54,6 +54,18 @@ test('filtered classes and styles', function () {
 });
 
 
+test('styles in the whitelist are compared regardless of case, as in CSS', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	$texy->htmlPolicy->allowedStyles = ['Color'];
+
+	Assert::match(
+		'<p><strong style="color:red">text</strong></p>',
+		$texy->toHtml('**text .{COLOR: red; background: gray}**'),
+	);
+});
+
+
 test('attribute vs. style disambiguation', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
