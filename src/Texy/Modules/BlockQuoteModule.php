@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use function max, strlen;
+use function strlen;
 
 
 /**

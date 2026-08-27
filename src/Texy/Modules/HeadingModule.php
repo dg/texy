@@ -9,7 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Modifier;
-use function array_flip, array_values, asort, count, is_array, max, min, reset, rtrim, strlen, trim;
+use function count, is_array, strlen;
 
 
 /**

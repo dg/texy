@@ -10,7 +10,6 @@ namespace Texy\Modules;
 use Texy;
 use Texy\Helpers;
 use Texy\HtmlElement;
-use function assert, htmlspecialchars, preg_split, str_replace, trim;
 use const ENT_NOQUOTES;
 
 

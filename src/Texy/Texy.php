@@ -7,7 +7,7 @@
 
 namespace Texy;
 
-use function array_flip, base_convert, class_exists, count, explode, htmlspecialchars, implode, is_array, link, ltrim, preg_match, str_contains, str_repeat, str_replace, strip_tags, strlen, strtr;
+use function count, is_array, strlen;
 use const ENT_NOQUOTES;
 
 

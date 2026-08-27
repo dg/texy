@@ -12,7 +12,7 @@ use Texy\BlockParser;
 use Texy\HtmlElement;
 use Texy\Modifier;
 use Texy\Patterns;
-use function implode, ord, preg_match, strlen;
+use function ord, strlen;
 
 
 /**

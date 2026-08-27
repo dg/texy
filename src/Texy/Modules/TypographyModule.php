@@ -9,7 +9,6 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Patterns;
-use function strtr;
 
 
 /**
