@@ -7,6 +7,8 @@
 
 namespace Texy;
 
+use function is_int, is_string;
+
 
 /**
  * Texy basic configurators.
@@ -113,7 +115,7 @@ class Configurator
 
 		$texy->htmlPolicy->allowedTags = array_filter(
 			$tags === true ? Output\Html\Schema::defaultAllowedTags() : $tags,
-			fn($value, $key) => !in_array($key, $names, true) && !in_array($value, $names, true),
+			fn($value, $key) => !in_array(strtolower(is_int($key) && is_string($value) ? $value : (string) $key), $names, true),
 			ARRAY_FILTER_USE_BOTH,
 		);
 	}

@@ -8,7 +8,7 @@
 namespace Texy;
 
 use Texy\Output\Html\Schema;
-use function is_array, is_string;
+use function array_key_exists, is_array, is_int, is_string;
 
 
 /**
@@ -38,12 +38,14 @@ final class HtmlPolicy
 
 
 	/**
-	 * Is the tag (opening or closing) acceptable? A rejected one is shown as text.
+	 * Is the tag (opening or closing) acceptable? A rejected one is shown as text. Names of the tag
+	 * and of its attributes are compared regardless of case, as in HTML.
 	 * @param  array<string, string|bool|null>  $attrs
 	 */
 	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
 	{
-		return $this->isTagAllowed($tagName) && $this->validateTag($tagName, $attrs, $closing);
+		return $this->isTagAllowed($tagName)
+			&& $this->validateTag(strtolower($tagName), array_change_key_case($attrs), $closing);
 	}
 
 
@@ -56,14 +58,12 @@ final class HtmlPolicy
 			return false;
 		}
 
-		return !is_array($this->allowedTags)
-			|| isset($this->allowedTags[$tagName])
-			|| in_array($tagName, $this->allowedTags, true);
+		return !is_array($this->allowedTags) || $this->getAllowedAttrs($tagName) !== null;
 	}
 
 
 	/**
-	 * Does the tag have what it needs, and do its URLs pass the URL policy?
+	 * Does the tag have what it needs, and do its URLs pass the URL policy? Names are lowercase.
 	 * @param  array<string, string|bool|null>  $attrs
 	 */
 	private function validateTag(string $tagName, array $attrs, bool $closing): bool
@@ -114,15 +114,45 @@ final class HtmlPolicy
 		}
 
 		$names = [];
-		foreach ([$this->allowedTags[$tagName] ?? [], $this->allowedTags['*'] ?? []] as $allowed) {
+		foreach ([$this->getAllowedAttrs($tagName), $this->getAllowedAttrs('*')] as $allowed) {
 			if ($allowed === true) {
 				return $attrs;
-			} elseif (is_array($allowed)) {
-				$names = [...$names, ...$allowed];
+			}
+			$names = [...$names, ...$allowed ?? []];
+		}
+
+		$names = array_flip($names);
+		return array_filter($attrs, fn($name) => isset($names[strtolower((string) $name)]), ARRAY_FILTER_USE_KEY);
+	}
+
+
+	/**
+	 * Attributes the whitelist gives the tag: true for any, a list of lowercase names, or null when the
+	 * tag is not in it. Names of tags and attributes are compared regardless of case, as in HTML.
+	 * @return true|list<string>|null
+	 */
+	private function getAllowedAttrs(string $tagName): true|array|null
+	{
+		assert(is_array($this->allowedTags));
+		$tagName = strtolower($tagName);
+		$entries = array_key_exists($tagName, $this->allowedTags)
+			? [$tagName => $this->allowedTags[$tagName]]
+			: $this->allowedTags; // a key in another case, or a tag listed without attributes
+		foreach ($entries as $key => $value) {
+			if (is_int($key)) {
+				if (is_string($value) && strtolower($value) === $tagName) {
+					return [];
+				}
+			} elseif (strtolower($key) === $tagName) {
+				return match (true) {
+					$value === true => true,
+					is_array($value) => array_values(array_map(strtolower(...), $value)),
+					default => [],
+				};
 			}
 		}
 
-		return array_intersect_key($attrs, array_flip($names));
+		return null;
 	}
 
 
@@ -136,7 +166,7 @@ final class HtmlPolicy
 	public function filterUrls(array $attrs): array
 	{
 		foreach ($attrs as $name => $value) {
-			$kind = Schema::urlAttribute($name);
+			$kind = Schema::urlAttribute(strtolower($name));
 			if ($kind === null || !is_string($value)) {
 				continue;
 			}
@@ -174,12 +204,12 @@ final class HtmlPolicy
 
 
 	/**
-	 * Is the CSS property allowed by the allowedStyles whitelist?
+	 * Is the CSS property allowed by the allowedStyles whitelist? Names compare regardless of case, as in CSS.
 	 */
 	public function isStyleAllowed(string $property): bool
 	{
 		return is_array($this->allowedStyles)
-			? in_array($property, $this->allowedStyles, true)
+			? in_array(strtolower($property), array_map(strtolower(...), $this->allowedStyles), true)
 			: $this->allowedStyles;
 	}
 }

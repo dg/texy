@@ -68,3 +68,20 @@ test('raw text neither ends its element nor outlives it', function () {
 	Assert::same("<p></p>\n", $texy->renderHtml($script('style', '<img src=x onerror=alert(1)>')));
 	Assert::same('', $texy->toHtml('<style><img src=x onerror=alert(1)></style>'));
 });
+
+
+test('the policy compares names of tags and attributes regardless of case', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::safeMode($texy);
+	Assert::false($texy->htmlPolicy->isTagAcceptable('A', ['HREF' => 'javascript:alert(1)'], closing: false));
+	Assert::false($texy->htmlPolicy->isTagAcceptable('A', [], closing: false));
+	Assert::same([], $texy->htmlPolicy->filterUrls(['HREF' => 'javascript:alert(1)']));
+
+	$texy->htmlPolicy->allowedTags['a'] = ['href', 'id'];
+	Assert::same(
+		'&lt;a id="x" HREF="javascript:alert(1)"&gt;',
+		$texy->renderHtml(new Nodes\DocumentNode(new Nodes\ContentNode([new Nodes\ParagraphNode(new Nodes\ContentNode([
+			new Nodes\HtmlTagNode('a', ['id' => 'x', 'HREF' => 'javascript:alert(1)']),
+		]))]))),
+	);
+});

@@ -50,6 +50,17 @@ test('a custom whitelist names both the tags and their attributes', function () 
 });
 
 
+test('names in the whitelist are compared regardless of case, as in HTML', function () {
+	$texy = new Texy;
+	$texy->htmlPolicy->allowedTags = ['my-extraTag' => ['dataId'], 'B'];
+
+	$html = $texy->toHtml('<my-extraTag dataId="1" onclick="z">x</my-extraTag> <b class="c">y</b>');
+
+	Assert::contains('<my-extratag dataid="1">x</my-extratag>', $html);
+	Assert::contains('<b>y</b>', $html);
+});
+
+
 test('true on a tag lets every attribute through', function () {
 	$texy = new Texy;
 	$texy->htmlPolicy->allowedTags = ['b' => true];
