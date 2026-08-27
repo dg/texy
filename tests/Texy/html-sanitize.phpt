@@ -43,6 +43,15 @@ test('a tag listed without a key is allowed without attributes', function () {
 });
 
 
+test('disabling links or images removes their tags listed in any case', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlPolicy->allowedTags = ['A' => ['href'], 'B', 'Img' => true, 'EMBED'];
+	Texy\Configurator::disableLinks($texy);
+	Texy\Configurator::disableImages($texy);
+	Assert::same(['B'], $texy->htmlPolicy->allowedTags);
+});
+
+
 test('disabling links or images with all tags allowed keeps the others', function () {
 	$texy = new Texy\Texy;
 	Texy\Configurator::disableImages($texy);

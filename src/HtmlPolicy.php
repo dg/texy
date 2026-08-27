@@ -8,7 +8,7 @@
 namespace Texy;
 
 use Texy\Output\Html\Schema;
-use function is_array, is_string;
+use function array_key_exists, is_array, is_int, is_string;
 
 
 /**
@@ -44,9 +44,7 @@ final class HtmlPolicy
 			return false;
 		}
 
-		return !is_array($this->allowedTags)
-			|| isset($this->allowedTags[$tagName])
-			|| in_array($tagName, $this->allowedTags, true);
+		return !is_array($this->allowedTags) || $this->getAllowedAttrs($tagName) !== null;
 	}
 
 
@@ -103,15 +101,45 @@ final class HtmlPolicy
 		}
 
 		$names = [];
-		foreach ([$this->allowedTags[$tagName] ?? [], $this->allowedTags['*'] ?? []] as $allowed) {
+		foreach ([$this->getAllowedAttrs($tagName), $this->getAllowedAttrs('*')] as $allowed) {
 			if ($allowed === true) {
 				return $attrs;
-			} elseif (is_array($allowed)) {
-				$names = [...$names, ...$allowed];
+			}
+			$names = [...$names, ...$allowed ?? []];
+		}
+
+		$names = array_flip($names);
+		return array_filter($attrs, fn($name) => isset($names[strtolower((string) $name)]), ARRAY_FILTER_USE_KEY);
+	}
+
+
+	/**
+	 * Attributes the whitelist gives the tag: true for any, a list of lowercase names, or null when the
+	 * tag is not in it. Names of tags and attributes are compared regardless of case, as in HTML.
+	 * @return true|list<string>|null
+	 */
+	private function getAllowedAttrs(string $tagName): true|array|null
+	{
+		assert(is_array($this->allowedTags));
+		$tagName = strtolower($tagName);
+		$entries = array_key_exists($tagName, $this->allowedTags)
+			? [$tagName => $this->allowedTags[$tagName]]
+			: $this->allowedTags; // a key in another case, or a tag listed without attributes
+		foreach ($entries as $key => $value) {
+			if (is_int($key)) {
+				if (is_string($value) && strtolower($value) === $tagName) {
+					return [];
+				}
+			} elseif (strtolower($key) === $tagName) {
+				return match (true) {
+					$value === true => true,
+					is_array($value) => array_values(array_map(strtolower(...), $value)),
+					default => [],
+				};
 			}
 		}
 
-		return array_intersect_key($attrs, array_flip($names));
+		return null;
 	}
 
 

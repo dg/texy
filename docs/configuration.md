@@ -40,7 +40,7 @@ $texy->htmlPolicy->allowedTags = [
 ];
 ```
 
-The whitelist applies both to tags written in the input (disallowed ones become visible text) and to attributes from modifiers. The key `'*'` lists attributes acceptable on any element, unioned with the per-element list.
+The whitelist applies both to tags written in the input (disallowed ones become visible text) and to attributes from modifiers. The key `'*'` lists attributes acceptable on any element, unioned with the per-element list. Names of tags and attributes match regardless of case, as in HTML.
 
 **Changed in 4.0:** attributes are no longer validated against a content model. Texy 3
 carried an HTML 4 DTD and dropped any attribute that did not belong to its element, so
@@ -56,7 +56,7 @@ This is about validity, not safety: safe mode escapes a disallowed tag whole, ex
 
 ### $htmlPolicy->allowedClasses, $htmlPolicy->allowedStyles
 
-Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `true`.
+Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `true`. Style properties match regardless of case, classes and IDs only exactly as written.
 
 ```php
 $texy->htmlPolicy->allowedClasses = false;          // no classes/IDs

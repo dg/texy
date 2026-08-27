@@ -24,7 +24,7 @@ final class ElementDecorator
 	/** @var array<string, int>|bool  lookup set snapshot of $policy->allowedClasses */
 	private bool|array $classes;
 
-	/** @var array<string, int>|bool  lookup set snapshot of $policy->allowedStyles */
+	/** @var array<string, int>|bool  lookup set snapshot of $policy->allowedStyles, lowercase like the properties of a modifier */
 	private bool|array $styles;
 
 
@@ -127,7 +127,7 @@ final class ElementDecorator
 	{
 		if ($modifier->styles) {
 			$allowedStyles = $this->styles ??= is_array($this->policy->allowedStyles)
-				? array_flip($this->policy->allowedStyles)
+				? array_flip(array_map(strtolower(...), $this->policy->allowedStyles))
 				: $this->policy->allowedStyles;
 			settype($attrs['style'], 'array');
 			if ($allowedStyles === true) {
