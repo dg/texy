@@ -87,6 +87,7 @@ Nodes and modifiers carry a `Range` (`$offset`, `$length` in bytes of the **norm
 - **In the document a range is the origin.** A Transform pass never moves or recomputes a range, even when it changes the node's text or structure; a node it creates carries the range of the notation it comes from (an `HtmlElementNode` the one of its opening tag) or none. What the built-in passes change: `DirectiveModule` consumes `{{texy: …}}` into `DocumentNode::$meta` and replaces handled directives, `HtmlModule` pairs tags into `HtmlElementNode` and turns rejected tags into `TextNode`, `ImageModule` and `LinkReferenceModule` fill `$url` of references, `EmoticonModule` fills `EmoticonNode::$resolved`, `HeadingPass` sets `$level`, `$id` and `$titleOverride`, the typography rewrites `TextNode::$text` and modifier titles.
 - **The range is the source, never the text.** `TextNode::$text` is display text from the parse on (`&amp;` is `TextNode('&')` with the range of the entity), only code-like nodes keep literal source. The notation is read through the range.
 - **A node records the parts of its notation a tool would otherwise take apart again:** a part gets its own `Range` when it can be rewritten on its own, a variant is stored as written. `LinkNode::$syntax` (the name of the syntax, e.g. `Syntax::WikiLink`), `$textRange`, `$urlRange`; `ImageNode::$urlRange`; `HeadingNode::$marker`, `$textRange`; `ListItemNode::$bullet`, `$bulletRange`; `CodeBlockNode::$codeMap`, an `OffsetMap` from `$code` to the source. `OffsetMap::applyTo()` maps every `Range` and `OffsetMap` property of a node, so parts stay right inside lists, quotes, cells and `/--div`. A node of a custom syntax records no parts; a tool replaces it whole.
+- **Changing the AST never changes the source.** `$link->url = …` changes the document. Writing into the source is an explicit operation over ranges, `Texy\Rewriter`: it collects replacements, refuses two that overlap or a range that does not hold the expected text (`RewriteException`, with the position from `SourcePosition::fromOffset()`), and applies them at once with `getResult()`.
 - Heading IDs are generated in the transform phase **before** typography, so they are stable regardless of `$allowed['typography']`. The displayed title (`HeadingNode::getTitle()`) is derived from the heading's content instead of copied, so it *is* typographed.
 
 ### Working with positions
@@ -95,10 +96,12 @@ There is no source map. Offsets refer to `Texy::normalize($text)` – the same n
 
 ```php
 $src = Texy::normalize(file_get_contents($file));
-$doc = $texy->parse($src);
-// Range offsets are exact byte positions in $src
-$edited = substr_replace($src, $replacement, $range->offset, $range->length);
-file_put_contents($file, $edited);
+$doc = $texy->parse($src);              // the syntax tree; offsets are byte positions in $src
+$rewriter = new Texy\Rewriter($src);
+foreach (NodeHelpers::find($doc, Nodes\LinkNode::class) as $link) {
+	$rewriter->replace($link->urlRange, $newTarget);
+}
+file_put_contents($file, $rewriter->getResult());
 ```
 
 Normalization is plain text hygiene – LF line endings, no control bytes or BOM, right-trimmed lines – so the recommended practice is to **store Texy files already normalized**. The file on disk is then byte-identical to the string the offsets refer to, and positions can be used against it directly.
