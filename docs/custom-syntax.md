@@ -156,5 +156,5 @@ NOTE: It may span several lines.
 - **Prefer existing node types** – they render in every output format alike; add a custom `Node` subclass only when no existing node fits. Subclassing a built-in node is the cheapest way to keep full rendering, since dispatch falls back to the ancestor's renderer.
 - **Use prefixed names** (`custom/username`, `myapp/alert`) – both to avoid future collisions and to let users disable your syntax via `$texy->allowed`.
 - **Support modifiers** – add `Texy\Patterns::Modifier . '?'` to your pattern and pass `Texy\Modifier::parse($matches[n])` into your node so users can style your construct like any other.
-- **Fill in `Range`** where practical – editor tooling and passes rely on source positions.
+- **Fill in `Range`** from `$offsets`, covering all the node is written with – editor tooling relies on it. To tools your node is opaque: they can only replace its whole range. If it is a built-in node type, you may fill the parts of its notation too (`LinkNode::$syntax`, `$textRange`, `$urlRange`…, see [architecture.md](architecture.md#source-positions)); use your syntax name as `$syntax`.
 - **Test combinations** – what happens when your markup appears inside a link? Inside a code block?
