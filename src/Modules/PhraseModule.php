@@ -55,6 +55,17 @@ final class PhraseModule extends Texy\Module
 		Syntax::Quote => ['>>', 'close' => '<<', 'link' => true],
 	];
 
+	/** attributes only a link has, which a phrase written as a link loses with it */
+	private const LinkAttrs = [
+		'download' => 1,
+		'href' => 1,
+		'hreflang' => 1,
+		'ping' => 1,
+		'referrerpolicy' => 1,
+		'rel' => 1,
+		'target' => 1,
+	];
+
 	/** @var array<string, string>  patterns of Phrases, which depend on nothing, built once */
 	private static array $patterns = [];
 
@@ -292,6 +303,10 @@ final class PhraseModule extends Texy\Module
 			$content = $context->parseInline(trim($mContent), $offsets[1]);
 
 		} else {
+			if ($mLink !== null && !$isLink && $mod !== null) {
+				$mod->attrs = array_diff_key($mod->attrs, self::LinkAttrs);
+			}
+
 			$node = $phrase === Syntax::CodeSpan
 				? new InlineCodeNode(trim($mContent), $mod, $range, $textRange) // code content is not parsed recursively
 				: new PhraseNode($context->parseInline(trim($mContent), $offsets[1]), Syntax::PhraseTypes[$phrase], $mod, $range, $phrase);

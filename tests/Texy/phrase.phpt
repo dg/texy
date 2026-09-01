@@ -84,6 +84,10 @@ test('a phrase loses its link when links are disabled', function () {
 		'<p><span>a</span>, <span class="x">b</span>, c, d and word</p>',
 		$texy->toHtml('"a":http://a.cz, "b .[x]":http://b.cz, [c|http://c.cz], [d](http://d.cz) and word:[http://e.cz]'),
 	);
+	Assert::match( // the attributes of the link go with it
+		'<p><span lang="en">a</span> <strong>b</strong></p>',
+		$texy->toHtml('"a .{target: _blank; lang: en}":http://a.cz **b .{rel: nofollow}**:http://b.cz'),
+	);
 });
 
 
