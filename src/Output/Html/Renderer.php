@@ -622,9 +622,8 @@ final class Renderer extends NodeRenderer
 		$root = $node->isImageLink ? $this->config->imageBaseUrl : $this->config->linkBaseUrl;
 		$el->attrs['href'] = Helpers::prependRoot($rawUrl, $root);
 
-		// rel="nofollow"
 		if ($nofollow || ($this->noFollow && str_contains($el->attrs['href'], '//'))) {
-			$el->attrs['rel'] = 'nofollow';
+			$el->attrs['rel'] = self::addNoFollow($el->attrs['rel'] ?? null);
 		}
 
 		// Add content
@@ -722,12 +721,7 @@ final class Renderer extends NodeRenderer
 		// Add rel="nofollow" for external links when linkNoFollow is enabled
 		if ($tagName === 'a' && !$node->closing && isset($attrs['href']) && is_string($attrs['href'])) {
 			if ($this->noFollow && str_contains($attrs['href'], '//')) {
-				$existingRel = isset($attrs['rel']) && is_string($attrs['rel']) ? $attrs['rel'] : '';
-				$relParts = $existingRel ? explode(' ', $existingRel) : [];
-				if (!in_array('nofollow', $relParts, true)) {
-					$relParts[] = 'nofollow';
-				}
-				$attrs['rel'] = implode(' ', $relParts);
+				$attrs['rel'] = self::addNoFollow($attrs['rel'] ?? null);
 			}
 		}
 
@@ -959,5 +953,17 @@ final class Renderer extends NodeRenderer
 		if ($float !== null) {
 			$this->decorator->applyFloat($el, $float);
 		}
+	}
+
+
+	/**
+	 * Adds nofollow to the values of rel the author gave.
+	 * @param  array<bool|int|string>|bool|int|string|null  $rel  value of the attribute
+	 */
+	private static function addNoFollow(array|bool|int|string|null $rel): string
+	{
+		$values = is_array($rel) ? $rel : (is_string($rel) ? explode(' ', $rel) : []);
+		$values = array_filter($values, fn($value) => is_string($value) && $value !== '' && $value !== 'nofollow');
+		return implode(' ', [...$values, 'nofollow']);
 	}
 }
