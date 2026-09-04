@@ -38,6 +38,18 @@ test('link forceNoFollow does not affect relative URLs', function () {
 });
 
 
+test('nofollow is added to the rel the author gave', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->linkNoFollow = true;
+	Assert::match(
+		'<p><a rel="noopener nofollow" href="https://example.com">web</a> <a
+href="https://example.com" rel="noopener nofollow">tag</a> <a
+href="https://example.com" rel="nofollow">class</a></p>',
+		$texy->toHtml('"web .{rel: noopener}":https://example.com <a href="https://example.com" rel="noopener">tag</a> "class .[nofollow]":https://example.com'),
+	);
+});
+
+
 // =============================================================================
 // URL shortening
 // =============================================================================
