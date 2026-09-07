@@ -122,11 +122,21 @@ final class Modifier
 	}
 
 
+	/**
+	 * CSS property names match regardless of case, except custom properties (--name).
+	 * @internal
+	 */
+	public static function normalizeProperty(string $name): string
+	{
+		return str_starts_with($name, '--') ? $name : strtolower($name);
+	}
+
+
 	private function parseStyle(string $s): void
 	{
 		foreach (explode(';', $s) as $value) {
 			$pair = explode(':', $value, 2);
-			$prop = strtolower(trim($pair[0]));
+			$prop = self::normalizeProperty(trim($pair[0]));
 			if ($prop === '' || !isset($pair[1])) {
 				continue;
 			}
