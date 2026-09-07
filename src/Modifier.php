@@ -88,21 +88,20 @@ final class Modifier
 			$ch = $s[$p];
 
 			if ($ch === '(') { // title
-				$m = Regexp::match($s, '~(?: \\\\\) | [^)\n] )++\)~x', offset: $p);
-				if (isset($m[0])) {
-					$this->title = Helpers::unescapeHtml(str_replace('\)', ')', trim(substr($m[0], 1, -1))));
-					$p += strlen($m[0]);
+				$m = Regexp::match($s, '~(?: \\\\\) | [^)\n] )++\)~xA', offset: $p);
+				if (!isset($m[0])) {
+					break;
 				}
+				$this->title = Helpers::unescapeHtml(str_replace('\)', ')', trim(substr($m[0], 1, -1))));
+				$p += strlen($m[0]);
 
-			} elseif ($ch === '{') { // style & attributes
-				$a = strpos($s, '}', $p) + 1;
-				$this->parseStyle(substr($s, $p + 1, $a - $p - 2));
-				$p = $a;
+			} elseif ($ch === '{' && ($a = strpos($s, '}', $p)) !== false) { // style & attributes
+				$this->parseStyle(substr($s, $p + 1, $a - $p - 1));
+				$p = $a + 1;
 
-			} elseif ($ch === '[') { // classes & ID
-				$a = strpos($s, ']', $p) + 1;
-				$this->parseClasses(str_replace('#', ' #', substr($s, $p + 1, $a - $p - 2)));
-				$p = $a;
+			} elseif ($ch === '[' && ($a = strpos($s, ']', $p)) !== false) { // classes & ID
+				$this->parseClasses(str_replace('#', ' #', substr($s, $p + 1, $a - $p - 1)));
+				$p = $a + 1;
 
 			} elseif ($val = ['^' => 'top', '-' => 'middle', '_' => 'bottom'][$ch] ?? null) { // alignment
 				$this->vAlign = $val;
@@ -143,11 +142,7 @@ final class Modifier
 
 			$value = trim($pair[1]);
 
-			if (
-				isset(self::ElAttrs[$prop])
-				|| str_starts_with($prop, 'data-')
-				|| str_starts_with($prop, 'aria-')
-			) { // attribute
+			if (isset(self::ElAttrs[$prop]) || preg_match('~^(?:data|aria)-[a-z0-9_.-]+$~D', $prop)) { // attribute
 				$this->attrs[$prop] = $value;
 			} elseif ($value !== '') { // style
 				$this->styles[$prop] = $value;
