@@ -55,7 +55,7 @@ This is about validity, not safety: safe mode escapes a disallowed tag whole, ex
 
 ### $htmlPolicy->allowedClasses, $htmlPolicy->allowedStyles
 
-Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `true`. Style properties match regardless of case, classes and IDs only exactly as written.
+Whitelists for CSS classes/IDs and inline style properties usable in [modifiers](modifiers.md). Default `true`. Style properties match regardless of case, custom properties (`--name`), classes and IDs only exactly as written.
 
 ```php
 $texy->htmlPolicy->allowedClasses = false;          // no classes/IDs

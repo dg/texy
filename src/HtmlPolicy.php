@@ -204,12 +204,12 @@ final class HtmlPolicy
 
 
 	/**
-	 * Is the CSS property allowed by the allowedStyles whitelist? Names compare regardless of case, as in CSS.
+	 * Is the CSS property allowed by the allowedStyles whitelist? Names compare as in CSS.
 	 */
 	public function isStyleAllowed(string $property): bool
 	{
 		return is_array($this->allowedStyles)
-			? in_array(strtolower($property), array_map(strtolower(...), $this->allowedStyles), true)
+			? in_array(Modifier::normalizeProperty($property), array_map(Modifier::normalizeProperty(...), $this->allowedStyles), true)
 			: $this->allowedStyles;
 	}
 }

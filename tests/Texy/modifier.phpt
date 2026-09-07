@@ -66,6 +66,19 @@ test('styles in the whitelist are compared regardless of case, as in CSS', funct
 });
 
 
+test('a custom property keeps its case, as in CSS', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	$texy->htmlPolicy->allowedStyles = ['--myColor'];
+
+	Assert::same(['--myColor' => 'red', 'color' => 'blue'], Texy\Modifier::parse('{--myColor: red; Color: blue}')->styles);
+	Assert::match(
+		'<p><strong style="--myColor:red">text</strong></p>',
+		$texy->toHtml('**text .{--myColor: red; --mycolor: blue}**'),
+	);
+});
+
+
 test('attribute vs. style disambiguation', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
