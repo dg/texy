@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /**
- * This file is part of the Texy! (https://texy.nette.org)
+ * This file is part of the Texy! (https://texy.deegee.dev)
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
@@ -167,7 +167,7 @@ class Texy
 		$this->initDTD();
 
 		// examples of link references ;-)
-		$link = new Link('https://texy.nette.org/');
+		$link = new Link('https://texy.deegee.dev/');
 		$link->modifier->title = 'The best text -> HTML converter and formatter';
 		$link->label = 'Texy!';
 		$this->linkModule->addReference('texy', $link);

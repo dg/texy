@@ -2,7 +2,7 @@
 	"name": "texy/texy",
 	"description": "📜 Texy: a text-to-HTML engine with its own easy-to-read markup, which you can change or extend, and real typography with proper quotes, dashes and non-breaking spaces. Always valid, sanitized HTML.",
 	"keywords": ["texy", "markup", "markup language", "lightweight markup", "text to html", "typography", "wiki", "markdown"],
-	"homepage": "https://texy.nette.org",
+	"homepage": "https://texy.deegee.dev",
 	"license": ["BSD-3-Clause", "GPL-2.0-only", "GPL-3.0-only"],
 	"authors": [
 		{
