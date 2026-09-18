@@ -88,12 +88,12 @@ test('case insensitive reference matching', function () {
 
 test('user-defined link definition works', function () {
 	$texy = new Texy\Texy;
-	$link = new Texy\Link('https://texy.nette.org/');
+	$link = new Texy\Link('https://texy.deegee.dev/');
 	$link->modifier->title = 'The best converter';
 	$link->label = 'Texy!';
 	$texy->linkModule->addReference('texy', $link);
 	Assert::same(
-		"<p><a href=\"https://texy.nette.org/\" title=\"The best converter\">Texy!</a></p>\n",
+		"<p><a href=\"https://texy.deegee.dev/\" title=\"The best converter\">Texy!</a></p>\n",
 		$texy->process('[texy]'),
 	);
 });
@@ -101,19 +101,19 @@ test('user-defined link definition works', function () {
 
 test('user-defined definition persists across process() calls', function () {
 	$texy = new Texy\Texy;
-	$link = new Texy\Link('https://texy.nette.org/');
+	$link = new Texy\Link('https://texy.deegee.dev/');
 	$link->label = 'Texy!';
 	$texy->linkModule->addReference('texy', $link);
 
 	// First process()
 	Assert::same(
-		"<p><a href=\"https://texy.nette.org/\">Texy!</a></p>\n",
+		"<p><a href=\"https://texy.deegee.dev/\">Texy!</a></p>\n",
 		$texy->process('[texy]'),
 	);
 
 	// Second process() - definition should still work
 	Assert::same(
-		"<p><a href=\"https://texy.nette.org/\">Texy!</a></p>\n",
+		"<p><a href=\"https://texy.deegee.dev/\">Texy!</a></p>\n",
 		$texy->process('[texy]'),
 	);
 });
