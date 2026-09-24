@@ -53,6 +53,10 @@ class Texy
 	/** @var list<Module>  in the order that decides ties between syntaxes */
 	private array $modules;
 
+	private Compatibility\Texy3 $compatibility {
+		get => $this->compatibility ??= new Compatibility\Texy3($this);
+	}
+
 
 	public function __construct()
 	{
@@ -108,6 +112,7 @@ class Texy
 	/** Lets modules register their patterns, which depend on the current configuration. */
 	private function registerModules(): void
 	{
+		Compatibility\Texy3::moveSettings($this);
 		$this->config->validate();
 		foreach ($this->modules as $module) {
 			$module->register($this->engine);
@@ -197,6 +202,7 @@ class Texy
 	 */
 	public function createHtmlRenderer(): Output\Html\Renderer
 	{
+		Compatibility\Texy3::moveSettings($this);
 		return new Output\Html\Renderer($this->htmlOutput, $this->htmlPolicy, $this->urlPolicy);
 	}
 
@@ -272,6 +278,7 @@ class Texy
 	{
 		$text = self::normalize($text);
 
+		Compatibility\Texy3::moveSettings($this);
 		$this->config->validate();
 		if ($this->config->typography) {
 			$text = new Typography\Typographer($this->config)->correct($text, preserveSpaces: true);
@@ -340,5 +347,30 @@ class Texy
 	final public function __clone()
 	{
 		throw new \LogicException('Clone is not supported.');
+	}
+
+
+	public function &__get(string $name): mixed
+	{
+		return $this->compatibility->getProperty($name);
+	}
+
+
+	public function __set(string $name, mixed $value): void
+	{
+		$this->compatibility->setProperty($name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return $this->compatibility->hasProperty($name);
+	}
+
+
+	/** @param  array<mixed>  $args */
+	public function __call(string $name, array $args): mixed
+	{
+		return $this->compatibility->callMethod($name, $args);
 	}
 }

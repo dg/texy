@@ -4,9 +4,6 @@ parameters:
 	paths:
 		- src
 
-	excludePaths:
-		- src/Compatibility/Texy.php  # compatibility file with if (false) block
-
 	ignoreErrors:
 		# Config::validate() checks what the phpDoc types promise, because the tables are plain public arrays
 		-

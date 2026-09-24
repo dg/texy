@@ -26,10 +26,12 @@ function isForbidden(string $class): bool
 
 /**
  * Finds the references to the language in PHP code, imported or written out.
+ * @param  ?Closure(string): bool  $isForbidden  tells a forbidden class, the language by default
  * @return list<string>
  */
-function findForbiddenReferences(string $code): array
+function findForbiddenReferences(string $code, ?Closure $isForbidden = null): array
 {
+	$isForbidden ??= isForbidden(...);
 	$tokens = array_values(array_filter(
 		PhpToken::tokenize($code),
 		fn(PhpToken $token) => !$token->is([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT]),
@@ -63,13 +65,13 @@ function findForbiddenReferences(string $code): array
 
 			foreach (expandImports($statement) as $alias => $class) {
 				$imports[strtolower($alias)] = $class;
-				if (isForbidden($class)) {
+				if ($isForbidden($class)) {
 					$found[] = $class;
 				}
 			}
 
 		} elseif ($token->is(T_NAME_FULLY_QUALIFIED)) {
-			if (isForbidden($token->text)) {
+			if ($isForbidden($token->text)) {
 				$found[] = ltrim($token->text, '\\');
 			}
 
@@ -78,7 +80,7 @@ function findForbiddenReferences(string $code): array
 			$class = isset($imports[strtolower($first)])
 				? $imports[strtolower($first)] . '\\' . $rest
 				: ltrim($namespace . '\\' . $token->text, '\\');
-			if (isForbidden($class)) {
+			if ($isForbidden($class)) {
 				$found[] = $class;
 			}
 
@@ -86,7 +88,7 @@ function findForbiddenReferences(string $code): array
 			$token->is(T_STRING)
 			&& isset($imports[strtolower($token->text)])
 			&& !$tokens[$i - 1]->is([T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION, T_CONST])
-			&& isForbidden($imports[strtolower($token->text)])
+			&& $isForbidden($imports[strtolower($token->text)])
 		) {
 			$found[] = $imports[strtolower($token->text)];
 		}
@@ -163,4 +165,23 @@ test('the engine reads nothing of the language', function () {
 	}
 
 	Assert::true($files > 50);
+});
+
+
+test('only the facade depends on the compatibility layer', function () {
+	$root = dirname(__DIR__, 2) . '/src/';
+	$isCompatibility = fn(string $class) => str_starts_with(strtolower(ltrim($class, '\\')), 'texy\compatibility\\');
+	$found = [];
+	foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)) as $file) {
+		$relative = strtr(substr($file->getPathname(), strlen($root)), '\\', '/');
+		if (
+			$file->getExtension() === 'php'
+			&& !str_starts_with($relative, 'Compatibility/')
+			&& findForbiddenReferences(file_get_contents($file->getPathname()), $isCompatibility)
+		) {
+			$found[] = $relative;
+		}
+	}
+
+	Assert::same(['Texy.php'], $found);
 });

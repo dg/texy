@@ -6,10 +6,14 @@
  */
 
 
-if (false) {
-	class Texy extends Texy\Texy
+/**
+ * The class name of Texy 3.
+ */
+class Texy extends Texy\Texy
+{
+	public function __construct()
 	{
+		trigger_error('Class Texy is deprecated, use Texy\Texy instead.', E_USER_DEPRECATED);
+		parent::__construct();
 	}
-} elseif (!class_exists(Texy::class)) {
-	class_alias(Texy\Texy::class, Texy::class);
 }

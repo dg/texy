@@ -21,8 +21,8 @@ use function strlen;
  */
 final class DelimitedBlockModule extends Texy\Module
 {
-	/** built-in type => its syntax name */
-	private const Types = [
+	/** @internal built-in type => its syntax name */
+	public const Types = [
 		'' => Syntax::DelimitedBare,
 		'pre' => Syntax::DelimitedPre,
 		'code' => Syntax::DelimitedCode,
