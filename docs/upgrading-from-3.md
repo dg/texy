@@ -4,16 +4,17 @@ Texy 4 replaces the internal string pipeline with a two-phase AST architecture:
 `parse()` turns the source into a document tree, `transform()` and its passes enrich it, and
 pluggable renderers produce HTML or plain text from the same tree (see
 [architecture.md](architecture.md)). For the basic use case the method has a new name, and the class
-lives in a namespace:
+lives in a namespace (the global `Texy` still works, with a deprecation):
 
 ```php
 $texy = new Texy\Texy;
 $html = $texy->toHtml($text);
 ```
 
-The names of Texy 3 are gone: configuration code and code extending Texy 3 (handlers, patterns with the old
-signature, `HtmlElement`, `Link` and `Image`) have to be moved to the new API. This guide is the map from the old
-names to the new ones.
+A compatibility layer keeps **configuration code** of Texy 3 running with a deprecation that names the new place; it
+goes away in 5.0. Code extending Texy 3 (handlers, patterns with the old signature, `HtmlElement`,
+`Link` and `Image`) is not emulated and fails; a removed method throws with guidance. This guide is the map from the
+old names to the new ones.
 
 ## Requirements
 

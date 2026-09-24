@@ -4,9 +4,6 @@ parameters:
 	paths:
 		- src
 
-	excludePaths:
-		- src/aliases.php  # compatibility file with if (false) block
-
 	ignoreErrors:
 		# Empty generator pattern using `false && yield` to satisfy return type Generator
 		# while yielding nothing. PHPStan correctly sees left side is always false.

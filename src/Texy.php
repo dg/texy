@@ -53,6 +53,8 @@ class Texy
 	/** @var list<Module>  in the order that decides ties between syntaxes */
 	private array $modules;
 
+	private ?Compat\Texy3 $compat = null;
+
 
 	public function __construct()
 	{
@@ -107,6 +109,7 @@ class Texy
 	/** Lets modules register their patterns, which depend on the current configuration. */
 	private function registerModules(): void
 	{
+		Compat\Texy3::moveSwitches($this);
 		$this->config->validate();
 		foreach ($this->modules as $module) {
 			$module->register($this->engine);
@@ -345,5 +348,36 @@ class Texy
 	final public function __clone()
 	{
 		throw new \LogicException('Clone is not supported.');
+	}
+
+
+	public function &__get(string $name): mixed
+	{
+		return $this->getCompat()->getProperty($name);
+	}
+
+
+	public function __set(string $name, mixed $value): void
+	{
+		$this->getCompat()->setProperty($name, $value);
+	}
+
+
+	public function __isset(string $name): bool
+	{
+		return $this->getCompat()->hasProperty($name);
+	}
+
+
+	/** @param  array<mixed>  $args */
+	public function __call(string $name, array $args): mixed
+	{
+		return $this->getCompat()->callMethod($name, $args);
+	}
+
+
+	private function getCompat(): Compat\Texy3
+	{
+		return $this->compat ??= new Compat\Texy3($this);
 	}
 }
