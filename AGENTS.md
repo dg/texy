@@ -66,7 +66,8 @@ composer phpstan
   See `docs/parsing.md`.
 - **Configuration placement rule:** what changes the document's meaning for every
   format lives on `$texy->config`; what only shapes HTML output lives on
-  `$texy->htmlOutput`.
+  `$texy->htmlOutput`. The compatibility layer for Texy 3 lives in `Texy\Compat`
+  and goes away in 5.0.
 - **`TextNode` holds display text**; renderers escape on output. Text gaps are
   source verbatim; HTML entities are decoded by the `html/entity` syntax into
   their own `TextNode`s. Code-like nodes keep literal source.

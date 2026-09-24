@@ -10,7 +10,7 @@ $texy->htmlOutput->imageBaseUrl = '/images/';  // generator: presentation
 $texy->htmlOutput->lineWrap = 120;       // output formatting
 ```
 
-A mistyped option is left to PHP and to static analysis, as elsewhere: writing to an undeclared property is deprecated and reading it warns.
+A mistyped option is left to PHP and to static analysis, as elsewhere: writing to an undeclared property is deprecated and reading it warns. Names of Texy 3 keep working with a deprecation, see [upgrading-from-3.md](upgrading-from-3.md).
 
 ## The Texy class
 
