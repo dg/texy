@@ -52,6 +52,12 @@ parameters:
 				- src/Texy/Output/Html/Config.php
 				- src/Texy/Output/NodeRenderer.php
 
+		# The same holds for the built-in handlers, each narrowed to its node class.
+		-
+			identifier: assign.propertyType
+			message: '#^Property Texy\\Output\\NodeRenderer<string>\:\:\$handlers#'
+			path: src/Texy/Output/Texy/Renderer.php
+
 		# Pattern handlers are intentionally polymorphic: each declares the exact capture
 		# shape of its own regexp, so no single Closure signature fits them all -- a
 		# concrete one would be contravariantly narrower and reject every real handler.

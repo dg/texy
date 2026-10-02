@@ -8,7 +8,7 @@
 namespace Texy\Parsing;
 
 use JetBrains\PhpStorm\Language;
-use Texy\{Nodes, Stage};
+use Texy\{Nodes, Regexp, Stage};
 
 
 /**
@@ -138,6 +138,22 @@ class Engine
 		$document = new Nodes\DocumentNode($content);
 		$this->runPasses($document, Stage::Syntax);
 		return $document;
+	}
+
+
+	/**
+	 * Does the pattern of an allowed block syntax match the text? Its handler could still refuse it.
+	 * @param  array<string, bool>  $allowedSyntaxes  Map of syntax name => enabled
+	 */
+	public function matchesBlockSyntax(string $text, array $allowedSyntaxes): bool
+	{
+		foreach ($this->blockPatterns as $name => $pattern) {
+			if (!empty($allowedSyntaxes[$name]) && Regexp::match($text, $pattern['pattern'])) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 

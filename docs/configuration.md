@@ -62,6 +62,7 @@ $rewriter = new Texy\Rewriter(Texy\Texy::normalize($text)); // write into the so
 $rewriter->replace($range, $new); $rewriter->getResult();
 Texy\SourcePosition::fromOffset($source, $offset);          // line and column, for messages
 $plain = $texy->toText($text);     // plain-text rendition
+$source = $texy->renderTexy($ast); // the syntax tree printed back as Texy source
 $fixed = $texy->applyTypography($text); // typography/hyphenation only, no parsing
 Texy\Nodes\HeadingNode::collectFrom($ast);          // headings in document order
 Texy\Nodes\HeadingNode::collectFrom($ast)[0]?->getTitle(); // document title (for <title>)

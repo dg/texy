@@ -223,8 +223,28 @@ class Texy
 	public function parse(string $text, bool $singleLine = false): Nodes\DocumentNode
 	{
 		$text = self::normalize($text);
+		$this->prepareModules();
 
-		// Let modules do per-parse initialization (pattern registration, state reset)
+		// Parse using the engine with current allowed settings
+		return $this->engine->parse($text, $this->allowed, $singleLine);
+	}
+
+
+	/**
+	 * Would a block syntax take the text, or a part of it, where a paragraph is meant? Only its
+	 * pattern decides, since whether its handler refuses the text can depend on the neighbours:
+	 * "1. a" is a list only when another item follows.
+	 */
+	public function readsAsBlock(string $text): bool
+	{
+		$this->prepareModules();
+		return $this->engine->matchesBlockSyntax(self::normalize($text), $this->allowed);
+	}
+
+
+	/** Lets modules do per-parse initialization (pattern registration, state reset). */
+	private function prepareModules(): void
+	{
 		$this->inModulePrepare = true;
 		try {
 			foreach ($this->modules as $module) {
@@ -233,9 +253,6 @@ class Texy
 		} finally {
 			$this->inModulePrepare = false;
 		}
-
-		// Parse using the engine with current allowed settings
-		return $this->engine->parse($text, $this->allowed, $singleLine);
 	}
 
 
@@ -350,6 +367,15 @@ class Texy
 	public function renderText(Nodes\DocumentNode $document): string
 	{
 		return (new Output\Text\Renderer)->render($document);
+	}
+
+
+	/**
+	 * Prints a syntax tree back as Texy source, see Output\Texy\Renderer.
+	 */
+	public function renderTexy(Nodes\DocumentNode $document): string
+	{
+		return (new Output\Texy\Renderer($this))->render($document);
 	}
 
 
