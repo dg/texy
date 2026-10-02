@@ -354,6 +354,15 @@ class Texy
 
 
 	/**
+	 * Prints a syntax tree back as Texy source, see Output\Texy\Renderer.
+	 */
+	public function renderTexy(Nodes\DocumentNode $document): string
+	{
+		return (new Output\Texy\Renderer)->render($document);
+	}
+
+
+	/**
 	 * Registers a pass: fn(Nodes\DocumentNode): void, called with the whole document.
 	 * The AST may be freely modified there; return values are ignored. A Transform pass
 	 * (the default) runs in transform(), a Syntax pass already in parse(), where it may

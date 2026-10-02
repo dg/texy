@@ -15,8 +15,10 @@ Output/
 │   ├── ImageDimensions     file-system probe for image sizes (the only I/O)
 │   ├── Schema              declarative HTML vocabulary (content model, categories)
 │   └── WellFormer          call-driven well-forming + indentation + line wrapping
-└── Text/
-    └── Renderer            plain-text rendition (Texy::toText())
+├── Text/
+│   └── Renderer            plain-text rendition (Texy::toText())
+└── Texy/
+    └── Renderer            the syntax tree printed back as Texy source (Texy::renderTexy())
 ```
 
 ## NodeRenderer – dispatch and extensibility
@@ -62,10 +64,23 @@ The content model lives in **`Schema`**, the declarative per-element vocabulary:
 
 `Text\Renderer` renders a plain-text rendition: markup dropped, visible text and block structure kept, typography artifacts (non-breaking spaces, soft hyphens) normalized back. It needs no `Texy` instance at all – the test of the AST's semantic completeness. Because sanitization and typography already happened in the transform phase, safe mode and typographic corrections apply to its output as well.
 
-The facade follows one grammar for HTML and plain text: `to*(string)` is the one-shot conversion, `render*(DocumentNode)` renders a document that `parse()` and `transform()` produced – `renderHtml()`/`process()`, `renderText()`/`toText()`.
+The facade follows one grammar for HTML and plain text: `to*(string)` is the one-shot conversion, `render*(DocumentNode)` renders a document that `parse()` and `transform()` produced – `renderHtml()`/`process()`, `renderText()`/`toText()`. `renderTexy()` has no one-shot counterpart, since its input would already be Texy source.
+
+## The Texy Renderer
+
+`Texy\Renderer` prints a **syntax tree** back as Texy source (`Texy::renderTexy()`, or `renderNode()` for a single node). Its contract is the round trip: parsing the printed source gives the same tree up to positions, and printing that tree gives the same source again (`tests/Texy/render-texy.phpt`). The input is what `parse()` returns; a document after `transform()` has resolved references, typography in its text and sanitized HTML, so printing it does not reproduce the notation.
+
+- A node is printed in the variant of its notation it records (`LinkNode::$syntax`, `ListItemNode::$bullet`, `HeadingNode::$marker`, the type of a phrase), anything else in one canonical form: a modifier as `.(title)[class #id]{style}<>`, item content indented by two spaces, a surrounded heading closed by its marker, a table separator of its own, a code block as `/--code` or as a fence where `/--` would change the code.
+- **Text is printed as it was written.** A one-character `TextNode` whose range is longer than its text was an entity or `\*`, and is escaped again; a node without a range, built by a consumer, gets `&` and `<` escaped. Where text in its new place would read as syntax (a paragraph starting the way a block does, a dot opening a table cell, a colon that would make a definition list), its first character is written as an entity, which parses back into the same text.
+- The notation dictates some placements: a paragraph's modifier goes to the end of its first line, where the parser looks for it; the first line of a list item cannot be followed by a hard break, so a space of the text before the break becomes a newline; a list is separated by two blank lines from a neighbour that would read as one more of its items.
+- A node of an extension has no printed form: `renderUnknown()` throws and `addRenderer()` gives it one.
+
+What cannot round-trip: a table cell continued over more lines than the rows it spans, a line starting with `/--` or `\--` inside an `html` or `text` block, a modifier title spanning a hard break, an empty `/--div`, the deprecated `[* | url *]` image syntax, and lines of a paragraph of raw HTML that read as a block once the paragraph starts at the beginning of a line.
 
 ## Rendering a document parsed elsewhere
 
 The AST is not tied to the Texy parser. A document another parser produced – [texy/markdown](https://github.com/dg/texy-markdown) builds one from CommonMark – renders through these same generators, and a node type they do not know degrades to its content (`NodeRenderer::renderUnknown()`) or gets a handler of its own through `addRenderer()`.
 
 One step is not the renderer's, though: typography is a transform over the AST, which `transform()` runs as its last step. A document built elsewhere gets it from `Texy::applyAstTypography($document)`, called before rendering.
+
+Such a document also prints as Texy source, which converts it to Texy. The printer needs a printed form for the other parser's own nodes, and the variants of notation the nodes record (heading markers, bullets, link syntaxes) have to be dropped first, because they are the other language's and the printer would write them as Texy's. Text has to be escaped by the target's rules too: the printer escapes only what was escaped in a Texy source. `Markdown::toTexy()` in texy/markdown does all three.
