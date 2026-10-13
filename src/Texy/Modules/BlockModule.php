@@ -20,7 +20,7 @@ final class BlockModule extends Texy\Module
 	{
 		$this->texy = $texy;
 
-		//$texy->allowed['blocks'] = true;
+		// $texy->allowed['blocks'] = true;
 		$texy->allowed['block/default'] = true;
 		$texy->allowed['block/pre'] = true;
 		$texy->allowed['block/code'] = true;

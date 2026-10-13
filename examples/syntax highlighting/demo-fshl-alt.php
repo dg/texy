@@ -29,11 +29,11 @@
  */
 
 
-if (@!include __DIR__ . '/../../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
-if (@!include __DIR__ . '/vendor/autoload.php') {
+if (@!include __DIR__ . '/vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
@@ -111,7 +111,7 @@ $texy = new Texy;
 // Register the standard block handler for /--code syntax
 $texy->addHandler('block', 'blockHandler');
 
-// Register NEW syntax: recognize <?php ... ?​> blocks
+// Register NEW syntax: recognize blocks starting with <?php
 // When Texy sees <?php at the start of a line, it will highlight it as PHP
 $texy->registerBlockPattern(
 	'codeBlockHandler',

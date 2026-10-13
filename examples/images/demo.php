@@ -24,7 +24,7 @@
  */
 
 
-if (@!include __DIR__ . '/../../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
@@ -39,7 +39,7 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') {
 function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null): Texy\HtmlElement|string|null
 {
 	// Check if the image URL is our special keyword "user"
-	if ($image->URL == 'user') {
+	if ($image->URL === 'user') {
 		// Transform it to an actual image file
 		$image->URL = 'image.gif';
 		$image->modifier->title = 'Texy! logo';
@@ -95,5 +95,5 @@ echo '</pre>';
 echo '<hr />';
 echo '<pre>';
 echo 'Used images:';
-//print_r($texy->summary['images']);
+// print_r($texy->summary['images']);
 echo '</pre>';

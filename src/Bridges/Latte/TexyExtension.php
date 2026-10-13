@@ -20,7 +20,7 @@ use Texy\{Helpers, Texy};
 class TexyExtension extends Latte\Extension
 {
 	/** @var \Closure(string, mixed...): string */
-	private \Closure $processor;
+	private readonly \Closure $processor;
 
 
 	/** @param  Texy|callable(string, mixed...): string  $texy */
