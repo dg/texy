@@ -7,7 +7,7 @@
 
 namespace Texy;
 
-use function array_keys, strlen, substr_replace;
+use function strlen;
 
 
 /**

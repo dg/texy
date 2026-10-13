@@ -7,7 +7,6 @@
 
 namespace Texy;
 
-use function array_fill_keys;
 
 $globalAttrs = array_fill_keys([
 	'aria-*',

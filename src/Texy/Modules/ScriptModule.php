@@ -8,7 +8,6 @@
 namespace Texy\Modules;
 
 use Texy;
-use function preg_quote, preg_split, trim;
 
 
 /**
