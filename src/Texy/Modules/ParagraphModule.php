@@ -9,8 +9,7 @@ namespace Texy\Modules;
 
 use Texy;
 use Texy\Regexp;
-use function preg_match, preg_split, str_contains, str_replace, strlen, strtr, substr_replace, trim;
-use const PREG_SPLIT_NO_EMPTY;
+use function strlen;
 
 
 /**

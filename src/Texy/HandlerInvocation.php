@@ -7,7 +7,7 @@
 
 namespace Texy;
 
-use function array_unshift, count, is_string;
+use function count, is_string;
 
 
 /**

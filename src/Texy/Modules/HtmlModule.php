@@ -10,8 +10,7 @@ namespace Texy\Modules;
 use Texy;
 use Texy\HtmlElement;
 use Texy\Patterns;
-use function array_flip, count, explode, is_array, is_string, preg_match, preg_match_all, str_contains, str_ends_with, strtolower, strtoupper, strtr, substr, trim;
-use const PREG_SET_ORDER;
+use function count, is_array, is_string;
 
 
 /**

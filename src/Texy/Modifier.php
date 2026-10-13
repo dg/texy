@@ -7,7 +7,7 @@
 
 namespace Texy;
 
-use function array_flip, explode, is_array, preg_match, settype, str_replace, str_starts_with, strlen, strpos, strtolower, substr, trim;
+use function is_array, strlen;
 
 
 /**

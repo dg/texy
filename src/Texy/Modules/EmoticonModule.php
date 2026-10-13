@@ -8,7 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use function getimagesize, implode, is_array, is_file, krsort, preg_quote, rtrim, str_contains;
+use function is_array;
 
 
 /**

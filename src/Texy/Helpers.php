@@ -8,7 +8,7 @@
 namespace Texy;
 
 use Nette\Utils\Strings;
-use function class_exists, function_exists, html_entity_decode, iconv, mb_strtolower, min, preg_match, preg_quote, rtrim, str_replace, strlen, strspn, strtolower, strtr, trim;
+use function function_exists, strlen;
 use const ENT_HTML5, ENT_QUOTES, ICONV_IMPL;
 
 
