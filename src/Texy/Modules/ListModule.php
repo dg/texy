@@ -8,10 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\BlockParser;
-use Texy\HtmlElement;
-use Texy\Modifier;
-use Texy\Patterns;
+use Texy\{BlockParser, HtmlElement, Modifier, Patterns};
 use function strlen;
 
 

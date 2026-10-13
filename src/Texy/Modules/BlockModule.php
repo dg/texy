@@ -8,8 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Helpers;
-use Texy\HtmlElement;
+use Texy\{Helpers, HtmlElement};
 
 
 /**

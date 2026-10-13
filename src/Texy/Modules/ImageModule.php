@@ -8,9 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\Helpers;
-use Texy\Image;
-use Texy\Patterns;
+use Texy\{Helpers, Image, Patterns};
 use function is_int;
 
 
