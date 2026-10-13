@@ -12,7 +12,7 @@ require __DIR__ . '/../bootstrap.php';
 function imageHandler($invocation, $image, $link)
 {
 	$texy = $invocation->getTexy();
-	if ($image->URL == 'user') { // accepts only [* user *]
+	if ($image->URL === 'user') { // accepts only [* user *]
 		$image->URL = 'image.gif'; // image URL
 		$image->modifier->title = 'Texy! logo';
 		if ($link) {

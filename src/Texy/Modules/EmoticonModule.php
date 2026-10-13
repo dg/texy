@@ -111,8 +111,8 @@ final class EmoticonModule extends Texy\Module
 
 		// file path
 		$file = rtrim($this->fileRoot ?? (string) $texy->imageModule->fileRoot, '/\\') . '/' . $file;
-		if (@is_file($file)) { // intentionally @
-			$size = @getimagesize($file); // intentionally @
+		if (@is_file($file)) { // @ the path may be too long or outside open_basedir
+			$size = @getimagesize($file); // @ a file smaller than 12 bytes triggers a read error
 			if (is_array($size)) {
 				$el->attrs['width'] = $size[0];
 				$el->attrs['height'] = $size[1];

@@ -325,7 +325,7 @@ final class HtmlModule extends Texy\Module
 		foreach ($matches as $m) {
 			$key = strtolower($m[1]);
 			$value = $m[2];
-			if ($value == null) {
+			if ($value === '') {
 				$res[$key] = true;
 			} elseif ($value[0] === '\'' || $value[0] === '"') {
 				$res[$key] = Texy\Helpers::unescapeHtml(substr($value, 1, -1));

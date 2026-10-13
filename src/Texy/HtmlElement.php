@@ -412,7 +412,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 			} elseif (is_array($value)) {
 				$tmp = null;
 				foreach ($value as $k => $v) {
-					if ($v == null) { // skip nulls & empty string; composite 'style' vs. 'others'
+					if ($v == null) { // intentionally ==, skips null and empty string; composite 'style' vs. 'others'
 						continue;
 					} elseif (is_string($k)) {
 						$tmp[] = $k . ':' . $v;

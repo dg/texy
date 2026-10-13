@@ -136,7 +136,7 @@ final class LinkModule extends Texy\Module
 
 		$link->type = $link::BRACKET;
 
-		if ($link->label != '') { // null or ''
+		if ($link->label != '') { // intentionally !=, skips null and empty string
 			// prevent circular references
 			assert($link->name !== null);
 			if (isset(self::$livelock[$link->name])) {

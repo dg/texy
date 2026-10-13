@@ -243,7 +243,7 @@ final class PhraseModule extends Texy\Module
 		$parser->again = $phrase !== 'phrase/code' && $phrase !== 'phrase/quicklink';
 
 		if ($phrase === 'phrase/span' || $phrase === 'phrase/span-alt') {
-			if ($mLink == null) {
+			if ($mLink === '') {
 				if (!$mMod) {
 					return null; // means "..."
 				}
@@ -253,7 +253,7 @@ final class PhraseModule extends Texy\Module
 		} elseif ($phrase === 'phrase/acronym' || $phrase === 'phrase/acronym-alt') {
 			$mod->title = trim(Texy\Helpers::unescapeHtml($mLink));
 
-		} elseif ($mLink != null) {
+		} elseif ($mLink !== '') {
 			$link = $texy->linkModule->factoryLink($mLink, null, $mContent);
 		}
 

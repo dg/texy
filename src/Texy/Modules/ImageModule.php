@@ -259,7 +259,7 @@ final class ImageModule extends Texy\Module
 		}
 
 		$file = rtrim((string) $this->fileRoot, '/\\') . '/' . $image->URL;
-		if (!@is_file($file) || !($size = @getimagesize($file))) { // intentionally @
+		if (!@is_file($file) || !($size = @getimagesize($file))) { // @ the path may be outside open_basedir, the image unreadable
 			return;
 		}
 
