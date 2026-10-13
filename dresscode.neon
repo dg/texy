@@ -1,0 +1,51 @@
+use:
+	- nette
+	- modernizations
+
+typeAnalysis: phpstan
+
+paths:
+	- src
+	- tests
+	- examples
+
+fileExtensions:
+	- php
+	- phpt
+
+imports: {grouping: {class: grouped}}
+
+overrides:
+	-
+		paths: [src]
+		nameResolution: certain
+		use:
+			- compilerOptimizations
+			- deprecations
+
+	- # the public constants and properties of the 3.x API keep their names
+		paths:
+			- src/Texy/Image.php
+			- src/Texy/Link.php
+			- src/Texy/Modules/HeadingModule.php
+			- src/Texy/Patterns.php
+			- src/Texy/Regexp.php
+			- src/Texy/Texy.php
+		naming: {constant: keep, property: keep}
+
+	- # renaming the parameters $URL would break calls naming them
+		paths: [src/Texy/Helpers.php, src/Texy/Link.php, src/Texy/Texy.php]
+		naming: {variable: keep}
+
+	- # renaming the parameters would break calls naming index: or child:
+		paths: [src/Texy/HtmlElement.php]
+		classes: {overridingMethod: {parameterName: keep}}
+
+	- # the package keeps its own deprecated API working, so it uses it
+		paths:
+			- src/Texy/Modules/EmoticonModule.php
+			- src/Texy/Modules/FigureModule.php
+			- src/Texy/Modules/ImageModule.php
+			- src/Texy/Modules/LinkModule.php
+			- src/Texy/Modules/TableModule.php
+		upgrading: {declarations: {deprecatedMember: keep}}
