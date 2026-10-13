@@ -5,8 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\Configurator;
-use Texy\Texy;
+use Texy\{Configurator, Texy};
 
 require __DIR__ . '/../bootstrap.php';
 

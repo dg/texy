@@ -8,9 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\LineParser;
-use Texy\Modifier;
-use Texy\Patterns;
+use Texy\{LineParser, Modifier, Patterns};
 
 
 /**

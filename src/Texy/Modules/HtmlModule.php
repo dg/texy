@@ -8,8 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HtmlElement;
-use Texy\Patterns;
+use Texy\{HtmlElement, Patterns};
 use function count, is_array, is_string;
 
 

@@ -8,12 +8,10 @@
 namespace Texy\Bridges\Latte;
 
 use Latte;
-use Latte\Compiler\Tag;
-use Latte\Compiler\TemplateParser;
+use Latte\Compiler\{Tag, TemplateParser};
 use Latte\ContentType;
 use Latte\Runtime\FilterInfo;
-use Texy\Helpers;
-use Texy\Texy;
+use Texy\{Helpers, Texy};
 
 
 /**

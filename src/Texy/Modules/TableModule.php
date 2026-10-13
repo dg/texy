@@ -8,10 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HtmlElement;
-use Texy\Modifier;
-use Texy\Patterns;
-use Texy\Regexp;
+use Texy\{HtmlElement, Modifier, Patterns, Regexp};
 
 
 /**

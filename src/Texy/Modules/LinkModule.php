@@ -8,10 +8,7 @@
 namespace Texy\Modules;
 
 use Texy;
-use Texy\HandlerInvocation;
-use Texy\LineParser;
-use Texy\Link;
-use Texy\Patterns;
+use Texy\{HandlerInvocation, LineParser, Link, Patterns};
 use function link, strlen;
 
 
