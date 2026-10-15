@@ -60,7 +60,7 @@ final class HtmlOutputModule extends Texy\Module
 
 		// special "base content"
 		$dtd = $texy->getDTD();
-		$this->baseDTD = $dtd['div'][1] + $dtd['html'][1] /*+ $dtd['head'][1]*/ + $dtd['body'][1] + ['html' => 1];
+		$this->baseDTD = $dtd['div'][1] + $dtd['html'][1] /* + $dtd['head'][1] */ + $dtd['body'][1] + ['html' => 1];
 
 		// wellform and reformat
 		$s = Regexp::replace(
@@ -119,7 +119,7 @@ final class HtmlOutputModule extends Texy\Module
 			$item = reset($this->tagStack);
 			if ($item && !isset($item['dtdContent'][HtmlElement::InnerText])) {  // text not allowed?
 
-			} elseif (array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
+			} elseif (array_intersect(array_keys($this->tagUsed, filter_value: true), $this->preserveSpaces)) { // inside pre & textarea preserve spaces
 				$s = Texy\Helpers::freezeSpaces($mText);
 
 			} else {
@@ -179,7 +179,7 @@ final class HtmlOutputModule extends Texy\Module
 				return $s;
 			}
 
-			$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, filter_value: true, strict: false), $this->preserveSpaces);
+			$indent = $this->indent && !array_intersect(array_keys($this->tagUsed, filter_value: true), $this->preserveSpaces);
 
 			if ($indent && $tag === 'br') { // formatting exception
 				return rtrim($s) . '<' . $tag . $attr . ">\n" . str_repeat("\t", max(0, $this->space - 1)) . "\x07";

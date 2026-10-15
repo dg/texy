@@ -10,7 +10,6 @@ namespace Texy;
 use function is_array, strlen;
 
 
-
 /**
  * Parses block structures (paragraphs, headings, lists, tables, etc.).
  */
@@ -20,14 +19,15 @@ class BlockParser extends Parser
 	public array $patterns;
 	private string $text;
 	private int $offset;
-	private bool $indented;
 
 
-	public function __construct(Texy $texy, HtmlElement $element, bool $indented)
-	{
+	public function __construct(
+		Texy $texy,
+		HtmlElement $element,
+		private readonly bool $indented,
+	) {
 		$this->texy = $texy;
 		$this->element = $element;
-		$this->indented = $indented;
 		$this->patterns = $texy->getBlockPatterns();
 	}
 

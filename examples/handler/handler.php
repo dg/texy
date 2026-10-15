@@ -18,13 +18,13 @@
  */
 
 
-if (@!include __DIR__ . '/../../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
 
 $texy = new Texy;
-$handler = new myHandler;
+$handler = new MyHandler;
 
 // ============================================================
 // ELEMENT HANDLERS
@@ -106,7 +106,7 @@ $texy->addHandler('afterParse', $handler->afterParse(...));
  * Example handler class showing all available handler signatures.
  * Copy the methods you need and modify them for your use case.
  */
-class myHandler
+class MyHandler
 {
 	// ============================================================
 	// INLINE ELEMENT HANDLERS
@@ -392,10 +392,10 @@ class myHandler
 	 * Called AFTER parsing completes
 	 * Use this to modify the DOM tree or collect statistics.
 	 * @param Texy\Texy $texy The Texy instance
-	 * @param Texy\HtmlElement $DOM The root element of the document
+	 * @param Texy\HtmlElement $dom The root element of the document
 	 * @param bool $isSingleLine True if processing a single line
 	 */
-	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, $isSingleLine): void
+	public function afterParse(Texy\Texy $texy, Texy\HtmlElement $dom, $isSingleLine): void
 	{
 	}
 }

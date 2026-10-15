@@ -22,7 +22,7 @@
  */
 
 
-if (@!include __DIR__ . '/../../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
@@ -108,5 +108,5 @@ echo '<hr>';
 
 echo '<h2>Table of contents</h2>';
 echo '<pre>';
-//print_r($texy->headingModule->TOC);
+// print_r($texy->headingModule->TOC);
 echo '</pre>';

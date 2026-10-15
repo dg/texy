@@ -23,7 +23,7 @@ final class ListModule extends Texy\Module
 		'*' => ['\*[\ \t]', 0, ''],
 		'-' => ['[\x{2013}-](?![>-])', 0, ''],
 		'+' => ['\+[\ \t]', 0, ''],
-		'1.' => ['1\.[\ \t]', /* not \d !*/ 1, '', '\d{1,3}\.[\ \t]'],
+		'1.' => ['1\.[\ \t]', /* not \d ! */ 1, '', '\d{1,3}\.[\ \t]'],
 		'1)' => ['\d{1,3}\)[\ \t]', 1, ''],
 		'I.' => ['I\.[\ \t]', 1, 'upper-roman', '[IVX]{1,4}\.[\ \t]'],
 		'I)' => ['[IVX]+\)[\ \t]', 1, 'upper-roman'], // before A) !
@@ -44,18 +44,18 @@ final class ListModule extends Texy\Module
 
 	private function beforeParse(): void
 	{
-		$RE = $REul = [];
+		$re = $reUl = [];
 		foreach ($this->bullets as $desc) {
-			$RE[] = $desc[0];
+			$re[] = $desc[0];
 			if (!$desc[1]) {
-				$REul[] = $desc[0];
+				$reUl[] = $desc[0];
 			}
 		}
 
 		$this->texy->registerBlockPattern(
 			$this->patternList(...),
 			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color: red}
-			. '(' . implode('|', $RE) . ')[\ \t]*+\S.*$#mUu', // item (unmatched)
+			. '(' . implode('|', $re) . ')[\ \t]*+\S.*$#mUu', // item (unmatched)
 			'list',
 		);
 
@@ -63,7 +63,7 @@ final class ListModule extends Texy\Module
 			$this->patternDefList(...),
 			'#^(?:' . Patterns::MODIFIER_H . '\n)?' // .{color:red}
 			. '(\S.{0,2000})\:[\ \t]*' . Patterns::MODIFIER_H . '?\n' // Term:
-			. '([\ \t]++)(' . implode('|', $REul) . ')[\ \t]*+\S.*$#mUu', // - description
+			. '([\ \t]++)(' . implode('|', $reUl) . ')[\ \t]*+\S.*$#mUu', // - description
 			'list/definition',
 		);
 	}
@@ -113,7 +113,7 @@ final class ListModule extends Texy\Module
 		$mod = new Modifier($mMod);
 		$mod->decorate($this->texy, $el);
 
-		$parser->moveBackward(1);
+		$parser->moveBackward();
 
 		while ($elItem = $this->patternItem($parser, $bullet, false, 'li')) {
 			$el->add($elItem);
@@ -236,7 +236,7 @@ final class ListModule extends Texy\Module
 		}
 
 		// parse content
-		$elItem->parseBlock($this->texy, $content, true);
+		$elItem->parseBlock($this->texy, $content, indented: true);
 
 		if (isset($elItem[0]) && $elItem[0] instanceof HtmlElement) {
 			$elItem[0]->setName(null);

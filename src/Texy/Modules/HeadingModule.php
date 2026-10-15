@@ -84,7 +84,7 @@ final class HeadingModule extends Texy\Module
 	}
 
 
-	private function afterParse(Texy\Texy $texy, Texy\HtmlElement $DOM, bool $isSingleLine): void
+	private function afterParse(Texy\Texy $texy, Texy\HtmlElement $dom, bool $isSingleLine): void
 	{
 		if ($isSingleLine) {
 			return;

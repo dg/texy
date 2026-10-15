@@ -22,7 +22,7 @@
  */
 
 
-if (@!include __DIR__ . '/../../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
@@ -34,7 +34,13 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') {
  * - Relative links (like "page-name") become "index?page=page-name"
  * - Links starting with "wiki:" become Wikipedia search URLs
  */
-function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Texy\Modifier $modifier, ?Texy\Link $link = null): Texy\HtmlElement|string|null
+function phraseHandler(
+	Texy\HandlerInvocation $invocation,
+	$phrase,
+	$content,
+	Texy\Modifier $modifier,
+	?Texy\Link $link = null,
+): Texy\HtmlElement|string|null
 {
 	// Only process if there's actually a link
 	if (!$link) {
@@ -47,7 +53,7 @@ function phraseHandler(Texy\HandlerInvocation $invocation, $phrase, $content, Te
 		// "my-page" becomes "index?page=my-page"
 		$link->URL = 'index?page=' . urlencode($link->URL);
 
-	} elseif (substr($link->URL, 0, 5) === 'wiki:') {
+	} elseif (str_starts_with($link->URL, 'wiki:')) {
 		// Handle our custom "wiki:" URL scheme
 		// "wiki:texy" becomes a Wikipedia search link
 		$searchTerm = substr($link->URL, 5);  // Remove "wiki:" prefix
@@ -80,7 +86,7 @@ echo $html;
 // This is useful for building sitemaps or checking for broken links
 echo '<hr />';
 echo '<pre>';
-//print_r($texy->summary['links']);
+// print_r($texy->summary['links']);
 echo '</pre>';
 
 

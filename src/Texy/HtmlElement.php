@@ -502,6 +502,7 @@ class HtmlElement implements \ArrayAccess, /* Countable, */ \IteratorAggregate
 			}
 
 			return $child !== null && isset($dtd[$this->name][1][$child]);
+
 		} else {
 			return true; // unknown element
 		}

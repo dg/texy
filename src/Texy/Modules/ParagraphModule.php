@@ -81,28 +81,23 @@ final class ParagraphModule extends Texy\Module
 		assert($content !== null);
 
 		// check content type
-		// block contains block tag
-		if (str_contains($content, $texy::CONTENT_BLOCK)) {
+		if (str_contains($content, $texy::CONTENT_BLOCK)) { // block contains block tag
 			$el->setName(null); // ignores modifier!
 
-		// block contains text (protected)
-		} elseif (str_contains($content, $texy::CONTENT_TEXTUAL)) {
+		} elseif (str_contains($content, $texy::CONTENT_TEXTUAL)) { // block contains text (protected)
 			// leave element p
 
-		// block contains text
-		} elseif (preg_match('#[^\s' . Texy\Patterns::MARK . ']#u', $content)) {
+		} elseif (preg_match('#[^\s' . Texy\Patterns::MARK . ']#u', $content)) { // block contains text
 			// leave element p
 
-		// block contains only replaced element
-		} elseif (str_contains($content, $texy::CONTENT_REPLACED)) {
+		} elseif (str_contains($content, $texy::CONTENT_REPLACED)) { // block contains only replaced element
 			if ($texy->nontextParagraph instanceof Texy\HtmlElement) {
 				$el = (clone $texy->nontextParagraph)->setText($content);
 			} else {
 				$el->setName($texy->nontextParagraph);
 			}
 
-		// block contains only markup tags or spaces or nothing
-		} else {
+		} else { // block contains only markup tags or spaces or nothing
 			// if {ignoreEmptyStuff} return null;
 			if (!$mod) {
 				$el->setName(null);
@@ -111,9 +106,7 @@ final class ParagraphModule extends Texy\Module
 
 		if ($el->getName()) {
 			// apply modifier
-			if ($mod) {
-				$mod->decorate($texy, $el);
-			}
+			$mod?->decorate($texy, $el);
 
 			// add <br>
 			if (str_contains($content, "\r")) {
