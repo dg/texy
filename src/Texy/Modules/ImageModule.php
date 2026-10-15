@@ -157,7 +157,6 @@ final class ImageModule extends Texy\Module
 			$image = new Image;
 
 			// dimensions
-			$matches = null;
 			if ($matches = Texy\Regexp::match($content[0], '#^(.*) (\d+|\?) *(X|x) *(\d+|\?) *()$#U')) {
 				$image->URL = trim($matches[1]);
 				$image->asMax = $matches[3] === 'X';

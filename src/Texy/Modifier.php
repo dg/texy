@@ -151,6 +151,7 @@ final class Modifier
 				}
 
 				$attrs['id'] = $this->id;
+
 			} elseif (is_array($allowedClasses)) {
 				foreach ($this->classes as $value => $foo) {
 					if (isset($allowedClasses[$value])) {

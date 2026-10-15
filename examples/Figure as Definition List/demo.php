@@ -19,7 +19,7 @@
  */
 
 
-if (@!include __DIR__ . '/../../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 
@@ -32,7 +32,13 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') {
  * 2. Modify the output as needed
  * 3. Return the modified element
  */
-function figureHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link, $content, Texy\Modifier $modifier): Texy\HtmlElement|string|null
+function figureHandler(
+	Texy\HandlerInvocation $invocation,
+	Texy\Image $image,
+	?Texy\Link $link,
+	$content,
+	Texy\Modifier $modifier,
+): Texy\HtmlElement|string|null
 {
 	// First, let Texy create the default output
 	$el = $invocation->proceed();

@@ -65,12 +65,7 @@ class LineParser extends Parser
 			}
 
 			$len = strlen($matches[$first][0]);
-			$text = substr_replace(
-				$text,
-				(string) $res,
-				$start,
-				$len,
-			);
+			$text = substr_replace($text, $res, $start, $len);
 
 			$delta = strlen($res) - $len;
 			foreach ($names as $name) {
@@ -127,7 +122,7 @@ class LineParser extends Parser
 					$offset + $delta,
 				)) {
 					/** @var non-empty-array<array{string, int}> $m */
-					if (!strlen($m[0][0])) {
+					if ($m[0][0] === '') {
 						continue;
 					}
 

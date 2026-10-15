@@ -19,7 +19,7 @@
  */
 
 
-if (@!include __DIR__ . '/../../vendor/autoload.php') {
+if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
 	die('Install packages using `composer install`');
 }
 

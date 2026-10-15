@@ -7,7 +7,6 @@
 
 namespace Texy;
 
-
 $globalAttrs = array_fill_keys([
 	'aria-*',
 	'data-*',
@@ -296,11 +295,11 @@ $scriptSupportingElements = array_fill_keys([
 ], 1);
 
 
-return [/*
+return [ /*
 	element => [
 		allowed attributes
 		allowed children content model | false for empty elements
-	],*/
+	], */
 	'a' => [
 		$globalAttrs + array_fill_keys(['href', 'target', 'download', 'ping', 'rel', 'hreflang', 'type', 'referrerpolicy'], 1),
 		[HtmlElement::InnerTransparent => 1],
@@ -363,7 +362,10 @@ return [/*
 		false,
 	],
 	'button' => [
-		$globalAttrs + array_fill_keys(['disabled', 'form', 'formaction', 'formenctype', 'formmethod', 'formnovalidate', 'formtarget', 'name', 'type', 'value'], 1),
+		$globalAttrs + array_fill_keys(
+			['disabled', 'form', 'formaction', 'formenctype', 'formmethod', 'formnovalidate', 'formtarget', 'name', 'type', 'value'],
+			1,
+		),
 		$phrasingContent,
 	],
 	'canvas' => [
@@ -455,7 +457,10 @@ return [/*
 		$flowContent,
 	],
 	'form' => [
-		$globalAttrs + array_fill_keys(['accept-charset', 'action', 'autocomplete', 'enctype', 'method', 'name', 'novalidate', 'target'], 1),
+		$globalAttrs + array_fill_keys(
+			['accept-charset', 'action', 'autocomplete', 'enctype', 'method', 'name', 'novalidate', 'target'],
+			1,
+		),
 		$flowContent,
 	],
 	'h1' => [
@@ -507,15 +512,34 @@ return [/*
 		$phrasingContent,
 	],
 	'iframe' => [
-		$globalAttrs + array_fill_keys(['src', 'srcdoc', 'name', 'sandbox', 'allow', 'allowfullscreen', 'allowpaymentrequest', 'width', 'height', 'referrerpolicy', 'loading'], 1),
+		$globalAttrs + array_fill_keys(
+			[
+				'src', 'srcdoc', 'name', 'sandbox', 'allow', 'allowfullscreen', 'allowpaymentrequest', 'width', 'height', 'referrerpolicy',
+				'loading',
+			],
+			1,
+		),
 		[],
 	],
 	'img' => [
-		$globalAttrs + array_fill_keys(['alt', 'src', 'srcset', 'crossorigin', 'usemap', 'ismap', 'width', 'height', 'decoding', 'referrerpolicy', 'loading', 'sizes', 'fetchpriority'], 1),
+		$globalAttrs + array_fill_keys(
+			[
+				'alt', 'src', 'srcset', 'crossorigin', 'usemap', 'ismap', 'width', 'height', 'decoding', 'referrerpolicy', 'loading',
+				'sizes', 'fetchpriority',
+			],
+			1,
+		),
 		false,
 	],
 	'input' => [
-		$globalAttrs + array_fill_keys(['accept', 'alt', 'autocomplete', 'checked', 'dirname', 'disabled', 'form', 'formaction', 'formenctype', 'formmethod', 'formnovalidate', 'formtarget', 'height', 'list', 'max', 'maxlength', 'min', 'minlength', 'multiple', 'name', 'pattern', 'placeholder', 'readonly', 'required', 'size', 'src', 'step', 'type', 'value', 'width'], 1),
+		$globalAttrs + array_fill_keys(
+			[
+				'accept', 'alt', 'autocomplete', 'checked', 'dirname', 'disabled', 'form', 'formaction', 'formenctype', 'formmethod',
+				'formnovalidate', 'formtarget', 'height', 'list', 'max', 'maxlength', 'min', 'minlength', 'multiple', 'name', 'pattern',
+				'placeholder', 'readonly', 'required', 'size', 'src', 'step', 'type', 'value', 'width',
+			],
+			1,
+		),
 		false,
 	],
 	'ins' => [
@@ -539,7 +563,13 @@ return [/*
 		$flowContent,
 	],
 	'link' => [
-		$globalAttrs + array_fill_keys(['href', 'crossorigin', 'rel', 'as', 'media', 'hreflang', 'type', 'sizes', 'imagesrcset', 'imagesizes', 'referrerpolicy', 'integrity'], 1),
+		$globalAttrs + array_fill_keys(
+			[
+				'href', 'crossorigin', 'rel', 'as', 'media', 'hreflang', 'type', 'sizes', 'imagesrcset', 'imagesizes', 'referrerpolicy',
+				'integrity',
+			],
+			1,
+		),
 		false,
 	],
 	'main' => [
@@ -711,7 +741,13 @@ return [/*
 		[],
 	],
 	'textarea' => [
-		$globalAttrs + array_fill_keys(['cols', 'dirname', 'disabled', 'form', 'maxlength', 'minlength', 'name', 'placeholder', 'readonly', 'required', 'rows', 'wrap'], 1),
+		$globalAttrs + array_fill_keys(
+			[
+				'cols', 'dirname', 'disabled', 'form', 'maxlength', 'minlength', 'name', 'placeholder', 'readonly', 'required', 'rows',
+				'wrap',
+			],
+			1,
+		),
 		[HtmlElement::InnerText => 1],
 	],
 	'tfoot' => [
@@ -755,7 +791,13 @@ return [/*
 		$phrasingContent,
 	],
 	'video' => [
-		$globalAttrs + array_fill_keys(['src', 'crossorigin', 'poster', 'preload', 'autoplay', 'playsinline', 'loop', 'muted', 'controls', 'width', 'height', 'fetchpriority'], 1),
+		$globalAttrs + array_fill_keys(
+			[
+				'src', 'crossorigin', 'poster', 'preload', 'autoplay', 'playsinline', 'loop', 'muted', 'controls', 'width', 'height',
+				'fetchpriority',
+			],
+			1,
+		),
 		['source' => 1, 'track' => 1, HtmlElement::InnerTransparent => 1],
 	],
 	'wbr' => [
