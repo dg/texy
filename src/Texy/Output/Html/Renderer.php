@@ -571,6 +571,12 @@ final class Renderer extends NodeRenderer
 
 	private function renderImage(Nodes\ImageNode $node): Element
 	{
+		// Check URL scheme (security - filter dangerous schemes like javascript:)
+		if ($node->url === null || !$this->urlPolicy->isImageAllowed($node->url)) {
+			// URL is missing or fails scheme filter, return just the alternative text
+			return $this->wrapChildren([$this->postLineText($node->modifier->title ?? '')]);
+		}
+
 		// Detect dimensions from file system
 		[$width, $height] = $this->imageDimensions->detect($node);
 
@@ -602,7 +608,7 @@ final class Renderer extends NodeRenderer
 		$this->decorateElement($mod, $el);
 
 		// src
-		$el->attrs['src'] = $node->url !== null ? Helpers::prependRoot($node->url, $this->config->imageRoot) : null;
+		$el->attrs['src'] = Helpers::prependRoot($node->url, $this->config->imageRoot);
 
 		// alt: from title or empty (if not set by custom attrs)
 		if (!$hasCustomAlt && !isset($el->attrs['alt'])) {

@@ -111,3 +111,50 @@ test('definition with rejected URL does not overwrite a user-defined one', funct
 		$texy->process("[*x*]: javascript:alert(1)\n\na [*x*] b"),
 	);
 });
+
+
+test('image node with rejected URL renders as its alternative text', function () {
+	$texy = createTexy();
+	$texy->imageModule->addDefinition('x', 'javascript:alert(1)', alt: 'Logo <b>');
+	Assert::match(
+		'<p>a Logo &lt;b&gt; b</p>',
+		$texy->process('a [*x*] b'),
+	);
+});
+
+
+test('linked image node with rejected URL keeps the link', function () {
+	$texy = createTexy();
+	$texy->imageModule->addDefinition('x', 'javascript:alert(1)', alt: 'Logo');
+	Assert::match(
+		'<p>a <a href="http://x.cz">Logo</a> b</p>',
+		$texy->process('a [*x*]:http://x.cz b'),
+	);
+});
+
+
+test('image node without URL renders as its alternative text', function () {
+	$texy = createTexy();
+	$texy->addLineSyntax('myimage', '~@@~', fn() => new Texy\Nodes\ImageNode(modifier: Texy\Modifier::parse('(Logo)')));
+	Assert::match(
+		'<p>a Logo b</p>',
+		$texy->process('a @@ b'),
+	);
+});
+
+
+test('renderer returns an element for an image node with rejected URL', function () {
+	$texy = createTexy();
+	$texy->htmlOutput->addRenderer(
+		function (Texy\Nodes\ImageNode $node, Texy\Output\Html\Renderer $renderer, ?Closure $previous) {
+			$el = $previous($node, $renderer);
+			$el->attrs['data-custom'] = 'yes';
+			return $el;
+		},
+	);
+	$texy->imageModule->addDefinition('x', 'javascript:alert(1)', alt: 'Logo');
+	Assert::match(
+		'<p>a Logo b</p>',
+		$texy->process('a [*x*] b'),
+	);
+});
