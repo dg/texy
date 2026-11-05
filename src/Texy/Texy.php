@@ -21,7 +21,7 @@ use function count, is_array, strlen;
 class Texy
 {
 	// Texy version
-	public const VERSION = '3.2.8';
+	public const VERSION = '3.2.10';
 
 	// configuration directives
 	public const
