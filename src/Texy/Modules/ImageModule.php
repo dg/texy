@@ -96,11 +96,15 @@ final class ImageModule extends Texy\Module
 	 * @param  array{string, string, string, ?string}  $matches
 	 * @param  array{int, int, int, ?int}  $offsets
 	 */
-	public function parseDefinition(ParseContext $context, array $matches, array $offsets): ImageDefinitionNode
+	public function parseDefinition(ParseContext $context, array $matches, array $offsets): ImageDefinitionNode|ContentNode
 	{
 		[, $mRef, $mURLs, $mMod] = $matches;
 		$parsed = $this->parseImageContent($mURLs);
 		$modifier = Modifier::parse($mMod, $offsets[3] ?? null);
+
+		if ($parsed['url'] === null) {
+			return new ContentNode;
+		}
 
 		return new ImageDefinitionNode(
 			trim($mRef),
@@ -118,11 +122,15 @@ final class ImageModule extends Texy\Module
 	 * @param  array{string, string, ?string, string, ?string}  $matches
 	 * @param  array{int, int, ?int, int, ?int}  $offsets
 	 */
-	public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode|LinkNode
+	public function parseImage(ParseContext $context, array $matches, array $offsets): ImageNode|LinkNode|null
 	{
 		[, $mURLs, $mMod, $mAlign, $mLink] = $matches;
 		$parsed = $this->parseImageContent($mURLs, $offsets[1]);
 		$modifier = Modifier::parse($mMod . $mAlign);
+
+		if ($parsed['url'] === null) {
+			return null;
+		}
 
 		// ImageNode source span is "[* ... <alignment>]"
 		$imageNode = new ImageNode(
