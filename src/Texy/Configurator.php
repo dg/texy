@@ -59,7 +59,7 @@ class Configurator
 		$texy->htmlPolicy->allowedTags = self::SafeTags + ['*' => ['title', 'lang', 'dir']];
 		$texy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
 		$texy->urlPolicy->imagePattern = '~https?:~A';
-		$texy->allowed[Syntax::Image] = false; // disable images
+		self::disableImages($texy);
 		$texy->allowed[Syntax::LinkDefinition] = false; // disable [ref]: URL reference definitions
 		$texy->allowed[Syntax::HtmlComment] = false; // disable HTML comments
 		$texy->htmlOutput->linkNoFollow = true; // force rel="nofollow"

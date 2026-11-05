@@ -36,6 +36,10 @@ Texy 4 requires PHP 8.2–8.6 (v3 ran on PHP 8.0+). The Latte integration requir
 - **Headings, TOC and metadata live in the document**, not in module state:
   read them via `HeadingNode::collectFrom($document)` on the AST returned by
   `parse()` and completed by `transform()`. They no longer expire on the next `process()` call.
+- **`safeMode()` disables figures and image definitions too**, not just the
+  inline image syntax. A figure used to produce `<img>` even in safe mode, and
+  so did a lone `[* image.jpg *]` on a line. To allow images in untrusted input,
+  set `$allowed[Syntax::Image]` and `$allowed[Syntax::Figure]` after `safeMode()`.
 
 ## Configuration properties
 

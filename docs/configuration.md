@@ -240,7 +240,7 @@ Exactly what it does:
 - `$htmlPolicy->allowedStyles = Texy::None` – no inline styles,
 - `$htmlPolicy->allowedTags = Configurator::SafeTags` – only `a[href,title]`, `abbr[title]`, `b`, `br`, `cite`, `code`, `em`, `i`, `strong`, `sub`, `sup`, `q`, `small`,
 - URL scheme filters: links `~https?:|ftp:|mailto:~A`, images `~https?:~A`,
-- `$allowed['image'] = false` – no images (note: the `figure` syntax is *not* disabled by safeMode; combine with `disableImages()` if needed),
+- `disableImages()` – no images, figures or image definitions,
 - `$allowed['link/definition'] = false` – no reference definitions,
 - `$allowed['html/comment'] = false` – no HTML comments,
 - `$htmlOutput->linkNoFollow = true` – `rel="nofollow"` on external links.
