@@ -7,8 +7,9 @@
 
 namespace Texy\Output\Texy;
 
-use Texy\{Modifier, Node, Nodes, Range, Regexp, Syntax, Texy};
+use Texy\{Modifier, Node, NodeHelpers, Nodes, NodeTraverser, Range, Regexp, Syntax, Texy};
 use Texy\Output\NodeRenderer;
+use Texy\Output\Text\Renderer as TextRenderer;
 use Texy\Parsing\OffsetMap;
 use function count, strlen;
 use const ENT_HTML5, ENT_QUOTES;
@@ -62,6 +63,11 @@ final class Renderer extends NodeRenderer
 		'XL' => 40, 'X' => 10, 'IX' => 9, 'V' => 5, 'IV' => 4, 'I' => 1,
 	];
 
+	/** characters that may start or end Texy syntax, all of them escaped where less is not enough */
+	private const SyntaxChars = '~[*/+^_"\~><`\'\[\]{}&:()#=|\\\\-]~';
+
+	private bool $strict = false;
+
 
 	public function __construct(
 		private Texy $texy,
@@ -72,11 +78,11 @@ final class Renderer extends NodeRenderer
 				&& $n->children[0] instanceof Nodes\BlockNode
 				? $r->renderBlocks($n->children)
 				: $r->renderInline($n),
-			Nodes\TextNode::class => fn(Nodes\TextNode $n) => self::renderText($n),
+			Nodes\TextNode::class => fn(Nodes\TextNode $n, self $r) => $r->renderText($n),
 
 			// Block nodes
-			Nodes\ParagraphNode::class => fn(Nodes\ParagraphNode $n, self $r) => $r->renderParagraph($n),
-			Nodes\HeadingNode::class => fn(Nodes\HeadingNode $n, self $r) => $r->renderHeading($n),
+			Nodes\ParagraphNode::class => fn(Nodes\ParagraphNode $n, self $r) => $r->renderVerified($n, $r->renderParagraph(...)),
+			Nodes\HeadingNode::class => fn(Nodes\HeadingNode $n, self $r) => $r->renderVerified($n, $r->renderHeading(...)),
 			Nodes\BlockQuoteNode::class => fn(Nodes\BlockQuoteNode $n, self $r) => $r->renderBlockQuote($n),
 			Nodes\CodeBlockNode::class => fn(Nodes\CodeBlockNode $n) => self::renderCodeBlock($n),
 			Nodes\SectionNode::class => fn(Nodes\SectionNode $n, self $r) => '/--' . ($n->type ?? 'div') . self::formatModifier($n->modifier)
@@ -223,6 +229,42 @@ final class Renderer extends NodeRenderer
 		$marker = $node->marker ?? self::HeadingMarkers[min($node->level, count(self::HeadingMarkers) - 1)];
 		$text .= $modifier;
 		return $text . "\n" . str_repeat($marker, max(3, strlen($text)));
+	}
+
+
+	/**
+	 * Text escaped node by node may still read as syntax together with its neighbours,
+	 * so the printed block is read back, and if its text differs, printed again with
+	 * every character escaped that Texy syntax could start with.
+	 * @template T of Nodes\BlockNode
+	 * @param  T  $node
+	 * @param  \Closure(T): string  $print
+	 */
+	private function renderVerified(Nodes\BlockNode $node, \Closure $print): string
+	{
+		$printed = $print($node);
+		if ($this->strict || !NodeHelpers::findFirst($node, fn(Node $n) => $n instanceof Nodes\TextNode && $n->range === null)) {
+			return $printed; // printing again changes only a text written nowhere
+		}
+
+		$expected = self::readText(new Nodes\DocumentNode(new Nodes\ContentNode([$node])));
+		if (self::readText($this->texy->parse($printed)) === $expected) {
+			return $printed;
+		}
+
+		$this->strict = true;
+		try {
+			return $print($node);
+		} finally {
+			$this->strict = false;
+		}
+	}
+
+
+	/** The text of the document without whitespace, which may be laid out differently. */
+	private static function readText(Nodes\DocumentNode $document): string
+	{
+		return preg_replace('~\s+~u', '', (new TextRenderer)->render($document));
 	}
 
 
@@ -591,18 +633,69 @@ final class Renderer extends NodeRenderer
 
 	/**
 	 * Text as it was written: a single character whose notation is longer was an entity
-	 * or an escaped asterisk and is escaped again.
+	 * or an escaped asterisk and is escaped again. A text written nowhere is escaped where
+	 * Texy would read it as syntax.
 	 */
-	private static function renderText(Nodes\TextNode $node): string
+	private function renderText(Nodes\TextNode $node): string
 	{
 		$text = self::restoreBreaks($node->text);
 		if ($node->range === null) {
-			return self::escape($text);
+			return $this->escapeSyntax($text);
 		} elseif ($node->range->length === strlen($text) || mb_strlen($text) !== 1) {
 			return $text;
 		}
 
 		return self::escapeChar($text);
+	}
+
+
+	/**
+	 * Text written so that Texy reads it back as the same text: where Texy finds syntax
+	 * in it, the first character of that syntax is escaped, until it finds none.
+	 */
+	private function escapeSyntax(string $text): string
+	{
+		if ($this->strict) {
+			return Regexp::replace($text, self::SyntaxChars, fn($m) => self::escapeChar($m[0] ?? ''));
+		}
+
+		$from = 0;
+		while (($offset = $this->findSyntax($text, $from)) !== null) {
+			$char = mb_substr(substr($text, $offset), 0, 1);
+			$escaped = self::escapeChar($char);
+			$text = substr_replace($text, $escaped, $offset, strlen($char));
+			$from = $offset + strlen($escaped);
+		}
+
+		return $text;
+	}
+
+
+	/** Where, from $from on, Texy reads the text as anything else than plain text and the addresses it links by itself. */
+	private function findSyntax(string $text, int $from): ?int
+	{
+		if (!str_starts_with($text, Texy::normalize($text))) {
+			return null; // the positions would not fit the text, the block read back decides
+		}
+
+		$found = null;
+		(new NodeTraverser)->traverse($this->texy->parse($text, singleLine: true), function (Node $node) use ($from, &$found): ?int {
+			$range = $node->range;
+			$plain = $node instanceof Nodes\DocumentNode
+				|| $node instanceof Nodes\ContentNode
+				|| $node instanceof Nodes\ParagraphNode
+				|| $node instanceof Nodes\UrlNode
+				|| $node instanceof Nodes\EmailNode
+				// an entity is a text written longer than it reads
+				|| ($node instanceof Nodes\TextNode && ($range === null || $range->length === strlen($node->text)));
+			if ($plain || $range === null || $range->offset < $from) {
+				return null;
+			}
+
+			$found = $range->offset;
+			return NodeTraverser::StopTraversal;
+		});
+		return $found;
 	}
 
 

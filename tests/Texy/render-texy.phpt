@@ -128,6 +128,37 @@ test('text that would read as syntax is escaped', function () {
 });
 
 
+test('a text written nowhere is escaped where Texy reads syntax in it, alone or with its neighbours', function () {
+	$cases = [
+		"\\*foo*\n" => ['*foo*'],
+		"&quot;foo\":http://a.cz\n" => ['"foo":http://a.cz'],
+		"&#96;code`\n" => ['`code`'],
+		"&amp;copy; AT&T\n" => ['&copy; AT&T'],
+		"&lt;b>x&lt;/b>\n" => ['<b>x</b>'],
+		"www.texy.info 2 * 3\n" => ['www.texy.info 2 * 3'],
+		"\\*foo\\*\n" => ['*', 'foo*'],
+		"a  \n\\*b\\*\n" => ["a  \n*b*"], // the trailing spaces normalization strips would shift the positions
+	];
+	foreach ($cases as $expected => $texts) {
+		$texy = new Texy;
+		$printed = printParagraph($texy, ...array_map(fn($text) => new Nodes\TextNode($text), $texts));
+		Assert::same($expected, $printed);
+		Assert::same(preg_replace('~\s+~', ' ', implode('', $texts)), trim($texy->renderText($texy->parse($printed))));
+	}
+
+	$heading = new Nodes\HeadingNode(
+		new Nodes\ContentNode([new Nodes\TextNode('*'), new Nodes\TextNode('foo*')]),
+		1,
+		Nodes\HeadingType::Underlined,
+	);
+	Assert::same("\\*foo\\*\n*******\n", (new Texy)->renderTexy(new Nodes\DocumentNode(new Nodes\ContentNode([$heading]))));
+
+	$withoutHtml = new Texy;
+	$withoutHtml->allowed[Syntax::HtmlTag] = false;
+	Assert::same("<b>x</b>\n", printParagraph($withoutHtml, new Nodes\TextNode('<b>x</b>')));
+});
+
+
 test('a line of a changed paragraph that would read as a block continues the previous one', function () {
 	$image = new Nodes\ImageNode('a.png');
 	$cases = [
