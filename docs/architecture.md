@@ -15,7 +15,7 @@ All classes live in the `Texy` namespace (so `HtmlElement` means `Texy\HtmlEleme
 
 ## Key components
 
-**The `Texy` class** (`src/Texy/Texy.php`) is the central orchestrator. It holds references to all modules, manages registered syntaxes and handlers, maintains processing state, and coordinates the conversion phases. It is the single place where components are wired together.
+**The `Texy` class** (`src/Texy.php`) is the central orchestrator. It holds references to all modules, manages registered syntaxes and handlers, maintains processing state, and coordinates the conversion phases. It is the single place where components are wired together.
 
 **[Modules](modules.md)** are functional units responsible for specific areas of the markup language. Each module registers, in its constructor, the syntaxes it recognizes and the element handlers that process them. For example `PhraseModule` handles inline formatting such as bold or italic text, while `TableModule` handles tables. Modules are designed as self-contained, reusable units with their own configuration exposed as public properties.
 
@@ -41,7 +41,7 @@ The distinction is crucial: a syntax handler is tightly coupled to the parser an
 
 ## Overall processing flow
 
-When `Texy::process()` receives input text, the following happens (`src/Texy/Texy.php`, method `process()`):
+When `Texy::process()` receives input text, the following happens (`src/Texy.php`, method `process()`):
 
 1. **Preprocessing.** Soft hyphens (U+00AD) are removed (if `$removeSoftHyphens` is on), line endings and spaces are normalized (`Helpers::normalize()`), and tabs are expanded to spaces according to `$tabWidth`. Then the `beforeParse` notification handlers are invoked with the text passed by reference – they can preprocess data, e.g. `LinkModule` and `ImageModule` extract reference definitions here and `TypographyModule` prepares locale-specific patterns.
 
@@ -96,7 +96,7 @@ Registration uses `Texy::addHandler($elementName, $callback)`. One element name 
 
 Element names identify the kind of processing: `phrase`, `image`, `block`, `heading`... Sometimes compound names distinguish flavors, e.g. `linkReference`, `linkEmail`, `linkURL`, `newReference`. Element names are more general than syntax names – the `phrase` element covers all inline formatting syntaxes.
 
-Invocation goes through `Texy::invokeAroundHandlers($event, $parser, $args)`, which wraps the registered handlers in a `HandlerInvocation` object (`src/Texy/HandlerInvocation.php`). The handler receives the `HandlerInvocation` as its first parameter followed by element-specific arguments, and controls the chain through `$invocation->proceed()`: calling it delegates onward (optionally with replaced parameters), not calling it breaks the chain.
+Invocation goes through `Texy::invokeAroundHandlers($event, $parser, $args)`, which wraps the registered handlers in a `HandlerInvocation` object (`src/HandlerInvocation.php`). The handler receives the `HandlerInvocation` as its first parameter followed by element-specific arguments, and controls the chain through `$invocation->proceed()`: calling it delegates onward (optionally with replaced parameters), not calling it breaks the chain.
 
 See the custom-handlers guide (user manual) for the exact `proceed()` semantics, the full reference of elements with signatures, and practical examples.
 

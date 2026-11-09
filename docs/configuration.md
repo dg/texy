@@ -8,7 +8,7 @@ $texy->allowedTags = Texy\Texy::NONE;   // main class
 $texy->imageModule->root = '/images/';  // module
 ```
 
-All defaults below are taken from the source code (`src/Texy/Texy.php`, `src/Texy/Modules/*.php`).
+All defaults below are taken from the source code (`src/Texy.php`, `src/Modules/*.php`).
 
 ## The Texy class
 
@@ -244,7 +244,7 @@ $texy->scriptModule->separator = ',';   // argument separator in {{command: a, b
 
 ## Configurator presets
 
-`Texy\Configurator` (`src/Texy/Configurator.php`) is a static class with prepared configurations.
+`Texy\Configurator` (`src/Configurator.php`) is a static class with prepared configurations.
 
 ### safeMode()
 

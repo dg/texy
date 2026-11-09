@@ -13,7 +13,7 @@ Modules are designed as independent units: each can work on its own and must not
 
 ## Anatomy of a typical module
 
-Every module extends the base class `Texy\Module` (`src/Texy/Module.php`), which holds the protected `$texy` back-reference. All initialization happens in the constructor:
+Every module extends the base class `Texy\Module` (`src/Module.php`), which holds the protected `$texy` back-reference. All initialization happens in the constructor:
 
 ```php
 final class FooModule extends Texy\Module
@@ -45,7 +45,7 @@ The set of modules is created in `Texy::loadModules()`; a subclass of `Texy` may
 
 ## Module overview
 
-All modules live in `src/Texy/Modules/`. Registered syntax IDs and their defaults are detailed in the syntax reference (user manual); configurable properties in the configuration reference (user manual).
+All modules live in `src/Modules/`. Registered syntax IDs and their defaults are detailed in the syntax reference (user manual); configurable properties in the configuration reference (user manual).
 
 ### Line (inline) modules
 

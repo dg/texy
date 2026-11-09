@@ -30,7 +30,7 @@
 	"autoload": {
 		"classmap": ["src/"],
 		"psr-4": {
-			"Texy\\": "src/Texy"
+			"Texy\\": "src"
 		}
 	},
 	"minimum-stability": "dev",
