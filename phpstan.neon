@@ -5,7 +5,7 @@ parameters:
 		- src
 
 	excludePaths:
-		- src/Texy.php  # compatibility file with if (false) block
+		- src/aliases.php  # compatibility file with if (false) block
 
 	ignoreErrors:
 		-
