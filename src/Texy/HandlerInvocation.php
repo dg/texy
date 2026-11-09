@@ -29,8 +29,7 @@ final class HandlerInvocation
 		array $args,
 	) {
 		$this->pos = count($this->handlers);
-		array_unshift($args, $this);
-		$this->args = $args;
+		$this->args = [$this, ...$args];
 	}
 
 
