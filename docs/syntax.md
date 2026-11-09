@@ -357,7 +357,7 @@ See [modifiers.md](modifiers.md) for the full description and the configuration 
 
 ## Syntax overview
 
-Every syntax lists its ID (the key in `$texy->allowed`), its default state, and the module that implements it. Defaults were verified against the module constructors in `src/Texy/Modules/`.
+Every syntax lists its ID (the key in `$texy->allowed`), its default state, and the module that implements it. Defaults were verified against the module constructors in `src/Modules/`.
 
 ### Inline (line) syntaxes
 

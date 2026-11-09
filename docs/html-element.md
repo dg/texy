@@ -1,6 +1,6 @@
 # HtmlElement – the DOM Representation
 
-`Texy\HtmlElement` (`src/Texy/HtmlElement.php`) represents one node of the DOM tree that parsing builds. It carries a tag name, an associative array of attributes, and a list of children, and provides the interface for manipulating and serializing the tree.
+`Texy\HtmlElement` (`src/HtmlElement.php`) represents one node of the DOM tree that parsing builds. It carries a tag name, an associative array of attributes, and a list of children, and provides the interface for manipulating and serializing the tree.
 
 ## Structure
 
@@ -54,7 +54,7 @@ A typical syntax handler creates an element, sets its attributes, and calls one 
 
 ## DTD validation
 
-Texy validates output against an HTML DTD table loaded from `src/Texy/DTD.php` into `Texy::$dtd` (accessible via `Texy::getDTD()`). The structure maps each tag name to a pair:
+Texy validates output against an HTML DTD table loaded from `src/DTD.php` into `Texy::$dtd` (accessible via `Texy::getDTD()`). The structure maps each tag name to a pair:
 
 ```php
 $dtd[$element][0]  // allowed attributes (as array keys)

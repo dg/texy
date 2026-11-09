@@ -1,9 +1,9 @@
 # Parsers and the Protection Mechanism
 
-Texy has two parsers, both extending the abstract `Texy\Parser` (`src/Texy/Parser.php`), which only carries the reference to the `Texy` instance (`getTexy()`) and the target `HtmlElement`:
+Texy has two parsers, both extending the abstract `Texy\Parser` (`src/Parser.php`), which only carries the reference to the `Texy` instance (`getTexy()`) and the target `HtmlElement`:
 
-- **`LineParser`** (`src/Texy/LineParser.php`) – inline syntaxes inside lines,
-- **`BlockParser`** (`src/Texy/BlockParser.php`) – multi-line block constructs.
+- **`LineParser`** (`src/LineParser.php`) – inline syntaxes inside lines,
+- **`BlockParser`** (`src/BlockParser.php`) – multi-line block constructs.
 
 They are not called directly; instead, `HtmlElement::parseLine()` and `HtmlElement::parseBlock()` create a parser with the element as the container and run it on given text. This makes parsing recursive: any syntax handler can create an element and parse its inner content the same way the main document is parsed.
 
@@ -33,7 +33,7 @@ At the very end of processing, `Texy::unprotect()` replaces all placeholders wit
 
 A collision occurs when several syntaxes can match at the same position and the system must pick one.
 
-A typical example is different lengths of the same symbol: `***text***` (`phrase/strong+em`), `**text**` (`phrase/strong`), `*text*` (`phrase/em-alt`). `PhraseModule` resolves this by registering the syntaxes from longest to shortest, so with three asterisks `phrase/strong+em` is processed first and shorter syntaxes never get the chance (`src/Texy/Modules/PhraseModule.php`).
+A typical example is different lengths of the same symbol: `***text***` (`phrase/strong+em`), `**text**` (`phrase/strong`), `*text*` (`phrase/em-alt`). `PhraseModule` resolves this by registering the syntaxes from longest to shortest, so with three asterisks `phrase/strong+em` is processed first and shorter syntaxes never get the chance (`src/Modules/PhraseModule.php`).
 
 Another example is bracketed constructs: `phrase/wikilink` (`[text|url]`) versus `link/reference` (`[ref]`). Both start with `[`. Pattern specificity resolves it: the wikilink pattern requires a pipe inside the brackets; if there is none, the pattern fails and `link/reference` gets its chance. Registration order matters here too.
 
@@ -76,10 +76,10 @@ The hierarchy has practical consequences: a pattern that wants to see only plain
 
 The type markers are not just masking – several parts of Texy read them to make decisions:
 
-- **Paragraph detection** (`ParagraphModule::solve()`, `src/Texy/Modules/ParagraphModule.php`). After parsing a paragraph's inline content, the module inspects which marks the result contains, in this order: contains `CONTENT_BLOCK` → no `<p>` is emitted, the element becomes transparent (the block stands on its own; note the modifier is ignored in this case); contains `CONTENT_TEXTUAL` or any real text → `<p>` stays; contains only `CONTENT_REPLACED` → the element configured in `$texy->nontextParagraph` (default `div`) is used instead of `<p>` (e.g. a paragraph holding a single image); contains only markup marks or whitespace → transparent element (unless a modifier forces the paragraph).
-- **Autolinks after markup.** The `link/url` and `link/email` patterns allow `\x17` as the preceding character in their lookbehind, so a URL is recognized even immediately after inline markup, not only after whitespace (`src/Texy/Modules/LinkModule.php`).
+- **Paragraph detection** (`ParagraphModule::solve()`, `src/Modules/ParagraphModule.php`). After parsing a paragraph's inline content, the module inspects which marks the result contains, in this order: contains `CONTENT_BLOCK` → no `<p>` is emitted, the element becomes transparent (the block stands on its own; note the modifier is ignored in this case); contains `CONTENT_TEXTUAL` or any real text → `<p>` stays; contains only `CONTENT_REPLACED` → the element configured in `$texy->nontextParagraph` (default `div`) is used instead of `<p>` (e.g. a paragraph holding a single image); contains only markup marks or whitespace → transparent element (unless a modifier forces the paragraph).
+- **Autolinks after markup.** The `link/url` and `link/email` patterns allow `\x17` as the preceding character in their lookbehind, so a URL is recognized even immediately after inline markup, not only after whitespace (`src/Modules/LinkModule.php`).
 - **Long words.** `LongWordsModule` defines a "word" as a run of characters excluding whitespace and `\x14`, `\x15`, `\x16` – but *including* `\x17`. Inline markup placeholders therefore count as part of the word, so a word split by `<strong>` tags is still hyphenated as one word, while block/textual/replaced content terminates a word.
-- **Typography.** `TypographyModule`'s rules are written to be mark-aware (`src/Texy/Modules/TypographyModule.php`): they skip over `[\x17-\x1F]*` when pairing numbers with units or one-letter prepositions with the following word, they remove spurious spaces between adjacent markup placeholders ("intermarkup space"), and the "no lone short word at the end of a paragraph" rule (`(?<=.{50})\s++(?=…\S{1,6}…$)` → non-breaking space) tolerates surrounding marks. Since block content (`CONTENT_BLOCK`) never reaches post-line handlers at all (the string is split on the `\x14` marks first), typography naturally never touches code blocks.
+- **Typography.** `TypographyModule`'s rules are written to be mark-aware (`src/Modules/TypographyModule.php`): they skip over `[\x17-\x1F]*` when pairing numbers with units or one-letter prepositions with the following word, they remove spurious spaces between adjacent markup placeholders ("intermarkup space"), and the "no lone short word at the end of a paragraph" rule (`(?<=.{50})\s++(?=…\S{1,6}…$)` → non-breaking space) tolerates surrounding marks. Since block content (`CONTENT_BLOCK`) never reaches post-line handlers at all (the string is split on the `\x14` marks first), typography naturally never touches code blocks.
 
 When returning a raw HTML string (not an `HtmlElement`) from a handler, you must protect it yourself:
 
@@ -114,7 +114,7 @@ Handlers of multi-line structures use two methods:
 
 ## Post-line processing
 
-After the DOM tree is serialized, `Texy::stringToHtml()` performs the final transformation of the internal string (`src/Texy/Texy.php`):
+After the DOM tree is serialized, `Texy::stringToHtml()` performs the final transformation of the internal string (`src/Texy.php`):
 
 1. HTML entities in the text are decoded to UTF-8.
 2. The string is split by the `CONTENT_BLOCK` mark and every *textual* segment (even-indexed, i.e. outside protected blocks) is run through the registered **post-line handlers** in order: `typography` (`TypographyModule::postLine()` – quotes, dashes, non-breaking spaces, symbols) and `longwords` (`LongWordsModule::postLine()` – inserting `&shy;` soft hyphens). Each handler is skipped if disabled in `$allowed`.

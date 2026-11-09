@@ -22,7 +22,7 @@ It is written before or at the end of the construct it applies to, e.g. `**text 
 
 Parts may appear in any order and any may be omitted: `.[highlight]`, `.(Note)`, `.{color:blue}` are all valid modifiers.
 
-Not every construct accepts every part. Three pattern building blocks in `src/Texy/Patterns.php` define what a given syntax accepts:
+Not every construct accepts every part. Three pattern building blocks in `src/Patterns.php` define what a given syntax accepts:
 
 - `Patterns::MODIFIER` – title, classes/ID, styles (typical for inline phrases),
 - `Patterns::MODIFIER_H` – additionally horizontal alignment (paragraphs, headings, lists, blocks),
@@ -30,7 +30,7 @@ Not every construct accepts every part. Three pattern building blocks in `src/Te
 
 ## The Modifier class
 
-`Texy\Modifier` (`src/Texy/Modifier.php`) parses a modifier string and stores its parts. Instances are typically created by syntax handlers, which pass the constructor the modifier text captured by the pattern's regex group; the constructor delegates to `setProperties()`.
+`Texy\Modifier` (`src/Modifier.php`) parses a modifier string and stores its parts. Instances are typically created by syntax handlers, which pass the constructor the modifier text captured by the pattern's regex group; the constructor delegates to `setProperties()`.
 
 Public properties:
 

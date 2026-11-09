@@ -24,34 +24,34 @@ parameters:
 			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Texy/Modules/FigureModule.php
+			path: src/Modules/FigureModule.php
 
 		-
 			message: '#^Empty array passed to foreach\.$#'
 			identifier: foreach.emptyArray
 			count: 1
-			path: src/Texy/Modules/HtmlOutputModule.php
+			path: src/Modules/HtmlOutputModule.php
 
 		-
 			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Texy/Modules/ImageModule.php
+			path: src/Modules/ImageModule.php
 
 		-
 			message: '#^Parameter \#1 \$URL of class Texy\\Link constructor expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Texy/Modules/LinkModule.php
+			path: src/Modules/LinkModule.php
 
 		-
 			message: '#^Method Texy\\Regexp\:\:replace\(\) should return string but returns string\|null\.$#'
 			identifier: return.type
 			count: 1
-			path: src/Texy/Regexp.php
+			path: src/Regexp.php
 
 		-
 			message: '#^Method Texy\\Texy\:\:addHandler\(\) has parameter \$callback with no signature specified for callable\.$#'
 			identifier: missingType.callable
 			count: 1
-			path: src/Texy/Texy.php
+			path: src/Texy.php
