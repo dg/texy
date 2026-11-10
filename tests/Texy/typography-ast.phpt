@@ -31,6 +31,24 @@ test('a unit after a range is bound to the number', function () {
 });
 
 
+test('the space after a one-letter word is fixed by the words of the locale', function () {
+	Assert::same("<p>Byl jsem v\u{A0}Praze a I\u{A0}tam</p>\n", convert('Byl jsem v Praze a I tam'));
+
+	$texy = new Texy\Texy;
+	$texy->config->locale = 'sk';
+	Assert::same("<p>Bol som v\u{A0}Prahe a\u{A0}tam</p>\n", $texy->toHtml('Bol som v Prahe a tam'));
+	$texy->config->locale = 'pl';
+	Assert::same("<p>Byłem w\u{A0}Pradze i\u{A0}tam</p>\n", $texy->toHtml('Byłem w Pradze i tam'));
+	$texy->config->locale = 'en';
+	Assert::same("<p>I went to a shop in a town.</p>\n", $texy->toHtml('I went to a shop in a town.'));
+
+	$texy->config->locales['hr'] = $texy->config->locales['cs'];
+	$texy->config->oneLetterWords['hr'] = 'iu';
+	$texy->config->locale = 'hr';
+	Assert::same("<p>Bio sam u\u{A0}Zagrebu i\u{A0}tamo</p>\n", $texy->toHtml('Bio sam u Zagrebu i tamo'));
+});
+
+
 test('quotes pair across phrase boundaries', function () {
 	Assert::same(
 		"<p>řekl „ahoj <strong>světe</strong>!“ a šel</p>\n",
@@ -53,8 +71,15 @@ test('HTML code and preformatted text keep their text verbatim', function () {
 });
 
 
-test('long words get soft hyphens', function () {
+test('long words get soft hyphens, by Czech syllables in Czech and Slovak only', function () {
 	Assert::contains("\u{AD}", convert('Dlouheslovohodnedlouhatezkorozdelitelne slovo'));
+
+	$texy = new Texy\Texy;
+	$texy->config->locale = 'sk';
+	Assert::contains("\u{AD}", $texy->toHtml('Dlouheslovohodnedlouhatezkorozdelitelne slovo'));
+	$texy->config->locale = 'en';
+	Assert::same("<p>antidisestablishmentarianism</p>\n", $texy->toHtml('antidisestablishmentarianism'));
+	Assert::same('antidisestablishmentarianism', $texy->applyTypography('antidisestablishmentarianism'));
 });
 
 
