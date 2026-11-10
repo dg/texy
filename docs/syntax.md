@@ -115,7 +115,7 @@ Dimensions – detected automatically for local files when `$texy->imageModule->
 
 ```texy
 [* img.jpg 150x100 *]    // exact size
-[* img.jpg 150 *]        // width, height keeps ratio
+[* img.jpg 150x? *]      // width, height keeps ratio
 [* img.jpg ?x100 *]      // height, width keeps ratio
 ```
 
@@ -304,6 +304,8 @@ HTML tags and comments may be mixed directly into the text. Tags are validated a
 ```texy
 This is **Texy bold** and this is <strong>HTML bold</strong>.
 ```
+
+A `<script>` or `<style>` written in the text is read inside a paragraph, so its lines are joined into one (or broken by `<br>` with `mergeLines` off) and a `//` comment swallows the rest of the code. Write scripts in a `/--html` block, which keeps them as written.
 
 ## Scripts / macros
 
