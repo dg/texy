@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This file is part of the Texy! (https://texy.info)
+ * This file is part of the Texy! (https://texy.deegee.dev)
  * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
