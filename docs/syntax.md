@@ -60,7 +60,7 @@ This paragraph is centered. .<>
 Rules:
 
 - No spaces are allowed immediately inside the delimiters: `** not bold **` does not match.
-- The generated tag for each phrase is configurable through `$texy->htmlOutput->phraseTags` (e.g. map `phrase/strong` to `b`).
+- A phrase node carries what it means, `PhraseNode::$type` (`Nodes\PhraseType`, e.g. `Emphasis` for both `*text*` and `//text//`), and the syntax it is written in, `$syntax`. The generated tag follows the meaning and is configurable through `$texy->htmlOutput->phraseTags`, keyed by the `PhraseType` values (e.g. map `strong` to `b`).
 - Any phrase accepts a [modifier](modifiers.md) just before the closing delimiter: `**strong and green .{color:green}**`.
 - Most phrases can become links by appending `:URL` (see below); this requires `$texy->config->phraseLinks = true` (default).
 

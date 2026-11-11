@@ -76,7 +76,7 @@ Where the Texy 3 properties live now:
 | `$texy->htmlOutputModule->indent` etc. | `$texy->htmlOutput->indent` etc. |
 | `$texy->imageModule->root`, `fileRoot` | `$texy->htmlOutput->imageBaseUrl`, `imageBasePath` |
 | `$texy->linkModule->root`, `forceNoFollow`, `shorten` | `$texy->htmlOutput->linkBaseUrl`, `linkNoFollow`, `shortenUrls` |
-| `$texy->phraseModule->tags` | `$texy->htmlOutput->phraseTags` |
+| `$texy->phraseModule->tags` | `$texy->htmlOutput->phraseTags`, keyed by what the phrase means (`'emphasis'`) instead of the syntax (`'phrase/em'`); the old keys are converted with a deprecation |
 | `$texy->emoticonModule->class` | `$texy->htmlOutput->emoticonClass` |
 | `$texy->urlSchemeFilters`, `Texy::checkURL()` | `$texy->urlPolicy` |
 
@@ -170,4 +170,5 @@ The string values of `Syntax::*` constants - the keys of `$texy->allowedSyntax` 
 are deliberately frozen at their v3 spellings (`'longwords'`, `'script'`,
 `'horizline'`, ...), so v3 configuration arrays keep working unchanged. Use
 the `Syntax::*` constants in new code; the constant names are the readable
-API, the values are a stable wire format.
+API, the values are a stable wire format. The keys of `phraseTags` are no longer
+syntax names but what a phrase means, so that one tag serves every notation of it.

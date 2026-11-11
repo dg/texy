@@ -5,8 +5,8 @@
  */
 
 use Tester\Assert;
-use Texy\Nodes\{ContentNode, DocumentNode, ImageNode, ParagraphNode, PhraseNode, TextNode};
-use Texy\{Syntax, Texy};
+use Texy\Nodes\{ContentNode, DocumentNode, ImageNode, ParagraphNode, PhraseNode, PhraseType, TextNode};
+use Texy\Texy;
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -22,7 +22,7 @@ foreach (["\x15", "\x16", "\x17"] as $byte) {
 		$first = new TextNode("A{$byte}B ");
 		$inner = new TextNode('C');
 		$last = new TextNode(' D...');
-		$document = paragraphOf(new ContentNode([$first, new PhraseNode(new ContentNode([$inner]), Syntax::Strong), $last]));
+		$document = paragraphOf(new ContentNode([$first, new PhraseNode(new ContentNode([$inner]), PhraseType::Strong), $last]));
 
 		(new Texy)->transform($document);
 

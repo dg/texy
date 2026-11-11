@@ -57,7 +57,7 @@ final class AstDumper
 		return match (true) {
 			$node instanceof Nodes\TextNode => '"' . self::escape($node->text) . '"',
 			$node instanceof Nodes\RawTextNode => '"' . self::escape($node->text) . '"',
-			$node instanceof Nodes\PhraseNode => $node->type,
+			$node instanceof Nodes\PhraseNode => $node->syntax ?? $node->type->value,
 			$node instanceof Nodes\InlineCodeNode => '"' . self::escape($node->code) . '"',
 			$node instanceof Nodes\HeadingNode => 'level=' . $node->level . ($node->marker === null ? '' : ' marker=' . $node->marker),
 			$node instanceof Nodes\ListNode => $node->type->isOrdered() ? 'ordered' : 'unordered',

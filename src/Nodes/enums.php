@@ -29,6 +29,26 @@ enum HeadingType
 
 
 /**
+ * What a phrase means, whatever notation it is written in; the value names it in Html\Config::$phraseTags.
+ */
+enum PhraseType: string
+{
+	case Strong = 'strong';
+	case Emphasis = 'emphasis';
+	case StrongEmphasis = 'strong-emphasis';
+	case Inserted = 'inserted';
+	case Deleted = 'deleted';
+	case Superscript = 'superscript';
+	case Subscript = 'subscript';
+	case Abbreviation = 'abbreviation';
+	case Quote = 'quote';
+
+	/** text carrying only a modifier */
+	case Span = 'span';
+}
+
+
+/**
  * Which paragraphs of a list item are wrapped in <p>.
  */
 enum ItemParagraphs

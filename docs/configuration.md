@@ -119,7 +119,7 @@ $g->imageBasePath = null;              // directory of the image files, sizes ar
 $g->figureTag = 'figure';               // <figure>/<figcaption>; another element puts the caption in <p>
 $g->figureClass = null;                 // class of every figure, a floated one gets its float class too
 $g->horizontalRuleClasses = ['-' => null, '*' => null];  // CSS class per HR type
-$g->phraseTags['phrase/strong'] = 'b';  // change the tag a phrase syntax renders to
+$g->phraseTags['strong'] = 'b';  // the tag of a phrase by what it means (PhraseType values), 'code' for inline code
 ```
 
 ## Output formatting ($texy->htmlOutput)

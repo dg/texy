@@ -118,6 +118,25 @@ test('canonical form of what records no variant', function () {
 	);
 
 	Assert::same("Sušení švestek\n==============\n", printTexy("Sušení švestek\n===\n"));
+
+	$phrase = fn(Nodes\PhraseType $type) => new Nodes\PhraseNode(new Nodes\ContentNode([new Nodes\TextNode('a')]), $type);
+	Assert::same(
+		"//a// \"a\"(()) \"a .{ }\"\n",
+		printParagraph(
+			new Texy,
+			$phrase(Nodes\PhraseType::Emphasis),
+			new Nodes\TextNode(' '),
+			$phrase(Nodes\PhraseType::Abbreviation),
+			new Nodes\TextNode(' '),
+			$phrase(Nodes\PhraseType::Span),
+		),
+	);
+
+	// the notation written for another meaning gives way to the one of the new meaning
+	$texy = new Texy;
+	$doc = $texy->parse('*a* x');
+	$doc->findFirst(Nodes\PhraseNode::class)->type = Nodes\PhraseType::Strong;
+	Assert::same("**a** x\n", $texy->renderTexy($doc));
 });
 
 

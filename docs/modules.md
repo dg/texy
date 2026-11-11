@@ -51,7 +51,7 @@ All modules live in `src/Modules/`; syntax names are catalogued on `Texy\Syntax`
 | **DirectiveModule** | `{{command: args}}` directives → `DirectiveNode`; consumes `{{texy: …}}` into `DocumentNode::$meta` and dispatches other directives to the handlers of `TexyConfig::addDirective()` in the first transform pass. |
 | **HtmlModule** | HTML tags and comments written in the input → `HtmlTagNode` / `HtmlCommentNode`; the pairing and the sanitization are common passes ([rendering.md](rendering.md#html-passthrough-transform-passes)). |
 | **ImageModule** | Images `[* url *]` → `ImageNode` (wrapped in `LinkNode` when clickable); the block form with caption → `FigureNode`; collects `[*ref*]:` definitions and resolves references in the transform phase. |
-| **PhraseModule** | All inline formatting → `PhraseNode` (type = syntax name), `` `code` `` → `InlineCodeNode`; acronyms → `AnnotationNode`, `''notexy''` → `RawTextNode`; the alternative link syntaxes (wikilink, markdown, quicklink) → `LinkNode`. |
+| **PhraseModule** | All inline formatting → `PhraseNode` (`$type` the meaning, `$syntax` the syntax name), `` `code` `` → `InlineCodeNode`; acronyms → `AnnotationNode`, `''notexy''` → `RawTextNode`; the alternative link syntaxes (wikilink, markdown, quicklink) → `LinkNode`. |
 | **LinkReferenceModule** | `[ref]: url` definitions → `LinkDefinitionNode`; resolves `[ref]` targets of `LinkNode`s in the transform phase. |
 | **AutolinkModule** | Autodetected URLs and e-mails → `UrlNode` / `EmailNode`. |
 | **EmoticonModule** | Emoticons `:-)` → `EmoticonNode`; resolved to Unicode characters by the table of the configuration already when parsed (`$resolved`). Disabled by default. |

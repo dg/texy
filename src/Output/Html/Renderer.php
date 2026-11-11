@@ -7,7 +7,7 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, Syntax, UrlPolicy};
+use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, UrlPolicy};
 use Texy\Output\NodeRenderer;
 use function count, is_array, is_string;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
@@ -22,15 +22,6 @@ use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
  */
 final class Renderer extends NodeRenderer
 {
-	/** phrase syntaxes rendered with the tag of their base syntax, unless phraseTags names one for them */
-	private const PhraseVariants = [
-		Syntax::EmphasisSingleAsterisk => Syntax::Emphasis,
-		Syntax::EmphasisSingleAsterisk2 => Syntax::Emphasis,
-		Syntax::SuperscriptShort => Syntax::Superscript,
-		Syntax::SubscriptShort => Syntax::Subscript,
-		Syntax::AbbreviationQuotes => Syntax::Abbreviation,
-	];
-
 	/** elements whose content HTML reads as it is, without entities */
 	private const RawTextElements = ['script' => 1, 'style' => 1];
 
@@ -646,17 +637,15 @@ final class Renderer extends NodeRenderer
 	private function renderPhrase(Nodes\PhraseNode $node): Element
 	{
 		$tags = $this->config->phraseTags;
-		$tag = $tags[$node->type] ?? $tags[self::PhraseVariants[$node->type] ?? ''] ?? 'span';
-
-		if ($node->type === Syntax::StrongEmphasis) {
-			$el = new Element($this->config->phraseTags[Syntax::Strong] ?? 'strong');
+		if ($node->type === Nodes\PhraseType::StrongEmphasis) {
+			$el = new Element($tags[Nodes\PhraseType::Strong->value] ?? 'strong');
 			$this->decorateElement($node->modifier, $el);
-			$inner = $el->create($this->config->phraseTags[Syntax::Emphasis] ?? 'em');
+			$inner = $el->create($tags[Nodes\PhraseType::Emphasis->value] ?? 'em');
 			$inner->children = $this->renderNodes($node->content->children);
 			return $el;
 		}
 
-		$el = new Element($tag);
+		$el = new Element($tags[$node->type->value] ?? 'span');
 		$this->decorateElement($node->modifier, $el);
 		$el->children = $this->renderNodes($node->content->children);
 		return $el;
@@ -665,7 +654,7 @@ final class Renderer extends NodeRenderer
 
 	private function renderInlineCode(Nodes\InlineCodeNode $node): Element
 	{
-		$el = new Element($this->config->phraseTags[Syntax::Code] ?? 'code');
+		$el = new Element($this->config->phraseTags['code'] ?? 'code');
 		$this->decorateElement($node->modifier, $el);
 		// Only escape <, >, & - not quotes (ENT_NOQUOTES)
 		$el->children = [new Raw(htmlspecialchars($node->code, ENT_NOQUOTES | ENT_HTML5, 'UTF-8'))];

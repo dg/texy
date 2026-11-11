@@ -8,6 +8,7 @@
 namespace Texy\Output\Texy;
 
 use Texy\{Modifier, Node, Nodes, NodeTraverser, Range, Regexp, Syntax, Texy, TraverseAction, UrlPolicy};
+use Texy\Nodes\PhraseType;
 use Texy\Output\NodeRenderer;
 use Texy\Output\Text\Renderer as TextRenderer;
 use Texy\Parsing\OffsetMap;
@@ -40,6 +41,20 @@ final class Renderer extends NodeRenderer
 		Syntax::SpanQuotes => ['"', '"'],
 		Syntax::SpanTilde => ['~', '~'],
 		Syntax::Quote => ['>>', '<<'],
+	];
+
+	/** the notation of a phrase that has none, such as one from Markdown, or whose own no longer means it */
+	private const PhraseSyntaxes = [
+		PhraseType::Strong->value => Syntax::Strong,
+		PhraseType::Emphasis->value => Syntax::Emphasis,
+		PhraseType::StrongEmphasis->value => Syntax::StrongEmphasis,
+		PhraseType::Inserted->value => Syntax::Inserted,
+		PhraseType::Deleted->value => Syntax::Deleted,
+		PhraseType::Superscript->value => Syntax::Superscript,
+		PhraseType::Subscript->value => Syntax::Subscript,
+		PhraseType::Abbreviation->value => Syntax::AbbreviationQuotes,
+		PhraseType::Quote->value => Syntax::Quote,
+		PhraseType::Span->value => Syntax::SpanQuotes,
 	];
 
 	/** underline characters of headings for levels from 1, as TexyConfig::$headingLevels has them by default */
@@ -512,11 +527,15 @@ final class Renderer extends NodeRenderer
 	private function renderPhrase(Nodes\PhraseNode $node): string
 	{
 		$modifier = $node->modifier;
-		if ($node->type === Syntax::SuperscriptShort || $node->type === Syntax::SubscriptShort) {
+		$syntax = $node->syntax;
+		if ($syntax === null || (Syntax::PhraseTypes[$syntax] ?? null) !== $node->type) {
+			$syntax = self::PhraseSyntaxes[$node->type->value];
+		}
+		if ($syntax === Syntax::SuperscriptShort || $syntax === Syntax::SubscriptShort) {
 			$text = str_replace("\u{2212}", '-', self::textOf($node->content));
-			return ($node->type === Syntax::SuperscriptShort ? '^' : '_') . $text;
+			return ($syntax === Syntax::SuperscriptShort ? '^' : '_') . $text;
 
-		} elseif ($node->type === Syntax::Abbreviation || $node->type === Syntax::AbbreviationQuotes) {
+		} elseif ($syntax === Syntax::Abbreviation || $syntax === Syntax::AbbreviationQuotes) {
 			// the explanation is the title of the modifier
 			$rest = $modifier === null ? null : clone $modifier;
 			if ($rest !== null) {
@@ -524,13 +543,13 @@ final class Renderer extends NodeRenderer
 			}
 
 			$text = $this->renderInline($node->content);
-			return ($node->type === Syntax::Abbreviation ? $text : '"' . $text . self::formatModifier($rest) . '"')
+			return ($syntax === Syntax::Abbreviation ? $text : '"' . $text . self::formatModifier($rest) . '"')
 				. '((' . ($modifier->title ?? '') . '))';
 		}
 
-		[$open, $close] = self::Phrases[$node->type] ?? self::Phrases[Syntax::SpanQuotes];
+		[$open, $close] = self::Phrases[$syntax] ?? self::Phrases[Syntax::SpanQuotes];
 		$modifier = self::formatModifier($modifier);
-		if ($modifier === '' && ($node->type === Syntax::SpanQuotes || $node->type === Syntax::SpanTilde)) {
+		if ($modifier === '' && ($syntax === Syntax::SpanQuotes || $syntax === Syntax::SpanTilde)) {
 			$modifier = ' .{ }'; // a span is a phrase only with a modifier, even an empty one
 		}
 
@@ -555,7 +574,7 @@ final class Renderer extends NodeRenderer
 			$node->syntax === Syntax::QuickLink => $this->renderInline($node->content) . ':' . $target,
 			($node->syntax === Syntax::Image || $node->syntax === Syntax::Figure) && $first instanceof Nodes\ImageNode
 				=> $this->renderPermittedImage($first, $float) . ':' . ($node->isImageLink && $node->ref === null ? ':' : $target),
-			$first instanceof Nodes\PhraseNode && count($node->content->children) === 1 && $node->syntax === $first->type
+			$first instanceof Nodes\PhraseNode && count($node->content->children) === 1 && $node->syntax === $first->syntax
 				=> $this->renderPhrase($first) . ':' . $target,
 			$first instanceof Nodes\InlineCodeNode && count($node->content->children) === 1 && $node->syntax === Syntax::Code
 				=> $this->renderNode($first) . ':' . $target,

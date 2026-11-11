@@ -123,14 +123,20 @@ test('acronym with explanation', function () {
 });
 
 
-test('a phrase variant uses the tag of its base syntax', function () {
+test('the tag of a phrase follows what it means, whatever the notation', function () {
 	$texy = new Texy\Texy;
-	$texy->htmlOutput->phraseTags[Texy\Syntax::Emphasis] = 'i';
-	$texy->htmlOutput->phraseTags[Texy\Syntax::Abbreviation] = 'dfn';
-	Assert::same('<p><i>a</i> <i>b</i> <dfn title="t">NATO</dfn></p>', trim($texy->toHtml('*a* //b// NATO((t))')));
+	$texy->htmlOutput->phraseTags[Texy\Nodes\PhraseType::Emphasis->value] = 'i';
+	$texy->htmlOutput->phraseTags[Texy\Nodes\PhraseType::Abbreviation->value] = 'dfn';
+	Assert::same(
+		'<p><i>a</i> <i>b</i> <dfn title="t">NATO</dfn> <dfn title="u">et al.</dfn></p>',
+		trim($texy->toHtml('*a* //b// NATO((t)) "et al."((u))')),
+	);
 
-	$texy->htmlOutput->phraseTags[Texy\Syntax::EmphasisSingleAsterisk] = 'em';
-	Assert::same('<p><em>a</em> <i>b</i></p>', trim($texy->toHtml('*a* //b//')));
+	$phrases = $texy->parse('*a* //b//')->find(Texy\Nodes\PhraseNode::class);
+	Assert::same(
+		[[Texy\Nodes\PhraseType::Emphasis, Texy\Syntax::EmphasisSingleAsterisk], [Texy\Nodes\PhraseType::Emphasis, Texy\Syntax::Emphasis]],
+		array_map(fn($phrase) => [$phrase->type, $phrase->syntax], $phrases),
+	);
 });
 
 

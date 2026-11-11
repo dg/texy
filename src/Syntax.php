@@ -7,6 +7,8 @@
 
 namespace Texy;
 
+use Texy\Nodes\PhraseType;
+
 
 /**
  * Texy syntax identifiers for use with $texy->allowedSyntax[].
@@ -179,4 +181,24 @@ final class Syntax
 
 	/** Directive (`{{command}}`) */
 	public const Directive = 'script';
+
+	/** what the phrase syntaxes mean */
+	public const PhraseTypes = [
+		self::StrongEmphasis => PhraseType::StrongEmphasis,
+		self::Strong => PhraseType::Strong,
+		self::Emphasis => PhraseType::Emphasis,
+		self::EmphasisSingleAsterisk => PhraseType::Emphasis,
+		self::EmphasisSingleAsterisk2 => PhraseType::Emphasis,
+		self::Inserted => PhraseType::Inserted,
+		self::Deleted => PhraseType::Deleted,
+		self::Superscript => PhraseType::Superscript,
+		self::SuperscriptShort => PhraseType::Superscript,
+		self::Subscript => PhraseType::Subscript,
+		self::SubscriptShort => PhraseType::Subscript,
+		self::SpanQuotes => PhraseType::Span,
+		self::SpanTilde => PhraseType::Span,
+		self::Quote => PhraseType::Quote,
+		self::Abbreviation => PhraseType::Abbreviation,
+		self::AbbreviationQuotes => PhraseType::Abbreviation,
+	];
 }

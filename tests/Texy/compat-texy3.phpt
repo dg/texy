@@ -263,6 +263,33 @@ test('switches of passes in $allowed move to the configuration once', function (
 });
 
 
+test('phrase tags keyed by syntax move to the keys of what the phrase means', function () {
+	$texy = new Texy;
+	$errors = capture(function () use ($texy) {
+		$texy->phraseModule->tags[Syntax::EmphasisSingleAsterisk] = 'i';
+		$texy->htmlOutput->phraseTags[Syntax::QuickLink] = 'a';
+		Assert::same('<p><i>a</i></p>', trim($texy->toHtml('*a*')));
+	});
+
+	Assert::same('i', $texy->htmlOutput->phraseTags['emphasis']);
+	Assert::false(isset($texy->htmlOutput->phraseTags[Syntax::EmphasisSingleAsterisk]));
+	Assert::false(isset($texy->htmlOutput->phraseTags[Syntax::QuickLink]));
+	Assert::same([
+		[E_USER_DEPRECATED, '$texy->phraseModule->tags is deprecated, use $texy->htmlOutput->phraseTags instead.'],
+		[E_USER_DEPRECATED, "phraseTags['phrase/em-alt'] is deprecated, use phraseTags['emphasis'] instead."],
+		[E_USER_DEPRECATED, "phraseTags['phrase/quicklink'] is deprecated, it has no effect."],
+	], $errors);
+
+	// set after parsing, before rendering
+	$document = $texy->transform($texy->parse('//a//'));
+	$errors = capture(function () use ($texy, $document) {
+		$texy->htmlOutput->phraseTags[Syntax::Emphasis] = 'cite';
+		Assert::same('<p><cite>a</cite></p>', trim($texy->renderHtml($document)));
+	});
+	Assert::count(1, $errors);
+});
+
+
 test('an unknown name behaves as without the layer', function () {
 	$texy = new Texy;
 	Assert::error(fn() => $texy->unknown, E_USER_WARNING, 'Undefined property: Texy\Texy::$unknown');

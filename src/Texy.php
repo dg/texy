@@ -109,7 +109,7 @@ class Texy
 	/** Lets modules register their patterns, which depend on the current configuration. */
 	private function registerModules(): void
 	{
-		Compat\Texy3::moveSwitches($this);
+		Compat\Texy3::moveSettings($this);
 		$this->config->validate();
 		foreach ($this->modules as $module) {
 			$module->register($this->engine);
@@ -183,6 +183,7 @@ class Texy
 	 */
 	public function createHtmlRenderer(): Output\Html\Renderer
 	{
+		Compat\Texy3::moveSettings($this);
 		return new Output\Html\Renderer($this->htmlOutput, $this->htmlPolicy, $this->urlPolicy);
 	}
 

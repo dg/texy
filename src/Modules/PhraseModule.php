@@ -331,7 +331,7 @@ final class PhraseModule extends Texy\Module
 
 		$node = $phrase === Syntax::Code
 			? new InlineCodeNode(trim($mContent), $mod, $range, $textRange) // code content is not parsed recursively
-			: new PhraseNode($context->parseInline(trim($mContent), $contentOffset), $phrase, $mod, $range);
+			: new PhraseNode($context->parseInline(trim($mContent), $contentOffset), Syntax::PhraseTypes[$phrase], $mod, $range, $phrase);
 
 		// Other phrases with link
 		if ($mLink !== null && $this->config->phraseLinks) {
@@ -361,9 +361,10 @@ final class PhraseModule extends Texy\Module
 		$content = [new TextNode(Texy\Helpers::decodeEntities($mContent), new Range($offsets[1], strlen($matches[1])))];
 		return new PhraseNode(
 			new ContentNode($content),
-			$phrase,
+			Syntax::PhraseTypes[$phrase],
 			null,
 			new Range($offsets[0], strlen($matches[0])),
+			$phrase,
 		);
 	}
 
@@ -382,7 +383,7 @@ final class PhraseModule extends Texy\Module
 		$mod->title = trim(Texy\Helpers::unescapeHtml($mTitle));
 		$content = $context->parseInline(trim($mContent), $contentOffset);
 
-		return new PhraseNode($content, $phrase, $mod, new Range($offsets[0], strlen($matches[0])));
+		return new PhraseNode($content, Syntax::PhraseTypes[$phrase], $mod, new Range($offsets[0], strlen($matches[0])), $phrase);
 	}
 
 

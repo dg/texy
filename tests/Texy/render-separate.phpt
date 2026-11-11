@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\{Nodes, Parsing, Syntax, Texy};
+use Texy\{Nodes, Parsing, Texy};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -129,7 +129,7 @@ test('output configuration changed after parsing is honoured', function () {
 
 	Assert::contains('<strong>', $texy->renderHtml($doc));
 
-	$texy->htmlOutput->phraseTags[Syntax::Strong] = 'b';
+	$texy->htmlOutput->phraseTags[Nodes\PhraseType::Strong->value] = 'b';
 	Assert::contains('<b>', $texy->renderHtml($doc));
 });
 
