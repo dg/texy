@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\{InvalidArgumentException, Texy};
+use Texy\{InvalidInputException, Texy};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -56,7 +56,7 @@ test('idempotence', function () {
 test('invalid UTF-8 is rejected', function () {
 	Assert::exception(
 		fn() => Texy::normalize("valid \xC3\x28 invalid"),
-		InvalidArgumentException::class,
+		InvalidInputException::class,
 		'Input is not valid UTF-8 text.',
 	);
 });

@@ -34,8 +34,11 @@ Texy 4 requires PHP 8.4–8.6 (v3 ran on PHP 8.0+) and the mbstring extension. T
   characters and trailing whitespace. It is idempotent and runs as the first
   step of every entry point, so it is also suitable for cleaning text before
   storage. The `preprocess()` step is gone.
-- **Invalid UTF-8 input throws** `Texy\InvalidArgumentException` immediately
-  instead of failing later inside a random regular expression.
+- **Invalid UTF-8 input throws** `Texy\InvalidInputException` immediately
+  instead of failing later inside a random regular expression. Whatever the
+  text itself causes is a `Texy\Exception`, so an application processing
+  foreign text catches that one; an error in the use of the library is a
+  `\LogicException`.
 - **Headings, TOC and metadata live in the document**, not in module state:
   read them via `$document->getHeadings()` on the AST returned by
   `parse()` and completed by `transform()`. They no longer expire on the next `toHtml()` call.

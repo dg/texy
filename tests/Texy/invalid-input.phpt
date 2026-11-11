@@ -13,7 +13,7 @@ test('toHtml() rejects invalid UTF-8', function () {
 	$texy = new Texy\Texy;
 	Assert::exception(
 		fn() => $texy->toHtml("valid start \xC3\x28 invalid"),
-		Texy\InvalidArgumentException::class,
+		Texy\InvalidInputException::class,
 		'Input is not valid UTF-8 text.',
 	);
 });
@@ -23,7 +23,7 @@ test('applyTypography() rejects invalid UTF-8', function () {
 	$texy = new Texy\Texy;
 	Assert::exception(
 		fn() => $texy->applyTypography("\xE2\x28\xA1"),
-		Texy\InvalidArgumentException::class,
+		Texy\InvalidInputException::class,
 		'Input is not valid UTF-8 text.',
 	);
 });

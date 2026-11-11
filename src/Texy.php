@@ -240,12 +240,12 @@ class Texy
 	 * and soft hyphens, right-trims lines and drops blank lines at both ends, keeping the newline
 	 * that ends the last line, so a file stays a file. Idempotent,
 	 * so it is safe to apply before storing text and again before parsing.
-	 * @throws InvalidArgumentException when the input is not valid UTF-8
+	 * @throws InvalidInputException when the input is not valid UTF-8
 	 */
 	public static function normalize(string $text): string
 	{
 		if (!preg_match('##u', $text)) {
-			throw new InvalidArgumentException('Input is not valid UTF-8 text.');
+			throw new InvalidInputException('Input is not valid UTF-8 text.');
 		}
 
 		// standardize line endings to unix-like

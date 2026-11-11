@@ -8,7 +8,18 @@
 namespace Texy;
 
 
+/**
+ * Processing failed on the text; an error in the use of the library is a \LogicException.
+ */
 class Exception extends \Exception
+{
+}
+
+
+/**
+ * The input is not valid UTF-8 text.
+ */
+class InvalidInputException extends Exception
 {
 }
 

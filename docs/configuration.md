@@ -278,6 +278,8 @@ Texy's protections against common attacks are activated by safe mode – enable 
 
 **URL validation** applies to all links and images via `$urlPolicy` (see above). Only absolute URLs with a scheme are checked; relative URLs always pass.
 
+**Errors.** Whatever the text itself causes throws a `Texy\Exception`: invalid UTF-8 is an `InvalidInputException`, a document exhausting a PCRE limit a `RegexpException`. Code processing foreign text catches `Texy\Exception`; an error in the use of the library, such as an invalid configuration, is a `\LogicException`.
+
 Recommended practice for user content:
 
 ```php
