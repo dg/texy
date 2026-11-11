@@ -50,6 +50,26 @@ test('the raw text of an element is raw only when its tag is', function () {
 });
 
 
+test('raw text neither ends its element nor outlives it', function () {
+	$script = fn(string $name, string $text) => new Nodes\DocumentNode(new Nodes\ContentNode(
+		[new Nodes\ParagraphNode(new Nodes\ContentNode([
+			new Nodes\HtmlElementNode($name, [], new Nodes\ContentNode([new Nodes\RawTextNode($text)])),
+		]))],
+	));
+	$texy = new Texy\Texy;
+	Assert::same(
+		"<p><script>a()<\\/SCRIPT><img src=x onerror=alert(1)></script></p>\n",
+		$texy->renderHtml($script('SCRIPT', 'a()</SCRIPT><img src=x onerror=alert(1)>')),
+	);
+
+	// <style> cannot stand in the body, the well-former drops it and its content with it
+	Texy\Configurator::safeMode($texy);
+	$texy->htmlPolicy->allowedTags['style'] = [];
+	Assert::same("<p></p>\n", $texy->renderHtml($script('style', '<img src=x onerror=alert(1)>')));
+	Assert::same('', $texy->toHtml('<style><img src=x onerror=alert(1)></style>'));
+});
+
+
 test('the policy compares names of tags and attributes regardless of case', function () {
 	$texy = new Texy\Texy;
 	Texy\Configurator::safeMode($texy);

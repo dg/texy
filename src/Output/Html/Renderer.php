@@ -22,9 +22,6 @@ use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
  */
 final class Renderer extends NodeRenderer
 {
-	/** elements whose content HTML reads as it is, without entities */
-	private const RawTextElements = ['script' => 1, 'style' => 1];
-
 	private ElementDecorator $decorator;
 
 	private bool $noFollow;
@@ -765,10 +762,10 @@ final class Renderer extends NodeRenderer
 		return $this->wrapChildren([
 			$open,
 			...($open instanceof Raw
-				&& isset(self::RawTextElements[strtolower($node->name)])
+				&& Schema::isRawText($node->name)
 				&& count($content) === 1
 				&& $content[0] instanceof Nodes\RawTextNode
-				? [new Raw($content[0]->text)]
+				? [new Raw(str_ireplace('</' . $node->name, '<\/' . $node->name, $content[0]->text))] // the content must not end the element
 				: $this->renderNodes($content)),
 			$this->renderHtmlTag($close),
 		]);
