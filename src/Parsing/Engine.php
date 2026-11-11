@@ -30,8 +30,8 @@ use function strlen;
  *
  * Usage:
  *   $engine = new Engine();
- *   $engine->addInlineSyntax('syntax/name', $pattern, $parser);
- *   $engine->addBlockSyntax('syntax/name', $pattern, $parser);
+ *   $engine->addInline('syntax/name', $pattern, $parser);
+ *   $engine->addBlock('syntax/name', $pattern, $parser);
  *   $engine->setGapHandler($handler);
  *   $doc = $engine->parse($text, ['syntax/name' => true]);
  */
@@ -74,67 +74,43 @@ class Engine implements Registry
 	}
 
 
+	/**
+	 * Registers an inline syntax; one of the application replaces a syntax of the language of that name.
+	 * @throws \LogicException  when the name belongs to a block syntax
+	 */
 	public function addInline(
 		string $name,
 		#[Language('RegExp')]
 		string $pattern,
 		callable $handler,
+		bool $application = false,
 	): void
 	{
 		$this->introduce($name, block: false);
-		$this->inlinePatterns['language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern];
+		$this->inlinePatterns[$application ? 'application' : 'language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern];
 	}
 
 
+	/**
+	 * Registers a block syntax; one of the application replaces a syntax of the language of that name.
+	 * @throws \LogicException  when the name belongs to an inline syntax
+	 */
 	public function addBlock(
 		string $name,
 		#[Language('RegExp')]
 		string $pattern,
 		callable $handler,
+		bool $application = false,
 	): void
 	{
 		$this->introduce($name, block: true);
-		$this->blockPatterns['language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
+		$this->blockPatterns[$application ? 'application' : 'language'][$name] = ['handler' => $handler(...), 'pattern' => $pattern . 'm'];
 	}
 
 
 	public function declare(string $name, bool $enabled = true): void
 	{
 		$this->declared[$name] ??= $enabled;
-	}
-
-
-	/**
-	 * Registers an inline syntax of the application, replacing a syntax of the language of that name.
-	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null)  $parser
-	 * @throws \LogicException  when the name belongs to a block syntax
-	 */
-	public function addInlineSyntax(
-		string $name,
-		#[Language('RegExp')]
-		string $pattern,
-		\Closure $parser,
-	): void
-	{
-		$this->introduce($name, block: false);
-		$this->inlinePatterns['application'][$name] = ['handler' => $parser, 'pattern' => $pattern];
-	}
-
-
-	/**
-	 * Registers a block syntax of the application, replacing a syntax of the language of that name.
-	 * @param  \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\BlockNode|Nodes\ContentNode|null)  $parser
-	 * @throws \LogicException  when the name belongs to an inline syntax
-	 */
-	public function addBlockSyntax(
-		string $name,
-		#[Language('RegExp')]
-		string $pattern,
-		\Closure $parser,
-	): void
-	{
-		$this->introduce($name, block: true);
-		$this->blockPatterns['application'][$name] = ['handler' => $parser, 'pattern' => $pattern . 'm'];
 	}
 
 

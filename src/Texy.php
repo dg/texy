@@ -129,7 +129,7 @@ class Texy
 		callable $parser,
 	): void
 	{
-		$this->engine->addInlineSyntax($name, $pattern, $parser(...));
+		$this->engine->addInline($name, $pattern, $parser, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
@@ -144,7 +144,7 @@ class Texy
 		callable $parser,
 	): void
 	{
-		$this->engine->addBlockSyntax($name, $pattern, $parser(...));
+		$this->engine->addBlock($name, $pattern, $parser, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
