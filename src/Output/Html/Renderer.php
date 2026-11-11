@@ -722,16 +722,8 @@ final class Renderer extends NodeRenderer
 		$tagName = strtolower($node->name);
 		$attrs = $node->attributes;
 
-		// Check if tag is allowed
-		if (!$this->htmlPolicy->isTagAllowed($tagName)) {
-			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node)); // shown as text
-		}
-
-		// Validate tag - reject if validation fails
-		$validation = $this->htmlPolicy->validateTag($tagName, $attrs, $node->closing);
-		if ($validation === false || $validation === 'drop') {
-			// Invalid tag - shown as text in the output
-			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node));
+		if (!$this->htmlPolicy->isTagAcceptable($tagName, $attrs, $node->closing)) {
+			return Helpers::decodeEntities($node->toSource()); // shown as text
 		}
 
 		// defense in depth: HtmlSanitizePass has already done this, but a hand-built

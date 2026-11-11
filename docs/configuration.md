@@ -268,7 +268,7 @@ Disables `image`, `figure`, `image/definition` and removes `img`, `object`, `emb
 
 Texy's protections against common attacks are activated by safe mode – enable it whenever you process untrusted input.
 
-**XSS.** In safe mode Texy validates HTML (removing disallowed tags and attributes, including event handlers like `onclick`), filters URLs to safe schemes (blocking `javascript:` and `data:` URLs – dangerous `<a href>`/`<img src>` drop the whole tag), and escapes text content properly:
+**XSS.** In safe mode Texy validates HTML (showing disallowed tags as text and removing disallowed attributes, including event handlers like `onclick`), filters URLs to safe schemes (blocking `javascript:` and `data:` URLs – an `<a href>`/`<img src>` with such a URL is shown as text whole), and escapes text content properly:
 
 ```texy
 <script>alert('XSS')</script>          → shown as text

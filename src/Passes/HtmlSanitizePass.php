@@ -53,7 +53,7 @@ final class HtmlSanitizePass
 		foreach ($children as $child) {
 			if ($child instanceof HtmlTagNode) {
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, $child->closing)) {
-					$out[] = new RawTextNode(Helpers::decodeEntities($this->policy->reconstructTag($child)), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($child->toSource()), $child->range);
 					continue;
 				}
 
@@ -64,11 +64,11 @@ final class HtmlSanitizePass
 				if (!$this->policy->isTagAcceptable(strtolower($child->name), $child->attributes, closing: false)) {
 					$open = new HtmlTagNode($child->name, $child->attributes, range: $child->range, source: $child->source);
 					$close = $child->closingTag ?? new HtmlTagNode($child->name, closing: true);
-					$out[] = new RawTextNode(Helpers::decodeEntities($this->policy->reconstructTag($open)), $child->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($open->toSource()), $child->range);
 					foreach ($this->sanitize($child->content->children) as $inner) {
 						$out[] = $inner;
 					}
-					$out[] = new RawTextNode(Helpers::decodeEntities($this->policy->reconstructTag($close)), $close->range);
+					$out[] = new RawTextNode(Helpers::decodeEntities($close->toSource()), $close->range);
 					continue;
 				}
 

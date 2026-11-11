@@ -12,9 +12,8 @@ use function array_key_exists, is_array, is_int, is_string;
 
 
 /**
- * Security policy for HTML in the document: which tags, classes and inline
- * styles may appear, plus validation and reconstruction of passthrough
- * HTML tags.
+ * Security policy for HTML in the document: which tags with which attributes,
+ * classes, IDs and inline styles may appear.
  */
 final class HtmlPolicy
 {
@@ -36,9 +35,19 @@ final class HtmlPolicy
 
 
 	/**
+	 * Is the tag (opening or closing) acceptable? A rejected one is shown as text.
+	 * @param  array<string, string|bool|null>  $attrs
+	 */
+	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
+	{
+		return $this->isTagAllowed($tagName) && $this->validateTag($tagName, $attrs, $closing);
+	}
+
+
+	/**
 	 * Is tag allowed by the allowedTags whitelist?
 	 */
-	public function isTagAllowed(string $tagName): bool
+	private function isTagAllowed(string $tagName): bool
 	{
 		if (!$this->allowedTags) { // all tags are disabled
 			return false;
@@ -49,11 +58,10 @@ final class HtmlPolicy
 
 
 	/**
-	 * Validate HTML tag for security.
-	 * Returns: true = valid, false = escape as text, 'drop' = remove entirely
+	 * Does the tag have what it needs, and do its URLs pass the URL policy?
 	 * @param  array<string, string|bool|null>  $attrs
 	 */
-	public function validateTag(string $tagName, array $attrs, bool $closing): bool|string
+	private function validateTag(string $tagName, array $attrs, bool $closing): bool
 	{
 		// <a> requires href, name, or id
 		if ($tagName === 'a' && !$closing) {
@@ -63,7 +71,7 @@ final class HtmlPolicy
 			// Validate href URL scheme (security: filter javascript: etc.)
 			if (isset($attrs['href']) && is_string($attrs['href'])) {
 				if (!$this->urlPolicy->isLinkAllowed($attrs['href'])) {
-					return 'drop'; // XSS protection - drop dangerous URLs entirely
+					return false;
 				}
 			}
 		}
@@ -75,7 +83,7 @@ final class HtmlPolicy
 			}
 			// Validate src URL scheme
 			if (is_string($attrs['src']) && !$this->urlPolicy->isImageAllowed($attrs['src'])) {
-				return 'drop'; // XSS protection - drop dangerous URLs entirely
+				return false;
 			}
 		}
 
@@ -140,50 +148,6 @@ final class HtmlPolicy
 		}
 
 		return null;
-	}
-
-
-	/**
-	 * Is the tag (opening or closing) acceptable? Mirrors the render-time
-	 * decision so it can also be evaluated in the transform phase.
-	 * @param  array<string, string|bool|null>  $attrs
-	 */
-	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
-	{
-		if (!$this->isTagAllowed($tagName)) {
-			return false;
-		}
-
-		$validation = $this->validateTag($tagName, $attrs, $closing);
-		return $validation !== false && $validation !== 'drop';
-	}
-
-
-	/**
-	 * Returns the tag as written; a tag the parser did not make is rebuilt from its attributes.
-	 */
-	public function reconstructTag(Nodes\HtmlTagNode $node): string
-	{
-		if ($node->source !== null) {
-			return strtr($node->source, "\r", "\n"); // \r is the hard break mark of a paragraph
-		}
-
-		$tag = '<';
-		if ($node->closing) {
-			$tag .= '/';
-		}
-		$tag .= $node->name;
-		foreach ($node->attributes as $name => $value) {
-			$tag .= ' ' . $name;
-			if ($value !== true) {
-				$tag .= '="' . $value . '"';
-			}
-		}
-		if ($node->selfClosing) {
-			$tag .= ' /';
-		}
-
-		return $tag . '>';
 	}
 
 
