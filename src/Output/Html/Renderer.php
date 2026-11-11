@@ -680,9 +680,7 @@ final class Renderer extends NodeRenderer
 			$el->attrs['rel'] = 'nofollow';
 		}
 
-		// Protect URL text from typography/longwords processing
-		$textualUrl = $this->config->shortenUrls ? Helpers::shortenUrl($node->url) : $node->url;
-		return $el->add(new Raw($textualUrl));
+		return $el->add($this->config->shortenUrls ? Helpers::shortenUrl($node->url) : $node->url);
 	}
 
 
@@ -690,7 +688,7 @@ final class Renderer extends NodeRenderer
 	{
 		$el = new Element('a', ['href' => 'mailto:' . $node->email]);
 		$text = $this->config->obfuscateEmail
-			? new Raw(str_replace('@', '&#64;<!-- -->', $node->email))
+			? new Raw(str_replace('@', '&#64;<!-- -->', htmlspecialchars($node->email, ENT_NOQUOTES | ENT_HTML5, 'UTF-8')))
 			: $node->email;
 		return $el->add($text);
 	}

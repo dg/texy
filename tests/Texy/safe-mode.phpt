@@ -75,3 +75,23 @@ test('the link of a code phrase obeys the URL policy', function () {
 		createTexy()->toHtml('`a`:[javascript:alert(1)]'),
 	);
 });
+
+
+test('markup written by entities in an autolinked address stays text', function () {
+	$texy = createTexy();
+	Assert::notContains('<b>', $texy->toHtml('https://x.cz/&lt;b&gt;a'));
+	$texy->htmlOutput->shortenUrls = false;
+	Assert::contains('>https://x.cz/&lt;b&gt;a</a>', $texy->toHtml('https://x.cz/&lt;b&gt;a'));
+});
+
+
+test('the address of an autolink built by code is escaped', function () {
+	$texy = createTexy();
+	$doc = new Texy\Nodes\DocumentNode(new Texy\Nodes\ContentNode([new Texy\Nodes\ParagraphNode(new Texy\Nodes\ContentNode([
+		new Texy\Nodes\EmailNode('a@b.cz<i>'),
+	]))]));
+	Assert::match(
+		'<p><a href="mailto:a&#64;b.cz&lt;i&gt;">a&#64;<!-- -->b.cz&lt;i&gt;</a></p>',
+		$texy->renderHtml($doc),
+	);
+});
