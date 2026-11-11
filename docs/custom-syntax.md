@@ -19,7 +19,7 @@ Register before calling `toHtml()`. Built-in modules register their patterns dur
 
 Registering under a built-in name (a `Syntax::*` constant) **replaces** that syntax: a name you register is owned by you and modules never overwrite it, no matter how many times the instance parses. The override is permanent for the lifetime of the instance – there is no API to restore the built-in pattern, so if you need the original behavior back, create a fresh `Texy` instance. Disabling via `$texy->allowedSyntax[$name] = false` works for overridden syntaxes exactly as for built-in ones.
 
-Your pattern behaves exactly as written: Texy adds only the `u` (UTF-8) flag, so what you verify in a regex tester works after registration. Flags of your own – including extended mode `x`, which lets you lay the pattern out over several lines with `#` comments – belong after the closing delimiter, as usual:
+Your pattern behaves exactly as written: Texy adds only the `u` (UTF-8) flag, and to a block pattern also `m`, so that `^` and `$` mean the edges of a line; what you verify in a regex tester with these flags works after registration. Flags of your own – including extended mode `x`, which lets you lay the pattern out over several lines with `#` comments – belong after the closing delimiter, as usual:
 
 ```php
 $texy->addInlineSyntax('custom/mention', '~
