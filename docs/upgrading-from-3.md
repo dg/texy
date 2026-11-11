@@ -18,7 +18,7 @@ old names to the new ones.
 
 ## Requirements
 
-Texy 4 requires PHP 8.4–8.6 (v3 ran on PHP 8.0+). The Latte integration requires Latte 3.1.7.
+Texy 4 requires PHP 8.4–8.6 (v3 ran on PHP 8.0+) and the mbstring extension. The generated IDs of headings (`$texy->config->headingIds`) need the intl extension. The Latte integration requires Latte 3.1.7.
 
 ## Behavioral changes
 
