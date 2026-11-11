@@ -50,6 +50,30 @@ test('a renderer for the subclass wins and can delegate to the parent one', func
 });
 
 
+test('a renderer serves the nodes a list or a table holds', function () {
+	$texy = new Texy;
+	$seen = [];
+	$texy->htmlOutput->addRenderer(function (Nodes\ListItemNode $node, Html\Renderer $renderer, Closure $previous) use (&$seen) {
+		$seen[] = $node->term ? 'term' : 'item';
+		return $previous($node);
+	});
+	$texy->htmlOutput->addRenderer(function (Nodes\TableRowNode $node, Html\Renderer $renderer, Closure $previous) use (&$seen) {
+		$seen[] = 'row';
+		return $previous($node);
+	});
+	$texy->htmlOutput->addRenderer(function (Nodes\TableCellNode $node, Html\Renderer $renderer, Closure $previous) use (&$seen) {
+		$seen[] = 'cell';
+		return $previous($node)->addClass('cell');
+	});
+
+	$html = $texy->toHtml("- one\n\nterm:\n  - definition\n\n| a | b");
+	Assert::same(['item', 'term', 'item', 'row', 'cell', 'cell'], $seen);
+	Assert::contains('<dt>term</dt>', $html);
+	Assert::contains('<dd>definition</dd>', $html);
+	Assert::contains('<td class="cell">a</td>', $html);
+});
+
+
 test('a renderer that could never be dispatched to is refused when registered', function () {
 	$cases = [
 		'nullable' => fn(?Nodes\ImageNode $n, $g, $p) => null,

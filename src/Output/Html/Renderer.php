@@ -40,6 +40,9 @@ final class Renderer extends NodeRenderer
 
 	private bool $plainBreaks = false;
 
+	/** the list whose items are being rendered */
+	private Nodes\ListNode|Nodes\DefinitionListNode|null $list = null;
+
 	private ImageDimensions $imageDimensions;
 
 
@@ -393,20 +396,18 @@ final class Renderer extends NodeRenderer
 			$el->attrs['style'] = $styles;
 		}
 
-		foreach ($node->items as $item) {
-			$el->add($this->renderListItem($item, $node->paragraphs));
-		}
-
+		$this->renderItems($node, $el);
 		return $el;
 	}
 
 
-	private function renderListItem(
-		Nodes\ListItemNode $node,
-		Nodes\ItemParagraphs $paragraphs = Nodes\ItemParagraphs::FirstUnwrapped,
-	): Element
+	private function renderListItem(Nodes\ListItemNode $node): Element
 	{
-		// Regular list item (li)
+		if ($this->list instanceof Nodes\DefinitionListNode) {
+			return $this->renderDefinitionItem($node);
+		}
+
+		$paragraphs = $this->list->paragraphs ?? Nodes\ItemParagraphs::FirstUnwrapped;
 		$el = new Element('li');
 		$this->decorateElement($node->modifier, $el);
 		$el->children = $this->renderItemContent($node->content->children, $paragraphs);
@@ -429,11 +430,25 @@ final class Renderer extends NodeRenderer
 		$el = new Element('dl');
 		$this->decorateElement($node->modifier, $el);
 
-		foreach ($node->items as $item) {
-			$el->add($this->renderDefinitionItem($item));
-		}
-
+		$this->renderItems($node, $el);
 		return $el;
+	}
+
+
+	/**
+	 * Renders the items of a list into its element; an item learns from the list how it is rendered.
+	 */
+	private function renderItems(Nodes\ListNode|Nodes\DefinitionListNode $list, Element $el): void
+	{
+		$outer = $this->list;
+		$this->list = $list;
+		try {
+			foreach ($list->items as $item) {
+				$el->add($this->renderNode($item));
+			}
+		} finally {
+			$this->list = $outer;
+		}
 	}
 
 
@@ -516,7 +531,7 @@ final class Renderer extends NodeRenderer
 				$elPart = new Element('tbody');
 				$el->add($elPart);
 			}
-			$elPart->add($this->renderTableRow($row));
+			$elPart->add($this->renderNode($row));
 		}
 
 		// if only thead without tbody, rename to tbody (tbody is required, thead is optional)
@@ -533,7 +548,7 @@ final class Renderer extends NodeRenderer
 		$el = new Element('tr');
 		$this->decorateElement($node->modifier, $el);
 		foreach ($node->cells as $cell) {
-			$el->add($this->renderTableCell($cell));
+			$el->add($this->renderNode($cell));
 		}
 
 		return $el;
