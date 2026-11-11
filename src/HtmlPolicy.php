@@ -35,12 +35,14 @@ final class HtmlPolicy
 
 
 	/**
-	 * Is the tag (opening or closing) acceptable? A rejected one is shown as text.
+	 * Is the tag (opening or closing) acceptable? A rejected one is shown as text. Names of the tag
+	 * and of its attributes are compared regardless of case, as in HTML.
 	 * @param  array<string, string|bool|null>  $attrs
 	 */
 	public function isTagAcceptable(string $tagName, array $attrs, bool $closing): bool
 	{
-		return $this->isTagAllowed($tagName) && $this->validateTag($tagName, $attrs, $closing);
+		return $this->isTagAllowed($tagName)
+			&& $this->validateTag(strtolower($tagName), array_change_key_case($attrs), $closing);
 	}
 
 
@@ -58,7 +60,7 @@ final class HtmlPolicy
 
 
 	/**
-	 * Does the tag have what it needs, and do its URLs pass the URL policy?
+	 * Does the tag have what it needs, and do its URLs pass the URL policy? Names are lowercase.
 	 * @param  array<string, string|bool|null>  $attrs
 	 */
 	private function validateTag(string $tagName, array $attrs, bool $closing): bool
@@ -161,7 +163,7 @@ final class HtmlPolicy
 	public function filterUrls(array $attrs): array
 	{
 		foreach ($attrs as $name => $value) {
-			$kind = Schema::urlAttribute($name);
+			$kind = Schema::urlAttribute(strtolower($name));
 			if ($kind === null || !is_string($value)) {
 				continue;
 			}
