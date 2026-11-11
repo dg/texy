@@ -86,5 +86,14 @@ Assert::match(
 );
 
 
-// Static content rendered at compile time goes stale with another version of Texy
-Assert::same(Texy\Texy::Version, new Texy\Bridges\Latte\TexyExtension($texy)->getCacheKey($latte));
+// Static content rendered at compile time goes stale with another version of Texy or another configuration
+$extension = new Texy\Bridges\Latte\TexyExtension($texy);
+$key = $extension->getCacheKey($latte);
+Assert::same(Texy\Texy::Version, $key[0]);
+Assert::same($key, $extension->getCacheKey($latte));
+$texy->config->headingTop = 2;
+Assert::notSame($key, $key = $extension->getCacheKey($latte));
+Texy\Configurator::safeMode($texy);
+Assert::notSame($key, $extension->getCacheKey($latte));
+
+Assert::same(Texy\Texy::Version, new Texy\Bridges\Latte\TexyExtension(fn(string $s) => $s)->getCacheKey($latte));
