@@ -92,9 +92,13 @@ abstract class Node
 	}
 
 
-	/** A deep copy: every node of the subtree is new, the modifiers are shared. */
+	/** A deep copy: every node of the subtree is new, and so is its modifier. */
 	public function __clone()
 	{
+		if ($this instanceof HasModifier && $this->modifier !== null) {
+			$this->modifier = clone $this->modifier;
+		}
+
 		foreach ($this->getChildren() as &$child) {
 			$child = clone $child;
 		}
