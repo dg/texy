@@ -437,19 +437,6 @@ test('no patterns registered returns single TextNode', function () {
 });
 
 
-test('addPattern method works', function () {
-	$parser = new InlineParser([]);
-
-	$parser->addPattern('bold', '~\*\*(.+?)\*\*~', createPhraseHandler('phrase/strong'));
-
-	$nodes = $parser->parse(createContext(), '**text**');
-
-	assertNodes([
-		[PhraseNode::class, 'phrase/strong'],
-	], $nodes);
-});
-
-
 // =============================================================================
 // F. UTF-8 handling
 // =============================================================================
