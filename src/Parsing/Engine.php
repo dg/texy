@@ -67,6 +67,13 @@ class Engine implements Registry
 	private array $passes = [];
 
 
+	public function __construct(
+		/** the language whose grammar this is; a document it parses is transformed only by an engine of the same language */
+		private ?string $language = null,
+	) {
+	}
+
+
 	public function addInline(
 		string $name,
 		#[Language('RegExp')]
@@ -215,6 +222,7 @@ class Engine implements Registry
 			: $context->parseBlock($text);
 
 		$document = new Nodes\DocumentNode($content);
+		$document->language = $this->language;
 		$this->runPasses($document, Stage::Syntax);
 		return $document;
 	}
@@ -235,14 +243,17 @@ class Engine implements Registry
 
 	/**
 	 * Runs the Transform and Finalize passes over a parsed document, changing it in place.
-	 * A document goes through this once, whichever instance or language asks for it, and a document
-	 * whose transformation has failed has to be parsed again.
+	 * A document goes through this once, and one whose transformation has failed has to be parsed
+	 * again. A parsed document is transformed only in the language that parsed it: the passes of
+	 * another one belong to another grammar.
 	 * @throws \LogicException
 	 */
 	public function transform(Nodes\DocumentNode $document): void
 	{
 		if ($document->transformState !== Nodes\TransformState::Pending) {
 			throw new \LogicException("A document is transformed only once, this one is {$document->transformState->name}.");
+		} elseif ($document->language !== null && $document->language !== $this->language) {
+			throw new \LogicException("The document was parsed as $document->language, transform it in that language.");
 		}
 
 		$document->transformState = Nodes\TransformState::Running;

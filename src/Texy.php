@@ -58,7 +58,7 @@ class Texy
 
 	public function __construct()
 	{
-		$this->engine = new Engine;
+		$this->engine = new Engine('Texy');
 		$this->config = new TexyConfig;
 		$this->urlPolicy = new UrlPolicy;
 		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
