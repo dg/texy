@@ -686,9 +686,12 @@ final class Renderer extends NodeRenderer
 	/********************* autolink node renderers ****************d*g**/
 
 
-	private function renderUrl(Nodes\UrlNode $node): Element
+	private function renderUrl(Nodes\UrlNode $node): Element|string
 	{
 		$url = Helpers::normalizeWww($node->url);
+		if (!$this->urlPolicy->isLinkAllowed($url)) {
+			return $node->url;
+		}
 
 		$el = new Element('a', ['href' => $url]);
 		if ($this->noFollow && str_contains($url, '//')) {
@@ -699,13 +702,15 @@ final class Renderer extends NodeRenderer
 	}
 
 
-	private function renderEmail(Nodes\EmailNode $node): Element
+	private function renderEmail(Nodes\EmailNode $node): Element|Raw|string
 	{
-		$el = new Element('a', ['href' => 'mailto:' . $node->email]);
+		$href = 'mailto:' . $node->email;
 		$text = $this->config->obfuscateEmail
 			? new Raw(str_replace('@', '&#64;<!-- -->', htmlspecialchars($node->email, ENT_NOQUOTES | ENT_HTML5, 'UTF-8')))
 			: $node->email;
-		return $el->add($text);
+		return $this->urlPolicy->isLinkAllowed($href)
+			? new Element('a', ['href' => $href])->add($text)
+			: $text;
 	}
 
 
@@ -761,6 +766,7 @@ final class Renderer extends NodeRenderer
 		// Sanitize comment content (security: prevent nested comments)
 		$content = preg_replace('~-{2,}~', ' - ', $node->text);
 		$content = trim($content, '-');
+		$content = str_starts_with($content, '>') ? ' ' . $content : $content; // <!--> would end the comment
 		return new Raw('<!--' . $content . '-->');
 	}
 
@@ -772,12 +778,15 @@ final class Renderer extends NodeRenderer
 	 */
 	private function renderHtmlElement(Nodes\HtmlElementNode $node): Element
 	{
-		$open = new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range, source: $node->source);
+		$open = $this->renderHtmlTag(new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range, source: $node->source));
 		$close = $node->closingTag ?? new Nodes\HtmlTagNode($node->name, closing: true);
 		$content = $node->content->children;
 		return $this->wrapChildren([
-			$this->renderHtmlTag($open),
-			...(isset(self::RawTextElements[strtolower($node->name)]) && count($content) === 1 && $content[0] instanceof Nodes\RawTextNode
+			$open,
+			...($open instanceof Raw
+				&& isset(self::RawTextElements[strtolower($node->name)])
+				&& count($content) === 1
+				&& $content[0] instanceof Nodes\RawTextNode
 				? [new Raw($content[0]->text)]
 				: $this->renderNodes($content)),
 			$this->renderHtmlTag($close),

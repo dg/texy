@@ -37,6 +37,8 @@ Renderers return an **`Element` | `Raw` | `string`** tree:
 - **`string`** – plain display text; escaped later by the well-forming engine.
 - **`Raw`** – a piece of ready-made HTML that bypasses text escaping and is tokenized as-is (generated `<br>`, obfuscated e-mail, escaped code content).
 
+The renderer does not trust the AST: a tree built by code or changed by a foreign pass gets the same checks as a parsed one. A `Raw` is made only from a value the renderer has escaped or composed itself, never straight from a property of a node, and every URL goes through `UrlPolicy`, autolinks included. `renderer-hostile-tree.phpt` renders such trees in safe mode.
+
 `Element::formatAttrs()` escapes attribute values and *freezes* their whitespace (`\x01`–`\x04`), so line wrapping can break between attributes but never inside a value; `WellFormer::finish()` unfreezes at the very end.
 
 Two helpers matter for security and structure:
