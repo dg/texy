@@ -98,4 +98,15 @@ test('attribute vs. style disambiguation', function () {
 		'<p style="translate:10px;rotate:45deg;scale:2">Text</p>',
 		$texy->toHtml('Text .{translate: 10px; rotate: 45deg; scale: 2}'),
 	);
+
+	// RDFa attributes are attributes, not styles
+	Assert::match(
+		'<p property="dc:title" style="color:red">Text</p>',
+		$texy->process('Text .{property: dc:title; color: red}'),
+	);
+
+	Assert::match(
+		'<p about="https://example.com/" vocab="https://schema.org/" typeof="Book" property="dc:title" resource="#book" datatype="rdf:HTML" prefix="dc: http://purl.org/dc/terms/" style="color:red">Text</p>',
+		$texy->process('Text .{about: https://example.com/; vocab: https://schema.org/; typeof: Book; property: dc:title; resource: #book; datatype: rdf:HTML; prefix: dc: http://purl.org/dc/terms/; color: red}'),
+	);
 });
