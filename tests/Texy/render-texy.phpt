@@ -134,9 +134,16 @@ test('canonical form of what records no variant', function () {
 
 	// the notation written for another meaning gives way to the one of the new meaning
 	$texy = new Texy;
-	$doc = $texy->parse('*a* x');
+	$doc = $texy->parse('*a* x ^^b^^ **c**:http://x.cz');
 	$doc->findFirst(Nodes\PhraseNode::class)->type = Nodes\PhraseType::Strong;
-	Assert::same("**a** x\n", $texy->renderTexy($doc));
+	$doc->findFirst(Nodes\PhraseNode::class, fn($phrase) => $phrase->syntax === Syntax::Strong)->type = Nodes\PhraseType::Superscript;
+	Assert::same("**a** x ^^b^^ \"^^c^^\":http://x.cz\n", $texy->renderTexy($doc));
+
+	// a link around a phrase written nowhere keeps the link
+	Assert::same(
+		"\"^^a^^\":http://x.cz\n",
+		printParagraph(new Texy, new Nodes\LinkNode('http://x.cz', new Nodes\ContentNode([$phrase(Nodes\PhraseType::Superscript)]))),
+	);
 });
 
 

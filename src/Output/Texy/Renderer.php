@@ -527,10 +527,7 @@ final class Renderer extends NodeRenderer
 	private function renderPhrase(Nodes\PhraseNode $node): string
 	{
 		$modifier = $node->modifier;
-		$syntax = $node->syntax;
-		if ($syntax === null || (Syntax::PhraseTypes[$syntax] ?? null) !== $node->type) {
-			$syntax = self::PhraseSyntaxes[$node->type->value];
-		}
+		$syntax = self::choosePhraseSyntax($node);
 		if ($syntax === Syntax::SuperscriptShort || $syntax === Syntax::SubscriptShort) {
 			$text = str_replace("\u{2212}", '-', self::textOf($node->content));
 			return ($syntax === Syntax::SuperscriptShort ? '^' : '_') . $text;
@@ -574,12 +571,23 @@ final class Renderer extends NodeRenderer
 			$node->syntax === Syntax::QuickLink => $this->renderInline($node->content) . ':' . $target,
 			($node->syntax === Syntax::Image || $node->syntax === Syntax::Figure) && $first instanceof Nodes\ImageNode
 				=> $this->renderPermittedImage($first, $float) . ':' . ($node->isImageLink && $node->ref === null ? ':' : $target),
-			$first instanceof Nodes\PhraseNode && count($node->content->children) === 1 && $node->syntax === $first->syntax
+			$first instanceof Nodes\PhraseNode
+				&& count($node->content->children) === 1
+				&& $node->syntax === self::choosePhraseSyntax($first)
 				=> $this->renderPhrase($first) . ':' . $target,
 			$first instanceof Nodes\InlineCodeNode && count($node->content->children) === 1 && $node->syntax === Syntax::Code
 				=> $this->renderNode($first) . ':' . $target,
 			default => $quote . $this->renderInline($node->content) . self::formatModifier($node->modifier) . $quote . ':' . $target,
 		};
+	}
+
+
+	/** The syntax the phrase is written in, unless it means something else than the phrase now does. */
+	private static function choosePhraseSyntax(Nodes\PhraseNode $node): string
+	{
+		return $node->syntax !== null && (Syntax::PhraseTypes[$node->syntax] ?? null) === $node->type
+			? $node->syntax
+			: self::PhraseSyntaxes[$node->type->value];
 	}
 
 
