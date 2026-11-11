@@ -105,18 +105,16 @@ final class ElementDecorator
 					$attrs['class'][] = $value;
 				}
 
-				$attrs['id'] = $modifier->id;
-
 			} elseif (is_array($allowedClasses)) {
 				foreach ($modifier->classes as $value => $foo) {
 					if (isset($allowedClasses[$value])) {
 						$attrs['class'][] = $value;
 					}
 				}
+			}
 
-				if (isset($allowedClasses['#' . $modifier->id])) {
-					$attrs['id'] = $modifier->id;
-				}
+			if ($modifier->id !== null && $this->policy->isIdAllowed($modifier->id)) {
+				$attrs['id'] = $modifier->id;
 			}
 		}
 	}

@@ -27,7 +27,7 @@ final class DocumentPasses
 	{
 		$engine->addPass((new HtmlPairingPass)->process(...));
 		$engine->addPass(new HtmlSanitizePass($htmlPolicy)->process(...));
-		$engine->addPass(new HeadingPass($config)->process(...));
+		$engine->addPass(new HeadingPass($config, $htmlPolicy)->process(...));
 		$engine->addPass(new TextRunPass($config)->process(...), Stage::Finalize);
 	}
 }

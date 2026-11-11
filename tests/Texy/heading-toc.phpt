@@ -171,6 +171,24 @@ test('explicit ID later in the document is not taken by a generated one', functi
 });
 
 
+test('an explicit ID the policy rejects is replaced by a generated one', function () {
+	$texy = new Texy\Texy;
+	$texy->config->headingIds = true;
+	$texy->htmlPolicy->allowedClasses = ['#allowed'];
+	$document = $texy->parse("Title .[#my]\n=====\n\nOther .[#allowed]\n=====");
+	$texy->transform($document);
+
+	Assert::same(['toc-title', 'allowed'], array_map(fn($h) => $h->id, $document->getHeadings()));
+	Assert::same(
+		"<h1 id=\"toc-title\">Title</h1>\n\n<h1 id=\"allowed\">Other</h1>\n",
+		$texy->renderHtml($document),
+	);
+
+	$texy->htmlPolicy->allowedClasses = false;
+	Assert::same("<h1 id=\"toc-my\">My</h1>\n", $texy->toHtml("My .[#my]\n========="));
+});
+
+
 test('two parses in a row - results do not leak', function () {
 	$texy = new Texy\Texy;
 	$texy->toHtml("First\n=====");

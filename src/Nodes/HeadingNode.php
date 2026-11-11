@@ -22,7 +22,7 @@ class HeadingNode extends BlockNode implements HasModifier
 	/** the {toc: ...} label, hoisted out of the modifier; null means the content is the title */
 	public ?string $titleOverride = null;
 
-	/** the heading's anchor, filled by HeadingPass; an explicit .[#id] wins over the generated one */
+	/** the heading's anchor, filled by HeadingPass; an explicit .[#id] the policy allows wins over the generated one */
 	public ?string $id = null;
 
 

@@ -7,7 +7,7 @@
 
 namespace Texy\Passes;
 
-use Texy\{Config, Helpers, Nodes};
+use Texy\{Config, Helpers, HtmlPolicy, Nodes};
 use Texy\Nodes\HeadingNode;
 
 
@@ -20,6 +20,7 @@ final class HeadingPass
 {
 	public function __construct(
 		private Config $config,
+		private HtmlPolicy $htmlPolicy,
 	) {
 	}
 
@@ -38,7 +39,7 @@ final class HeadingPass
 
 
 	/**
-	 * Explicit IDs reserve their names first, so a generated one never collides
+	 * Explicit IDs the policy allows reserve their names first, so a generated one never collides
 	 * with an explicit one later in the document.
 	 * @param  list<HeadingNode>  $headings
 	 */
@@ -46,9 +47,10 @@ final class HeadingPass
 	{
 		$usedID = [];
 		foreach ($headings as $node) {
-			if ($node->modifier?->id) {
-				$usedID[$node->modifier->id] = true;
-				$node->id = $node->modifier->id;
+			$id = $node->modifier?->id;
+			if ($id && $this->htmlPolicy->isIdAllowed($id)) {
+				$usedID[$id] = true;
+				$node->id = $id;
 			}
 		}
 

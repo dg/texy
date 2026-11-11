@@ -185,4 +185,15 @@ final class HtmlPolicy
 
 		return $tag . '>';
 	}
+
+
+	/**
+	 * Is the ID allowed by the allowedClasses whitelist?
+	 */
+	public function isIdAllowed(string $id): bool
+	{
+		return is_array($this->allowedClasses)
+			? in_array('#' . $id, $this->allowedClasses, true)
+			: $this->allowedClasses;
+	}
 }
