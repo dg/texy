@@ -5,8 +5,8 @@
  */
 
 use Tester\Assert;
-use Texy\{Nodes, Texy};
-use Texy\Output\Html;
+use Texy\{Nodes, Syntax, Texy};
+use Texy\Output\{Html, NodeRenderer};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -71,6 +71,30 @@ test('a renderer serves the nodes a list or a table holds', function () {
 	Assert::contains('<dt>term</dt>', $html);
 	Assert::contains('<dd>definition</dd>', $html);
 	Assert::contains('<td class="cell">a</td>', $html);
+});
+
+
+test('a renderer of every built-in class is dispatched to', function () {
+	$texy = new Texy;
+	$texy->allowedSyntax[Syntax::Emoticon] = true;
+	$classes = array_keys(new ReflectionProperty(NodeRenderer::class, 'handlers')->getValue($texy->createHtmlRenderer()));
+	$seen = [];
+	foreach ($classes as $class) {
+		$texy->htmlOutput->addRenderer(
+			eval("return function ($class \$n, \$g, \$previous) use (&\$seen) { \$seen[] = \$n::class; return \$previous(\$n); };"),
+		);
+	}
+
+	$source = implode("\n\n", array_map(file_get_contents(...), glob(__DIR__ . '/sources/*.texy')));
+	$doc = $texy->parse($source);
+	$doc->content->children[] = new Nodes\ParagraphNode(new Nodes\ContentNode([
+		new Nodes\AnnotationNode('NATO', 'North Atlantic Treaty Organisation'),
+		new Nodes\SoftBreakNode,
+	]));
+	$texy->renderHtml($texy->transform($doc));
+
+	// a ContentNode is rendered through its children
+	Assert::same([Nodes\ContentNode::class], array_values(array_diff($classes, $seen)));
 });
 
 
