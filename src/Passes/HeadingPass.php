@@ -7,7 +7,7 @@
 
 namespace Texy\Passes;
 
-use Texy\{Config, Helpers, HtmlPolicy, Nodes};
+use Texy\{Config, Helpers, Nodes};
 use Texy\Nodes\HeadingNode;
 
 
@@ -20,7 +20,6 @@ final class HeadingPass
 {
 	public function __construct(
 		private Config $config,
-		private HtmlPolicy $htmlPolicy,
 	) {
 	}
 
@@ -39,18 +38,17 @@ final class HeadingPass
 
 
 	/**
-	 * Explicit IDs the policy allows reserve their names first, so a generated one never collides
-	 * with an explicit one later in the document.
+	 * Explicit IDs reserve their names first, so a generated one never collides
+	 * with an explicit one later in the document. HtmlSanitizePass has removed those the policy rejects.
 	 * @param  list<HeadingNode>  $headings
 	 */
 	private function generateIDs(array $headings): void
 	{
 		$usedID = [];
 		foreach ($headings as $node) {
-			$id = $node->modifier?->id;
-			if ($id && $this->htmlPolicy->isIdAllowed($id)) {
-				$usedID[$id] = true;
-				$node->id = $id;
+			if ($node->modifier?->id) {
+				$usedID[$node->modifier->id] = true;
+				$node->id = $node->modifier->id;
 			}
 		}
 

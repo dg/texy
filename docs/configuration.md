@@ -66,7 +66,7 @@ $texy->htmlPolicy->allowedStyles = ['color'];
 
 ### $urlPolicy
 
-URL scheme security policy (`Texy\UrlPolicy`): a regex of allowed link schemes and one for image schemes. A null pattern means no restriction. Only absolute URLs with a scheme are checked; scheme-less (relative) URLs always pass. A rejected link keeps its text. A rejected image stays as source text in Texy syntax; an image node from elsewhere (a custom syntax, another parser) renders as its alternative text.
+URL scheme security policy (`Texy\UrlPolicy`): a regex of allowed link schemes and one for image schemes. A null pattern means no restriction. Only absolute URLs with a scheme are checked; scheme-less (relative) URLs always pass. A rejected link keeps its text. A rejected image stays as source text in Texy syntax; an image node from elsewhere (a custom syntax, another parser) renders as its alternative text. The policy is applied in the transform phase, so renderer handlers and other output formats see the document after it.
 
 ```php
 $texy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';

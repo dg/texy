@@ -90,7 +90,7 @@ What a pass sees done, and what it does not get for content it inserts:
 |---|---|---|
 | `Stage::Syntax` (in `parse()`) | the grammar of the language | nothing, the whole transformation follows |
 | between `parse()` and `transform()` | the grammar of the language | nothing, the whole transformation follows |
-| `Stage::Transform` | the meaning of the language, the HTML policy, heading shift and IDs | the ID of a new heading, the policy for new tags |
+| `Stage::Transform` | the meaning of the language, the HTML policy, heading shift and IDs | the ID of a new heading, the policy for new tags, URLs and modifiers (the HTML renderer applies it once more) |
 | `Stage::Finalize` | also typography and hyphenation | also typography |
 
 New headings and plain text therefore belong to `Stage::Syntax` or between `parse()` and `transform()`. A document is transformed once: a second `transform()` throws, and so does a `transform()` of another language than the one that parsed it.

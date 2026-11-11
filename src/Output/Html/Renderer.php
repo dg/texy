@@ -53,7 +53,7 @@ final class Renderer extends NodeRenderer
 	) {
 		$this->noFollow = $config->linkNoFollow;
 		$this->imageDimensions = new ImageDimensions($config);
-		$this->decorator = new ElementDecorator($htmlPolicy, $urlPolicy, $config);
+		$this->decorator = new ElementDecorator($htmlPolicy, $config);
 
 		$this->handlers = [
 			// Core nodes
@@ -248,7 +248,7 @@ final class Renderer extends NodeRenderer
 		$el = new Element('h' . $node->level);
 		$this->decorateElement($node->modifier, $el);
 		if ($node->id !== null) {
-			$el->attrs['id'] = $node->id; // HeadingPass has applied the policy
+			$el->attrs['id'] = $node->id; // the transformation has applied the policy
 		}
 
 		$el->children = $this->renderNodes($node->content->children);
@@ -728,7 +728,7 @@ final class Renderer extends NodeRenderer
 
 		// defense in depth: HtmlSanitizePass has already done this, but a hand-built
 		// AST or a policy tightened after parsing must not slip attributes through
-		$attrs = $this->htmlPolicy->filterAttrs($tagName, $attrs);
+		$attrs = $this->htmlPolicy->filterUrls($this->htmlPolicy->filterAttrs($tagName, $attrs));
 
 		// Add rel="nofollow" for external links when linkNoFollow is enabled
 		if ($tagName === 'a' && !$node->closing && isset($attrs['href']) && is_string($attrs['href'])) {

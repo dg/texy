@@ -152,12 +152,59 @@ final class HtmlPolicy
 
 
 	/**
+	 * A URL attribute survives only if UrlPolicy accepts it. This holds regardless of
+	 * the whitelist - "javascript:" must not get through even on a permissive policy.
+	 * @template T
+	 * @param  array<string, T>  $attrs
+	 * @return array<string, T>
+	 */
+	public function filterUrls(array $attrs): array
+	{
+		foreach ($attrs as $name => $value) {
+			$kind = Schema::urlAttribute($name);
+			if ($kind === null || !is_string($value)) {
+				continue;
+			}
+
+			$allowed = $kind === Schema::UrlImage
+				? $this->urlPolicy->isImageAllowed($value)
+				: $this->urlPolicy->isLinkAllowed($value);
+			if (!$allowed) {
+				unset($attrs[$name]);
+			}
+		}
+
+		return $attrs;
+	}
+
+
+	/**
+	 * Is the class allowed by the allowedClasses whitelist?
+	 */
+	public function isClassAllowed(string $class): bool
+	{
+		return is_array($this->allowedClasses)
+			? in_array($class, $this->allowedClasses, true)
+			: $this->allowedClasses;
+	}
+
+
+	/**
 	 * Is the ID allowed by the allowedClasses whitelist?
 	 */
 	public function isIdAllowed(string $id): bool
 	{
-		return is_array($this->allowedClasses)
-			? in_array('#' . $id, $this->allowedClasses, true)
-			: $this->allowedClasses;
+		return $this->isClassAllowed('#' . $id);
+	}
+
+
+	/**
+	 * Is the CSS property allowed by the allowedStyles whitelist? Names compare as in CSS.
+	 */
+	public function isStyleAllowed(string $property): bool
+	{
+		return is_array($this->allowedStyles)
+			? in_array(Modifier::normalizeProperty($property), array_map(Modifier::normalizeProperty(...), $this->allowedStyles), true)
+			: $this->allowedStyles;
 	}
 }

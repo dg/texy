@@ -95,3 +95,33 @@ test('the address of an autolink built by code is escaped', function () {
 		$texy->renderHtml($doc),
 	);
 });
+
+
+test('a renderer handler gets the document after the policy', function () {
+	$texy = createTexy();
+	$texy->htmlOutput->addRenderer(fn(Texy\Nodes\LinkNode $node) => new Texy\Output\Html\Element('a', ['href' => $node->url]));
+	Assert::same("<p>click</p>\n", $texy->toHtml('"click":javascript:alert(1)'));
+});
+
+
+test('the transformed document holds only what the policy allows', function () {
+	$texy = new Texy\Texy;
+	Texy\Configurator::safeMode($texy, images: true);
+	$texy->urlPolicy->linkPattern = '~https:~A';
+	$doc = $texy->parse(
+		"\"a\":http://x b [* https://a.cz/x.jpg .(alt) *] www.x.cz\n\n"
+		. "[* https://a.cz/a.jpg *]:http://x *** caption\n\n"
+		. '"c .[nofollow]":https://x "d .[cls #id]{color: red; cite: javascript:x; lang: cs}"',
+	);
+	$doc->findFirst(Texy\Nodes\ImageNode::class)->url = 'javascript:x'; // the parser itself refuses such an image
+	$texy->transform($doc);
+
+	Assert::same(['https://x'], array_map(fn($link) => $link->url, $doc->find(Texy\Nodes\LinkNode::class)));
+	Assert::same(['nofollow' => true], $doc->findFirst(Texy\Nodes\LinkNode::class)->modifier->classes);
+	Assert::same([], $doc->find(Texy\Nodes\UrlNode::class));
+	Assert::same([null, 'https://a.cz/a.jpg'], array_map(fn($image) => $image->url, $doc->find(Texy\Nodes\ImageNode::class)));
+	Assert::type(Texy\Nodes\ImageNode::class, $doc->findFirst(Texy\Nodes\FigureNode::class)->image);
+
+	$modifier = $doc->findFirst(Texy\Nodes\PhraseNode::class)->modifier;
+	Assert::same([null, [], [], ['lang' => 'cs']], [$modifier->id, $modifier->classes, $modifier->styles, $modifier->attrs]);
+});

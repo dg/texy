@@ -34,6 +34,9 @@ test('an e-mail obeys the URL policy', function () {
 	$texy = new Texy\Texy;
 	$texy->urlPolicy->linkPattern = '~https?:~A';
 	Assert::same("<p>a&#64;<!-- -->b.cz</p>\n", $texy->toHtml('a@b.cz'));
+	Assert::same("<p>a&#64;<!-- -->b.cz</p>\n", $texy->renderHtml(new Nodes\DocumentNode(new Nodes\ContentNode([
+		new Nodes\ParagraphNode(new Nodes\ContentNode([new Nodes\EmailNode('a@b.cz')])),
+	]))));
 });
 
 
