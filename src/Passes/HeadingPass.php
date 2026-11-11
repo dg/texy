@@ -39,7 +39,7 @@ final class HeadingPass
 
 	/**
 	 * Explicit IDs reserve their names first, so a generated one never collides
-	 * with an explicit one later in the document.
+	 * with an explicit one later in the document. HtmlSanitizePass has removed those the policy rejects.
 	 * @param  list<HeadingNode>  $headings
 	 */
 	private function generateIDs(array $headings): void

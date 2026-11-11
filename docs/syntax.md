@@ -60,7 +60,7 @@ This paragraph is centered. .<>
 Rules:
 
 - No spaces are allowed immediately inside the delimiters: `** not bold **` does not match.
-- The generated tag for each phrase is configurable through `$texy->htmlOutput->phraseTags` (e.g. map `phrase/strong` to `b`).
+- A phrase node carries what it means, `PhraseNode::$type` (`Nodes\PhraseType`, e.g. `Emphasis` for both `*text*` and `//text//`), and the syntax it is written in, `$syntax`. The generated tag follows the meaning and is configurable through `$texy->htmlOutput->phraseTags`, keyed by the `PhraseType` values (e.g. map `strong` to `b`).
 - Any phrase accepts a [modifier](modifiers.md) just before the closing delimiter: `**strong and green .{color:green}**`.
 - Most phrases can become links by appending `:URL` (see below); this requires `$texy->config->phraseLinks = true` (default).
 
@@ -169,7 +169,7 @@ Second-level heading
 === Lower level
 ```
 
-Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->config->headingBalancing` (`Dynamic` orders the heading styles of the document, `Fixed` maps characters via `$headingLevels`), then shifted by `$headingTop`; a level beyond 6 is `<h6>`. Optional automatic `id` attributes: `$headingIds`, `$headingIdPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the title used in the table of contents, and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `$document->getHeadings()` returns them in document order, each carrying `$level`, `getTitle()` and `$id` (the anchor, explicit or generated); the document title is `$document->getHeadings()[0]?->getTitle()`. Without the modifier the title comes from the heading's own content, so unlike the ID it reflects typography.
+Final `<h1>`–`<h6>` levels are computed in the transform phase according to `$texy->config->headingBalancing` (`Dynamic` orders the heading styles of the document, `Fixed` maps characters via `$headingLevels`), then shifted by `$headingTop`; a level beyond 6 is `<h6>`. Optional automatic `id` attributes: `$headingIds`, `$headingIdPrefix`; the modifier `.{toc: Custom title}` on a heading overrides the title used in the table of contents, and hence the generated ID slug (it is transport syntax and never reaches the output). Headings are read from the document itself: `$document->getHeadings()` returns them in document order, each carrying `$level`, `getTitle()` and `$id` (the anchor, explicit or generated; an explicit ID that `allowedClasses` rejects is replaced by a generated one); the document title is `$document->getHeadings()[0]?->getTitle()`. Without the modifier the title comes from the heading's own content, so unlike the ID it reflects typography.
 
 ## Lists
 

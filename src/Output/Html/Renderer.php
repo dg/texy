@@ -7,7 +7,7 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, Syntax, UrlPolicy};
+use Texy\{Helpers, HtmlPolicy, Modifier, Node, Nodes, UrlPolicy};
 use Texy\Output\NodeRenderer;
 use function count, is_array, is_string;
 use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
@@ -22,23 +22,14 @@ use const ENT_HTML5, ENT_NOQUOTES, ENT_QUOTES;
  */
 final class Renderer extends NodeRenderer
 {
-	/** phrase syntaxes rendered with the tag of their base syntax, unless phraseTags names one for them */
-	private const PhraseVariants = [
-		Syntax::EmphasisSingleAsterisk => Syntax::Emphasis,
-		Syntax::EmphasisSingleAsterisk2 => Syntax::Emphasis,
-		Syntax::SuperscriptShort => Syntax::Superscript,
-		Syntax::SubscriptShort => Syntax::Subscript,
-		Syntax::AbbreviationQuotes => Syntax::Abbreviation,
-	];
-
-	/** elements whose content HTML reads as it is, without entities */
-	private const RawTextElements = ['script' => 1, 'style' => 1];
-
 	private ElementDecorator $decorator;
 
 	private bool $noFollow;
 
 	private bool $plainBreaks = false;
+
+	/** the list whose items are being rendered */
+	private Nodes\ListNode|Nodes\DefinitionListNode|null $list = null;
 
 	private ImageDimensions $imageDimensions;
 
@@ -50,7 +41,7 @@ final class Renderer extends NodeRenderer
 	) {
 		$this->noFollow = $config->linkNoFollow;
 		$this->imageDimensions = new ImageDimensions($config);
-		$this->decorator = new ElementDecorator($htmlPolicy, $urlPolicy, $config);
+		$this->decorator = new ElementDecorator($htmlPolicy, $config);
 
 		$this->handlers = [
 			// Core nodes
@@ -244,8 +235,8 @@ final class Renderer extends NodeRenderer
 	{
 		$el = new Element('h' . $node->level);
 		$this->decorateElement($node->modifier, $el);
-		if ($node->id !== null && $node->modifier?->id === null) {
-			$el->attrs['id'] = $node->id; // generated, so not subject to the modifier policy
+		if ($node->id !== null) {
+			$el->attrs['id'] = $node->id; // the transformation has applied the policy
 		}
 
 		$el->children = $this->renderNodes($node->content->children);
@@ -393,20 +384,20 @@ final class Renderer extends NodeRenderer
 			$el->attrs['style'] = $styles;
 		}
 
-		foreach ($node->items as $item) {
-			$el->add($this->renderListItem($item, $node->paragraphs));
-		}
-
+		$this->renderItems($node, $el);
 		return $el;
 	}
 
 
-	private function renderListItem(
-		Nodes\ListItemNode $node,
-		Nodes\ItemParagraphs $paragraphs = Nodes\ItemParagraphs::FirstUnwrapped,
-	): Element
+	private function renderListItem(Nodes\ListItemNode $node): Element
 	{
-		// Regular list item (li)
+		$list = $this->list;
+		$this->list = null; // the content of the item belongs to no list, a nested one rendered by a handler included
+		if ($list instanceof Nodes\DefinitionListNode) {
+			return $this->renderDefinitionItem($node);
+		}
+
+		$paragraphs = $list->paragraphs ?? Nodes\ItemParagraphs::FirstUnwrapped;
 		$el = new Element('li');
 		$this->decorateElement($node->modifier, $el);
 		$el->children = $this->renderItemContent($node->content->children, $paragraphs);
@@ -429,11 +420,25 @@ final class Renderer extends NodeRenderer
 		$el = new Element('dl');
 		$this->decorateElement($node->modifier, $el);
 
-		foreach ($node->items as $item) {
-			$el->add($this->renderDefinitionItem($item));
-		}
-
+		$this->renderItems($node, $el);
 		return $el;
+	}
+
+
+	/**
+	 * Renders the items of a list into its element; an item learns from the list how it is rendered.
+	 */
+	private function renderItems(Nodes\ListNode|Nodes\DefinitionListNode $list, Element $el): void
+	{
+		$outer = $this->list;
+		try {
+			foreach ($list->items as $item) {
+				$this->list = $list;
+				$el->add($this->renderNode($item));
+			}
+		} finally {
+			$this->list = $outer;
+		}
 	}
 
 
@@ -516,7 +521,7 @@ final class Renderer extends NodeRenderer
 				$elPart = new Element('tbody');
 				$el->add($elPart);
 			}
-			$elPart->add($this->renderTableRow($row));
+			$elPart->add($this->renderNode($row));
 		}
 
 		// if only thead without tbody, rename to tbody (tbody is required, thead is optional)
@@ -533,7 +538,7 @@ final class Renderer extends NodeRenderer
 		$el = new Element('tr');
 		$this->decorateElement($node->modifier, $el);
 		foreach ($node->cells as $cell) {
-			$el->add($this->renderTableCell($cell));
+			$el->add($this->renderNode($cell));
 		}
 
 		return $el;
@@ -631,17 +636,15 @@ final class Renderer extends NodeRenderer
 	private function renderPhrase(Nodes\PhraseNode $node): Element
 	{
 		$tags = $this->config->phraseTags;
-		$tag = $tags[$node->type] ?? $tags[self::PhraseVariants[$node->type] ?? ''] ?? 'span';
-
-		if ($node->type === Syntax::StrongEmphasis) {
-			$el = new Element($this->config->phraseTags[Syntax::Strong] ?? 'strong');
+		if ($node->type === Nodes\PhraseType::StrongEmphasis) {
+			$el = new Element($tags[Nodes\PhraseType::Strong->value] ?? 'strong');
 			$this->decorateElement($node->modifier, $el);
-			$inner = $el->create($this->config->phraseTags[Syntax::Emphasis] ?? 'em');
+			$inner = $el->create($tags[Nodes\PhraseType::Emphasis->value] ?? 'em');
 			$inner->children = $this->renderNodes($node->content->children);
 			return $el;
 		}
 
-		$el = new Element($tag);
+		$el = new Element($tags[$node->type->value] ?? 'span');
 		$this->decorateElement($node->modifier, $el);
 		$el->children = $this->renderNodes($node->content->children);
 		return $el;
@@ -650,7 +653,7 @@ final class Renderer extends NodeRenderer
 
 	private function renderInlineCode(Nodes\InlineCodeNode $node): Element
 	{
-		$el = new Element($this->config->phraseTags[Syntax::Code] ?? 'code');
+		$el = new Element($this->config->phraseTags['code'] ?? 'code');
 		$this->decorateElement($node->modifier, $el);
 		// Only escape <, >, & - not quotes (ENT_NOQUOTES)
 		$el->children = [new Raw(htmlspecialchars($node->code, ENT_NOQUOTES | ENT_HTML5, 'UTF-8'))];
@@ -671,28 +674,31 @@ final class Renderer extends NodeRenderer
 	/********************* autolink node renderers ****************d*g**/
 
 
-	private function renderUrl(Nodes\UrlNode $node): Element
+	private function renderUrl(Nodes\UrlNode $node): Element|string
 	{
 		$url = Helpers::normalizeWww($node->url);
+		if (!$this->urlPolicy->isLinkAllowed($url)) {
+			return $node->url;
+		}
 
 		$el = new Element('a', ['href' => $url]);
 		if ($this->noFollow && str_contains($url, '//')) {
 			$el->attrs['rel'] = 'nofollow';
 		}
 
-		// Protect URL text from typography/longwords processing
-		$textualUrl = $this->config->shortenUrls ? Helpers::shortenUrl($node->url) : $node->url;
-		return $el->add(new Raw($textualUrl));
+		return $el->add($this->config->shortenUrls ? Helpers::shortenUrl($node->url) : $node->url);
 	}
 
 
-	private function renderEmail(Nodes\EmailNode $node): Element
+	private function renderEmail(Nodes\EmailNode $node): Element|Raw|string
 	{
-		$el = new Element('a', ['href' => 'mailto:' . $node->email]);
+		$href = 'mailto:' . $node->email;
 		$text = $this->config->obfuscateEmail
-			? new Raw(str_replace('@', '&#64;<!-- -->', $node->email))
+			? new Raw(str_replace('@', '&#64;<!-- -->', htmlspecialchars($node->email, ENT_NOQUOTES | ENT_HTML5, 'UTF-8')))
 			: $node->email;
-		return $el->add($text);
+		return $this->urlPolicy->isLinkAllowed($href)
+			? new Element('a', ['href' => $href])->add($text)
+			: $text;
 	}
 
 
@@ -704,21 +710,13 @@ final class Renderer extends NodeRenderer
 		$tagName = strtolower($node->name);
 		$attrs = $node->attributes;
 
-		// Check if tag is allowed
-		if (!$this->htmlPolicy->isTagAllowed($tagName)) {
-			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node)); // shown as text
-		}
-
-		// Validate tag - reject if validation fails
-		$validation = $this->htmlPolicy->validateTag($tagName, $attrs, $node->closing);
-		if ($validation === false || $validation === 'drop') {
-			// Invalid tag - shown as text in the output
-			return Helpers::decodeEntities($this->htmlPolicy->reconstructTag($node));
+		if (!$this->htmlPolicy->isTagAcceptable($tagName, $attrs, $node->closing)) {
+			return Helpers::decodeEntities($node->toSource()); // shown as text
 		}
 
 		// defense in depth: HtmlSanitizePass has already done this, but a hand-built
 		// AST or a policy tightened after parsing must not slip attributes through
-		$attrs = $this->htmlPolicy->filterAttrs($tagName, $attrs);
+		$attrs = $this->htmlPolicy->filterUrls($this->htmlPolicy->filterAttrs($tagName, $attrs));
 
 		// Add rel="nofollow" for external links when linkNoFollow is enabled
 		if ($tagName === 'a' && !$node->closing && isset($attrs['href']) && is_string($attrs['href'])) {
@@ -748,6 +746,7 @@ final class Renderer extends NodeRenderer
 		// Sanitize comment content (security: prevent nested comments)
 		$content = preg_replace('~-{2,}~', ' - ', $node->text);
 		$content = trim($content, '-');
+		$content = str_starts_with($content, '>') ? ' ' . $content : $content; // <!--> would end the comment
 		return new Raw('<!--' . $content . '-->');
 	}
 
@@ -759,13 +758,16 @@ final class Renderer extends NodeRenderer
 	 */
 	private function renderHtmlElement(Nodes\HtmlElementNode $node): Element
 	{
-		$open = new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range, source: $node->source);
+		$open = $this->renderHtmlTag(new Nodes\HtmlTagNode($node->name, $node->attributes, range: $node->range, source: $node->source));
 		$close = $node->closingTag ?? new Nodes\HtmlTagNode($node->name, closing: true);
 		$content = $node->content->children;
 		return $this->wrapChildren([
-			$this->renderHtmlTag($open),
-			...(isset(self::RawTextElements[strtolower($node->name)]) && count($content) === 1 && $content[0] instanceof Nodes\RawTextNode
-				? [new Raw($content[0]->text)]
+			$open,
+			...($open instanceof Raw
+				&& Schema::isRawText($node->name)
+				&& count($content) === 1
+				&& $content[0] instanceof Nodes\RawTextNode
+				? [new Raw(str_ireplace('</' . $node->name, '<\/' . $node->name, $content[0]->text))] // the content must not end the element
 				: $this->renderNodes($content)),
 			$this->renderHtmlTag($close),
 		]);

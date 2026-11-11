@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\{Nodes, Syntax, Texy};
+use Texy\{Nodes, Parsing, Texy};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -77,6 +77,20 @@ test('a clone of a syntax tree is a new document, a clone of a finished one stay
 });
 
 
+test('a document is transformed in the language that parsed it, one of no language in any', function () {
+	$parse = fn(?string $language) => new Parsing\Engine($language)->parse('text', [], singleLine: true);
+
+	Assert::exception(
+		fn() => (new Texy)->transform($parse('Markdown')),
+		LogicException::class,
+		'The document was parsed as Markdown, transform it in that language.',
+	);
+	Assert::noError(fn() => (new Texy)->transform($parse('Texy')));
+	Assert::noError(fn() => (new Texy)->transform($parse(null)));
+	Assert::noError(fn() => (new Texy)->transform(new Nodes\DocumentNode));
+});
+
+
 test('rendering the same document twice gives the same output', function () {
 	$texy = new Texy;
 	$doc = $texy->parse("Heading\n=======\n\nText.");
@@ -115,7 +129,7 @@ test('output configuration changed after parsing is honoured', function () {
 
 	Assert::contains('<strong>', $texy->renderHtml($doc));
 
-	$texy->htmlOutput->phraseTags[Syntax::Strong] = 'b';
+	$texy->htmlOutput->phraseTags[Nodes\PhraseType::Strong->value] = 'b';
 	Assert::contains('<b>', $texy->renderHtml($doc));
 });
 

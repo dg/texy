@@ -27,4 +27,32 @@ class HtmlTagNode extends InlineNode
 		public ?string $source = null,
 	) {
 	}
+
+
+	/**
+	 * Returns the tag as written; a tag the parser did not make is rebuilt from its attributes.
+	 */
+	public function toSource(): string
+	{
+		if ($this->source !== null) {
+			return strtr($this->source, "\r", "\n"); // \r is the hard break mark of a paragraph
+		}
+
+		$tag = '<';
+		if ($this->closing) {
+			$tag .= '/';
+		}
+		$tag .= $this->name;
+		foreach ($this->attributes as $name => $value) {
+			$tag .= ' ' . $name;
+			if ($value !== true) {
+				$tag .= '="' . $value . '"';
+			}
+		}
+		if ($this->selfClosing) {
+			$tag .= ' /';
+		}
+
+		return $tag . '>';
+	}
 }

@@ -7,8 +7,8 @@
 
 namespace Texy\Output\Html;
 
+use Texy\Nodes\PhraseType;
 use Texy\Output\NodeRenderer;
-use Texy\Syntax;
 
 
 /**
@@ -83,23 +83,21 @@ class Config
 
 	// phrases
 	/**
-	 * Syntax → HTML tag mapping; Emphasis covers *text* as well, Superscript and Subscript their short forms,
-	 * Abbreviation its quoted form.
+	 * PhraseType value → HTML tag, plus 'code' for inline code; StrongEmphasis is the tag
+	 * of Strong around the tag of Emphasis.
 	 * @var array<string, string>
 	 */
 	public array $phraseTags = [
-		Syntax::Strong => 'strong',
-		Syntax::Emphasis => 'em',
-		Syntax::Inserted => 'ins',
-		Syntax::Deleted => 'del',
-		Syntax::Superscript => 'sup',
-		Syntax::Subscript => 'sub',
-		Syntax::SpanQuotes => 'span',
-		Syntax::SpanTilde => 'span',
-		Syntax::Abbreviation => 'abbr',
-		Syntax::Code => 'code',
-		Syntax::Quote => 'q',
-		Syntax::QuickLink => 'a',
+		PhraseType::Strong->value => 'strong',
+		PhraseType::Emphasis->value => 'em',
+		PhraseType::Inserted->value => 'ins',
+		PhraseType::Deleted->value => 'del',
+		PhraseType::Superscript->value => 'sup',
+		PhraseType::Subscript->value => 'sub',
+		PhraseType::Span->value => 'span',
+		PhraseType::Abbreviation->value => 'abbr',
+		PhraseType::Quote->value => 'q',
+		'code' => 'code',
 	];
 
 	/** @var list<\Closure>  user node renderers (see addRenderer) */

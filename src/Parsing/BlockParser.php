@@ -38,6 +38,17 @@ class BlockParser
 	}
 
 
+	/**
+	 * Returns a parser that knows no syntax, so the gap handler gets all the text.
+	 */
+	public function withoutPatterns(): static
+	{
+		$clone = clone $this;
+		$clone->patterns = [];
+		return $clone;
+	}
+
+
 	public function parse(ParseContext $context, string $text, int $baseOffset = 0): Nodes\ContentNode
 	{
 		$this->text = $text = rtrim($text, "\n");

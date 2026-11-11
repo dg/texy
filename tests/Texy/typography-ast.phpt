@@ -57,6 +57,28 @@ test('quotes pair across phrase boundaries', function () {
 });
 
 
+test('the content of an unknown inline node gets typography', function () {
+	$texy = new Texy\Texy;
+	$doc = $texy->parse('outside "quoted" ...');
+	$doc->findFirst(Texy\Nodes\ParagraphNode::class)->content->children[] = new class (new Texy\Nodes\ContentNode(
+		[new Texy\Nodes\TextNode(' and inside "quoted" ...')],
+	)) extends Texy\Nodes\InlineNode {
+		public function __construct(
+			public Texy\Nodes\ContentNode $content,
+		) {
+		}
+
+
+		public function &getChildren(): Generator
+		{
+			yield $this->content;
+		}
+	};
+
+	Assert::same("<p>outside „quoted“ … and inside „quoted“ …</p>\n", $texy->renderHtml($texy->transform($doc)));
+});
+
+
 test('code phrase content is protected from typography', function () {
 	Assert::same(
 		"<p>napiš <code>\"quotes\" -- ...</code> takto</p>\n",

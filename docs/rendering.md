@@ -23,7 +23,7 @@ Output/
 
 ## NodeRenderer – dispatch and extensibility
 
-`NodeRenderer` keeps a map `class-string<Node> => renderer`. Generators seed it with their built-in renderers in the constructor; `addRenderer()` lets users override rendering per node class. A class with no renderer of its own falls back to one registered for an ancestor, so a subclass of a built-in node renders without extra work. The chain works last-registered-first: a custom renderer receives `($node, $renderer, $previous)` and either returns a result or returns `null` / calls `$previous($node, $renderer)` to delegate (see [custom-handlers.md](custom-handlers.md)). For HTML, custom renderers are registered on the config (`$texy->htmlOutput->addRenderer()`) and applied to every renderer built from it.
+`NodeRenderer` keeps a map `class-string<Node> => renderer`. Generators seed it with their built-in renderers in the constructor; `addRenderer()` lets users override rendering per node class. A class with no renderer of its own falls back to one registered for an ancestor, so a subclass of a built-in node renders without extra work. The chain works last-registered-first: a custom renderer receives `($node, $renderer, $previous)` and either returns a result or returns `null` / calls `$previous($node)` to delegate (see [custom-handlers.md](custom-handlers.md)). For HTML, custom renderers are registered on the config (`$texy->htmlOutput->addRenderer()`) and applied to every renderer built from it.
 
 ## HTML Config and Renderer
 
@@ -37,19 +37,21 @@ Renderers return an **`Element` | `Raw` | `string`** tree:
 - **`string`** – plain display text; escaped later by the well-forming engine.
 - **`Raw`** – a piece of ready-made HTML that bypasses text escaping and is tokenized as-is (generated `<br>`, obfuscated e-mail, escaped code content).
 
+The renderer does not trust the AST: a tree built by code or changed by a foreign pass gets the same checks as a parsed one. A `Raw` is made only from a value the renderer has escaped or composed itself, never straight from a property of a node, and every URL goes through `UrlPolicy`, autolinks included. `renderer-hostile-tree.phpt` renders such trees in safe mode.
+
 `Element::formatAttrs()` escapes attribute values and *freezes* their whitespace (`\x01`–`\x04`), so line wrapping can break between attributes but never inside a value; `WellFormer::finish()` unfreezes at the very end.
 
 Two helpers matter for security and structure:
 
 - **`ElementDecorator`** applies a `Modifier` to an `Element`: attributes filtered by `$htmlPolicy->allowedTags`, classes/ID by `$htmlPolicy->allowedClasses`, styles by `$htmlPolicy->allowedStyles`, alignment via `$textAlignClasses` and `$verticalAlignClasses` or inline styles, the float of images and figures via `$floatClasses`. All modifier-driven decoration funnels through here (`Renderer::decorateElement()`, and `Renderer::applyFloat()` for the float, which is a property of the node, not of its modifier).
-- **`HtmlPolicy`** implements the passthrough policy: the `$allowedTags` whitelist, per-tag validation (`<a>` needs `href`/`name`/`id` and a safe scheme, `<img>` needs a safe `src` – dangerous URLs are dropped entirely), and reconstruction of rejected tags as visible text. It is used both by the transform-phase `HtmlSanitizePass` (the authoritative decision) and by the renderer as defense in depth.
+- **`HtmlPolicy`** implements the policy: the `$allowedTags` whitelist with per-tag validation (`<a>` needs `href`/`name`/`id` and a safe scheme, `<img>` needs a safe `src`; a rejected tag is shown as text), the filter of URL attributes by `UrlPolicy`, and the class, ID and style whitelists. It is used both by the transform-phase `HtmlSanitizePass` (the authoritative decision) and by the renderer as defense in depth.
 
 ## HTML passthrough transform passes
 
-Raw HTML in the input is parsed as individual `HtmlTagNode`s / `HtmlCommentNode`s. Two common passes of `DocumentPasses` in the transform phase give them structure and truth:
+Raw HTML in the input is parsed as individual `HtmlTagNode`s / `HtmlCommentNode`s. Two common passes of `DocumentPasses` in the transform phase give them structure and truth, and the second applies the rest of the policy too:
 
 1. **`HtmlPairingPass`** – stack-based pairing of open/close tags into `HtmlElementNode` subtrees, per content container, tolerant of crossing: what cannot be paired stays as standalone `HtmlTagNode`. The opening tag as written and the original closing tag are preserved, so a rejected pair is shown as written.
-2. **`HtmlSanitizePass`** – evaluates `HtmlPolicy::isTagAcceptable()` over the paired tree; **rejected tags become `RawTextNode`s** holding the tag as written (`$source`; only a tag the parser did not make is rebuilt from its attributes). After this pass the AST tells the truth: escaped tags are visible text, shown exactly as written (no typography; other formats escape them), allowed tags are markup. This is also why safe mode automatically applies to every output format.
+2. **`HtmlSanitizePass`** – evaluates `HtmlPolicy::isTagAcceptable()` over the paired tree; **rejected tags become `RawTextNode`s** holding the tag as written (`$source`; only a tag the parser did not make is rebuilt from its attributes). After this pass the AST tells the truth: escaped tags are visible text, shown exactly as written (no typography; other formats escape them), allowed tags are markup. The same pass applies the URL policy and the policy of modifiers: a link whose URL is rejected is replaced by its content, an autolink by its text as a `RawTextNode`, a rejected image loses its URL and so renders as its alternative text, and a modifier keeps only the classes, ID, styles and URL attributes the policy allows. Only the attributes whitelist of a modifier waits for the renderer, since it depends on the element. This is why safe mode applies to every output format, and why a renderer handler receives URLs that already passed the policy. An `EmailNode` stays, since it holds an address, not a URL: the HTML renderer then writes it as obfuscated text without a link, and a handler of its own checks `mailto:` against `UrlPolicy` itself.
 
 ## Well-forming and formatting
 

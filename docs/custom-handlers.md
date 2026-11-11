@@ -22,7 +22,7 @@ $texy->htmlOutput->addRenderer(
 );
 ```
 
-Registration validates the parameter: a nullable, union or untyped first parameter could never be dispatched to, so it is refused with an exception right away. Dispatch respects inheritance – a node subclass without its own renderer uses the renderer of its nearest ancestor, so `class MyImageNode extends ImageNode` renders like an image until you register a renderer for it.
+Registration validates the parameter: a nullable, union or untyped first parameter could never be dispatched to, so it is refused with an exception right away. Dispatch respects inheritance – a node subclass without its own renderer uses the renderer of its nearest ancestor, so `class MyImageNode extends ImageNode` renders like an image until you register a renderer for it. The reverse does not hold: a renderer for an ancestor such as `Nodes\BlockNode` never runs for a built-in class, since each has a renderer of its own; it serves only your subclasses that have none.
 
 A node no renderer is found for at all **degrades to its content**: the wrapper disappears, the children render as usual. That is what keeps a document renderable in every format – you register a renderer for the format you care about, and `toText()` still works on the same tree instead of failing on a class it has never heard of.
 
@@ -36,7 +36,7 @@ Handlers for one node class form a chain, executed **from the last registered to
 
 Valid return values are `Html\Element`, `Html\Raw`, a plain string (display text – it will be HTML-escaped), or `null` to delegate. The same mechanism applies to the other generators, with string results.
 
-The same handler works for a construct wherever it appears – e.g. an `ImageNode` handler fires for inline images and for the image inside a figure alike, because the figure renderer delegates through `renderNode()`.
+The same handler works for a construct wherever it appears – e.g. an `ImageNode` handler fires for inline images and for the image inside a figure alike, because the figure renderer delegates through `renderNode()`. The tags of a paired HTML element are the exception: they render as part of its `HtmlElementNode`, so a renderer for `HtmlTagNode` sees only tags without a pair.
 
 Handlers must respect the render-phase purity rule: **do not mutate the node or the modifier** – if you need a modified variant, clone it.
 
@@ -90,10 +90,10 @@ What a pass sees done, and what it does not get for content it inserts:
 |---|---|---|
 | `Stage::Syntax` (in `parse()`) | the grammar of the language | nothing, the whole transformation follows |
 | between `parse()` and `transform()` | the grammar of the language | nothing, the whole transformation follows |
-| `Stage::Transform` | the meaning of the language, the HTML policy, heading shift and IDs | the ID of a new heading, the policy for new tags |
+| `Stage::Transform` | the meaning of the language, the HTML policy, heading shift and IDs | the ID of a new heading, the policy for new tags, URLs and modifiers (the HTML renderer applies it once more) |
 | `Stage::Finalize` | also typography and hyphenation | also typography |
 
-New headings and plain text therefore belong to `Stage::Syntax` or between `parse()` and `transform()`. A document is transformed once: a second `transform()` throws.
+New headings and plain text therefore belong to `Stage::Syntax` or between `parse()` and `transform()`. A document is transformed once: a second `transform()` throws, and so does a `transform()` of another language than the one that parsed it.
 
 Most passes only visit nodes of one kind. `$doc->find()` collects them in traversal order, so the pass is a plain `foreach`:
 

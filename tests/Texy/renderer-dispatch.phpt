@@ -5,8 +5,8 @@
  */
 
 use Tester\Assert;
-use Texy\{Nodes, Texy};
-use Texy\Output\Html;
+use Texy\{Nodes, Syntax, Texy};
+use Texy\Output\{Html, NodeRenderer};
 
 require __DIR__ . '/../bootstrap.php';
 
@@ -47,6 +47,73 @@ test('a renderer for the subclass wins and can delegate to the parent one', func
 	Assert::contains('data-custom="yes"', $texy->renderHtml(documentWith($texy, new CustomImageNode('foo.png'))));
 	// the parent class stays untouched
 	Assert::notContains('data-custom', $texy->renderHtml(documentWith($texy, new Nodes\ImageNode('foo.png'))));
+});
+
+
+test('a renderer serves the nodes a list or a table holds', function () {
+	$texy = new Texy;
+	$seen = [];
+	$texy->htmlOutput->addRenderer(function (Nodes\ListItemNode $node, Html\Renderer $renderer, Closure $previous) use (&$seen) {
+		$seen[] = $node->term ? 'term' : 'item';
+		return $previous($node);
+	});
+	$texy->htmlOutput->addRenderer(function (Nodes\TableRowNode $node, Html\Renderer $renderer, Closure $previous) use (&$seen) {
+		$seen[] = 'row';
+		return $previous($node);
+	});
+	$texy->htmlOutput->addRenderer(function (Nodes\TableCellNode $node, Html\Renderer $renderer, Closure $previous) use (&$seen) {
+		$seen[] = 'cell';
+		return $previous($node)->addClass('cell');
+	});
+
+	$html = $texy->toHtml("- one\n\nterm:\n  - definition\n\n| a | b");
+	Assert::same(['item', 'term', 'item', 'row', 'cell', 'cell'], $seen);
+	Assert::contains('<dt>term</dt>', $html);
+	Assert::contains('<dd>definition</dd>', $html);
+	Assert::contains('<td class="cell">a</td>', $html);
+});
+
+
+test('a list rendered by a handler inside an item is no item of the outer list', function () {
+	$texy = new Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->addRenderer(function (Nodes\ListNode $node, Html\Renderer $renderer) {
+		$el = new Html\Element('ul', ['class' => 'custom']);
+		foreach ($node->items as $item) {
+			$el->add($renderer->renderNode($item));
+		}
+		return $el;
+	});
+
+	Assert::same(
+		'<dl><dt>term</dt><dd>definition<ul class="custom"><li>nested a</li><li>nested b</li></ul></dd></dl>',
+		$texy->toHtml("term:\n  - definition\n\n    - nested a\n    - nested b\n"),
+	);
+});
+
+
+test('a renderer of every built-in class is dispatched to', function () {
+	$texy = new Texy;
+	$texy->allowedSyntax[Syntax::Emoticon] = true;
+	$classes = array_keys(new ReflectionProperty(NodeRenderer::class, 'handlers')->getValue($texy->createHtmlRenderer()));
+	$seen = [];
+	foreach ($classes as $class) {
+		$texy->htmlOutput->addRenderer(
+			eval("return function ($class \$n, \$g, \$previous) use (&\$seen) { \$seen[] = \$n::class; return \$previous(\$n); };"),
+		);
+	}
+
+	$source = implode("\n\n", array_map(file_get_contents(...), glob(__DIR__ . '/sources/*.texy')));
+	$doc = $texy->parse($source);
+	$doc->content->children[] = new Nodes\ParagraphNode(new Nodes\ContentNode([
+		new Nodes\AnnotationNode('NATO', 'North Atlantic Treaty Organisation'),
+		new Nodes\SoftBreakNode,
+	]));
+	$texy->renderHtml($texy->transform($doc));
+
+	// a ContentNode is rendered through its children
+	Assert::same([Nodes\ContentNode::class], array_values(array_diff($classes, $seen)));
 });
 
 

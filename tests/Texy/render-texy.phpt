@@ -118,6 +118,32 @@ test('canonical form of what records no variant', function () {
 	);
 
 	Assert::same("Sušení švestek\n==============\n", printTexy("Sušení švestek\n===\n"));
+
+	$phrase = fn(Nodes\PhraseType $type) => new Nodes\PhraseNode(new Nodes\ContentNode([new Nodes\TextNode('a')]), $type);
+	Assert::same(
+		"//a// \"a\"(()) \"a .{ }\"\n",
+		printParagraph(
+			new Texy,
+			$phrase(Nodes\PhraseType::Emphasis),
+			new Nodes\TextNode(' '),
+			$phrase(Nodes\PhraseType::Abbreviation),
+			new Nodes\TextNode(' '),
+			$phrase(Nodes\PhraseType::Span),
+		),
+	);
+
+	// the notation written for another meaning gives way to the one of the new meaning
+	$texy = new Texy;
+	$doc = $texy->parse('*a* x ^^b^^ **c**:http://x.cz');
+	$doc->findFirst(Nodes\PhraseNode::class)->type = Nodes\PhraseType::Strong;
+	$doc->findFirst(Nodes\PhraseNode::class, fn($phrase) => $phrase->syntax === Syntax::Strong)->type = Nodes\PhraseType::Superscript;
+	Assert::same("**a** x ^^b^^ \"^^c^^\":http://x.cz\n", $texy->renderTexy($doc));
+
+	// a link around a phrase written nowhere keeps the link
+	Assert::same(
+		"\"^^a^^\":http://x.cz\n",
+		printParagraph(new Texy, new Nodes\LinkNode('http://x.cz', new Nodes\ContentNode([$phrase(Nodes\PhraseType::Superscript)]))),
+	);
 });
 
 

@@ -229,8 +229,20 @@ final class TextRunPass
 			) {
 				// renders to nothing
 
-			} else { // ImageNode, LineBreakNode, EmoticonNode, unknown inline nodes
-				$pieces[] = [self::Replaced, null];
+			} else { // ImageNode, LineBreakNode, EmoticonNode; an unknown node is replaced unless it has content
+				$replaced = true;
+				foreach ($node->getChildren() as $child) {
+					if ($child instanceof Nodes\ContentNode) {
+						$pieces[] = [self::Markup, null];
+						$this->collect($child->children, $pieces);
+						$pieces[] = [self::Markup, null];
+						$replaced = false;
+					}
+				}
+
+				if ($replaced) {
+					$pieces[] = [self::Replaced, null];
+				}
 			}
 		}
 	}

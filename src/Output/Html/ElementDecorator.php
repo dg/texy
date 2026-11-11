@@ -7,30 +7,23 @@
 
 namespace Texy\Output\Html;
 
-use Texy\{HtmlPolicy, Modifier, UrlPolicy};
-use function is_array, is_string;
+use Texy\{HtmlPolicy, Modifier};
 
 
 /**
  * Applies Modifier (classes, styles, attributes, alignment) to an Element.
  *
- * This is where the security policy is enforced, and the placement is deliberate:
- * it is the moment an author-written modifier is poured into the output element.
- * Anything a transform pass or a renderer handler writes into the Element itself
- * never passes through here, so generated markup is not subject to the policy.
+ * HtmlSanitizePass has applied the policy to the modifiers already; it is applied here once
+ * more, when an author-written modifier is poured into the output element, since a tree
+ * built by code need not have been transformed. The attributes whitelist is applied only
+ * here, as it depends on the element. Anything a transform pass or a renderer handler
+ * writes into the Element itself never passes through here, so generated markup is not
+ * subject to the policy.
  */
 final class ElementDecorator
 {
-	/** @var array<string, int>|bool  lookup set snapshot of $policy->allowedClasses */
-	private bool|array $classes;
-
-	/** @var array<string, int>|bool  lookup set snapshot of $policy->allowedStyles, normalized like the properties of a modifier */
-	private bool|array $styles;
-
-
 	public function __construct(
 		private HtmlPolicy $policy,
-		private UrlPolicy $urlPolicy,
 		private Config $config,
 	) {
 	}
@@ -57,7 +50,7 @@ final class ElementDecorator
 		$attrs = &$el->attrs;
 
 		if ($modifier->attrs) {
-			$attrs = $this->filterUrls($this->policy->filterAttrs($el->name ?? '', $modifier->attrs));
+			$attrs = $this->policy->filterUrls($this->policy->filterAttrs($el->name ?? '', $modifier->attrs));
 		}
 
 		if ($modifier->title !== null) {
@@ -66,58 +59,18 @@ final class ElementDecorator
 	}
 
 
-	/**
-	 * A URL attribute survives only if UrlPolicy accepts it. This runs regardless of
-	 * the whitelist - "javascript:" must not get through even on a permissive policy.
-	 * @param  array<string, mixed>  $attrs
-	 * @return array<string, mixed>
-	 */
-	private function filterUrls(array $attrs): array
-	{
-		foreach ($attrs as $name => $value) {
-			$kind = Schema::urlAttribute($name);
-			if ($kind === null || !is_string($value)) {
-				continue;
-			}
-
-			$allowed = $kind === Schema::UrlImage
-				? $this->urlPolicy->isImageAllowed($value)
-				: $this->urlPolicy->isLinkAllowed($value);
-			if (!$allowed) {
-				unset($attrs[$name]);
-			}
-		}
-
-		return $attrs;
-	}
-
-
 	/** @param  array<string, mixed>  $attrs */
 	private function decorateClasses(Modifier $modifier, array &$attrs): void
 	{
-		if ($modifier->classes || $modifier->id !== null) {
-			$allowedClasses = $this->classes ??= is_array($this->policy->allowedClasses)
-				? array_flip($this->policy->allowedClasses)
-				: $this->policy->allowedClasses;
-			settype($attrs['class'], 'array');
-			if ($allowedClasses === true) {
-				foreach ($modifier->classes as $value => $foo) {
-					$attrs['class'][] = $value;
-				}
-
-				$attrs['id'] = $modifier->id;
-
-			} elseif (is_array($allowedClasses)) {
-				foreach ($modifier->classes as $value => $foo) {
-					if (isset($allowedClasses[$value])) {
-						$attrs['class'][] = $value;
-					}
-				}
-
-				if (isset($allowedClasses['#' . $modifier->id])) {
-					$attrs['id'] = $modifier->id;
-				}
+		foreach ($modifier->classes as $class => $foo) {
+			if ($this->policy->isClassAllowed($class)) {
+				$attrs['class'] = (array) ($attrs['class'] ?? []);
+				$attrs['class'][] = $class;
 			}
+		}
+
+		if ($modifier->id !== null && $this->policy->isIdAllowed($modifier->id)) {
+			$attrs['id'] = $modifier->id;
 		}
 	}
 
@@ -125,21 +78,10 @@ final class ElementDecorator
 	/** @param  array<string, mixed>  $attrs */
 	private function decorateStyles(Modifier $modifier, array &$attrs): void
 	{
-		if ($modifier->styles) {
-			$allowedStyles = $this->styles ??= is_array($this->policy->allowedStyles)
-				? array_flip(array_map(Modifier::normalizeProperty(...), $this->policy->allowedStyles))
-				: $this->policy->allowedStyles;
-			settype($attrs['style'], 'array');
-			if ($allowedStyles === true) {
-				foreach ($modifier->styles as $prop => $value) {
-					$attrs['style'][$prop] = $value;
-				}
-			} elseif (is_array($allowedStyles)) {
-				foreach ($modifier->styles as $prop => $value) {
-					if (isset($allowedStyles[$prop])) {
-						$attrs['style'][$prop] = $value;
-					}
-				}
+		foreach ($modifier->styles as $prop => $value) {
+			if ($this->policy->isStyleAllowed($prop)) {
+				$attrs['style'] = (array) ($attrs['style'] ?? []);
+				$attrs['style'][$prop] = $value;
 			}
 		}
 	}

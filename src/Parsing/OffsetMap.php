@@ -24,6 +24,9 @@ final class OffsetMap
 	/** @var array<int, int>  local offset of line start => absolute offset in source (ascending keys) */
 	private array $map = [];
 
+	/** @var ?list<int>  keys of $map, read when an offset is first looked up */
+	private ?array $starts = null;
+
 
 	/**
 	 * @param  array<int, int>  $map  local offset of line start => absolute offset in source (ascending keys)
@@ -33,6 +36,18 @@ final class OffsetMap
 	{
 		foreach ($map as $local => $absolute) {
 			$this->map[$local - $skipped] = $absolute;
+		}
+	}
+
+
+	/**
+	 * Adds the start of a line appended to the mapped text.
+	 */
+	public function add(int $local, int $absolute): void
+	{
+		$this->map[$local] = $absolute;
+		if ($this->starts !== null) {
+			$this->starts[] = $local;
 		}
 	}
 
@@ -131,21 +146,26 @@ final class OffsetMap
 	 */
 	public function toAbsolute(int $local): int
 	{
-		$lineStart = null;
-		foreach ($this->map as $localLineStart => $_) {
-			if ($localLineStart <= $local) {
-				$lineStart = $localLineStart;
+		$starts = $this->starts ??= array_keys($this->map);
+		if (!$starts) {
+			return $local;
+		} elseif ($local < $starts[0]) {
+			return $this->map[$starts[0]];
+		}
+
+		// the last start that is not behind the offset
+		$low = 0;
+		$high = count($starts) - 1;
+		while ($low < $high) {
+			$middle = ($low + $high + 1) >> 1;
+			if ($starts[$middle] <= $local) {
+				$low = $middle;
 			} else {
-				break;
+				$high = $middle - 1;
 			}
 		}
 
-		if ($lineStart === null) {
-			$first = reset($this->map);
-			return $first === false ? $local : $first;
-		}
-
-		return $this->map[$lineStart] + ($local - $lineStart);
+		return $this->map[$starts[$low]] + ($local - $starts[$low]);
 	}
 
 

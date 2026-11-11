@@ -48,7 +48,7 @@ All classes live in the `Texy` namespace; modules in `Texy\Modules`, AST nodes i
    - `DirectiveModule::processDirectives()` – consumes `{{texy: …}}` directives into `DocumentNode::$meta` (e.g. `$meta['nofollow']`) and dispatches other directives to the handlers of `$texy->config->addDirective()`; running first, a handler may still change configuration the later passes depend on,
    - `ImageModule` / `LinkReferenceModule` `resolveReferences()` – resolves `[ref]` and `[*ref*]` references against collected definitions,
    - `HeadingModule::processHeadings()` – level balancing of `HeadingBalancing::Dynamic` and `{toc: …}` hoisting,
-   - and the common passes of `DocumentPasses`: `HtmlPairingPass` and `HtmlSanitizePass` (pairing and the tag whitelist, see [rendering.md](rendering.md#html-passthrough-transform-passes)), `HeadingPass` (shift by `headingTop`, IDs).
+   - and the common passes of `DocumentPasses`: `HtmlPairingPass` and `HtmlSanitizePass` (pairing, and the policy of tags, URLs and modifiers, see [rendering.md](rendering.md#html-passthrough-transform-passes)), `HeadingPass` (shift by `headingTop`, IDs).
 
    The **typography pass** (below) is the common `Stage::Finalize` pass. A document goes through a transformation once, whichever instance or language asks for it: the state is held on the document, a second `transform()` throws `LogicException`, and a document whose transformation failed has to be parsed again.
 

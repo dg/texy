@@ -125,6 +125,17 @@ final class WellFormer
 	public function raw(string $html): void
 	{
 		$offset = 0;
+		$item = reset($this->tagStack);
+		if ($item && Schema::isRawText($item['tag'])) {
+			// the content of script and style is no markup: it goes out as it is, or not at all with a dropped element
+			$offset = stripos($html, '</' . $item['tag']);
+			$offset = $offset === false ? strlen($html) : $offset;
+			if ($item['open'] !== null) {
+				$this->flushText();
+				$this->appendPre(substr($html, 0, $offset));
+			}
+		}
+
 		$matches = Regexp::matchAll(
 			$html,
 			'~
@@ -132,6 +143,7 @@ final class WellFormer
 				< (?: (!--.*--) | (/?) ([a-z][a-z0-9._:-]*) (|[ \n].*) \s* (/?) ) >
 			~Uisx',
 			captureOffset: true,
+			offset: $offset,
 		);
 
 		foreach ($matches as $m) {

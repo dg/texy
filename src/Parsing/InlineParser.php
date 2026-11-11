@@ -21,18 +21,8 @@ class InlineParser
 {
 	public function __construct(
 		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}> */
-		public array $patterns,
+		private array $patterns,
 	) {
-	}
-
-
-	/** @param \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null) $handler */
-	public function addPattern(string $name, string $pattern, \Closure $handler): void
-	{
-		$this->patterns[$name] = [
-			'pattern' => $pattern,
-			'handler' => $handler,
-		];
 	}
 
 

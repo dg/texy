@@ -29,7 +29,7 @@
  */
 
 use Texy\{Modifier, Range, Syntax};
-use Texy\Nodes\{DivNode, PhraseNode};
+use Texy\Nodes\{DivNode, PhraseNode, PhraseType};
 use Texy\Parsing\ParseContext;
 
 if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may not be installed
@@ -48,8 +48,8 @@ $texy->allowedSyntax[Syntax::EmphasisSingleAsterisk] = false;  // Disables *text
 $texy->allowedSyntax[Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 
 // Strong and emphasized phrases are rendered as <b> and <i> instead of <strong> and <em>
-$texy->htmlOutput->phraseTags[Syntax::Strong] = 'b';
-$texy->htmlOutput->phraseTags[Syntax::Emphasis] = 'i';
+$texy->htmlOutput->phraseTags[PhraseType::Strong->value] = 'b';
+$texy->htmlOutput->phraseTags[PhraseType::Emphasis->value] = 'i';
 
 
 // ============================================================
@@ -74,7 +74,7 @@ $texy->addInlineSyntax(
 
 		return new PhraseNode(
 			$content,
-			Syntax::Strong, // the same phrase as **bold** creates
+			PhraseType::Strong, // the same phrase as **bold** creates
 			Modifier::parse($mMod),
 			new Range($offsets[0], strlen($matches[0])),
 		);
@@ -97,7 +97,7 @@ $texy->addInlineSyntax(
 
 		return new PhraseNode(
 			$content,
-			Syntax::Emphasis,
+			PhraseType::Emphasis,
 			Modifier::parse($mMod),
 			new Range($offsets[0], strlen($matches[0])),
 		);

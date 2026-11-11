@@ -58,7 +58,7 @@ class Texy
 
 	public function __construct()
 	{
-		$this->engine = new Engine;
+		$this->engine = new Engine('Texy');
 		$this->config = new TexyConfig;
 		$this->urlPolicy = new UrlPolicy;
 		$this->htmlPolicy = new HtmlPolicy($this->urlPolicy);
@@ -109,7 +109,7 @@ class Texy
 	/** Lets modules register their patterns, which depend on the current configuration. */
 	private function registerModules(): void
 	{
-		Compat\Texy3::moveSwitches($this);
+		Compat\Texy3::moveSettings($this);
 		$this->config->validate();
 		foreach ($this->modules as $module) {
 			$module->register($this->engine);
@@ -129,7 +129,7 @@ class Texy
 		callable $parser,
 	): void
 	{
-		$this->engine->addInlineSyntax($name, $pattern, $parser(...));
+		$this->engine->addInline($name, $pattern, $parser, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
@@ -144,7 +144,7 @@ class Texy
 		callable $parser,
 	): void
 	{
-		$this->engine->addBlockSyntax($name, $pattern, $parser(...));
+		$this->engine->addBlock($name, $pattern, $parser, application: true);
 		$this->allowedSyntax[$name] ??= true;
 	}
 
@@ -183,6 +183,7 @@ class Texy
 	 */
 	public function createHtmlRenderer(): Output\Html\Renderer
 	{
+		Compat\Texy3::moveSettings($this);
 		return new Output\Html\Renderer($this->htmlOutput, $this->htmlPolicy, $this->urlPolicy);
 	}
 
@@ -240,12 +241,12 @@ class Texy
 	 * and soft hyphens, right-trims lines and drops blank lines at both ends, keeping the newline
 	 * that ends the last line, so a file stays a file. Idempotent,
 	 * so it is safe to apply before storing text and again before parsing.
-	 * @throws InvalidArgumentException when the input is not valid UTF-8
+	 * @throws InvalidInputException when the input is not valid UTF-8
 	 */
 	public static function normalize(string $text): string
 	{
 		if (!preg_match('##u', $text)) {
-			throw new InvalidArgumentException('Input is not valid UTF-8 text.');
+			throw new InvalidInputException('Input is not valid UTF-8 text.');
 		}
 
 		// standardize line endings to unix-like

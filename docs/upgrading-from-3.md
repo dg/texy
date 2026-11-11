@@ -18,7 +18,7 @@ old names to the new ones.
 
 ## Requirements
 
-Texy 4 requires PHP 8.4–8.6 (v3 ran on PHP 8.0+). The Latte integration requires Latte 3.1.7.
+Texy 4 requires PHP 8.4–8.6 (v3 ran on PHP 8.0+) and the mbstring extension. The generated IDs of headings (`$texy->config->headingIds`) need the intl extension. The Latte integration requires Latte 3.1.7.
 
 ## Behavioral changes
 
@@ -34,8 +34,11 @@ Texy 4 requires PHP 8.4–8.6 (v3 ran on PHP 8.0+). The Latte integration requir
   characters and trailing whitespace. It is idempotent and runs as the first
   step of every entry point, so it is also suitable for cleaning text before
   storage. The `preprocess()` step is gone.
-- **Invalid UTF-8 input throws** `Texy\InvalidArgumentException` immediately
-  instead of failing later inside a random regular expression.
+- **Invalid UTF-8 input throws** `Texy\InvalidInputException` immediately
+  instead of failing later inside a random regular expression. Whatever the
+  text itself causes is a `Texy\Exception`, so an application processing
+  foreign text catches that one; an error in the use of the library is a
+  `\LogicException`.
 - **Headings, TOC and metadata live in the document**, not in module state:
   read them via `$document->getHeadings()` on the AST returned by
   `parse()` and completed by `transform()`. They no longer expire on the next `toHtml()` call.
@@ -73,7 +76,7 @@ Where the Texy 3 properties live now:
 | `$texy->htmlOutputModule->indent` etc. | `$texy->htmlOutput->indent` etc. |
 | `$texy->imageModule->root`, `fileRoot` | `$texy->htmlOutput->imageBaseUrl`, `imageBasePath` |
 | `$texy->linkModule->root`, `forceNoFollow`, `shorten` | `$texy->htmlOutput->linkBaseUrl`, `linkNoFollow`, `shortenUrls` |
-| `$texy->phraseModule->tags` | `$texy->htmlOutput->phraseTags` |
+| `$texy->phraseModule->tags` | `$texy->htmlOutput->phraseTags`, keyed by what the phrase means (`'emphasis'`) instead of the syntax (`'phrase/em'`); the old keys are converted with a deprecation |
 | `$texy->emoticonModule->class` | `$texy->htmlOutput->emoticonClass` |
 | `$texy->urlSchemeFilters`, `Texy::checkURL()` | `$texy->urlPolicy` |
 
@@ -167,4 +170,5 @@ The string values of `Syntax::*` constants - the keys of `$texy->allowedSyntax` 
 are deliberately frozen at their v3 spellings (`'longwords'`, `'script'`,
 `'horizline'`, ...), so v3 configuration arrays keep working unchanged. Use
 the `Syntax::*` constants in new code; the constant names are the readable
-API, the values are a stable wire format.
+API, the values are a stable wire format. The keys of `phraseTags` are no longer
+syntax names but what a phrase means, so that one tag serves every notation of it.

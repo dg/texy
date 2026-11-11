@@ -110,3 +110,25 @@ test('attribute vs. style disambiguation', function () {
 		$texy->process('Text .{about: https://example.com/; vocab: https://schema.org/; typeof: Book; property: dc:title; resource: #book; datatype: rdf:HTML; prefix: dc: http://purl.org/dc/terms/; color: red}'),
 	);
 });
+
+
+test('an attribute name is a name, otherwise it is not an attribute', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->lineWrap = 0;
+
+	Assert::same(['data-a.b_c' => '1', 'aria-label' => 'x'], Texy\Modifier::parse('{data-a.b_c: 1; aria-label: x}')->attrs);
+	Assert::same([], Texy\Modifier::parse('{data-a onclick=alert(1) x: y}')->attrs);
+	Assert::match(
+		'<p style="data-a onclick=alert(1) x:y">Text</p>',
+		$texy->toHtml('Text .{data-a onclick=alert(1) x: y}'),
+	);
+	Assert::same('', Texy\Output\Html\Element::formatAttrs(['a b' => 'x', 'a"' => 'x', 'a=' => 'x', '' => 'x']));
+});
+
+
+test('an unclosed bracket ends the modifier', function () {
+	Assert::equal(new Texy\Modifier, Texy\Modifier::parse('{{'));
+	Assert::equal(new Texy\Modifier, Texy\Modifier::parse('[a'));
+	Assert::equal(new Texy\Modifier, Texy\Modifier::parse('(a'));
+	Assert::equal(new Texy\Modifier(classes: ['a']), Texy\Modifier::parse('[a]{b'));
+});

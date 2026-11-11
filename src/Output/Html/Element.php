@@ -108,8 +108,8 @@ class Element
 	{
 		$s = '';
 		foreach ($attrs as $key => $value) {
-			if ($value === null || $value === false) {
-				continue; // skip nulls and false boolean attributes
+			if ($value === null || $value === false || !preg_match('~^[^\s"\'<>/=]+$~D', (string) $key)) {
+				continue; // skip nulls, false boolean attributes and what is not an attribute name
 
 			} elseif ($value === true) {
 				$s .= ' ' . $key; // true boolean attribute

@@ -7,7 +7,8 @@
 
 namespace Texy\Compat;
 
-use Texy\{HeadingBalancing, Texy};
+use Texy\{HeadingBalancing, Syntax, Texy};
+use Texy\Nodes\PhraseType;
 use function array_key_exists, is_array, is_string, sprintf;
 
 
@@ -162,6 +163,13 @@ final class Texy3
 
 	private const PassSwitches = ['typography' => 'typography', 'longwords' => 'hyphenation'];
 
+	/** keys of phraseTags as Texy 3 had them that are no phrase of a meaning, and their keys now; null means none */
+	private const PhraseTagKeys = [
+		Syntax::StrongEmphasis => null,
+		Syntax::Code => 'code',
+		Syntax::QuickLink => null,
+	];
+
 	/** @var array<string, ModuleProxy> */
 	private array $proxies = [];
 
@@ -175,8 +183,11 @@ final class Texy3
 	}
 
 
-	/** Moves the switches of passes, which $allowedSyntax does not hold any more, to the configuration. */
-	public static function moveSwitches(Texy $texy): void
+	/**
+	 * Moves the settings Texy 3 kept elsewhere: the switches of passes, which $allowedSyntax does not hold
+	 * any more, to the configuration, and the phrase tags keyed by syntax to the keys of what they mean.
+	 */
+	public static function moveSettings(Texy $texy): void
 	{
 		foreach (self::PassSwitches as $key => $property) {
 			if (array_key_exists($key, $texy->allowedSyntax)) {
@@ -184,6 +195,20 @@ final class Texy3
 				$texy->config->$property = (bool) $texy->allowedSyntax[$key];
 				unset($texy->allowedSyntax[$key]);
 			}
+		}
+
+		$tags = &$texy->htmlOutput->phraseTags;
+		$keys = self::PhraseTagKeys + array_map(fn(PhraseType $type) => $type->value, Syntax::PhraseTypes);
+		foreach (array_intersect_key($tags, $keys) as $key => $tag) {
+			$new = $keys[$key];
+			trigger_error(
+				"phraseTags['$key'] is deprecated, " . ($new === null ? 'it has no effect.' : "use phraseTags['$new'] instead."),
+				E_USER_DEPRECATED,
+			);
+			if ($new !== null) {
+				$tags[$new] = $tag;
+			}
+			unset($tags[$key]);
 		}
 	}
 

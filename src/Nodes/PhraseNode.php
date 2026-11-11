@@ -18,9 +18,11 @@ class PhraseNode extends InlineNode implements HasModifier
 {
 	public function __construct(
 		public ContentNode $content,
-		public string $type,
+		public PhraseType $type,
 		public ?Modifier $modifier = null,
 		public ?Range $range = null,
+		/** name of the syntax the phrase is written in, e.g. Syntax::EmphasisSingleAsterisk */
+		public ?string $syntax = null,
 	) {
 	}
 

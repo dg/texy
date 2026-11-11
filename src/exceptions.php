@@ -8,13 +8,24 @@
 namespace Texy;
 
 
+/**
+ * Processing failed on the text; an error in the use of the library is a \LogicException.
+ */
 class Exception extends \Exception
 {
 }
 
 
 /**
- * Regular expression pattern or execution failed.
+ * The input is not valid UTF-8 text.
+ */
+class InvalidInputException extends Exception
+{
+}
+
+
+/**
+ * Matching the text exhausted a limit of PCRE; a pattern that does not compile is a \LogicException.
  */
 class RegexpException extends Exception
 {
@@ -24,7 +35,7 @@ class RegexpException extends Exception
 /**
  * A replacement does not fit the source: it overlaps another one or finds other text than expected.
  */
-class RewriteException extends Exception
+class RewriteException extends \LogicException
 {
 }
 

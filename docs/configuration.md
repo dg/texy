@@ -66,7 +66,7 @@ $texy->htmlPolicy->allowedStyles = ['color'];
 
 ### $urlPolicy
 
-URL scheme security policy (`Texy\UrlPolicy`): a regex of allowed link schemes and one for image schemes. A null pattern means no restriction. Only absolute URLs with a scheme are checked; scheme-less (relative) URLs always pass. A rejected link keeps its text. A rejected image stays as source text in Texy syntax; an image node from elsewhere (a custom syntax, another parser) renders as its alternative text.
+URL scheme security policy (`Texy\UrlPolicy`): a regex of allowed link schemes and one for image schemes. A null pattern means no restriction. Only absolute URLs with a scheme are checked; scheme-less (relative) URLs always pass. A rejected link keeps its text. A rejected image stays as source text in Texy syntax; an image node from elsewhere (a custom syntax, another parser) renders as its alternative text. The policy is applied in the transform phase, so renderer handlers and other output formats see the document after it.
 
 ```php
 $texy->urlPolicy->linkPattern = '~https?:|ftp:|mailto:~A';
@@ -119,7 +119,7 @@ $g->imageBasePath = null;              // directory of the image files, sizes ar
 $g->figureTag = 'figure';               // <figure>/<figcaption>; another element puts the caption in <p>
 $g->figureClass = null;                 // class of every figure, a floated one gets its float class too
 $g->horizontalRuleClasses = ['-' => null, '*' => null];  // CSS class per HR type
-$g->phraseTags['phrase/strong'] = 'b';  // change the tag a phrase syntax renders to
+$g->phraseTags['strong'] = 'b';  // the tag of a phrase by what it means (PhraseType values), 'code' for inline code
 ```
 
 ## Output formatting ($texy->htmlOutput)
@@ -162,7 +162,7 @@ foreach ($headings as $heading) {
 }
 ```
 
-`HeadingNode::$id` is the effective anchor: an explicit `.[#id]` written by the author, or the generated one. A generated ID is written by the engine, so it survives safe mode; an author's `.[#id]` goes through the `allowedClasses` policy like any other modifier.
+`HeadingNode::$id` is the effective anchor: an explicit `.[#id]` written by the author, or the generated one. A generated ID is written by the engine, so it survives safe mode; an author's `.[#id]` goes through the `allowedClasses` policy like any other modifier, and one the policy rejects gives way to a generated ID.
 
 ### Phrases
 
@@ -268,7 +268,7 @@ Disables `image`, `figure`, `image/definition` and removes `img`, `object`, `emb
 
 Texy's protections against common attacks are activated by safe mode – enable it whenever you process untrusted input.
 
-**XSS.** In safe mode Texy validates HTML (removing disallowed tags and attributes, including event handlers like `onclick`), filters URLs to safe schemes (blocking `javascript:` and `data:` URLs – dangerous `<a href>`/`<img src>` drop the whole tag), and escapes text content properly:
+**XSS.** In safe mode Texy validates HTML (showing disallowed tags as text and removing disallowed attributes, including event handlers like `onclick`), filters URLs to safe schemes (blocking `javascript:` and `data:` URLs – an `<a href>`/`<img src>` with such a URL is shown as text whole), and escapes text content properly:
 
 ```texy
 <script>alert('XSS')</script>          → shown as text
@@ -277,6 +277,8 @@ Texy's protections against common attacks are activated by safe mode – enable 
 ```
 
 **URL validation** applies to all links and images via `$urlPolicy` (see above). Only absolute URLs with a scheme are checked; relative URLs always pass.
+
+**Errors.** Whatever the text itself causes throws a `Texy\Exception`: invalid UTF-8 is an `InvalidInputException`, a document exhausting a PCRE limit a `RegexpException`. Code processing foreign text catches `Texy\Exception`; an error in the use of the library, such as an invalid configuration, a pattern of a syntax that does not compile or a replacement that does not fit the source of `Rewriter`, is a `\LogicException`.
 
 Recommended practice for user content:
 

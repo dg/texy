@@ -5,7 +5,7 @@
  */
 
 use Tester\Assert;
-use Texy\Nodes\{ContentNode, PhraseNode, TextNode};
+use Texy\Nodes\{ContentNode, PhraseNode, PhraseType, TextNode};
 use Texy\Parsing\{InlineParser, ParseContext};
 use Texy\{Range, Texy};
 
@@ -28,9 +28,10 @@ function createPhraseHandler(string $type): Closure
 		$contentOffset = $offsets[1] ?? $offsets[0];
 		return new PhraseNode(
 			new ContentNode([new TextNode($content, new Range($contentOffset, strlen($content)))]),
-			$type,
+			PhraseType::Span,
 			null,
 			new Range($offsets[0], strlen($matches[0])),
+			$type,
 		);
 	};
 }
@@ -57,7 +58,7 @@ function assertNodes(array $expected, ContentNode $content): void
 		if ($type === TextNode::class) {
 			Assert::same($content, $actual[$i]->text, "TextNode $i content mismatch");
 		} elseif ($type === PhraseNode::class) {
-			Assert::same($content, $actual[$i]->type, "PhraseNode $i type mismatch");
+			Assert::same($content, $actual[$i]->syntax, "PhraseNode $i syntax mismatch");
 		}
 	}
 }
@@ -269,9 +270,10 @@ test('null tries alternative pattern at same position', function () {
 				$secondHandlerCalled = true;
 				return new PhraseNode(
 					new ContentNode([new TextNode($matches[1])]),
-					'second',
+					PhraseType::Span,
 					null,
 					new Range($offsets[0], strlen($matches[0])),
+					'second',
 				);
 			},
 		],
@@ -433,19 +435,6 @@ test('no patterns registered returns single TextNode', function () {
 
 	assertNodes([
 		[TextNode::class, 'some text'],
-	], $nodes);
-});
-
-
-test('addPattern method works', function () {
-	$parser = new InlineParser([]);
-
-	$parser->addPattern('bold', '~\*\*(.+?)\*\*~', createPhraseHandler('phrase/strong'));
-
-	$nodes = $parser->parse(createContext(), '**text**');
-
-	assertNodes([
-		[PhraseNode::class, 'phrase/strong'],
 	], $nodes);
 });
 
