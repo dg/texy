@@ -136,11 +136,16 @@ class Regexp
 	public static function pcre(string $func, array $args): mixed
 	{
 		assert(is_callable($func));
+		error_clear_last();
 		$res = @$func(...$args); // @ is escalated to exception
 		if (($code = preg_last_error()) // run-time error, but preg_last_error & return code are liars
 			&& ($res === null || !in_array($func, ['preg_replace_callback', 'preg_replace'], true))
 		) {
-			throw new RegexpException(preg_last_error_msg() . ' (pattern: ' . implode(' or ', (array) $args[0]) . ')', $code);
+			$pattern = ' (pattern: ' . implode(' or ', (array) $args[0]) . ')';
+			$compilation = strstr(error_get_last()['message'] ?? '', 'Compilation failed');
+			throw $compilation === false
+				? new RegexpException(preg_last_error_msg() . $pattern, $code)
+				: new \LogicException($compilation . $pattern); // a pattern that does not compile is a bug, not bad text
 		}
 
 		return $res;
