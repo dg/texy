@@ -391,11 +391,13 @@ final class Renderer extends NodeRenderer
 
 	private function renderListItem(Nodes\ListItemNode $node): Element
 	{
-		if ($this->list instanceof Nodes\DefinitionListNode) {
+		$list = $this->list;
+		$this->list = null; // the content of the item belongs to no list, a nested one rendered by a handler included
+		if ($list instanceof Nodes\DefinitionListNode) {
 			return $this->renderDefinitionItem($node);
 		}
 
-		$paragraphs = $this->list->paragraphs ?? Nodes\ItemParagraphs::FirstUnwrapped;
+		$paragraphs = $list->paragraphs ?? Nodes\ItemParagraphs::FirstUnwrapped;
 		$el = new Element('li');
 		$this->decorateElement($node->modifier, $el);
 		$el->children = $this->renderItemContent($node->content->children, $paragraphs);
@@ -429,9 +431,9 @@ final class Renderer extends NodeRenderer
 	private function renderItems(Nodes\ListNode|Nodes\DefinitionListNode $list, Element $el): void
 	{
 		$outer = $this->list;
-		$this->list = $list;
 		try {
 			foreach ($list->items as $item) {
+				$this->list = $list;
 				$el->add($this->renderNode($item));
 			}
 		} finally {

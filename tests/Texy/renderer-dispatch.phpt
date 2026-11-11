@@ -74,6 +74,25 @@ test('a renderer serves the nodes a list or a table holds', function () {
 });
 
 
+test('a list rendered by a handler inside an item is no item of the outer list', function () {
+	$texy = new Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	$texy->htmlOutput->indent = false;
+	$texy->htmlOutput->addRenderer(function (Nodes\ListNode $node, Html\Renderer $renderer) {
+		$el = new Html\Element('ul', ['class' => 'custom']);
+		foreach ($node->items as $item) {
+			$el->add($renderer->renderNode($item));
+		}
+		return $el;
+	});
+
+	Assert::same(
+		'<dl><dt>term</dt><dd>definition<ul class="custom"><li>nested a</li><li>nested b</li></ul></dd></dl>',
+		$texy->toHtml("term:\n  - definition\n\n    - nested a\n    - nested b\n"),
+	);
+});
+
+
 test('a renderer of every built-in class is dispatched to', function () {
 	$texy = new Texy;
 	$texy->allowedSyntax[Syntax::Emoticon] = true;
