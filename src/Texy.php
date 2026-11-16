@@ -22,7 +22,7 @@ use Texy\Parsing\{Engine, ParseContext};
 class Texy
 {
 	// Texy version
-	public const Version = '4.0.0-dev';
+	public const Version = '4.0.0';
 
 	#[\Deprecated('use Texy::Version', since: '4.0')]
 	public const VERSION = self::Version;
