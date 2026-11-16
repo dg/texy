@@ -27,15 +27,29 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 
 
 $texy = new Texy;
-$texy->htmlOutputModule->baseIndent = 1;
 
 
 /**
  * Helper function to process and display the text
  */
-function doIt($texy)
+function processAndShow(Texy $texy): void
 {
-	$text = file_get_contents(__DIR__ . '/sample.texy');
+	$text = <<<'TEXY'
+		This <strong>example</strong> shows how <a href=https://texy.deegee.dev title='Texy! excellent text-to-html converter & formatter'>Texy!</a> handle HTML tags.
+
+		Dangerous <span onmouseover="alert('onmouseover')">span</span>
+
+		<div id="page">
+		 Hello!
+		</div>
+
+
+		<my-extraTag attr1="10">
+
+		"Homepage .{target: _blank}":texy.deegee.dev
+
+		</my-extraTag>
+		TEXY;
 	$html = $texy->process($text);
 
 	// Show the rendered output
@@ -59,7 +73,7 @@ echo '<link rel="stylesheet" href="../style.css">';
 // like onclick are removed.
 // ============================================================
 echo '<h2>Enable nearly all valid tags</h2>';
-doIt($texy);
+processAndShow($texy);
 
 
 // ============================================================
@@ -69,7 +83,7 @@ doIt($texy);
 // ============================================================
 echo '<h2>Texy::ALL - enables all tags</h2>';
 $texy->allowedTags = $texy::ALL;
-doIt($texy);
+processAndShow($texy);
 
 
 // ============================================================
@@ -79,7 +93,7 @@ doIt($texy);
 // ============================================================
 echo '<h2>safeMode() - enables only some "safe" tags</h2>';
 Texy\Configurator::safeMode($texy);
-doIt($texy);
+processAndShow($texy);
 
 
 // ============================================================
@@ -88,7 +102,7 @@ doIt($texy);
 // ============================================================
 echo '<h2>disableLinks() - disable all links</h2>';
 Texy\Configurator::disableLinks($texy);
-doIt($texy);
+processAndShow($texy);
 
 
 // ============================================================
@@ -98,7 +112,7 @@ doIt($texy);
 // ============================================================
 echo '<h2>Texy::NONE - disables all tags</h2>';
 $texy->allowedTags = $texy::NONE;
-doIt($texy);
+processAndShow($texy);
 
 
 // ============================================================
@@ -112,4 +126,4 @@ $texy->allowedTags = [
 	'my-extraTag' => ['attr1'],  // Allow <my-extraTag attr1="...">
 	'strong' => [],              // Allow <strong> with no attributes
 ];
-doIt($texy);
+processAndShow($texy);

@@ -39,7 +39,7 @@ $texy = new Texy;
 $texy->allowed['phrase/strong+em'] = false;  // Disables ***text***
 $texy->allowed['phrase/strong'] = false;     // Disables **text**
 $texy->allowed['phrase/em-alt'] = false;     // Disables *text*
-$texy->allowed['phrase/em-alt2'] = false;    // Disables *text*
+$texy->allowed['phrase/em-alt2'] = false;    // Disables *text* (second variant)
 
 
 // ============================================================
@@ -97,7 +97,7 @@ function userInlineHandler(Texy\LineParser $parser, array $matches, string $name
 	$mod->decorate($texy, $el);
 
 	// Add our own class to all elements
-	$el->attrs['class'] = 'myclass';
+	$el->attrs['class'][] = 'myclass';
 
 	// Set the text content
 	$el->setText($mContent);
@@ -140,7 +140,15 @@ function userBlockHandler(Texy\BlockParser $parser, array $matches, string $name
 
 
 // Process the text
-$text = file_get_contents(__DIR__ . '/syntax.texy');
+$text = <<<'TEXY'
+	User syntax - this is *bold* and this _italic_
+
+	.h1
+	This is main title
+
+	.perex
+	Welcome to the world of your own syntax :-)
+	TEXY;
 $html = $texy->process($text);
 
 

@@ -27,7 +27,7 @@ $texy = new Texy;
 
 // STEP 2: Configure Texy (all of this is optional)
 
-// Tell Texy where your images are located
+// Tell Texy where your images are located (default is 'images/')
 $texy->imageModule->root = 'images/';
 
 // Enable some text formatting that is disabled by default:
@@ -35,12 +35,10 @@ $texy->imageModule->root = 'images/';
 // --deleted text-- renders as <del>
 // ^^superscript^^ renders as <sup>
 // __subscript__ renders as <sub>
-// visual ""citation"" renders as <cite>
 $texy->allowed['phrase/ins'] = true;
 $texy->allowed['phrase/del'] = true;
 $texy->allowed['phrase/sup'] = true;
 $texy->allowed['phrase/sub'] = true;
-$texy->allowed['phrase/cite'] = true;
 
 
 // STEP 3: Process your Texy text

@@ -69,14 +69,11 @@ $texy = new Texy;
 // Register our custom handler for figures
 $texy->addHandler('figure', 'figureHandler');
 
-// You can also set CSS classes for figures (optional)
-// $texy->figureModule->class = 'figure';
-// $texy->figureModule->leftClass = 'figure-left';
-// $texy->figureModule->rightClass = 'figure-right';
-
 
 // Process the text
-$text = file_get_contents(__DIR__ . '/sample.texy');
+$text = <<<'TEXY'
+	[* image.gif *] *** This is image with description, coded as definition list
+	TEXY;
 $html = $texy->process($text);
 
 

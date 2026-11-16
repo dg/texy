@@ -9,7 +9,6 @@
  *
  * WHAT YOU'LL LEARN:
  * - How to use processTypo() instead of process()
- * - Enable automatic hyphenation of long words
  * - Texy's typographic improvements (quotes, dashes, spaces)
  *
  * WHAT processTypo() DOES:
@@ -31,9 +30,8 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 
 $texy = new Texy;
 
-// Enable hyphenation of long words
-// Long words will get soft hyphens (­) for better text wrapping
-$texy->allowed['longwords'] = true;
+// Long words get soft hyphens for better text wrapping (on by default)
+// $texy->allowed['longwords'] = false;
 
 // Optional: Change the locale for typography rules
 // $texy->typographyModule->locale = 'en';  // English quotes: "text"
@@ -44,7 +42,15 @@ $texy->allowed['longwords'] = true;
 
 // Use processTypo() instead of process()
 // This applies only typography fixes, not full Texy markup
-$text = file_get_contents(__DIR__ . '/sample.texy');
+$text = <<<'TEXY'
+	"Hello"
+
+	(c) John Doe
+
+	tohlejevelmidlouheslovo
+
+	Nedělitelná mezera ve spojení slov v lese.
+	TEXY;
 $html = $texy->processTypo($text);
 
 

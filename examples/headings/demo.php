@@ -28,7 +28,21 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 
 
 $texy = new Texy;
-$text = file_get_contents(__DIR__ . '/sample.texy');
+$text = <<<'TEXY'
+	First level (underlined)
+	========================
+
+	Second level (underlined)
+	-------------------------
+
+	##### Third level (surrounded)
+
+	#### Fourth level (surrounded)
+
+	### Fifth level (surrounded)
+
+	<h3>Third level (direct HTML)</h3>
+	TEXY;
 
 
 // ============================================================
@@ -108,5 +122,7 @@ echo '<hr>';
 
 echo '<h2>Table of contents</h2>';
 echo '<pre>';
-// print_r($texy->headingModule->TOC);
+foreach ($texy->headingModule->TOC as $item) {
+	echo $item['el']->getName() . ': ' . htmlspecialchars($item['title'] ?? '') . "\n";
+}
 echo '</pre>';

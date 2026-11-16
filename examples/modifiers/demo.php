@@ -12,11 +12,11 @@
  * - How to create a whitelist of specific allowed classes/styles
  * - Why this matters for security with user input
  *
- * TEXY MODIFIER SYNTAX:
- * **text** .{color:red}           - adds inline style
- * **text** .[myclass]             - adds CSS class
- * **text** .[myclass #myid]       - adds class and ID
- * **text** .{color:red}[myclass]  - combines both
+ * TEXY MODIFIER SYNTAX (placed at the end, inside the element):
+ * **text .{color:red}**           - adds inline style
+ * **text .[myclass]**             - adds CSS class
+ * **text .[myclass #myid]**       - adds class and ID
+ * **text .{color:red}[myclass]**  - combines both
  *
  * SECURITY NOTE:
  * If you're processing user input, consider using allowedClasses and
@@ -30,15 +30,19 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
 
 
 $texy = new Texy;
-$texy->htmlOutputModule->baseIndent = 1;
 
 
 /**
  * Helper function to process and display the text
  */
-function doIt($texy)
+function processAndShow(Texy $texy): void
 {
-	$text = file_get_contents(__DIR__ . '/sample.texy');
+	$text = <<<'TEXY'
+		This **text is formatted .{color:silver; background: blue;}** with *style .{font-weight: bold}* modifiers.
+
+
+		And this "text has defined .[one two #id]" class and id names.
+		TEXY;
 	$html = $texy->process($text);
 
 	// Show the rendered output
@@ -63,7 +67,7 @@ echo '<link rel="stylesheet" href="../style.css">';
 echo '<h2>mode: Styles and Classes allowed (default)</h2>';
 $texy->allowedClasses = true;
 $texy->allowedStyles = true;
-doIt($texy);
+processAndShow($texy);
 
 
 // ============================================================
@@ -74,7 +78,7 @@ doIt($texy);
 echo '<h2>mode: Styles and Classes disabled</h2>';
 $texy->allowedClasses = false;
 $texy->allowedStyles = false;
-doIt($texy);
+processAndShow($texy);
 
 
 // ============================================================
@@ -86,4 +90,4 @@ doIt($texy);
 echo '<h2>mode: Custom</h2>';
 $texy->allowedClasses = ['one', '#id'];  // Note: IDs are prefixed with #
 $texy->allowedStyles = ['color'];
-doIt($texy);
+processAndShow($texy);

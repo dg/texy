@@ -13,14 +13,14 @@
  * - How to intercept and modify images using a handler
  * - How to set image folder paths
  * - How to add CSS classes for left/right aligned images
- * - How to set a default alt text
  * - How to get a list of all images used in the document
  *
  * TEXY IMAGE SYNTAX:
  * [* image.gif *]           - simple image
  * [* image.gif *]:link.html - image as a link
- * [*< image.gif *]          - left-aligned image
- * [*> image.gif *]          - right-aligned image
+ * [* image.gif *]::         - image linked to its full-size version
+ * [* image.gif <]           - left-aligned image
+ * [* image.gif >]           - right-aligned image
  */
 
 
@@ -46,7 +46,7 @@ function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Te
 
 		// If the image is a link, set the link destination too
 		if ($link) {
-			$link->URL = 'big.gif';
+			$link->URL = 'big/big.gif';
 		}
 	}
 
@@ -60,20 +60,26 @@ $texy = new Texy;
 // Register our custom image handler
 $texy->addHandler('image', 'imageHandler');
 
-// Configure image paths
-$texy->imageModule->root = 'imagesdir/';           // Base folder for images
-$texy->imageModule->linkedRoot = 'imagesdir/big/'; // Folder for linked/full-size images
+// Base folder for images (default is 'images/')
+$texy->imageModule->root = 'images/';
 
 // CSS classes for aligned images
-$texy->imageModule->leftClass = 'my-left-class';   // Class for [*< ... *] (left-aligned)
-$texy->imageModule->rightClass = 'my-right-class'; // Class for [*> ... *] (right-aligned)
-
-// Default alt text when none is specified
-$texy->imageModule->defaultAlt = 'default alt. text';
+$texy->imageModule->leftClass = 'my-left-class';   // Class for [* ... <] (left-aligned)
+$texy->imageModule->rightClass = 'my-right-class'; // Class for [* ... >] (right-aligned)
 
 
 // Process the text
-$text = file_get_contents(__DIR__ . '/sample.texy');
+$text = <<<'TEXY'
+	[* image.gif <] This is left-aligned image.
+
+	[* image.gif 20x20 .(my alternative text) >] This is right-aligned image with defined dimensions.
+
+	[* image.gif 60 X ?  *] This is image with one maximal dimension defined.
+
+	This is by-cms-defined image [* user *]
+
+	And this is by-cms-defined image with by-cms-defined link [* user *]::
+	TEXY;
 $html = $texy->process($text);
 
 
@@ -92,8 +98,8 @@ echo '</pre>';
 
 // Show all images that were used in the document
 // This is useful for dependency tracking or cache invalidation
-echo '<hr />';
+echo '<hr>';
 echo '<pre>';
-echo 'Used images:';
-// print_r($texy->summary['images']);
+echo "Used images:\n";
+echo implode("\n", array_unique($texy->summary['images']));
 echo '</pre>';

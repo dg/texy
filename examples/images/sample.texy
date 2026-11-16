@@ -1,9 +1,0 @@
-[* image.gif <] This is left-aligned image.
-
-[* image.gif 20x20 .(my alternative text) >] This is right-aligned image with defined dimensions.
-
-[* image.gif 60 X ?  *] This is image with one maximal dimension defined.
-
-This is by-cms-defined image [* user *]
-
-And this is by-cms-defined image with by-cms-defined link [* user *]::

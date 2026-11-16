@@ -11,14 +11,10 @@
  * - How to set a CSS class for emoticon images
  * - How to add your own custom emoticons
  *
- * BUILT-IN EMOTICONS:
- * :-) :-)  smile
- * :-(      sad
- * ;-)      wink
- * :-D      big grin
- * 8-)      cool
- * :-P      tongue out
- * and more...
+ * BUILT-IN EMOTICONS are rendered as Unicode characters:
+ * :-)  🙂    :-(  ☹    ;-)  😉    :-D  😁    :-P  😛    and more...
+ *
+ * An emoticon mapped to a file name is rendered as an <img> instead.
  */
 
 
@@ -35,15 +31,23 @@ $texy = new Texy;
 $texy->allowed['emoticon'] = true;
 
 // Set a CSS class that will be added to all emoticon images
-$texy->emoticonModule->class = 'smilie';
+$texy->emoticonModule->class = 'smiley';
 
 // Add your own custom emoticon
-// When someone types :oops: in the text, it will show redface.gif
+// When someone types :oops: in the text, it will show images/redface.gif
 $texy->emoticonModule->icons[':oops:'] = 'redface.gif';
 
 
 // Process the text
-$text = file_get_contents(__DIR__ . '/sample.texy');
+$text = <<<'TEXY'
+	I feel sometimes :-) and sometimes :-(
+
+	Collapsing of multiple brackets: :-)))))
+
+	User-defined smilies: :oops: I did it again.
+
+	When acronyms and smilies may collide, use spaces:  FBI((Famous But Incompetent :-) ))
+	TEXY;
 $html = $texy->process($text);
 
 

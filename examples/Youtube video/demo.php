@@ -36,39 +36,29 @@ if (@!include __DIR__ . '/../../vendor/autoload.php') { // @ dependencies may no
  */
 function imageHandler(Texy\HandlerInvocation $invocation, Texy\Image $image, ?Texy\Link $link = null): Texy\HtmlElement|string|null
 {
-	// Check if the URL has a custom scheme (like "youtube:VIDEO_ID")
-	$parts = explode(':', $image->URL);
-	if (count($parts) !== 2) {
-		// Not a custom scheme, let Texy handle it normally
+	// Not our "youtube:" scheme, let Texy handle it normally
+	if (!str_starts_with($image->URL, 'youtube:')) {
 		return $invocation->proceed();
 	}
 
-	$scheme = $parts[0];
-	$videoId = $parts[1];
+	$videoId = substr($image->URL, 8);
 
-	// Handle YouTube videos
-	if ($scheme === 'youtube') {
-		// Use the image dimensions for the video size, or defaults
-		$width = $image->width ?: 425;
-		$height = $image->height ?: 350;
+	// Use the image dimensions for the video size, or defaults
+	$width = $image->width ?: 425;
+	$height = $image->height ?: 350;
 
-		// Create the YouTube embed iframe
-		$code = '<iframe'
-			. ' width="' . $width . '"'
-			. ' height="' . $height . '"'
-			. ' src="https://www.youtube.com/embed/' . htmlspecialchars($videoId) . '"'
-			. ' frameborder="0"'
-			. ' allow="autoplay"'
-			. ' allowfullscreen>'
-			. '</iframe>';
+	// Create the YouTube embed iframe
+	$code = '<iframe'
+		. ' width="' . $width . '"'
+		. ' height="' . $height . '"'
+		. ' src="https://www.youtube.com/embed/' . htmlspecialchars($videoId) . '"'
+		. ' allow="autoplay"'
+		. ' allowfullscreen>'
+		. '</iframe>';
 
-		// Tell Texy this is ready-to-use HTML (don't process it further)
-		$texy = $invocation->getTexy();
-		return $texy->protect($code, $texy::CONTENT_BLOCK);
-	}
-
-	// Unknown scheme, let Texy handle it normally
-	return $invocation->proceed();
+	// Tell Texy this is ready-to-use HTML (don't process it further)
+	$texy = $invocation->getTexy();
+	return $texy->protect($code, $texy::CONTENT_BLOCK);
 }
 
 
@@ -79,7 +69,14 @@ $texy->addHandler('image', 'imageHandler');
 
 
 // Process the text
-$text = file_get_contents(__DIR__ . '/sample.texy');
+$text = <<<'TEXY'
+	The Wind
+	--------
+
+	One of the best ads I've seen in a long time:
+
+	[* youtube:2mTLO2F_ERY *]
+	TEXY;
 $html = $texy->process($text);
 
 

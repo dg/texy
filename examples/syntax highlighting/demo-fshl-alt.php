@@ -41,7 +41,13 @@ if (@!include __DIR__ . '/vendor/autoload.php') { // @ dependencies may not be i
 /**
  * Handler for standard /--code blocks (same as demo-fshl.php)
  */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): ?Texy\HtmlElement
+function blockHandler(
+	Texy\HandlerInvocation $invocation,
+	$blocktype,
+	$content,
+	$lang,
+	Texy\Modifier $modifier,
+): Texy\HtmlElement|string|null
 {
 	if ($blocktype !== 'block/code') {
 		return $invocation->proceed();
@@ -55,7 +61,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 	];
 
 	if (!isset($lexers[$lang])) {
-		return null;
+		return $invocation->proceed();
 	}
 
 	$langClass = $lexers[$lang];
@@ -67,9 +73,7 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 	$content = $texy->protect($content, $texy::CONTENT_BLOCK);
 
 	$elPre = new Texy\HtmlElement('pre');
-	if ($modifier) {
-		$modifier->decorate($texy, $elPre);
-	}
+	$modifier->decorate($texy, $elPre);
 	$elPre->attrs['class'] = strtolower($lang);
 	$elPre->create('code', $content);
 
@@ -133,7 +137,7 @@ $html = $texy->process($text);
 
 
 // Display the result with stylesheets
-header('Content-type: text/html; charset=utf-8');
+echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="style.css">';
 echo '<link rel="stylesheet" href="fshl.css">';
 echo '<title>' . $texy->headingModule->title . '</title>';

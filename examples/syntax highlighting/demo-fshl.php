@@ -38,7 +38,13 @@ if (@!include __DIR__ . '/vendor/autoload.php') { // @ dependencies may not be i
  * This handler intercepts /--code blocks and applies syntax highlighting
  * based on the specified language.
  */
-function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, $lang, Texy\Modifier $modifier): ?Texy\HtmlElement
+function blockHandler(
+	Texy\HandlerInvocation $invocation,
+	$blocktype,
+	$content,
+	$lang,
+	Texy\Modifier $modifier,
+): Texy\HtmlElement|string|null
 {
 	// Only handle code blocks, let other blocks pass through
 	if ($blocktype !== 'block/code') {
@@ -53,9 +59,9 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 		'sql' => FSHL\Lexer\Sql::class,
 	];
 
-	// If we don't support this language, skip highlighting
+	// If we don't support this language, render it as plain code
 	if (!isset($lexers[$lang])) {
-		return null;
+		return $invocation->proceed();
 	}
 
 	$langClass = $lexers[$lang];
@@ -73,11 +79,8 @@ function blockHandler(Texy\HandlerInvocation $invocation, $blocktype, $content, 
 
 	// Build the HTML structure: <pre class="php"><code>...</code></pre>
 	$elPre = new Texy\HtmlElement('pre');
-	if ($modifier) {
-		$modifier->decorate($texy, $elPre);
-	}
+	$modifier->decorate($texy, $elPre);
 	$elPre->attrs['class'] = strtolower($lang);
-
 	$elPre->create('code', $content);
 
 	return $elPre;
@@ -96,7 +99,7 @@ $html = $texy->process($text);
 
 
 // Display the result with stylesheets
-header('Content-type: text/html; charset=utf-8');
+echo '<!doctype html><meta charset=utf-8>';
 echo '<link rel="stylesheet" href="style.css">';
 echo '<link rel="stylesheet" href="fshl.css">';
 echo '<title>' . $texy->headingModule->title . '</title>';

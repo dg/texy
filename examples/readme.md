@@ -112,8 +112,8 @@ $texy->registerLinePattern(
 ### Images
 - `[* image.jpg *]` → image
 - `[* image.jpg *]:link` → linked image
-- `[*< image.jpg *]` → left-aligned
-- `[*> image.jpg *]` → right-aligned
+- `[* image.jpg <]` → left-aligned
+- `[* image.jpg >]` → right-aligned
 
 ### Headings
 ```
@@ -148,5 +148,5 @@ echo "Hello";
 
 ## Learn More
 
-- [Texy Documentation](https://texy.info)
+- [Texy Documentation](https://texy.deegee.dev)
 - [GitHub Repository](https://github.com/dg/texy)

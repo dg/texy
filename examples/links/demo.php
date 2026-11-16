@@ -18,7 +18,7 @@
  * TEXY LINK SYNTAX:
  * "link text":url           - basic link
  * "link text":relative-page - relative link (transformed by our handler)
- * "link text":wiki:topic    - custom scheme (transformed to Wikipedia)
+ * "link text":[wiki:topic]  - custom scheme (transformed to Wikipedia)
  */
 
 
@@ -72,7 +72,15 @@ $texy->addHandler('phrase', 'phraseHandler');
 
 
 // Process the text
-$text = file_get_contents(__DIR__ . '/sample.texy');
+$text = <<<'TEXY'
+	Links demo
+	----------
+
+	- "Texy! at Wikipedia":[wiki:texy]
+
+	- "my first page":first-page
+	- "my second page":second-page
+	TEXY;
 $html = $texy->process($text);
 
 
@@ -82,16 +90,17 @@ echo '<link rel="stylesheet" href="../style.css">';
 echo $html;
 
 
-// Show all links found in the document
-// This is useful for building sitemaps or checking for broken links
-echo '<hr />';
-echo '<pre>';
-// print_r($texy->summary['links']);
-echo '</pre>';
-
-
 // Show the generated HTML source code
 echo '<hr>';
 echo '<pre>';
 echo htmlspecialchars($html);
+echo '</pre>';
+
+
+// Show all links found in the document
+// This is useful for building sitemaps or checking for broken links
+echo '<hr>';
+echo '<pre>';
+echo "Used links:\n";
+echo htmlspecialchars(implode("\n", $texy->summary['links']));
 echo '</pre>';
