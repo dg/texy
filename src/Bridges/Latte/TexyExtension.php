@@ -26,13 +26,16 @@ class TexyExtension extends Latte\Extension
 	private readonly ?Texy $texy;
 
 
-	/** @param  Texy|\Closure(string, mixed...): string  $texy */
-	public function __construct(Texy|\Closure $texy)
+	/**
+	 * Takes a callable too, as a DI configuration writes a method of a service: [@service, method].
+	 * @param  Texy|callable(string, mixed...): string  $texy
+	 */
+	public function __construct(Texy|callable $texy)
 	{
 		$this->texy = $texy instanceof Texy ? $texy : null;
 		$this->processor = $texy instanceof Texy
 			? fn(string $text): string => $texy->toHtml(Helpers::outdent($text))
-			: $texy;
+			: $texy(...);
 	}
 
 

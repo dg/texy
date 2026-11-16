@@ -63,3 +63,16 @@ $latte->addExtension(new Texy\Bridges\Latte\TexyExtension(fn(string $text): stri
 $html = $latte->renderToString("<div>\n\t{texy}\n\tone\n\t\ttwo\n\t{/texy}\n\t{texy}\n\t\tthree {\$x}\n\t{/texy}\n</div>", ['x' => 'x']);
 Assert::contains("[one\n\ttwo", $html);
 Assert::contains('[three x]', $html);
+
+
+// a method of a service as a DI configuration writes it, [@service, method]
+$processor = new class {
+	public function convert(string $text): string
+	{
+		return '<' . $text . '>';
+	}
+};
+$latte = new Latte\Engine;
+$latte->setLoader(new Latte\Loaders\StringLoader);
+$latte->addExtension(new Texy\Bridges\Latte\TexyExtension([$processor, 'convert']));
+Assert::same('<a>', $latte->renderToString('{="a"|texy}'));
