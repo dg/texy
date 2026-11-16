@@ -18,6 +18,24 @@ use Texy\Parsing\{Engine, ParseContext};
  * $texy = new Texy();
  * $html = $texy->toHtml($text);
  * </code>
+ *
+ * @property-read Modules\ScriptModule $scriptModule
+ * @property-read Modules\ParagraphModule $paragraphModule
+ * @property-read Modules\HtmlModule $htmlModule
+ * @property-read Modules\ImageModule $imageModule
+ * @property-read Modules\LinkModule $linkModule
+ * @property-read Modules\PhraseModule $phraseModule
+ * @property-read Modules\EmoticonModule $emoticonModule
+ * @property-read Modules\BlockModule $blockModule
+ * @property-read Modules\HeadingModule $headingModule
+ * @property-read Modules\HorizLineModule $horizLineModule
+ * @property-read Modules\BlockQuoteModule $blockQuoteModule
+ * @property-read Modules\ListModule $listModule
+ * @property-read Modules\TableModule $tableModule
+ * @property-read Modules\FigureModule $figureModule
+ * @property-read Modules\TypographyModule $typographyModule
+ * @property-read Modules\LongWordsModule $longWordsModule
+ * @property-read Modules\HtmlOutputModule $htmlOutputModule
  */
 class Texy
 {

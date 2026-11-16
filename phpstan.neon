@@ -76,6 +76,13 @@ parameters:
 			paths:
 				- src/Parsing/Engine.php
 
+		# The module properties of Texy 3 keep the types of Texy 3 for upgrade tools.
+		-
+			identifier: class.notFound
+			message: '#^PHPDoc tag @property-read for property Texy\\Texy\:\:\$\w+Module contains unknown class#'
+			count: 8
+			path: src/Texy.php
+
 		# The traversal writes null through a reference yielded by getChildren().
 		# Nodes that yield a non-nullable typed property (e.g. `yield $this->content`)
 		# throw TypeError there; PHPStan cannot model writes through references.
