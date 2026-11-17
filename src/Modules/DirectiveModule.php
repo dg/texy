@@ -31,12 +31,9 @@ final class DirectiveModule extends Texy\Module
 			Syntax::Directive,
 			'~
 				\{\{
-				((?:
-					[^}]++ |   # content not containing }
-					}          # or single }
-				)+)
+				( }?+ (?: [^}]++ | } (?! } ) )*+ )  # content up to the first }} (1)
 				}}
-			~Ux',
+			~x',
 			$this->parse(...),
 		);
 	}

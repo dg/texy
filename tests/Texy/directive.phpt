@@ -94,3 +94,11 @@ test('texy directive with args returns empty', function () {
 		$html,
 	);
 });
+
+
+test('a directive of many braces is parsed', function () {
+	$texy = new Texy\Texy;
+	foreach (['{{%s}}', '{{%s'] as $directive) {
+		Assert::noError(fn() => $texy->toHtml(sprintf($directive, str_repeat('a}', 10_000))));
+	}
+});
