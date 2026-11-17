@@ -50,6 +50,12 @@ test('a caption line alone is not a table', function () {
 });
 
 
+test('a caption of many opening chars is parsed', function () {
+	$texy = new Texy;
+	Assert::contains('<caption>Caption</caption>', $texy->toHtml('|' . str_repeat('#', 10_000) . " Caption\n| a | b\n"));
+});
+
+
 test('toText prints the caption above the rows', function () {
 	$texy = new Texy;
 	Assert::same("Caption\na\tb\n", $texy->toText("|## Caption\n| a | b\n"));

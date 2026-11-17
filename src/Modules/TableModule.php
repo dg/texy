@@ -318,7 +318,7 @@ final class TableModule extends Texy\Module
 		$context->getBlockParser()->next(
 			'~^
 				\|                            # opening pipe
-				( [\#=] ){2,}  (?! [|\#=+] )  # opening chars (1)
+				[\#=]+ ([\#=]) (?![|\#=+])    # opening chars (1)
 				(.+)                          # caption (2)
 				\1*                           # matching closing chars
 				\|? [ \t]*                    # optional closing pipe and spaces
