@@ -53,10 +53,7 @@ final class DelimitedBlockModule extends Texy\Module
 				(.*)                         # content type (1)
 				' . Texy\Patterns::ModifierHAlign . '? # modifier (2)
 				$
-				((?:                         # content (3)
-					\n (?0) |                # recursive nested blocks
-					\n.*+                    # or any content
-				)*)
+				(' . self::buildContentPattern(ParseContext::MaxDepth) . ') # content (3)
 				(?:
 					\n \\\--.* $ |           # closing tag
 					\z                       # or end of input
@@ -64,6 +61,18 @@ final class DelimitedBlockModule extends Texy\Module
 			~mUix',
 			$this->parse(...),
 		);
+	}
+
+
+	/**
+	 * Builds the pattern of the lines of a block, where a nested block down to $depth levels takes its lines as one.
+	 * Deeper, /-- is a line of content.
+	 */
+	private static function buildContentPattern(int $depth): string
+	{
+		return $depth
+			? '(?: \n (?!/--|\\\--) .*+ | \n /-- .*+ ' . self::buildContentPattern($depth - 1) . ' (?: \n \\\-- .*+ | \z ) )*+'
+			: '(?: \n (?!\\\--) .*+ )*+';
 	}
 
 

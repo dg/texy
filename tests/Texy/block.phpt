@@ -34,3 +34,18 @@ test('block type variants', function () {
 		$texy->toHtml(file_get_contents(__DIR__ . '/sources/block-types.texy')),
 	);
 });
+
+
+test('a block of many lines is parsed', function () {
+	$texy = new Texy\Texy;
+	foreach (["/--code\n%s\\--", "/--code\n%s", "/--div\n%s\\--"] as $block) {
+		Assert::noError(fn() => $texy->toHtml(sprintf($block, str_repeat("line\n", 40_000))));
+	}
+});
+
+
+test('blocks nested deeper than the limit are parsed', function () {
+	$texy = new Texy\Texy;
+	$html = $texy->toHtml(str_repeat("/--div\n", 2_000) . "text\n" . str_repeat("\\--\n", 2_000));
+	Assert::same(Texy\Parsing\ParseContext::MaxDepth, substr_count($html, '<div>'));
+});
