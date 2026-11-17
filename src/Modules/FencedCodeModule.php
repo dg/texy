@@ -27,7 +27,7 @@ final class FencedCodeModule extends Texy\Module
 				(`{3,}) [ \t]*+                     # opening fence (1)
 				([^\n`]*)                           # info string (2)
 				$
-				((?: \n (?! \1 `*+ [ \t]*+ $ ) .*+ )*) # content (3): lines that are not a valid closing fence
+				((?: \n (?! \1 `*+ [ \t]*+ $ ) .*+ )*+) # content (3): lines that are not a valid closing fence
 				(?:
 					\n \1 `*+ [ \t]*+ $ |           # closing fence (same length or longer)
 					\z                              # or end of input

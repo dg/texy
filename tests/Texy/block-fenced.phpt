@@ -126,3 +126,11 @@ test('intentional blank lines at the start of content stay', function () {
 		$texy->toHtml("```\n\ncode\n```"),
 	);
 });
+
+
+test('a block of many lines is parsed', function () {
+	$texy = new Texy\Texy;
+	foreach (["```\n%s```", "```\n%s"] as $block) {
+		Assert::noError(fn() => $texy->toHtml(sprintf($block, str_repeat("line\n", 40_000))));
+	}
+});
