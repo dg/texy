@@ -29,7 +29,7 @@ final class HtmlModule extends Texy\Module
 				(?= [\s/>] )
 				(
 					(?:
-						\s++ [a-z0-9_:-]++ |          # attribute name
+						\s++ [a-z_:][a-z0-9_:-]*+ |   # attribute name
 						= \s*+ (?: "[^"]*+" | \'[^\']*+\' ) (?=[\s=>]|/>) |  # attribute value in quotes
 						= [^\s>]++                    # attribute value without quotes
 					)*+
@@ -130,7 +130,7 @@ final class HtmlModule extends Texy\Module
 			$attrs,
 			<<<'X'
 				~
-				([a-z0-9_:-]+)                 # attribute name
+				([a-z_:][a-z0-9_:-]*)          # attribute name
 				\s*
 				(?:
 					= \s*                      # equals sign

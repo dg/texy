@@ -50,6 +50,12 @@ test('tag name ends with a space, slash or >', function () {
 });
 
 
+test('an attribute name starts with a letter', function () {
+	Assert::match('<p>&lt;b 1=x&gt;text</p>', process('<b 1=x>text</b>'));
+	Assert::match('<p><b data-1="x" _a :b>text</b></p>', process('<b data-1=x _a :b>text</b>'));
+});
+
+
 test('a tag of many attributes is parsed', function () {
 	foreach ([' x', ' x="y"', " x='y'", ' x=y'] as $attribute) {
 		Assert::noError(fn() => process('<span' . str_repeat($attribute, 10_000) . '>text</span>'));
