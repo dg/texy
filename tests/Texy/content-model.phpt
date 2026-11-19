@@ -424,3 +424,19 @@ test('allowed: custom element when added', function () {
 		trim($texy->toHtml('<x-w>C</x-w>')),
 	);
 });
+
+
+test('deep nesting takes linear time', function () {
+	foreach (['<div>', '<b><i>', '<b>x</i>'] as $fragment) {
+		assertLinearTime(fn(int $n) => processHtml(str_repeat($fragment, $n)), 5_000);
+	}
+
+	assertLinearTime(fn(int $n) => processHtml('<i>' . str_repeat('<b>', $n) . '</i>'), 5_000);
+});
+
+
+test('deep nesting is indented up to a limit', function () {
+	$html = (new Texy)->toHtml(str_repeat('<div>', 40_000));
+	Assert::true(strlen($html) < 1_000_000);
+	Assert::contains("\n" . str_repeat("\t", 99) . '<div><div>', $html);
+});

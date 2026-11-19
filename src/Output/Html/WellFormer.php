@@ -27,6 +27,9 @@ final class WellFormer
 		BarrierEat = 2,   // after an eating tag: blocks trims, transparent to back-tab eating
 		BarrierClose = 3; // before a block close: blocks trims and back-tab eating
 
+	/** indentation from which block elements are no longer put on lines of their own */
+	private const MaxIndent = 100;
+
 	/** @var list<array{int, string}>  output buffer: [segment type, text] */
 	private array $segs = [];
 
@@ -55,8 +58,8 @@ final class WellFormer
 	private array $tagUsed = [];
 
 	/**
-	 * Stack of the open elements.
-	 * @var array<int, array{tag: string, open: ?string, close: ?string, closeIndent: ?int, dtdContent: array<string, int>, indent: int}>
+	 * Stack of the open elements, the innermost last.
+	 * @var list<array{tag: string, open: ?string, close: ?string, closeIndent: ?int, dtdContent: array<string, int>, indent: int}>
 	 */
 	private array $tagStack = [];
 
@@ -118,7 +121,7 @@ final class WellFormer
 	public function raw(string $html): void
 	{
 		$offset = 0;
-		$item = reset($this->tagStack);
+		$item = end($this->tagStack);
 		if ($item && Schema::isRawText($item['tag'])) {
 			// the content of script and style is no markup: it goes out as it is, or not at all with a dropped element
 			$offset = stripos($html, '</' . $item['tag']);
@@ -216,7 +219,7 @@ final class WellFormer
 		}
 
 		$this->textBuffer = '';
-		$item = reset($this->tagStack);
+		$item = end($this->tagStack);
 		if ($item && !isset($item['dtdContent'][Schema::Text])) { // text not allowed?
 			return;
 		}
@@ -242,7 +245,7 @@ final class WellFormer
 			// Unknown tags (custom elements) are always allowed and inherit content model
 			// from parent - they act as transparent wrappers that don't restrict children
 			$allowed = true;
-			$item = reset($this->tagStack);
+			$item = end($this->tagStack);
 			if ($item) {
 				$dtdContent = $item['dtdContent'];
 			}
@@ -307,7 +310,7 @@ final class WellFormer
 				: $dtdContent; // unknown tags keep inherited content model
 
 			// Format output with indentation for block elements
-			if ($this->config->indent && !isset(Schema::inlineElements()[$tag])) {
+			if ($this->config->indent && !isset(Schema::inlineElements()[$tag]) && $this->space < self::MaxIndent) {
 				$closeIndent = $this->space;
 				$this->append("\n" . str_repeat("\t", $this->space++) . $open);
 				$this->eatBarrier();
@@ -318,14 +321,14 @@ final class WellFormer
 		}
 
 		// Push tag to stack for tracking open elements
-		array_unshift($this->tagStack, [
+		$this->tagStack[] = [
 			'tag' => $tag,
 			'open' => $open,
 			'close' => $close,
 			'closeIndent' => $closeIndent,
 			'dtdContent' => $dtdContent,
 			'indent' => $indent,
-		]);
+		];
 		$tmp = &$this->tagUsed[$tag];
 		$tmp++;
 		$this->endFragment();
@@ -353,26 +356,27 @@ final class WellFormer
 		// autoclose tags
 		$tmp = [];
 		$back = true;
-		foreach ($this->tagStack as $i => $item) {
+		while ($item = array_pop($this->tagStack)) {
 			$itemTag = $item['tag'];
 			$this->emitClose($item);
 			$this->space -= $item['indent'];
 			$this->tagUsed[$itemTag]--;
 			$back = $back && isset(Schema::inlineElements()[$itemTag]);
-			unset($this->tagStack[$i]);
 			if ($itemTag === $tag) {
 				break;
 			}
 
-			array_unshift($tmp, $item);
+			$tmp[] = $item;
 		}
 
 		if (!$back || !$tmp) {
 			return;
 		}
 
+		$tmp = array_reverse($tmp); // the outermost first
+
 		// allowed-check (nejspis neni ani potreba)
-		$item = reset($this->tagStack);
+		$item = end($this->tagStack);
 		$dtdContent = $item ? $item['dtdContent'] : $this->baseDTD;
 		if (!isset($dtdContent[$tmp[0]['tag']])) {
 			return;
@@ -385,7 +389,7 @@ final class WellFormer
 			}
 			$this->space += $item['indent'];
 			$this->tagUsed[$item['tag']]++;
-			array_unshift($this->tagStack, $item);
+			$this->tagStack[] = $item;
 		}
 	}
 
@@ -414,7 +418,7 @@ final class WellFormer
 	/** @param  array<string, int>  $dtdContent */
 	private function closeOptionalTags(string $tag, array &$dtdContent): void
 	{
-		foreach ($this->tagStack as $i => $item) {
+		while ($item = end($this->tagStack)) {
 			// is tag allowed here?
 			$dtdContent = $item['dtdContent'];
 			if (isset($dtdContent[$tag])) {
@@ -438,7 +442,7 @@ final class WellFormer
 			$this->emitClose($item);
 			$this->space -= $item['indent'];
 			$this->tagUsed[$itemTag]--;
-			unset($this->tagStack[$i]);
+			array_pop($this->tagStack);
 			$dtdContent = $this->baseDTD;
 		}
 	}
@@ -453,7 +457,7 @@ final class WellFormer
 		$this->flushText();
 
 		// empty out stack
-		foreach ($this->tagStack as $item) {
+		foreach (array_reverse($this->tagStack) as $item) {
 			$this->emitClose($item);
 		}
 
