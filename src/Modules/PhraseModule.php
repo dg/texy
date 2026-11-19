@@ -113,14 +113,8 @@ final class PhraseModule extends Texy\Module
 				(?<! " )                         # not preceded by "
 				"
 				(?! \s )                         # not followed by space
-				( (?: [^\r\n "]++ | [ ] )+ )     # content (1)
-				' . Patterns::Modifier . '?      # modifier (2)
-				(?<! \s )                        # not preceded by space
-				"
-				(?! " )                          # not followed by "
-				\(\(
-				( .+ )                           # explanation (3)
-				\)\)
+				# content (1), then modifier (2), " not preceded by space nor followed by " and explanation (3)
+				' . self::buildContentPattern(self::buildStep('\r\n"'), Patterns::Modifier . '? (?<! \s ) " (?! " ) \(\( ( .+ ) \)\)') . '
 			~Ux',
 			$this->parseAcronym(...),
 		);
@@ -133,8 +127,8 @@ final class PhraseModule extends Texy\Module
 				( [' . Patterns::Letter . ']{2,} ) # at least 2 chars (1)
 				()                               # modifier placeholder (2)
 				\(\(
-				( (?: [^\n )]++ | [ )] )+ )      # explanation (3)
-				\)\)
+				# explanation (3), then ))
+				' . self::buildContentPattern('(?: [^\n )]++ | [ )] )', '\)\)') . '
 			~Ux',
 			$this->parseAcronym(...),
 		);
@@ -158,7 +152,7 @@ final class PhraseModule extends Texy\Module
 			'~
 				`
 				# content (1), then modifier (2) and a backtick not preceded by space
-				' . self::buildContentPattern('(?: [^\r\n `]++ | [ `] )', Patterns::Modifier . '? (?<! \s ) `', first: '\S') . '
+				' . self::buildContentPattern(self::buildStep('\r\n`', '`'), Patterns::Modifier . '? (?<! \s ) `', first: '\S') . '
 				(?: : (' . Patterns::LinkUrl . ') )??  # optional link (3)
 			~Ux',
 			$this->parsePhrase(...),
@@ -185,29 +179,22 @@ final class PhraseModule extends Texy\Module
 				(?! [\s*] )                      # not followed by space or *
 				( [^|\r\n\]]++ )                 # text (1)
 				\|
-				( (?: [^|\r\n \]]++ | [ ] )+ )   # link (2)
-				' . Patterns::Modifier . '?      # modifier (3)
-				(?<! \s )                        # not preceded by space
-				]
-				(?! ] )                          # not followed by ]
+				# link (2), then modifier (3) and ] not preceded by space nor followed by ]
+				' . self::buildContentPattern(self::buildStep('|\r\n\]'), Patterns::Modifier . '? (?<! \s ) ] (?! ] )', skip: false) . '
 			~Ux',
 			$this->parseLink(...),
 		);
 
 		// [text](link)
+		$end = Patterns::Modifier . '? (?<! \s ) ] \( ' . self::buildContentPattern('(?: [^\r )]++ | [ ] )', '\)', skip: false);
 		$engine->addInline(
 			Syntax::MarkdownLink,
 			'~
 				(?<! [[.] )                      # not preceded by [ or .
 				\[
 				(?! [\s*] )                      # not followed by space or *
-				( (?: [^|\r\n \]]++ | [ ] )+ )   # text (1)
-				' . Patterns::Modifier . '?      # modifier (2)
-				(?<! \s )                        # not preceded by space
-				]
-				\(
-				( (?: [^\r )]++ | [ ] )+ )       # link (3)
-				\)
+				# text (1), then modifier (2), ] not preceded by space and the link (3) in parentheses
+				' . self::buildContentPattern(self::buildStep('|\r\n\]'), $end, skip: false) . '
 			~Ux',
 			$this->parseLink(...),
 		);
@@ -239,13 +226,10 @@ final class PhraseModule extends Texy\Module
 
 		$beforeOpen = $spec['beforeOpen'] ?? '[' . $char . $guard . ']';
 		$afterClose = $spec['afterClose'] ?? '[' . $closeChar . $guardAfter . ']';
-		$whitespace = match (true) {
-			!empty($spec['noSpaces']) => '\s',
-			!empty($spec['multiline']) => ' ',
-			default => '\r\n ',
-		};
-		$lone = (empty($spec['noSpaces']) ? ' ' : '') . (empty($spec['noDelimiter']) ? $closeChar : '');
-		$step = '(?: [^' . $whitespace . $closeChar . ']++ | [' . $lone . '] )';
+		$lone = empty($spec['noDelimiter']) ? $closeChar : '';
+		$step = empty($spec['noSpaces'])
+			? self::buildStep((empty($spec['multiline']) ? '\r\n' : '') . $closeChar, $lone)
+			: '(?: [^\s' . $closeChar . ']++ | [' . $lone . '] )';
 		$end = Patterns::Modifier . '?  # modifier (2)
 				(?<! [\s' . $closeChar . $guard . '] ) ' . preg_quote($close, '~') . ' (?! ' . $afterClose . ' )  # closing delimiter';
 
@@ -262,16 +246,26 @@ final class PhraseModule extends Texy\Module
 
 
 	/**
-	 * Builds the content (1), which runs by $step to the first place where $end matches, and $end
-	 * behind it. The loop is possessive, so a long content takes no stack, and where it finds no
-	 * end, no delimiter it passed over would find one either: (*SKIP) resumes the search behind them.
+	 * Builds the content group, which runs by $step to the first place where $end matches, and $end
+	 * behind it. The loop is possessive, so a long content takes no stack. With $skip, where it finds
+	 * no end, no delimiter it passed over would find one either: (*SKIP) resumes the search behind them.
 	 */
-	private static function buildContentPattern(string $step, string $end, ?string $first = null): string
+	private static function buildContentPattern(string $step, string $end, ?string $first = null, bool $skip = true): string
 	{
 		return '( ' . ($first ?? $step) . ' (?: (?! (?n: ' . $end . '
-				) ) ' . $step . ' )*+ )  # content (1)
-				(*SKIP)
+				) ) ' . $step . ' )*+ )  # content
+				' . ($skip ? '(*SKIP)' : '') . '
 				' . $end;
+	}
+
+
+	/**
+	 * Builds a step of content that may hold spaces: a run of chars other than $stops, a run of spaces
+	 * in which no modifier starts, or a single space or char of $lone.
+	 */
+	private static function buildStep(string $stops, string $lone = ''): string
+	{
+		return '(?: [^' . $stops . ' ]++ | [ ]++ (?! [ \t]*+ \. ) | [ ' . $lone . '] )';
 	}
 
 

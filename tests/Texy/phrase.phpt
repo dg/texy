@@ -203,6 +203,21 @@ test('a long text of delimiters that never close is parsed', function () {
 });
 
 
+test('a phrase of many words is parsed', function () {
+	$words = str_repeat('a ', 10_000) . 'a';
+	foreach (['"%s"((x))', 'NATO((%s))', '[a|%s]', '[%s](x)', '[a](%s)'] as $phrase) {
+		Assert::noError(fn() => process(sprintf($phrase, $words)));
+	}
+});
+
+
+test('a long run of spaces in a phrase takes linear time', function () {
+	foreach (['**a%sb', '`a%sb', '"a%sb"((x))', '[a|a%sb', '[a%sb'] as $phrase) {
+		assertLinearTime(fn(int $n) => process(sprintf($phrase, str_repeat(' ', $n))), 50_000);
+	}
+});
+
+
 test('a long link of a phrase is parsed', function () {
 	foreach (['a.', '(a)', '//a//:'] as $fragment) {
 		Assert::noError(fn() => process('"a":http://a.cz/' . str_repeat($fragment, 10_000)));

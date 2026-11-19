@@ -24,3 +24,28 @@ function normalizeNewlines(string $s): string
 {
 	return str_replace("\r\n", "\n", $s);
 }
+
+
+/**
+ * Asserts that the time of $run grows linearly with its size, not quadratically.
+ * CPU time of four times the input is compared, so neither a slow machine nor a busy one fails it.
+ * @param  Closure(int): mixed  $run
+ */
+function assertLinearTime(Closure $run, int $size): void
+{
+	$small = measureCpuTime(fn() => $run($size));
+	$large = measureCpuTime(fn() => $run(4 * $size));
+	Tester\Assert::true($large < 8 * $small + 0.1, sprintf('%.3f s for size %d, %.3f s for size %d', $small, $size, $large, 4 * $size));
+}
+
+
+function measureCpuTime(Closure $fn): float
+{
+	$sum = fn(array $r): float => $r['ru_utime.tv_sec']
+		+ $r['ru_utime.tv_usec'] / 1e6
+		+ $r['ru_stime.tv_sec']
+		+ $r['ru_stime.tv_usec'] / 1e6;
+	$start = getrusage();
+	$fn();
+	return $sum(getrusage()) - $sum($start);
+}
