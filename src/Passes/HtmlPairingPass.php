@@ -41,6 +41,7 @@ final class HtmlPairingPass
 	{
 		$out = [];
 		$frames = []; // stack of [open HtmlTagNode, collected children]
+		$open = []; // number of open frames per tag name
 
 		foreach ($children as $child) {
 			if (!$child instanceof HtmlTagNode) {
@@ -52,32 +53,25 @@ final class HtmlPairingPass
 
 			if (!$child->closing && !$child->selfClosing && !isset(Output\Html\Schema::voidElements()[$name])) {
 				$frames[] = [$child, []];
+				$open[$name] = ($open[$name] ?? 0) + 1;
 				continue;
 			}
 
-			if (!$child->closing) { // void or self-closing tag is a leaf
+			if (!$child->closing || empty($open[$name])) { // void or self-closing tag is a leaf, so is a stray closing tag
 				self::emit($out, $frames, $child);
 				continue;
 			}
 
 			// closing tag: find matching open frame from the top
-			$found = null;
-			for ($i = count($frames) - 1; $i >= 0; $i--) {
-				if (strtolower($frames[$i][0]->name) === $name) {
-					$found = $i;
-					break;
-				}
-			}
-
-			if ($found === null) { // stray closing tag
-				self::emit($out, $frames, $child);
-				continue;
+			$found = count($frames) - 1;
+			while (($frameName = strtolower($frames[$found][0]->name)) !== $name) {
+				$open[$frameName]--;
+				$found--;
 			}
 
 			// crossed tags above the match cannot be paired - flatten them back
-			while (count($frames) - 1 > $found) {
-				self::flatten($out, $frames);
-			}
+			self::flatten($out, $frames, $found + 1);
+			$open[$name]--;
 
 			$frame = array_pop($frames);
 			assert($frame !== null);
@@ -90,9 +84,7 @@ final class HtmlPairingPass
 		}
 
 		// unmatched opening tags stay standalone
-		while ($frames) {
-			self::flatten($out, $frames);
-		}
+		self::flatten($out, $frames, 0);
 
 		return $out;
 	}
@@ -116,18 +108,22 @@ final class HtmlPairingPass
 
 
 	/**
-	 * Pops the innermost frame and re-emits its open tag and children unpaired.
+	 * Pops the frames from $depth up and re-emits their open tags and children unpaired.
 	 * @param  array<Nodes\InlineNode|Nodes\BlockNode>  $out
 	 * @param  list<array{HtmlTagNode, array<Nodes\InlineNode|Nodes\BlockNode>}>  $frames
 	 */
-	private static function flatten(array &$out, array &$frames): void
+	private static function flatten(array &$out, array &$frames, int $depth): void
 	{
-		$frame = array_pop($frames);
-		assert($frame !== null);
-		[$tag, $collected] = $frame;
-		self::emit($out, $frames, $tag);
-		foreach ($collected as $node) {
-			self::emit($out, $frames, $node);
+		$popped = array_slice($frames, $depth); // array_splice() would rebuild the whole stack
+		while (count($frames) > $depth) {
+			array_pop($frames);
+		}
+
+		foreach ($popped as [$tag, $collected]) {
+			self::emit($out, $frames, $tag);
+			foreach ($collected as $node) {
+				self::emit($out, $frames, $node);
+			}
 		}
 	}
 }

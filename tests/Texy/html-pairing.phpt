@@ -87,3 +87,10 @@ test('cross-block closing tag does not leave an empty paragraph', function () {
 	Assert::contains('</ul>', $html);
 	Assert::contains('</div>', $html);
 });
+
+
+test('many unmatched and stray tags take linear time', function () {
+	foreach (['<b>', '<b>x</i>', '<i><b></i>'] as $fragment) {
+		assertLinearTime(fn(int $n) => firstParagraph(str_repeat($fragment, $n)), 5_000);
+	}
+});
