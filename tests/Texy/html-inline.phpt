@@ -50,6 +50,13 @@ test('tag name ends with a space, slash or >', function () {
 });
 
 
+test('a tag of many attributes is parsed', function () {
+	foreach ([' x', ' x="y"', " x='y'", ' x=y'] as $attribute) {
+		Assert::noError(fn() => process('<span' . str_repeat($attribute, 10_000) . '>text</span>'));
+	}
+});
+
+
 test('line break inside a tag is a space', function () {
 	Assert::match('<p>x <a href="x" title="a b">y</a> z</p>', process("x <a href=x title=\"a\n  b\">y</a> z"));
 

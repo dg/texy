@@ -30,10 +30,9 @@ final class HtmlModule extends Texy\Module
 				(
 					(?:
 						\s++ [a-z0-9_:-]++ |          # attribute name
-						= \s*+ " [^"]*+ " |           # attribute value in double quotes
-						= \s*+ \' [^\']*+ \' |        # attribute value in single quotes
+						= \s*+ (?: "[^"]*+" | \'[^\']*+\' ) (?=[\s=>]|/>) |  # attribute value in quotes
 						= [^\s>]++                    # attribute value without quotes
-					)*
+					)*+
 				)
 				\s*+
 				(/?)                                  # self-closing slash
