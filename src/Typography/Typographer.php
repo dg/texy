@@ -24,7 +24,8 @@ final class Typographer
 	 */
 	private array $replacements = [
 		'~(?<! [.\x{2026}] ) \.{3,4} (?! [.\x{2026}] )~mx'  => '…',                       // ellipsis  ...
-		'~(?<= [\d ] | ^ ) - (?= [\d ] | $)~x' /* .      */ => "\u{2013}",                // en dash 123-123
+		'~(?<= \ | ^ ) - (?= [\d ] | $) | (?<= \d ) - (?= \ | $)~x' => "\u{2013}",      // en dash 123 - 123
+		'~(?<! \d | [\d' . Patterns::Letter . ']- ) (\d++) - (?= \d++ (?! -\d ) )~x' => "\$1\u{2013}", // en dash 10-20, not 1-2-3 or iso-8859-2
 		'~(?<= [^!*+,/:;<=>@\\\_|-] ) -- (?= [^!*+,/:;<=>@\\\_|-] )~x' => "\u{2013}",   // en dash alphanum--alphanum
 		'~,-~' /* .                                      */ => ",\u{2013}",               // en dash ,-
 		'~(?<! \d ) (\d{1,2}\.) \ (\d{1,2}\.) \ (\d\d)~x' => "\$1\u{A0}\$2\u{A0}\$3",     // date 23. 1. 1978
@@ -37,8 +38,8 @@ final class Typographer
 		'~(?<! [<=] ) ={1,}>\ ~x' /* .                   */ => '⇒ ',                      // right arrow ==>, not <=>
 		'~\+-~' /* .                                     */ => '±',                       // +-
 		'~(\d++) \ x\ (?= \d)~x' /* .                    */ => "\$1\u{A0}×\u{A0}",        // dimension sign 123 x 123...
-		'~(\d++) x (?= \d)~x' /* .                       */ => '$1×',                     // dimension sign 123x123...
-		'~(?<= \d ) x (?= \ |,|\.|$ )~mx' /* .           */ => '×',                       // dimension sign 123x
+		// dimension sign 123x123... and 123x, not in a word like f3l1x; the x of 12x34 is no letter for the next number
+		'~(?<! [\d' . Patterns::Letter . '] (?<! \d x ) ) (\d++) x (?= [\d ,.] | $ )~mx' => '$1×',
 		'~(\S\ ?) \(TM\)~ix' /* .                        */ => '$1™',                     // trademark (TM)
 		'~(\S\ ?) \(R\)~ix' /* .                         */ => '$1®',                     // registered (R)
 		'~\(C\) (\ ?\S)~ix' /* .                         */ => '©$1',                     // copyright (C)

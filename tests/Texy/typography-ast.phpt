@@ -37,6 +37,22 @@ test('an arrow does not stand right behind a name, <=> is no arrow', function ()
 });
 
 
+test('a dash between two numbers is a range, a chain of numbers keeps its hyphens', function () {
+	Assert::same(
+		"<p>Lotus 1-2-3, iso-8859-2\u{A0}a 2024-01-15, strany 10–20, 603-123-456, a\u{A0}–\u{A0}b</p>\n",
+		convert('Lotus 1-2-3, iso-8859-2 a 2024-01-15, strany 10-20, 603-123-456, a - b'),
+	);
+});
+
+
+test('x behind a number is a multiplication sign, not in a word', function () {
+	Assert::same(
+		"<p>Přezdívka f3l1x a dávka 4× denně, 1920×1080, 114×57×25, Win9x,\u{A0}ab12x3</p>\n",
+		convert('Přezdívka f3l1x a dávka 4x denně, 1920x1080, 114x57x25, Win9x, ab12x3'),
+	);
+});
+
+
 test('a unit after a range is bound to the number', function () {
 	Assert::same("<p>stála 1500–2000\u{A0}Kč a vážila 10–12\u{A0}kg</p>\n", convert('stála 1500-2000 Kč a vážila 10-12 kg'));
 });

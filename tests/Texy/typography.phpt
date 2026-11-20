@@ -30,3 +30,8 @@ $texy = new Texy\Texy;
 Assert::same('„a "b“ c', $texy->applyTypography('"a "b" c'));
 Assert::same(20_000, substr_count($texy->applyTypography(str_repeat('"a ', 20_000)), '"'));
 Assert::same(20_000, substr_count($texy->applyTypography(str_repeat("'a ", 20_000)), "'"));
+
+// numbers chained by hyphens and x, and arrows, take no backtracking
+foreach (['1-', 'a1-', '1x', 'a1x', '1x ', '-', '->', '=>', 'a-> '] as $fragment) {
+	Assert::noError(fn() => $texy->applyTypography(str_repeat($fragment, 10_000)));
+}
