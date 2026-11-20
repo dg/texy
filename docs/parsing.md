@@ -37,6 +37,10 @@ A handler sees only its own match, never the surrounding text. A pattern that ne
 - Keep patterns specific (e.g. wikilink `[text|url]` requires the pipe, markdown link `[text](url)` requires `](`) so most collisions never arise.
 - Patterns that can start at the same offset must end by the same rule and differ only in what follows: there the longer match is the more specific one. A pattern that rejects an end the other accepts runs past it and wins by length – two rules for one notation belong in one pattern.
 
+### Patterns on long input
+
+A pattern runs over a whole paragraph or document in one PCRE call, and the limits of PCRE hold per call: every iteration of a repeated group that can backtrack leaves a point on the JIT stack, and every iteration of any group counts toward `pcre.backtrack_limit`. A loop over lines, words or attributes is therefore possessive (`*+`); content running to a delimiter is built as `step (?: (?! end ) step )*+ end` instead of a lazy repeat (`PhraseModule::buildContentPattern()`), and recursion is unrolled to a fixed depth (`DelimitedBlockModule`). As the match limit still caps the number of iterations, a step takes as much at once as the end allows to pass over, a whole run of spaces rather than a single space.
+
 ### TextNode holds display text
 
 `TextNode::$text` is **display text**: renderers escape it on output. Text gaps between matches hold the source verbatim – the parser applies no content policy. HTML entity decoding is a property of the *language*, not of the parser, so it is an ordinary registered syntax: Texy's `html/entity` (`HtmlModule`, disable via `$allowedSyntax['html/entity']`) turns each valid reference into its own `TextNode` with decoded content and an exact source range. The pattern and decoding logic are shared through `Helpers::EntityPattern` / `Helpers::decodeEntity()` so other languages (texy/markdown) reuse them. The exceptions holding literal source text are code-like content (`phrase/code`, `phrase/notexy` → `RawTextNode`, code blocks), where the author's characters are shown verbatim.
