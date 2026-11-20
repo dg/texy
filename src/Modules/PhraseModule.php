@@ -194,7 +194,9 @@ final class PhraseModule extends Texy\Module
 		);
 
 		// [text](link)
-		$end = Patterns::Modifier . '? (?<! \s ) ] \( ' . self::buildContentPattern('(?: [^\r )]++ | [ ] )', '\)', skip: false);
+		$end = Patterns::Modifier
+			. '? (?<! \s ) ] \( '
+			. self::buildContentPattern('(?: [^\r ()]++ | [ ] | \( [^\r ()]*+ \) )', '\)', skip: false);
 		$engine->addInline(
 			Syntax::MarkdownLink,
 			'~

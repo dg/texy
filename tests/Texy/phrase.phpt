@@ -175,6 +175,15 @@ test('*emphasis* without spaces ends at its first asterisk, one with spaces stan
 });
 
 
+test('the URL of a markdown link holds balanced parentheses', function () {
+	Assert::match(
+		'<p>Or <a%A%href="https://en.wikipedia.org/wiki/Class_(computer_programming)#Class_vs._type">implementations</a>?</p>',
+		process('Or [implementations](https://en.wikipedia.org/wiki/Class_(computer_programming)#Class_vs._type)?'),
+	);
+	Assert::match('<p>(<a href="http://x.cz">a</a>)</p>', process('([a](http://x.cz))'));
+});
+
+
 test('asymmetric >>quote<< delimiters', function () {
 	Assert::match('<p><q>quoted</q></p>', process('>>quoted<<'));
 });
@@ -226,7 +235,7 @@ test('a long text of *emphasis* that never closes with spaces takes linear time'
 
 test('a phrase of many words is parsed', function () {
 	$words = str_repeat('a ', 10_000) . 'a';
-	foreach (['"%s"((x))', 'NATO((%s))', '[a|%s]', '[%s](x)', '[a](%s)'] as $phrase) {
+	foreach (['"%s"((x))', 'NATO((%s))', '[a|%s]', '[%s](x)', '[a](%s)', '[a](%s(', '[a](%s(a)'] as $phrase) {
 		Assert::noError(fn() => process(sprintf($phrase, $words)));
 	}
 });
@@ -242,5 +251,8 @@ test('a long run of spaces in a phrase takes linear time', function () {
 test('a long link of a phrase is parsed', function () {
 	foreach (['a.', '(a)', '//a//:'] as $fragment) {
 		Assert::noError(fn() => process('"a":http://a.cz/' . str_repeat($fragment, 10_000)));
+	}
+	foreach (['(', '(a', '(a)', '(a,', ')'] as $fragment) {
+		Assert::noError(fn() => process('[a](http://a.cz/' . str_repeat($fragment, 10_000) . ')'));
 	}
 });
