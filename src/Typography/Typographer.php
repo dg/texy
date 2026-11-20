@@ -32,9 +32,9 @@ final class Typographer
 		'~\ ---\ ~' /* .                                 */ => "\u{A0}\u{2014} ",         // em dash ---
 		'~\ ([\x{2013}\x{2014}])~' /* .                  */ => "\u{A0}\$1",               // &nbsp; behind dash (dash stays at line end)
 		'~\ <-{1,2} >\ ~x' /* .                          */ => ' ↔ ',                     // left right arrow <-->
-		'~-{1,}>\ ~' /* .                                */ => '→ ',                      // right arrow -->
+		'~(?<! [-\d_)\]' . Patterns::Letter . '] ) -{1,}>\ ~x' => '→ ', // right arrow -->, not behind a name
 		'~\ <-{1,}~' /* .                                */ => ' ← ',                     // left arrow <--
-		'~={1,}>\ ~' /* .                                */ => '⇒ ',                      // right arrow ==>
+		'~(?<! [<=] ) ={1,}>\ ~x' /* .                   */ => '⇒ ',                      // right arrow ==>, not <=>
 		'~\+-~' /* .                                     */ => '±',                       // +-
 		'~(\d++) \ x\ (?= \d)~x' /* .                    */ => "\$1\u{A0}×\u{A0}",        // dimension sign 123 x 123...
 		'~(\d++) x (?= \d)~x' /* .                       */ => '$1×',                     // dimension sign 123x123...

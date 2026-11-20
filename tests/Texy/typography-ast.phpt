@@ -27,6 +27,16 @@ test('basic typography', function () {
 });
 
 
+test('an arrow does not stand right behind a name, <=> is no arrow', function () {
+	Assert::same("<p>A → B a foo()-&gt; bar</p>\n", convert('A -> B a foo()-> bar'));
+	Assert::same(
+		"<p>DibiConnection-&gt; nativeQuery a Application-&gt; run</p>\n",
+		convert("DibiConnection->\tnativeQuery a Application-> run"),
+	);
+	Assert::same("<p>Prohodit <code>dá</code> &lt;=&gt; <code>pá</code>, A ⇒ B</p>\n", convert('Prohodit `dá` <=> `pá`, A => B'));
+});
+
+
 test('a unit after a range is bound to the number', function () {
 	Assert::same("<p>stála 1500–2000\u{A0}Kč a vážila 10–12\u{A0}kg</p>\n", convert('stála 1500-2000 Kč a vážila 10-12 kg'));
 });
