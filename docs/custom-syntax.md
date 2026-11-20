@@ -60,7 +60,7 @@ function (\Texy\Parsing\ParseContext $context, array $matches, array $offsets, s
 
 Returning an existing node type (`PhraseNode`, `LinkNode`, `HtmlElementNode`…) gives you rendering for free in every output format. A brand-new `Node` subclass needs a [renderer handler](custom-handlers.md#renderer-handlers) on the generator you care about; the other formats fall back to rendering its children, so the document stays renderable everywhere. Implement `getChildren()` so they can find them; typography reads the content found there as text around markup, and treats a node without content like an image. Text that must stay verbatim belongs in a subclass of `InlineCodeNode` or `RawTextNode`. The one exception is printing the tree back as Texy source (`renderTexy()`): there is no notation to fall back to, so it throws until you give the node a printed form: create the renderer yourself (`new Output\Texy\Renderer($texy)`), give it the form with `addRenderer()` and call its `render()`, since `renderTexy()` always uses a fresh one.
 
-Collision resolution ([parsing.md](parsing.md#inlineparser)): at the same position the longer match wins, then your syntax over a built-in one, then earlier registration. Keep patterns specific.
+Collision resolution ([parsing.md](parsing.md#inlineparser)): at the same position the longer match wins, then your syntax over a built-in one, then earlier registration. Keep patterns specific, and a pattern that starts like an existing one must not reject an end that one accepts, otherwise it runs past it and wins by length.
 
 ## Examples
 

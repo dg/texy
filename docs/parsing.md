@@ -35,6 +35,7 @@ A handler sees only its own match, never the surrounding text. A pattern that ne
 - Different lengths of the same symbol (`***x***` vs `**x**` vs `*x*`) are resolved by the longer-match rule.
 - Same position, same length: a syntax of the application precedes those of the language, then earlier registration wins. A block syntax compares no length: the earliest offset wins, then the application and the order of registration.
 - Keep patterns specific (e.g. wikilink `[text|url]` requires the pipe, markdown link `[text](url)` requires `](`) so most collisions never arise.
+- Patterns that can start at the same offset must end by the same rule and differ only in what follows: there the longer match is the more specific one. A pattern that rejects an end the other accepts runs past it and wins by length – two rules for one notation belong in one pattern.
 
 ### TextNode holds display text
 
