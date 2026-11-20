@@ -104,10 +104,10 @@ final class Syntax
 	/** Emphasis - double slash (`//text//`) */
 	public const Emphasis = 'phrase/em';
 
-	/** Emphasis - single asterisk (`*text*`) */
+	/** Emphasis - single asterisk (`*text*`), with spaces only at word boundaries */
 	public const EmphasisSingleAsterisk = 'phrase/em-alt';
 
-	/** Emphasis - single asterisk contextual (`*text*`) */
+	#[\Deprecated('part of EmphasisSingleAsterisk')]
 	public const EmphasisSingleAsterisk2 = 'phrase/em-alt2';
 
 	/** Inserted text (`++text++`) */
@@ -200,7 +200,6 @@ final class Syntax
 		self::Strong => PhraseType::Strong,
 		self::Emphasis => PhraseType::Emphasis,
 		self::EmphasisSingleAsterisk => PhraseType::Emphasis,
-		self::EmphasisSingleAsterisk2 => PhraseType::Emphasis,
 		self::Inserted => PhraseType::Inserted,
 		self::Deleted => PhraseType::Deleted,
 		self::Superscript => PhraseType::Superscript,

@@ -161,6 +161,20 @@ test('paired phrases keep their delimiter guards', function () {
 });
 
 
+test('*emphasis* without spaces ends at its first asterisk, one with spaces stands at word boundaries', function () {
+	Assert::match(
+		'<p>Jakýsi <em>handi</em>cap a pak <em>Ukaž ruce!</em></p>',
+		process('Jakýsi *handi*cap a pak *Ukaž ruce!*'),
+	);
+	Assert::match('<p><em>ANO</em>/<em>NE</em></p>', process('*ANO*/*NE*'));
+	Assert::match('<p>a <em>b c</em> d</p>', process("a *b\nc* d"));
+	Assert::match('<p>x*a b*y</p>', process('x*a b*y'));
+	Assert::match('<p>x *a** b <em>c</em>u.</p>', process('x *a** b *c*u.'));
+	Assert::match('<p>text *foo bar*x and the<em>baz</em>here</p>', process('text *foo bar*x and the*baz*here'));
+	Assert::match('<p>a <em>b <em>ne</em>konkrétní c</em> d</p>', process('a *b *ne*konkrétní c* d'));
+});
+
+
 test('asymmetric >>quote<< delimiters', function () {
 	Assert::match('<p><q>quoted</q></p>', process('>>quoted<<'));
 });
@@ -197,8 +211,15 @@ test('phrases can be extended through the table', function () {
 
 
 test('a long text of delimiters that never close is parsed', function () {
-	foreach (['**a ', '//a ', '*a.', '`a ', "''a "] as $fragment) {
+	foreach (['**a ', '//a ', '*a.', '*a', 'a**', '*a b', '*a ', '*a *b*x ', '*a**', '* ', '`a ', "''a "] as $fragment) {
 		Assert::noError(fn() => process(str_repeat($fragment, 10_000)));
+	}
+});
+
+
+test('a long text of *emphasis* that never closes with spaces takes linear time', function () {
+	foreach (['*a ', '*a *b*x ', '*a**'] as $fragment) {
+		assertLinearTime(fn(int $n) => process(str_repeat($fragment, $n)), 5_000);
 	}
 });
 

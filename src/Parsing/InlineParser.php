@@ -15,12 +15,13 @@ use function strlen;
 /**
  * Parses inline structures (links, images, formatting, etc.).
  * A handler returns an InlineNode, a ContentNode (sequence to splice; empty
- * consumes silently), or null to refuse the match.
+ * consumes silently), or null to refuse the match. A syntax with a list of patterns
+ * matches where the leftmost of them does, the earlier one on a tie.
  */
 final class InlineParser
 {
 	public function __construct(
-		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}> */
+		/** @var array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string|list<string>}> */
 		private array $patterns,
 	) {
 	}
@@ -54,7 +55,9 @@ final class InlineParser
 		// real pair behind it would never be offered.
 		$candidates = [];
 		foreach ($this->patterns as $name => $info) {
-			$candidates[$name] = $this->match($text, $info, $name, 0);
+			foreach ((array) $info['pattern'] as $variant => $_) {
+				$candidates[$name][$variant] = $this->match($text, $name, $variant, 0);
+			}
 		}
 
 		$res = [];
@@ -62,13 +65,19 @@ final class InlineParser
 
 		while (true) {
 			$best = null;
-			foreach ($candidates as $name => $m) {
-				if ($m !== null && $m['offset'] < $pos) {
-					$candidates[$name] = $m = $this->match($text, $this->patterns[$name], $name, $pos);
+			foreach ($candidates as $name => $variants) {
+				$own = null;
+				foreach ($variants as $variant => $m) {
+					if ($m !== null && $m['offset'] < $pos) {
+						$candidates[$name][$variant] = $m = $this->match($text, $name, $variant, $pos);
+					}
+					if ($m !== null && ($own === null || $m['offset'] < $own['offset'])) {
+						$own = $m;
+					}
 				}
 				// leftmost wins, longer match on a tie
-				if ($m !== null && ($best === null || [$m['offset'], -$m['length']] < [$best['offset'], -$best['length']])) {
-					$best = $m;
+				if ($own !== null && ($best === null || [$own['offset'], -$own['length']] < [$best['offset'], -$best['length']])) {
+					$best = $own;
 				}
 			}
 
@@ -86,7 +95,7 @@ final class InlineParser
 			$node = ($best['handler'])($context, $best['match'], $absoluteOffsets, $best['name']);
 			if ($node === null) {
 				// Handler rejected - other patterns at this position still get their turn
-				$candidates[$best['name']] = $this->match($text, $this->patterns[$best['name']], $best['name'], $best['offset'] + 1);
+				$candidates[$best['name']][$best['variant']] = $this->match($text, $best['name'], $best['variant'], $best['offset'] + 1);
 				continue;
 			}
 
@@ -120,14 +129,15 @@ final class InlineParser
 
 
 	/**
-	 * First match of one pattern at or after the offset, in the shape the loop works with.
-	 * @param  array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}  $info
-	 * @return ?array{name: string, offset: int, length: int, match: array<?string>, offsets: array<?int>, handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null)}
+	 * First match of one pattern of the syntax at or after the offset, in the shape the loop works with.
+	 * @return ?array{name: string, variant: int, offset: int, length: int, match: array<?string>, offsets: array<?int>, handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null)}
 	 */
-	private function match(string $text, array $info, string $name, int $offset): ?array
+	private function match(string $text, string $name, int $variant, int $offset): ?array
 	{
+		$info = $this->patterns[$name];
+		$pattern = ((array) $info['pattern'])[$variant];
 		while ($offset <= strlen($text)) {
-			$m = Regexp::match($text, $info['pattern'], captureOffset: true, offset: $offset);
+			$m = Regexp::match($text, $pattern, captureOffset: true, offset: $offset);
 			if ($m === null) {
 				return null;
 			}
@@ -146,6 +156,7 @@ final class InlineParser
 
 			return [
 				'name' => $name,
+				'variant' => $variant,
 				'offset' => $m[0][1],
 				'length' => strlen($m[0][0]),
 				'match' => $flatten,

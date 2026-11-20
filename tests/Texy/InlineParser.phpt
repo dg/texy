@@ -193,6 +193,26 @@ test('same offset and length - first registered wins', function () {
 });
 
 
+test('of the patterns of one syntax the leftmost wins, the earlier one at same offset', function () {
+	$parser = new InlineParser([
+		'em' => [
+			'pattern' => ['~\*(\w+)\*~', '~\*(.+?)\*(?!\w)~'],
+			'handler' => fn($context, $matches, $offsets) => new TextNode("[$matches[1]]", new Range($offsets[0], strlen($matches[0]))),
+		],
+	]);
+
+	$nodes = $parser->parse(createContext(), '*a*b *c d* *e*');
+
+	assertNodes([
+		[TextNode::class, '[a]'],
+		[TextNode::class, 'b '],
+		[TextNode::class, '[c d]'],
+		[TextNode::class, ' '],
+		[TextNode::class, '[e]'],
+	], $nodes);
+});
+
+
 // =============================================================================
 // C. NULL handler return
 // =============================================================================

@@ -21,7 +21,7 @@ final class Engine
 
 	/**
 	 * Registered regexps and associated handlers for inline parsing, of the language and of the application.
-	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string}>}
+	 * @var array{language: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string|list<string>}>, application: array<string, array{handler: \Closure(ParseContext, array<?string>, array<?int>, string): (Nodes\InlineNode|Nodes\ContentNode|null), pattern: string|list<string>}>}
 	 */
 	private array $inlinePatterns = ['language' => [], 'application' => []];
 
@@ -56,13 +56,14 @@ final class Engine
 
 	/**
 	 * Registers an inline syntax; one of the application replaces a syntax of the language of that name.
+	 * @param  string|list<string>  $pattern  a list holds variants, the earlier one wins at one position
 	 * @param  \Closure  $handler  fn(ParseContext, array $matches, array $offsets, string $name): Nodes\InlineNode|Nodes\ContentNode|null
 	 * @throws \LogicException  when the name belongs to a block syntax
 	 */
 	public function addInline(
 		string $name,
 		#[Language('RegExp')]
-		string $pattern,
+		string|array $pattern,
 		\Closure $handler,
 		bool $application = false,
 	): void

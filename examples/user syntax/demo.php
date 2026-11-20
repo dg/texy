@@ -45,7 +45,6 @@ $texy = new Texy\Texy;
 $texy->allowedSyntax[Syntax::StrongEmphasis] = false;         // Disables ***text***
 $texy->allowedSyntax[Syntax::Strong] = false;                  // Disables **text**
 $texy->allowedSyntax[Syntax::EmphasisSingleAsterisk] = false;  // Disables *text*
-$texy->allowedSyntax[Syntax::EmphasisSingleAsterisk2] = false; // Disables *text*
 
 // Strong and emphasized phrases are rendered as <b> and <i> instead of <strong> and <em>
 $texy->htmlOutput->phraseTags[PhraseType::Strong->value] = 'b';

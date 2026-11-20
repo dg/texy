@@ -160,6 +160,7 @@ final class Texy3
 		Syntax::StrongEmphasis => null,
 		Syntax::CodeSpan => 'code',
 		Syntax::QuickLink => null,
+		'phrase/em-alt2' => 'emphasis',
 	];
 
 	/** @var array<string, ModuleProxy> */
@@ -188,6 +189,11 @@ final class Texy3
 				$texy->config->$property = (bool) $texy->allowedSyntax[$key];
 				unset($texy->allowedSyntax[$key]);
 			}
+		}
+
+		if (array_key_exists('phrase/em-alt2', $texy->allowedSyntax)) {
+			trigger_error("\$texy->allowed['phrase/em-alt2'] is deprecated, it is part of 'phrase/em-alt'.", E_USER_DEPRECATED);
+			unset($texy->allowedSyntax['phrase/em-alt2']);
 		}
 
 		foreach ($texy->allowedSyntax as $key => $_) {

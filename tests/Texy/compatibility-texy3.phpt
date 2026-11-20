@@ -307,6 +307,22 @@ test('a switch of a custom type of delimited block is dropped', function () {
 });
 
 
+test('the switch and the tag of phrase/em-alt2 are dropped, it is part of phrase/em-alt', function () {
+	$texy = new Texy;
+	$errors = capture(function () use ($texy) {
+		$texy->allowedSyntax['phrase/em-alt2'] = false;
+		$texy->htmlOutput->phraseTags['phrase/em-alt2'] = 'i';
+		Assert::same('<p><i>a b</i></p>', trim($texy->toHtml('*a b*')));
+	});
+
+	Assert::false(isset($texy->allowedSyntax['phrase/em-alt2']));
+	Assert::same([
+		[E_USER_DEPRECATED, "\$texy->allowed['phrase/em-alt2'] is deprecated, it is part of 'phrase/em-alt'."],
+		[E_USER_DEPRECATED, "phraseTags['phrase/em-alt2'] is deprecated, use phraseTags['emphasis'] instead."],
+	], $errors);
+});
+
+
 test('phrase tags keyed by syntax move to the keys of what the phrase means', function () {
 	$texy = new Texy;
 	$errors = capture(function () use ($texy) {

@@ -40,11 +40,6 @@ final class PhraseModule extends Texy\Module
 		// : guards the // in http://
 		Syntax::Emphasis => ['//', 'guard' => ':', 'link' => true, 'multiline' => true],
 		Syntax::EmphasisSingleAsterisk => ['*', 'guard' => '\\', 'link' => true, 'noSpaces' => true],
-		Syntax::EmphasisSingleAsterisk2 => [
-			'*', 'guard' => '\\', 'link' => true, 'multiline' => true,
-			'beforeOpen' => '[^\s.,;:<>()"\'-]',    // must stand at a word boundary, ...
-			'afterClose' => '[^\s.,;:<>()"?!\'-]',  // ... hence the inverted classes
-		],
 		Syntax::Inserted => ['++'],
 		// < and > guard the arrows <-- and -->
 		Syntax::Deleted => ['--', 'guard' => '<', 'guardAfter' => '>'],
@@ -53,6 +48,15 @@ final class PhraseModule extends Texy\Module
 		Syntax::SpanQuotes => ['"', 'link' => true, 'multiline' => true, 'noDelimiter' => true],
 		Syntax::SpanTilde => ['~', 'link' => true, 'multiline' => true, 'noDelimiter' => true],
 		Syntax::Quote => ['>>', 'close' => '<<', 'link' => true],
+	];
+
+	/** further variants of a notation of Phrases, the earlier one wins at one position */
+	private const Variants = [
+		Syntax::EmphasisSingleAsterisk => [[
+			'*', 'guard' => '\\', 'link' => true, 'multiline' => true,
+			'beforeOpen' => '[^\s.,;:<>()"\'-]',    // content with spaces must stand at a word boundary, ...
+			'afterClose' => '[^\s.,;:<>()"?!\'-]',  // ... hence the inverted classes
+		]],
 	];
 
 	/** attributes only a link has, which a phrase written as a link loses with it */
@@ -66,7 +70,7 @@ final class PhraseModule extends Texy\Module
 		'target' => 1,
 	];
 
-	/** @var array<string, string>  patterns of Phrases, which depend on nothing, built once */
+	/** @var array<string, list<string>>  patterns of Phrases, which depend on nothing, built once */
 	private static array $patterns = [];
 
 
@@ -79,7 +83,11 @@ final class PhraseModule extends Texy\Module
 		}
 
 		foreach (self::Phrases as $syntax => $spec) {
-			$engine->addInline($syntax, self::$patterns[$syntax] ??= self::buildPhrasePattern($spec), $this->parsePhrase(...));
+			$engine->addInline(
+				$syntax,
+				self::$patterns[$syntax] ??= array_map(self::buildPhrasePattern(...), [$spec, ...self::Variants[$syntax] ?? []]),
+				$this->parsePhrase(...),
+			);
 		}
 
 		// m^2 alternative superscript

@@ -42,7 +42,7 @@ This paragraph is centered. .<>
 |---|---|---|---|
 | `**bold**` | `<strong>` | `phrase/strong` | on |
 | `//italic//` | `<em>` | `phrase/em` | on |
-| `*italic*` | `<em>` | `phrase/em-alt`, `phrase/em-alt2` | on |
+| `*italic*` | `<em>` | `phrase/em-alt` | on |
 | `***bold italic***` | `<strong><em>` | `phrase/strong+em` | on |
 | `` `code` `` | `<code>` | `phrase/code` | on |
 | `x^2`, `O_2` | `<sup>`, `<sub>` | `phrase/sup-alt`, `phrase/sub-alt` | on |
@@ -387,8 +387,7 @@ Every syntax lists its ID (the key in `$texy->allowedSyntax`), its default state
 | `phrase/strong+em` | ✅ on | `***text***` | PhraseModule |
 | `phrase/strong` | ✅ on | `**text**` | PhraseModule |
 | `phrase/em` | ✅ on | `//text//` | PhraseModule |
-| `phrase/em-alt` | ✅ on | `*text*` | PhraseModule |
-| `phrase/em-alt2` | ✅ on | `*text*` (at punctuation boundaries) | PhraseModule |
+| `phrase/em-alt` | ✅ on | `*text*`, with spaces only at word boundaries | PhraseModule |
 | `phrase/ins` | ❌ off | `++inserted++` | PhraseModule |
 | `phrase/del` | ❌ off | `--deleted--` | PhraseModule |
 | `phrase/sup` | ❌ off | `^^superscript^^` | PhraseModule |

@@ -32,7 +32,6 @@ final class Renderer extends NodeRenderer
 		Syntax::Strong => ['**', '**'],
 		Syntax::Emphasis => ['//', '//'],
 		Syntax::EmphasisSingleAsterisk => ['*', '*'],
-		Syntax::EmphasisSingleAsterisk2 => ['*', '*'],
 		Syntax::Inserted => ['++', '++'],
 		Syntax::Deleted => ['--', '--'],
 		Syntax::Superscript => ['^^', '^^'],
