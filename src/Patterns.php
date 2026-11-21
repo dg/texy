@@ -66,7 +66,7 @@ class Patterns
 			(?= [\w/+.\~%&?@=_#$] )          # URL must start with these chars
 			(?:
 				[:;,.!?]*+                   # URL must not end with these chars
-				(?: [^\s():;,.!?]++ | \( [^\s()]{0,100}+ \) | \( )  # URL body, parentheses balanced
+				(?: [^\s\p{Z}\p{Cf}():;,.!?]++ | \( [^\s\p{Z}\p{Cf}()]{0,100}+ \) | \( )  # URL body, parentheses balanced, no space or invisible char
 			)++
 		)
 		X;

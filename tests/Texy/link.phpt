@@ -150,6 +150,27 @@ test('a URL takes the parentheses it opens, not the one around the link', functi
 });
 
 
+test('a URL ends before a space or an invisible char of any kind', function () {
+	$texy = new Texy\Texy;
+	$texy->htmlOutput->lineWrap = 0;
+	Assert::same(
+		"<p><a href=\"https://open.spotify.com/episode/2RSuB6b5\">podcastu</a>\u{200B}.</p>",
+		trim($texy->toHtml("\"podcastu\":https://open.spotify.com/episode/2RSuB6b5\u{200B}.")),
+	);
+	Assert::same(
+		"<p><a href=\"https://nette.org/\">web</a>\u{A0}a dál</p>",
+		trim($texy->toHtml("\"web\":https://nette.org/\u{A0}a dál")),
+	);
+	Assert::same(
+		'<p><a href="https://www.google.com/search?q=&quot;nejkratší+vesmír&quot;">fráze</a>, dál</p>',
+		trim($texy->toHtml('"fráze":https://www.google.com/search?q="nejkratší+vesmír", dál')),
+	);
+	foreach (['"', "\u{200B}", "\u{A0}", '"a'] as $fragment) {
+		Assert::noError(fn() => $texy->toHtml('"a":http://a.cz/' . str_repeat($fragment, 10_000)));
+	}
+});
+
+
 test('an autolink takes the parentheses it opens, not a trailing question mark', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
