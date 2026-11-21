@@ -2,6 +2,7 @@
 
 /**
  * Test: Headings.
+ * @phpExtension intl
  */
 
 use Tester\Assert;

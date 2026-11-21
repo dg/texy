@@ -142,7 +142,7 @@ function collectRanges(Node $node, SplObjectStorage $ranges = new SplObjectStora
 test('transform() keeps the range of every node, and a node it creates points at its origin', function () {
 	foreach (glob(__DIR__ . '/sources/*.texy') as $file) {
 		$texy = new Texy\Texy;
-		$texy->config->headingIds = true;
+		$texy->config->headingIds = extension_loaded('intl');
 		$src = Texy\Texy::normalize(file_get_contents($file));
 		$doc = $texy->parse($src);
 		$before = collectRanges($doc);

@@ -13,6 +13,11 @@ $examples = glob(__DIR__ . '/../../examples/*/*.php') ?: [];
 Assert::true($examples !== []);
 
 foreach ($examples as $file) {
+	$name = basename(dirname($file)) . '/' . basename($file);
+	if ($name === 'headings/demo.php' && !extension_loaded('intl')) {
+		continue;
+	}
+
 	$process = proc_open(
 		[PHP_BINARY, '-d', 'error_reporting=-1', '-d', 'display_errors=stderr', '-d', 'log_errors=0', $file],
 		[1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
@@ -22,8 +27,6 @@ foreach ($examples as $file) {
 	stream_get_contents($pipes[1]);
 	$errors = stream_get_contents($pipes[2]);
 	$code = proc_close($process);
-
-	$name = basename(dirname($file)) . '/' . basename($file);
 	Assert::same('', trim((string) $errors), $name);
 	Assert::same(0, $code, $name);
 }

@@ -1,5 +1,9 @@
 <?php declare(strict_types=1);
 
+/**
+ * @phpExtension intl
+ */
+
 use Tester\Assert;
 use Texy\Nodes\{HeadingNode, HeadingType};
 
