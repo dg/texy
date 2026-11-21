@@ -38,7 +38,7 @@ final class Modifier
 		'type' => 1, 'value' => 1,
 	];
 
-	/** @var array<string, true> of classes (as keys) */
+	/** @var array<string|int, true> of classes (as keys, a numeric one is an int) */
 	public array $classes = [];
 
 
@@ -136,7 +136,7 @@ final class Modifier
 		foreach (explode(';', $s) as $value) {
 			$pair = explode(':', $value, 2);
 			$prop = self::normalizeProperty(trim($pair[0]));
-			if ($prop === '' || !isset($pair[1])) {
+			if ($prop === '' || ctype_digit($prop[0]) || !isset($pair[1])) { // no name starts with a digit
 				continue;
 			}
 

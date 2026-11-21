@@ -66,6 +66,7 @@ final class ElementDecorator
 	private function decorateClasses(Modifier $modifier, array &$attrs): void
 	{
 		foreach ($modifier->classes as $class => $foo) {
+			$class = (string) $class; // a numeric name is an int key
 			if ($this->policy->isClassAllowed($class)) {
 				$attrs['class'] = (array) ($attrs['class'] ?? []);
 				$attrs['class'][] = $class;

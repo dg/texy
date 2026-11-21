@@ -113,7 +113,7 @@ final class HtmlSanitizePass
 
 		$modifier->classes = array_filter(
 			$modifier->classes,
-			fn(string $class) => ($isLink && $class === 'nofollow') || $this->policy->isClassAllowed($class),
+			fn(string|int $class) => ($isLink && $class === 'nofollow') || $this->policy->isClassAllowed((string) $class),
 			ARRAY_FILTER_USE_KEY,
 		);
 		$modifier->styles = array_filter($modifier->styles, $this->policy->isStyleAllowed(...), ARRAY_FILTER_USE_KEY);

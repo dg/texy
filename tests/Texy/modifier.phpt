@@ -54,6 +54,17 @@ test('filtered classes and styles', function () {
 });
 
 
+test('a numeric class is a class like any other, a numeric style name is no style', function () {
+	$texy = new Texy\Texy;
+	Assert::same("<p class=\"start 5\">a</p>\n", $texy->toHtml('a .[start 5]'));
+	Assert::same("<p style=\"color:red\">a</p>\n", $texy->toHtml('a .{5: x; color: red}'));
+
+	Texy\Configurator::safeMode($texy);
+	$texy->htmlPolicy->allowedClasses = ['5'];
+	Assert::same("<p class=\"5\">a</p>\n", $texy->toHtml('a .[start 5]{5: x}'));
+});
+
+
 test('styles in the whitelist are compared regardless of case, as in CSS', function () {
 	$texy = new Texy\Texy;
 	$texy->htmlOutput->lineWrap = 0;
