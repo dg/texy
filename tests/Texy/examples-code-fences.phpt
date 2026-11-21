@@ -20,7 +20,7 @@ Tester\Helpers::purge($dir);
 function convert(string $dir, string ...$args): array
 {
 	$process = proc_open(
-		[PHP_BINARY, __DIR__ . '/../../examples/code blocks to fences/convert.php', ...$args],
+		[...getPhpCommand(), __DIR__ . '/../../examples/code blocks to fences/convert.php', ...$args],
 		[1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
 		$pipes,
 		$dir,

@@ -19,7 +19,7 @@ foreach ($examples as $file) {
 	}
 
 	$process = proc_open(
-		[PHP_BINARY, '-d', 'error_reporting=-1', '-d', 'display_errors=stderr', '-d', 'log_errors=0', $file],
+		[...getPhpCommand(), '-d', 'error_reporting=-1', '-d', 'display_errors=stderr', '-d', 'log_errors=0', $file],
 		[1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
 		$pipes,
 		dirname($file),

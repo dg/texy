@@ -27,6 +27,24 @@ function normalizeNewlines(string $s): string
 
 
 /**
+ * Returns the command of the CLI interpreter with the ini file of the running test, which may run under php-cgi.
+ * @return list<string>
+ */
+function getPhpCommand(): array
+{
+	$binary = PHP_SAPI === 'cli'
+		? PHP_BINARY
+		: dirname(PHP_BINARY) . '/php' . (PHP_OS_FAMILY === 'Windows' ? '.exe' : '');
+	if (php_ini_scanned_files()) {
+		return [$binary];
+	}
+
+	$ini = php_ini_loaded_file();
+	return [$binary, '-n', ...($ini ? ['-c', $ini] : [])];
+}
+
+
+/**
  * Asserts that the time of $run grows linearly with its size, not quadratically.
  * CPU time of four times the input is compared, so neither a slow machine nor a busy one fails it.
  * @param  Closure(int): mixed  $run
