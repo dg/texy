@@ -50,12 +50,16 @@ final class PhraseModule extends Texy\Module
 		Syntax::Quote => ['>>', 'close' => '<<', 'link' => true],
 	];
 
+	/** punctuation outside ASCII: ¡«»¿, general punctuation (dashes, „“, …), CJK and fullwidth */
+	private const UnicodePunctuation = '\x{A1}\x{AB}\x{BB}\x{BF}\x{2010}-\x{205E}\x{3000}-\x{303F}'
+		. '\x{FF01}-\x{FF0F}\x{FF1A}-\x{FF20}\x{FF3B}-\x{FF40}\x{FF5B}-\x{FF65}';
+
 	/** further variants of a notation of Phrases, the earlier one wins at one position */
 	private const Variants = [
 		Syntax::EmphasisSingleAsterisk => [[
 			'*', 'guard' => '\\', 'link' => true, 'multiline' => true,
-			'beforeOpen' => '[^\s.,;:<>()"\'-]',    // content with spaces must stand at a word boundary, ...
-			'afterClose' => '[^\s.,;:<>()"?!\'-]',  // ... hence the inverted classes
+			'beforeOpen' => '[^\s.,;:<>()"\'' . self::UnicodePunctuation . '-]',    // content with spaces must stand at a word boundary, ...
+			'afterClose' => '[^\s.,;:<>()"?!\'' . self::UnicodePunctuation . '-]',  // ... hence the inverted classes
 		]],
 	];
 

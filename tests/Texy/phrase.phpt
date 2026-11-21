@@ -175,6 +175,16 @@ test('*emphasis* without spaces ends at its first asterisk, one with spaces stan
 });
 
 
+test('*emphasis* with spaces stands at punctuation outside ASCII too', function () {
+	Assert::match(
+		'<p>Text „<em>factory method</em>“ a <em>factory method</em>…</p>',
+		process('Text „*factory method*“ a *factory method*…'),
+	);
+	Assert::match('<p>«<em>a b</em>» ¿<em>a b</em>?</p>', process('«*a b*» ¿*a b*?'));
+	Assert::match('<p>役目です。<em>factory method</em>（DI）</p>', process('役目です。*factory method*（DI）'));
+});
+
+
 test('the URL of a markdown link holds balanced parentheses', function () {
 	Assert::match(
 		'<p>Or <a%A%href="https://en.wikipedia.org/wiki/Class_(computer_programming)#Class_vs._type">implementations</a>?</p>',
